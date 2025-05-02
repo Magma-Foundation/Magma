@@ -432,7 +432,7 @@ public class Main {
             this(new None<>(), 0, Lists.empty());
         }
 
-        public Frame withProto(StructurePrototype type) {
+        public Frame defineProto(StructurePrototype type) {
             return new Frame(new Some<>(type), this.counter, this.typeParams);
         }
 
@@ -1108,7 +1108,7 @@ public class Main {
     ) {
         return suffix(withEnd.strip(), "}", content -> {
             final StructurePrototype prototype = new StructurePrototype(type, name, typeParams, variants);
-            return compileAll(state.mapLastFrame(last -> last.withProto(prototype)), content, Main::structSegment).flatMap(tuple -> {
+            return compileAll(state.mapLastFrame(last -> last.defineProto(prototype).defineTypeParams(typeParams)), content, Main::structSegment).flatMap(tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
                 }

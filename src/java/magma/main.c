@@ -12,27 +12,27 @@ union OptionValue<T> {
 };
 /* private */struct Head<S, T> {
 	S _super;
-	template Option<struct T> (*next)(S);
+	template Option<T> (*next)(S);
 };
 /* private */struct List<S, T> {
 	S _super;
-	template List<struct T> (*addLast)(S, struct T);
-	template Iterator<struct T> (*iterate)(S);
-	template Option<(template List<struct T>, struct T)> (*removeLast)(S);
+	template List<T> (*addLast)(S, T);
+	template Iterator<T> (*iterate)(S);
+	template Option<(template List<T>, T)> (*removeLast)(S);
 	int (*isEmpty)(S);
-	struct T (*get)(S, int);
-	template List<struct T> (*addFirst)(S, struct T);
-	int (*contains)(S, struct T);
-	template List<struct T> (*mapLast)(S, struct T (*)(struct T));
-	template Iterator<struct T> (*iterateReversed)(S);
-	template Option<struct T> (*last)(S);
-	template List<struct T> (*setLast)(S, struct T);
-	template List<struct T> (*addAddLast)(S, template List<struct T>);
+	T (*get)(S, int);
+	template List<T> (*addFirst)(S, T);
+	int (*contains)(S, T);
+	template List<T> (*mapLast)(S, T (*)(T));
+	template Iterator<T> (*iterateReversed)(S);
+	template Option<T> (*last)(S);
+	template List<T> (*setLast)(S, T);
+	template List<T> (*addAddLast)(S, template List<T>);
 };
 /* private */struct Collector<S, T, C> {
 	S _super;
-	struct C (*createInitial)(S);
-	struct C (*fold)(S, struct C, struct T);
+	C (*createInitial)(S);
+	C (*fold)(S, C, T);
 };
 /* private */struct Splitter<S> {
 	S _super;
@@ -134,7 +134,7 @@ union ResultValue<T, X> {
 /* private static */struct Iterators {
 };
 /* private static */struct SingleHead<T> {
-	/* private final */ struct T value;
+	/* private final */ T value;
 	/* private */ int retrieved;
 };
 /* private */struct InfixSplitter {
@@ -216,7 +216,7 @@ union ResultValue<T, X> {
 	return local1.appendSlice(local1, name);
 }
 /* private static */ struct String_ Strings::from(struct Strings this, char* value);
-/* public */ template Option<R> Some::map<R>(struct Some<T> this, R (*mapper)(struct T)){
+/* public */ template Option<R> Some::map<R>(struct Some<T> this, R (*mapper)(T)){
 	return /* new Some<> */(mapper.apply(mapper, this.value));
 }
 /* public */ int isEmpty(){
@@ -243,7 +243,7 @@ union ResultValue<T, X> {
 /* public */ void ifPresent(template Consumer<struct T> consumer){
 	consumer.accept(consumer, this.value);
 }
-/* public */ template Option<R> None::map<R>(struct None<T> this, R (*mapper)(struct T)){
+/* public */ template Option<R> None::map<R>(struct None<T> this, R (*mapper)(T)){
 	return /* new None<> */();
 }
 /* public */ int isEmpty(){
@@ -269,7 +269,7 @@ union ResultValue<T, X> {
 }
 /* public */ void ifPresent(template Consumer<struct T> consumer){
 }
-/* public */ C Iterator::collect<C>(struct Iterator<T> this, template Collector<struct T, C> collector){
+/* public */ C Iterator::collect<C>(struct Iterator<T> this, template Collector<T, C> collector){
 	return this.fold(this, collector.createInitial(collector), /*  collector::fold */);
 }
 /* private */ C fold<C>(C initial, C (*folder)(C, struct T)){
@@ -318,7 +318,7 @@ struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.l
 /* public static */ template List<T> empty<T>(){
 	return /* new JavaList<> */(/* new ArrayList<> */());
 }
-/* public */ template Option<struct T> EmptyHead::next(struct EmptyHead<T> this){
+/* public */ template Option<T> EmptyHead::next(struct EmptyHead<T> this){
 	return /* new None<> */();
 }
 struct public Joiner::Joiner(struct Joiner this){
@@ -334,7 +334,7 @@ struct public Joiner::Joiner(struct Joiner this){
 struct public Frame::Frame(struct Frame this){
 	this(/* new None<> */(), /*  0 */, Lists.empty(Lists));
 }
-/* public */ struct Frame withProto(struct StructurePrototype type){
+/* public */ struct Frame defineProto(struct StructurePrototype type){
 	return /* new Frame */(/* new Some<> */(type), this.counter, this.typeParams);
 }
 /* public */ (char*, struct Frame) createName(){
@@ -468,7 +468,7 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 	auto local0 = option.<Head<T>>map(option, /* SingleHead::new */);
 	return /* new Iterator<> */(local0.orElseGet(local0, /* EmptyHead::new */));
 }
-struct public SingleHead::SingleHead(struct SingleHead<T> this, struct T value){/* this.value = value; *//* this.retrieved = false; */
+struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this.value = value; *//* this.retrieved = false; */
 }
 /* public */ template Option<struct T> next(){/* if (this.retrieved) {
                 return new None<>();
@@ -565,7 +565,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto generatedTuple = local3.orElse(local3, "");
 	return "template " + this.base() + "<" + generatedTuple + ">";
 }
-/* public */ template List<struct T> ListCollector::createInitial(struct ListCollector<T> this){
+/* public */ template List<T> ListCollector::createInitial(struct ListCollector<T> this){
 	return Lists.empty(Lists);
 }
 /* public */ template List<struct T> fold(template List<struct T> current, struct T element){
@@ -780,9 +780,10 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 }
 /* private static */ template Option<(struct CompileState, char*)> structureWithName(char* type, struct CompileState state, char* beforeKeyword, char* name, template List<char*> typeParams, template List<struct Parameter> params, template List<char*> variants, char* withEnd){
 	auto local0 = /* last -> last */;
+	auto local1 = local0.defineProto(local0, prototype);
 	return suffix(withEnd.strip(withEnd), "}", /* content -> {
             final StructurePrototype prototype = new StructurePrototype(type, name, typeParams, variants);
-            return compileAll */(state.mapLastFrame(state, local0.withProto(local0, prototype)), content, /*  Main::structSegment */).flatMap(tuple -> {
+            return compileAll */(state.mapLastFrame(state, local1.defineTypeParams(local1, typeParams)), content, /*  Main::structSegment */).flatMap(tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
                 }
