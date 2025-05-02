@@ -133,6 +133,7 @@ union ResultValue<T, X> {
 /* private static */struct TypeSeparatorSplitter {
 };
 /* private */struct Definition {
+	template List<char*> annotations;
 	template Option<char*> maybeBeforeType;
 	struct Type type;
 	char* name;
@@ -202,80 +203,59 @@ union ResultValue<T, X> {
 	auto local1 = local0.appendSlice(local0, " ");
 	return local1.appendSlice(local1, name);
 }
-/* @Actual
- private static */ struct String_ Strings::from(struct Strings this, char* value){
-	return /* new JavaString */(value);
-}
-/* @Override
- public <R> */ template Option<struct R> Some::map(struct Some<T> this, struct R (*mapper)(T)){
+/* private static */ struct String_ Strings::from(struct Strings this, char* value);
+/* public <R> */ template Option<struct R> Some::map(struct Some<T> this, struct R (*mapper)(T)){
 	return /* new Some<> */(mapper.apply(mapper, this.value));
 }
-/* @Override
- public */ int Some::isEmpty(struct Some<T> this){
+/* public */ int Some::isEmpty(struct Some<T> this){
 	return false;
 }
-/* @Override
- public */ T Some::orElse(struct Some<T> this, T other){
+/* public */ T Some::orElse(struct Some<T> this, T other){
 	return this.value;
 }
-/* @Override
- public */ template Option<T> Some::or(struct Some<T> this, template Option<T> (*other)()){
+/* public */ template Option<T> Some::or(struct Some<T> this, template Option<T> (*other)()){
 	return this;
 }
-/* @Override
- public */ T Some::orElseGet(struct Some<T> this, T (*other)()){
+/* public */ T Some::orElseGet(struct Some<T> this, T (*other)()){
 	return this.value;
 }
-/* @Override
- public <R> */ template Option<struct R> Some::flatMap(struct Some<T> this, template Option<struct R> (*mapper)(T)){
+/* public <R> */ template Option<struct R> Some::flatMap(struct Some<T> this, template Option<struct R> (*mapper)(T)){
 	return mapper.apply(mapper, this.value);
 }
-/* @Override
- public */ template Option<T> Some::filter(struct Some<T> this, template Predicate<T> predicate){
+/* public */ template Option<T> Some::filter(struct Some<T> this, template Predicate<T> predicate){
 	return predicate.test(predicate, this.value) ? this : new None<>();
 }
-/* @Override
- public */ int Some::isPresent(struct Some<T> this){
+/* public */ int Some::isPresent(struct Some<T> this){
 	return true;
 }
-/* @Override
- public */ void Some::ifPresent(struct Some<T> this, template Consumer<T> consumer){
+/* public */ void Some::ifPresent(struct Some<T> this, template Consumer<T> consumer){
 	consumer.accept(consumer, this.value);
 }
-/* @Override
- public <R> */ template Option<struct R> None::map(struct None<T> this, struct R (*mapper)(T)){
+/* public <R> */ template Option<struct R> None::map(struct None<T> this, struct R (*mapper)(T)){
 	return /* new None<> */();
 }
-/* @Override
- public */ int None::isEmpty(struct None<T> this){
+/* public */ int None::isEmpty(struct None<T> this){
 	return true;
 }
-/* @Override
- public */ T None::orElse(struct None<T> this, T other){
+/* public */ T None::orElse(struct None<T> this, T other){
 	return other;
 }
-/* @Override
- public */ template Option<T> None::or(struct None<T> this, template Option<T> (*other)()){
+/* public */ template Option<T> None::or(struct None<T> this, template Option<T> (*other)()){
 	return other.get(other);
 }
-/* @Override
- public */ T None::orElseGet(struct None<T> this, T (*other)()){
+/* public */ T None::orElseGet(struct None<T> this, T (*other)()){
 	return other.get(other);
 }
-/* @Override
- public <R> */ template Option<struct R> None::flatMap(struct None<T> this, template Option<struct R> (*mapper)(T)){
+/* public <R> */ template Option<struct R> None::flatMap(struct None<T> this, template Option<struct R> (*mapper)(T)){
 	return /* new None<> */();
 }
-/* @Override
- public */ template Option<T> None::filter(struct None<T> this, template Predicate<T> predicate){
+/* public */ template Option<T> None::filter(struct None<T> this, template Predicate<T> predicate){
 	return /* new None<> */();
 }
-/* @Override
- public */ int None::isPresent(struct None<T> this){
+/* public */ int None::isPresent(struct None<T> this){
 	return false;
 }
-/* @Override
- public */ void None::ifPresent(struct None<T> this, template Consumer<T> consumer){
+/* public */ void None::ifPresent(struct None<T> this, template Consumer<T> consumer){
 }
 /* public <C> */ struct C Iterator::collect(struct Iterator<T> this, template Collector<T, struct C> collector){
 	return this.fold(this, collector.createInitial(collector), /*  collector::fold */);
@@ -310,8 +290,7 @@ union ResultValue<T, X> {
 }
 struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.length = length; *//* this.counter = 0; */
 }
-/* @Override
- public */ template Option<int> RangeHead::next(struct RangeHead this){/* if (this.counter >= this.length) {
+/* public */ template Option<int> RangeHead::next(struct RangeHead this){/* if (this.counter >= this.length) {
                 return new None<>();
             } */
 	auto value = this.counter;/* this.counter++; */
@@ -323,27 +302,23 @@ struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.l
 /* public static <T> */ template List<struct T> Lists::empty(struct Lists this){
 	return /* new JavaList<> */(/* new ArrayList<> */());
 }
-/* @Override
- public */ template Option<T> EmptyHead::next(struct EmptyHead<T> this){
+/* public */ template Option<T> EmptyHead::next(struct EmptyHead<T> this){
 	return /* new None<> */();
 }
 struct public Joiner::Joiner(struct Joiner this){
 	this("");
 }
-/* @Override
- public */ template Option<char*> Joiner::createInitial(struct Joiner this){
+/* public */ template Option<char*> Joiner::createInitial(struct Joiner this){
 	return /* new None<> */();
 }
-/* @Override
- public */ template Option<char*> Joiner::fold(struct Joiner this, template Option<char*> current, char* element){
+/* public */ template Option<char*> Joiner::fold(struct Joiner this, template Option<char*> current, char* element){
 	auto local6 = current.map(current, /* inner -> inner + this */.delimiter + element);
 	return /* new Some<> */(local6.orElse(local6, element));
 }
 struct public ImmutableCompileState::ImmutableCompileState(struct ImmutableCompileState this){
 	this(Lists.empty(Lists), Lists.empty(Lists), Lists.empty(Lists), /* new None<> */(), /*  0 */);
 }
-/* @Override
- public */ char* ImmutableCompileState::generate(struct ImmutableCompileState this){
+/* public */ char* ImmutableCompileState::generate(struct ImmutableCompileState this){
 	auto local7 = /* join(this */;
 	return local7.structs) + join(local7, this.functions);
 }
@@ -352,40 +327,32 @@ struct public ImmutableCompileState::ImmutableCompileState(struct ImmutableCompi
 	auto local9 = local8.collect(local8, /* new Joiner */());
 	return local9.orElse(local9, "");
 }
-/* @Override
- public */ struct CompileState ImmutableCompileState::addStruct(struct ImmutableCompileState this, char* struct){
+/* public */ struct CompileState ImmutableCompileState::addStruct(struct ImmutableCompileState this, char* struct){
 	auto local10 = this.structs;
 	return /* new ImmutableCompileState */(local10.addLast(local10, struct), this.functions, this.statements, this.maybeStructureType, this.counter);
 }
-/* @Override
- public */ struct CompileState ImmutableCompileState::addFunction(struct ImmutableCompileState this, char* function){
+/* public */ struct CompileState ImmutableCompileState::addFunction(struct ImmutableCompileState this, char* function){
 	auto local11 = this.functions;
 	return /* new ImmutableCompileState */(this.structs, local11.addLast(local11, function), this.statements, this.maybeStructureType, this.counter);
 }
-/* @Override
- public */ struct CompileState ImmutableCompileState::withStructType(struct ImmutableCompileState this, struct StructurePrototype type){
+/* public */ struct CompileState ImmutableCompileState::withStructType(struct ImmutableCompileState this, struct StructurePrototype type){
 	return /* new ImmutableCompileState */(this.structs, this.functions, this.statements, /* new Some<> */(type), this.counter);
 }
-/* @Override
- public */ struct CompileState ImmutableCompileState::withoutStructType(struct ImmutableCompileState this){
+/* public */ struct CompileState ImmutableCompileState::withoutStructType(struct ImmutableCompileState this){
 	return /* new ImmutableCompileState */(this.structs, this.functions, this.statements, /* new None<> */(), this.counter);
 }
-/* @Override
- public */ template Option<struct StructurePrototype> ImmutableCompileState::findStructureType(struct ImmutableCompileState this){
+/* public */ template Option<struct StructurePrototype> ImmutableCompileState::findStructureType(struct ImmutableCompileState this){
 	return this.maybeStructureType;
 }
-/* @Override
- public */ (char*, struct CompileState) ImmutableCompileState::createLocalName(struct ImmutableCompileState this){
+/* public */ (char*, struct CompileState) ImmutableCompileState::createLocalName(struct ImmutableCompileState this){
 	auto name = /*  "local" + this */.counter;
 	return /* new Tuple<> */(name, /* new ImmutableCompileState */(this.structs, this.functions, this.statements, this.maybeStructureType, this.counter + 1));
 }
-/* @Override
- public */ struct CompileState ImmutableCompileState::addStatement(struct ImmutableCompileState this, char* statement){
+/* public */ struct CompileState ImmutableCompileState::addStatement(struct ImmutableCompileState this, char* statement){
 	auto local12 = this.statements;
 	return /* new ImmutableCompileState */(this.structs, this.functions, local12.addLast(local12, statement), this.maybeStructureType, this.counter);
 }
-/* @Override
- public */ (template List<char*>, struct CompileState) ImmutableCompileState::removeStatements(struct ImmutableCompileState this){
+/* public */ (template List<char*>, struct CompileState) ImmutableCompileState::removeStatements(struct ImmutableCompileState this){
 	return /* new Tuple<> */(this.statements, /* new ImmutableCompileState */(this.structs, this.functions, Lists.empty(Lists), this.maybeStructureType, this.counter));
 }
 struct public DivideState::DivideState(struct DivideState this, char* input){
@@ -447,14 +414,12 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
 }
 struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this.value = value; *//* this.retrieved = false; */
 }
-/* @Override
- public */ template Option<T> SingleHead::next(struct SingleHead<T> this){/* if (this.retrieved) {
+/* public */ template Option<T> SingleHead::next(struct SingleHead<T> this){/* if (this.retrieved) {
                 return new None<>();
             } *//* this.retrieved = true; */
 	return /* new Some<> */(this.value);
 }
-/* @Override
- public */ template Option<(char*, char*)> InfixSplitter::split(struct InfixSplitter this, char* input){
+/* public */ template Option<(char*, char*)> InfixSplitter::split(struct InfixSplitter this, char* input){
 	auto local19 = this.apply(this, input);
 	return local19.map(local19, /* classIndex -> {
                 var beforeKeyword = input */.substring(0, classIndex);
@@ -470,8 +435,7 @@ struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this
 	auto local21 = this.locator(this);
 	return local21.apply(local21, input, this.infix);
 }
-/* @Override
- public */ template Option<(char*, char*)> TypeSeparatorSplitter::split(struct TypeSeparatorSplitter this, char* input){
+/* public */ template Option<(char*, char*)> TypeSeparatorSplitter::split(struct TypeSeparatorSplitter this, char* input){
 	auto local22 = /* segments -> {
                 var left = segments */.left;
                 if (left;
@@ -497,13 +461,12 @@ struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this
 	return appended;
 }
 struct public Definition::Definition(struct Definition this, struct Type type, char* name){
-	this(/* new None<> */(), type, name);
+	this(Lists.empty(Lists), /* new None<> */(), type, name);
 }
 /* public */ struct Definition Definition::mapName(struct Definition this, char* (*mapper)(char*)){
-	return /* new Definition */(this.maybeBeforeType, this.type, mapper.apply(mapper, this.name));
+	return /* new Definition */(this.annotations, this.maybeBeforeType, this.type, mapper.apply(mapper, this.name));
 }
-/* @Override
- public */ struct String_ Definition::generate(struct Definition this){
+/* public */ struct String_ Definition::generate(struct Definition this){
 	return Strings.from(Strings, this.generate0(this));
 }
 /* private */ char* Definition::generate0(struct Definition this){
@@ -513,16 +476,13 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto beforeTypeString = local26.orElse(local26, "");
 	return local27.generateWithName(local27, this.name).toSlice();
 }
-/* @Override
- public */ struct String_ Content::generate(struct Content this){
+/* public */ struct String_ Content::generate(struct Content this){
 	return Strings.from(Strings, generatePlaceholder(this.input));
 }
-/* @Override
- public */ struct String_ Functional::generate(struct Functional this){
+/* public */ struct String_ Functional::generate(struct Functional this){
 	return this.generateWithName(this, "");
 }
-/* @Override
- public */ struct String_ Functional::generateWithName(struct Functional this, char* name){
+/* public */ struct String_ Functional::generateWithName(struct Functional this, char* name){
 	auto local28 = /* type -> type */;
 	auto local29 = this.arguments(this, /* ) */.iterate();
 	auto local30 = local29.map(local29, local28.generate(local28, /* ) */.toSlice());
@@ -536,8 +496,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto joinedArguments = local31.orElse(local31, "");
 	return local37.appendSlice(local37, ")");
 }
-/* @Override
- public */ struct String_ Template::generate(struct Template this){
+/* public */ struct String_ Template::generate(struct Template this){
 	return Strings.from(Strings, this.generate0(this));
 }
 /* private */ char* Template::generate0(struct Template this){
@@ -548,38 +507,32 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto generatedTuple = local41.orElse(local41, "");
 	return "template " + this.base() + "<" + generatedTuple + ">";
 }
-/* @Override
- public */ template List<T> ListCollector::createInitial(struct ListCollector<T> this){
+/* public */ template List<T> ListCollector::createInitial(struct ListCollector<T> this){
 	return Lists.empty(Lists);
 }
-/* @Override
- public */ template List<T> ListCollector::fold(struct ListCollector<T> this, template List<T> current, T element){
+/* public */ template List<T> ListCollector::fold(struct ListCollector<T> this, template List<T> current, T element){
 	return current.addLast(current, element);
 }
-/* @Override
- public */ struct String_ TypeParameter::generate(struct TypeParameter this){
+/* public */ struct String_ TypeParameter::generate(struct TypeParameter this){
 	return Strings.from(Strings, this.generate0(this));
 }
 /* private */ char* TypeParameter::generate0(struct TypeParameter this){
 	return this.value;
 }
-/* @Override
- public */ struct String_ Ref::generate(struct Ref this){
+/* public */ struct String_ Ref::generate(struct Ref this){
 	return Strings.from(Strings, this.generate0(this));
 }
 /* private */ char* Ref::generate0(struct Ref this){
 	auto local42 = this.type;
 	return local42.generate(local42).toSlice() + "*";
 }
-/* @Override
- public */ struct String_ TupleType::generate(struct TupleType this){
+/* public */ struct String_ TupleType::generate(struct TupleType this){
 	return Strings.from(Strings, this.generate0(this));
 }
 /* private */ char* TupleType::generate0(struct TupleType this){
 	return "(" + generateNodesAsValues(this.arguments) + ")";
 }
-/* @Override
- public */ struct String_ StructRef::generate(struct StructRef this){
+/* public */ struct String_ StructRef::generate(struct StructRef this){
 	auto local43 = this.typeParams;
 	auto local44 = local43.iterate(local43);
 	auto local45 = local44.collect(local44, /* new Joiner */(", "));
@@ -589,8 +542,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto typeParamString = local46.orElse(local46, "");
 	return local48.appendSlice(local48, typeParamString);
 }
-/* @Override
- public */ template Option<(char*, char*)> DividingSplitter::split(struct DividingSplitter this, char* input){
+/* public */ template Option<(char*, char*)> DividingSplitter::split(struct DividingSplitter this, char* input){
 	auto local49 = /* divisions -> {
                 var left1 = divisions */.left;
                 if (left1;
@@ -605,18 +557,15 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
                 return new Tuple<>(left, right);
             });
 }
-/* @Override
- public */ struct String_ Symbol::generate(struct Symbol this){
+/* public */ struct String_ Symbol::generate(struct Symbol this){
 	return Strings.from(Strings, this.value);
 }
-/* @Override
- public */ struct String_ StringNode::generate(struct StringNode this){
+/* public */ struct String_ StringNode::generate(struct StringNode this){
 	auto local52 = Strings.from(Strings, "\"");
 	auto local53 = local52.appendSlice(local52, this.value);
 	return local53.appendSlice(local53, "\"");
 }
-/* @Override
- public */ struct String_ Invocation::generate(struct Invocation this){
+/* public */ struct String_ Invocation::generate(struct Invocation this){
 	auto local54 = this.arguments(this, /* ) */.iterate();
 	auto local55 = local54.map(local54, /* Node::generate */);
 	auto local56 = local55.map(local55, /* String_::toSlice */);
@@ -624,15 +573,13 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto joined = local57.orElse(local57, "");
 	return Strings.from(Strings, this.caller(this, /* ) */.generate().toSlice() + "(" + joined + ")");
 }
-/* @Override
- public */ struct String_ DataAccess::generate(struct DataAccess this){
+/* public */ struct String_ DataAccess::generate(struct DataAccess this){
 	auto local58 = this.parent(this, /* ) */.generate();
 	return Strings.from(Strings, local58.toSlice(local58, /* ) + " */." + this.property());
 }
 auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = value; */
 }
-/* @Override
- public */ struct String_ Primitive::generate(struct Primitive this){
+/* public */ struct String_ Primitive::generate(struct Primitive this){
 	return Strings.from(Strings, this.generate0(this));
 }
 /* private */ char* Primitive::generate0(struct Primitive this){
@@ -651,21 +598,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
             }
         } */;
 }
-/* @Actual
- private static */ template Option<struct IOException> writeOutput(char* output){/* try {
-            Files.writeString(TARGET, output);
-            return new None<>();
-        } *//* catch (IOException e) {
-            return new Some<>(e);
-        } */
-}
-/* @Actual
- private static */ template Result<char*, struct IOException> readInput(){/* try {
-            return new Ok<>(Files.readString(SOURCE));
-        } *//* catch (IOException e) {
-            return new Err<>(e);
-        } */
-}
+/* private static */ template Option<struct IOException> writeOutput(char* output);
+/* private static */ template Result<char*, struct IOException> readInput();
 /* private static */ char* compileRoot(char* input){
 	auto local60 = compileAll(state, input, /*  Main::compileRootSegment */);
 	auto local61 = tuple.right + tuple.left;
@@ -1017,28 +951,34 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new Some<> */(/* new Tuple<CompileState, String> */(state, generated));
 }
 /* private static */ template Option<(struct CompileState, char*)> methodWithContent(struct CompileState state, struct Definition definition, template List<struct Definition> params, char* withBraces){
-	auto local100 = /* tuple -> {
-                    var newParameters = tuple */.left;
+	auto local100 = /* content -> {
+                var newParameters = state */;
 	auto local101 = /* structType -> params */;
 	auto local102 = local100.findStructureType(local100);
-	auto local103 = local102.map(local102, local101.addFirst(local101, /* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
+	auto local103 = /* name -> state */;
+	auto local104 = local103.findStructureType(local103);
+	auto local105 = local104.map(local104, /* structureType -> structureType */.name + "::" + name);
+	auto local106 = local102.map(local102, local101.addFirst(local101, /* new Definition */(/* new StructRef */(structType.name, structType.typeParams), "this"))).orElse(params);
 
-                    var paramStrings = generateNodesAsValues(newParameters);
+                var paramStrings = generateNodesAsValues(newParameters);
 
-                    var removed = tuple.left;
-	auto local104 = local103.removeStatements(local103, /* );
-                    var joined = removed */.left.iterate();
-	auto local105 = /* name -> removed */.right;
-	auto local106 = local105.findStructureType(local105);
-	auto local107 = local104.collect(local104, /* new Joiner */()).orElse("");
+                var newHeader = definition
+                        ;
+	auto local107 = local106.mapName(local106, local105.orElse(local105, /* name) */).generate().toSlice() + "(" + paramStrings + ")";
 
-                    var generated = definition
-                            ;
-	auto local108 = /* content -> {
-                return compileAll */(state, content, /*  Main::functionSegment */);
+                if(definition.annotations.contains("Actual")) {
+                    return new Some<>(new Tuple<>(state;
+	auto local108 = /* tuple -> {
+                    var removed = tuple */.left;
+	auto local109 = local107.addFunction(newHeader + ";\n"), ""));
+                }
+
+                return compileAll(local107, state, content, /*  Main::functionSegment */);
 	return prefix(withBraces.strip(withBraces), "{", /* withoutStart1 -> {
-            return suffix */(withoutStart1, "}", local108.flatMap(local108, local107.mapName(local107, local106.map(local106, /* structureType -> structureType */.name + "::" + name).orElse(name)).generate().toSlice() + "(" + paramStrings + "){" + joined + tuple.right + "\n}\n";
+            return suffix */(withoutStart1, "}", local109.flatMap(local109, local108.removeStatements(local108, /* );
+                    var joined = removed */.left.iterate().collect(new Joiner()).orElse("");
 
+                    var generated = newHeader + "{" + joined + tuple.right + "\n}\n";
                     return new Some<>(new Tuple<>(removed.right.addFunction(generated), ""));
                 });
             });
@@ -1063,8 +1003,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new None<> */();
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> constructorWithType(struct CompileState state, char* input){
-	auto local109 = (_, /*  name) -> state */.findStructureType();
-	return split(input.strip(input), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), local109.flatMap(local109, /* structureType -> {
+	auto local110 = (_, /*  name) -> state */.findStructureType();
+	return split(input.strip(input), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), local110.flatMap(local110, /* structureType -> {
             if (!structureType */.name.equals(name)) {
                 return new None<>();
             }
@@ -1073,25 +1013,25 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         }));
 }
 /* private static */ template Option<(struct CompileState, char*)> functionSegment(struct CompileState state, char* input){
-	auto local110 = /* slice -> statementValue */(state0, slice);
-	auto local111 = /* content -> content */;
-	auto local112 = /* (state0a, input1) -> content */(state0a, input1);
+	auto local111 = /* slice -> statementValue */(state0, slice);
+	auto local112 = /* content -> content */;
+	auto local113 = /* (state0a, input1) -> content */(state0a, input1);
 	return or(state, input.strip(input), Lists.of(Lists, /* 
-                Main::whitespace */, /* (state0, input1) -> suffix */(input1.strip(input1), ";", local110.map(local110, Tuple.mapRight(Tuple, /* slice0 -> "\n\t" + slice0 + ";" */))), local112.map(local112, Tuple.mapRight(Tuple, local111.generate(local111, /* ) */.toSlice()))));
+                Main::whitespace */, /* (state0, input1) -> suffix */(input1.strip(input1), ";", local111.map(local111, Tuple.mapRight(Tuple, /* slice0 -> "\n\t" + slice0 + ";" */))), local113.map(local113, Tuple.mapRight(Tuple, local112.generate(local112, /* ) */.toSlice()))));
 }
 /* private static */ template Option<(struct CompileState, char*)> statementValue(struct CompileState state, char* input){
-	auto local113 = /* right -> right */;
-	auto local114 = /* (state1, s) -> invocation */(state1, s);
+	auto local114 = /* right -> right */;
+	auto local115 = /* (state1, s) -> invocation */(state1, s);
 	return Main.or(Main, state, input, Lists.of(Lists, /* 
                 Main::returns */, /* 
-                Main::initialization */, local114.map(local114, Tuple.mapRight(Tuple, local113.generate(local113, /* ) */.toSlice()))));
+                Main::initialization */, local115.map(local115, Tuple.mapRight(Tuple, local114.generate(local114, /* ) */.toSlice()))));
 }
 /* private static */ template Option<(struct CompileState, char*)> initialization(struct CompileState state, char* s){
-	auto local115 = /* result -> result */;
-	auto local116 = /* result0 -> {
+	auto local116 = /* result -> result */;
+	auto local117 = /* result0 -> {
             return value */(result0.left, s2);
-	auto local117 = /* (s1, s2) -> definition */(state, s1);
-	return first(s, "=", local117.flatMap(local117, local116.map(local116, Tuple.mapRight(Tuple, local115.generate(local115, /* ) */.toSlice())).map(result1 -> {
+	auto local118 = /* (s1, s2) -> definition */(state, s1);
+	return first(s, "=", local118.flatMap(local118, local117.map(local117, Tuple.mapRight(Tuple, local116.generate(local116, /* ) */.toSlice())).map(result1 -> {
                 return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
             });
         }));
@@ -1110,7 +1050,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
                         }
 
                         var parent = access.parent;
-                        if(parent instanceof Symbol) {
+                        if (parent instanceof Symbol) {
                             return new Tuple<>(oldState, new Invocation(oldCaller, oldArguments.addFirst(parent)));
                         }
 
@@ -1137,18 +1077,18 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return appended;
 }
 /* private static */ template Option<(struct CompileState, char*)> returns(struct CompileState state, char* input){
-	auto local118 = /* result1 -> result1 */;
-	auto local119 = /* slice -> value */(state, slice);
-	auto local120 = local119.map(local119, Tuple.mapRight(Tuple, local118.generate(local118, /* ) */.toSlice()));
-	return prefix(input.strip(input), "return ", local120.map(local120, Tuple.mapRight(Tuple, /* result -> "return " + result */)));
+	auto local119 = /* result1 -> result1 */;
+	auto local120 = /* slice -> value */(state, slice);
+	auto local121 = local120.map(local120, Tuple.mapRight(Tuple, local119.generate(local119, /* ) */.toSlice()));
+	return prefix(input.strip(input), "return ", local121.map(local121, Tuple.mapRight(Tuple, /* result -> "return " + result */)));
 }
 /* private static */ template Option<(struct CompileState, struct Value)> value(struct CompileState state, char* input){
-	auto local121 = /* (state1, input1) -> content */(state1, input1);
+	auto local122 = /* (state1, input1) -> content */(state1, input1);
 	return Main.or(Main, state, input, Lists.of(Lists, /* 
                 Main::stringNode */, /* 
                 Main::invocation */, /* 
                 Main::dataAccess */, /* 
-                Main::symbol */, local121.map(local121, Tuple.mapRight(Tuple, /* right -> right */))));
+                Main::symbol */, local122.map(local122, Tuple.mapRight(Tuple, /* right -> right */))));
 }
 /* private static */ template Option<(struct CompileState, struct Value)> stringNode(struct CompileState state, char* input){
 	auto stripped = input.strip(input);/* if (stripped.length() >= 2 && stripped.startsWith("\"") && stripped.endsWith("\"")) {
@@ -1165,14 +1105,39 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         });
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> definition(struct CompileState state, char* input){
-	return split(input.strip(input), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), /*  (beforeName, name) -> {
+	auto local123 = /* (oldBeforeName, name) -> {
             if (!isSymbol(name)) {
                 return new None<>();
             }
 
-            return Main */.or(state, beforeName.strip(), Lists.of(
-                    (instance, beforeName0) -> definitionWithTypeSeparator(instance, beforeName0, name),
-                    (instance, beforeName0) -> definitionWithoutTypeSeparator(instance, beforeName0, name)
+            List<String> annotations;
+            String newBeforeName;
+            var index = oldBeforeName */.indexOf("\n");
+            if (index >= 0) {
+                var stripped = oldBeforeName;
+	auto local124 = /* (state1, c) -> {
+                    if (c == '\'') {
+                        return state1 */.advance();
+                    }
+                    return state1;
+	auto local125 = local123.substring(local123, /* 0 */, index).strip();
+                newBeforeName = oldBeforeName.substring(index + "\n";
+	auto local126 = local125.length());
+
+                annotations = divide(local125, stripped, local124.append(local124, /* c);
+                } */).iterate();
+	auto local127 = /* value -> value */;
+	auto local128 = local126.map(local126, /* String::strip */);
+	return split(input.strip(input), /* new InfixSplitter */(" ", /*  Main::lastIndexOfSlice */), local128.map(local128, local127.substring(local127, /* 1 */)).collect(new ListCollector<>());
+            }
+            else {
+                annotations = Lists.empty();
+                newBeforeName = oldBeforeName;
+            }
+
+            return Main.or(state, newBeforeName.strip(), Lists.of(
+                    (instance, beforeName0) -> definitionWithTypeSeparator(instance, beforeName0, name, annotations),
+                    (instance, beforeName0) -> definitionWithoutTypeSeparator(instance, beforeName0, name, annotations)
             ));
         });
 }
@@ -1185,20 +1150,20 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         } */
 	return true;
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name){
-	auto local122 = type(state, type);
-	return local122.flatMap(local122, /* typeTuple -> {
-            return assembleDefinition(typeTuple */.left, new None<String>(), typeTuple.right, name);
+/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithoutTypeSeparator(struct CompileState state, char* type, char* name, template List<char*> annotations){
+	auto local129 = type(state, type);
+	return local129.flatMap(local129, /* typeTuple -> {
+            return assembleDefinition(typeTuple */.left, new None<String>(), typeTuple.right, name, annotations);
         });
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> assembleDefinition(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name){
-	auto definition = /* new Definition */(maybeBeforeType, type, name.strip(name));
+/* private static */ template Option<(struct CompileState, struct Definition)> assembleDefinition(struct CompileState state, template Option<char*> maybeBeforeType, struct Type type, char* name, template List<char*> annotations){
+	auto definition = /* new Definition */(annotations, maybeBeforeType, type, name.strip(name));
 	return /* new Some<> */(/* new Tuple<> */(state, definition));
 }
-/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name){
+/* private static */ template Option<(struct CompileState, struct Definition)> definitionWithTypeSeparator(struct CompileState state, char* beforeName, char* name, template List<char*> annotations){
 	return split(beforeName, /* new TypeSeparatorSplitter */(), /* (beforeType, typeString) -> {
             return type */(state, typeString).flatMap(typeTuple -> {
-                return assembleDefinition(typeTuple.left, new Some<>(beforeType), typeTuple.right, name);
+                return assembleDefinition(typeTuple.left, new Some<>(beforeType), typeTuple.right, name, annotations);
             });
         });
 }
@@ -1232,9 +1197,9 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return /* new None<> */();
 }
 /* private static <S, T extends S> */ template Option<(struct CompileState, struct S)> (*wrap)(struct CompileState, char*)(template Option<(struct CompileState, struct T)> (*content)(struct CompileState, char*)){
-	auto local123 = /* (state, input) -> content */;
-	auto local124 = local123.apply(local123, state, input);
-	return local124.map(local124, Tuple.mapRight(Tuple, /* value -> value */));
+	auto local130 = /* (state, input) -> content */;
+	auto local131 = local130.apply(local130, state, input);
+	return local131.map(local131, Tuple.mapRight(Tuple, /* value -> value */));
 }
 /* private static */ template Option<(struct CompileState, struct Type)> primitive(struct CompileState state, char* input){
 	auto stripped = input.strip(input);
@@ -1289,8 +1254,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return split(input, /* new InfixSplitter */(infix, /*  Main::firstIndexOfSlice */), mapper);
 }
 /* private static <T> */ template Option<struct T> split(char* input, struct Splitter splitter, template Option<struct T> (*mapper)(char*, char*)){
-	auto local125 = splitter.split(splitter, input);
-	return local125.flatMap(local125, /* tuple -> {
+	auto local132 = splitter.split(splitter, input);
+	return local132.flatMap(local132, /* tuple -> {
             return mapper */.apply(tuple.left, tuple.right);
         });
 }
