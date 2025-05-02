@@ -216,7 +216,7 @@ union ResultValue<T, X> {
 	return local1.appendSlice(local1, name);
 }
 /* private static */ struct String_ Strings::from(struct Strings this, char* value);
-/* public */ template Option<struct R> Some::map<R>(struct Some<T> this, R (*mapper)(struct T)){
+/* public */ template Option<R> Some::map<R>(struct Some<T> this, R (*mapper)(struct T)){
 	return /* new Some<> */(mapper.apply(mapper, this.value));
 }
 /* public */ int isEmpty(){
@@ -231,7 +231,7 @@ union ResultValue<T, X> {
 /* public */ struct T orElseGet(struct T (*other)()){
 	return this.value;
 }
-/* public */ template Option<struct R> flatMap<R>(template Option<R> (*mapper)(struct T)){
+/* public */ template Option<R> flatMap<R>(template Option<R> (*mapper)(struct T)){
 	return mapper.apply(mapper, this.value);
 }
 /* public */ template Option<struct T> filter(template Predicate<struct T> predicate){
@@ -243,7 +243,7 @@ union ResultValue<T, X> {
 /* public */ void ifPresent(template Consumer<struct T> consumer){
 	consumer.accept(consumer, this.value);
 }
-/* public */ template Option<struct R> None::map<R>(struct None<T> this, R (*mapper)(struct T)){
+/* public */ template Option<R> None::map<R>(struct None<T> this, R (*mapper)(struct T)){
 	return /* new None<> */();
 }
 /* public */ int isEmpty(){
@@ -258,7 +258,7 @@ union ResultValue<T, X> {
 /* public */ struct T orElseGet(struct T (*other)()){
 	return other.get(other);
 }
-/* public */ template Option<struct R> flatMap<R>(template Option<R> (*mapper)(struct T)){
+/* public */ template Option<R> flatMap<R>(template Option<R> (*mapper)(struct T)){
 	return /* new None<> */();
 }
 /* public */ template Option<struct T> filter(template Predicate<struct T> predicate){
@@ -269,10 +269,10 @@ union ResultValue<T, X> {
 }
 /* public */ void ifPresent(template Consumer<struct T> consumer){
 }
-/* public */ struct C Iterator::collect<C>(struct Iterator<T> this, template Collector<struct T, C> collector){
+/* public */ C Iterator::collect<C>(struct Iterator<T> this, template Collector<struct T, C> collector){
 	return this.fold(this, collector.createInitial(collector), /*  collector::fold */);
 }
-/* private */ struct C fold<C>(C initial, C (*folder)(C, struct T)){
+/* private */ C fold<C>(C initial, C (*folder)(C, struct T)){
 	auto current = initial;/* while (true) {
                 C finalCurrent = current;
                 var maybeNext = this.head.next().map(next -> folder.apply(finalCurrent, next));
@@ -284,11 +284,11 @@ union ResultValue<T, X> {
                 }
             } */
 }
-/* public */ template Iterator<struct R> flatMap<R>(template Iterator<R> (*mapper)(struct T)){
+/* public */ template Iterator<R> flatMap<R>(template Iterator<R> (*mapper)(struct T)){
 	auto local0 = this.map(this, mapper);
 	return local0.fold(local0, /* new Iterator<> */(/* new EmptyHead<> */()), /*  Iterator::concat */);
 }
-/* public */ template Iterator<struct R> map<R>(R (*mapper)(struct T)){
+/* public */ template Iterator<R> map<R>(R (*mapper)(struct T)){
 	auto local0 = (/* ) -> this */.head.next();
 	return /* new Iterator<> */(local0.map(local0, mapper));
 }
@@ -312,10 +312,10 @@ struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.l
 	auto value = this.counter;/* this.counter++; */
 	return /* new Some<> */(value);
 }
-/* public static */ template List<struct T> Lists::of<T>(struct Lists this, /* T... */ elements){
+/* public static */ template List<T> Lists::of<T>(struct Lists this, /* T... */ elements){
 	return /* new JavaList<> */(Arrays.asList(Arrays, elements));
 }
-/* public static */ template List<struct T> empty<T>(){
+/* public static */ template List<T> empty<T>(){
 	return /* new JavaList<> */(/* new ArrayList<> */());
 }
 /* public */ template Option<struct T> EmptyHead::next(struct EmptyHead<T> this){
@@ -461,10 +461,10 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
                 return new None<>();
             } */
 }
-/* public static */ (struct A, struct C) (*Tuple::mapRight)((struct A, struct B))<A, B, C>(struct Tuple<A, B> this, C (*mapper)(B)){
+/* public static */ (A, C) (*Tuple::mapRight)((A, B))<A, B, C>(struct Tuple<A, B> this, C (*mapper)(B)){
 	return /* tuple -> new Tuple<> */(tuple.left, mapper.apply(mapper, tuple.right));
 }
-/* public static */ template Iterator<struct T> Iterators::fromOptions<T>(struct Iterators this, template Option<T> option){
+/* public static */ template Iterator<T> Iterators::fromOptions<T>(struct Iterators this, template Option<T> option){
 	auto local0 = option.<Head<T>>map(option, /* SingleHead::new */);
 	return /* new Iterator<> */(local0.orElseGet(local0, /* EmptyHead::new */));
 }
@@ -834,7 +834,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	auto local0 = typeParams.isEmpty(typeParams, /* ) ? "" : "<" + typeParams */.iterate();
 	return local0.collect(local0, /* new Joiner */(", ")).orElse("") + ">";
 }
-/* private static */ template Option<(struct CompileState, struct T)> or<T>(struct CompileState state, char* input, template List<template Option<(struct CompileState, T)> (*)(struct CompileState, char*)> actions){
+/* private static */ template Option<(struct CompileState, T)> or<T>(struct CompileState state, char* input, template List<template Option<(struct CompileState, T)> (*)(struct CompileState, char*)> actions){
 	auto local0 = /* action -> action */;
 	auto local1 = actions.iterate(actions);
 	auto local2 = local1.map(local1, local0.apply(local0, state, input));
@@ -905,16 +905,16 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
             return new None<>();
         } */
 }
-/* private static */ template Option<(struct CompileState, template List<struct T>)> parseValues<T>(struct CompileState state, char* input, template Option<(struct CompileState, T)> (*compiler)(struct CompileState, char*)){
+/* private static */ template Option<(struct CompileState, template List<T>)> parseValues<T>(struct CompileState state, char* input, template Option<(struct CompileState, T)> (*compiler)(struct CompileState, char*)){
 	return parseAll(state, input, /*  Main::foldValueChar */, compiler);
 }
-/* private static */ template Option<(struct CompileState, template List<struct T>)> parseAll<T>(struct CompileState initial, char* input, struct DivideState (*folder)(struct DivideState, char), template Option<(struct CompileState, T)> (*mapper)(struct CompileState, char*)){
+/* private static */ template Option<(struct CompileState, template List<T>)> parseAll<T>(struct CompileState initial, char* input, struct DivideState (*folder)(struct DivideState, char), template Option<(struct CompileState, T)> (*mapper)(struct CompileState, char*)){
 	auto local0 = /* (maybeCurrent, segment) -> maybeCurrent */;
 	auto local1 = divide(input, /*  folder)
                  */.iterate();
 	return local1.<Option<Tuple<CompileState, List<T>>>>fold(local1, /* new Some<> */(/* new Tuple<CompileState, List<T>> */(initial, Lists.empty(Lists))), local0.flatMap(local0, /* state -> foldElement */(state, segment, mapper)));
 }
-/* private static */ template Option<(struct CompileState, template List<struct T>)> foldElement<T>((struct CompileState, template List<T>) state, char* segment, template Option<(struct CompileState, T)> (*mapper)(struct CompileState, char*)){
+/* private static */ template Option<(struct CompileState, template List<T>)> foldElement<T>((struct CompileState, template List<T>) state, char* segment, template Option<(struct CompileState, T)> (*mapper)(struct CompileState, char*)){
 	auto local0 = mapper.apply(mapper, oldState, segment);
 	auto oldState = state.left;
 	auto oldCache = state.right;
@@ -1226,8 +1226,10 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return assembleDefinition(state, /* new None<String> */(), type, name, annotations, Lists.empty(Lists));
 }
 /* private static */ template Option<(struct CompileState, struct Definition)> assembleDefinition(struct CompileState state, template Option<char*> maybeBeforeType, char* type, char* name, template List<char*> annotations, template List<char*> typeParams){
-	auto local0 = type(state.enter(state), type);
-	return local0.map(local0, /* newType -> {
+	auto local0 = /* last -> last */;
+	auto local1 = state.enter(state);
+	auto local2 = type(local1.mapLastFrame(local1, local0.defineTypeParams(local0, typeParams)), type);
+	return local2.map(local2, /* newType -> {
             var definition = new Definition(annotations, maybeBeforeType, typeParams, newType */.right, name.strip());
             return new Tuple<>(newType.left.exit(), definition);
         });
@@ -1279,7 +1281,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
         } */
 	return /* new None<> */();
 }
-/* private static */ template Option<(struct CompileState, struct S)> (*wrap)(struct CompileState, char*)<S, T extends S>(template Option<(struct CompileState, struct T)> (*content)(struct CompileState, char*)){
+/* private static */ template Option<(struct CompileState, S)> (*wrap)(struct CompileState, char*)<S, T extends S>(template Option<(struct CompileState, struct T)> (*content)(struct CompileState, char*)){
 	auto local0 = /* (state, input) -> content */;
 	auto local1 = local0.apply(local0, state, input);
 	return local1.map(local1, Tuple.mapRight(Tuple, /* value -> value */));
@@ -1324,7 +1326,7 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	auto slice = input.substring(input, prefix.length(prefix));
 	return mapper.apply(mapper, slice);
 }
-/* private static */ template Option<struct T> suffix<T>(char* input, char* suffix, template Option<T> (*mapper)(char*)){/* if (!input.endsWith(suffix)) {
+/* private static */ template Option<T> suffix<T>(char* input, char* suffix, template Option<T> (*mapper)(char*)){/* if (!input.endsWith(suffix)) {
             return new None<>();
         } */
 	auto slice = input.substring(input, /* 0 */, input.length(input, /* ) - suffix */.length());
@@ -1333,10 +1335,10 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 /* private static */ char* generatePlaceholder(char* input){
 	return "/* " + input + " */";
 }
-/* private static */ template Option<struct T> first<T>(char* input, char* infix, template Option<T> (*mapper)(char*, char*)){
+/* private static */ template Option<T> first<T>(char* input, char* infix, template Option<T> (*mapper)(char*, char*)){
 	return split(input, /* new InfixSplitter */(infix, /*  Main::firstIndexOfSlice */), mapper);
 }
-/* private static */ template Option<struct T> split<T>(char* input, struct Splitter splitter, template Option<T> (*mapper)(char*, char*)){
+/* private static */ template Option<T> split<T>(char* input, struct Splitter splitter, template Option<T> (*mapper)(char*, char*)){
 	auto local0 = splitter.split(splitter, input);
 	return local0.flatMap(local0, /* tuple -> {
             return mapper */.apply(tuple.left, tuple.right);

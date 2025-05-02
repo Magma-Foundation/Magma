@@ -1631,8 +1631,15 @@ public class Main {
         return assembleDefinition(state, new None<String>(), type, name, annotations, Lists.empty());
     }
 
-    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, String type, String name, List<String> annotations, List<String> typeParams) {
-        return type(state.enter(), type).map(newType -> {
+    private static Option<Tuple<CompileState, Definition>> assembleDefinition(
+            CompileState state,
+            Option<String> maybeBeforeType,
+            String type,
+            String name,
+            List<String> annotations,
+            List<String> typeParams
+    ) {
+        return type(state.enter().mapLastFrame(last -> last.defineTypeParams(typeParams)), type).map(newType -> {
             var definition = new Definition(annotations, maybeBeforeType, typeParams, newType.right, name.strip());
             return new Tuple<>(newType.left.exit(), definition);
         });
