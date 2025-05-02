@@ -578,24 +578,26 @@ public class Main {
         }
     }
 
-    private record Definition(List<String> annotations, Option<String> maybeBeforeType, Type type,
-                              String name) implements Parameter {
+    private record Definition(
+            List<String> annotations,
+            Option<String> maybeBeforeType,
+            List<String> typeParams,
+            Type type,
+            String name
+    ) implements Parameter {
         public Definition(Type type, String name) {
-            this(Lists.empty(), new None<>(), type, name);
+            this(Lists.empty(), new None<>(), Lists.empty(), type, name);
         }
 
         public Definition mapName(Function<String, String> mapper) {
-            return new Definition(this.annotations, this.maybeBeforeType, this.type, mapper.apply(this.name));
+            return new Definition(this.annotations, this.maybeBeforeType, this.typeParams, this.type, mapper.apply(this.name));
         }
 
         @Override
         public String_ generate() {
-            return Strings.from(this.generate0());
-        }
-
-        private String generate0() {
+            var typeParamString = this.typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + ">").orElse("");
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
-            return beforeTypeString + this.type.generateWithName(this.name).toSlice();
+            return Strings.from(beforeTypeString + this.type.generateWithName(this.name).toSlice() + typeParamString);
         }
     }
 
@@ -1335,7 +1337,7 @@ public class Main {
                         .mapName(name -> state.findStructureType().map(structureType -> structureType.name + "::" + name).orElse(name))
                         .generate().toSlice() + "(" + paramStrings + ")";
 
-                if(definition.annotations.contains("Actual")) {
+                if (definition.annotations.contains("Actual")) {
                     return new Some<>(new Tuple<>(state.addFunction(newHeader + ";\n"), ""));
                 }
 
@@ -1401,7 +1403,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> initialization(CompileState state, String s) {
         return first(s, "=", (s1, s2) -> definition(state, s1).flatMap(result0 -> {
             return value(result0.left, s2).map(Tuple.mapRight(result -> result.generate().toSlice())).map(result1 -> {
-                return new Tuple<>(result1.left, result0.right.generate0() + " = " + result1.right());
+                return new Tuple<>(result1.left, result0.right.generate().toSlice() + " = " + result1.right());
             });
         }));
     }
@@ -1527,21 +1529,41 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeSeparator(CompileState state, String type, String name, List<String> annotations) {
         return type(state, type).flatMap(typeTuple -> {
-            return assembleDefinition(typeTuple.left, new None<String>(), typeTuple.right, name, annotations);
+            return assembleDefinition(typeTuple.left, new None<String>(), typeTuple.right, name, annotations, Lists.empty());
         });
     }
 
-    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, Type type, String name, List<String> annotations) {
-        var definition = new Definition(annotations, maybeBeforeType, type, name.strip());
+    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, Type type, String name, List<String> annotations, List<String> typeParams) {
+        var definition = new Definition(annotations, maybeBeforeType, typeParams, type, name.strip());
         return new Some<>(new Tuple<>(state, definition));
     }
 
     private static Option<Tuple<CompileState, Definition>> definitionWithTypeSeparator(CompileState state, String beforeName, String name, List<String> annotations) {
         return split(beforeName, new TypeSeparatorSplitter(), (beforeType, typeString) -> {
             return type(state, typeString).flatMap(typeTuple -> {
-                return assembleDefinition(typeTuple.left, new Some<>(beforeType), typeTuple.right, name, annotations);
+                return or(typeTuple.left, beforeType, Lists.of(
+                        (state2, s) -> definitionWithTypeParams(name, annotations, typeTuple, state2, s),
+                        (state1, s) -> definitionWithoutTypeParams(name, annotations, typeTuple, state1, s)
+                ));
             });
         });
+    }
+
+    private static Option<Tuple<CompileState, Definition>> definitionWithTypeParams(String name, List<String> annotations, Tuple<CompileState, Type> typeTuple, CompileState state2, String input) {
+        return suffix(input.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (beforeTypeParams, typeParamStrings) -> {
+                var typeParams = divide(typeParamStrings, Main::foldValueChar)
+                        .iterate()
+                        .map(String::strip)
+                        .collect(new ListCollector<>());
+
+                return assembleDefinition(state2, new Some<>(beforeTypeParams.strip()), typeTuple.right, name, annotations, typeParams);
+            });
+        });
+    }
+
+    private static Option<Tuple<CompileState, Definition>> definitionWithoutTypeParams(String name, List<String> annotations, Tuple<CompileState, Type> typeTuple, CompileState state1, String beforeType) {
+        return assembleDefinition(state1, new Some<>(beforeType.strip()), typeTuple.right, name, annotations, Lists.empty());
     }
 
     private static Option<Tuple<CompileState, Type>> type(CompileState state, String input) {
