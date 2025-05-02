@@ -27,7 +27,7 @@ union OptionValue<T> {
 	template Iterator<T> (*iterateReversed)(S);
 	template Option<T> (*last)(S);
 	template List<T> (*setLast)(S, T);
-	template List<T> (*addAddLast)(S, template List<T>);
+	template List<T> (*addAllLast)(S, template List<T>);
 };
 /* private */struct Collector<S, T, C> {
 	S _super;
@@ -81,6 +81,7 @@ union ResultValue<T, X> {
 	struct CompileState (*enter)(S);
 	struct CompileState (*exit)(S);
 	int (*hasTypeParam)(S, char*);
+	template List<char*> (*findTypeParams)(S);
 };
 /* private static */struct Strings {
 };
@@ -216,7 +217,7 @@ union ResultValue<T, X> {
 	return local1.appendSlice(local1, name);
 }
 /* private static */ struct String_ Strings::from(struct Strings this, char* value);
-/* public */ template Option<R> Some::map<R>(struct Some<T> this, R (*mapper)(T)){
+/* public */ template Option<R> Some::map<T, R>(struct Some<T> this, R (*mapper)(T)){
 	return /* new Some<> */(mapper.apply(mapper, this.value));
 }
 /* public */ int isEmpty(){
@@ -243,7 +244,7 @@ union ResultValue<T, X> {
 /* public */ void ifPresent(template Consumer<struct T> consumer){
 	consumer.accept(consumer, this.value);
 }
-/* public */ template Option<R> None::map<R>(struct None<T> this, R (*mapper)(T)){
+/* public */ template Option<R> None::map<T, R>(struct None<T> this, R (*mapper)(T)){
 	return /* new None<> */();
 }
 /* public */ int isEmpty(){
@@ -269,7 +270,7 @@ union ResultValue<T, X> {
 }
 /* public */ void ifPresent(template Consumer<struct T> consumer){
 }
-/* public */ C Iterator::collect<C>(struct Iterator<T> this, template Collector<T, C> collector){
+/* public */ C Iterator::collect<T, C>(struct Iterator<T> this, template Collector<T, C> collector){
 	return this.fold(this, collector.createInitial(collector), /*  collector::fold */);
 }
 /* private */ C fold<C>(C initial, C (*folder)(C, struct T)){
@@ -318,7 +319,7 @@ struct private RangeHead::RangeHead(struct RangeHead this, int length){/* this.l
 /* public static */ template List<T> empty<T>(){
 	return /* new JavaList<> */(/* new ArrayList<> */());
 }
-/* public */ template Option<T> EmptyHead::next(struct EmptyHead<T> this){
+/* public */ template Option<T> EmptyHead::next<T>(struct EmptyHead<T> this){
 	return /* new None<> */();
 }
 struct public Joiner::Joiner(struct Joiner this){
@@ -342,7 +343,7 @@ struct public Frame::Frame(struct Frame this){
 }
 /* public */ struct Frame defineTypeParams(template List<char*> typeParams){
 	auto local0 = this.typeParams;
-	return /* new Frame */(this.prototype, this.counter, local0.addAddLast(local0, typeParams));
+	return /* new Frame */(this.prototype, this.counter, local0.addAllLast(local0, typeParams));
 }
 /* public */ int hasTypeParam(char* typeParam){
 	auto local0 = this.typeParams;
@@ -411,6 +412,13 @@ struct public ImmutableCompileState::ImmutableCompileState(struct ImmutableCompi
 	auto local2 = local0.iterateReversed(local0);
 	return local2.anyMatch(local2, local1.hasTypeParam(local1, typeParam));
 }
+/* public */ template List<char*> findTypeParams(){
+	auto local0 = this.frames;
+	auto local1 = local0.iterateReversed(local0);
+	auto local2 = local1.map(local1, /* frame -> frame */.typeParams);
+	auto local3 = local2.flatMap(local2, /* List::iterate */);
+	return local3.collect(local3, /* new ListCollector<> */());
+}
 struct public DivideState::DivideState(struct DivideState this, char* input){
 	this(input, /* new JavaList<> */(), /* new StringBuilder */(), /*  0 */, /*  0 */);
 }
@@ -461,14 +469,14 @@ struct public DivideState::DivideState(struct DivideState this, char* input){
                 return new None<>();
             } */
 }
-/* public static */ (A, C) (*Tuple::mapRight)((A, B))<A, B, C>(struct Tuple<A, B> this, C (*mapper)(B)){
+/* public static */ (A, C) (*Tuple::mapRight)((A, B))<A, B, A, B, C>(struct Tuple<A, B> this, C (*mapper)(B)){
 	return /* tuple -> new Tuple<> */(tuple.left, mapper.apply(mapper, tuple.right));
 }
 /* public static */ template Iterator<T> Iterators::fromOptions<T>(struct Iterators this, template Option<T> option){
 	auto local0 = option.<Head<T>>map(option, /* SingleHead::new */);
 	return /* new Iterator<> */(local0.orElseGet(local0, /* EmptyHead::new */));
 }
-struct public SingleHead::SingleHead(struct SingleHead<T> this, T value){/* this.value = value; *//* this.retrieved = false; */
+struct public SingleHead::SingleHead<T>(struct SingleHead<T> this, T value){/* this.value = value; *//* this.retrieved = false; */
 }
 /* public */ template Option<struct T> next(){/* if (this.retrieved) {
                 return new None<>();
@@ -534,6 +542,9 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto beforeTypeString = local5.orElse(local5, "");
 	return Strings.from(Strings, local6.generateWithName(local6, this.name).toSlice() + typeParamString);
 }
+/* public */ struct Definition addTypeParamsBefore(template List<char*> typeParams){
+	return /* new Definition */(this.annotations, this.maybeBeforeType, typeParams.addAllLast(typeParams, this.typeParams), this.type, this.name);
+}
 /* public */ struct String_ Content::generate(struct Content this){
 	return Strings.from(Strings, generatePlaceholder(this.input));
 }
@@ -565,7 +576,7 @@ struct public Definition::Definition(struct Definition this, struct Type type, c
 	auto generatedTuple = local3.orElse(local3, "");
 	return "template " + this.base() + "<" + generatedTuple + ">";
 }
-/* public */ template List<T> ListCollector::createInitial(struct ListCollector<T> this){
+/* public */ template List<T> ListCollector::createInitial<T>(struct ListCollector<T> this){
 	return Lists.empty(Lists);
 }
 /* public */ template List<struct T> fold(template List<struct T> current, struct T element){
@@ -877,15 +888,21 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
                 return compileMethodHeader */(state, inputDefinition);
 	return first(input, "(", /* (inputDefinition, withParams) -> {
             return first */(withParams, ")", local0.flatMap(local0, /* definitionTuple -> {
-                    var left = definitionTuple */.left;
-                    var right = definitionTuple.right;
-                    var entered = left.enter().mapLastFrame(last -> right.typeParams.isEmpty() ? last : last.defineTypeParams(right.typeParams));
-                    return methodWithParameters(paramsString, withBraces, definitionTuple, entered).map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
+                    var oldState = definitionTuple */.left;
+                    var oldDefinition = definitionTuple.right;
+
+                    var oldTypeParams = oldState.findTypeParams();
+
+                    var entered = oldState.enter().mapLastFrame(last -> oldDefinition.typeParams.isEmpty() ? last : last.defineTypeParams(oldDefinition.typeParams));
+
+                    var newDefinition = oldDefinition.addTypeParamsBefore(oldTypeParams);
+
+                    return methodWithParameters(entered, newDefinition, paramsString, withBraces).map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
                 });
             });
         });
 }
-/* private static */ template Option<(struct CompileState, char*)> methodWithParameters(char* paramsString, char* withBraces, (struct CompileState, struct Definition) definitionTuple, struct CompileState state){
+/* private static */ template Option<(struct CompileState, char*)> methodWithParameters(struct CompileState state, struct Definition definition, char* paramsString, char* withBraces){
 	auto local0 = /* outputParams -> {
             var params = outputParams */.right
                     ;
@@ -895,8 +912,8 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	return local3.flatMap(local3, local2.flatMap(local2, /* Iterators::fromOptions */).collect(new ListCollector<>());
 
             return Main.or(outputParams.left, withBraces, Lists.of(
-                    (state0, element) -> methodWithoutContent(state0, definitionTuple.right, params, element),
-                    (state0, element) -> methodWithContent(state0, definitionTuple.right, params, element)));
+                    (state0, element) -> methodWithoutContent(state0, definition, params, element),
+                    (state0, element) -> methodWithContent(state0, definition, params, element)));
         });
 }
 /* private static */ template Option<struct Definition> retainDefinition(struct Parameter param){/* if (param instanceof Definition definition) {

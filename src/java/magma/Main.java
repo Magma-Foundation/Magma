@@ -60,7 +60,7 @@ public class Main {
 
         List<T> setLast(T element);
 
-        List<T> addAddLast(List<T> other);
+        List<T> addAllLast(List<T> other);
     }
 
     private interface Collector<T, C> {
@@ -123,6 +123,8 @@ public class Main {
         CompileState exit();
 
         boolean hasTypeParam(String typeParam);
+
+        List<String> findTypeParams();
     }
 
     private static class Strings {
@@ -386,7 +388,7 @@ public class Main {
         }
 
         @Override
-        public List<T> addAddLast(List<T> other) {
+        public List<T> addAllLast(List<T> other) {
             return other.iterate().<List<T>>fold(this, List::addLast);
         }
     }
@@ -441,7 +443,7 @@ public class Main {
         }
 
         public Frame defineTypeParams(List<String> typeParams) {
-            return new Frame(this.prototype, this.counter, this.typeParams.addAddLast(typeParams));
+            return new Frame(this.prototype, this.counter, this.typeParams.addAllLast(typeParams));
         }
 
         public boolean hasTypeParam(String typeParam) {
@@ -522,6 +524,14 @@ public class Main {
         @Override
         public boolean hasTypeParam(String typeParam) {
             return this.frames.iterateReversed().anyMatch(frame -> frame.hasTypeParam(typeParam));
+        }
+
+        @Override
+        public List<String> findTypeParams() {
+            return this.frames.iterateReversed()
+                    .map(frame -> frame.typeParams)
+                    .flatMap(List::iterate)
+                    .collect(new ListCollector<>());
         }
     }
 
@@ -689,6 +699,10 @@ public class Main {
             var typeParamString = this.typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + ">").orElse("");
             var beforeTypeString = this.maybeBeforeType.map(beforeType -> generatePlaceholder(beforeType) + " ").orElse("");
             return Strings.from(beforeTypeString + this.type.generateWithName(this.name).toSlice() + typeParamString);
+        }
+
+        public Definition addTypeParamsBefore(List<String> typeParams) {
+            return new Definition(this.annotations, this.maybeBeforeType, typeParams.addAllLast(this.typeParams), this.type, this.name);
         }
     }
 
@@ -1240,17 +1254,29 @@ public class Main {
         return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (paramsString, withBraces) -> {
                 return compileMethodHeader(state, inputDefinition).flatMap(definitionTuple -> {
-                    var left = definitionTuple.left;
-                    var right = definitionTuple.right;
-                    var entered = left.enter().mapLastFrame(last -> right.typeParams.isEmpty() ? last : last.defineTypeParams(right.typeParams));
-                    return methodWithParameters(paramsString, withBraces, definitionTuple, entered)
+                    var oldState = definitionTuple.left;
+                    var oldDefinition = definitionTuple.right;
+
+                    var oldTypeParams = oldState.findTypeParams();
+
+                    var entered = oldState.enter()
+                            .mapLastFrame(last -> oldDefinition.typeParams.isEmpty() ? last : last.defineTypeParams(oldDefinition.typeParams));
+
+                    var newDefinition = oldDefinition.addTypeParamsBefore(oldTypeParams);
+
+                    return methodWithParameters(entered, newDefinition, paramsString, withBraces)
                             .map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
                 });
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> methodWithParameters(String paramsString, String withBraces, Tuple<CompileState, Definition> definitionTuple, CompileState state) {
+    private static Option<Tuple<CompileState, String>> methodWithParameters(
+            CompileState state,
+            Definition definition,
+            String paramsString,
+            String withBraces
+    ) {
         return parseValues(state, paramsString, Main::parameter).flatMap(outputParams -> {
             var params = outputParams.right
                     .iterate()
@@ -1259,8 +1285,8 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return Main.or(outputParams.left, withBraces, Lists.of(
-                    (state0, element) -> methodWithoutContent(state0, definitionTuple.right, params, element),
-                    (state0, element) -> methodWithContent(state0, definitionTuple.right, params, element)));
+                    (state0, element) -> methodWithoutContent(state0, definition, params, element),
+                    (state0, element) -> methodWithContent(state0, definition, params, element)));
         });
     }
 
