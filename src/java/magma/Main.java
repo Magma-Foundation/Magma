@@ -59,6 +59,8 @@ public class Main {
         Option<T> last();
 
         List<T> setLast(T element);
+
+        List<T> addAddLast(List<T> other);
     }
 
     private interface Collector<T, C> {
@@ -106,7 +108,7 @@ public class Main {
 
         CompileState addFunction(String function);
 
-        CompileState withStructType(StructurePrototype type);
+        CompileState mapLastFrame(Function<Frame, Frame> mapper);
 
         Option<StructurePrototype> findStructureType();
 
@@ -119,6 +121,8 @@ public class Main {
         CompileState enter();
 
         CompileState exit();
+
+        boolean hasTypeParam(String typeParam);
     }
 
     private static class Strings {
@@ -268,6 +272,10 @@ public class Main {
         public Option<T> next() {
             return this.head.next();
         }
+
+        public boolean anyMatch(Predicate<T> predicate) {
+            return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        }
     }
 
     private static final class RangeHead implements Head<Integer> {
@@ -376,6 +384,11 @@ public class Main {
             copy.set(copy.size() - 1, newLast);
             return new JavaList<>(copy);
         }
+
+        @Override
+        public List<T> addAddLast(List<T> other) {
+            return other.iterate().<List<T>>fold(this, List::addLast);
+        }
     }
 
     private static class Lists {
@@ -414,17 +427,25 @@ public class Main {
     private record StructurePrototype(String type, String name, List<String> typeParams, List<String> variants) {
     }
 
-    private record Frame(Option<StructurePrototype> prototype, int counter) {
+    private record Frame(Option<StructurePrototype> prototype, int counter, List<String> typeParams) {
         public Frame() {
-            this(new None<>(), 0);
+            this(new None<>(), 0, Lists.empty());
         }
 
         public Frame withProto(StructurePrototype type) {
-            return new Frame(new Some<>(type), this.counter);
+            return new Frame(new Some<>(type), this.counter, this.typeParams);
         }
 
         public Tuple<String, Frame> createName() {
-            return new Tuple<>("local" + this.counter, new Frame(this.prototype, this.counter + 1));
+            return new Tuple<>("local" + this.counter, new Frame(this.prototype, this.counter + 1, this.typeParams));
+        }
+
+        public Frame defineTypeParams(List<String> typeParams) {
+            return new Frame(this.prototype, this.counter, this.typeParams.addAddLast(typeParams));
+        }
+
+        public boolean hasTypeParam(String typeParam) {
+            return this.typeParams.contains(typeParam);
         }
     }
 
@@ -458,8 +479,8 @@ public class Main {
         }
 
         @Override
-        public CompileState withStructType(StructurePrototype type) {
-            return new ImmutableCompileState(this.structs, this.functions, this.statements, this.frames.mapLast(last -> last.withProto(type)));
+        public CompileState mapLastFrame(Function<Frame, Frame> mapper) {
+            return new ImmutableCompileState(this.structs, this.functions, this.statements, this.frames.mapLast(mapper));
         }
 
         @Override
@@ -496,6 +517,11 @@ public class Main {
         @Override
         public CompileState exit() {
             return new ImmutableCompileState(this.structs, this.functions, this.statements, this.frames.removeLast().map(Tuple::left).orElse(this.frames));
+        }
+
+        @Override
+        public boolean hasTypeParam(String typeParam) {
+            return this.frames.iterateReversed().anyMatch(frame -> frame.hasTypeParam(typeParam));
         }
     }
 
@@ -1076,7 +1102,8 @@ public class Main {
             String withEnd
     ) {
         return suffix(withEnd.strip(), "}", content -> {
-            return compileAll(state.enter().withStructType(new StructurePrototype(type, name, typeParams, variants)), content, Main::structSegment).flatMap(tuple -> {
+            final StructurePrototype type1 = new StructurePrototype(type, name, typeParams, variants);
+            return compileAll(state.enter().mapLastFrame(last -> last.withProto(type1)), content, Main::structSegment).flatMap(tuple -> {
                 if (!isSymbol(name)) {
                     return new None<>();
                 }
@@ -1207,20 +1234,28 @@ public class Main {
     private static Option<Tuple<CompileState, String>> method(CompileState state, String input) {
         return first(input, "(", (inputDefinition, withParams) -> {
             return first(withParams, ")", (paramsString, withBraces) -> {
-                return compileMethodHeader(state, inputDefinition).flatMap(outputDefinition -> {
-                    return parseValues(outputDefinition.left, paramsString, Main::parameter).flatMap(outputParams -> {
-                        var params = outputParams.right
-                                .iterate()
-                                .map(Main::retainDefinition)
-                                .flatMap(Iterators::fromOptions)
-                                .collect(new ListCollector<>());
-
-                        return or(outputParams.left, withBraces, Lists.of(
-                                (state0, element) -> methodWithoutContent(state0, outputDefinition.right, params, element),
-                                (state0, element) -> methodWithContent(state0, outputDefinition.right, params, element)));
-                    });
+                return compileMethodHeader(state, inputDefinition).flatMap(definitionTuple -> {
+                    var left = definitionTuple.left;
+                    var right = definitionTuple.right;
+                    var entered = left.enter().mapLastFrame(last -> right.typeParams.isEmpty() ? last : last.defineTypeParams(right.typeParams));
+                    return methodWithParameters(paramsString, withBraces, definitionTuple, entered)
+                            .map(tuple -> new Tuple<>(tuple.left.exit(), tuple.right));
                 });
             });
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> methodWithParameters(String paramsString, String withBraces, Tuple<CompileState, Definition> definitionTuple, CompileState state) {
+        return parseValues(state, paramsString, Main::parameter).flatMap(outputParams -> {
+            var params = outputParams.right
+                    .iterate()
+                    .map(Main::retainDefinition)
+                    .flatMap(Iterators::fromOptions)
+                    .collect(new ListCollector<>());
+
+            return Main.or(outputParams.left, withBraces, Lists.of(
+                    (state0, element) -> methodWithoutContent(state0, definitionTuple.right, params, element),
+                    (state0, element) -> methodWithContent(state0, definitionTuple.right, params, element)));
         });
     }
 
@@ -1411,7 +1446,7 @@ public class Main {
                     var joined = removed.left.iterate().collect(new Joiner()).orElse("");
 
                     var generated = newHeader + "{" + joined + tuple.right + "\n}\n";
-                    return new Some<>(new Tuple<>(removed.right.addFunction(generated), ""));
+                    return new Some<>(new Tuple<>(removed.right.exit().addFunction(generated), ""));
                 });
             });
         });
@@ -1632,7 +1667,7 @@ public class Main {
         return Main.or(state, input, Lists.of(
                 Main::primitive,
                 Main::template,
-                Main::typeParameter,
+                Main::typeParam,
                 Main::string,
                 Main::structureType,
                 wrap(Main::content)
@@ -1658,12 +1693,10 @@ public class Main {
         }
     }
 
-    private static Option<Tuple<CompileState, Type>> typeParameter(CompileState state, String input) {
-        if (state.findStructureType() instanceof Some(var structureType)) {
-            var stripped = input.strip();
-            if (structureType.typeParams.contains(stripped)) {
-                return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));
-            }
+    private static Option<Tuple<CompileState, Type>> typeParam(CompileState state, String input) {
+        var stripped = input.strip();
+        if (state.hasTypeParam(stripped)) {
+            return new Some<>(new Tuple<>(state, new TypeParameter(stripped)));
         }
         return new None<>();
     }
