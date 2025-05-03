@@ -217,8 +217,8 @@ union ResultValue<T, X> {
 	return local1.appendSlice(local1, name);
 }
 /* private static */ struct String_ Strings::from(struct Strings this, char* value);
-/* public */ template Option<R> Some::map<T, R>(struct Some<T> this, R (*mapper)(T)){
-	return Some(mapper.apply(mapper, this.value));
+/* public */ template Option<R> Some::map<T, R, C0>(struct Some<T> this, <C0>(C0, R (*mapper)(C0, T))){
+	return Some(mapper[1](mapper[0], this.value));
 }
 /* public */ int isEmpty(){
 	return false;
@@ -699,6 +699,22 @@ auto Primitive::Primitive(struct Primitive this, char* value){/* this.value = va
 	local0.ifPresent(local0, /* Throwable::printStackTrace */);
 }
 /* private static */ template Option<struct IOException> run(){
+    auto local0 = readInput();
+    auto local1;
+    switch (local0._variant) {
+        case ResultVariant.Err:
+            local1 = Some(error);
+            break;
+        case ResultVariant.Ok:
+            auto local2 = (Ok) local0;
+            auto input = local2.value;
+            auto output = compileRoot(input);
+            local1 = writeOutput(output);
+            break;
+        }
+    }
+    return local1;
+
 	return /* switch (readInput()) {
             case Err<String, IOException>(var error) -> new Some<>(error);
             case Ok<String, IOException>(var input) -> {

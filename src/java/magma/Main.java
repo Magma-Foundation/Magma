@@ -1521,7 +1521,9 @@ public class Main {
                 var paramStrings = generateNodesAsValues(newParameters);
 
                 var newHeader = definition
-                        .mapName(name -> state.findStructureType().map(structureType -> structureType.name + "::" + name).orElse(name))
+                        .mapName(name -> {
+                            return state.findStructureType().map(structureType -> structureType.name + "::" + name).orElse(name);
+                        })
                         .generate().toSlice() + "(" + paramStrings + ")";
 
                 if (definition.annotations.contains("Actual")) {
@@ -1662,6 +1664,16 @@ public class Main {
 
     private static Option<Tuple<CompileState, Value>> value(CompileState state, String input) {
         return Main.or(state, input, Lists.of(
+                new BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>() {
+                    @Override
+                    public Option<Tuple<CompileState, Value>> apply(CompileState state, String s) {
+                        var stripped = s.strip();
+                        if(stripped.startsWith("switch")) {
+
+                        }
+                        return
+                    }
+                },
                 Main::stringNode,
                 Main::invocation,
                 Main::dataAccess,
