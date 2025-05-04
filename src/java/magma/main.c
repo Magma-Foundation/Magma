@@ -909,27 +909,44 @@ auto lambda0(auto tuple){
 	auto local2 = arrowIndex + "->";
 		auto beforeArrow = strip(local0, );
 		auto afterArrow = input.substring(input, length(local2, ));
+		/* List<String> paramNames */;
 		if (isSymbol(beforeArrow)){
-			auto withBraces = afterArrow.strip(afterArrow, );
-			/* if (withBraces.startsWith(" */{
-				@) && withBraces.endsWith("}")) {
+			/* paramNames  */ = Collections.singletonList(Collections, beforeArrow);
+		}
+		/* else if (beforeArrow.equals("()")) */{
+			/* paramNames  */ = Collections.emptyList(Collections, );
+		}
+		/* else */{
+			return template None<struct >::new();
+		}
+		auto withBraces = afterArrow.strip(afterArrow, );
+		/* if (withBraces.startsWith(" */{
+			@) && withBraces.endsWith("}")) {
 auto content = /*  withBraces.substring(1, withBraces.length() - 1);
-                    var result = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth));
-                    return assembleLambda(result.left, beforeArrow, result.right) */;
-			}
-			/* else */{
-				if (/* compileValue(state, afterArrow, depth) instanceof Some(var valueTuple) */){
-					return assembleLambda(valueTuple.left, beforeArrow, "\n\treturn " + valueTuple.right + ";");
-				}
+                var result = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth));
+                return assembleLambda(result.left, paramNames, result.right) */;
+		}
+		/* else */{
+			if (/* compileValue(state, afterArrow, depth) instanceof Some(var valueTuple) */){
+				return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
 			}
 		}
 	}
 	return template None<struct >::new();
 }
-/* private static */template Option</* Tuple<CompileState */, /* Symbol> */> assembleLambda(struct CompileState state, char* beforeArrow, char* content){
+auto lambda0(auto name){
+	return "auto " + name;
+}
+auto lambda1(auto name){
+	return "auto " + name;
+}
+/* private static */template Option</* Tuple<CompileState */, /* Symbol> */> assembleLambda(struct CompileState state, template List<char*> paramNames, char* content){
+	auto local0 = paramNames.stream(paramNames, );
+	auto local1 = map(local0, lambda1);
 	auto nameTuple = state.createName(state, "lambda");
-	auto name = nameTuple.left;
-	return template Some<struct >::new(template Tuple<struct >::new(/* nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n}\n" */), struct Symbol::new(/* name) */));
+	auto generatedName = nameTuple.left;
+	auto joinedParams = collect(local1, Collectors.joining(Collectors, ", "));
+	return template Some<struct >::new(template Tuple<struct >::new(/* nameTuple.right.addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n" */), struct Symbol::new(/* generatedName) */));
 }
 /* private static */struct boolean isSymbol(char* input){
 	auto stripped = input.strip(input, );

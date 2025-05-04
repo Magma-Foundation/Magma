@@ -1055,17 +1055,27 @@ public class Main {
         if (arrowIndex >= 0) {
             var beforeArrow = input.substring(0, arrowIndex).strip();
             var afterArrow = input.substring(arrowIndex + "->".length());
+
+            List<String> paramNames;
             if (isSymbol(beforeArrow)) {
-                var withBraces = afterArrow.strip();
-                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1);
-                    var result = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth));
-                    return assembleLambda(result.left, beforeArrow, result.right);
-                }
-                else {
-                    if (compileValue(state, afterArrow, depth) instanceof Some(var valueTuple)) {
-                        return assembleLambda(valueTuple.left, beforeArrow, "\n\treturn " + valueTuple.right + ";");
-                    }
+                paramNames = Collections.singletonList(beforeArrow);
+            }
+            else if (beforeArrow.equals("()")) {
+                paramNames = Collections.emptyList();
+            }
+            else {
+                return new None<>();
+            }
+
+            var withBraces = afterArrow.strip();
+            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                var content = withBraces.substring(1, withBraces.length() - 1);
+                var result = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth));
+                return assembleLambda(result.left, paramNames, result.right);
+            }
+            else {
+                if (compileValue(state, afterArrow, depth) instanceof Some(var valueTuple)) {
+                    return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
                 }
             }
         }
@@ -1073,10 +1083,15 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, Symbol>> assembleLambda(CompileState state, String beforeArrow, String content) {
+    private static Option<Tuple<CompileState, Symbol>> assembleLambda(CompileState state, List<String> paramNames, String content) {
         var nameTuple = state.createName("lambda");
-        var name = nameTuple.left;
-        return new Some<>(new Tuple<>(nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n}\n"), new Symbol(name)));
+        var generatedName = nameTuple.left;
+
+        var joinedParams = paramNames.stream()
+                .map(name -> "auto " + name)
+                .collect(Collectors.joining(", "));
+
+        return new Some<>(new Tuple<>(nameTuple.right.addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
     }
 
     private static boolean isSymbol(String input) {
