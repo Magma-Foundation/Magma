@@ -274,10 +274,14 @@ public class Main {
         }
     }
 
-    private record Invocation(Value caller, String arguments) implements Value {
+    private record Invocation(Value caller, List<Value> arguments) implements Value {
         @Override
         public String generate() {
-            return this.caller.generate() + "(" + this.arguments + ")";
+            var joined = this.arguments.stream()
+                    .map(Value::generate)
+                    .collect(Collectors.joining(", "));
+
+            return this.caller.generate() + "(" + joined + ")";
         }
     }
 
@@ -292,6 +296,13 @@ public class Main {
         @Override
         public String generate() {
             return this.parent() + "::" + this.child();
+        }
+    }
+
+    private record Content(String input) implements Value {
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.input);
         }
     }
 
@@ -351,19 +362,44 @@ public class Main {
         return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements);
     }
 
-    private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Tuple<CompileState, String> compileAll(
+            CompileState initial,
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            BiFunction<CompileState, String, Tuple<CompileState, String>> mapper,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        var tuple = parseAll(initial, input, folder, mapper);
+        return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
+    }
+
+    private static <T> Tuple<CompileState, List<T>> parseAll(
+            CompileState initial,
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
+    ) {
         var segments = divideAll(input, folder);
 
         var current = initial;
-        var output = new StringBuilder();
+        var compiled = new ArrayList<T>();
         for (var segment : segments) {
             var mapped = mapper.apply(current, segment);
 
             current = mapped.left;
-            output = merger.apply(output, mapped.right);
+            compiled.add(mapped.right);
         }
 
-        return new Tuple<>(current, output.toString());
+        return new Tuple<>(current, compiled);
+    }
+
+    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var output = new StringBuilder();
+        for (var element : elements) {
+            output = merger.apply(output, element);
+        }
+
+        return output.toString();
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String mapped) {
@@ -650,10 +686,12 @@ public class Main {
         var joined = String.join("", divisions.subList(0, divisions.size() - 1));
         var caller = joined.substring(0, joined.length() - ")".length());
 
-        var arguments = divisions.getLast();
-        var argumentsTuple = compileValues(state, arguments, (state1, input1) -> compileValueOrPlaceholder(state1, input1, depth));
+        var inputArguments = divisions.getLast();
+        var argumentsTuple = parseValues(state, inputArguments, (state1, input1) -> parseValue(state1, input1, depth)
+                .orElseGet(() -> new Tuple<>(state1, new Content(input1))));
+
         var argumentState = argumentsTuple.left;
-        var argumentsString = argumentsTuple.right;
+        var arguments = argumentsTuple.right;
 
         if (caller.startsWith("new ")) {
             var withoutPrefix = caller.substring("new ".length());
@@ -663,14 +701,27 @@ public class Main {
         }
 
         if (parseValue(argumentState, caller, depth) instanceof Some(var callerTuple)) {
-            return new Some<>(new Tuple<>(callerTuple.left, new Invocation(callerTuple.right, argumentsString)));
+            return new Some<>(new Tuple<>(callerTuple.left, new Invocation(callerTuple.right, arguments)));
         }
 
         return new None<>();
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
-        return compileAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
+        var tuple = parseValues(state, input, compiler);
+        return new Tuple<>(tuple.left, generateValues(tuple.right));
+    }
+
+    private static String generateValues(List<String> elements) {
+        return generateAll(elements, Main::mergeValues);
+    }
+
+    private static <T> Tuple<CompileState, List<T>> parseValues(
+            CompileState state,
+            String input,
+            BiFunction<CompileState, String, Tuple<CompileState, T>> compiler
+    ) {
+        return parseAll(state, input, Main::foldValueChar, compiler);
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
