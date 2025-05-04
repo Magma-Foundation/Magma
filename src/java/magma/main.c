@@ -1,59 +1,65 @@
-/* private interface Result<T, X>  */{/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); */
-/*  */
-
+/* private interface Result<T, X>  */{/* 
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); *//* 
+     */
 };
-/* private interface Option<T>  */{/* void ifPresent(Consumer<T> consumer); */
-/* T orElseGet(Supplier<T> supplier); */
-/* Option<T> or(Supplier<Option<T>> other); */
-/* boolean isPresent(); */
-/* <R> Option<R> map(Function<T, R> mapper); */
-/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
-/* T orElse(T other); */
-/*  */
+/* private interface Option<T>  */{/* 
+        void ifPresent(Consumer<T> consumer); *//* 
 
+        T orElseGet(Supplier<T> supplier); *//* 
+
+        Option<T> or(Supplier<Option<T>> other); *//* 
+
+        boolean isPresent(); *//* 
+
+        <R> Option<R> map(Function<T, R> mapper); *//* 
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper); *//* 
+
+        T orElse(T other); *//* 
+     */
 };
-/* private interface Error  */{/* String display(); */
-/*  */
-
+/* private interface Error  */{/* 
+        String display(); *//* 
+     */
 };
-/* private @interface Actual  */{/*  */
-
+/* private @interface Actual  */{/* 
+     */
 };
-/* private interface Value  */{/* String generate(); */
-/*  */
-
+/* private interface Value  */{/* 
+        String generate(); *//* 
+     */
 };
-/* private record IOError(IOException exception) implements Error  */{/*  */
-
+/* private record IOError(IOException exception) implements Error  */{/* 
+     */
 };
-/* record None<T>() implements Option<T>  */{/*  */
-
+/* record None<T>() implements Option<T>  */{/* 
+     */
 };
-/* private record Some<T>(T value) implements Option<T>  */{/*  */
-
+/* private record Some<T>(T value) implements Option<T>  */{/* 
+     */
 };
-/* private record Ok<T, X>(T value) implements Result<T, X>  */{/*  */
-
+/* private record Ok<T, X>(T value) implements Result<T, X>  */{/* 
+     */
 };
-/* private record Err<T, X>(X error) implements Result<T, X>  */{/*  */
-
+/* private record Err<T, X>(X error) implements Result<T, X>  */{/* 
+     */
 };
-/* private static class DivideState  */{/* private final String input; */
-/* private final List<String> segments; */
-/* private final int index; */
-/* private StringBuilder buffer; */
-/* private int depth; */
-/*  */
-
+/* private static class DivideState  */{/* 
+        private final String input; *//* 
+        private final List<String> segments; *//* 
+        private final int index; *//* 
+        private StringBuilder buffer; *//* 
+        private int depth; *//* 
+     */
 };
-/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{/*  */
-
+/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{/* 
+     */
 };
-/* private record CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */{/*  */
-
+/* private record CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */{/* 
+     */
 };
-/* private record Tuple<A, B>(A left, B right)  */{/*  */
-
+/* private record Tuple<A, B>(A left, B right)  */{/* 
+     */
 };
 /* private record Definition(
             List<String> annotations,
@@ -61,40 +67,65 @@
             String beforeType,
             String type,
             String name
-    )  */{/*  */
-
+    )  */{/* 
+     */
 };
-/* private record StringValue(String value) implements Value  */{/*  */
-
+/* private record StringValue(String value) implements Value  */{/* 
+     */
 };
-/* private record Symbol(String value) implements Value  */{/*  */
-
+/* private record Symbol(String value) implements Value  */{/* 
+     */
 };
-/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{/*  */
-
+/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{/* 
+     */
 };
-/* private record DataAccess(Value parent, String child) implements Value  */{/*  */
-
+/* private record DataAccess(Value parent, String child) implements Value  */{/* 
+     */
 };
-/* private record MethodAccess(String parent, String child) implements Value  */{/*  */
-
+/* private record MethodAccess(String parent, String child) implements Value  */{/* 
+     */
 };
-/* private record Content(String input) implements Value  */{/*  */
-
+/* private record Content(String input) implements Value  */{/* 
+     */
 };
-/* private record Operation(Value left, Operator operator, Value right) implements Value  */{/*  */
-
+/* private record Operation(Value left, Operator operator, Value right) implements Value  */{/* 
+     */
 };
-/* private static class Whitespace implements Value  */{/*  */
-
+/* private static class Whitespace implements Value  */{/* 
+     */
 };
-/* private record TupleNode(Value first, Value second) implements Value  */{/*  */
-
+/* private record TupleNode(Value first, Value second) implements Value  */{/* 
+     */
 };
-/* private record NumberValue(String value) implements Value  */{/*  */
-
+/* private record NumberValue(String value) implements Value  */{/* 
+     */
 };
-/* public class Main  */{/* private enum Operator {
+/* private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String record)  */{/* 
+        return (state0, input0) -> {
+            var stripped = input0.strip();
+            if (stripped.endsWith("}")) {
+                var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+                var contentStart = withoutEnd.indexOf("{");
+                if (contentStart >= 0) {
+                    var left = withoutEnd.substring(0, contentStart);
+                    var right = withoutEnd.substring(contentStart + "{".length());
+                    if (left.indexOf(record) >= 0) {
+                        var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
+                        if (maybeResult instanceof Some(var result)) {
+                            var generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
+                            return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
+                        }
+                    }
+                }
+            }
+
+            return new None<>();
+        } *//* ; *//* 
+     */
+};
+/* public class Main  */{/* 
+
+    private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
         GREATER_THAN_OR_EQUALS(">=");
@@ -104,13 +135,13 @@
         Operator(String representation) {
             this.representation = representation;
         }
-    } */
-/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
-/* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
-expect /* private static */template Option<struct IOError> writeTarget(char* output);
-expect /* private static */template Result<char*, struct IOError> readSource();
-/*  */
+    } *//* 
 
+    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
+    public static final Path TARGET = SOURCE.resolveSibling("main.c"); */expect /* private static */template Option<struct IOError> writeTarget(/* String output */);
+expect /* private static */template Result<char*, struct IOError> readSource();
+/* 
+ */
 };
 @Override
 /* public */char* display(){
@@ -119,14 +150,14 @@ expect /* private static */template Result<char*, struct IOError> readSource();
 	return toString(writer);
 }
 @Override
-/* public */void ifPresent(template Consumer<struct T> consumer){
+/* public */void ifPresent(/* Consumer<T> consumer */){
 }
 @Override
-/* public */struct T orElseGet(template Supplier<struct T> supplier){
+/* public */struct T orElseGet(/* Supplier<T> supplier */){
 	return get(supplier);
 }
 @Override
-/* public */template Option<struct T> or(template Supplier<template Option<struct T>> other){
+/* public */template Option<struct T> or(/* Supplier<Option<T>> other */){
 	return get(other);
 }
 @Override
@@ -134,27 +165,27 @@ expect /* private static */template Result<char*, struct IOError> readSource();
 	return false;
 }
 @Override
-/* public <R> */template Option<struct R> map(template Function<struct T, struct R> mapper){
+/* public <R> */template Option<struct R> map(/* Function<T, R> mapper */){
 	return template None<struct >::new();
 }
 @Override
-/* public <R> */template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper){
+/* public <R> */template Option<struct R> flatMap(/* Function<T, Option<R>> mapper */){
 	return template None<struct >::new();
 }
 @Override
-/* public */struct T orElse(struct T other){
+/* public */struct T orElse(/* T other */){
 	return other;
 }
 @Override
-/* public */void ifPresent(template Consumer<struct T> consumer){
+/* public */void ifPresent(/* Consumer<T> consumer */){
 	accept(consumer, this.value);
 }
 @Override
-/* public */struct T orElseGet(template Supplier<struct T> supplier){
+/* public */struct T orElseGet(/* Supplier<T> supplier */){
 	return this.value;
 }
 @Override
-/* public */template Option<struct T> or(template Supplier<template Option<struct T>> other){
+/* public */template Option<struct T> or(/* Supplier<Option<T>> other */){
 	return this;
 }
 @Override
@@ -162,29 +193,29 @@ expect /* private static */template Result<char*, struct IOError> readSource();
 	return true;
 }
 @Override
-/* public <R> */template Option<struct R> map(template Function<struct T, struct R> mapper){
+/* public <R> */template Option<struct R> map(/* Function<T, R> mapper */){
 	return template Some<struct >::new(apply(mapper, this.value));
 }
 @Override
-/* public <R> */template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper){
+/* public <R> */template Option<struct R> flatMap(/* Function<T, Option<R>> mapper */){
 	return apply(mapper, this.value);
 }
 @Override
-/* public */struct T orElse(struct T other){
+/* public */struct T orElse(/* T other */){
 	return this.value;
 }
 @Override
-/* public <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr){
+/* public <R> */struct R match(/* Function<T, R> whenOk */, /*  Function<X, R> whenErr */){
 	return apply(whenOk, this.value);
 }
 @Override
-/* public <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr){
+/* public <R> */struct R match(/* Function<T, R> whenOk */, /*  Function<X, R> whenErr */){
 	return apply(whenErr, this.error);
 }
-struct public DivideState(char* input){
+struct public DivideState(/* String input */){
 	this(input, template ArrayList<struct >::new(), struct StringBuilder::new(), 0, 0);
 }
-struct public DivideState(char* input, template List<char*> segments, struct StringBuilder buffer, struct int index, struct int depth){
+struct public DivideState(/* String input */, /*  List<String> segments */, /*  StringBuilder buffer */, /*  int index */, /*  int depth */){
 	/* this.input  */ = input;
 	/* this.segments  */ = segments;
 	/* this.index  */ = index;
@@ -222,7 +253,7 @@ auto lambda0(auto tuple){
 /* public */template Option<(struct Character, struct DivideState)> popAndAppendToTuple(){
 	return map(pop(this), lambda0);
 }
-/* private */struct DivideState append(struct char c){
+/* private */struct DivideState append(/* char c */){
 	append(this.buffer, c);
 	return this;
 }
@@ -241,7 +272,7 @@ auto lambda0(auto tuple){
 struct public Frame(){
 	this(template HashMap<struct >::new(), template ArrayList<struct >::new());
 }
-/* public */(char*, struct Frame) createName(char* category){
+/* public */(char*, struct Frame) createName(/* String category */){
 	if (/* !this.counters.containsKey(category) */){
 		put(this.counters, category, 0);
 	}
@@ -251,24 +282,24 @@ struct public Frame(){
 	put(this.counters, category, newCounter);
 	return (name, this);
 }
-/* public */struct Frame addStatement(char* statement){
+/* public */struct Frame addStatement(/* String statement */){
 	add(this.statements, statement);
 	return this;
 }
 struct public CompileState(){
 	this(template ArrayList<struct >::new(), template ArrayList<struct >::new(), template ArrayList<struct >::new(singletonList(Collections, struct Frame::new())));
 }
-/* public */struct CompileState addFunction(char* generated){
+/* public */struct CompileState addFunction(/* String generated */){
 	add(this.functions, generated);
 	return this;
 }
-/* public */(char*, struct CompileState) createName(char* category){
+/* public */(char*, struct CompileState) createName(/* String category */){
 	auto frame = getLast(this.frames);
 	auto nameTuple = createName(frame, category);
 	set(this.frames, size(this.frames) - 1, nameTuple.right);
 	return (nameTuple.left, this);
 }
-/* public */struct CompileState addStatement(char* statement){
+/* public */struct CompileState addStatement(/* String statement */){
 	addStatement(getLast(this.frames), statement);
 	return this;
 }
@@ -280,9 +311,12 @@ struct public CompileState(){
 	removeLast(this.frames);
 	return this;
 }
-/* public */struct CompileState addStruct(char* generated){
+/* public */struct CompileState addStruct(/* String generated */){
 	add(this.structs, generated);
 	return this;
+}
+/* public */struct int depth(){
+	return size(this.frames);
 }
 /* private */char* generate(){
 	/* String annotationsStrings */;
@@ -316,7 +350,7 @@ struct public CompileState(){
 }
 @Override
 /* public */char* generate(){
-	return child(/* this.parent() + " */::" + this);
+	return parent(this) + "::" + child(this);
 }
 @Override
 /* public */char* generate(){
@@ -324,7 +358,7 @@ struct public CompileState(){
 }
 @Override
 /* public */char* generate(){
-	return generate(generate(this.left) + " " + this.operator.representation + " " + this.right);
+	return generate(this.left) + " " + this.operator.representation + " " + generate(this.right);
 }
 @Override
 /* public */char* generate(){
@@ -348,56 +382,50 @@ auto lambda1(auto input){
 /* public static */void main(){
 	ifPresent(match(readSource(), lambda1, struct Some::new), lambda0);
 }
-/* private static */char* compile(char* input){
+/* private static */char* compile(/* String input */){
 	auto state = struct CompileState::new();
-	auto tuple = compileStatements(state, input, struct Main::compileRootSegment);
+	auto maybeTuple = compileStatements(state, input, struct Main::compileRootSegment);
+	if (/* !(maybeTuple instanceof Some(var tuple)) */){
+		return "";
+	}
 	auto joinedStructs = join(String, "", tuple.left.structs);
 	auto joinedFunctions = join(String, "", tuple.left.functions);
 	return joinedStructs + joinedFunctions + tuple.right;
 }
-auto lambda0(){
-	return (state, generatePlaceholder(input));
+/* private static */template Option<(struct CompileState, char*)> compileRootSegment(/* CompileState state */, /*  String input */){
+	return or(state, input, of(List, type(structure("class")), type(struct Main::compileContent)));
 }
-/* private static */(struct CompileState, char*) compileRootSegment(struct CompileState state, char* input){
-	return orElseGet(compileStructure(state, input, "class "), lambda0);
-}
-/* private static */template Option<(struct CompileState, char*)> compileStructure(struct CompileState state, char* input, char* infix){
-	auto stripped = strip(input);
-	if (endsWith(stripped, "}")){
-		auto withoutEnd = substring(stripped, 0, length(length(stripped) - "}"));
-		auto contentStart = indexOf(withoutEnd, "{");
-		if (contentStart >= 0){
-			auto left = substring(withoutEnd, 0, contentStart);
-			auto right = substring(withoutEnd, length(contentStart + "{"));
-			if (indexOf(left, infix) >= 0){
-				auto result = compileStatements(state, right, struct Main::compileStructSegment);
-				auto generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
-				return template Some<struct >::new((addStruct(result.left, generated), ""));
-			}
-		}
-	}
-	return template None<struct >::new();
-}
-/* private static */(struct CompileState, char*) compileStatements(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, (struct CompileState, char*)> mapper){
-	auto tuple = parseStatements(state, input, mapper);
+auto lambda0(auto tuple){
 	return (tuple.left, generateStatements(tuple.right));
 }
-/* private static */char* generateStatements(template List<char*> elements){
+/* private static */template Option<(struct CompileState, char*)> compileStatements(/* CompileState state */, /*  String input */, /*  BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper */){
+	return map(parseStatements(state, input, mapper), lambda0);
+}
+/* private static */char* generateStatements(/* List<String> elements */){
 	return generateAll(elements, struct Main::mergeStatements);
 }
-/* private static */(struct CompileState, template List<char*>) parseStatements(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, (struct CompileState, char*)> mapper){
+/* private static */template Option<(struct CompileState, template List<char*>)> parseStatements(/* CompileState state */, /*  String input */, /*  BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper */){
 	return parseAll(state, input, struct Main::foldStatementChar, mapper);
 }
-/* private static <T> */(struct CompileState, template List<struct T>) parseAll(struct CompileState initial, char* input, template BiFunction<struct DivideState, struct Character, struct DivideState> folder, template BiFunction<struct CompileState, char*, (struct CompileState, struct T)> mapper){
+/* private static <T> */template Option<(struct CompileState, template List<struct T>)> parseAll(/* 
+            CompileState initial */, /* 
+            String input */, /* 
+            BiFunction<DivideState, Character, DivideState> folder */, /* 
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
+     */){
 	auto segments = divideAll(input, folder);
-	auto current = initial;
-	auto compiled = template ArrayList<struct T>::new();
+	(struct CompileState, template List<struct T>) current = (initial, template ArrayList<struct T>::new());
 	/* for (var segment : segments) */{
-		auto mapped = apply(mapper, current, segment);
-		/* current  */ = mapped.left;
-		add(compiled, mapped.right);
+		auto maybeMapped = apply(mapper, current.left, segment);
+		if (/* maybeMapped instanceof Some(var mapped) */){
+			add(current.right, mapped.right);
+			/* current  */ = (mapped.left, current.right);
+		}
+		/* else */{
+			return template None<struct >::new();
+		}
 	}
-	return (current, compiled);
+	return template Some<struct >::new(current);
 }
 auto lambda0(){
 	return apply(folder, popped.right, popped.left);
@@ -411,7 +439,7 @@ auto lambda2(){
 auto lambda3(){
 	return foldDoubleQuotes(popped.right, popped.left);
 }
-/* private static */template List<char*> divideAll(char* input, template BiFunction<struct DivideState, struct Character, struct DivideState> folder){
+/* private static */template List<char*> divideAll(/* String input */, /*  BiFunction<DivideState, Character, DivideState> folder */){
 	auto current = struct DivideState::new(input);
 	/* while (true) */{
 		auto maybePopped = pop(current);
@@ -422,7 +450,7 @@ auto lambda3(){
 	}
 	return advance(current).segments;
 }
-/* private static */template Option<struct DivideState> foldDoubleQuotes(struct DivideState state, struct char maybeDoubleQuotes){
+/* private static */template Option<struct DivideState> foldDoubleQuotes(/* DivideState state */, /*  char maybeDoubleQuotes */){
 	if (/* maybeDoubleQuotes != '\"' */){
 		return template None<struct >::new();
 	}
@@ -442,24 +470,26 @@ auto lambda3(){
 	}
 	return template Some<struct >::new(current);
 }
-/* private static */template Option<struct DivideState> foldSingleQuotes(struct DivideState state, struct char c){
+/* private static */template Option<struct DivideState> foldSingleQuotes(/* DivideState state */, /*  char c */){
 	if (/* c != '\'' */){
 		return template None<struct >::new();
 	}
 	auto appended = append(state, c);
-	return flatMap(flatMap(popAndAppendToTuple(appended), /* popped -> popped.left == '\\' ? popped.right.popAndAppendToOption() : new Some<>(popped.right) */), struct DivideState::popAndAppendToOption);
+	return /* appended.popAndAppendToTuple()
+                .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
+                .flatMap(DivideState */::popAndAppendToOption);
 }
-/* private static */char* generateAll(template List<char*> elements, template BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
+/* private static */char* generateAll(/* List<String> elements */, /*  BiFunction<StringBuilder, String, StringBuilder> merger */){
 	auto output = struct StringBuilder::new();
 	/* for (var element : elements) */{
 		/* output  */ = apply(merger, output, element);
 	}
 	return toString(output);
 }
-/* private static */struct StringBuilder mergeStatements(struct StringBuilder output, char* mapped){
+/* private static */struct StringBuilder mergeStatements(/* StringBuilder output */, /*  String mapped */){
 	return append(output, mapped);
 }
-/* private static */struct DivideState foldStatementChar(struct DivideState state, struct char c){
+/* private static */struct DivideState foldStatementChar(/* DivideState state */, /*  char c */){
 	auto appended = append(state, c);
 	if (/* c == ';' && appended.isLevel() */){
 		return advance(appended);
@@ -476,106 +506,110 @@ auto lambda3(){
 	}
 	return appended;
 }
-auto lambda0(){
-	return (state, generatePlaceholder(stripped) + "\n");
+/* private static */template Option<(struct CompileState, char*)> compileStructSegment(/* CompileState state */, /*  String input */){
+	return or(state, input, of(List, type(structure("record")), type(structure("class")), type(structure("interface")), type(struct Main::compileMethod), type(struct Main::compileContent)));
 }
-/* private static */(struct CompileState, char*) compileStructSegment(struct CompileState state, char* input){
-	auto stripped = strip(input);
-	return orElseGet(or(state, input, of(List, type(/* (state0, input0) -> compileStructure(state0, input0, "record") */), type(/* (state0, input0) -> compileStructure(state0, input0, "class") */), type(/* (state0, input0) -> compileStructure(state0, input0, "interface") */), type(struct Main::compileMethod))), lambda0);
-}
-/* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* stripped){
+/* private static */template Option<(struct CompileState, char*)> compileMethod(/* CompileState state */, /*  String stripped */){
 	if (/* !stripped.endsWith("}") */){
 		return template None<struct >::new();
 	}
-	auto withoutContentEnd = substring(stripped, 0, length(length(stripped) - "}"));
+	auto withoutContentEnd = substring(stripped, 0, length(stripped) - length("}"));
 	auto contentStart = indexOf(withoutContentEnd, "{");
 	if (/* contentStart < 0 */){
 		return template None<struct >::new();
 	}
 	auto beforeContent = strip(substring(withoutContentEnd, 0, contentStart));
-	auto right = substring(withoutContentEnd, length(contentStart + "{"));
+	auto right = substring(withoutContentEnd, contentStart + length("{"));
 	if (/* !beforeContent.endsWith(")") */){
 		return template None<struct >::new();
 	}
-	auto withoutParamEnd = substring(beforeContent, 0, length(length(beforeContent) - ")"));
+	auto withoutParamEnd = substring(beforeContent, 0, length(beforeContent) - length(")"));
 	auto paramStart = indexOf(withoutParamEnd, "(");
 	if (/* paramStart < 0 */){
 		return template None<struct >::new();
 	}
 	auto definitionString = substring(withoutParamEnd, 0, paramStart);
-	auto inputParams = substring(withoutParamEnd, length(paramStart + "("));
+	auto inputParams = substring(withoutParamEnd, paramStart + length("("));
 	if (/* !(parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) */){
 		return template None<struct >::new();
 	}
 	auto definition = definitionTuple.right;
-	auto paramsTuple = compileValues(definitionTuple.left, inputParams, /*  (state2, input) -> {
-            return compileWhitespace(state2, input).orElseGet(() -> {
-                return compileDefinitionOrPlaceholder(state2, input);
-            });
-        } */);
-	auto paramsState = paramsTuple.left;
-	auto paramsString = paramsTuple.right;
-	auto header = generate(definition) + "(" + paramsString + ")";
-	if (contains(definition.modifiers, "expect")){
-		return template Some<struct >::new((paramsState, header + ";\n"));
+	auto maybeParamsTuple = compileValues(definitionTuple.left, inputParams, struct Main::compileParameter);
+	if (/* maybeParamsTuple instanceof Some(var paramsTuple) */){
+		auto paramsState = paramsTuple.left;
+		auto paramsString = paramsTuple.right;
+		auto header = generate(definition) + "(" + paramsString + ")";
+		if (contains(definition.modifiers, "expect")){
+			return template Some<struct >::new((paramsState, header + ";\n"));
+		}
+		auto maybeStatementsTuple = /*  parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1)) */;
+		if (/* maybeStatementsTuple instanceof Some(var statementsTuple) */){
+			auto statementsState = statementsTuple.left;
+			auto statements = statementsTuple.right;
+			auto oldStatements = template ArrayList<char*>::new();
+			addAll(oldStatements, getLast(frames(statementsState)).statements);
+			addAll(oldStatements, statements);
+			auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+			return template Some<struct >::new((addFunction(exit(statementsState), generated), ""));
+		}
 	}
-	auto statementsTuple = parseStatements(enter(paramsState), right, /*  (state1, input1) -> compileFunctionSegment(state1, input1, 1) */);
-	auto statementsState = statementsTuple.left;
-	auto statements = statementsTuple.right;
-	auto oldStatements = template ArrayList<char*>::new();
-	addAll(oldStatements, getLast(frames(statementsState)).statements);
-	addAll(oldStatements, statements);
-	auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-	return template Some<struct >::new((addFunction(exit(statementsState), generated), ""));
+	return template None<struct >::new();
 }
-/* private static */template Option<(struct CompileState, char*)> compileWhitespace(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, char*)> compileParameter(/* CompileState state2 */, /*  String input */){
+	return /* compileWhitespace(state2, input)
+                .or(() -> compileContent(state2, input)) */;
+}
+/* private static */template Option<(struct CompileState, char*)> compileWhitespace(/* CompileState state */, /*  String input */){
 	if (isBlank(input)){
 		return template Some<struct >::new((state, ""));
 	}
 	return template None<struct >::new();
 }
-auto lambda0(){
-	return (state, generatePlaceholder(stripped));
+/* private static */template Option<(struct CompileState, char*)> compileFunctionSegment(/* CompileState state */, /*  String input */){
+	return or(state, input, of(List, type(struct Main::compileWhitespace), type(struct Main::compileStatement), type(struct Main::compileBlock), type(struct Main::compileContent)));
 }
-/* private static */(struct CompileState, char*) compileFunctionSegment(struct CompileState state, char* input, struct int depth){
-	auto stripped = strip(input);
-	if (isEmpty(stripped)){
-		return (state, "");
-	}
-	auto indent = repeat("\n" + "\t", depth);
-	if (endsWith(stripped, ";")){
-		auto withoutEnd = substring(stripped, 0, length(length(stripped) - ";"));
-		auto statements = compileFunctionStatementValue(withoutEnd, state, depth);
-		return (statements.left, indent + statements.right + ";");
-	}
-	return orElseGet(compileBlock(state, depth, stripped, indent), lambda0);
+/* private static */template Some<(struct CompileState, char*)> compileContent(/* CompileState state1 */, /*  String s */){
+	return /* new Some<>(new Tuple<>(state1, generatePlaceholder(s))) */;
 }
-/* private static */template Option<(struct CompileState, char*)> compileBlock(struct CompileState state, struct int depth, char* stripped, char* indent){
-	if (/* !stripped.endsWith("}") */){
+/* private static */template Option<(struct CompileState, char*)> compileBlock(/* CompileState state */, /*  String s */){
+	char* indent = "\n" + repeat("\t", depth(state) - 1);
+	if (/* !s.endsWith("}") */){
 		return template None<struct >::new();
 	}
-	auto withoutEnd = substring(stripped, 0, length(length(stripped) - "}"));
+	auto withoutEnd = substring(s, 0, length(s) - length("}"));
 	auto contentStart = indexOf(withoutEnd, "{");
 	if (/* contentStart < 0 */){
 		return template None<struct >::new();
 	}
 	auto beforeContent = substring(withoutEnd, 0, contentStart);
-	auto content = substring(withoutEnd, length(contentStart + "{"));
-	struct CompileState state2 = enter(state);
-	auto tuple = parseStatements(/* state2 */, content, /*  (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1) */);
-	auto oldStatements = template ArrayList<char*>::new();
-	addAll(oldStatements, getLast(tuple.left.frames).statements);
-	addAll(oldStatements, tuple.right);
-	auto string = compileBlockHeader(exit(tuple.left), beforeContent, depth);
-	return template Some<struct >::new((string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
+	auto content = substring(withoutEnd, contentStart + length("{"));
+	struct CompileState state3 = enter(state);
+	auto maybeStatements = /* parseStatements(state3, content, Main */::compileFunctionSegment);
+	if (/* maybeStatements instanceof Some(var statementsTuple) */){
+		auto oldStatements = template ArrayList<char*>::new();
+		addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
+		addAll(oldStatements, statementsTuple.right);
+		auto string = compileBlockHeader(exit(statementsTuple.left), beforeContent, depth(state));
+		return template Some<struct >::new((string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
+	}
+	return template None<struct >::new();
 }
-/* private static */(struct CompileState, char*) compileBlockHeader(struct CompileState state, char* input, struct int depth){
+/* private static */template Option<(struct CompileState, char*)> compileStatement(/* CompileState state */, /*  String input */){
+	auto stripped = strip(input);
+	if (endsWith(stripped, ";")){
+		auto withoutEnd = substring(stripped, 0, length(stripped) - length(";"));
+		auto statements = compileFunctionStatementValue(state, withoutEnd);
+		return template Some<struct >::new((statements.left, "\n" + "\t".repeat(state.depth() - 1) + statements.right + ";"));
+	}
+	return template None<struct >::new();
+}
+/* private static */(struct CompileState, char*) compileBlockHeader(/* CompileState state */, /*  String input */, /*  int depth */){
 	auto stripped = strip(input);
 	if (startsWith(stripped, "if")){
 		auto withoutPrefix = strip(substring(stripped, length("if")));
 		if (/* withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")") */){
 			auto value = substring(withoutPrefix, 1, length(withoutPrefix) - 1);
-			auto tuple = compileValueOrPlaceholder(state, value, depth);
+			auto tuple = compileValueOrPlaceholder(state, value);
 			return (tuple.left, "if (" + tuple.right + ")");
 		}
 	}
@@ -585,68 +619,69 @@ auto lambda0(){
 	return (state, generatePlaceholder(input));
 }
 auto lambda1(){
-	return compileAssignment(state, input, depth);
+	return compileAssignment(state, input);
 }
 auto lambda2(auto tuple){
 	return (tuple.left, generate(tuple.right));
 }
 auto lambda3(){
-	return map(compileInvokable(state, input, depth), lambda2);
+	return map(compileInvokable(state, input), lambda2);
 }
-/* private static */(struct CompileState, char*) compileFunctionStatementValue(char* input, struct CompileState state, struct int depth){
-	return orElseGet(or(or(compileReturn(state, input, depth), lambda3), lambda1), lambda0);
+/* private static */(struct CompileState, char*) compileFunctionStatementValue(/* CompileState state */, /*  String input */){
+	return orElseGet(or(or(compileReturn(state, input), lambda3), lambda1), lambda0);
 }
-/* private static */template Option<(struct CompileState, char*)> compileReturn(struct CompileState state, char* input, struct int depth){
+/* private static */template Option<(struct CompileState, char*)> compileReturn(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
 	if (startsWith(stripped, "return ")){
 		auto right = substring(stripped, length("return "));
-		auto tuple = compileValueOrPlaceholder(state, right, depth);
+		auto tuple = compileValueOrPlaceholder(state, right);
 		return template Some<struct >::new((tuple.left, "return " + tuple.right));
 	}
 	return template None<struct >::new();
 }
-/* private static */template Option<(struct CompileState, char*)> compileAssignment(struct CompileState state, char* input, struct int depth){
+/* private static */template Option<(struct CompileState, char*)> compileAssignment(/* CompileState state */, /*  String input */){
 	auto valueSeparator = indexOf(input, "=");
 	if (/* valueSeparator < 0 */){
 		return template None<struct >::new();
 	}
 	auto left = substring(input, 0, valueSeparator);
-	auto right = substring(input, length(valueSeparator + "="));
+	auto right = substring(input, valueSeparator + length("="));
 	auto definitionTuple = compileDefinitionOrPlaceholder(state, left);
-	auto valueTuple = compileValueOrPlaceholder(definitionTuple.left, right, depth);
+	auto valueTuple = compileValueOrPlaceholder(definitionTuple.left, right);
 	return template Some<struct >::new((valueTuple.left, definitionTuple.right + " = " + valueTuple.right));
 }
 auto lambda0(){
 	return (state, generatePlaceholder(input));
 }
-/* private static */(struct CompileState, char*) compileDefinitionOrPlaceholder(struct CompileState state, char* input){
+/* private static */(struct CompileState, char*) compileDefinitionOrPlaceholder(/* CompileState state */, /*  String input */){
 	return orElseGet(compileDefinition(state, input), lambda0);
 }
 auto lambda0(auto tuple){
 	return (left(tuple), generate(right(tuple)));
 }
-/* private static */template Option<(struct CompileState, char*)> compileDefinition(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, char*)> compileDefinition(/* CompileState state */, /*  String input */){
 	return map(parseDefinition(state, input), lambda0);
 }
-/* private static */template Option<(struct CompileState, struct Definition)> parseDefinition(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct Definition)> parseDefinition(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
 	auto valueSeparator = lastIndexOf(stripped, " ");
 	if (valueSeparator >= 0){
 		auto beforeName = substring(stripped, 0, valueSeparator);
-		auto name = strip(substring(stripped, length(valueSeparator + " ")));
+		auto name = strip(substring(stripped, valueSeparator + length(" ")));
 		auto annotationSeparator = lastIndexOf(beforeName, "\n");
 		if (/* annotationSeparator < 0 */){
 			return definitionWithAnnotations(state, emptyList(Collections), beforeName, name);
 		}
 		auto annotationsArray = split(strip(substring(beforeName, 0, annotationSeparator)), quote(Pattern, "\n"));
-		toList(map(/* var annotations = Arrays.stream(annotationsArray)
-                    .map(String */::strip), /* slice -> slice.isEmpty() ? "" : slice.substring(1) */));
-		auto beforeName0 = substring(beforeName, length(annotationSeparator + "\n"));
-		return definitionWithAnnotations(state, annotations, /*  beforeName0 */, name);
+		toList(/* var annotations = Arrays.stream(annotationsArray)
+                    .map(String */::strip)
+                    .map(slice -> slice.isEmpty() ? "" : slice.substring(1)));
+		auto beforeName0 = substring(beforeName, annotationSeparator + length("\n"));
+		return /* definitionWithAnnotations(state, annotations, beforeName0, name) */;
 	}
 	return template None<struct >::new();
 }
-/* private static */template Option<(struct CompileState, struct Definition)> definitionWithAnnotations(struct CompileState state, template List<char*> annotations, char* withoutAnnotations, char* name){
+/* private static */template Option<(struct CompileState, struct Definition)> definitionWithAnnotations(/* CompileState state */, /*  List<String> annotations */, /*  String withoutAnnotations */, /*  String name */){
 	auto stripped = strip(withoutAnnotations);
 	if (/* findTypeSeparator(stripped) instanceof Some(var slices) */){
 		auto beforeType = slices.left;
@@ -655,7 +690,7 @@ auto lambda0(auto tuple){
 	}
 	return definitionWithBeforeType(state, annotations, "", stripped, name);
 }
-/* private static */template Option<(char*, char*)> findTypeSeparator(char* input){
+/* private static */template Option<(char*, char*)> findTypeSeparator(/* String input */){
 	auto divisions = divideAll(strip(input), struct Main::foldTypeSeparator);
 	if (size(divisions) >= 2){
 		auto left = subList(divisions, 0, size(divisions) - 1);
@@ -664,7 +699,7 @@ auto lambda0(auto tuple){
 	}
 	return template None<struct >::new();
 }
-/* private static */struct DivideState foldTypeSeparator(struct DivideState state, struct Character c){
+/* private static */struct DivideState foldTypeSeparator(/* DivideState state */, /*  Character c */){
 	if (/* c == ' ' && state.isLevel() */){
 		return advance(state);
 	}
@@ -677,8 +712,7 @@ auto lambda0(auto tuple){
 	}
 	return appended;
 }
-/* private static */template Some<(struct CompileState, struct Definition)> definitionWithBeforeType(struct CompileState state, template List<char*> annotations, char* beforeType, char* type, char* name){
-	auto typeResult = compileType(state, type);
+auto lambda0(auto typeResult){
 	auto newAnnotations = template ArrayList<char*>::new();
 	auto newModifiers = template ArrayList<char*>::new();
 	/* for (var annotation : annotations) */{
@@ -691,87 +725,95 @@ auto lambda0(auto tuple){
 	}
 	return template Some<struct >::new((typeResult.left, struct Definition::new(newAnnotations, newModifiers, beforeType, typeResult.right, name)));
 }
-/* private static */(struct CompileState, char*) compileType(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct Definition)> definitionWithBeforeType(/* CompileState state */, /*  List<String> annotations */, /*  String beforeType */, /*  String type */, /*  String name */){
+	return flatMap(compileType(state, type), lambda0);
+}
+/* private static */template Option<(struct CompileState, char*)> compileType(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
 	if (equals(stripped, "var")){
-		return (state, "auto");
+		return template Some<struct >::new((state, "auto"));
 	}
 	if (equals(stripped, "void")){
-		return (state, "void");
+		return template Some<struct >::new((state, "void"));
 	}
 	if (equals(stripped, "String")){
-		return (state, "char*");
+		return template Some<struct >::new((state, "char*"));
 	}
 	if (isSymbol(stripped)){
-		return (state, "struct " + stripped);
+		return template Some<struct >::new((state, "struct " + stripped));
 	}
 	if (endsWith(stripped, ">")){
-		auto withoutEnd = substring(stripped, 0, length(length(stripped) - ">"));
+		auto withoutEnd = substring(stripped, 0, length(stripped) - length(">"));
 		auto argsStart = indexOf(withoutEnd, "<");
 		if (argsStart >= 0){
 			auto base = strip(substring(withoutEnd, 0, argsStart));
-			auto argsString = substring(withoutEnd, length(argsStart + "<"));
-			auto argsTuple = parseValues(state, argsString, struct Main::compileType);
-			auto args = argsTuple.right;
-			if (/* base.equals("Tuple") && args.size() >= 2 */){
-				auto first = get(args, 0);
-				auto second = get(args, 1);
-				return (argsTuple.left, "(" + first + ", " + second + ")");
+			auto argsString = substring(withoutEnd, argsStart + length("<"));
+			auto maybeArgsTuple = parseValues(state, argsString, struct Main::compileType);
+			if (/* maybeArgsTuple instanceof Some(var argsTuple) */){
+				auto args = argsTuple.right;
+				if (/* base.equals("Tuple") && args.size() >= 2 */){
+					auto first = get(args, 0);
+					auto second = get(args, 1);
+					return template Some<struct >::new((argsTuple.left, "(" + first + ", " + second + ")"));
+				}
+				return template Some<struct >::new((argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
 			}
-			return (argsTuple.left, "template " + base + "<" + generateValues(args) + ">");
 		}
 	}
-	return (state, generatePlaceholder(stripped));
+	return template Some<struct >::new((state, generatePlaceholder(stripped)));
 }
-/* private static */template Option<(struct CompileState, struct Value)> compileInvokable(struct CompileState state, char* input, struct int depth){
+/* private static */template Option<(struct CompileState, struct Value)> compileInvokable(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
 	if (/* !stripped.endsWith(")") */){
 		return template None<struct >::new();
 	}
-	auto withoutEnd = substring(stripped, 0, length(length(stripped) - ")"));
+	auto withoutEnd = substring(stripped, 0, length(stripped) - length(")"));
 	auto divisions = divideAll(withoutEnd, struct Main::foldInvocationStart);
 	if (/* divisions.size() < 2 */){
 		return template None<struct >::new();
 	}
 	auto joined = join(String, "", subList(divisions, 0, size(divisions) - 1));
-	auto callerString = substring(joined, 0, length(length(joined) - ")"));
+	auto callerString = substring(joined, 0, length(joined) - length(")"));
 	auto inputArguments = getLast(divisions);
-	auto argumentsTuple = parseValues(state, inputArguments, /*  (state1, input1) -> {
-            return parseArgument(depth, state1, input1);
-        } */);
-	auto argumentState = argumentsTuple.left;
-	auto oldArguments = toList(filter(stream(argumentsTuple.right), /* arg -> !(arg instanceof Whitespace) */));
-	if (startsWith(callerString, "new ")){
-		auto withoutPrefix = substring(callerString, length("new "));
-		if (/* withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2 */){
-			return template Some<struct >::new((argumentState, struct TupleNode::new(get(oldArguments, 0), get(oldArguments, 1))));
+	if (/* parseValues(state, inputArguments, Main */::parseArgument) instanceof Some(var argumentsTuple)){
+		auto argumentState = argumentsTuple.left;
+		auto oldArguments = /*  argumentsTuple.right
+                    .stream()
+                    .filter(arg -> !(arg instanceof Whitespace))
+                    .toList() */;
+		if (startsWith(callerString, "new ")){
+			auto withoutPrefix = substring(callerString, length("new "));
+			if (/* withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2 */){
+				return template Some<struct >::new((argumentState, struct TupleNode::new(get(oldArguments, 0), get(oldArguments, 1))));
+			}
+			auto maybeCallerTuple = compileType(argumentState, withoutPrefix);
+			if (/* maybeCallerTuple instanceof Some(var callerTuple) */){
+				auto invocation = struct Invocation::new(struct MethodAccess::new(callerTuple.right, "new"), oldArguments);
+				return template Some<struct >::new((callerTuple.left, invocation));
+			}
 		}
-		auto callerTuple = compileType(argumentState, withoutPrefix);
-		auto invocation = struct Invocation::new(struct MethodAccess::new(callerTuple.right, "new"), oldArguments);
-		return template Some<struct >::new((callerTuple.left, invocation));
-	}
-	if (/* parseValue(argumentState, callerString, depth) instanceof Some(var callerTuple) */){
-		auto callerState = callerTuple.left;
-		auto oldCaller = callerTuple.right;
-		auto nextState = callerState;
-		struct Value newCaller = oldCaller;
-		auto newArguments = template ArrayList<struct Value>::new();
-		if (/* oldCaller instanceof DataAccess(Value parent, var property) */){
-			add(newArguments, parent);
-			/* newCaller  */ = struct Symbol::new(property);
+		if (/* parseValue(argumentState, callerString) instanceof Some(var callerTuple) */){
+			auto callerState = callerTuple.left;
+			auto oldCaller = callerTuple.right;
+			struct Value newCaller = oldCaller;
+			auto newArguments = template ArrayList<struct Value>::new();
+			if (/* oldCaller instanceof DataAccess(Value parent, var property) */){
+				add(newArguments, parent);
+				/* newCaller  */ = struct Symbol::new(property);
+			}
+			addAll(newArguments, oldArguments);
+			return template Some<struct >::new((callerState, struct Invocation::new(newCaller, newArguments)));
 		}
-		addAll(newArguments, oldArguments);
-		return template Some<struct >::new((nextState, struct Invocation::new(newCaller, newArguments)));
 	}
 	return template None<struct >::new();
 }
-auto lambda0(){
-	return (/* state1 */, struct Content::new(/* input1 */));
+/* private static */template Option<(struct CompileState, struct Value)> parseArgument(/* CompileState state1 */, /*  String input1 */){
+	return /* or(state1, input1, List.of(
+                type(Main */::parseWhitespace),
+                type((state2, input2) -> parseValue(state2, input2))
+        ));
 }
-/* private static */(struct CompileState, struct Value) parseArgument(struct int depth, struct CompileState state1, char* input1){
-	return orElseGet(or(/* state1 */, /*  input1 */, of(List, type(struct Main::parseWhitespace), type(/* (state2, input2) -> parseValue(state2, input2, depth) */))), lambda0);
-}
-/* private static */template Option<(struct CompileState, struct Whitespace)> parseWhitespace(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct Whitespace)> parseWhitespace(/* CompileState state */, /*  String input */){
 	if (isBlank(input)){
 		return template Some<struct >::new((state, struct Whitespace::new()));
 	}
@@ -779,23 +821,29 @@ auto lambda0(){
 		return template None<struct >::new();
 	}
 }
-/* private static */(struct CompileState, char*) compileValues(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, (struct CompileState, char*)> compiler){
-	auto tuple = parseValues(state, input, compiler);
+auto lambda0(auto tuple){
 	return (tuple.left, generateValues(tuple.right));
 }
-/* private static */char* generateValues(template List<char*> elements){
+/* private static */template Option<(struct CompileState, char*)> compileValues(/* CompileState state */, /*  String input */, /*  BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler */){
+	return map(parseValues(state, input, compiler), lambda0);
+}
+/* private static */char* generateValues(/* List<String> elements */){
 	return generateAll(elements, struct Main::mergeValues);
 }
-/* private static <T> */(struct CompileState, template List<struct T>) parseValues(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, (struct CompileState, struct T)> compiler){
+/* private static <T> */template Option<(struct CompileState, template List<struct T>)> parseValues(/* 
+            CompileState state */, /* 
+            String input */, /* 
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> compiler
+     */){
 	return parseAll(state, input, struct Main::foldValueChar, compiler);
 }
-/* private static */struct StringBuilder mergeValues(struct StringBuilder cache, char* element){
+/* private static */struct StringBuilder mergeValues(/* StringBuilder cache */, /*  String element */){
 	if (isEmpty(cache)){
 		return append(cache, element);
 	}
 	return append(append(cache, ", "), element);
 }
-/* private static */struct DivideState foldValueChar(struct DivideState state, struct char c){
+/* private static */struct DivideState foldValueChar(/* DivideState state */, /*  char c */){
 	if (/* c == ',' && state.isLevel() */){
 		return advance(state);
 	}
@@ -814,24 +862,26 @@ auto lambda0(){
 auto lambda0(){
 	return (state, generatePlaceholder(input));
 }
-/* private static */(struct CompileState, char*) compileValueOrPlaceholder(struct CompileState state, char* input, struct int depth){
-	return orElseGet(compileValue(state, input, depth), lambda0);
+/* private static */(struct CompileState, char*) compileValueOrPlaceholder(/* CompileState state */, /*  String input */){
+	return orElseGet(compileValue(state, input), lambda0);
 }
 auto lambda0(auto tuple){
 	return (tuple.left, generate(tuple.right));
 }
-/* private static */template Option<(struct CompileState, char*)> compileValue(struct CompileState state, char* input, struct int depth){
-	return map(parseValue(state, input, depth), lambda0);
+/* private static */template Option<(struct CompileState, char*)> compileValue(/* CompileState state */, /*  String input */){
+	return map(parseValue(state, input), lambda0);
 }
-/* private static */template Option<(struct CompileState, struct Value)> parseValue(struct CompileState state, char* input, struct int depth){
-	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> type = of(List, type(struct Main::compileString), type(/* (state0, input0) -> compileLambda(state0, input0, depth) */), type(/* (state0, input0) -> compileInvokable(state0, input0, depth) */), type(/* (state0, input0) -> compileAccess(state0, input0, depth) */), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(struct Main::parseNumber));
-	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>>::new(type);
+/* private static */template Option<(struct CompileState, struct Value)> parseValue(/* CompileState state */, /*  String input */){
+	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> beforeOperators = of(List, type(struct Main::compileString), type(struct Main::compileLambda));
+	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> afterOperators = of(List, type(struct Main::compileInvokable), type(struct Main::compileAccess), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(struct Main::parseNumber));
+	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>>::new(beforeOperators);
 	/* for (var value : Operator.values()) */{
-		add(rules, type(/* (state1, input1) -> compileOperator(state1, input1, depth, value) */));
+		/* rules.add(type((state1, input1) -> compileOperator(state1, input1, value))) */;
 	}
+	addAll(rules, afterOperators);
 	return or(state, input, rules);
 }
-/* private static */template Option<(struct CompileState, struct Value)> parseNumber(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct Value)> parseNumber(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
 	if (isNumber(stripped)){
 		return template Some<struct >::new((state, struct NumberValue::new(stripped)));
@@ -840,7 +890,7 @@ auto lambda0(auto tuple){
 		return template None<struct >::new();
 	}
 }
-/* private static */struct boolean isNumber(char* input){
+/* private static */struct boolean isNumber(/* String input */){
 	/* for (var i = 0; i < input.length(); i++) */{
 		auto c = charAt(input, i);
 		if (isDigit(Character, c)){
@@ -850,13 +900,13 @@ auto lambda0(auto tuple){
 	}
 	return true;
 }
-/* private static */template Option<(struct CompileState, struct Value)> compileOperator(struct CompileState state, char* input, struct int depth, struct Operator operator){
+/* private static */template Option<(struct CompileState, struct Value)> compileOperator(/* CompileState state */, /*  String input */, /*  Operator operator */){
 	auto index = indexOf(input, operator.representation);
 	if (index >= 0){
 		auto left = substring(input, 0, index);
-		auto right = substring(input, length(index + operator.representation));
-		if (/* parseValue(state, left, depth) instanceof Some(var leftTuple) */){
-			if (/* parseValue(leftTuple.left, right, depth) instanceof Some(var rightTuple) */){
+		auto right = substring(input, index + length(operator.representation));
+		if (/* parseValue(state, left) instanceof Some(var leftTuple) */){
+			if (/* parseValue(leftTuple.left, right) instanceof Some(var rightTuple) */){
 				auto operation = struct Operation::new(leftTuple.right, operator, rightTuple.right);
 				return template Some<struct >::new((rightTuple.left, operation));
 			}
@@ -864,7 +914,11 @@ auto lambda0(auto tuple){
 	}
 	return template None<struct >::new();
 }
-/* private static <T> */template Option<(struct CompileState, struct T)> or(struct CompileState state, char* input, template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct T)>>> rules){
+/* private static <T> */template Option<(struct CompileState, struct T)> or(/* 
+            CompileState state */, /* 
+            String input */, /* 
+            List<BiFunction<CompileState, String, Option<Tuple<CompileState, T>>>> rules
+     */){
 	/* for (var rule : rules) */{
 		auto applied = apply(rule, state, input);
 		if (isPresent(applied)){
@@ -879,50 +933,56 @@ auto lambda0(auto value){
 auto lambda1(auto value){
 	return (value.left, value.right);
 }
-/* private static <S, T extends S> */template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct S)>> type(template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct T)>> mapper){
+/* private static <S, T extends S> */template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct S)>> type(/* BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper */){
 	return /* (state, input) -> mapper.apply(state, input).map(value -> new Tuple<>(value.left, value.right)) */;
 }
-/* private static */template Option<(struct CompileState, struct MethodAccess)> compileMethodReference(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct MethodAccess)> compileMethodReference(/* CompileState state */, /*  String input */){
 	auto functionSeparator = indexOf(strip(input), "::");
 	if (/* functionSeparator < 0 */){
 		return template None<struct >::new();
 	}
 	auto left = substring(strip(input), 0, functionSeparator);
 	strip(/* var right = input.strip().substring(functionSeparator + " */::".length()));
-	auto leftTuple = compileType(state, left);
-	return template Some<struct >::new((leftTuple.left, struct MethodAccess::new(leftTuple.right, right)));
+	auto maybeLeftTuple = compileType(state, left);
+	if (/* maybeLeftTuple instanceof Some(var leftTuple) */){
+		return template Some<struct >::new((leftTuple.left, struct MethodAccess::new(leftTuple.right, right)));
+	}
+	return template None<struct >::new();
 }
-/* private static */template Option<(struct CompileState, struct Symbol)> compileSymbolValue(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct Symbol)> compileSymbolValue(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
 	if (isSymbol(stripped)){
 		return template Some<struct >::new((struct CompileState, struct Symbol)::new(state, struct Symbol::new(stripped)));
 	}
 	return template None<struct >::new();
 }
-/* private static */template Option<(struct CompileState, struct DataAccess)> compileAccess(struct CompileState state, char* input, struct int depth){
+/* private static */template Option<(struct CompileState, struct DataAccess)> compileAccess(/* CompileState state */, /*  String input */){
 	auto separator = lastIndexOf(strip(input), ".");
 	if (/* separator < 0 */){
 		return template None<struct >::new();
 	}
 	auto parent = substring(strip(input), 0, separator);
-	auto child = substring(strip(input), length(separator + "."));
-	if (/* !isSymbol(child) || !(parseValue(state, parent, depth) instanceof Some(var tuple)) */){
+	auto child = substring(strip(input), separator + length("."));
+	if (/* !isSymbol(child) || !(parseValue(state, parent) instanceof Some(var tuple)) */){
 		return template None<struct >::new();
 	}
 	return template Some<struct >::new((struct CompileState, struct DataAccess)::new(tuple.left, struct DataAccess::new(tuple.right, child)));
 }
-/* private static */template Option<(struct CompileState, struct StringValue)> compileString(struct CompileState state, char* input){
+/* private static */template Option<(struct CompileState, struct StringValue)> compileString(/* CompileState state */, /*  String input */){
 	auto stripped = strip(input);
-	if (/* !stripped.startsWith("\"") || !stripped.endsWith("\"") */){
+	if (/* !stripped.startsWith("\"") || !stripped.endsWith("\"") || stripped.length() < 2 */){
 		return template None<struct >::new();
 	}
 	return template Some<struct >::new((state, struct StringValue::new(substring(stripped, 1, length(stripped) - 1))));
 }
-/* private static */template Option<(struct CompileState, struct Symbol)> compileLambda(struct CompileState state, char* input, struct int depth){
+auto lambda0(auto result){
+			return assembleLambda(result.left, paramNames, result.right);
+}
+/* private static */template Option<(struct CompileState, struct Symbol)> compileLambda(/* CompileState state */, /*  String input */){
 	auto arrowIndex = indexOf(input, "->");
 	if (arrowIndex >= 0){
 		auto beforeArrow = strip(substring(input, 0, arrowIndex));
-		auto afterArrow = substring(input, length(arrowIndex + "->"));
+		auto afterArrow = substring(input, arrowIndex + length("->"));
 		/* List<String> paramNames */;
 		if (isSymbol(beforeArrow)){
 			/* paramNames  */ = singletonList(Collections, beforeArrow);
@@ -936,12 +996,11 @@ auto lambda1(auto value){
 		auto withBraces = strip(afterArrow);
 		/* if (withBraces.startsWith(" */{
 			@) && withBraces.endsWith("}")) {
-auto content = /*  withBraces.substring(1, withBraces.length() - 1);
-                var result = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth));
-                return assembleLambda(result.left, paramNames, result.right) */;
+auto content = flatMap(/* withBraces.substring(1, withBraces.length() - 1);
+                return compileStatements(state, content, Main */::compileFunctionSegment), lambda0);
 		}
 		/* else */{
-			if (/* compileValue(state, afterArrow, depth) instanceof Some(var valueTuple) */){
+			if (/* compileValue(state, afterArrow) instanceof Some(var valueTuple) */){
 				return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
 			}
 		}
@@ -954,13 +1013,13 @@ auto lambda0(auto name){
 auto lambda1(auto name){
 	return "auto " + name;
 }
-/* private static */template Option<(struct CompileState, struct Symbol)> assembleLambda(struct CompileState state, template List<char*> paramNames, char* content){
+/* private static */template Option<(struct CompileState, struct Symbol)> assembleLambda(/* CompileState state */, /*  List<String> paramNames */, /*  String content */){
 	auto nameTuple = createName(state, "lambda");
 	auto generatedName = nameTuple.left;
 	auto joinedParams = collect(map(stream(paramNames), lambda1), joining(Collectors, ", "));
 	return template Some<struct >::new((addFunction(nameTuple.right, "auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), struct Symbol::new(generatedName)));
 }
-/* private static */struct boolean isSymbol(char* input){
+/* private static */struct boolean isSymbol(/* String input */){
 	auto stripped = strip(input);
 	/* for (var i = 0; i < stripped.length(); i++) */{
 		auto c = charAt(stripped, i);
@@ -971,7 +1030,7 @@ auto lambda1(auto name){
 	}
 	return true;
 }
-/* private static */struct DivideState foldInvocationStart(struct DivideState state, struct char c){
+/* private static */struct DivideState foldInvocationStart(/* DivideState state */, /*  char c */){
 	auto appended = append(state, c);
 	if (/* c == '(' */){
 		auto entered = enter(appended);
@@ -987,7 +1046,7 @@ auto lambda1(auto name){
 	}
 	return appended;
 }
-/* private static */char* generatePlaceholder(char* stripped){
+/* private static */char* generatePlaceholder(/* String stripped */){
 	return "/* " + stripped + " */";
 }
 /* package magma; *//* 
