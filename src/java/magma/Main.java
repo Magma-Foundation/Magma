@@ -30,6 +30,8 @@ public class Main {
         Option<T> or(Supplier<Option<T>> other);
 
         boolean isPresent();
+
+        <R> Option<R> map(Function<T, R> mapper);
     }
 
     private interface Error {
@@ -67,6 +69,11 @@ public class Main {
         public boolean isPresent() {
             return false;
         }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -88,6 +95,11 @@ public class Main {
         @Override
         public boolean isPresent() {
             return true;
+        }
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
         }
     }
 
@@ -174,6 +186,21 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
+    private record Definition(List<String> newAnnotations, List<String> newModifiers, String type, String name) {
+        private String generate() {
+            String annotationsStrings;
+            if (this.newAnnotations().isEmpty()) {
+                annotationsStrings = "";
+            }
+            else {
+                annotationsStrings = this.newAnnotations().stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
+            }
+
+            var modifiersString = this.newModifiers().isEmpty() ? "" : String.join(" ", this.newModifiers()) + " ";
+            return annotationsStrings + modifiersString + this.type() + " " + this.name();
+        }
+    }
+
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
@@ -194,6 +221,7 @@ public class Main {
         }
     }
 
+    @Actual
     private static Result<String, IOError> readSource() {
         try {
             return new Ok<>(Files.readString(SOURCE));
@@ -287,12 +315,18 @@ public class Main {
                     var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
                     var paramStart = withoutParamEnd.indexOf("(");
                     if (paramStart >= 0) {
-                        var definition = withoutParamEnd.substring(0, paramStart);
+                        var definitionString = withoutParamEnd.substring(0, paramStart);
                         var params = withoutParamEnd.substring(paramStart + "(".length());
 
-                        if (compileDefinition(state, definition) instanceof Some(var definitionTuple)) {
+                        if (parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) {
+                            var definition = definitionTuple.right;
+                            var header = definition.generate() + "(" + generatePlaceholder(params) + ")";
+                            if (definition.newModifiers.contains("expect")) {
+                                return new Tuple<>(definitionTuple.left, header + ";\n");
+                            }
+
                             var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
-                            var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
+                            var generated = header + "{" + statementsTuple.right + "\n}\n";
                             return new Tuple<>(statementsTuple.left.addFunction(generated), "");
                         }
                     }
@@ -300,7 +334,7 @@ public class Main {
             }
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        return new Tuple<>(state, generatePlaceholder(stripped) + "\n");
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
@@ -354,6 +388,10 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        return parseDefinition(state, input).map(tuple -> new Tuple<>(tuple.left(), tuple.right().generate()));
+    }
+
+    private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         var stripped = input.strip();
         var valueSeparator = stripped.lastIndexOf(" ");
         if (valueSeparator >= 0) {
@@ -377,8 +415,9 @@ public class Main {
         return new None<>();
     }
 
-    private static Some<Tuple<CompileState, String>> definitionWithAnnotations(CompileState state, List<String> annotations, String type, String name) {
+    private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String type, String name) {
         var typeResult = compileType(state, type);
+
         var newAnnotations = new ArrayList<String>();
         var newModifiers = new ArrayList<String>();
         for (var annotation : annotations) {
@@ -390,16 +429,7 @@ public class Main {
             }
         }
 
-        String annotationsStrings;
-        if (newAnnotations.isEmpty()) {
-            annotationsStrings = "";
-        }
-        else {
-            annotationsStrings = newAnnotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
-        }
-
-        var modifiersString = newModifiers.isEmpty() ? "" : String.join(" ", newModifiers) + " ";
-        return new Some<>(new Tuple<>(typeResult.left, annotationsStrings + modifiersString + typeResult.right + " " + name));
+        return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name)));
     }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {

@@ -32,6 +32,19 @@ public class Main  */{
 }
 /* private record Tuple<A, */ B>(/* A left, B right */){
 }
+/* private record */ Definition(/* List<String> newAnnotations, List<String> newModifiers, String type, String name */){/* private String generate() {
+            String annotationsStrings;
+            if (this.newAnnotations().isEmpty()) {
+                annotationsStrings = "";
+            }
+            else {
+                annotationsStrings = this.newAnnotations().stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
+            }
+
+            var modifiersString = this.newModifiers().isEmpty() ? "" : String.join(" ", this.newModifiers()) + " ";
+            return annotationsStrings + modifiersString + this.type() + " " + this.name();
+        } */
+}
 auto lambda0(auto input){
 	auto output = compile(input);
 	return writeTarget(output);
@@ -41,19 +54,6 @@ auto lambda1(auto error){
 }
 /* public static void */ main(/*  */){
 	readSource().match(lambda0, struct Some::new).ifPresent(lambda1);
-}
-expect /* private static Option<IOError> */ writeTarget(/* String output */){/* try {
-            Files.writeString(TARGET, output);
-            return new None<>();
-        } *//* catch (IOException e) {
-            return new Some<>(new IOError(e));
-        } */
-}
-/* private static Result<String, IOError> */ readSource(/*  */){/* try {
-            return new Ok<>(Files.readString(SOURCE));
-        } *//* catch (IOException e) {
-            return new Err<>(new IOError(e));
-        } */
 }
 /* private static Tuple<CompileState, String> */ compileRoot(/* String input, CompileState state */){
 	return compileStatements(state, input, struct Main::compileClassSegment);
@@ -139,7 +139,8 @@ struct  if(/* c == ')' */){
 }
 /* private interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
-    } *//* private interface Option<T> {
+    } */
+/* private interface Option<T> {
         void ifPresent(Consumer<T> consumer);
 
         T orElseGet(Supplier<T> supplier);
@@ -147,17 +148,23 @@ struct  if(/* c == ')' */){
         Option<T> or(Supplier<Option<T>> other);
 
         boolean isPresent();
-    } *//* private interface Error {
+
+        <R> Option<R> map(Function<T, R> mapper);
+    } */
+/* private interface Error {
         String display();
-    } *//* private @interface Actual {
-    } *//* private record IOError(IOException exception) implements Error {
+    } */
+/* private @interface Actual {
+    } */
+/* private record IOError(IOException exception) implements Error {
         @Override
         public String display() {
             var writer = new StringWriter();
             this.exception.printStackTrace(new PrintWriter(writer));
             return writer.toString();
         }
-    } *//* record None<T>() implements Option<T> {
+    } */
+/* record None<T>() implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
         }
@@ -176,7 +183,13 @@ struct  if(/* c == ')' */){
         public boolean isPresent() {
             return false;
         }
-    } *//* private record Some<T>(T value) implements Option<T> {
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+    } */
+/* private record Some<T>(T value) implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
             consumer.accept(this.value);
@@ -196,17 +209,25 @@ struct  if(/* c == ')' */){
         public boolean isPresent() {
             return true;
         }
-    } *//* private record Ok<T, X>(T value) implements Result<T, X> {
+
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+    } */
+/* private record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(this.value);
         }
-    } *//* private record Err<T, X>(X error) implements Result<T, X> {
+    } */
+/* private record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(this.error);
         }
-    } *//* private static class DivideState {
+    } */
+/* private static class DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
@@ -253,12 +274,18 @@ struct  if(/* c == ')' */){
         public boolean isLevel() {
             return this.depth == 0;
         }
-    } *//* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* public static final Path TARGET = SOURCE.resolveSibling("main.c"); *//* private static String compile(String input) {
+    } */
+/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
+/* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
+expect /* private static Option<IOError> */ writeTarget(/* String output */);
+expect /* private static Result<String, IOError> */ readSource(/*  */);
+/* private static String compile(String input) {
         var state = new CompileState();
 
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); *//* var contentStart = withoutEnd.indexOf("{");
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length()); */
+/* var contentStart = withoutEnd.indexOf("{");
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
@@ -269,17 +296,23 @@ struct  if(/* c == ')' */){
         }
 
         return generatePlaceholder(stripped);
-    } *//* else if (c == '{' || c == '(') {
+    } */
+/* else if (c == '{' || c == '(') {
             return appended.enter();
         }
         else if (c == '}' || c == ')') {
             return appended.exit();
-        } *//* return appended; *//* }
+        } */
+/* return appended; */
+/* }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        var stripped = input.strip(); *//* if (stripped.endsWith("}")) {
-            var withoutContentEnd = stripped.substring(0, stripped.length() - "} *//* ".length());
-            var contentStart = withoutContentEnd.indexOf("{"); *//* if (contentStart >= 0) {
+        var stripped = input.strip(); */
+/* if (stripped.endsWith("}")) {
+            var withoutContentEnd = stripped.substring(0, stripped.length() - "} */
+/* ".length());
+            var contentStart = withoutContentEnd.indexOf("{"); */
+/* if (contentStart >= 0) {
                 var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
                 var right = withoutContentEnd.substring(contentStart + "{".length());
 
@@ -287,52 +320,82 @@ struct  if(/* c == ')' */){
                     var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
                     var paramStart = withoutParamEnd.indexOf("(");
                     if (paramStart >= 0) {
-                        var definition = withoutParamEnd.substring(0, paramStart);
+                        var definitionString = withoutParamEnd.substring(0, paramStart);
                         var params = withoutParamEnd.substring(paramStart + "(".length());
 
-                        if (compileDefinition(state, definition) instanceof Some(var definitionTuple)) {
+                        if (parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) {
+                            var definition = definitionTuple.right;
+                            var header = definition.generate() + "(" + generatePlaceholder(params) + ")";
+                            if (definition.newModifiers.contains("expect")) {
+                                return new Tuple<>(definitionTuple.left, header + ";\n");
+                            }
+
                             var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
-                            var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
+                            var generated = header + "{" + statementsTuple.right + "\n}\n";
                             return new Tuple<>(statementsTuple.left.addFunction(generated), "");
                         }
                     }
                 }
             }
-        } *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+        } */
+/* return new Tuple<>(state, generatePlaceholder(stripped) + "\n"); */
+/* }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        var stripped = input.strip(); *//* if (stripped.isEmpty()) {
+        var stripped = input.strip(); */
+/* if (stripped.isEmpty()) {
             return new Tuple<>(state, "");
-        } *//* if (stripped.endsWith(";")) {
+        } */
+/* if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
             var s = compileFunctionStatementValue(slice, state);
             return new Tuple<>(s.left, "\n\t" + s.right + ";");
-        } *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+        } */
+/* return new Tuple<>(state, generatePlaceholder(stripped)); */
+/* }
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(String input, CompileState state) {
         return compileReturn(state, input)
                 .or(() -> compileInvocation(state, input))
                 .or(() -> compileAssignment(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); */
+/* }
 
     private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
-        var stripped = input.strip(); *//* if (stripped.startsWith("return ")) {
+        var stripped = input.strip(); */
+/* if (stripped.startsWith("return ")) {
             var right = stripped.substring("return ".length());
             if (compileValue(state, right) instanceof Some(var other)) {
                 return new Some<>(new Tuple<>(other.left, "return " + other.right));
             }
-        } *//* return new None<>(); *//* }
+        } */
+/* return new None<>(); */
+/* }
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
-        var valueSeparator = input.indexOf("="); *//* if (valueSeparator < 0) {
+        var valueSeparator = input.indexOf("="); */
+/* if (valueSeparator < 0) {
             return new None<>();
-        } *//* var left = input.substring(0, valueSeparator); *//* var right = input.substring(valueSeparator + "=".length()); *//* var definitionTuple = compileDefinitionOrPlaceholder(state, left); *//* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); *//* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); *//* }
+        } */
+/* var left = input.substring(0, valueSeparator); */
+/* var right = input.substring(valueSeparator + "=".length()); */
+/* var definitionTuple = compileDefinitionOrPlaceholder(state, left); */
+/* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); */
+/* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); */
+/* }
 
     private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
-        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
+        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); */
+/* }
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
-        var stripped = input.strip(); *//* var valueSeparator = stripped.lastIndexOf(" "); *//* if (valueSeparator >= 0) {
+        return parseDefinition(state, input).map(tuple -> new Tuple<>(tuple.left(), tuple.right().generate())); */
+/* }
+
+    private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
+        var stripped = input.strip(); */
+/* var valueSeparator = stripped.lastIndexOf(" "); */
+/* if (valueSeparator >= 0) {
             var beforeName = stripped.substring(0, valueSeparator);
             var name = stripped.substring(valueSeparator + " ".length()).strip();
             var annotationSeparator = beforeName.lastIndexOf("\n");
@@ -348,28 +411,35 @@ struct  if(/* c == ')' */){
 
             var beforeName0 = beforeName.substring(annotationSeparator + "\n".length());
             return definitionWithAnnotations(state, annotations, beforeName0, name);
-        } *//* return new None<>(); *//* }
+        } */
+/* return new None<>(); */
+/* }
 
-    private static Some<Tuple<CompileState, String>> definitionWithAnnotations(CompileState state, List<String> annotations, String type, String name) {
-        var typeResult = compileType(state, type); *//* var newAnnotations = new ArrayList<String>(); *//* var newModifiers = new ArrayList<String>(); *//* for (var annotation : annotations) {
+    private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String type, String name) {
+        var typeResult = compileType(state, type); */
+/* var newAnnotations = new ArrayList<String>(); */
+/* var newModifiers = new ArrayList<String>(); */
+/* for (var annotation : annotations) {
             if (annotation.equals("Actual")) {
                 newModifiers.add("expect");
             }
             else {
                 newAnnotations.add(annotation);
             }
-        } *//* String annotationsStrings; *//* if (newAnnotations.isEmpty()) {
-            annotationsStrings = "";
-        } *//* else {
-            annotationsStrings = newAnnotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
-        } *//* var modifiersString = newModifiers.isEmpty() ? "" : String.join(" ", newModifiers) + " "; *//* return new Some<>(new Tuple<>(typeResult.left, annotationsStrings + modifiersString + typeResult.right + " " + name)); *//* }
+        } */
+/* return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name))); */
+/* }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
-        var stripped = input.strip(); *//* if (stripped.equals("var")) {
+        var stripped = input.strip(); */
+/* if (stripped.equals("var")) {
             return new Tuple<>(state, "auto");
-        } *//* if (isSymbol(stripped)) {
+        } */
+/* if (isSymbol(stripped)) {
             return new Tuple<>(state, "struct " + stripped);
-        } *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+        } */
+/* return new Tuple<>(state, generatePlaceholder(stripped)); */
+/* }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
         if (stripped.endsWith(")")) {
@@ -377,11 +447,15 @@ struct  if(/* c == ')' */){
 
             var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
             if (divisions.size() >= 2) {
-                var joined = String.join("", divisions.subList(0, divisions.size() - 1)); *//* var caller = joined.substring(0, joined.length() - ")".length());
+                var joined = String.join("", divisions.subList(0, divisions.size() - 1)); */
+/* var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
                 if (compileValue(state, caller) instanceof Some(var callerTuple)) {
-                    var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValueOrPlaceholder, Main::mergeValues); *//* var generated = callerTuple.right + "(" + argumentsTuple.right + ")"; *//* return new Some<>(new Tuple<>(argumentsTuple.left, generated)); *//* }
+                    var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValueOrPlaceholder, Main::mergeValues); */
+/* var generated = callerTuple.right + "(" + argumentsTuple.right + ")"; */
+/* return new Some<>(new Tuple<>(argumentsTuple.left, generated)); */
+/* }
             }
         }
 
@@ -417,11 +491,15 @@ struct  if(/* c == ')' */){
             if (isSymbol(beforeArrow)) {
                 var withBraces = afterArrow.strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1); *//* var result = compileStatements(state, content, Main::compileFunctionSegment); *//* return assembleLambda(result.left, beforeArrow, result.right); *//* }
+                    var content = withBraces.substring(1, withBraces.length() - 1); */
+/* var result = compileStatements(state, content, Main::compileFunctionSegment); */
+/* return assembleLambda(result.left, beforeArrow, result.right); */
+/* }
                 else {
                     if (compileValue(state, afterArrow) instanceof Some(var valueTuple)) {
                         return assembleLambda(valueTuple.left, beforeArrow, "\n\treturn " + valueTuple.right + ";");
-                    } *//* \n"), name));
+                    } */
+/* \n"), name));
     }
 
     private static boolean isSymbol(String input) {
@@ -441,6 +519,7 @@ struct  if(/* c == ')' */){
         if (c == '(') {
             var entered = appended.enter();
             if (appended.isShallow()) {
-                return entered.advance(); *//* }
+                return entered.advance(); */
+/* }
             else {
                 return entered; */
