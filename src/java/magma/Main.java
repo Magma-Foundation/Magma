@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -106,6 +107,16 @@ public class Main {
     }
 
     private static String compileAll(String input, Function<String, String> mapper) {
+        var segments = divideAll(input);
+        var output = new StringBuilder();
+        for (var segment : segments) {
+            output.append(mapper.apply(segment));
+        }
+
+        return output.toString();
+    }
+
+    private static List<String> divideAll(String input) {
         var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -127,13 +138,7 @@ public class Main {
         }
 
         segments.add(buffer.toString());
-
-        var output = new StringBuilder();
-        for (var segment : segments) {
-            output.append(mapper.apply(segment));
-        }
-
-        return output.toString();
+        return segments;
     }
 
     private static String compileClassSegment(String input) {
