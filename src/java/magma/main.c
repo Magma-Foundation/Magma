@@ -85,6 +85,9 @@
 /* private record Operation(Value left, Operator operator, Value right) implements Value  */{/*  */
 
 };
+/* private static class Whitespace implements Value  */{/*  */
+
+};
 /* public class Main  */{/* private enum Operator {
         ADD("+");
         private final String representation;
@@ -388,8 +391,12 @@ expect /* private static *//* Result<String, IOError> */ readSource();
         }
 
         var appended = state.append(c);
-        if(c == ') return appended.enter();
-        if(c == ') return appended.exit();
+        if (c == ') {
+            return appended.enter();
+        }
+        if (c == ') {
+            return appended.exit();
+        }
         return appended;
     }
 
@@ -446,8 +453,9 @@ expect /* private static *//* Result<String, IOError> */ readSource();
         var callerString = joined.substring(0, joined.length() - ")".length());
 
         var inputArguments = divisions.getLast();
-        var argumentsTuple = parseValues(state, inputArguments, (state1, input1) -> parseValue(state1, input1, depth)
-                .orElseGet(() -> new Tuple<>(state1, new Content(input1))));
+        var argumentsTuple = parseValues(state, inputArguments, (state1, input1) -> {
+            return parseArgument(depth, state1, input1);
+        });
 
         var argumentState = argumentsTuple.left;
         var oldArguments = argumentsTuple.right;
@@ -489,6 +497,22 @@ expect /* private static *//* Result<String, IOError> */ readSource();
         }
 
         return new None<>();
+    }
+
+    private static Tuple<CompileState, Value> parseArgument(int depth, CompileState state1, String input1) {
+        return or(state1, input1, List.of(
+                type(Main::parseWhitespace),
+                type((state2, input2) -> parseValue(state2, input2, depth))
+        )).orElseGet(() -> new Tuple<>(state1, new Content(input1)));
+    }
+
+    private static Option<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, new Whitespace()));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
@@ -903,6 +927,10 @@ struct public CompileState(){
 @Override
 /* public */char* generate(){
 	return this.left.generate(this.left, ) + " " + this.operator.representation + " " + this.right.generate(this.left.generate(this.left, ) + " " + this.operator.representation + " " + this.right, );
+}
+@Override
+/* public */char* generate(){
+	return "";
 }
 auto lambda0(auto error){
 	return System.err.println(System.err, error.display(error, ));

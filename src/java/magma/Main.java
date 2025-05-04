@@ -362,6 +362,13 @@ public class Main {
         }
     }
 
+    private static class Whitespace implements Value {
+        @Override
+        public String generate() {
+            return "";
+        }
+    }
+
     private enum Operator {
         ADD("+");
         private final String representation;
@@ -774,8 +781,12 @@ public class Main {
         }
 
         var appended = state.append(c);
-        if(c == '<') return appended.enter();
-        if(c == '>') return appended.exit();
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
         return appended;
     }
 
@@ -832,8 +843,9 @@ public class Main {
         var callerString = joined.substring(0, joined.length() - ")".length());
 
         var inputArguments = divisions.getLast();
-        var argumentsTuple = parseValues(state, inputArguments, (state1, input1) -> parseValue(state1, input1, depth)
-                .orElseGet(() -> new Tuple<>(state1, new Content(input1))));
+        var argumentsTuple = parseValues(state, inputArguments, (state1, input1) -> {
+            return parseArgument(depth, state1, input1);
+        });
 
         var argumentState = argumentsTuple.left;
         var oldArguments = argumentsTuple.right;
@@ -875,6 +887,22 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Tuple<CompileState, Value> parseArgument(int depth, CompileState state1, String input1) {
+        return or(state1, input1, List.of(
+                type(Main::parseWhitespace),
+                type((state2, input2) -> parseValue(state2, input2, depth))
+        )).orElseGet(() -> new Tuple<>(state1, new Content(input1)));
+    }
+
+    private static Option<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, new Whitespace()));
+        }
+        else {
+            return new None<>();
+        }
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
