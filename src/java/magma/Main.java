@@ -449,10 +449,22 @@ public class Main {
         }
 
         if (stripped.endsWith(";")) {
-            var slice = stripped.substring(0, stripped.length() - ";".length());
-            var s = compileFunctionStatementValue(slice, state);
-            return new Tuple<>(s.left, "\n\t" + s.right + ";");
+            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+            var statements = compileFunctionStatementValue(withoutEnd, state);
+            return new Tuple<>(statements.left, "\n\t" + statements.right + ";");
         }
+
+        if(stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if(contentStart >= 0) {
+                var beforeContent = withoutEnd.substring(0, contentStart);
+                var content = withoutEnd.substring(contentStart + "{".length());
+                var newContent = compileStatements(state, content, Main::compileFunctionSegment);
+                return new Tuple<>(newContent.left, generatePlaceholder(beforeContent) + "{" + newContent.right + "}");
+            }
+        }
+
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
