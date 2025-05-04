@@ -218,6 +218,10 @@ public class Main {
                 return new None<>();
             }
         }
+
+        public char peek() {
+            return this.input.charAt(this.index);
+        }
     }
 
     private record Frame(Map<String, Integer> counters, List<String> statements) {
@@ -878,7 +882,7 @@ public class Main {
 
         if (callerString.startsWith("new ")) {
             var withoutPrefix = callerString.substring("new ".length());
-            if (withoutPrefix.equals("Tuple<>")) {
+            if (withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2) {
                 return new Some<>(new Tuple<>(argumentState, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
             }
 
@@ -965,10 +969,14 @@ public class Main {
         }
 
         var appended = state.append(c);
-        if (c == '(') {
+        if (c == '-' && appended.peek() == '>') {
+            return appended.popAndAppendToOption().orElse(appended);
+        }
+
+        if (c == '(' || c == '<') {
             return appended.enter();
         }
-        if (c == ')') {
+        if (c == ')' || c == '>') {
             return appended.exit();
         }
         return appended;
