@@ -74,32 +74,32 @@ public class Main {
         }
     }
 
-    private static class State {
+    private static class DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        public State() {
+        public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        private State enter() {
+        private DivideState enter() {
             this.depth = this.depth + 1;
             return this;
         }
 
-        private State exit() {
+        private DivideState exit() {
             this.depth = this.depth - 1;
             return this;
         }
 
-        private State advance() {
+        private DivideState advance() {
             this.segments().add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
@@ -113,13 +113,19 @@ public class Main {
             return this.depth == 1;
         }
 
-        private State append(char c) {
+        private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         }
 
         public boolean isLevel() {
             return this.depth == 0;
+        }
+    }
+
+    private record CompileState(List<String> methods) {
+        public CompileState() {
+            this(new ArrayList<>());
         }
     }
 
@@ -151,6 +157,8 @@ public class Main {
     }
 
     private static String compile(String input) {
+        var state = new CompileState();
+
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -158,22 +166,24 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right);
+                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right, state);
             }
         }
 
         return generatePlaceholder(stripped);
     }
 
-    private static String compileRoot(String input) {
-        return compileStatements(input, Main::compileClassSegment);
+    private static String compileRoot(String input, CompileState state) {
+        return compileStatements(input, input1 -> {
+            return compileClassSegment(input1, state);
+        });
     }
 
     private static String compileStatements(String input, Function<String, String> mapper) {
         return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
     }
 
-    private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static String compileAll(String input, BiFunction<DivideState, Character, DivideState> folder, Function<String, String> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
         var segments = divideAll(input, folder);
         var output = new StringBuilder();
         for (var segment : segments) {
@@ -188,8 +198,8 @@ public class Main {
         return output.append(mapped);
     }
 
-    private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
-        var current = new State();
+    private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
+        var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
@@ -198,7 +208,7 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static State foldStatementChar(State state, char c) {
+    private static DivideState foldStatementChar(DivideState state, char c) {
         var appended = state.append(c);
         if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
@@ -212,7 +222,7 @@ public class Main {
         return appended;
     }
 
-    private static String compileClassSegment(String input) {
+    private static String compileClassSegment(String input, CompileState state) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -220,27 +230,27 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left.strip()) + "{" + compileStatements(right, Main::compileFunctionSegment) + "\n}\n";
+                return generatePlaceholder(left.strip()) + "{" + compileStatements(right, input1 -> compileFunctionSegment(input1, state)) + "\n}\n";
             }
         }
         return generatePlaceholder(stripped);
     }
 
-    private static String compileFunctionSegment(String input) {
+    private static String compileFunctionSegment(String input, CompileState state) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
-            return "\n\t" + compileFunctionSegmentValue(slice) + ";";
+            return "\n\t" + compileFunctionSegmentValue(slice, state) + ";";
         }
         return generatePlaceholder(stripped);
     }
 
-    private static String compileFunctionSegmentValue(String input) {
+    private static String compileFunctionSegmentValue(String input, CompileState state) {
         var stripped = input.strip();
-        return compileInvocation(stripped).orElseGet(() -> generatePlaceholder(input));
+        return compileInvocation(stripped, state).orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Option<String> compileInvocation(String stripped) {
+    private static Option<String> compileInvocation(String stripped, CompileState state) {
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -250,7 +260,7 @@ public class Main {
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                return new Some<>(compileValue(caller) + "(" + compileAll(arguments, Main::foldValueChar, Main::compileValue, Main::mergeValues) + ")");
+                return new Some<>(compileValue(caller, state) + "(" + compileAll(arguments, Main::foldValueChar, input -> compileValue(input, state), Main::mergeValues) + ")");
             }
         }
 
@@ -264,16 +274,16 @@ public class Main {
         return cache.append(", ").append(element);
     }
 
-    private static State foldValueChar(State state, char c) {
+    private static DivideState foldValueChar(DivideState state, char c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
         return state.append(c);
     }
 
-    private static String compileValue(String input) {
+    private static String compileValue(String input, CompileState state) {
         var stripped = input.strip();
-        var maybeInvocation = compileInvocation(stripped);
+        var maybeInvocation = compileInvocation(stripped, state);
         if (maybeInvocation instanceof Some(var invocation)) {
             return invocation;
         }
@@ -292,7 +302,7 @@ public class Main {
             var parent = stripped.substring(0, separator);
             var child = stripped.substring(separator + ".".length());
             if (isSymbol(child)) {
-                return compileValue(parent) + "." + child;
+                return compileValue(parent, state) + "." + child;
             }
         }
 
@@ -315,7 +325,7 @@ public class Main {
         return true;
     }
 
-    private static State foldInvocationStart(State state, char c) {
+    private static DivideState foldInvocationStart(DivideState state, char c) {
         var appended = state.append(c);
         if (c == '(') {
             var entered = appended.enter();

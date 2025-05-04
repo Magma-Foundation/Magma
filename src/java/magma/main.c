@@ -58,23 +58,23 @@ public class Main  */{
             return whenErr.apply(this.error);
         } *//*  */
 }
-/* private static class State */{/* private final List<String> segments;
+/* private static class DivideState */{/* private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        public State() {
+        public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
-        } *//* private State(List<String> segments, StringBuilder buffer, int depth) {
+        } *//* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        } *//* private State enter() {
+        } *//* private DivideState enter() {
             this.depth = this.depth + 1;
             return this;
-        } *//* private State exit() {
+        } *//* private DivideState exit() {
             this.depth = this.depth - 1;
             return this;
-        } *//* private State advance() {
+        } *//* private DivideState advance() {
             this.segments().add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
@@ -82,11 +82,15 @@ public class Main  */{
             return this.segments;
         } *//* private boolean isShallow() {
             return this.depth == 1;
-        } *//* private State append(char c) {
+        } *//* private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         } *//* public boolean isLevel() {
             return this.depth == 0;
+        } *//*  */
+}
+/* private record CompileState(List<String> methods) */{/* public CompileState() {
+            this(new ArrayList<>());
         } *//*  */
 }
 /* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -111,25 +115,29 @@ public class Main  */{
             return new Err<>(new IOError(e));
         } *//*  */
 }
-/* private static String compile(String input) */{/* var stripped = input.strip();
+/* private static String compile(String input) */{/* var state = new CompileState();
+        
+        var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "} *//* ".length());
             var contentStart = withoutEnd.indexOf("{");
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right);
+                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right, state);
             }
         } */
 	/* return generatePlaceholder */(stripped);
 }
-/* private static String compileRoot(String input) */{
-	/* return compileStatements */(input, /* Main::compileClassSegment */);
+/* private static String compileRoot(String input, CompileState state) */{
+	/* return compileStatements */(input, /* input1 -> {
+            return compileClassSegment(input1 */, /* state);
+        } */);
 }
 /* private static String compileStatements(String input, Function<String, String> mapper) */{
 	/* return compileAll */(input, /* Main::foldStatementChar */, mapper, /* Main::mergeStatements */);
 }
-/* private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{/* var segments = divideAll(input, folder);
+/* private static String compileAll(String input, BiFunction<DivideState, Character, DivideState> folder, Function<String, String> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{/* var segments = divideAll(input, folder);
         var output = new StringBuilder();
         for (var segment : segments) {
             var mapped = mapper.apply(segment);
@@ -140,14 +148,14 @@ public class Main  */{
 /* private static StringBuilder mergeStatements(StringBuilder output, String mapped) */{
 	/* return output */.append(mapped);
 }
-/* private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) */{/* var current = new State();
+/* private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) */{/* var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
         } */
 	/* return current.advance().segments */;
 }
-/* private static State foldStatementChar(State state, char c) */{/* var appended = state.append(c);
+/* private static DivideState foldStatementChar(DivideState state, char c) */{/* var appended = state.append(c);
         if (c == '} */
 	/* ' && appended */.isShallow(/* )) {
             return appended.advance().exit( */);
@@ -161,7 +169,7 @@ public class Main  */{
 /* return appended;
     }
 
-    private static String compileClassSegment(String input) */{/* var stripped = input.strip();
+    private static String compileClassSegment(String input, CompileState state) */{/* var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - " */
 }
@@ -170,27 +178,27 @@ public class Main  */{
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left.strip()) + "{" + compileStatements(right, Main::compileFunctionSegment) + "\n}\n";
+                return generatePlaceholder(left.strip()) + "{" + compileStatements(right, input1 -> compileFunctionSegment(input1, state)) + "\n}\n";
             } *//*  */
 }
 /* return generatePlaceholder(stripped);
     }
 
-    private static String compileFunctionSegment(String input) */{
+    private static String compileFunctionSegment(String input, CompileState state) */{
 	/* var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
-            return "\n\t" + compileFunctionSegmentValue(slice) + ";" */;
+            return "\n\t" + compileFunctionSegmentValue(slice, state) + ";" */;
 }
 /* return generatePlaceholder(stripped);
     }
 
-    private static String compileFunctionSegmentValue(String input) */{
+    private static String compileFunctionSegmentValue(String input, CompileState state) */{
 	/* var stripped = input.strip();
-        return compileInvocation(stripped).orElseGet(() -> generatePlaceholder(input));
+        return compileInvocation(stripped, state).orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Option<String> compileInvocation(String stripped) {
+    private static Option<String> compileInvocation(String stripped, CompileState state) {
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -200,7 +208,7 @@ public class Main  */{
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                return new Some<>(compileValue(caller) + "(" + compileAll(arguments, Main::foldValueChar, Main::compileValue, Main::mergeValues) + ")");
+                return new Some<>(compileValue(caller, state) + "(" + compileAll(arguments, Main::foldValueChar, input -> compileValue(input, state), Main::mergeValues) + ")");
             }
         }
 
@@ -214,22 +222,22 @@ public class Main  */{
         return cache.append(", ").append(element);
     }
 
-    private static State foldValueChar(State state, char c) {
+    private static DivideState foldValueChar(DivideState state, char c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
         return state.append(c);
     }
 
-    private static String compileValue(String input) {
+    private static String compileValue(String input, CompileState state) {
         var stripped = input.strip();
-        var maybeInvocation = compileInvocation(stripped);
+        var maybeInvocation = compileInvocation(stripped, state);
         if (maybeInvocation instanceof Some(var invocation)) {
             return invocation;
         }
 
-        var arrowIndex = stripped.indexOf("->".toString());
-        if(arrowIndex >= 0) {
+        var arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
             var left = stripped.substring(0, arrowIndex);
             var right = stripped.substring(arrowIndex + "->".length());
             if (isSymbol(left)) {
@@ -242,7 +250,7 @@ public class Main  */{
             var parent = stripped.substring(0, separator);
             var child = stripped.substring(separator + ".".length());
             if (isSymbol(child)) {
-                return compileValue(parent) + "." + child;
+                return compileValue(parent, state) + "." + child;
             }
         }
 
@@ -265,7 +273,7 @@ public class Main  */{
         return true;
     }
 
-    private static State foldInvocationStart(State state, char c) {
+    private static DivideState foldInvocationStart(DivideState state, char c) {
         var appended = state.append(c);
         if (c == '(') {
             var entered = appended.enter();
