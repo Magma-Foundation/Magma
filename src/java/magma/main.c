@@ -100,6 +100,9 @@
 /* private record NumberValue(String value) implements Value  */{/* 
      */
 };
+/* private record CharValue(String value) implements Value  */{/* 
+     */
+};
 /* private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String record)  */{/* 
         return (state0, input0) -> {
             var stripped = input0.strip();
@@ -128,7 +131,8 @@
     private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
-        GREATER_THAN_OR_EQUALS(">=");
+        GREATER_THAN_OR_EQUALS(">="),
+        EQUALS("==");
 
         private final String representation;
 
@@ -239,10 +243,10 @@ struct public DivideState(char* input, template List<char*> segments, struct Str
 	return this.segments;
 }
 /* private */struct boolean isShallow(){
-	return /* this.depth == 1 */;
+	return this.depth == 1;
 }
 /* public */struct boolean isLevel(){
-	return /* this.depth == 0 */;
+	return this.depth == 0;
 }
 /* public */template Option<struct DivideState> popAndAppendToOption(){
 	return map(popAndAppendToTuple(this), struct Tuple::right);
@@ -372,6 +376,10 @@ struct public CompileState(){
 /* public */char* generate(){
 	return this.value;
 }
+@Override
+/* public */char* generate(){
+	return "'" + this.value + "'";
+}
 auto lambda0(auto error){
 	return println(System.err, display(error));
 }
@@ -463,14 +471,20 @@ auto lambda3(){
 		}
 		auto next = popped.left;
 		/* current  */ = popped.right;
-		if (/* next == '\\' */){
+		if (next == '\\'){
 			/* current  */ = orElse(popAndAppendToOption(current), current);
 		}
-		if (/* next == '\"' */){
+		if (next == '\"'){
 			/* break */;
 		}
 	}
 	return template Some<struct >::new(current);
+}
+auto lambda0(auto popped){
+	return popped.left;
+}
+auto lambda1(auto popped){
+	return popped.left;
 }
 /* private static */template Option<struct DivideState> foldSingleQuotes(struct DivideState state, struct char c){
 	if (/* c != '\'' */){
@@ -559,10 +573,10 @@ auto lambda3(){
 }
 /* private static */template Option<(struct CompileState, char*)> compileParameter(struct CompileState state2, char* input){
 	return /* or(state2, input, List.of(
-               type(Main */::compileWhitespace),
-               type(Main::compileDefinition),
-               type(Main::compileContent)
-       ));
+                type(Main */::compileWhitespace),
+                type(Main::compileDefinition),
+                type(Main::compileContent)
+        ));
 }
 /* private static */template Option<(struct CompileState, char*)> compileWhitespace(struct CompileState state, char* input){
 	if (isBlank(input)){
@@ -709,10 +723,10 @@ auto lambda0(auto tuple){
 		return advance(state);
 	}
 	auto appended = append(state, c);
-	if (/* c == '<' */){
+	if (c == '<'){
 		return enter(appended);
 	}
-	if (/* c == '>' */){
+	if (c == '>'){
 		return exit(appended);
 	}
 	return appended;
@@ -849,13 +863,13 @@ auto lambda0(auto tuple){
 		return advance(state);
 	}
 	auto appended = append(state, c);
-	if (/* c == '-' && appended.peek() == '>' */){
+	if (c == '-' && appended.peek() == '>'){
 		return orElse(popAndAppendToOption(appended), appended);
 	}
-	if (/* c == '(' || c == '<' */){
+	if (c == '(' || c == '<'){
 		return enter(appended);
 	}
-	if (/* c == ')' || c == '>' */){
+	if (c == ')' || c == '>'){
 		return exit(appended);
 	}
 	return appended;
@@ -873,7 +887,7 @@ auto lambda0(auto tuple){
 	return map(parseValue(state, input), lambda0);
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseValue(struct CompileState state, char* input){
-	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> beforeOperators = of(List, type(struct Main::compileString), type(struct Main::compileLambda));
+	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> beforeOperators = of(List, type(struct Main::compileString), type(struct Main::compileChar), type(struct Main::compileLambda));
 	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> afterOperators = of(List, type(struct Main::compileInvokable), type(struct Main::compileAccess), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(struct Main::parseNumber));
 	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>>::new(beforeOperators);
 	/* for (var value : Operator.values()) */{
@@ -881,6 +895,15 @@ auto lambda0(auto tuple){
 	}
 	addAll(rules, afterOperators);
 	return or(state, input, rules);
+}
+/* private static */template Option<(struct CompileState, struct Value)> compileChar(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (/* stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3 */){
+		return template Some<struct >::new((state, struct CharValue::new(substring(stripped, 1, length(stripped) - 1))));
+	}
+	/* else */{
+		return template None<struct >::new();
+	}
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseNumber(struct CompileState state, char* input){
 	auto stripped = strip(input);
@@ -1029,7 +1052,7 @@ auto lambda1(auto name){
 }
 /* private static */struct DivideState foldInvocationStart(struct DivideState state, struct char c){
 	auto appended = append(state, c);
-	if (/* c == '(' */){
+	if (c == '('){
 		auto entered = enter(appended);
 		if (isShallow(appended)){
 			return advance(entered);
@@ -1038,7 +1061,7 @@ auto lambda1(auto name){
 			return entered;
 		}
 	}
-	if (/* c == ')' */){
+	if (c == ')'){
 		return exit(appended);
 	}
 	return appended;

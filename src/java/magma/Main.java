@@ -391,10 +391,18 @@ public class Main {
         }
     }
 
+    private record CharValue(String value) implements Value {
+        @Override
+        public String generate() {
+            return "'" + this.value + "'";
+        }
+    }
+
     private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
-        GREATER_THAN_OR_EQUALS(">=");
+        GREATER_THAN_OR_EQUALS(">="),
+        EQUALS("==");
 
         private final String representation;
 
@@ -454,7 +462,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> namespaced(CompileState state, String input) {
         var stripped = input.strip();
-        if(stripped.startsWith("package ") || stripped.startsWith("import ")) {
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Some<>(new Tuple<>(state, ""));
         }
         return new None<>();
@@ -675,11 +683,11 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState state2, String input) {
-       return or(state2, input, List.of(
-               type(Main::compileWhitespace),
-               type(Main::compileDefinition),
-               type(Main::compileContent)
-       ));
+        return or(state2, input, List.of(
+                type(Main::compileWhitespace),
+                type(Main::compileDefinition),
+                type(Main::compileContent)
+        ));
     }
 
     private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
@@ -1040,6 +1048,7 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseValue(CompileState state, String input) {
         List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> beforeOperators = List.of(
                 type(Main::compileString),
+                type(Main::compileChar),
                 type(Main::compileLambda)
         );
 
@@ -1058,6 +1067,15 @@ public class Main {
         rules.addAll(afterOperators);
 
         return or(state, input, rules);
+    }
+
+    private static Option<Tuple<CompileState, Value>> compileChar(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3) {
+            return new Some<>(new Tuple<>(state, new CharValue(stripped.substring(1, stripped.length() - 1))));
+        } else {
+            return new None<>();
+        }
     }
 
     private static Option<Tuple<CompileState, Value>> parseNumber(CompileState state, String input) {
