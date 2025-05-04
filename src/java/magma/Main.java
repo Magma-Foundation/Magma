@@ -32,6 +32,8 @@ public class Main {
         boolean isPresent();
 
         <R> Option<R> map(Function<T, R> mapper);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
     }
 
     private interface Error {
@@ -74,6 +76,11 @@ public class Main {
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
         }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -101,6 +108,11 @@ public class Main {
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<>(mapper.apply(this.value));
         }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(value);
+        }
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -118,18 +130,22 @@ public class Main {
     }
 
     private static class DivideState {
+        private final String input;
         private final List<String> segments;
+        private final int index;
         private StringBuilder buffer;
         private int depth;
 
-        public DivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+        public DivideState(String input) {
+            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
         }
 
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+        public DivideState(String input, List<String> segments, StringBuilder buffer, int index, int depth) {
+            this.input = input;
             this.segments = segments;
-            this.buffer = buffer;
+            this.index = index;
             this.depth = depth;
+            this.buffer = buffer;
         }
 
         private DivideState enter() {
@@ -156,13 +172,29 @@ public class Main {
             return this.depth == 1;
         }
 
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public Option<DivideState> popAndAppend() {
+            return this.pop().map(tuple -> {
+                return tuple.right.append(tuple.left);
+            });
+        }
+
         private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         }
 
-        public boolean isLevel() {
-            return this.depth == 0;
+        public Option<Tuple<Character, DivideState>> pop() {
+            if (this.index < this.input.length()) {
+                var c = this.input.charAt(this.index);
+                return new Some<>(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+            }
+            else {
+                return new None<>();
+            }
         }
     }
 
@@ -264,6 +296,7 @@ public class Main {
         var output = new StringBuilder();
         for (var segment : segments) {
             var mapped = mapper.apply(current, segment);
+
             current = mapped.left;
             output = merger.apply(output, mapped.right);
         }
@@ -276,13 +309,30 @@ public class Main {
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState();
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            current = folder.apply(current, c);
+        var current = new DivideState(input);
+        while (true) {
+            var maybePopped = current.pop();
+            if (!(maybePopped instanceof Some(var popped))) {
+                break;
+            }
+
+            current = foldSingleQuotes(popped.right, popped.left)
+                    .orElseGet(() -> folder.apply(popped.right, popped.left));
         }
 
         return current.advance().segments;
+    }
+
+    private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
+        if (c != '\'') {
+            return new None<>();
+        }
+
+        var appended = state.append(c);
+        return appended.pop()
+                .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppend() : new Some<>(popped.right))
+                .flatMap(DivideState::popAndAppend);
+
     }
 
     private static DivideState foldStatementChar(DivideState state, char c) {
