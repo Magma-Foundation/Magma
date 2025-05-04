@@ -266,7 +266,7 @@ auto lambda0(auto tuple){
 		auto c = charAt(this.input, this.index);
 		return template Some<struct >::new((c, struct DivideState::new(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
 	}
-	/* else */{
+	else {
 		return template None<struct >::new();
 	}
 }
@@ -327,7 +327,7 @@ struct public CompileState(){
 	if (isEmpty(this.annotations)){
 		/* annotationsStrings  */ = "";
 	}
-	/* else */{
+	else {
 		/* annotationsStrings  */ = /*  this.annotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n" */;
 	}
 	auto modifiersString = /*  this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " " */;
@@ -431,7 +431,7 @@ auto lambda0(auto tuple){
 			add(current.right, mapped.right);
 			/* current  */ = (mapped.left, current.right);
 		}
-		/* else */{
+		else {
 			return template None<struct >::new();
 		}
 	}
@@ -608,7 +608,7 @@ auto lambda1(auto popped){
 		auto oldStatements = template ArrayList<char*>::new();
 		addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
 		addAll(oldStatements, statementsTuple.right);
-		auto string = compileBlockHeader(exit(statementsTuple.left), beforeContent, depth(state));
+		auto string = compileBlockHeader(exit(statementsTuple.left), beforeContent);
 		return template Some<struct >::new((string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
 	}
 	return template None<struct >::new();
@@ -622,8 +622,11 @@ auto lambda1(auto popped){
 	}
 	return template None<struct >::new();
 }
-/* private static */(struct CompileState, char*) compileBlockHeader(struct CompileState state, char* input, struct int depth){
+/* private static */(struct CompileState, char*) compileBlockHeader(struct CompileState state, char* input){
 	auto stripped = strip(input);
+	if (equals(stripped, "else")){
+		return (state, "else ");
+	}
 	if (startsWith(stripped, "if")){
 		auto withoutPrefix = strip(substring(stripped, length("if")));
 		if (/* withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")") */){
@@ -738,7 +741,7 @@ auto lambda0(auto typeResult){
 		if (equals(annotation, "Actual")){
 			add(newModifiers, "expect");
 		}
-		/* else */{
+		else {
 			add(newAnnotations, annotation);
 		}
 	}
@@ -836,7 +839,7 @@ auto lambda0(auto typeResult){
 	if (isBlank(input)){
 		return template Some<struct >::new((state, struct Whitespace::new()));
 	}
-	/* else */{
+	else {
 		return template None<struct >::new();
 	}
 }
@@ -901,7 +904,7 @@ auto lambda0(auto tuple){
 	if (/* stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3 */){
 		return template Some<struct >::new((state, struct CharValue::new(substring(stripped, 1, length(stripped) - 1))));
 	}
-	/* else */{
+	else {
 		return template None<struct >::new();
 	}
 }
@@ -910,7 +913,7 @@ auto lambda0(auto tuple){
 	if (isNumber(stripped)){
 		return template Some<struct >::new((state, struct NumberValue::new(stripped)));
 	}
-	/* else */{
+	else {
 		return template None<struct >::new();
 	}
 }
@@ -1010,7 +1013,7 @@ auto lambda0(auto result){
 		/* else if (beforeArrow.equals("()")) */{
 			/* paramNames  */ = emptyList(Collections);
 		}
-		/* else */{
+		else {
 			return template None<struct >::new();
 		}
 		auto withBraces = strip(afterArrow);
@@ -1019,7 +1022,7 @@ auto lambda0(auto result){
 auto content = flatMap(/* withBraces.substring(1, withBraces.length() - 1);
                 return compileStatements(state, content, Main */::compileFunctionSegment), lambda0);
 		}
-		/* else */{
+		else {
 			if (/* compileValue(state, afterArrow) instanceof Some(var valueTuple) */){
 				return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
 			}
@@ -1057,7 +1060,7 @@ auto lambda1(auto name){
 		if (isShallow(appended)){
 			return advance(entered);
 		}
-		/* else */{
+		else {
 			return entered;
 		}
 	}

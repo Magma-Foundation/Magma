@@ -732,7 +732,7 @@ public class Main {
             oldStatements.addAll(statementsTuple.left.frames.getLast().statements);
             oldStatements.addAll(statementsTuple.right);
 
-            var string = compileBlockHeader(statementsTuple.left.exit(), beforeContent, state.depth());
+            var string = compileBlockHeader(statementsTuple.left.exit(), beforeContent);
             return new Some<>(new Tuple<>(string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
         }
 
@@ -749,8 +749,12 @@ public class Main {
         return new None<>();
     }
 
-    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input, int depth) {
+    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input) {
         var stripped = input.strip();
+        if (stripped.equals("else")) {
+            return new Tuple<>(state, "else ");
+        }
+
         if (stripped.startsWith("if")) {
             var withoutPrefix = stripped.substring("if".length()).strip();
             if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
@@ -759,7 +763,6 @@ public class Main {
                 return new Tuple<>(tuple.left, "if (" + tuple.right + ")");
             }
         }
-
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
@@ -1073,7 +1076,8 @@ public class Main {
         var stripped = input.strip();
         if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3) {
             return new Some<>(new Tuple<>(state, new CharValue(stripped.substring(1, stripped.length() - 1))));
-        } else {
+        }
+        else {
             return new None<>();
         }
     }
