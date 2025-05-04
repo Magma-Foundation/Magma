@@ -408,7 +408,7 @@ public class Main {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
                 if (left.contains(infix)) {
-                    var result = compileStatements(state, right, Main::compileClassSegment);
+                    var result = compileStatements(state, right, Main::compileStructSegment);
                     var generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
                     return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
                 }
@@ -535,7 +535,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
         var stripped = input.strip();
 
         return or(state, input, List.of(
@@ -579,7 +579,12 @@ public class Main {
 
         var definition = definitionTuple.right;
 
-        var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
+        var paramsTuple = compileValues(definitionTuple.left, inputParams, (state2, input) -> {
+            return compileWhitespace(state2, input).orElseGet(() -> {
+                return compileDefinitionOrPlaceholder(state2, input);
+            });
+        });
+
         var paramsState = paramsTuple.left;
         var paramsString = paramsTuple.right;
 
@@ -599,6 +604,13 @@ public class Main {
         var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
         return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
 
+    }
+
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, ""));
+        }
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
