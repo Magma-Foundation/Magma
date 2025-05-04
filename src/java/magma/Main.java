@@ -234,18 +234,25 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record Definition(List<String> newAnnotations, List<String> newModifiers, String type, String name) {
+    private record Definition(
+            List<String> annotations,
+            List<String> modifiers,
+            String beforeType,
+            String type,
+            String name
+    ) {
         private String generate() {
             String annotationsStrings;
-            if (this.newAnnotations().isEmpty()) {
+            if (this.annotations.isEmpty()) {
                 annotationsStrings = "";
             }
             else {
-                annotationsStrings = this.newAnnotations().stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
+                annotationsStrings = this.annotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
             }
 
-            var modifiersString = this.newModifiers().isEmpty() ? "" : String.join(" ", this.newModifiers()) + " ";
-            return annotationsStrings + modifiersString + this.type() + " " + this.name();
+            var modifiersString = this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " ";
+            var beforeTypeString = this.beforeType.isEmpty() ? "" : generatePlaceholder(this.beforeType);
+            return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name;
         }
     }
 
@@ -414,7 +421,7 @@ public class Main {
                         if (parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) {
                             var definition = definitionTuple.right;
                             var header = definition.generate() + "(" + generatePlaceholder(params) + ")";
-                            if (definition.newModifiers.contains("expect")) {
+                            if (definition.modifiers.contains("expect")) {
                                 return new Tuple<>(definitionTuple.left, header + ";\n");
                             }
 
@@ -508,7 +515,18 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String type, String name) {
+    private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String withoutAnnotations, String name) {
+        var stripped = withoutAnnotations.strip();
+        var typeSeparator = stripped.lastIndexOf(" ");
+        if (typeSeparator >= 0) {
+            var beforeType = stripped.substring(0, typeSeparator);
+            var type = stripped.substring(typeSeparator + " ".length());
+            return definitionWithBeforeType(state, annotations, beforeType, type, name);
+        }
+        return definitionWithBeforeType(state, annotations, "", stripped, name);
+    }
+
+    private static Some<Tuple<CompileState, Definition>> definitionWithBeforeType(CompileState state, List<String> annotations, String beforeType, String type, String name) {
         var typeResult = compileType(state, type);
 
         var newAnnotations = new ArrayList<String>();
@@ -522,7 +540,7 @@ public class Main {
             }
         }
 
-        return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name)));
+        return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, beforeType, typeResult.right, name)));
     }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
