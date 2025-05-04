@@ -298,13 +298,6 @@ public class Main {
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
-        if (input.isBlank()) {
-            return new Some<>(new Tuple<>(state, ""));
-        }
-        return new None<>();
-    }
-
     private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
@@ -348,7 +341,7 @@ public class Main {
             return new Tuple<>(state, "auto");
         }
 
-        return new Tuple<>(state, input);
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
@@ -428,6 +421,14 @@ public class Main {
         if (isSymbol(stripped)) {
             var compileStateStringTuple = new Tuple<CompileState, String>(state, stripped);
             return new Some<>(compileStateStringTuple);
+        }
+
+        var functionSeparator = stripped.indexOf("::");
+        if(functionSeparator >= 0 ) {
+            var left = stripped.substring(0, functionSeparator);
+            var right = stripped.substring(functionSeparator + "::".length()).strip();
+            var leftTuple = compileType(state, left);
+            return new Some<>(new Tuple<>(leftTuple.left, leftTuple.right + "::" + right));
         }
 
         return new None<>();
