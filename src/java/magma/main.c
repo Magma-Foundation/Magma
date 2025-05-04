@@ -41,7 +41,7 @@ public class Main  */{
     public static void main() */{/* readSource().match(input -> {
             var output = compile(input);
             return writeTarget(output);
-        } *//* , Some::new).ifPresent(error -> System.err.println(error.display())); */}
+        }, Some::new).ifPresent(error -> System.err.println(error.display())); */}
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
             return new None<>();
@@ -54,10 +54,9 @@ public class Main  */{
             return new Err<>(new IOError(e));
         } *//*  */}
 /* private static String compile(String input) */{/* var stripped = input.strip();
-        if (stripped.endsWith(" */}
-/* ")) */{/* var withoutEnd = stripped.substring(0, stripped.length() - " */}
-/* ".length());
-            var contentStart = withoutEnd.indexOf(" */{/* ");
+        if (stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "} *//* ".length());
+            var contentStart = withoutEnd.indexOf("{");
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
@@ -71,14 +70,14 @@ public class Main  */{
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             buffer.append(c);
-            if (c == '} *//* ' && depth == 1) {
+            if (c == '}' && depth == 1) {
                 output = output.append(mapper.apply(buffer.toString()));
                 buffer = new StringBuilder();
                 depth--;
-            } *//* else if (c == '{') {
+            } *//* else if (c == '{' || c == '(') {
                 depth++;
             }
-            else if (c == '} *//* ') {
+            else if (c == '}' || c == ')') {
                 depth--;
             } *//*  */}
 /* return output.append(mapper.apply(buffer.toString())).toString();
@@ -86,13 +85,14 @@ public class Main  */{
 
     private static String compileClassSegment(String input) */{/* var stripped = input.strip();
         if (stripped.endsWith("}")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
+            var withoutEnd = stripped.substring(0, stripped.length() - " */}
+/* ".length());
+            var contentStart = withoutEnd.indexOf(" */{/* ");
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
                 return generatePlaceholder(left.strip()) + "{" + compileAll(right, Main::compileFunctionSegment) + "}\n";
-            } */}
+            } *//*  */}
 /* return generatePlaceholder(stripped);
     }
 

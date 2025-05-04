@@ -116,10 +116,10 @@ public class Main {
                 buffer = new StringBuilder();
                 depth--;
             }
-            else if (c == '{') {
+            else if (c == '{' || c == '(') {
                 depth++;
             }
-            else if (c == '}') {
+            else if (c == '}' || c == ')') {
                 depth--;
             }
         }
