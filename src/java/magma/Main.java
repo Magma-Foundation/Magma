@@ -147,14 +147,20 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> functions) {
+    private record CompileState(List<String> functions, int counter) {
         public CompileState() {
-            this(new ArrayList<>());
+            this(new ArrayList<>(), 0);
         }
 
         public CompileState addFunction(String generated) {
             this.functions.add(generated);
             return this;
+        }
+
+        public Tuple<String, CompileState> createName(String category) {
+            var name = category + this.counter;
+            var next = new CompileState(this.functions, this.counter + 1);
+            return new Tuple<>(name, next);
         }
     }
 
@@ -445,7 +451,9 @@ public class Main {
     }
 
     private static Some<Tuple<CompileState, String>> assembleLambda(CompileState state, String beforeArrow, String content) {
-        return new Some<>(new Tuple<CompileState, String>(state.addFunction("auto lambda(auto " + beforeArrow + "){" + content + "\n}\n"), "lambda"));
+        var nameTuple = state.createName("lambda");
+        var name = nameTuple.left;
+        return new Some<>(new Tuple<CompileState, String>(nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n}\n"), name));
     }
 
     private static boolean isSymbol(String input) {

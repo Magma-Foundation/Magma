@@ -101,24 +101,28 @@ public class Main  */{
             return this.depth == 0;
         } */
 }
-/* private record CompileState(List<String> functions) */{/* public CompileState() {
-            this(new ArrayList<>());
+/* private record CompileState(List<String> functions, int counter) */{/* public CompileState() {
+            this(new ArrayList<>(), 0);
         } *//* public CompileState addFunction(String generated) {
             this.functions.add(generated);
             return this;
+        } *//* public Tuple<String, CompileState> createName(String category) {
+            var name = category + this.counter;
+            var next = new CompileState(this.functions, this.counter + 1);
+            return new Tuple<>(name, next);
         } */
 }
 /* private record Tuple<A, B>(A left, B right) */{
 }
-auto lambda(auto input){
+auto lambda0(auto input){
 	auto output = compile(input);
 	return writeTarget(output);
 }
-auto lambda(auto error){
+auto lambda1(auto error){
 	return System.err.println(error.display());
 }
 /* public static void main() */{
-	readSource().match(lambda, struct Some::new).ifPresent(lambda);
+	readSource().match(lambda0, struct Some::new).ifPresent(lambda1);
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -258,7 +262,9 @@ auto lambda(auto error){
     }
 
     private static Some<Tuple<CompileState, String>> assembleLambda(CompileState state, String beforeArrow, String content) {
-        return new Some<>(new Tuple<CompileState, String>(state.addFunction("auto lambda(auto " + beforeArrow + "){" + content + "\n */
+        var nameTuple = state.createName("lambda");
+        var name = nameTuple.left;
+        return new Some<>(new Tuple<CompileState, String>(nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n */
 }
 /* }
         }
@@ -349,7 +355,7 @@ auto lambda(auto error){
             if (isSymbol(beforeArrow)) {
                 var withBraces = afterArrow.strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1); *//* var result = compileStatements(state, content, Main::compileFunctionSegment); *//* return assembleLambda(result.left, beforeArrow, result.right); *//* \n"), "lambda"));
+                    var content = withBraces.substring(1, withBraces.length() - 1); *//* var result = compileStatements(state, content, Main::compileFunctionSegment); *//* return assembleLambda(result.left, beforeArrow, result.right); *//* \n"), name));
     }
 
     private static boolean isSymbol(String input) {
