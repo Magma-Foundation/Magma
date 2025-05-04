@@ -9,7 +9,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -218,9 +220,34 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> functions, int counter) {
+    private record Frame(Map<String, Integer> counters, List<String> statements) {
+        public Frame() {
+            this(new HashMap<>(), new ArrayList<>());
+        }
+
+        public Tuple<String, Frame> createName(String category) {
+            if (!this.counters.containsKey(category)) {
+                this.counters.put(category, 0);
+            }
+
+            var oldCounter = this.counters.get(category);
+            var name = category + oldCounter;
+
+            var newCounter = oldCounter + 1;
+            this.counters.put(category, newCounter);
+
+            return new Tuple<>(name, this);
+        }
+
+        public Frame addStatement(String statement) {
+            statements.add(statement);
+            return this;
+        }
+    }
+
+    private record CompileState(List<String> functions, List<Frame> frames) {
         public CompileState() {
-            this(new ArrayList<>(), 0);
+            this(new ArrayList<>(), new ArrayList<>(Collections.singletonList(new Frame())));
         }
 
         public CompileState addFunction(String generated) {
@@ -229,9 +256,26 @@ public class Main {
         }
 
         public Tuple<String, CompileState> createName(String category) {
-            var name = category + this.counter;
-            var next = new CompileState(this.functions, this.counter + 1);
-            return new Tuple<>(name, next);
+            var frame = this.frames.getLast();
+            var nameTuple = frame.createName(category);
+
+            this.frames.set(this.frames.size() - 1, nameTuple.right);
+            return new Tuple<>(nameTuple.left, this);
+        }
+
+        public CompileState addStatement(String statement) {
+            this.frames.getLast().addStatement(statement);
+            return this;
+        }
+
+        public CompileState enter() {
+            this.frames.add(new Frame());
+            return this;
+        }
+
+        public CompileState exit() {
+            this.frames.removeLast();
+            return this;
         }
     }
 
@@ -359,7 +403,16 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements);
+        var tuple = parseStatements(state, input, mapper);
+        return new Tuple<>(tuple.left, generateStatements(tuple.right));
+    }
+
+    private static String generateStatements(List<String> elements) {
+        return generateAll(elements, Main::mergeStatements);
+    }
+
+    private static Tuple<CompileState, List<String>> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
     private static Tuple<CompileState, String> compileAll(
@@ -391,19 +444,6 @@ public class Main {
         }
 
         return new Tuple<>(current, compiled);
-    }
-
-    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        var output = new StringBuilder();
-        for (var element : elements) {
-            output = merger.apply(output, element);
-        }
-
-        return output.toString();
-    }
-
-    private static StringBuilder mergeStatements(StringBuilder output, String mapped) {
-        return output.append(mapped);
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
@@ -460,6 +500,19 @@ public class Main {
 
     }
 
+    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var output = new StringBuilder();
+        for (var element : elements) {
+            output = merger.apply(output, element);
+        }
+
+        return output.toString();
+    }
+
+    private static StringBuilder mergeStatements(StringBuilder output, String mapped) {
+        return output.append(mapped);
+    }
+
     private static DivideState foldStatementChar(DivideState state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
@@ -505,9 +558,16 @@ public class Main {
                                 return new Tuple<>(paramsState, header + ";\n");
                             }
 
-                            var statementsTuple = compileStatements(paramsState, right, (state1, input1) -> compileFunctionSegment(state1, input1, 1));
-                            var generated = header + "{" + statementsTuple.right + "\n}\n";
-                            return new Tuple<>(statementsTuple.left.addFunction(generated), "");
+                            var statementsTuple = parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1, 1));
+                            var statementsState = statementsTuple.left;
+                            var statements = statementsTuple.right;
+
+                            var oldStatements = new ArrayList<String>();
+                            oldStatements.addAll(statementsState.frames().getLast().statements);
+                            oldStatements.addAll(statements);
+
+                            var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+                            return new Tuple<>(statementsState.exit().addFunction(generated), "");
                         }
                     }
                 }
@@ -704,16 +764,19 @@ public class Main {
             var callerState = callerTuple.left;
             var oldCaller = callerTuple.right;
 
+            var nextState = callerState;
             Value newCaller = oldCaller;
             var newArguments = new ArrayList<Value>();
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                newArguments.add(parent);
+                var localTuple = nextState.createName("local");
+
+                newArguments.add(new Symbol(localTuple.left));
                 newCaller = new Symbol(property);
+                nextState = localTuple.right.addStatement("\n\tauto " + localTuple.left + " = " + parent.generate() + ";");
             }
 
             newArguments.addAll(oldArguments);
-
-            return new Some<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
+            return new Some<>(new Tuple<>(nextState, new Invocation(newCaller, newArguments)));
         }
 
         return new None<>();
