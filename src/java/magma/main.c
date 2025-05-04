@@ -393,7 +393,14 @@ auto lambda1(auto input){
 	return joinedStructs + joinedFunctions + tuple.right;
 }
 /* private static */template Option<(struct CompileState, char*)> compileRootSegment(/* CompileState state */, /*  String input */){
-	return or(state, input, of(List, type(structure("class")), type(struct Main::compileContent)));
+	return or(state, input, of(List, type(struct Main::namespaced), type(structure("class")), type(struct Main::compileContent)));
+}
+/* private static */template Option<(struct CompileState, char*)> namespaced(/* CompileState state */, /*  String input */){
+	auto stripped = strip(input);
+	if (/* stripped.startsWith("package ") || stripped.startsWith("import ") */){
+		return template Some<struct >::new((state, ""));
+	}
+	return template None<struct >::new();
 }
 auto lambda0(auto tuple){
 	return (tuple.left, generateStatements(tuple.right));
@@ -1049,24 +1056,5 @@ auto lambda1(auto name){
 /* private static */char* generatePlaceholder(/* String stripped */){
 	return "/* " + stripped + " */";
 }
-/* package magma; *//* 
-
-import java.io.IOException; *//* 
-import java.io.PrintWriter; *//* 
-import java.io.StringWriter; *//* 
-import java.nio.file.Files; *//* 
-import java.nio.file.Path; *//* 
-import java.nio.file.Paths; *//* 
-import java.util.ArrayList; *//* 
-import java.util.Arrays; *//* 
-import java.util.Collections; *//* 
-import java.util.HashMap; *//* 
-import java.util.List; *//* 
-import java.util.Map; *//* 
-import java.util.function.BiFunction; *//* 
-import java.util.function.Consumer; *//* 
-import java.util.function.Function; *//* 
-import java.util.function.Supplier; *//* 
-import java.util.regex.Pattern; *//* 
-import java.util.stream.Collectors; *//* 
+/* 
  */

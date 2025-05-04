@@ -446,9 +446,18 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
+                type(Main::namespaced),
                 type(structure("class")),
                 type(Main::compileContent)
         ));
+    }
+
+    private static Option<Tuple<CompileState, String>> namespaced(CompileState state, String input) {
+        var stripped = input.strip();
+        if(stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return new Some<>(new Tuple<>(state, ""));
+        }
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper) {
