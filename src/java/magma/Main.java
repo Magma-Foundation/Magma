@@ -416,16 +416,21 @@ public class Main {
                     var paramStart = withoutParamEnd.indexOf("(");
                     if (paramStart >= 0) {
                         var definitionString = withoutParamEnd.substring(0, paramStart);
-                        var params = withoutParamEnd.substring(paramStart + "(".length());
+                        var inputParams = withoutParamEnd.substring(paramStart + "(".length());
 
                         if (parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) {
                             var definition = definitionTuple.right;
-                            var header = definition.generate() + "(" + generatePlaceholder(params) + ")";
+
+                            var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
+                            var paramsState = paramsTuple.left;
+                            var paramsString = paramsTuple.right;
+
+                            var header = definition.generate() + "(" + paramsString + ")";
                             if (definition.modifiers.contains("expect")) {
-                                return new Tuple<>(definitionTuple.left, header + ";\n");
+                                return new Tuple<>(paramsState, header + ";\n");
                             }
 
-                            var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
+                            var statementsTuple = compileStatements(paramsState, right, Main::compileFunctionSegment);
                             var generated = header + "{" + statementsTuple.right + "\n}\n";
                             return new Tuple<>(statementsTuple.left.addFunction(generated), "");
                         }
@@ -568,7 +573,7 @@ public class Main {
                 var arguments = divisions.getLast();
 
                 if (compileValue(state, caller) instanceof Some(var callerTuple)) {
-                    var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValueOrPlaceholder, Main::mergeValues);
+                    var argumentsTuple = compileValues(callerTuple.left, arguments, Main::compileValueOrPlaceholder);
                     var generated = callerTuple.right + "(" + argumentsTuple.right + ")";
                     return new Some<>(new Tuple<>(argumentsTuple.left, generated));
                 }
@@ -576,6 +581,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> compiler) {
+        return compileAll(state, input, Main::foldValueChar, compiler, Main::mergeValues);
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
