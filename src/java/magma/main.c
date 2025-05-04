@@ -111,7 +111,7 @@ public class Main  */{
 /* private record Tuple<A, B>(A left, B right) */{/*  */
 }
 auto lambda(auto input){
-	/* var output  */ = compile(input);
+	auto output = compile(input);
 	/* return writeTarget(output) */;/*  */
 }
 /* public static void main() */{
@@ -131,8 +131,8 @@ auto lambda(auto input){
         } *//*  */
 }
 /* var contentStart = withoutEnd.indexOf(" */{
-	/* ");
-            if (contentStart > */ = /*  0) {
+	");
+ if (contentStart > = /*  0) {
                 var left = withoutEnd.substring(0, contentStart) */;/* var right = withoutEnd.substring(contentStart + "{".length());
                 var result = compileRoot(right, state);
                 var joined = String.join("", result.left.functions);
@@ -149,9 +149,9 @@ auto lambda(auto input){
 	/* return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;/*  */
 }
 /* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{
-	/* var segments  */ = divideAll(input, folder);
-	/* var current  */ = initial;
-	/* var output  */ = /*  new StringBuilder() */;/* for (var segment : segments) {
+	auto segments = divideAll(input, folder);
+	auto current = initial;
+	auto output = /*  new StringBuilder() */;/* for (var segment : segments) {
             var mapped = mapper.apply(current, segment);
             current = mapped.left;
             output = merger.apply(output, mapped.right);
@@ -162,7 +162,7 @@ auto lambda(auto input){
 	/* return output */.append(mapped);/*  */
 }
 /* private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) */{
-	/* var current  */ = /*  new DivideState() */;/* for (var i = 0; i < input.length(); i++) {
+	auto current = /*  new DivideState() */;/* for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
         } */
@@ -178,7 +178,7 @@ auto lambda(auto input){
 /* else if (c == ' */{/* ' || c == '(') {
             return appended.enter();
         } *//* else if (c == '} */
-	/* ' || c  */ = /* = ')') {
+	' || c = /* = ')') {
             return appended.exit() */;
 }
 /* if (stripped.endsWith("}")) */{/* var withoutEnd = stripped.substring(0, stripped.length() - " */
@@ -192,14 +192,23 @@ auto lambda(auto input){
 }
 /* if (stripped.endsWith(";")) */{
 	/* var slice = stripped */.substring(/* 0 */, /* stripped.length() - ";" */.length());
-	/* var s  */ = compileFunctionStatementValue(slice, state);
+	auto s = compileFunctionStatementValue(slice, state);
 	/* return new Tuple<>(s.left, "\n\t" + s.right + ";") */;/*  */
 }
+/* if (valueSeparator < 0) */{
+	/* return new None<>() */;/*  */
+}
 /* if (valueSeparator >= 0) */{
-	/* var left = input */.substring(/* 0 */, valueSeparator);
-	/* var right = input */.substring(/* valueSeparator + "=" */.length());
-	/* var tuple  */ = compileValueOrPlaceholder(state, right);
-	/* return new Some<>(new Tuple<>(tuple.left, generatePlaceholder(left) + "  */ = /*  " + tuple.right)) */;/*  */
+	/* var type = stripped */.substring(/* 0 */, valueSeparator);
+	/* var name = stripped */.substring(/* valueSeparator + " " */.length()).strip();
+	auto typeResult = compileType(state, type);
+	/* return new Tuple<>(typeResult.left, typeResult.right + " " + name) */;/*  */
+}
+/* }
+
+    private static Tuple<CompileState, String> compileType(CompileState state, String input) */{
+	/* if (input.equals("var")) {
+            return new Tuple<>(state, "auto") */;
 }
 /* }
         }
@@ -232,7 +241,10 @@ auto lambda(auto input){
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
-        var valueSeparator = input.indexOf("="); *//* return new None<>(); *//* }
+        var valueSeparator = input.indexOf("="); *//* var left = input.substring(0, valueSeparator); *//* var right = input.substring(valueSeparator + "=".length()); *//* var definitionTuple = compileDefinition(state, left); *//* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); *//* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); *//* }
+
+    private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
+        var stripped = input.strip(); *//* var valueSeparator = stripped.indexOf(" "); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* return new Tuple<>(state, input); *//* }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
         if (stripped.endsWith(")")) {
@@ -243,7 +255,7 @@ auto lambda(auto input){
                 var joined = String.join("", divisions.subList(0, divisions.size() - 1)); *//* var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                if (compileValue(state, caller) instanceof Some(var callerTuple)){
+                if (compileValue(state, caller) instanceof Some(var callerTuple)) {
                     var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValueOrPlaceholder, Main::mergeValues); *//* var generated = callerTuple.right + "(" + argumentsTuple.right + ")"; *//* return new Some<>(new Tuple<>(argumentsTuple.left, generated)); *//* }
             }
         }

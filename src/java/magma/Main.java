@@ -296,14 +296,36 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
         var valueSeparator = input.indexOf("=");
-        if (valueSeparator >= 0) {
-            var left = input.substring(0, valueSeparator);
-            var right = input.substring(valueSeparator + "=".length());
-            var tuple = compileValueOrPlaceholder(state, right);
-            return new Some<>(new Tuple<>(tuple.left, generatePlaceholder(left) + " = " + tuple.right));
+        if (valueSeparator < 0) {
+            return new None<>();
         }
 
-        return new None<>();
+        var left = input.substring(0, valueSeparator);
+        var right = input.substring(valueSeparator + "=".length());
+        var definitionTuple = compileDefinition(state, left);
+        var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right);
+        return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right));
+    }
+
+    private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
+        var stripped = input.strip();
+        var valueSeparator = stripped.indexOf(" ");
+        if (valueSeparator >= 0) {
+            var type = stripped.substring(0, valueSeparator);
+            var name = stripped.substring(valueSeparator + " ".length()).strip();
+            var typeResult = compileType(state, type);
+            return new Tuple<>(typeResult.left, typeResult.right + " " + name);
+        }
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
+    }
+
+    private static Tuple<CompileState, String> compileType(CompileState state, String input) {
+        if (input.equals("var")) {
+            return new Tuple<>(state, "auto");
+        }
+
+        return new Tuple<>(state, input);
     }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
@@ -316,7 +338,7 @@ public class Main {
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                if (compileValue(state, caller) instanceof Some(var callerTuple)){
+                if (compileValue(state, caller) instanceof Some(var callerTuple)) {
                     var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValueOrPlaceholder, Main::mergeValues);
                     var generated = callerTuple.right + "(" + argumentsTuple.right + ")";
                     return new Some<>(new Tuple<>(argumentsTuple.left, generated));
