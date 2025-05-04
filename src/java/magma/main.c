@@ -165,8 +165,8 @@ expect /* private static */template Result<char*, struct IOError> readSource();
 	return get(other);
 }
 @Override
-/* public */struct boolean isPresent(){
-	return false;
+/* public */int isPresent(){
+	return 0;
 }
 @Override
 /* public <R> */template Option<struct R> map(template Function<struct T, struct R> mapper){
@@ -193,8 +193,8 @@ expect /* private static */template Result<char*, struct IOError> readSource();
 	return this;
 }
 @Override
-/* public */struct boolean isPresent(){
-	return true;
+/* public */int isPresent(){
+	return 1;
 }
 @Override
 /* public <R> */template Option<struct R> map(template Function<struct T, struct R> mapper){
@@ -242,10 +242,10 @@ struct public DivideState(char* input, template List<char*> segments, struct Str
 /* public */template List<char*> segments(){
 	return this.segments;
 }
-/* private */struct boolean isShallow(){
+/* private */int isShallow(){
 	return this.depth == 1;
 }
-/* public */struct boolean isLevel(){
+/* public */int isLevel(){
 	return this.depth == 0;
 }
 /* public */template Option<struct DivideState> popAndAppendToOption(){
@@ -764,6 +764,9 @@ auto lambda0(auto typeResult){
 	if (equals(stripped, "String")){
 		return template Some<struct >::new((state, "char*"));
 	}
+	if (equals(stripped, "boolean")){
+		return template Some<struct >::new((state, "int"));
+	}
 	if (isSymbol(stripped)){
 		return template Some<struct >::new((state, "struct " + stripped));
 	}
@@ -894,13 +897,23 @@ auto lambda0(auto tuple){
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseValue(struct CompileState state, char* input){
 	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> beforeOperators = of(List, type(struct Main::compileString), type(struct Main::compileChar), type(struct Main::compileLambda));
-	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> afterOperators = of(List, type(struct Main::compileInvokable), type(struct Main::compileAccess), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(struct Main::parseNumber));
+	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> afterOperators = of(List, type(struct Main::compileInvokable), type(struct Main::compileAccess), type(struct Main::parseBooleanValue), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(struct Main::parseNumber));
 	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>>::new(beforeOperators);
 	/* for (var value : Operator.values()) */{
 		/* rules.add(type((state1, input1) -> compileOperator(state1, input1, value))) */;
 	}
 	addAll(rules, afterOperators);
 	return or(state, input, rules);
+}
+/* private static */template Option<(struct CompileState, struct Value)> parseBooleanValue(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (equals(stripped, "false")){
+		return template Some<struct >::new((state, struct NumberValue::new("0")));
+	}
+	if (equals(stripped, "true")){
+		return template Some<struct >::new((state, struct NumberValue::new("1")));
+	}
+	return template None<struct >::new();
 }
 /* private static */template Option<(struct CompileState, struct Value)> compileChar(struct CompileState state, char* input){
 	auto stripped = strip(input);
@@ -920,15 +933,15 @@ auto lambda0(auto tuple){
 		return template None<struct >::new();
 	}
 }
-/* private static */struct boolean isNumber(char* input){
+/* private static */int isNumber(char* input){
 	/* for (var i = 0; i < input.length(); i++) */{
 		auto c = charAt(input, i);
 		if (isDigit(Character, c)){
 			/* continue */;
 		}
-		return false;
+		return 0;
 	}
-	return true;
+	return 1;
 }
 /* private static */template Option<(struct CompileState, struct Value)> compileOperator(struct CompileState state, char* input, struct Operator operator){
 	auto index = indexOf(input, operator.representation);
@@ -1045,16 +1058,16 @@ auto lambda1(auto name){
 	auto joinedParams = collect(map(stream(paramNames), lambda1), joining(Collectors, ", "));
 	return template Some<struct >::new((addFunction(nameTuple.right, "auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), struct Symbol::new(generatedName)));
 }
-/* private static */struct boolean isSymbol(char* input){
+/* private static */int isSymbol(char* input){
 	auto stripped = strip(input);
 	/* for (var i = 0; i < stripped.length(); i++) */{
 		auto c = charAt(stripped, i);
 		if (isLetter(Character, c)){
 			/* continue */;
 		}
-		return false;
+		return 0;
 	}
-	return true;
+	return 1;
 }
 /* private static */struct DivideState foldInvocationStart(struct DivideState state, char c){
 	auto appended = append(state, c);

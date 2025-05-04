@@ -900,6 +900,10 @@ public class Main {
             return new Some<>(new Tuple<>(state, "char*"));
         }
 
+        if (stripped.equals("boolean")) {
+            return new Some<>(new Tuple<>(state, "int"));
+        }
+
         if (isSymbol(stripped)) {
             return new Some<>(new Tuple<>(state, "struct " + stripped));
         }
@@ -1062,6 +1066,7 @@ public class Main {
         List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> afterOperators = List.of(
                 type(Main::compileInvokable),
                 type(Main::compileAccess),
+                type(Main::parseBooleanValue),
                 type(Main::compileSymbolValue),
                 type(Main::compileMethodReference),
                 type(Main::parseNumber)
@@ -1074,6 +1079,19 @@ public class Main {
         rules.addAll(afterOperators);
 
         return or(state, input, rules);
+    }
+
+    private static Option<Tuple<CompileState, Value>> parseBooleanValue(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.equals("false")) {
+            return new Some<>(new Tuple<>(state, new NumberValue("0")));
+        }
+
+        if (stripped.equals("true")) {
+            return new Some<>(new Tuple<>(state, new NumberValue("1")));
+        }
+
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, Value>> compileChar(CompileState state, String input) {
