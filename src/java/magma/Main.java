@@ -25,7 +25,7 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{};\n" + generatePlaceholder(right);
+                return generatePlaceholder(left) + "{\n};\n" + generatePlaceholder(right);
             }
         }
 
