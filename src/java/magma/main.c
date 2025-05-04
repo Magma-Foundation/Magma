@@ -100,7 +100,9 @@ public class Main  */{
 }
 auto lambda(auto input){
 	/* var output = compile(input);
-            return writeTarget */(output);}/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+            return writeTarget */(output);
+}
+/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
@@ -258,7 +260,7 @@ auto lambda(auto input){
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var result = compileStatements(state, content, Main::compileFunctionSegment);
-                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "}"), "lambda");
+                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "\n}\n"), "lambda");
                 }
             }
         }

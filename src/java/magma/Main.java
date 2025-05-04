@@ -315,7 +315,7 @@ public class Main {
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var result = compileStatements(state, content, Main::compileFunctionSegment);
-                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "}"), "lambda");
+                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "\n}\n"), "lambda");
                 }
             }
         }
