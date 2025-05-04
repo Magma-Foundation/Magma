@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Main  */{/* 
+public class Main  */{};
+/* 
     public static void main() {
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -25,7 +26,7 @@ public class Main  */{/*
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{" + generatePlaceholder(right) + "}";
+                return generatePlaceholder(left) + "{};\n" + generatePlaceholder(right);
             }
         }
 
@@ -35,4 +36,4 @@ public class Main  */{/*
     private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
     }
- */}
+ */
