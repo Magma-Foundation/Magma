@@ -654,6 +654,10 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input, int depth) {
         var stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, stripped));
+        }
+
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
