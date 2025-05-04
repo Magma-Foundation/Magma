@@ -1212,33 +1212,36 @@ public class Main {
 
     private static Option<Tuple<CompileState, Symbol>> compileLambda(CompileState state, String input) {
         var arrowIndex = input.indexOf("->");
-        if (arrowIndex >= 0) {
-            var beforeArrow = input.substring(0, arrowIndex).strip();
-            var afterArrow = input.substring(arrowIndex + "->".length());
+        if (arrowIndex < 0) {
+            return new None<>();
+        }
+        var beforeArrow = input.substring(0, arrowIndex).strip();
+        var afterArrow = input.substring(arrowIndex + "->".length());
 
-            List<String> paramNames;
-            if (isSymbol(beforeArrow)) {
-                paramNames = Collections.singletonList(beforeArrow);
-            }
-            else if (beforeArrow.equals("()")) {
-                paramNames = Collections.emptyList();
-            }
-            else {
-                return new None<>();
-            }
+        if (!(findLambdaParamNames(beforeArrow) instanceof Some(var paramNames))) {
+            return new None<>();
+        }
 
-            var withBraces = afterArrow.strip();
-            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                var content = withBraces.substring(1, withBraces.length() - 1);
-                return compileStatements(state, content, Main::compileFunctionSegment).flatMap(result -> {
-                    return assembleLambda(result.left, paramNames, result.right);
-                });
-            }
-            else {
-                if (compileValue(state, afterArrow) instanceof Some(var valueTuple)) {
-                    return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
-                }
-            }
+        var withBraces = afterArrow.strip();
+        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+            var content = withBraces.substring(1, withBraces.length() - 1);
+            return compileStatements(state, content, Main::compileFunctionSegment).flatMap(result -> assembleLambda(result.left, paramNames, result.right));
+        }
+
+        if (compileValue(state, afterArrow) instanceof Some(var valueTuple)) {
+            return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+        }
+
+        return new None<>();
+    }
+
+    private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
+        if (isSymbol(beforeArrow)) {
+            return new Some<>(Collections.singletonList(beforeArrow));
+        }
+
+        if (beforeArrow.equals("()")) {
+            return new Some<>(Collections.emptyList());
         }
 
         return new None<>();

@@ -1015,34 +1015,35 @@ auto lambda1(auto value){
 	return template Some<struct >::new((state, struct StringValue::new(substring(stripped, 1, length(stripped) - 1))));
 }
 auto lambda0(auto result){
-			return assembleLambda(result.left, paramNames, result.right);
+	return assembleLambda(result.left, paramNames, result.right);
 }
 /* private static */template Option<(struct CompileState, struct Symbol)> compileLambda(struct CompileState state, char* input){
 	auto arrowIndex = indexOf(input, "->");
-	if (arrowIndex >= 0){
-		auto beforeArrow = strip(substring(input, 0, arrowIndex));
-		auto afterArrow = substring(input, arrowIndex + length("->"));
-		/* List<String> paramNames */;
-		if (isSymbol(beforeArrow)){
-			/* paramNames  */ = singletonList(Collections, beforeArrow);
-		}
-		/* else if (beforeArrow.equals("()")) */{
-			/* paramNames  */ = emptyList(Collections);
-		}
-		else {
-			return template None<struct >::new();
-		}
-		auto withBraces = strip(afterArrow);
-		/* if (withBraces.startsWith(" */{
-			@) && withBraces.endsWith("}")) {
+	if (/* arrowIndex < 0 */){
+		return template None<struct >::new();
+	}
+	auto beforeArrow = strip(substring(input, 0, arrowIndex));
+	auto afterArrow = substring(input, arrowIndex + length("->"));
+	if (/* !(findLambdaParamNames(beforeArrow) instanceof Some(var paramNames)) */){
+		return template None<struct >::new();
+	}
+	auto withBraces = strip(afterArrow);
+	/* if (withBraces.startsWith(" */{
+		@) && withBraces.endsWith("}")) {
 auto content = flatMap(/* withBraces.substring(1, withBraces.length() - 1);
-                return compileStatements(state, content, Main */::compileFunctionSegment), lambda0);
-		}
-		else {
-			if (/* compileValue(state, afterArrow) instanceof Some(var valueTuple) */){
-				return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
-			}
-		}
+            return compileStatements(state, content, Main */::compileFunctionSegment), lambda0);
+	}
+	if (/* compileValue(state, afterArrow) instanceof Some(var valueTuple) */){
+		return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+	}
+	return template None<struct >::new();
+}
+/* private static */template Option<template List<char*>> findLambdaParamNames(char* beforeArrow){
+	if (isSymbol(beforeArrow)){
+		return template Some<struct >::new(singletonList(Collections, beforeArrow));
+	}
+	if (equals(beforeArrow, "()")){
+		return template Some<struct >::new(emptyList(Collections));
 	}
 	return template None<struct >::new();
 }
