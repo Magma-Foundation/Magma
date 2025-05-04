@@ -458,7 +458,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(String input, CompileState state) {
         return compileReturn(state, input)
-                .or(() -> compileInvocation(state, input))
+                .or(() -> compileInvokable(state, input))
                 .or(() -> compileAssignment(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
@@ -566,22 +566,35 @@ public class Main {
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
-        if (stripped.endsWith(")")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+    private static Option<Tuple<CompileState, String>> compileInvokable(CompileState state, String stripped) {
+        if (!stripped.endsWith(")")) {
+            return new None<>();
+        }
 
-            var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
-            if (divisions.size() >= 2) {
-                var joined = String.join("", divisions.subList(0, divisions.size() - 1));
-                var caller = joined.substring(0, joined.length() - ")".length());
-                var arguments = divisions.getLast();
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
+        if (divisions.size() < 2) {
+            return new None<>();
+        }
+        var joined = String.join("", divisions.subList(0, divisions.size() - 1));
+        var caller = joined.substring(0, joined.length() - ")".length());
 
-                if (compileValue(state, caller) instanceof Some(var callerTuple)) {
-                    var argumentsTuple = compileValues(callerTuple.left, arguments, Main::compileValueOrPlaceholder);
-                    var generated = callerTuple.right + "(" + argumentsTuple.right + ")";
-                    return new Some<>(new Tuple<>(argumentsTuple.left, generated));
-                }
-            }
+        var arguments = divisions.getLast();
+        var argumentsTuple = compileValues(state, arguments, Main::compileValueOrPlaceholder);
+        var argumentState = argumentsTuple.left;
+        var argumentsString = argumentsTuple.right;
+
+        if(caller.startsWith("new ")) {
+            var withoutPrefix = caller.substring("new ".length());
+            var callerTuple = compileType(argumentState, withoutPrefix);
+
+            var generated = callerTuple.right + "::new(" + argumentsString + ")";
+            return new Some<>(new Tuple<>(callerTuple.left, generated));
+        }
+
+        if (compileValue(argumentState, caller) instanceof Some(var callerTuple)) {
+            var generated = callerTuple.right + "(" + argumentsString + ")";
+            return new Some<>(new Tuple<>(callerTuple.left, generated));
         }
 
         return new None<>();
@@ -632,7 +645,7 @@ public class Main {
             }
         }
 
-        var maybeInvocation = compileInvocation(state, stripped);
+        var maybeInvocation = compileInvokable(state, stripped);
         if (maybeInvocation.isPresent()) {
             return maybeInvocation;
         }
