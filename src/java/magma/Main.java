@@ -578,9 +578,12 @@ public class Main {
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
-
         if (stripped.equals("var")) {
             return new Tuple<>(state, "auto");
+        }
+
+        if (stripped.equals("void")) {
+            return new Tuple<>(state, "void");
         }
 
         if (stripped.equals("String")) {

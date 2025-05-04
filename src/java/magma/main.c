@@ -56,7 +56,7 @@ auto lambda1(auto input){
 	auto output = compile(input);
 	return writeTarget(output);
 }
-/* public static */struct void main(/*  */){
+/* public static */void main(/*  */){
 	readSource().match(lambda1, struct Some::new).ifPresent(lambda0);
 }
 /* private static */char* compile(char* input){
@@ -299,6 +299,9 @@ auto lambda2(auto tuple){
 	auto stripped = input.strip();
 	if (stripped.equals("var")){
 		return /* Tuple<> */::new(state, "auto");
+	}
+	if (stripped.equals("void")){
+		return /* Tuple<> */::new(state, "void");
 	}
 	if (stripped.equals("String")){
 		return /* Tuple<> */::new(state, "char*");
