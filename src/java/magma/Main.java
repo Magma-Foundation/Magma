@@ -749,13 +749,34 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String withoutAnnotations, String name) {
         var stripped = withoutAnnotations.strip();
-        var typeSeparator = stripped.lastIndexOf(" ");
-        if (typeSeparator >= 0) {
-            var beforeType = stripped.substring(0, typeSeparator);
-            var type = stripped.substring(typeSeparator + " ".length());
+        if (findTypeSeparator(stripped) instanceof Some(var slices)) {
+            var beforeType = slices.left;
+            var type = slices.right;
             return definitionWithBeforeType(state, annotations, beforeType, type, name);
         }
+
         return definitionWithBeforeType(state, annotations, "", stripped, name);
+    }
+
+    private static Option<Tuple<String, String>> findTypeSeparator(String input) {
+        var divisions = divideAll(input.strip(), Main::foldTypeSeparator);
+        if (divisions.size() >= 2) {
+            var left = divisions.subList(0, divisions.size() - 1);
+            var joinedLeft = String.join(" ", left);
+            return new Some<>(new Tuple<>(joinedLeft, divisions.getLast()));
+        }
+        return new None<>();
+    }
+
+    private static DivideState foldTypeSeparator(DivideState state, Character c) {
+        if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if(c == '<') return appended.enter();
+        if(c == '>') return appended.exit();
+        return appended;
     }
 
     private static Some<Tuple<CompileState, Definition>> definitionWithBeforeType(CompileState state, List<String> annotations, String beforeType, String type, String name) {

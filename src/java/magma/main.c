@@ -96,7 +96,7 @@
 /* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
 /* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 expect /* private static *//* Option<IOError> */ writeTarget(char* output);
-expect /* private static Result<String, *//* IOError> */ readSource();
+expect /* private static *//* Result<String, IOError> */ readSource();
 /* private static Option<DivideState> foldDoubleQuotes(DivideState state, char maybeDoubleQuotes) {
         if (maybeDoubleQuotes != '') {
             return new None<>();
@@ -363,13 +363,34 @@ expect /* private static Result<String, *//* IOError> */ readSource();
 
     private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String withoutAnnotations, String name) {
         var stripped = withoutAnnotations.strip();
-        var typeSeparator = stripped.lastIndexOf(" ");
-        if (typeSeparator >= 0) {
-            var beforeType = stripped.substring(0, typeSeparator);
-            var type = stripped.substring(typeSeparator + " ".length());
+        if (findTypeSeparator(stripped) instanceof Some(var slices)) {
+            var beforeType = slices.left;
+            var type = slices.right;
             return definitionWithBeforeType(state, annotations, beforeType, type, name);
         }
+
         return definitionWithBeforeType(state, annotations, "", stripped, name);
+    }
+
+    private static Option<Tuple<String, String>> findTypeSeparator(String input) {
+        var divisions = divideAll(input.strip(), Main::foldTypeSeparator);
+        if (divisions.size() >= 2) {
+            var left = divisions.subList(0, divisions.size() - 1);
+            var joinedLeft = String.join(" ", left);
+            return new Some<>(new Tuple<>(joinedLeft, divisions.getLast()));
+        }
+        return new None<>();
+    }
+
+    private static DivideState foldTypeSeparator(DivideState state, Character c) {
+        if (c == ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if(c == ') return appended.enter();
+        if(c == ') return appended.exit();
+        return appended;
     }
 
     private static Some<Tuple<CompileState, Definition>> definitionWithBeforeType(CompileState state, List<String> annotations, String beforeType, String type, String name) {
@@ -773,7 +794,7 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 	auto local0 = this.popAndAppendToTuple(this, );
 	return map(local0, struct Tuple::right);
 }
-/* public Option<Tuple<Character, *//* DivideState>> */ popAndAppendToTuple(){
+/* public *//* Option<Tuple<Character, DivideState>> */ popAndAppendToTuple(){
 	auto local0 = this.pop(this, );
 	return map(local0, /* tuple -> {
                 return new Tuple<>(tuple.left */, /*  tuple.right.append(tuple.left));
@@ -783,7 +804,7 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 	this.buffer.append(this.buffer, c);
 	return this;
 }
-/* public Option<Tuple<Character, *//* DivideState>> */ pop(){
+/* public *//* Option<Tuple<Character, DivideState>> */ pop(){
 	if (/* this.index < this.input.length() */){
 		auto c = this.input.charAt(this.input, this.index);
 		return /* Some<> */::new(/* new Tuple<>(c */, /*  new DivideState(this.input */, this.segments, this.buffer, /*  this.index + 1 */, /*  this.depth)) */);
@@ -795,7 +816,7 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 struct public Frame(){
 	this(/* HashMap<> */::new(), /* ArrayList<> */::new());
 }
-/* public Tuple<String, *//* Frame> */ createName(char* category){
+/* public *//* Tuple<String, Frame> */ createName(char* category){
 	if (/* !this.counters.containsKey(category) */){
 		this.counters.put(this.counters, category, /*  0 */);
 	}
@@ -816,7 +837,7 @@ struct public CompileState(){
 	this.functions.add(this.functions, generated);
 	return this;
 }
-/* public Tuple<String, *//* CompileState> */ createName(char* category){
+/* public *//* Tuple<String, CompileState> */ createName(char* category){
 	auto frame = this.frames.getLast(this.frames, );
 	auto nameTuple = frame.createName(frame, category);
 	this.frames.set(this.frames, /* this.frames.size() - 1 */, nameTuple.right);
@@ -902,13 +923,13 @@ auto lambda1(auto input){
 	auto joinedFunctions = String.join(String, "", tuple.left.functions);
 	return joinedStructs + joinedFunctions + tuple.right;
 }
-/* private static Tuple<CompileState, *//* String> */ compileRootSegment(struct CompileState state, char* input){
+/* private static *//* Tuple<CompileState, String> */ compileRootSegment(struct CompileState state, char* input){
 	auto local0 = compileStructure(state, input, "class ");
 	return orElseGet(local0, /* () -> {
             return new Tuple<>(state */, /*  generatePlaceholder(input));
         } */);
 }
-/* private static Option<Tuple<CompileState, *//* String>> */ compileStructure(struct CompileState state, char* input, char* infix){
+/* private static *//* Option<Tuple<CompileState, String>> */ compileStructure(struct CompileState state, char* input, char* infix){
 	auto stripped = input.strip(input, );
 	if (stripped.endsWith(stripped, "}")){
 		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
@@ -927,17 +948,17 @@ auto lambda1(auto input){
 	}
 	return /* None<> */::new();
 }
-/* private static Tuple<CompileState, *//* String> */ compileStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
+/* private static *//* Tuple<CompileState, String> */ compileStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
 	auto tuple = parseStatements(state, input, mapper);
 	return /* Tuple<> */::new(tuple.left, generateStatements(tuple.right));
 }
 /* private static */char* generateStatements(/* List<String> */ elements){
 	return generateAll(elements, struct Main::mergeStatements);
 }
-/* private static Tuple<CompileState, *//* List<String>> */ parseStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
+/* private static *//* Tuple<CompileState, List<String>> */ parseStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
 	return parseAll(state, input, struct Main::foldStatementChar, mapper);
 }
-/* private static <T> Tuple<CompileState, *//* List<T>> */ parseAll(struct CompileState initial, char* input, /* 
+/* private static <T> *//* Tuple<CompileState, List<T>> */ parseAll(struct CompileState initial, char* input, /* 
             BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder, /* 
             BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* T>> */ mapper){
 	auto segments = divideAll(input, folder);
