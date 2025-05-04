@@ -98,14 +98,13 @@ public class Main  */{
 }
 /* private record Tuple<A, B>(A left, B right) */{/*  */
 }
-/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+auto lambda(auto input){
+	/* var output = compile(input);
+            return writeTarget */(output);}/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	readSource().match(/* input  */ -> /*  {
-            var output = compile(input);
-            return writeTarget(output);
-        } */, /* Some::new */).ifPresent(/* error  */ -> /*  System.err.println */(error.display()));
+	readSource().match(lambda, /* Some::new */).ifPresent(/* error -> System */.err.println(error.display()));
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -252,10 +251,15 @@ public class Main  */{
 
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
-            var left = stripped.substring(0, arrowIndex);
-            var right = stripped.substring(arrowIndex + "->".length());
-            if (isSymbol(left)) {
-                return new Tuple<>(state, generatePlaceholder(left) + " -> " + generatePlaceholder(right));
+            var beforeArrow = stripped.substring(0, arrowIndex).strip();
+            var afterArrow = stripped.substring(arrowIndex + "->".length());
+            if (isSymbol(beforeArrow)) {
+                var withBraces = afterArrow.strip();
+                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                    var content = withBraces.substring(1, withBraces.length() - 1);
+                    var result = compileStatements(state, content, Main::compileFunctionSegment);
+                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "}"), "lambda");
+                }
             }
         }
 

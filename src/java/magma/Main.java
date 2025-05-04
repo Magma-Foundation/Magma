@@ -308,10 +308,15 @@ public class Main {
 
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
-            var left = stripped.substring(0, arrowIndex);
-            var right = stripped.substring(arrowIndex + "->".length());
-            if (isSymbol(left)) {
-                return new Tuple<>(state, generatePlaceholder(left) + " -> " + generatePlaceholder(right));
+            var beforeArrow = stripped.substring(0, arrowIndex).strip();
+            var afterArrow = stripped.substring(arrowIndex + "->".length());
+            if (isSymbol(beforeArrow)) {
+                var withBraces = afterArrow.strip();
+                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                    var content = withBraces.substring(1, withBraces.length() - 1);
+                    var result = compileStatements(state, content, Main::compileFunctionSegment);
+                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "}"), "lambda");
+                }
             }
         }
 
