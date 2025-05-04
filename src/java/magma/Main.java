@@ -380,9 +380,17 @@ public class Main {
         }
     }
 
+    private record NumberValue(String value) implements Value {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
     private enum Operator {
         ADD("+"),
-        SUBTRACT("-");
+        SUBTRACT("-"),
+        GREATER_THAN_OR_EQUALS(">=");
 
         private final String representation;
 
@@ -1004,7 +1012,8 @@ public class Main {
                 type((state0, input0) -> compileInvokable(state0, input0, depth)),
                 type((state0, input0) -> compileAccess(state0, input0, depth)),
                 type(Main::compileSymbolValue),
-                type(Main::compileMethodReference)
+                type(Main::compileMethodReference),
+                type(Main::parseNumber)
         );
 
         var rules = new ArrayList<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>>(type);
@@ -1013,6 +1022,27 @@ public class Main {
         }
 
         return or(state, input, rules);
+    }
+
+    private static Option<Tuple<CompileState, Value>> parseNumber(CompileState state, String input) {
+        var stripped = input.strip();
+        if (isNumber(stripped)) {
+            return new Some<>(new Tuple<>(state, new NumberValue(stripped)));
+        }
+        else {
+            return new None<>();
+        }
+    }
+
+    private static boolean isNumber(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Option<Tuple<CompileState, Value>> compileOperator(CompileState state, String input, int depth, Operator operator) {
