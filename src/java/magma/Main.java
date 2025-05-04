@@ -123,10 +123,18 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> methods) {
+    private record CompileState(List<String> functions) {
         public CompileState() {
             this(new ArrayList<>());
         }
+
+        public CompileState addFunction(String generated) {
+            this.functions.add(generated);
+            return this;
+        }
+    }
+
+    private record Tuple<A, B>(A left, B right) {
     }
 
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -166,32 +174,35 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right, state);
+                var result = compileRoot(right, state);
+                var joined = String.join("", result.left.functions);
+                return generatePlaceholder(left) + "{\n};\n" + joined + result.right;
             }
         }
 
         return generatePlaceholder(stripped);
     }
 
-    private static String compileRoot(String input, CompileState state) {
-        return compileStatements(input, input1 -> {
-            return compileClassSegment(input1, state);
-        });
+    private static Tuple<CompileState, String> compileRoot(String input, CompileState state) {
+        return compileStatements(state, input, Main::compileClassSegment);
     }
 
-    private static String compileStatements(String input, Function<String, String> mapper) {
-        return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
+    private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements);
     }
 
-    private static String compileAll(String input, BiFunction<DivideState, Character, DivideState> folder, Function<String, String> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
         var segments = divideAll(input, folder);
+
+        var current = initial;
         var output = new StringBuilder();
         for (var segment : segments) {
-            var mapped = mapper.apply(segment);
-            output = merger.apply(output, mapped);
+            var mapped = mapper.apply(current, segment);
+            current = mapped.left;
+            output = merger.apply(output, mapped.right);
         }
 
-        return output.toString();
+        return new Tuple<>(current, output.toString());
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String mapped) {
@@ -222,7 +233,7 @@ public class Main {
         return appended;
     }
 
-    private static String compileClassSegment(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -230,27 +241,31 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left.strip()) + "{" + compileStatements(right, input1 -> compileFunctionSegment(input1, state)) + "\n}\n";
+                var tuple0 = compileStatements(state, right, Main::compileFunctionSegment);
+                var generated = generatePlaceholder(left.strip()) + "{" + tuple0.right + "\n}\n";
+                return new Tuple<>(tuple0.left.addFunction(generated), "");
             }
         }
-        return generatePlaceholder(stripped);
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static String compileFunctionSegment(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
-            return "\n\t" + compileFunctionSegmentValue(slice, state) + ";";
+            var s = compileFunctionSegmentValue(slice, state);
+            return new Tuple<>(s.left, "\n\t" + s.right + ";");
         }
-        return generatePlaceholder(stripped);
+        return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static String compileFunctionSegmentValue(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileFunctionSegmentValue(String input, CompileState state) {
         var stripped = input.strip();
-        return compileInvocation(stripped, state).orElseGet(() -> generatePlaceholder(input));
+        return compileInvocation(stripped, state).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Option<String> compileInvocation(String stripped, CompileState state) {
+    private static Option<Tuple<CompileState, String>> compileInvocation(String stripped, CompileState state) {
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -260,7 +275,10 @@ public class Main {
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                return new Some<>(compileValue(caller, state) + "(" + compileAll(arguments, Main::foldValueChar, input -> compileValue(input, state), Main::mergeValues) + ")");
+                var callerTuple = compileValue(state, caller);
+                var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValue, Main::mergeValues);
+                var generated = callerTuple.right + "(" + argumentsTuple.right + ")";
+                return new Some<>(new Tuple<>(argumentsTuple.left, generated));
             }
         }
 
@@ -281,7 +299,7 @@ public class Main {
         return state.append(c);
     }
 
-    private static String compileValue(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
         var stripped = input.strip();
         var maybeInvocation = compileInvocation(stripped, state);
         if (maybeInvocation instanceof Some(var invocation)) {
@@ -293,7 +311,7 @@ public class Main {
             var left = stripped.substring(0, arrowIndex);
             var right = stripped.substring(arrowIndex + "->".length());
             if (isSymbol(left)) {
-                return generatePlaceholder(left) + " -> " + generatePlaceholder(right);
+                return new Tuple<>(state, generatePlaceholder(left) + " -> " + generatePlaceholder(right));
             }
         }
 
@@ -302,15 +320,16 @@ public class Main {
             var parent = stripped.substring(0, separator);
             var child = stripped.substring(separator + ".".length());
             if (isSymbol(child)) {
-                return compileValue(parent, state) + "." + child;
+                var tuple = compileValue(state, parent);
+                return new Tuple<>(tuple.left, tuple.right + "." + child);
             }
         }
 
         if (isSymbol(stripped)) {
-            return stripped;
+            return new Tuple<>(state, stripped);
         }
 
-        return generatePlaceholder(stripped);
+        return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
     private static boolean isSymbol(String input) {
