@@ -103,6 +103,9 @@
 /* private record CharValue(String value) implements Value  */{/* 
      */
 };
+/* private record Not(Value value) implements Value  */{/* 
+     */
+};
 /* private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String record)  */{/* 
         return (state0, input0) -> {
             var stripped = input0.strip();
@@ -280,7 +283,7 @@ struct public Frame(){
 	this(template HashMap</*  */>::new(), template ArrayList</*  */>::new());
 }
 /* public */(char*, struct Frame) createName(char* category){
-	if (/* !this.counters.containsKey(category) */){
+	if (!containsKey(this.counters, category)){
 		put(this.counters, category, 0);
 	}
 	auto oldCounter = get(this.counters, category);
@@ -381,6 +384,10 @@ struct public CompileState(){
 @Override
 /* public */char* generate(){
 	return "'" + this.value + "'";
+}
+@Override
+/* public */char* generate(){
+	return "!" + generate(this.value);
 }
 auto lambda0(auto error){
 	return println(System.err, display(error));
@@ -533,7 +540,7 @@ auto lambda3(auto popped){
 	return or(state, input, of(List, type(structure("record")), type(structure("class")), type(structure("interface")), type(struct Main::compileMethod), type(struct Main::compileContent)));
 }
 /* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* stripped){
-	if (/* !stripped.endsWith("}") */){
+	if (!endsWith(stripped, "}")){
 		return template None</*  */>::new();
 	}
 	auto withoutContentEnd = substring(stripped, 0, length(stripped) - length("}"));
@@ -543,7 +550,7 @@ auto lambda3(auto popped){
 	}
 	auto beforeContent = strip(substring(withoutContentEnd, 0, contentStart));
 	auto right = substring(withoutContentEnd, contentStart + length("{"));
-	if (/* !beforeContent.endsWith(")") */){
+	if (!endsWith(beforeContent, ")")){
 		return template None</*  */>::new();
 	}
 	auto withoutParamEnd = substring(beforeContent, 0, length(beforeContent) - length(")"));
@@ -613,7 +620,7 @@ auto lambda0(auto contentStart){
 }
 /* private static */template Option<(struct CompileState, char*)> compileBlock(struct CompileState state, char* s){
 	char* indent = "\n" + repeat("\t", depth(state) - 1);
-	if (/* !s.endsWith("}") */){
+	if (!endsWith(s, "}")){
 		return template None</*  */>::new();
 	}
 	auto withoutEnd = substring(s, 0, length(s) - length("}"));
@@ -816,7 +823,7 @@ auto lambda0(auto typeResult){
 }
 /* private static */template Option<(struct CompileState, struct Value)> compileInvokable(struct CompileState state, char* input){
 	auto stripped = strip(input);
-	if (/* !stripped.endsWith(")") */){
+	if (!endsWith(stripped, ")")){
 		return template None</*  */>::new();
 	}
 	auto withoutEnd = substring(stripped, 0, length(stripped) - length(")"));
@@ -920,7 +927,7 @@ auto lambda0(auto tuple){
 	return map(parseValue(state, input), lambda0);
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseValue(struct CompileState state, char* input){
-	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> beforeOperators = of(List, type(struct Main::compileString), type(struct Main::compileChar), type(struct Main::compileLambda));
+	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> beforeOperators = of(List, type(struct Main::compileNot), type(struct Main::compileString), type(struct Main::compileChar), type(struct Main::compileLambda));
 	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> afterOperators = of(List, type(struct Main::compileInvokable), type(struct Main::compileAccess), type(struct Main::parseBooleanValue), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(struct Main::parseNumber));
 	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>>::new(beforeOperators);
 	/* for (var value : Operator.values()) */{
@@ -928,6 +935,16 @@ auto lambda0(auto tuple){
 	}
 	addAll(rules, afterOperators);
 	return or(state, input, rules);
+}
+auto lambda0(auto inner){
+	return (inner.left, struct Not::new(inner.right));
+}
+/* private static */template Option<(struct CompileState, struct Value)> compileNot(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (!startsWith(stripped, "!")){
+		return template None</*  */>::new();
+	}
+	return map(parseValue(state, substring(stripped, 1)), lambda0);
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseBooleanValue(struct CompileState state, char* input){
 	auto stripped = strip(input);
@@ -1035,7 +1052,7 @@ auto lambda1(auto value){
 }
 /* private static */template Option<(struct CompileState, struct StringValue)> compileString(struct CompileState state, char* input){
 	auto stripped = strip(input);
-	if (/* !stripped.startsWith("\"") || !stripped.endsWith("\"") || stripped.length() < 2 */){
+	if (!startsWith(stripped, "\"") || !endsWith(stripped, "\"") || length(stripped) < 2){
 		return template None</*  */>::new();
 	}
 	return template Some</*  */>::new((state, struct StringValue::new(substring(stripped, 1, length(stripped) - 1))));

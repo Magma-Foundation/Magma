@@ -399,6 +399,13 @@ public class Main {
         }
     }
 
+    private record Not(Value value) implements Value {
+        @Override
+        public String generate() {
+            return "!" + this.value.generate();
+        }
+    }
+
     private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
@@ -1080,6 +1087,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Value>> parseValue(CompileState state, String input) {
         List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> beforeOperators = List.of(
+                type(Main::compileNot),
                 type(Main::compileString),
                 type(Main::compileChar),
                 type(Main::compileLambda)
@@ -1101,6 +1109,15 @@ public class Main {
         rules.addAll(afterOperators);
 
         return or(state, input, rules);
+    }
+
+    private static Option<Tuple<CompileState, Value>> compileNot(CompileState state, String input) {
+        var stripped = input.strip();
+        if (!stripped.startsWith("!")) {
+            return new None<>();
+        }
+
+        return parseValue(state, stripped.substring(1)).map(inner -> new Tuple<>(inner.left, new Not(inner.right)));
     }
 
     private static Option<Tuple<CompileState, Value>> parseBooleanValue(CompileState state, String input) {
