@@ -944,7 +944,15 @@ public class Main {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+
+        var appended = state.append(c);
+        if (c == '(') {
+            return appended.enter();
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Tuple<CompileState, String> compileValueOrPlaceholder(CompileState state, String input, int depth) {
