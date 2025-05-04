@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -105,14 +106,15 @@ public class Main {
     }
 
     private static String compileAll(String input, Function<String, String> mapper) {
+        var segments = new ArrayList<String>();
         var buffer = new StringBuilder();
-        var output = new StringBuilder();
         var depth = 0;
+
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             buffer.append(c);
             if (c == '}' && depth == 1) {
-                output = output.append(mapper.apply(buffer.toString()));
+                segments.add(buffer.toString());
                 buffer = new StringBuilder();
                 depth--;
             }
@@ -124,7 +126,14 @@ public class Main {
             }
         }
 
-        return output.append(mapper.apply(buffer.toString())).toString();
+        segments.add(buffer.toString());
+
+        var output = new StringBuilder();
+        for (var segment : segments) {
+            output.append(mapper.apply(segment));
+        }
+
+        return output.toString();
     }
 
     private static String compileClassSegment(String input) {
