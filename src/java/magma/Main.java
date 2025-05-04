@@ -702,15 +702,18 @@ public class Main {
 
         if (parseValue(argumentState, callerString, depth) instanceof Some(var callerTuple)) {
             var callerState = callerTuple.left;
-            var caller = callerTuple.right;
+            var oldCaller = callerTuple.right;
+
+            Value newCaller = oldCaller;
             var newArguments = new ArrayList<Value>();
-            if (caller instanceof DataAccess(Value parent, var property)) {
+            if (oldCaller instanceof DataAccess(Value parent, var property)) {
                 newArguments.add(parent);
+                newCaller = new Symbol(property);
             }
 
             newArguments.addAll(oldArguments);
 
-            return new Some<>(new Tuple<>(callerState, new Invocation(caller, newArguments)));
+            return new Some<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
         }
 
         return new None<>();
