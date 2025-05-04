@@ -114,8 +114,11 @@ auto lambda(auto input){
 	auto output = compile(input);
 	return writeTarget(output);
 }
+auto lambda(auto error){
+	return System.err.println(error.display());
+}
 /* public static void main() */{
-	readSource().match(lambda, struct Some::new).ifPresent(/* error -> System */.err.println(error.display()));
+	readSource().match(lambda, struct Some::new).ifPresent(lambda);
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -218,6 +221,46 @@ auto lambda(auto input){
 	/* return new Tuple<>(state, "struct " + stripped) */;
 }
 /* }
+                else */{
+	/* if (compileValue(state, afterArrow) instanceof Some(var valueTuple)) {
+                        return assembleLambda(valueTuple.left, beforeArrow, "\n\treturn " + valueTuple.right + ";") */;
+}
+/* }
+            }
+        }
+
+        var maybeInvocation = compileInvocation(state, stripped);
+        if (maybeInvocation.isPresent()) */{
+	return maybeInvocation;
+	/* }
+
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parent = stripped */.substring(/* 0 */, separator);
+	/* var child = stripped */.substring(/* separator + "." */.length());/* if (isSymbol(child)) {
+                var tuple = compileValueOrPlaceholder(state, parent);
+                var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
+                return new Some<>(compileStateStringTuple);
+            } */
+	/* } */ if (isSymbol(stripped)) {
+            var compileStateStringTuple = /*  new Tuple<CompileState, String>(state, stripped) */;
+	/* return new Some<>(compileStateStringTuple) */;
+	/* }
+
+        var functionSeparator = stripped.indexOf(" */::");
+        if (functionSeparator >= 0) {
+            var left = stripped.substring(/* 0 */, functionSeparator);
+	/* var right = stripped */.substring(/* functionSeparator + " */::".length()).strip();
+	auto leftTuple = compileType(state, left);
+	return /* new Some<>(new Tuple<>(leftTuple.left, leftTuple.right + " */::" + right));/* }
+
+        return new None<>();
+    }
+
+    private static Some<Tuple<CompileState, String>> assembleLambda(CompileState state, String beforeArrow, String content) {
+        return new Some<>(new Tuple<CompileState, String>(state.addFunction("auto lambda(auto " + beforeArrow + "){" + content + "\n */
+}
+/* }
         }
         if (c == ')') */{
 	return appended.exit();
@@ -299,11 +342,6 @@ auto lambda(auto input){
 
     private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         var stripped = input.strip();
-        var maybeInvocation = compileInvocation(state, stripped);
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation;
-        }
-
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
@@ -311,35 +349,7 @@ auto lambda(auto input){
             if (isSymbol(beforeArrow)) {
                 var withBraces = afterArrow.strip();
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1); *//* var result = compileStatements(state, content, Main::compileFunctionSegment); *//* var compileStateStringTuple = new Tuple<CompileState, String>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "\n}\n"), "lambda"); *//* return new Some<>(compileStateStringTuple); *//* }
-            }
-        }
-
-        var separator = stripped.lastIndexOf(".");
-        if (separator >= 0) {
-            var parent = stripped.substring(0, separator);
-            var child = stripped.substring(separator + ".".length());
-            if (isSymbol(child)) {
-                var tuple = compileValueOrPlaceholder(state, parent);
-                var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
-                return new Some<>(compileStateStringTuple);
-            }
-        }
-
-        if (isSymbol(stripped)) {
-            var compileStateStringTuple = new Tuple<CompileState, String>(state, stripped);
-            return new Some<>(compileStateStringTuple);
-        }
-
-        var functionSeparator = stripped.indexOf("::");
-        if (functionSeparator >= 0) {
-            var left = stripped.substring(0, functionSeparator);
-            var right = stripped.substring(functionSeparator + "::".length()).strip();
-            var leftTuple = compileType(state, left);
-            return new Some<>(new Tuple<>(leftTuple.left, leftTuple.right + "::" + right));
-        }
-
-        return new None<>();
+                    var content = withBraces.substring(1, withBraces.length() - 1); *//* var result = compileStatements(state, content, Main::compileFunctionSegment); *//* return assembleLambda(result.left, beforeArrow, result.right); *//* \n"), "lambda"));
     }
 
     private static boolean isSymbol(String input) {

@@ -393,11 +393,6 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         var stripped = input.strip();
-        var maybeInvocation = compileInvocation(state, stripped);
-        if (maybeInvocation.isPresent()) {
-            return maybeInvocation;
-        }
-
         var arrowIndex = stripped.indexOf("->");
         if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
@@ -407,10 +402,19 @@ public class Main {
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var result = compileStatements(state, content, Main::compileFunctionSegment);
-                    var compileStateStringTuple = new Tuple<CompileState, String>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "\n}\n"), "lambda");
-                    return new Some<>(compileStateStringTuple);
+                    return assembleLambda(result.left, beforeArrow, result.right);
+                }
+                else {
+                    if (compileValue(state, afterArrow) instanceof Some(var valueTuple)) {
+                        return assembleLambda(valueTuple.left, beforeArrow, "\n\treturn " + valueTuple.right + ";");
+                    }
                 }
             }
+        }
+
+        var maybeInvocation = compileInvocation(state, stripped);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation;
         }
 
         var separator = stripped.lastIndexOf(".");
@@ -438,6 +442,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Some<Tuple<CompileState, String>> assembleLambda(CompileState state, String beforeArrow, String content) {
+        return new Some<>(new Tuple<CompileState, String>(state.addFunction("auto lambda(auto " + beforeArrow + "){" + content + "\n}\n"), "lambda"));
     }
 
     private static boolean isSymbol(String input) {
