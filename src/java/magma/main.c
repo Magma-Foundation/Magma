@@ -345,8 +345,7 @@ struct public CompileState(){
 }
 @Override
 /* public */char* generate(){
-	collect(/* var joined = this.arguments.stream()
-                    .map(Value */::generate), joining(Collectors, ", "));
+	auto joined = collect(map(stream(this.arguments), struct Value::generate), joining(Collectors, ", "));
 	return generate(this.caller) + "(" + joined + ")";
 }
 @Override
@@ -500,7 +499,7 @@ auto lambda3(auto popped){
 	auto appended = append(state, c);
 	return /* appended.popAndAppendToTuple()
                 .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
-                .flatMap(DivideState */::popAndAppendToOption);
+                .flatMap(DivideState::popAndAppendToOption) */;
 }
 /* private static */char* generateAll(template List<char*> elements, template BiFunction<struct StringBuilder, char*, struct StringBuilder> merger){
 	auto output = struct StringBuilder::new();
@@ -580,10 +579,10 @@ auto lambda3(auto popped){
 }
 /* private static */template Option<(struct CompileState, char*)> compileParameter(struct CompileState state2, char* input){
 	return /* or(state2, input, List.of(
-                type(Main */::compileWhitespace),
+                type(Main::compileWhitespace),
                 type(Main::compileDefinition),
                 type(Main::compileContent)
-        ));
+        )) */;
 }
 /* private static */template Option<(struct CompileState, char*)> compileWhitespace(struct CompileState state, char* input){
 	if (isBlank(input)){
@@ -610,7 +609,7 @@ auto lambda3(auto popped){
 	auto beforeContent = substring(withoutEnd, 0, contentStart);
 	auto content = substring(withoutEnd, contentStart + length("{"));
 	struct CompileState state3 = enter(state);
-	auto maybeStatements = /* parseStatements(state3, content, Main */::compileFunctionSegment);
+	auto maybeStatements = /*  parseStatements(state3, content, Main::compileFunctionSegment) */;
 	if (/* maybeStatements instanceof Some(var statementsTuple) */){
 		auto oldStatements = template ArrayList<char*>::new();
 		addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
@@ -702,9 +701,10 @@ auto lambda0(auto tuple){
 			return definitionWithAnnotations(state, emptyList(Collections), beforeName, name);
 		}
 		auto annotationsArray = split(strip(substring(beforeName, 0, annotationSeparator)), quote(Pattern, "\n"));
-		toList(/* var annotations = Arrays.stream(annotationsArray)
-                    .map(String */::strip)
-                    .map(slice -> slice.isEmpty() ? "" : slice.substring(1)));
+		auto annotations = /*  Arrays.stream(annotationsArray)
+                    .map(String::strip)
+                    .map(slice -> slice.isEmpty() ? "" : slice.substring(1))
+                    .toList() */;
 		auto beforeName0 = substring(beforeName, annotationSeparator + length("\n"));
 		return /* definitionWithAnnotations(state, annotations, beforeName0, name) */;
 	}
@@ -810,7 +810,7 @@ auto lambda0(auto typeResult){
 	auto joined = join(String, "", subList(divisions, 0, size(divisions) - 1));
 	auto callerString = substring(joined, 0, length(joined) - length(")"));
 	auto inputArguments = getLast(divisions);
-	if (/* parseValues(state, inputArguments, Main */::parseArgument) instanceof Some(var argumentsTuple)){
+	if (/* parseValues(state, inputArguments, Main::parseArgument) instanceof Some(var argumentsTuple) */){
 		auto argumentState = argumentsTuple.left;
 		auto oldArguments = /*  argumentsTuple.right
                     .stream()
@@ -844,9 +844,9 @@ auto lambda0(auto typeResult){
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseArgument(struct CompileState state1, char* input1){
 	return /* or(state1, input1, List.of(
-                type(Main */::parseWhitespace),
+                type(Main::parseWhitespace),
                 type((state2, input2) -> parseValue(state2, input2))
-        ));
+        )) */;
 }
 /* private static */template Option<(struct CompileState, struct Whitespace)> parseWhitespace(struct CompileState state, char* input){
 	if (isBlank(input)){
@@ -988,10 +988,12 @@ auto lambda1(auto value){
 		return template None</*  */>::new();
 	}
 	auto left = substring(strip(input), 0, functionSeparator);
-	strip(/* var right = input.strip().substring(functionSeparator + " */::".length()));
+	auto right = strip(substring(strip(input), functionSeparator + length("::")));
 	auto maybeLeftTuple = compileType(state, left);
 	if (/* maybeLeftTuple instanceof Some(var leftTuple) */){
-		return template Some</*  */>::new((leftTuple.left, struct MethodAccess::new(leftTuple.right, right)));
+		if (isSymbol(right)){
+			return template Some</*  */>::new((leftTuple.left, struct MethodAccess::new(leftTuple.right, right)));
+		}
 	}
 	return template None</*  */>::new();
 }
@@ -1037,8 +1039,8 @@ auto lambda0(auto result){
 	auto withBraces = strip(afterArrow);
 	/* if (withBraces.startsWith(" */{
 		@) && withBraces.endsWith("}")) {
-auto content = flatMap(/* withBraces.substring(1, withBraces.length() - 1);
-            return compileStatements(state, content, Main */::compileFunctionSegment), lambda0);
+auto content = /*  withBraces.substring(1, withBraces.length() - 1);
+            return compileStatements(state, content, Main::compileFunctionSegment).flatMap(result -> assembleLambda(result.left, paramNames, result.right)) */;
 	}
 	if (/* compileValue(state, afterArrow) instanceof Some(var valueTuple) */){
 		return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");

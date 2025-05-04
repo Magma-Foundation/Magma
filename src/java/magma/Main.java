@@ -1172,7 +1172,9 @@ public class Main {
         var right = input.strip().substring(functionSeparator + "::".length()).strip();
         var maybeLeftTuple = compileType(state, left);
         if (maybeLeftTuple instanceof Some(var leftTuple)) {
-            return new Some<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
+            if (isSymbol(right)) {
+                return new Some<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
+            }
         }
         return new None<>();
     }
