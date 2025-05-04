@@ -337,11 +337,17 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
-        if (input.equals("var")) {
+        var stripped = input.strip();
+
+        if (stripped.equals("var")) {
             return new Tuple<>(state, "auto");
         }
 
-        return new Tuple<>(state, generatePlaceholder(input));
+        if (isSymbol(stripped)) {
+            return new Tuple<>(state, "struct " + stripped);
+        }
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
@@ -424,7 +430,7 @@ public class Main {
         }
 
         var functionSeparator = stripped.indexOf("::");
-        if(functionSeparator >= 0 ) {
+        if (functionSeparator >= 0) {
             var left = stripped.substring(0, functionSeparator);
             var right = stripped.substring(functionSeparator + "::".length()).strip();
             var leftTuple = compileType(state, left);

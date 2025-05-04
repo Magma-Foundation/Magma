@@ -115,7 +115,7 @@ auto lambda(auto input){
 	return writeTarget(output);
 }
 /* public static void main() */{
-	readSource().match(lambda, /* Some */::new).ifPresent(/* error -> System */.err.println(error.display()));
+	readSource().match(lambda, struct Some::new).ifPresent(/* error -> System */.err.println(error.display()));
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -131,8 +131,7 @@ auto lambda(auto input){
         } */
 }
 /* var contentStart = withoutEnd.indexOf(" */{
-	/* ");
- */ if (contentStart > = /*  0) {
+	/* "); */ if (contentStart > = /*  0) {
                 var left = withoutEnd.substring(0, contentStart) */;/* var right = withoutEnd.substring(contentStart + "{".length());
                 var result = compileRoot(right, state);
                 var joined = String.join("", result.left.functions);
@@ -143,10 +142,10 @@ auto lambda(auto input){
         return generatePlaceholder(stripped) */;
 }
 /* private static Tuple<CompileState, String> compileRoot(String input, CompileState state) */{
-	return compileStatements(state, input, /* Main */::compileClassSegment);
+	return compileStatements(state, input, struct Main::compileClassSegment);
 }
 /* private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) */{
-	return compileAll(state, input, /* Main */::foldStatementChar, mapper, /* Main */::mergeStatements);
+	return compileAll(state, input, struct Main::foldStatementChar, mapper, struct Main::mergeStatements);
 }
 /* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{
 	auto segments = divideAll(input, folder);
@@ -212,11 +211,11 @@ auto lambda(auto input){
 	auto typeResult = compileType(state, type);
 	/* return new Tuple<>(typeResult.left, typeResult.right + " " + name) */;
 }
-/* }
-
-    private static Tuple<CompileState, String> compileType(CompileState state, String input) */{
-	/* if (input.equals("var")) {
-            return new Tuple<>(state, "auto") */;
+/* if (stripped.equals("var")) */{
+	/* return new Tuple<>(state, "auto") */;
+}
+/* if (isSymbol(stripped)) */{
+	/* return new Tuple<>(state, "struct " + stripped) */;
 }
 /* }
         }
@@ -256,7 +255,10 @@ auto lambda(auto input){
         var valueSeparator = input.indexOf("="); *//* var left = input.substring(0, valueSeparator); *//* var right = input.substring(valueSeparator + "=".length()); *//* var definitionTuple = compileDefinition(state, left); *//* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); *//* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); *//* }
 
     private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
-        var stripped = input.strip(); *//* var valueSeparator = stripped.indexOf(" "); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* return new Tuple<>(state, generatePlaceholder(input)); *//* }
+        var stripped = input.strip(); *//* var valueSeparator = stripped.indexOf(" "); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+
+    private static Tuple<CompileState, String> compileType(CompileState state, String input) {
+        var stripped = input.strip(); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
         if (stripped.endsWith(")")) {
@@ -330,7 +332,7 @@ auto lambda(auto input){
         }
 
         var functionSeparator = stripped.indexOf("::");
-        if(functionSeparator >= 0 ) {
+        if (functionSeparator >= 0) {
             var left = stripped.substring(0, functionSeparator);
             var right = stripped.substring(functionSeparator + "::".length()).strip();
             var leftTuple = compileType(state, left);
