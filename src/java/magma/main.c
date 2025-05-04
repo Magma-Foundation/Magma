@@ -112,7 +112,7 @@ public class Main  */{
 }
 auto lambda(auto input){
 	auto output = compile(input);
-	/* return writeTarget(output) */;/*  */
+	return writeTarget(output);/*  */
 }
 /* public static void main() */{
 	readSource().match(lambda, /*  Some::new */).ifPresent(/* error -> System */.err.println(error.display()));/*  */
@@ -143,10 +143,10 @@ auto lambda(auto input){
         return generatePlaceholder(stripped) */;
 }
 /* private static Tuple<CompileState, String> compileRoot(String input, CompileState state) */{
-	/* return compileStatements(state, input, Main::compileClassSegment) */;/*  */
+	return compileStatements(state, input, /*  Main::compileClassSegment */);/*  */
 }
 /* private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) */{
-	/* return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;/*  */
+	return compileAll(state, input, /*  Main::foldStatementChar */, mapper, /*  Main::mergeStatements */);/*  */
 }
 /* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{
 	auto segments = divideAll(input, folder);
@@ -159,14 +159,14 @@ auto lambda(auto input){
 	/* return new Tuple<>(current, output.toString()) */;/*  */
 }
 /* private static StringBuilder mergeStatements(StringBuilder output, String mapped) */{
-	/* return output */.append(mapped);/*  */
+	return output.append(mapped);/*  */
 }
 /* private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) */{
 	auto current = /*  new DivideState() */;/* for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
         } */
-	/* return current.advance().segments */;/*  */
+	return current.advance().segments;/*  */
 }
 /* private static DivideState foldStatementChar(DivideState state, char c) */{
 	/* var appended = state */.append(c);/* if (c == ';' && appended.isLevel()) {
@@ -195,6 +195,11 @@ auto lambda(auto input){
 	auto s = compileFunctionStatementValue(slice, state);
 	/* return new Tuple<>(s.left, "\n\t" + s.right + ";") */;/*  */
 }
+/* if (stripped.startsWith("return ")) */{
+	/* var right = stripped */.substring(/* "return " */.length());/* if (compileValue(state, right) instanceof Some(var other)) {
+                return new Some<>(new Tuple<>(other.left, "return " + other.right));
+            } *//*  */
+}
 /* if (valueSeparator < 0) */{
 	/* return new None<>() */;/*  */
 }
@@ -213,7 +218,7 @@ auto lambda(auto input){
 /* }
         }
         if (c == ')') */{
-	/* return appended */.exit();
+	return appended.exit();
 	/* }
         return appended;
     }
@@ -236,9 +241,13 @@ auto lambda(auto input){
         var stripped = input.strip(); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(String input, CompileState state) {
-        var stripped = input.strip(); *//* return compileInvocation(state, stripped)
-                .or(() -> compileAssignment(state, stripped))
+        return compileReturn(state, input)
+                .or(() -> compileInvocation(state, input))
+                .or(() -> compileAssignment(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
+
+    private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
+        var stripped = input.strip(); *//* return new None<>(); *//* }
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
         var valueSeparator = input.indexOf("="); *//* var left = input.substring(0, valueSeparator); *//* var right = input.substring(valueSeparator + "=".length()); *//* var definitionTuple = compileDefinition(state, left); *//* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); *//* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); *//* }

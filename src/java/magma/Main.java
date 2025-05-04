@@ -288,10 +288,22 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(String input, CompileState state) {
-        var stripped = input.strip();
-        return compileInvocation(state, stripped)
-                .or(() -> compileAssignment(state, stripped))
+        return compileReturn(state, input)
+                .or(() -> compileInvocation(state, input))
+                .or(() -> compileAssignment(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            var right = stripped.substring("return ".length());
+            if (compileValue(state, right) instanceof Some(var other)) {
+                return new Some<>(new Tuple<>(other.left, "return " + other.right));
+            }
+        }
+
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
