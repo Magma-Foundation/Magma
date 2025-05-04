@@ -285,10 +285,10 @@ public class Main {
         }
     }
 
-    private record Access(String child, String parent) implements Value {
+    private record DataAccess(Value parent, String child) implements Value {
         @Override
         public String generate() {
-            return this.parent() + "." + this.child();
+            return this.parent.generate() + "." + this.child;
         }
     }
 
@@ -684,24 +684,33 @@ public class Main {
             return new None<>();
         }
         var joined = String.join("", divisions.subList(0, divisions.size() - 1));
-        var caller = joined.substring(0, joined.length() - ")".length());
+        var callerString = joined.substring(0, joined.length() - ")".length());
 
         var inputArguments = divisions.getLast();
         var argumentsTuple = parseValues(state, inputArguments, (state1, input1) -> parseValue(state1, input1, depth)
                 .orElseGet(() -> new Tuple<>(state1, new Content(input1))));
 
         var argumentState = argumentsTuple.left;
-        var arguments = argumentsTuple.right;
+        var oldArguments = argumentsTuple.right;
 
-        if (caller.startsWith("new ")) {
-            var withoutPrefix = caller.substring("new ".length());
+        if (callerString.startsWith("new ")) {
+            var withoutPrefix = callerString.substring("new ".length());
             var callerTuple = compileType(argumentState, withoutPrefix);
 
-            return new Some<>(new Tuple<>(callerTuple.left, new Invocation(new MethodAccess(callerTuple.right, "new"), arguments)));
+            return new Some<>(new Tuple<>(callerTuple.left, new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments)));
         }
 
-        if (parseValue(argumentState, caller, depth) instanceof Some(var callerTuple)) {
-            return new Some<>(new Tuple<>(callerTuple.left, new Invocation(callerTuple.right, arguments)));
+        if (parseValue(argumentState, callerString, depth) instanceof Some(var callerTuple)) {
+            var callerState = callerTuple.left;
+            var caller = callerTuple.right;
+            var newArguments = new ArrayList<Value>();
+            if (caller instanceof DataAccess(Value parent, var property)) {
+                newArguments.add(parent);
+            }
+
+            newArguments.addAll(oldArguments);
+
+            return new Some<>(new Tuple<>(callerState, new Invocation(caller, newArguments)));
         }
 
         return new None<>();
@@ -798,7 +807,7 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, Access>> compileAccess(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, DataAccess>> compileAccess(CompileState state, String input, int depth) {
         var separator = input.strip().lastIndexOf(".");
         if (separator < 0) {
             return new None<>();
@@ -806,11 +815,11 @@ public class Main {
 
         var parent = input.strip().substring(0, separator);
         var child = input.strip().substring(separator + ".".length());
-        if (!isSymbol(child) || !(compileValue(state, parent, depth) instanceof Some(var tuple))) {
+        if (!isSymbol(child) || !(parseValue(state, parent, depth) instanceof Some(var tuple))) {
             return new None<>();
         }
 
-        return new Some<>(new Tuple<CompileState, Access>(tuple.left, new Access(child, tuple.right)));
+        return new Some<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
 
     }
 
