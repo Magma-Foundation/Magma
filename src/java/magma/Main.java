@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main {
     private interface Result<T, X> {
@@ -19,6 +20,8 @@ public class Main {
 
     private interface Option<T> {
         void ifPresent(Consumer<T> consumer);
+
+        T orElseGet(Supplier<T> supplier);
     }
 
     private interface Error {
@@ -38,12 +41,22 @@ public class Main {
         @Override
         public void ifPresent(Consumer<T> consumer) {
         }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get();
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
             consumer.accept(this.value);
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return this.value;
         }
     }
 
@@ -104,10 +117,6 @@ public class Main {
             this.buffer.append(c);
             return this;
         }
-
-        public boolean isLevel() {
-            return this.depth == 0;
-        }
     }
 
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -145,14 +154,14 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{\n};\n" + getString(right);
+                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right);
             }
         }
 
         return generatePlaceholder(stripped);
     }
 
-    private static String getString(String input) {
+    private static String compileRoot(String input) {
         return compileAll(input, Main::compileClassSegment);
     }
 
@@ -215,6 +224,10 @@ public class Main {
 
     private static String compileFunctionSegmentValue(String input) {
         var stripped = input.strip();
+        return compileInvocation(stripped).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Option<String> compileInvocation(String stripped) {
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -224,11 +237,37 @@ public class Main {
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+                return new Some<>(compileValue(caller) + "(" + generatePlaceholder(arguments) + ")");
+            }
+        }
+
+        return new None<>();
+    }
+
+    private static String compileValue(String input) {
+        var stripped = input.strip();
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parent = stripped.substring(0, separator);
+            var child = stripped.substring(separator + ".".length());
+            if (isSymbol(child)) {
+                return compileValue(parent) + "." + child;
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static boolean isSymbol(String input) {
+        var stripped = input.strip();
+        for (var i = 0; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if(Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static State foldInvocationStart(State state, char c) {

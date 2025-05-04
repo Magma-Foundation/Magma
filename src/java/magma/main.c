@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main  */{
 };
@@ -18,7 +19,9 @@ public class Main  */{
 	/* <R> R match */(/* Function<T, R> whenOk, Function<X, R> whenErr */);
 }
 /* private interface Option<T> */{
-	/* void ifPresent */(/* Consumer<T> consumer */);
+	/* void ifPresent(Consumer<T> consumer);
+
+        T orElseGet */(/* Supplier<T> supplier */);
 }
 /* private interface Error */{
 	/* String display */(/*  */);
@@ -32,11 +35,17 @@ public class Main  */{
 }
 /* record None<T>() implements Option<T> */{/* @Override
         public void ifPresent(Consumer<T> consumer) {
+        } *//* @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get();
         } *//*  */
 }
 /* private record Some<T>(T value) implements Option<T> */{/* @Override
         public void ifPresent(Consumer<T> consumer) {
             consumer.accept(this.value);
+        } *//* @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return this.value;
         } *//*  */
 }
 /* private record Ok<T, X>(T value) implements Result<T, X> */{/* @Override
@@ -76,8 +85,6 @@ public class Main  */{
         } *//* private State append(char c) {
             this.buffer.append(c);
             return this;
-        } *//* public boolean isLevel() {
-            return this.depth == 0;
         } *//*  */
 }
 /* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -87,7 +94,7 @@ public class Main  */{
 	/* readSource().match(input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Some::new).ifPresent */(/* error -> System.err.println(error.display()) */);
+        }, Some::new) */.ifPresent(/* error -> System.err.println(error.display()) */);
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -109,12 +116,12 @@ public class Main  */{
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{\n};\n" + getString(right);
+                return generatePlaceholder(left) + "{\n};\n" + compileRoot(right);
             }
         } */
 	/* return generatePlaceholder */(/* stripped */);
 }
-/* private static String getString(String input) */{
+/* private static String compileRoot(String input) */{
 	/* return compileAll */(/* input, Main::compileClassSegment */);
 }
 /* private static String compileAll(String input, Function<String, String> mapper) */{/* var segments = divideAll(input, Main::foldStatementChar);
@@ -122,7 +129,7 @@ public class Main  */{
         for (var segment : segments) {
             output.append(mapper.apply(segment));
         } */
-	/* return output.toString */(/*  */);
+	/* return output */.toString(/*  */);
 }
 /* private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) */{/* var current = new State();
         for (var i = 0; i < input.length(); i++) {
@@ -133,7 +140,7 @@ public class Main  */{
 }
 /* private static State foldStatementChar(State state, char c) */{/* var appended = state.append(c);
         if (c == '} */
-	/* ' && appended.isShallow */(/* )) {
+	/* ' && appended */.isShallow(/* )) {
             return appended.advance().exit( */);
 }
 /* else if (c == ' */{/* ' || c == '(') {
@@ -171,22 +178,50 @@ public class Main  */{
 
     private static String compileFunctionSegmentValue(String input) */{
 	/* var stripped = input.strip();
+        return compileInvocation(stripped).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Option<String> compileInvocation(String stripped) {
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
             var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
             if (divisions.size() >= 2) {
                 var joined = String.join("", divisions.subList(0, divisions.size() - 1));
-                var left = joined.substring(0, joined.length() - ")".length());
-                var last = divisions.getLast();
+                var caller = joined.substring(0, joined.length() - ")".length());
+                var arguments = divisions.getLast();
 
-                var caller = left;
-                var arguments = last;
-                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+                return new Some<>(compileValue(caller) + "(" + generatePlaceholder(arguments) + ")");
+            }
+        }
+
+        return new None<>();
+    }
+
+    private static String compileValue(String input) {
+        var stripped = input.strip();
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parent = stripped.substring(0, separator);
+            var child = stripped.substring(separator + ".".length());
+            if (isSymbol(child)) {
+                return compileValue(parent) + "." + child;
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static boolean isSymbol(String input) {
+        var stripped = input.strip();
+        for (var i = 0; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if(Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static State foldInvocationStart(State state, char c) {
