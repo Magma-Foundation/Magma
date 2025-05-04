@@ -555,6 +555,10 @@ public class Main {
             return new Tuple<>(state, "auto");
         }
 
+        if (stripped.equals("String")) {
+            return new Tuple<>(state, "char*");
+        }
+
         if (isSymbol(stripped)) {
             return new Tuple<>(state, "struct " + stripped);
         }
