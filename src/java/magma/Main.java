@@ -381,7 +381,9 @@ public class Main {
     }
 
     private enum Operator {
-        ADD("+");
+        ADD("+"),
+        SUBTRACT("-");
+
         private final String representation;
 
         Operator(String representation) {
@@ -996,25 +998,31 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Value>> parseValue(CompileState state, String input, int depth) {
-        return or(state, input, List.of(
+        List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> type = List.of(
                 type(Main::compileString),
                 type((state0, input0) -> compileLambda(state0, input0, depth)),
                 type((state0, input0) -> compileInvokable(state0, input0, depth)),
                 type((state0, input0) -> compileAccess(state0, input0, depth)),
                 type(Main::compileSymbolValue),
-                type(Main::compileMethodReference),
-                type((state1, input1) -> compileOperator(state1, input1, depth))
-        ));
+                type(Main::compileMethodReference)
+        );
+
+        var rules = new ArrayList<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>>(type);
+        for (var value : Operator.values()) {
+            rules.add(type((state1, input1) -> compileOperator(state1, input1, depth, value)));
+        }
+
+        return or(state, input, rules);
     }
 
-    private static Option<Tuple<CompileState, Value>> compileOperator(CompileState state, String input, int depth) {
-        var index = input.indexOf("+");
+    private static Option<Tuple<CompileState, Value>> compileOperator(CompileState state, String input, int depth, Operator operator) {
+        var index = input.indexOf(operator.representation);
         if (index >= 0) {
             var left = input.substring(0, index);
-            var right = input.substring(index + "+".length());
+            var right = input.substring(index + operator.representation.length());
             if (parseValue(state, left, depth) instanceof Some(var leftTuple)) {
                 if (parseValue(leftTuple.left, right, depth) instanceof Some(var rightTuple)) {
-                    var operation = new Operation(leftTuple.right, Operator.ADD, rightTuple.right);
+                    var operation = new Operation(leftTuple.right, operator, rightTuple.right);
                     return new Some<>(new Tuple<>(rightTuple.left, operation));
                 }
             }

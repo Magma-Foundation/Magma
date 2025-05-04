@@ -92,7 +92,9 @@
 
 };
 /* public class Main  */{/* private enum Operator {
-        ADD("+");
+        ADD("+"),
+        SUBTRACT("-");
+
         private final String representation;
 
         Operator(String representation) {
@@ -363,7 +365,9 @@ auto lambda0(){
 /* private static */template Option<(struct CompileState, char*)> compileStructure(struct CompileState state, char* input, char* infix){
 	auto stripped = input.strip(input);
 	if (stripped.endsWith(stripped, "}")){
-		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
+	auto local0 = stripped.length(stripped) - "}";
+	auto local1 = stripped.length(stripped) - "}";
+		auto withoutEnd = stripped.substring(stripped, /* 0 */, length(local1));
 		auto contentStart = withoutEnd.indexOf(withoutEnd, "{");
 		if (/* contentStart >= 0 */){
 	auto local0 = contentStart + "{";
@@ -492,33 +496,37 @@ auto lambda0(){
 	return orElseGet(local0, lambda0);
 }
 /* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* stripped){
-	auto local0 = withoutContentEnd.substring(withoutContentEnd, /* 0 */, contentStart);
-	auto local1 = contentStart + "{";
-	auto local2 = contentStart + "{";
-	auto local3 = paramStart + "(";
-	auto local4 = paramStart + "(";
-	auto local5 = statementsState.frames(statementsState);
-	auto local6 = statementsState.exit(statementsState);
+	auto local0 = stripped.length(stripped) - "}";
+	auto local1 = stripped.length(stripped) - "}";
+	auto local2 = withoutContentEnd.substring(withoutContentEnd, /* 0 */, contentStart);
+	auto local3 = contentStart + "{";
+	auto local4 = contentStart + "{";
+	auto local5 = beforeContent.length(beforeContent) - ")";
+	auto local6 = beforeContent.length(beforeContent) - ")";
+	auto local7 = paramStart + "(";
+	auto local8 = paramStart + "(";
+	auto local9 = statementsState.frames(statementsState);
+	auto local10 = statementsState.exit(statementsState);
 	if (/* !stripped.endsWith("}") */){
 		return template None<struct >::new();
 	}
-	auto withoutContentEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
+	auto withoutContentEnd = stripped.substring(stripped, /* 0 */, length(local1));
 	auto contentStart = withoutContentEnd.indexOf(withoutContentEnd, "{");
 	if (/* contentStart < 0 */){
 		return template None<struct >::new();
 	}
-	auto beforeContent = strip(local0);
-	auto right = withoutContentEnd.substring(withoutContentEnd, length(local2));
+	auto beforeContent = strip(local2);
+	auto right = withoutContentEnd.substring(withoutContentEnd, length(local4));
 	if (/* !beforeContent.endsWith(")") */){
 		return template None<struct >::new();
 	}
-	auto withoutParamEnd = beforeContent.substring(beforeContent, /* 0 */, /*  beforeContent.length() - ")".length() */);
+	auto withoutParamEnd = beforeContent.substring(beforeContent, /* 0 */, length(local6));
 	auto paramStart = withoutParamEnd.indexOf(withoutParamEnd, "(");
 	if (/* paramStart < 0 */){
 		return template None<struct >::new();
 	}
 	auto definitionString = withoutParamEnd.substring(withoutParamEnd, /* 0 */, paramStart);
-	auto inputParams = withoutParamEnd.substring(withoutParamEnd, length(local4));
+	auto inputParams = withoutParamEnd.substring(withoutParamEnd, length(local8));
 	if (/* !(parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) */){
 		return template None<struct >::new();
 	}
@@ -538,10 +546,10 @@ auto lambda0(){
 	auto statementsState = statementsTuple.left;
 	auto statements = statementsTuple.right;
 	auto oldStatements = template ArrayList<char*>::new();
-	oldStatements.addAll(oldStatements, getLast(local5).statements);
+	oldStatements.addAll(oldStatements, getLast(local9).statements);
 	oldStatements.addAll(oldStatements, statements);
 	auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-	return template Some<struct >::new((addFunction(local6, generated), ""));
+	return template Some<struct >::new((addFunction(local10, generated), ""));
 }
 /* private static */template Option<(struct CompileState, char*)> compileWhitespace(struct CompileState state, char* input){
 	if (input.isBlank(input)){
@@ -561,25 +569,29 @@ auto lambda0(){
 	}
 	auto indent = repeat(local0, depth);
 	if (stripped.endsWith(stripped, ";")){
-		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - ";".length() */);
+	auto local0 = stripped.length(stripped) - ";";
+	auto local1 = stripped.length(stripped) - ";";
+		auto withoutEnd = stripped.substring(stripped, /* 0 */, length(local1));
 		auto statements = compileFunctionStatementValue(withoutEnd, state, depth);
 		return (statements.left, indent + statements.right + ";");
 	}
 	return orElseGet(local1, lambda0);
 }
 /* private static */template Option<(struct CompileState, char*)> compileBlock(struct CompileState state, struct int depth, char* stripped, char* indent){
-	auto local0 = contentStart + "{";
-	auto local1 = contentStart + "{";
+	auto local0 = stripped.length(stripped) - "}";
+	auto local1 = stripped.length(stripped) - "}";
+	auto local2 = contentStart + "{";
+	auto local3 = contentStart + "{";
 	if (/* !stripped.endsWith("}") */){
 		return template None<struct >::new();
 	}
-	auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
+	auto withoutEnd = stripped.substring(stripped, /* 0 */, length(local1));
 	auto contentStart = withoutEnd.indexOf(withoutEnd, "{");
 	if (/* contentStart < 0 */){
 		return template None<struct >::new();
 	}
 	auto beforeContent = withoutEnd.substring(withoutEnd, /* 0 */, contentStart);
-	auto content = withoutEnd.substring(withoutEnd, length(local1));
+	auto content = withoutEnd.substring(withoutEnd, length(local3));
 	struct CompileState state2 = state.enter(state);
 	auto tuple = parseStatements(/* state2 */, content, /*  (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1) */);
 	auto oldStatements = template ArrayList<char*>::new();
@@ -748,7 +760,9 @@ auto lambda0(auto tuple){
 		return (state, "struct " + stripped);
 	}
 	if (stripped.endsWith(stripped, ">")){
-		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - ">".length() */);
+	auto local0 = stripped.length(stripped) - ">";
+	auto local1 = stripped.length(stripped) - ">";
+		auto withoutEnd = stripped.substring(stripped, /* 0 */, length(local1));
 		auto argsStart = withoutEnd.indexOf(withoutEnd, "<");
 		if (/* argsStart >= 0 */){
 	auto local0 = withoutEnd.substring(withoutEnd, /* 0 */, argsStart);
@@ -769,25 +783,29 @@ auto lambda0(auto tuple){
 	return (state, generatePlaceholder(stripped));
 }
 /* private static */template Option<(struct CompileState, struct Value)> compileInvokable(struct CompileState state, char* input, struct int depth){
-	auto local0 = argumentsTuple.right.stream(argumentsTuple.right);
-	auto local1 = filter(local0, /* arg -> !(arg instanceof Whitespace) */);
+	auto local0 = stripped.length(stripped) - ")";
+	auto local1 = stripped.length(stripped) - ")";
+	auto local2 = joined.length(joined) - ")";
+	auto local3 = joined.length(joined) - ")";
+	auto local4 = argumentsTuple.right.stream(argumentsTuple.right);
+	auto local5 = filter(local4, /* arg -> !(arg instanceof Whitespace) */);
 	auto stripped = input.strip(input);
 	if (/* !stripped.endsWith(")") */){
 		return template None<struct >::new();
 	}
-	auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - ")".length() */);
+	auto withoutEnd = stripped.substring(stripped, /* 0 */, length(local1));
 	auto divisions = divideAll(withoutEnd, struct Main::foldInvocationStart);
 	if (/* divisions.size() < 2 */){
 		return template None<struct >::new();
 	}
 	auto joined = String.join(String, "", divisions.subList(divisions, /* 0 */, /*  divisions.size() - 1 */));
-	auto callerString = joined.substring(joined, /* 0 */, /*  joined.length() - ")".length() */);
+	auto callerString = joined.substring(joined, /* 0 */, length(local3));
 	auto inputArguments = divisions.getLast(divisions);
 	auto argumentsTuple = parseValues(state, inputArguments, /*  (state1, input1) -> {
             return parseArgument(depth, state1, input1);
         } */);
 	auto argumentState = argumentsTuple.left;
-	auto oldArguments = toList(local1);
+	auto oldArguments = toList(local5);
 	if (callerString.startsWith(callerString, "new ")){
 	auto local0 = "new ";
 	auto local1 = "new ";
@@ -890,18 +908,21 @@ auto lambda0(auto tuple){
 	return map(local0, lambda0);
 }
 /* private static */template Option<(struct CompileState, struct Value)> parseValue(struct CompileState state, char* input, struct int depth){
-	return or(state, input, List.of(List, type(struct Main::compileString), type(/* (state0, input0) -> compileLambda(state0, input0, depth) */), type(/* (state0, input0) -> compileInvokable(state0, input0, depth) */), type(/* (state0, input0) -> compileAccess(state0, input0, depth) */), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference), type(/* (state1, input1) -> compileOperator(state1, input1, depth) */)));
+	template List<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>> type = List.of(List, type(struct Main::compileString), type(/* (state0, input0) -> compileLambda(state0, input0, depth) */), type(/* (state0, input0) -> compileInvokable(state0, input0, depth) */), type(/* (state0, input0) -> compileAccess(state0, input0, depth) */), type(struct Main::compileSymbolValue), type(struct Main::compileMethodReference));
+	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct Value)>>>::new(type);
+	/* for (var value : Operator.values()) */{
+		rules.add(rules, type(/* (state1, input1) -> compileOperator(state1, input1, depth, value) */));
+	}
+	return or(state, input, rules);
 }
-/* private static */template Option<(struct CompileState, struct Value)> compileOperator(struct CompileState state, char* input, struct int depth){
-	auto index = input.indexOf(input, "+");
+/* private static */template Option<(struct CompileState, struct Value)> compileOperator(struct CompileState state, char* input, struct int depth, struct Operator operator){
+	auto index = input.indexOf(input, operator.representation);
 	if (/* index >= 0 */){
-	auto local0 = index + "+";
-	auto local1 = index + "+";
 		auto left = input.substring(input, /* 0 */, index);
-		auto right = input.substring(input, length(local1));
+		auto right = input.substring(input, index + operator.representation.length(index + operator.representation));
 		if (/* parseValue(state, left, depth) instanceof Some(var leftTuple) */){
 			if (/* parseValue(leftTuple.left, right, depth) instanceof Some(var rightTuple) */){
-				auto operation = struct Operation::new(leftTuple.right, Operator.ADD, rightTuple.right);
+				auto operation = struct Operation::new(leftTuple.right, operator, rightTuple.right);
 				return template Some<struct >::new((rightTuple.left, operation));
 			}
 		}
@@ -918,6 +939,9 @@ auto lambda0(auto tuple){
 	return template None<struct >::new();
 }
 auto lambda0(auto value){
+	return (value.left, value.right);
+}
+auto lambda1(auto value){
 	return (value.left, value.right);
 }
 /* private static <S, T extends S> */template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct S)>> type(template BiFunction<struct CompileState, char*, template Option<(struct CompileState, struct T)>> mapper){
