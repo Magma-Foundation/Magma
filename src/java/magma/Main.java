@@ -369,6 +369,13 @@ public class Main {
         }
     }
 
+    private record TupleNode(Value first, Value second) implements Value {
+        @Override
+        public String generate() {
+            return "(" + this.first.generate() + ", " + this.second.generate() + ")";
+        }
+    }
+
     private enum Operator {
         ADD("+");
         private final String representation;
@@ -847,7 +854,7 @@ public class Main {
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static Option<Tuple<CompileState, Invocation>> compileInvokable(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, Value>> compileInvokable(CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return new None<>();
@@ -871,9 +878,13 @@ public class Main {
 
         if (callerString.startsWith("new ")) {
             var withoutPrefix = callerString.substring("new ".length());
-            var callerTuple = compileType(argumentState, withoutPrefix);
+            if (withoutPrefix.equals("Tuple<>")) {
+                return new Some<>(new Tuple<>(argumentState, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
+            }
 
-            return new Some<>(new Tuple<>(callerTuple.left, new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments)));
+            var callerTuple = compileType(argumentState, withoutPrefix);
+            var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
+            return new Some<>(new Tuple<>(callerTuple.left, invocation));
         }
 
         if (parseValue(argumentState, callerString, depth) instanceof Some(var callerTuple)) {
