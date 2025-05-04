@@ -4,12 +4,29 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Main {
     private interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    private interface Optional<T> {
+        void ifPresent(Consumer<T> consumer);
+    }
+
+    record None<T>() implements Optional<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+    }
+
+    private record Some<T>(T value) implements Optional<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
     }
 
     private record Ok<T, X>(T value) implements Result<T, X> {
@@ -33,15 +50,15 @@ public class Main {
         readSource().match(input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Optional::of).ifPresent(Throwable::printStackTrace);
+        }, Some::new).ifPresent(Throwable::printStackTrace);
     }
 
     private static Optional<IOException> writeTarget(String output) {
         try {
             Files.writeString(TARGET, output);
-            return Optional.empty();
+            return new None<>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<>(e);
         }
     }
 
