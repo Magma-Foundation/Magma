@@ -85,7 +85,7 @@
 /* public class Main  */{/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
 /* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 expect /* private static *//* Option<IOError> */ writeTarget(char* output);
-expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
+expect /* private static Result<String, *//* IOError> */ readSource();
 /* private static Option<DivideState> foldDoubleQuotes(DivideState state, char maybeDoubleQuotes) {
         if (maybeDoubleQuotes != '') {
             return new None<>();
@@ -154,7 +154,7 @@ expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
         return appended;
     }
 
-    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileStructSegment(CompileState state, String input) {
         var stripped = input.strip();
 
         return or(state, input, List.of(
@@ -198,7 +198,12 @@ expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
 
         var definition = definitionTuple.right;
 
-        var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
+        var paramsTuple = compileValues(definitionTuple.left, inputParams, (state2, input) -> {
+            return compileWhitespace(state2, input).orElseGet(() -> {
+                return compileDefinitionOrPlaceholder(state2, input);
+            });
+        });
+
         var paramsState = paramsTuple.left;
         var paramsString = paramsTuple.right;
 
@@ -218,6 +223,13 @@ expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
         var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
         return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
 
+    }
+
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, ""));
+        }
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
@@ -628,7 +640,7 @@ expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
 
 };
 @Override
-/* public */char* display(/*  */){
+/* public */char* display(){
 	auto writer = struct StringWriter::new();
 	this.exception.printStackTrace(this.exception, struct PrintWriter::new(writer));
 	return writer.toString(writer, );
@@ -645,7 +657,7 @@ expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
 	return other.get(other, );
 }
 @Override
-/* public */struct boolean isPresent(/*  */){
+/* public */struct boolean isPresent(){
 	return false;
 }
 @Override
@@ -673,7 +685,7 @@ expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
 	return this;
 }
 @Override
-/* public */struct boolean isPresent(/*  */){
+/* public */struct boolean isPresent(){
 	return true;
 }
 @Override
@@ -706,34 +718,34 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 	/* this.depth  */ = depth;
 	/* this.buffer  */ = buffer;
 }
-/* private */struct DivideState enter(/*  */){
+/* private */struct DivideState enter(){
 	/* this.depth  */ = /*  this.depth + 1 */;
 	return this;
 }
-/* private */struct DivideState exit(/*  */){
+/* private */struct DivideState exit(){
 	/* this.depth  */ = /*  this.depth - 1 */;
 	return this;
 }
-/* private */struct DivideState advance(/*  */){
+/* private */struct DivideState advance(){
 	auto local0 = this.segments(this, );
 	add(local0, this.buffer.toString(this.buffer, ));
 	/* this.buffer  */ = struct StringBuilder::new();
 	return this;
 }
-/* public *//* List<String> */ segments(/*  */){
+/* public *//* List<String> */ segments(){
 	return this.segments;
 }
-/* private */struct boolean isShallow(/*  */){
+/* private */struct boolean isShallow(){
 	struct return this.depth = /* = 1 */;
 }
-/* public */struct boolean isLevel(/*  */){
+/* public */struct boolean isLevel(){
 	struct return this.depth = /* = 0 */;
 }
-/* public *//* Option<DivideState> */ popAndAppendToOption(/*  */){
+/* public *//* Option<DivideState> */ popAndAppendToOption(){
 	auto local0 = this.popAndAppendToTuple(this, );
 	return map(local0, struct Tuple::right);
 }
-/* public Option<Tuple<Character, *//* DivideState>> */ popAndAppendToTuple(/*  */){
+/* public Option<Tuple<Character, *//* DivideState>> */ popAndAppendToTuple(){
 	auto local0 = this.pop(this, );
 	return map(local0, /* tuple -> {
                 return new Tuple<>(tuple.left */, /*  tuple.right.append(tuple.left));
@@ -743,7 +755,7 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 	this.buffer.append(this.buffer, c);
 	return this;
 }
-/* public Option<Tuple<Character, *//* DivideState>> */ pop(/*  */){
+/* public Option<Tuple<Character, *//* DivideState>> */ pop(){
 	if (/* this.index < this.input.length() */){
 		auto c = this.input.charAt(this.input, this.index);
 		return /* Some<> */::new(/* new Tuple<>(c */, /*  new DivideState(this.input */, this.segments, this.buffer, /*  this.index + 1 */, /*  this.depth)) */);
@@ -752,7 +764,7 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 		return /* None<> */::new();
 	}
 }
-struct public Frame(/*  */){
+struct public Frame(){
 	this(/* HashMap<> */::new(), /* ArrayList<> */::new());
 }
 /* public Tuple<String, *//* Frame> */ createName(char* category){
@@ -769,7 +781,7 @@ struct public Frame(/*  */){
 	this.statements.add(this.statements, statement);
 	return this;
 }
-struct public CompileState(/*  */){
+struct public CompileState(){
 	this(/* ArrayList<> */::new(), /* ArrayList<> */::new(), /* ArrayList<> */::new(Collections.singletonList(Collections, struct Frame::new())));
 }
 /* public */struct CompileState addFunction(char* generated){
@@ -787,11 +799,11 @@ struct public CompileState(/*  */){
 	addStatement(local0, statement);
 	return this;
 }
-/* public */struct CompileState enter(/*  */){
+/* public */struct CompileState enter(){
 	this.frames.add(this.frames, struct Frame::new());
 	return this;
 }
-/* public */struct CompileState exit(/*  */){
+/* public */struct CompileState exit(){
 	this.frames.removeLast(this.frames, );
 	return this;
 }
@@ -799,7 +811,7 @@ struct public CompileState(/*  */){
 	this.structs.add(this.structs, generated);
 	return this;
 }
-/* private */char* generate(/*  */){
+/* private */char* generate(){
 	/* String annotationsStrings */;
 	if (this.annotations.isEmpty(this.annotations, )){
 		/* annotationsStrings  */ = "";
@@ -812,31 +824,31 @@ struct public CompileState(/*  */){
 	/* return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name */;
 }
 @Override
-/* public */char* generate(/*  */){
+/* public */char* generate(){
 	return "\"" + this.value + "\"";
 }
 @Override
-/* public */char* generate(/*  */){
+/* public */char* generate(){
 	return this.value;
 }
 @Override
-/* public */char* generate(/*  */){
+/* public */char* generate(){
 	auto local0 = /* var joined = this.arguments.stream()
                     .map(Value */::generate);
 	collect(local0, Collectors.joining(Collectors, ", "));
 	/* return this.caller.generate() + "(" + joined + ")" */;
 }
 @Override
-/* public */char* generate(/*  */){
+/* public */char* generate(){
 	/* return this.parent.generate() + "." + this.child */;
 }
 @Override
-/* public */char* generate(/*  */){
+/* public */char* generate(){
 	auto local0 = /* this.parent() + " */::" + this;
 	return child(local0, );
 }
 @Override
-/* public */char* generate(/*  */){
+/* public */char* generate(){
 	return generatePlaceholder(this.input);
 }
 auto lambda0(auto error){
@@ -846,7 +858,7 @@ auto lambda1(auto input){
 	auto output = compile(input);
 	return writeTarget(output);
 }
-/* public static */void main(/*  */){
+/* public static */void main(){
 	auto local0 = readSource();
 	auto local1 = match(local0, lambda1, struct Some::new);
 	ifPresent(local1, lambda0);
@@ -873,7 +885,7 @@ auto lambda1(auto input){
 			auto left = withoutEnd.substring(withoutEnd, /* 0 */, contentStart);
 			auto right = withoutEnd.substring(withoutEnd, /* contentStart + "{".length() */);
 			if (left.contains(left, infix)){
-				auto result = compileStatements(state, right, struct Main::compileClassSegment);
+				auto result = compileStatements(state, right, struct Main::compileStructSegment);
 				auto generated = /*  generatePlaceholder(left) + "{" + result.right + "\n};\n" */;
 				return /* Some<> */::new(/* Tuple<> */::new(/* result.left.addStruct(generated */), /*  "") */);
 			}
