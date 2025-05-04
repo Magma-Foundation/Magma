@@ -6,6 +6,9 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -46,14 +49,45 @@ public class Main  */{
             return whenErr.apply(this.error);
         } *//*  */
 }
+/* private static class State */{/* private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        } *//* private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        } *//* private State enter() {
+            this.depth = this.depth + 1;
+            return this;
+        } *//* private State exit() {
+            this.depth = this.depth - 1;
+            return this;
+        } *//* private State advance() {
+            this.segments().add(this.buffer.toString());
+            this.buffer = new StringBuilder();
+            return this;
+        } *//* public List<String> segments() {
+            return this.segments;
+        } *//* private boolean isShallow() {
+            return this.depth == 1;
+        } *//* private State append(char c) {
+            this.buffer.append(c);
+            return this;
+        } *//* public boolean isLevel() {
+            return this.depth == 0;
+        } *//*  */
+}
 /* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	/* readSource */(/* ).match(input -> {
+	/* readSource().match(input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Some::new).ifPresent(error -> System.err.println(error.display()) */);
+        }, Some::new).ifPresent */(/* error -> System.err.println(error.display()) */);
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -83,24 +117,32 @@ public class Main  */{
 /* private static String getString(String input) */{
 	/* return compileAll */(/* input, Main::compileClassSegment */);
 }
-/* private static String compileAll(String input, Function<String, String> mapper) */{/* var buffer = new StringBuilder();
+/* private static String compileAll(String input, Function<String, String> mapper) */{/* var segments = divideAll(input, Main::foldStatementChar);
         var output = new StringBuilder();
-        var depth = 0;
+        for (var segment : segments) {
+            output.append(mapper.apply(segment));
+        } */
+	/* return output.toString */(/*  */);
+}
+/* private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) */{/* var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            buffer.append(c);
-            if (c == '}' && depth == 1) {
-                output = output.append(mapper.apply(buffer.toString()));
-                buffer = new StringBuilder();
-                depth--;
-            } *//* else if (c == '{' || c == '(') {
-                depth++;
-            }
-            else if (c == '}' || c == ')') {
-                depth--;
-            } *//*  */
+            current = folder.apply(current, c);
+        } */
+	/* return current.advance().segments */;
 }
-/* return output.append(mapper.apply(buffer.toString())).toString();
+/* private static State foldStatementChar(State state, char c) */{/* var appended = state.append(c);
+        if (c == '} */
+	/* ' && appended.isShallow */(/* )) {
+            return appended.advance().exit( */);
+}
+/* else if (c == ' */{/* ' || c == '(') {
+            return appended.enter();
+        } *//* else if (c == '} */
+	/* ' || c == ')') {
+            return appended.exit() */;
+}
+/* return appended;
     }
 
     private static String compileClassSegment(String input) */{/* var stripped = input.strip();
@@ -127,19 +169,43 @@ public class Main  */{
 /* return generatePlaceholder(stripped);
     }
 
-    private static String compileFunctionSegmentValue(String input) */{/* var stripped = input.strip();
+    private static String compileFunctionSegmentValue(String input) */{
+	/* var stripped = input.strip();
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            var argumentsStart = withoutEnd.indexOf("(");
-            if (argumentsStart >= 0) {
-                var caller = withoutEnd.substring(0, argumentsStart);
-                var arguments = withoutEnd.substring(argumentsStart + "(".length());
+
+            var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
+            if (divisions.size() >= 2) {
+                var joined = String.join("", divisions.subList(0, divisions.size() - 1));
+                var left = joined.substring(0, joined.length() - ")".length());
+                var last = divisions.getLast();
+
+                var caller = left;
+                var arguments = last;
                 return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
-            } */
-}
-/* return generatePlaceholder(stripped);
+            }
+        }
+
+        return generatePlaceholder(stripped);
     }
 
-    private static String generatePlaceholder(String stripped) */{
-	/* return "/* " + stripped + " */" */;
+    private static State foldInvocationStart(State state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var entered = appended.enter();
+            if (appended.isShallow()) {
+                return entered.advance();
+            }
+            else {
+                return entered;
+            }
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
+    }
+
+    private static String generatePlaceholder(String stripped) {
+        return "/* " + stripped + " */" */;
 }

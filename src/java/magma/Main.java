@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -76,35 +77,19 @@ public class Main {
         }
 
         private State enter() {
-            this.setDepth(this.getDepth() + 1);
+            this.depth = this.depth + 1;
             return this;
         }
 
-        public int getDepth() {
-            return this.depth;
-        }
-
-        public void setDepth(int depth) {
-            this.depth = depth;
-        }
-
         private State exit() {
-            this.setDepth(this.getDepth() - 1);
+            this.depth = this.depth - 1;
             return this;
         }
 
         private State advance() {
-            this.segments().add(this.getBuffer().toString());
-            this.setBuffer(new StringBuilder());
+            this.segments().add(this.buffer.toString());
+            this.buffer = new StringBuilder();
             return this;
-        }
-
-        public StringBuilder getBuffer() {
-            return this.buffer;
-        }
-
-        public void setBuffer(StringBuilder buffer) {
-            this.buffer = buffer;
         }
 
         public List<String> segments() {
@@ -112,16 +97,16 @@ public class Main {
         }
 
         private boolean isShallow() {
-            return this.getDepth() == 1;
+            return this.depth == 1;
         }
 
         private State append(char c) {
-            this.getBuffer().append(c);
+            this.buffer.append(c);
             return this;
         }
 
-        public List<String> getSegments() {
-            return this.segments;
+        public boolean isLevel() {
+            return this.depth == 0;
         }
     }
 
@@ -172,7 +157,7 @@ public class Main {
     }
 
     private static String compileAll(String input, Function<String, String> mapper) {
-        var segments = divideAll(input);
+        var segments = divideAll(input, Main::foldStatementChar);
         var output = new StringBuilder();
         for (var segment : segments) {
             output.append(mapper.apply(segment));
@@ -181,11 +166,11 @@ public class Main {
         return output.toString();
     }
 
-    private static List<String> divideAll(String input) {
+    private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            current = foldStatementChar(current, c);
+            current = folder.apply(current, c);
         }
 
         return current.advance().segments;
@@ -232,15 +217,35 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            var argumentsStart = withoutEnd.indexOf("(");
-            if (argumentsStart >= 0) {
-                var caller = withoutEnd.substring(0, argumentsStart);
-                var arguments = withoutEnd.substring(argumentsStart + "(".length());
+
+            var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
+            if (divisions.size() >= 2) {
+                var joined = String.join("", divisions.subList(0, divisions.size() - 1));
+                var caller = joined.substring(0, joined.length() - ")".length());
+                var arguments = divisions.getLast();
+
                 return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static State foldInvocationStart(State state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var entered = appended.enter();
+            if (appended.isShallow()) {
+                return entered.advance();
+            }
+            else {
+                return entered;
+            }
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String generatePlaceholder(String stripped) {
