@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +16,19 @@ public class Main {
 
     private interface Option<T> {
         void ifPresent(Consumer<T> consumer);
+    }
+
+    private interface Error {
+        String display();
+    }
+
+    private record IOError(IOException exception) implements Error {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.exception.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
     }
 
     record None<T>() implements Option<T> {
@@ -50,23 +65,23 @@ public class Main {
         readSource().match(input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Some::new).ifPresent(Throwable::printStackTrace);
+        }, Some::new).ifPresent(error -> System.err.println(error.display()));
     }
 
-    private static Option<IOException> writeTarget(String output) {
+    private static Option<IOError> writeTarget(String output) {
         try {
             Files.writeString(TARGET, output);
             return new None<>();
         } catch (IOException e) {
-            return new Some<>(e);
+            return new Some<>(new IOError(e));
         }
     }
 
-    private static Result<String, IOException> readSource() {
+    private static Result<String, IOError> readSource() {
         try {
             return new Ok<>(Files.readString(SOURCE));
         } catch (IOException e) {
-            return new Err<>(e);
+            return new Err<>(new IOError(e));
         }
     }
 
