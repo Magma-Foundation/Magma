@@ -781,11 +781,21 @@ public class Main {
             Value newCaller = oldCaller;
             var newArguments = new ArrayList<Value>();
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                var localTuple = nextState.createName("local");
+                Value thisArgument;
+                if (parent instanceof Symbol symbol) {
+                    thisArgument = symbol;
+                }
+                else if (parent instanceof DataAccess access) {
+                    thisArgument = access;
+                }
+                else {
+                    var localTuple = nextState.createName("local");
 
-                newArguments.add(new Symbol(localTuple.left));
-                newCaller = new Symbol(property);
-                nextState = localTuple.right.addStatement("\n\tauto " + localTuple.left + " = " + parent.generate() + ";");
+                    thisArgument = new Symbol(localTuple.left);
+                    newCaller = new Symbol(property);
+                    nextState = localTuple.right.addStatement("\n\tauto " + localTuple.left + " = " + parent.generate() + ";");
+                }
+                newArguments.add(thisArgument);
             }
 
             newArguments.addAll(oldArguments);
