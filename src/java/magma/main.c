@@ -91,7 +91,7 @@ public class Main  */{
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	/* readSource */(/*  */).match(/* input -> {
+	readSource(/*  */).match(/* input -> {
             var output = compile(input);
             return writeTarget(output);
         }, Some::new */).ifPresent(/* error -> System.err.println(error.display()) */);
@@ -212,6 +212,10 @@ public class Main  */{
             if (isSymbol(child)) {
                 return compileValue(parent) + "." + child;
             }
+        }
+
+        if(isSymbol(stripped)) {
+            return stripped;
         }
 
         return generatePlaceholder(stripped);
