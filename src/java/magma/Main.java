@@ -825,6 +825,17 @@ public class Main {
             return new Tuple<>(state, "struct " + stripped);
         }
 
+        if (stripped.endsWith(">")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+            var argsStart = withoutEnd.indexOf("<");
+            if (argsStart >= 0) {
+                var base = withoutEnd.substring(0, argsStart);
+                var args = withoutEnd.substring(argsStart + "<".length());
+                var newArgs = compileValues(state, args, Main::compileType);
+                return new Tuple<>(newArgs.left, "template " + base + "<" + newArgs.right + ">");
+            }
+        }
+
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
