@@ -131,6 +131,7 @@
     private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
+        LESS_THAN("<"),
         GREATER_THAN_OR_EQUALS(">="),
         EQUALS("==");
 
@@ -262,7 +263,7 @@ auto lambda0(auto tuple){
 	return this;
 }
 /* public */template Option<(struct Character, struct DivideState)> pop(){
-	if (/* this.index < this.input.length() */){
+	if (this.index < length(this.input)){
 		auto c = charAt(this.input, this.index);
 		return template Some</*  */>::new((c, struct DivideState::new(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
 	}
@@ -486,6 +487,12 @@ auto lambda0(auto popped){
 auto lambda1(auto popped){
 	return popped.left;
 }
+auto lambda2(auto popped){
+	return popped.left;
+}
+auto lambda3(auto popped){
+	return popped.left;
+}
 /* private static */template Option<struct DivideState> foldSingleQuotes(struct DivideState state, char c){
 	if (/* c != '\'' */){
 		return template None</*  */>::new();
@@ -531,7 +538,7 @@ auto lambda1(auto popped){
 	}
 	auto withoutContentEnd = substring(stripped, 0, length(stripped) - length("}"));
 	auto contentStart = indexOf(withoutContentEnd, "{");
-	if (/* contentStart < 0 */){
+	if (contentStart < 0){
 		return template None</*  */>::new();
 	}
 	auto beforeContent = strip(substring(withoutContentEnd, 0, contentStart));
@@ -541,7 +548,7 @@ auto lambda1(auto popped){
 	}
 	auto withoutParamEnd = substring(beforeContent, 0, length(beforeContent) - length(")"));
 	auto paramStart = indexOf(withoutParamEnd, "(");
-	if (/* paramStart < 0 */){
+	if (paramStart < 0){
 		return template None</*  */>::new();
 	}
 	auto definitionString = substring(withoutParamEnd, 0, paramStart);
@@ -597,7 +604,7 @@ auto lambda1(auto popped){
 	}
 	auto withoutEnd = substring(s, 0, length(s) - length("}"));
 	auto contentStart = indexOf(withoutEnd, "{");
-	if (/* contentStart < 0 */){
+	if (contentStart < 0){
 		return template None</*  */>::new();
 	}
 	auto beforeContent = substring(withoutEnd, 0, contentStart);
@@ -663,7 +670,7 @@ auto lambda3(){
 }
 /* private static */template Option<(struct CompileState, char*)> compileAssignment(struct CompileState state, char* input){
 	auto valueSeparator = indexOf(input, "=");
-	if (/* valueSeparator < 0 */){
+	if (valueSeparator < 0){
 		return template None</*  */>::new();
 	}
 	auto left = substring(input, 0, valueSeparator);
@@ -691,7 +698,7 @@ auto lambda0(auto tuple){
 		auto beforeName = substring(stripped, 0, valueSeparator);
 		auto name = strip(substring(stripped, valueSeparator + length(" ")));
 		auto annotationSeparator = lastIndexOf(beforeName, "\n");
-		if (/* annotationSeparator < 0 */){
+		if (annotationSeparator < 0){
 			return definitionWithAnnotations(state, emptyList(Collections), beforeName, name);
 		}
 		auto annotationsArray = split(strip(substring(beforeName, 0, annotationSeparator)), quote(Pattern, "\n"));
@@ -797,7 +804,7 @@ auto lambda0(auto typeResult){
 	}
 	auto withoutEnd = substring(stripped, 0, length(stripped) - length(")"));
 	auto divisions = divideAll(withoutEnd, struct Main::foldInvocationStart);
-	if (/* divisions.size() < 2 */){
+	if (size(divisions) < 2){
 		return template None</*  */>::new();
 	}
 	auto joined = join(String, "", subList(divisions, 0, size(divisions) - 1));
@@ -977,7 +984,7 @@ auto lambda1(auto value){
 }
 /* private static */template Option<(struct CompileState, struct MethodAccess)> compileMethodReference(struct CompileState state, char* input){
 	auto functionSeparator = indexOf(strip(input), "::");
-	if (/* functionSeparator < 0 */){
+	if (functionSeparator < 0){
 		return template None</*  */>::new();
 	}
 	auto left = substring(strip(input), 0, functionSeparator);
@@ -997,7 +1004,7 @@ auto lambda1(auto value){
 }
 /* private static */template Option<(struct CompileState, struct DataAccess)> compileAccess(struct CompileState state, char* input){
 	auto separator = lastIndexOf(strip(input), ".");
-	if (/* separator < 0 */){
+	if (separator < 0){
 		return template None</*  */>::new();
 	}
 	auto parent = substring(strip(input), 0, separator);
@@ -1019,7 +1026,7 @@ auto lambda0(auto result){
 }
 /* private static */template Option<(struct CompileState, struct Symbol)> compileLambda(struct CompileState state, char* input){
 	auto arrowIndex = indexOf(input, "->");
-	if (/* arrowIndex < 0 */){
+	if (arrowIndex < 0){
 		return template None</*  */>::new();
 	}
 	auto beforeArrow = strip(substring(input, 0, arrowIndex));

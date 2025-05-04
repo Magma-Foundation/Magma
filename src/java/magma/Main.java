@@ -402,6 +402,7 @@ public class Main {
     private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
+        LESS_THAN("<"),
         GREATER_THAN_OR_EQUALS(">="),
         EQUALS("==");
 
