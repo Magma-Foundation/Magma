@@ -719,26 +719,44 @@ public class Main {
         }
 
         var withoutEnd = s.substring(0, s.length() - "}".length());
-        var contentStart = withoutEnd.indexOf("{");
-        if (contentStart < 0) {
-            return new None<>();
-        }
 
-        var beforeContent = withoutEnd.substring(0, contentStart);
-        var content = withoutEnd.substring(contentStart + "{".length());
-        CompileState state3 = state.enter();
+        return findContentStart(withoutEnd).flatMap(contentStart -> {
+            var beforeContent = contentStart.left.substring(0, contentStart.left.length() - "{".length());
+            var content = contentStart.right;
 
-        var maybeStatements = parseStatements(state3, content, Main::compileFunctionSegment);
-        if (maybeStatements instanceof Some(var statementsTuple)) {
+            var entered = state.enter();
+            var maybeStatements = parseStatements(entered, content, Main::compileFunctionSegment);
+            if (!(maybeStatements instanceof Some(var statementsTuple))) {
+                return new None<>();
+            }
+
             var oldStatements = new ArrayList<String>();
             oldStatements.addAll(statementsTuple.left.frames.getLast().statements);
             oldStatements.addAll(statementsTuple.right);
 
             var string = compileBlockHeader(statementsTuple.left.exit(), beforeContent);
             return new Some<>(new Tuple<>(string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
+        });
+    }
+
+    private static Option<Tuple<String, String>> findContentStart(String input) {
+        var divisions = divideAll(input, Main::foldContentStart);
+        if (divisions.size() < 2) {
+            return new None<>();
         }
 
-        return new None<>();
+        var first = divisions.getFirst();
+        var after = divisions.subList(1, divisions.size());
+        var joined = String.join("", after);
+        return new Some<>(new Tuple<>(first, joined));
+    }
+
+    private static DivideState foldContentStart(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '{') {
+            return appended.advance();
+        }
+        return appended;
     }
 
     private static Option<Tuple<CompileState, String>> compileStatement(CompileState state, String input) {

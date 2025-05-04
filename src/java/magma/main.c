@@ -519,9 +519,8 @@ auto lambda3(auto popped){
 	if (/* c == '}' && appended.isShallow() */){
 		return exit(advance(appended));
 	}
-	/* else if (c == ' */{
-		/* ' || */ c = /* = '(') {
-            return appended.enter() */;
+	/* else if (c == '{' || c == '(') */{
+		return enter(appended);
 	}
 	/* else if (c == '}' || c == ')') */{
 		return exit(appended);
@@ -596,28 +595,44 @@ auto lambda3(auto popped){
 /* private static */template Some<(struct CompileState, char*)> compileContent(struct CompileState state1, char* s){
 	return /* new Some<>(new Tuple<>(state1, generatePlaceholder(s))) */;
 }
+auto lambda0(auto contentStart){
+	auto beforeContent = substring(contentStart.left, 0, length(contentStart.left) - length("{"));
+	auto content = contentStart.right;
+	auto entered = enter(state);
+	auto maybeStatements = parseStatements(entered, content, struct Main::compileFunctionSegment);
+	if (/* !(maybeStatements instanceof Some(var statementsTuple)) */){
+		return template None</*  */>::new();
+	}
+	auto oldStatements = template ArrayList<char*>::new();
+	addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
+	addAll(oldStatements, statementsTuple.right);
+	auto string = compileBlockHeader(exit(statementsTuple.left), beforeContent);
+	return template Some</*  */>::new((string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
+}
 /* private static */template Option<(struct CompileState, char*)> compileBlock(struct CompileState state, char* s){
 	char* indent = "\n" + repeat("\t", depth(state) - 1);
 	if (/* !s.endsWith("}") */){
 		return template None</*  */>::new();
 	}
 	auto withoutEnd = substring(s, 0, length(s) - length("}"));
-	auto contentStart = indexOf(withoutEnd, "{");
-	if (contentStart < 0){
+	return flatMap(findContentStart(withoutEnd), lambda0);
+}
+/* private static */template Option<(char*, char*)> findContentStart(char* input){
+	auto divisions = divideAll(input, struct Main::foldContentStart);
+	if (size(divisions) < 2){
 		return template None</*  */>::new();
 	}
-	auto beforeContent = substring(withoutEnd, 0, contentStart);
-	auto content = substring(withoutEnd, contentStart + length("{"));
-	struct CompileState state3 = enter(state);
-	auto maybeStatements = /*  parseStatements(state3, content, Main::compileFunctionSegment) */;
-	if (/* maybeStatements instanceof Some(var statementsTuple) */){
-		auto oldStatements = template ArrayList<char*>::new();
-		addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
-		addAll(oldStatements, statementsTuple.right);
-		auto string = compileBlockHeader(exit(statementsTuple.left), beforeContent);
-		return template Some</*  */>::new((string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
+	auto first = getFirst(divisions);
+	auto after = subList(divisions, 1, size(divisions));
+	auto joined = join(String, "", after);
+	return template Some</*  */>::new((first, joined));
+}
+/* private static */struct DivideState foldContentStart(struct DivideState state, char c){
+	auto appended = append(state, c);
+	if (c == '{'){
+		return advance(appended);
 	}
-	return template None</*  */>::new();
+	return appended;
 }
 /* private static */template Option<(struct CompileState, char*)> compileStatement(struct CompileState state, char* input){
 	auto stripped = strip(input);
@@ -1037,10 +1052,9 @@ auto lambda0(auto result){
 		return template None</*  */>::new();
 	}
 	auto withBraces = strip(afterArrow);
-	/* if (withBraces.startsWith(" */{
-		@) && withBraces.endsWith("}")) {
-auto content = /*  withBraces.substring(1, withBraces.length() - 1);
-            return compileStatements(state, content, Main::compileFunctionSegment).flatMap(result -> assembleLambda(result.left, paramNames, result.right)) */;
+	if (/* withBraces.startsWith("{") && withBraces.endsWith("}") */){
+		auto content = substring(withBraces, 1, length(withBraces) - 1);
+		return flatMap(compileStatements(state, content, struct Main::compileFunctionSegment), lambda0);
 	}
 	if (/* compileValue(state, afterArrow) instanceof Some(var valueTuple) */){
 		return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
