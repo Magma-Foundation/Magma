@@ -221,6 +221,9 @@ public class Main {
 
     private static DivideState foldStatementChar(DivideState state, char c) {
         var appended = state.append(c);
+        if (c == ';' && appended.isLevel()) {
+            return appended.advance();
+        }
         if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
         }
