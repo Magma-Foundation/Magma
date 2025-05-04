@@ -878,7 +878,10 @@ public class Main {
         });
 
         var argumentState = argumentsTuple.left;
-        var oldArguments = argumentsTuple.right;
+        var oldArguments = argumentsTuple.right
+                .stream()
+                .filter(arg -> !(arg instanceof Whitespace))
+                .toList();
 
         if (callerString.startsWith("new ")) {
             var withoutPrefix = callerString.substring("new ".length());
