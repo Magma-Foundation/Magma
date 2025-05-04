@@ -12,17 +12,17 @@ public class Main {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
-    private interface Optional<T> {
+    private interface Option<T> {
         void ifPresent(Consumer<T> consumer);
     }
 
-    record None<T>() implements Optional<T> {
+    record None<T>() implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
         }
     }
 
-    private record Some<T>(T value) implements Optional<T> {
+    private record Some<T>(T value) implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
             consumer.accept(this.value);
@@ -53,7 +53,7 @@ public class Main {
         }, Some::new).ifPresent(Throwable::printStackTrace);
     }
 
-    private static Optional<IOException> writeTarget(String output) {
+    private static Option<IOException> writeTarget(String output) {
         try {
             Files.writeString(TARGET, output);
             return new None<>();
