@@ -381,7 +381,18 @@ public class Main {
 
     private static String compile(String input) {
         var state = new CompileState();
+        var tuple = compileStatements(state, input, (state1, input1) -> compileRootSegment(state1, input1));
+        var joined = String.join("", tuple.left.functions);
+        return joined + tuple.right;
+    }
 
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
+        return compileStructure(state, input, "class ").orElseGet(() -> {
+            return new Tuple<>(state, generatePlaceholder(input));
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> compileStructure(CompileState state, String input, String infix) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -389,17 +400,14 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                var result = compileRoot(right, state);
-                var joined = String.join("", result.left.functions);
-                return generatePlaceholder(left) + "{\n};\n" + joined + result.right;
+                if (left.contains(infix)) {
+                    var result = compileStatements(state, right, Main::compileClassSegment);
+                    return new Some<>(new Tuple<>(result.left, generatePlaceholder(left) + "{" + result.right + "\n};\n"));
+                }
             }
         }
 
-        return generatePlaceholder(stripped);
-    }
-
-    private static Tuple<CompileState, String> compileRoot(String input, CompileState state) {
-        return compileStatements(state, input, Main::compileClassSegment);
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
@@ -532,6 +540,10 @@ public class Main {
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         var stripped = input.strip();
+        if (compileStructure(state, input, "record ") instanceof Some(var recordTuple)) {
+            return recordTuple;
+        }
+
         if (stripped.endsWith("}")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
             var contentStart = withoutContentEnd.indexOf("{");
