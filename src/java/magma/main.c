@@ -132,6 +132,8 @@
         ADD("+"),
         SUBTRACT("-"),
         LESS_THAN("<"),
+        AND("&&"),
+        OR("||"),
         GREATER_THAN_OR_EQUALS(">="),
         EQUALS("==");
 
@@ -405,7 +407,7 @@ auto lambda1(auto input){
 }
 /* private static */template Option<(struct CompileState, char*)> namespaced(struct CompileState state, char* input){
 	auto stripped = strip(input);
-	if (/* stripped.startsWith("package ") || stripped.startsWith("import ") */){
+	if (startsWith(stripped, "package ") || startsWith(stripped, "import ")){
 		return template Some</*  */>::new((state, ""));
 	}
 	return template None</*  */>::new();
@@ -513,10 +515,10 @@ auto lambda3(auto popped){
 }
 /* private static */struct DivideState foldStatementChar(struct DivideState state, char c){
 	auto appended = append(state, c);
-	if (/* c == ';' && appended.isLevel() */){
+	if (c == ';' && isLevel(appended)){
 		return advance(appended);
 	}
-	if (/* c == '}' && appended.isShallow() */){
+	if (c == '}' && isShallow(appended)){
 		return exit(advance(appended));
 	}
 	/* else if (c == '{' || c == '(') */{
@@ -650,7 +652,7 @@ auto lambda0(auto contentStart){
 	}
 	if (startsWith(stripped, "if")){
 		auto withoutPrefix = strip(substring(stripped, length("if")));
-		if (/* withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")") */){
+		if (startsWith(withoutPrefix, "(") && endsWith(withoutPrefix, ")")){
 			auto value = substring(withoutPrefix, 1, length(withoutPrefix) - 1);
 			auto tuple = compileValueOrPlaceholder(state, value);
 			return (tuple.left, "if (" + tuple.right + ")");
@@ -744,7 +746,7 @@ auto lambda0(auto tuple){
 	return template None</*  */>::new();
 }
 /* private static */struct DivideState foldTypeSeparator(struct DivideState state, struct Character c){
-	if (/* c == ' ' && state.isLevel() */){
+	if (c == ' ' && isLevel(state)){
 		return advance(state);
 	}
 	auto appended = append(state, c);
@@ -801,7 +803,7 @@ auto lambda0(auto typeResult){
 			auto maybeArgsTuple = parseValues(state, argsString, struct Main::compileType);
 			if (/* maybeArgsTuple instanceof Some(var argsTuple) */){
 				auto args = argsTuple.right;
-				if (/* base.equals("Tuple") && args.size() >= 2 */){
+				if (equals(base, "Tuple") && size(args) >= 2){
 					auto first = get(args, 0);
 					auto second = get(args, 1);
 					return template Some</*  */>::new((argsTuple.left, "(" + first + ", " + second + ")"));
@@ -833,7 +835,7 @@ auto lambda0(auto typeResult){
                     .toList() */;
 		if (startsWith(callerString, "new ")){
 			auto withoutPrefix = substring(callerString, length("new "));
-			if (/* withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2 */){
+			if (equals(withoutPrefix, "Tuple<>") && size(oldArguments) >= 2){
 				return template Some</*  */>::new((argumentState, struct TupleNode::new(get(oldArguments, 0), get(oldArguments, 1))));
 			}
 			auto maybeCallerTuple = compileType(argumentState, withoutPrefix);
@@ -890,11 +892,11 @@ auto lambda0(auto tuple){
 	return append(append(cache, ", "), element);
 }
 /* private static */struct DivideState foldValueChar(struct DivideState state, char c){
-	if (/* c == ',' && state.isLevel() */){
+	if (c == ',' && isLevel(state)){
 		return advance(state);
 	}
 	auto appended = append(state, c);
-	if (c == '-' && appended.peek() == '>'){
+	if (c == '-' && peek(appended) == '>'){
 		return orElse(popAndAppendToOption(appended), appended);
 	}
 	if (c == '(' || c == '<'){
@@ -939,7 +941,7 @@ auto lambda0(auto tuple){
 }
 /* private static */template Option<(struct CompileState, struct Value)> compileChar(struct CompileState state, char* input){
 	auto stripped = strip(input);
-	if (/* stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3 */){
+	if (startsWith(stripped, "'") && endsWith(stripped, "'") && length(stripped) >= 3){
 		return template Some</*  */>::new((state, struct CharValue::new(substring(stripped, 1, length(stripped) - 1))));
 	}
 	else {
@@ -1052,7 +1054,7 @@ auto lambda0(auto result){
 		return template None</*  */>::new();
 	}
 	auto withBraces = strip(afterArrow);
-	if (/* withBraces.startsWith("{") && withBraces.endsWith("}") */){
+	if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
 		auto content = substring(withBraces, 1, length(withBraces) - 1);
 		return flatMap(compileStatements(state, content, struct Main::compileFunctionSegment), lambda0);
 	}

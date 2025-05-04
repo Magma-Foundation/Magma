@@ -403,6 +403,8 @@ public class Main {
         ADD("+"),
         SUBTRACT("-"),
         LESS_THAN("<"),
+        AND("&&"),
+        OR("||"),
         GREATER_THAN_OR_EQUALS(">="),
         EQUALS("==");
 
