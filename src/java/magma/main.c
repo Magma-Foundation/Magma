@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 public class Main  */{
 };
-struct private record CompileState(/* List<String> functions, int counter */){/* public CompileState() {
+/* private record */ CompileState(/* List<String> functions, int counter */){/* public CompileState() {
             this(new ArrayList<>(), 0);
         } *//* public CompileState addFunction(String generated) {
             this.functions.add(generated);
@@ -26,7 +26,7 @@ struct private record CompileState(/* List<String> functions, int counter */){/*
             return new Tuple<>(name, next);
         } */
 }
-struct private record Tuple<A, B>(/* A left, B right */){
+/* private record Tuple<A, */ B>(/* A left, B right */){
 }
 auto lambda0(auto input){
 	auto output = compile(input);
@@ -35,29 +35,30 @@ auto lambda0(auto input){
 auto lambda1(auto error){
 	return System.err.println(error.display());
 }
-struct public static void main(/*  */){
+/* public static void */ main(/*  */){
 	readSource().match(lambda0, struct Some::new).ifPresent(lambda1);
 }
-/* @Actual */ private static Option<IOError> writeTarget(/* String output */){/* try {
+/* @Actual
+    private static Option<IOError> */ writeTarget(/* String output */){/* try {
             Files.writeString(TARGET, output);
             return new None<>();
         } *//* catch (IOException e) {
             return new Some<>(new IOError(e));
         } */
 }
-struct private static Result<String, IOError> readSource(/*  */){/* try {
+/* private static Result<String, IOError> */ readSource(/*  */){/* try {
             return new Ok<>(Files.readString(SOURCE));
         } *//* catch (IOException e) {
             return new Err<>(new IOError(e));
         } */
 }
-struct private static Tuple<CompileState, String> compileRoot(/* String input, CompileState state */){
+/* private static Tuple<CompileState, String> */ compileRoot(/* String input, CompileState state */){
 	return compileStatements(state, input, struct Main::compileClassSegment);
 }
-struct private static Tuple<CompileState, String> compileStatements(/* CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */){
+/* private static Tuple<CompileState, String> */ compileStatements(/* CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */){
 	return compileAll(state, input, struct Main::foldStatementChar, mapper, struct Main::mergeStatements);
 }
-struct private static Tuple<CompileState, String> compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger */){
+/* private static Tuple<CompileState, String> */ compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger */){
 	auto segments = divideAll(input, folder);
 	auto current = initial;
 	auto output = /*  new StringBuilder() */;/* for (var segment : segments) {
@@ -67,75 +68,28 @@ struct private static Tuple<CompileState, String> compileAll(/* CompileState ini
         } */
 	/* return new Tuple<>(current, output.toString()) */;
 }
-struct private static StringBuilder mergeStatements(/* StringBuilder output, String mapped */){
+/* private static StringBuilder */ mergeStatements(/* StringBuilder output, String mapped */){
 	return output.append(mapped);
 }
-struct private static List<String> divideAll(/* String input, BiFunction<DivideState, Character, DivideState> folder */){
+/* private static List<String> */ divideAll(/* String input, BiFunction<DivideState, Character, DivideState> folder */){
 	auto current = /*  new DivideState() */;/* for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
         } */
 	return current.advance().segments;
 }
-struct private static DivideState foldStatementChar(/* DivideState state, char c */){
+/* private static DivideState */ foldStatementChar(/* DivideState state, char c */){
 	/* var appended = state */.append(c);/* if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == '} */
 	/* ' && appended */.isShallow(/* )) {
             return appended.advance().exit( */);
 }
-/* if */(/* stripped.endsWith("}") */){/* var withoutContentEnd = stripped.substring(0, stripped.length() - " */
-}
-/* if */(/* contentStart >= 0 */){
-	/* var beforeContent = withoutContentEnd */.substring(/* 0 */, contentStart).strip();
-	/* var right = withoutContentEnd.substring(contentStart + "{".length());
-
-                if (beforeContent.endsWith(")")) {
-                    var withoutParamEnd = beforeContent.substring(0, beforeContent */.length(/* ) - ")".length() */);/* var paramStart = withoutParamEnd.indexOf("(");
-                    if (paramStart >= 0) {
-                        var definition = withoutParamEnd.substring(0, paramStart);
-                        var params = withoutParamEnd.substring(paramStart + "(".length());
-
-                        var definitionTuple = compileDefinition(state, definition);
-                        var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
-                        var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
-                        return new Tuple<>(statementsTuple.left.addFunction(generated), "");
-                    }
-                }
-            } */
-}
-/* if */(/* stripped.isEmpty() */){
-	/* return new Tuple<>(state, "") */;
-}
-/* if */(/* stripped.endsWith(";") */){
-	/* var slice = stripped */.substring(/* 0 */, /* stripped.length() - ";" */.length());
-	auto s = compileFunctionStatementValue(slice, state);
-	/* return new Tuple<>(s.left, "\n\t" + s.right + ";") */;
-}
-/* if */(/* stripped.startsWith("return ") */){
-	/* var right = stripped */.substring(/* "return " */.length());/* if (compileValue(state, right) instanceof Some(var other)) {
-                return new Some<>(new Tuple<>(other.left, "return " + other.right));
-            } */
-}
-/* if */(/* valueSeparator < 0 */){
-	/* return new None<>() */;
-}
-/* if */(/* valueSeparator >= 0 */){
-	/* var type = stripped */.substring(/* 0 */, valueSeparator);
-	/* var name = stripped */.substring(/* valueSeparator + " " */.length()).strip();
-	auto typeResult = compileType(state, type);
-	/* return new Tuple<>(typeResult.left, typeResult.right + " " + name) */;
-}
-/* if */(/* stripped.equals("var") */){
-	/* return new Tuple<>(state, "auto") */;
-}
-/* if */(/* isSymbol(stripped) */){
-	/* return new Tuple<>(state, "struct " + stripped) */;
-}
-/* } */ }
+/* }
+            }
         }
 
-        var maybeInvocation = compileInvocation(/* state, stripped);
+        var maybeInvocation = */ compileInvocation(/* state, stripped);
         if (maybeInvocation.isPresent() */){
 	return maybeInvocation;
 	/* }
@@ -148,8 +102,10 @@ struct private static DivideState foldStatementChar(/* DivideState state, char c
                 var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
                 return new Some<>(compileStateStringTuple);
             } */
-	/* } */ if (isSymbol(stripped)) {
-            var compileStateStringTuple = /*  new Tuple<CompileState, String>(state, stripped) */;
+	/* }
+
+        if (isSymbol(stripped)) {
+            var */ compileStateStringTuple = /*  new Tuple<CompileState, String>(state, stripped) */;
 	/* return new Some<>(compileStateStringTuple) */;
 	/* }
 
@@ -168,8 +124,8 @@ struct private static DivideState foldStatementChar(/* DivideState state, char c
         var name = nameTuple.left;
         return new Some<>(new Tuple<CompileState, String>(nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n */
 }
-/* } */ }
-        if(/* c == ')' */){
+/* }
+        } */ if(/* c == ')' */){
 	return appended.exit();
 	/* }
         return appended;
@@ -318,11 +274,37 @@ struct private static DivideState foldStatementChar(/* DivideState state, char c
         } *//* return appended; *//* }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        var stripped = input.strip(); *//* ".length());
-            var contentStart = withoutContentEnd.indexOf("{"); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+        var stripped = input.strip(); *//* if (stripped.endsWith("}")) {
+            var withoutContentEnd = stripped.substring(0, stripped.length() - "} *//* ".length());
+            var contentStart = withoutContentEnd.indexOf("{"); *//* if (contentStart >= 0) {
+                var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
+                var right = withoutContentEnd.substring(contentStart + "{".length());
+
+                if (beforeContent.endsWith(")")) {
+                    var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
+                    var paramStart = withoutParamEnd.indexOf("(");
+                    if (paramStart >= 0) {
+                        var definition = withoutParamEnd.substring(0, paramStart);
+                        var params = withoutParamEnd.substring(paramStart + "(".length());
+
+                        if (compileDefinition(state, definition) instanceof Some(var definitionTuple)) {
+                            var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
+                            var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
+                            return new Tuple<>(statementsTuple.left.addFunction(generated), "");
+                        }
+                    }
+                }
+            }
+        } *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        var stripped = input.strip(); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+        var stripped = input.strip(); *//* if (stripped.isEmpty()) {
+            return new Tuple<>(state, "");
+        } *//* if (stripped.endsWith(";")) {
+            var slice = stripped.substring(0, stripped.length() - ";".length());
+            var s = compileFunctionStatementValue(slice, state);
+            return new Tuple<>(s.left, "\n\t" + s.right + ";");
+        } *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(String input, CompileState state) {
         return compileReturn(state, input)
@@ -331,16 +313,35 @@ struct private static DivideState foldStatementChar(/* DivideState state, char c
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
 
     private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
-        var stripped = input.strip(); *//* return new None<>(); *//* }
+        var stripped = input.strip(); *//* if (stripped.startsWith("return ")) {
+            var right = stripped.substring("return ".length());
+            if (compileValue(state, right) instanceof Some(var other)) {
+                return new Some<>(new Tuple<>(other.left, "return " + other.right));
+            }
+        } *//* return new None<>(); *//* }
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
-        var valueSeparator = input.indexOf("="); *//* var left = input.substring(0, valueSeparator); *//* var right = input.substring(valueSeparator + "=".length()); *//* var definitionTuple = compileDefinition(state, left); *//* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); *//* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); *//* }
+        var valueSeparator = input.indexOf("="); *//* if (valueSeparator < 0) {
+            return new None<>();
+        } *//* var left = input.substring(0, valueSeparator); *//* var right = input.substring(valueSeparator + "=".length()); *//* var definitionTuple = compileDefinitionOrPlaceholder(state, left); *//* var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right); *//* return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right)); *//* }
 
-    private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
-        var stripped = input.strip(); *//* var valueSeparator = stripped.indexOf(" "); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
+        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
+
+    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        var stripped = input.strip(); *//* var valueSeparator = stripped.lastIndexOf(" "); *//* if (valueSeparator >= 0) {
+            var type = stripped.substring(0, valueSeparator);
+            var name = stripped.substring(valueSeparator + " ".length()).strip();
+            var typeResult = compileType(state, type);
+            return new Some<>(new Tuple<>(typeResult.left, typeResult.right + " " + name));
+        } *//* return new None<>(); *//* }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
-        var stripped = input.strip(); *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
+        var stripped = input.strip(); *//* if (stripped.equals("var")) {
+            return new Tuple<>(state, "auto");
+        } *//* if (isSymbol(stripped)) {
+            return new Tuple<>(state, "struct " + stripped);
+        } *//* return new Tuple<>(state, generatePlaceholder(stripped)); *//* }
 
     private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
         if (stripped.endsWith(")")) {

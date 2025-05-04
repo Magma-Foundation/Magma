@@ -286,10 +286,11 @@ public class Main {
                         var definition = withoutParamEnd.substring(0, paramStart);
                         var params = withoutParamEnd.substring(paramStart + "(".length());
 
-                        var definitionTuple = compileDefinition(state, definition);
-                        var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
-                        var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
-                        return new Tuple<>(statementsTuple.left.addFunction(generated), "");
+                        if (compileDefinition(state, definition) instanceof Some(var definitionTuple)) {
+                            var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
+                            var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
+                            return new Tuple<>(statementsTuple.left.addFunction(generated), "");
+                        }
                     }
                 }
             }
@@ -339,22 +340,26 @@ public class Main {
 
         var left = input.substring(0, valueSeparator);
         var right = input.substring(valueSeparator + "=".length());
-        var definitionTuple = compileDefinition(state, left);
+        var definitionTuple = compileDefinitionOrPlaceholder(state, left);
         var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right);
         return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right));
     }
 
-    private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
+        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         var stripped = input.strip();
-        var valueSeparator = stripped.indexOf(" ");
+        var valueSeparator = stripped.lastIndexOf(" ");
         if (valueSeparator >= 0) {
             var type = stripped.substring(0, valueSeparator);
             var name = stripped.substring(valueSeparator + " ".length()).strip();
             var typeResult = compileType(state, type);
-            return new Tuple<>(typeResult.left, typeResult.right + " " + name);
+            return new Some<>(new Tuple<>(typeResult.left, typeResult.right + " " + name));
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
