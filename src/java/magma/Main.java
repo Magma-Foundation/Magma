@@ -829,10 +829,18 @@ public class Main {
             var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
             var argsStart = withoutEnd.indexOf("<");
             if (argsStart >= 0) {
-                var base = withoutEnd.substring(0, argsStart);
-                var args = withoutEnd.substring(argsStart + "<".length());
-                var newArgs = compileValues(state, args, Main::compileType);
-                return new Tuple<>(newArgs.left, "template " + base + "<" + newArgs.right + ">");
+                var base = withoutEnd.substring(0, argsStart).strip();
+                var argsString = withoutEnd.substring(argsStart + "<".length());
+                var argsTuple = parseValues(state, argsString, Main::compileType);
+                var args = argsTuple.right;
+
+                if (base.equals("Tuple") && args.size() >= 2) {
+                    var first = args.get(0);
+                    var second = args.get(1);
+                    return new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")");
+                }
+
+                return new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">");
             }
         }
 
