@@ -145,8 +145,23 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
-            return "\n\t" + generatePlaceholder(slice) + ";";
+            return "\n\t" + compileFunctionSegmentValue(slice) + ";";
         }
+        return generatePlaceholder(stripped);
+    }
+
+    private static String compileFunctionSegmentValue(String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            var argumentsStart = withoutEnd.indexOf("(");
+            if (argumentsStart >= 0) {
+                var caller = withoutEnd.substring(0, argumentsStart);
+                var arguments = withoutEnd.substring(argumentsStart + "(".length());
+                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+            }
+        }
+
         return generatePlaceholder(stripped);
     }
 

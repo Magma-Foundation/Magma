@@ -12,13 +12,13 @@ import java.util.function.Function;
 public class Main  */{
 };
 /* private interface Result<T, X> */{
-	/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) */;
+	/* <R> R match */(/* Function<T, R> whenOk, Function<X, R> whenErr */);
 }
 /* private interface Option<T> */{
-	/* void ifPresent(Consumer<T> consumer) */;
+	/* void ifPresent */(/* Consumer<T> consumer */);
 }
 /* private interface Error */{
-	/* String display() */;
+	/* String display */(/*  */);
 }
 /* private record IOError(IOException exception) implements Error */{/* @Override
         public String display() {
@@ -50,10 +50,10 @@ public class Main  */{
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	/* readSource().match(input -> {
+	/* readSource */(/* ).match(input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Some::new).ifPresent(error -> System.err.println(error.display())) */;
+        }, Some::new).ifPresent(error -> System.err.println(error.display()) */);
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -78,10 +78,10 @@ public class Main  */{
                 return generatePlaceholder(left) + "{\n};\n" + getString(right);
             }
         } */
-	/* return generatePlaceholder(stripped) */;
+	/* return generatePlaceholder */(/* stripped */);
 }
 /* private static String getString(String input) */{
-	/* return compileAll(input, Main::compileClassSegment) */;
+	/* return compileAll */(/* input, Main::compileClassSegment */);
 }
 /* private static String compileAll(String input, Function<String, String> mapper) */{/* var buffer = new StringBuilder();
         var output = new StringBuilder();
@@ -122,7 +122,20 @@ public class Main  */{
 	/* var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
-            return "\n\t" + generatePlaceholder(slice) + ";" */;
+            return "\n\t" + compileFunctionSegmentValue(slice) + ";" */;
+}
+/* return generatePlaceholder(stripped);
+    }
+
+    private static String compileFunctionSegmentValue(String input) */{/* var stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            var argumentsStart = withoutEnd.indexOf("(");
+            if (argumentsStart >= 0) {
+                var caller = withoutEnd.substring(0, argumentsStart);
+                var arguments = withoutEnd.substring(argumentsStart + "(".length());
+                return generatePlaceholder(caller) + "(" + generatePlaceholder(arguments) + ")";
+            } */
 }
 /* return generatePlaceholder(stripped);
     }
