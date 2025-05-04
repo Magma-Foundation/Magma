@@ -7,11 +7,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Main  */{
 };
@@ -38,8 +42,7 @@ auto lambda1(auto error){
 /* public static void */ main(/*  */){
 	readSource().match(lambda0, struct Some::new).ifPresent(lambda1);
 }
-/* @Actual
-    private static Option<IOError> */ writeTarget(/* String output */){/* try {
+expect /* private static Option<IOError> */ writeTarget(/* String output */){/* try {
             Files.writeString(TARGET, output);
             return new None<>();
         } *//* catch (IOException e) {
@@ -85,11 +88,10 @@ auto lambda1(auto error){
 	/* ' && appended */.isShallow(/* )) {
             return appended.advance().exit( */);
 }
-/* }
-            }
-        }
-
-        var maybeInvocation = */ compileInvocation(/* state, stripped);
+@
+@
+@
+/* var maybeInvocation = */ compileInvocation(/* state, stripped);
         if (maybeInvocation.isPresent() */){
 	return maybeInvocation;
 	/* }
@@ -102,10 +104,10 @@ auto lambda1(auto error){
                 var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
                 return new Some<>(compileStateStringTuple);
             } */
-	/* }
-
-        if (isSymbol(stripped)) {
-            var */ compileStateStringTuple = /*  new Tuple<CompileState, String>(state, stripped) */;
+	@
+@
+@f (isSymbol(stripped)) {
+auto compileStateStringTuple = /*  new Tuple<CompileState, String>(state, stripped) */;
 	/* return new Some<>(compileStateStringTuple) */;
 	/* }
 
@@ -124,8 +126,9 @@ auto lambda1(auto error){
         var name = nameTuple.left;
         return new Some<>(new Tuple<CompileState, String>(nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n */
 }
-/* }
-        } */ if(/* c == ')' */){
+@
+@
+struct  if(/* c == ')' */){
 	return appended.exit();
 	/* }
         return appended;
@@ -330,11 +333,36 @@ auto lambda1(auto error){
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         var stripped = input.strip(); *//* var valueSeparator = stripped.lastIndexOf(" "); *//* if (valueSeparator >= 0) {
-            var type = stripped.substring(0, valueSeparator);
+            var beforeName = stripped.substring(0, valueSeparator);
             var name = stripped.substring(valueSeparator + " ".length()).strip();
-            var typeResult = compileType(state, type);
-            return new Some<>(new Tuple<>(typeResult.left, typeResult.right + " " + name));
+            var annotationSeparator = beforeName.lastIndexOf("\n");
+            if (annotationSeparator < 0) {
+                return definitionWithAnnotations(state, Collections.emptyList(), beforeName, name);
+            }
+
+            var annotationsArray = beforeName.substring(0, annotationSeparator).strip().split(Pattern.quote("\n"));
+            var annotations = Arrays.stream(annotationsArray)
+                    .map(String::strip)
+                    .map(slice -> slice.isEmpty() ? "" : slice.substring(1))
+                    .toList();
+
+            var beforeName0 = beforeName.substring(annotationSeparator + "\n".length());
+            return definitionWithAnnotations(state, annotations, beforeName0, name);
         } *//* return new None<>(); *//* }
+
+    private static Some<Tuple<CompileState, String>> definitionWithAnnotations(CompileState state, List<String> annotations, String type, String name) {
+        var typeResult = compileType(state, type); *//* var newAnnotations = new ArrayList<String>(); *//* var newModifiers = new ArrayList<String>(); *//* for (var annotation : annotations) {
+            if (annotation.equals("Actual")) {
+                newModifiers.add("expect");
+            }
+            else {
+                newAnnotations.add(annotation);
+            }
+        } *//* String annotationsStrings; *//* if (newAnnotations.isEmpty()) {
+            annotationsStrings = "";
+        } *//* else {
+            annotationsStrings = newAnnotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
+        } *//* var modifiersString = newModifiers.isEmpty() ? "" : String.join(" ", newModifiers) + " "; *//* return new Some<>(new Tuple<>(typeResult.left, annotationsStrings + modifiersString + typeResult.right + " " + name)); *//* }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip(); *//* if (stripped.equals("var")) {
