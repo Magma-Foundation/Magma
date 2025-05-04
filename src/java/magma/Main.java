@@ -240,7 +240,7 @@ public class Main {
         }
 
         public Frame addStatement(String statement) {
-            statements.add(statement);
+            this.statements.add(statement);
             return this;
         }
     }
@@ -590,19 +590,32 @@ public class Main {
             return new Tuple<>(statements.left, indent + statements.right + ";");
         }
 
-        if (stripped.endsWith("}")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
-            if (contentStart >= 0) {
-                var beforeContent = withoutEnd.substring(0, contentStart);
-                var content = withoutEnd.substring(contentStart + "{".length());
-                var newContent = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
-                var string = compileBlockHeader(newContent.left, beforeContent, depth);
-                return new Tuple<>(string.left, indent + string.right + "{" + newContent.right + indent + "}");
-            }
+        return compileBlock(state, depth, stripped, indent)
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileBlock(CompileState state, int depth, String stripped, String indent) {
+        if (!stripped.endsWith("}")) {
+            return new None<>();
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+        var contentStart = withoutEnd.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
+        }
+
+        var beforeContent = withoutEnd.substring(0, contentStart);
+        var content = withoutEnd.substring(contentStart + "{".length());
+        CompileState state2 = state.enter();
+        var tuple = parseStatements(state2, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
+
+        var oldStatements = new ArrayList<String>();
+        oldStatements.addAll(tuple.left.frames.getLast().statements);
+        oldStatements.addAll(tuple.right);
+
+        var string = compileBlockHeader(tuple.left.exit(), beforeContent, depth);
+        return new Some<>(new Tuple<>(string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
     }
 
     private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input, int depth) {

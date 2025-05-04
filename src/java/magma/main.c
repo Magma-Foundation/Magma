@@ -22,69 +22,69 @@ import java.util.stream.Collectors;
 public class Main  */{
 };
 /* private */struct record Frame(/* Map<String */, /* Integer> */ counters, /* List<String> */ statements){
-	auto local0 = this.counters;
-	auto local1 = this.counters;
-	auto local2 = this.counters;
-	auto local3 = statements;
 	/* public Frame() */{
 		this(/* HashMap<> */::new(), /* ArrayList<> */::new());
 	}
 	/* public Tuple<String, Frame> createName(String category) */{
+	auto local0 = this.counters;
+	auto local1 = this.counters;
 		if (/* !this.counters.containsKey(category) */){
+	auto local0 = this.counters;
 			put(local0, category, /*  0 */);
 		}
-		auto oldCounter = get(local1, category);
+		auto oldCounter = get(local0, category);
 		auto name = /*  category + oldCounter */;
 		auto newCounter = /*  oldCounter + 1 */;
-		put(local2, category, newCounter);
+		put(local1, category, newCounter);
 		return /* Tuple<> */::new(name, this);
 	}
 	/* public Frame addStatement(String statement) */{
-		add(local3, statement);
+	auto local0 = this.statements;
+		add(local0, statement);
 		return this;
 	}
 }
 /* private */struct record CompileState(/* List<String> */ functions, /* List<Frame> */ frames){
-	auto local0 = Collections;
-	auto local1 = this.functions;
-	auto local2 = this.frames;
-	auto local3 = frame;
-	auto local4 = this.frames;
-	auto local5 = this.frames;
-	auto local6 = getLast(local5, );
-	auto local7 = this.frames;
-	auto local8 = this.frames;
 	/* public CompileState() */{
+	auto local0 = Collections;
 		this(/* ArrayList<> */::new(), /* ArrayList<> */::new(singletonList(local0, struct Frame::new())));
 	}
 	/* public CompileState addFunction(String generated) */{
-		add(local1, generated);
+	auto local0 = this.functions;
+		add(local0, generated);
 		return this;
 	}
 	/* public Tuple<String, CompileState> createName(String category) */{
-		auto frame = getLast(local2, );
-		auto nameTuple = createName(local3, category);
-		set(local4, /* this.frames.size() - 1 */, nameTuple.right);
+	auto local0 = this.frames;
+	auto local1 = frame;
+	auto local2 = this.frames;
+		auto frame = getLast(local0, );
+		auto nameTuple = createName(local1, category);
+		set(local2, /* this.frames.size() - 1 */, nameTuple.right);
 		return /* Tuple<> */::new(nameTuple.left, this);
 	}
 	/* public CompileState addStatement(String statement) */{
-		addStatement(local6, statement);
+	auto local0 = this.frames;
+	auto local1 = getLast(local0, );
+		addStatement(local1, statement);
 		return this;
 	}
 	/* public CompileState enter() */{
-		add(local7, struct Frame::new());
+	auto local0 = this.frames;
+		add(local0, struct Frame::new());
 		return this;
 	}
 	/* public CompileState exit() */{
-		removeLast(local8, );
+	auto local0 = this.frames;
+		removeLast(local0, );
 		return this;
 	}
 }
 /* private record *//* Tuple<A, */ B>(struct A left, struct B right){
 }
 /* private */struct record Definition(/* List<String> */ annotations, /* List<String> */ modifiers, char* beforeType, char* type, char* name){
-	auto local0 = this.annotations;
 	/* private String generate() */{
+	auto local0 = this.annotations;
 		/* String annotationsStrings */;
 		if (isEmpty(local0, )){
 			/* annotationsStrings  */ = "";
@@ -114,21 +114,21 @@ auto lambda1(auto input){
 /* private static */char* compile(char* input){
 	auto local0 = input;
 	auto local1 = stripped;
-	auto local2 = withoutEnd;
-	auto local3 = withoutEnd;
-	auto local4 = withoutEnd;
-	auto local5 = String;
-	auto local6 = stripped;
 	auto state = struct CompileState::new();
 	auto stripped = strip(local0, );
-	if (endsWith(local6, "}")){
-		auto withoutEnd = substring(local1, /* 0 */, /*  stripped.length() - "}".length() */);
-		auto contentStart = indexOf(local2, "{");
+	if (endsWith(local1, "}")){
+	auto local0 = stripped;
+	auto local1 = withoutEnd;
+		auto withoutEnd = substring(local0, /* 0 */, /*  stripped.length() - "}".length() */);
+		auto contentStart = indexOf(local1, "{");
 		if (/* contentStart >= 0 */){
-			auto left = substring(local3, /* 0 */, contentStart);
-			auto right = substring(local4, /* contentStart + "{".length() */);
+	auto local0 = withoutEnd;
+	auto local1 = withoutEnd;
+	auto local2 = String;
+			auto left = substring(local0, /* 0 */, contentStart);
+			auto right = substring(local1, /* contentStart + "{".length() */);
 			auto result = compileRoot(right, state);
-			auto joined = join(local5, "", result.left.functions);
+			auto joined = join(local2, "", result.left.functions);
 			/* return generatePlaceholder(left) + "{\n};\n" + joined + result.right */;
 		}
 	}
@@ -157,12 +157,12 @@ auto lambda1(auto input){
 /* private static <T> Tuple<CompileState, *//* List<T>> */ parseAll(struct CompileState initial, char* input, /* 
             BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder, /* 
             BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* T>> */ mapper){
-	auto local0 = mapper;
-	auto local1 = compiled;
 	auto segments = divideAll(input, folder);
 	auto current = initial;
 	auto compiled = /* ArrayList<T> */::new();
 	/* for (var segment : segments) */{
+	auto local0 = mapper;
+	auto local1 = compiled;
 		auto mapped = apply(local0, current, segment);
 		/* current  */ = mapped.left;
 		add(local1, mapped.right);
@@ -171,18 +171,18 @@ auto lambda1(auto input){
 }
 /* private static *//* List<String> */ divideAll(char* input, /*  BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder){
 	auto local0 = current;
-	auto local1 = foldSingleQuotes(popped.right, popped.left);
-	auto local2 = or(local1, /* () -> foldDoubleQuotes(popped.right */, /*  popped.left) */);
-	auto local3 = current;
 	auto current = struct DivideState::new(input);
 	/* while (true) */{
+	auto local0 = current;
+	auto local1 = foldSingleQuotes(popped.right, popped.left);
+	auto local2 = or(local1, /* () -> foldDoubleQuotes(popped.right */, /*  popped.left) */);
 		auto maybePopped = pop(local0, );
 		if (/* !(maybePopped instanceof Some(var popped)) */){
 			/* break */;
 		}
 		/* current  */ = orElseGet(local2, /* () -> folder.apply(popped.right */, /*  popped.left) */);
 	}
-	return advance(local3, ).segments;
+	return advance(local0, ).segments;
 }
 /* private static *//* Option<DivideState> */ foldDoubleQuotes(struct DivideState state, struct char maybeDoubleQuotes){
 	auto local0 = state;
@@ -219,13 +219,13 @@ auto next = /*  popped.left;
 	return flatMap(local3, struct DivideState::popAndAppendToOption);
 }
 /* private static */char* generateAll(/* List<String> */ elements, /*  BiFunction<StringBuilder */, /*  String */, /* StringBuilder> */ merger){
-	auto local0 = merger;
-	auto local1 = output;
+	auto local0 = output;
 	auto output = struct StringBuilder::new();
 	/* for (var element : elements) */{
+	auto local0 = merger;
 		/* output  */ = apply(local0, output, element);
 	}
-	return toString(local1, );
+	return toString(local0, );
 }
 /* private static */struct StringBuilder mergeStatements(struct StringBuilder output, char* mapped){
 	auto local0 = output;
@@ -233,15 +233,15 @@ auto next = /*  popped.left;
 }
 /* private static */struct DivideState foldStatementChar(struct DivideState state, struct char c){
 	auto local0 = state;
-	auto local1 = appended;
-	auto local2 = appended;
-	auto local3 = advance(local2, );
 	auto appended = append(local0, c);
 	if (/* c == ' && appended.isLevel() */){
-		return advance(local1, );
+	auto local0 = appended;
+		return advance(local0, );
 	}
 	if (/* c == ' && appended.isShallow() */){
-		return exit(local3, );
+	auto local0 = appended;
+	auto local1 = advance(local0, );
+		return exit(local1, );
 	}
 	/* else */struct if (c = /* = ' || c == ') {
             return appended.enter();
@@ -254,55 +254,55 @@ auto next = /*  popped.left;
 /* private static Tuple<CompileState, *//* String> */ compileClassSegment(struct CompileState state, char* input){
 	auto local0 = input;
 	auto local1 = stripped;
-	auto local2 = withoutContentEnd;
-	auto local3 = withoutContentEnd;
-	auto local4 = substring(local3, /* 0 */, contentStart);
-	auto local5 = withoutContentEnd;
-	auto local6 = beforeContent;
-	auto local7 = withoutParamEnd;
-	auto local8 = withoutParamEnd;
-	auto local9 = withoutParamEnd;
-	auto local10 = definition.modifiers;
-	auto local11 = paramsState;
-	auto local12 = paramsState;
-	auto local13 = statementsState;
-	auto local14 = frames(local13, );
-	auto local15 = oldStatements;
-	auto local16 = oldStatements;
-	auto local17 = statementsState;
-	auto local18 = exit(local17, );
-	auto local19 = beforeContent;
-	auto local20 = stripped;
 	auto stripped = strip(local0, );
-	if (endsWith(local20, "}")){
-		auto withoutContentEnd = substring(local1, /* 0 */, /*  stripped.length() - "}".length() */);
-		auto contentStart = indexOf(local2, "{");
+	if (endsWith(local1, "}")){
+	auto local0 = stripped;
+	auto local1 = withoutContentEnd;
+		auto withoutContentEnd = substring(local0, /* 0 */, /*  stripped.length() - "}".length() */);
+		auto contentStart = indexOf(local1, "{");
 		if (/* contentStart >= 0 */){
-			auto beforeContent = strip(local4, );
-			auto right = substring(local5, /* contentStart + "{".length() */);
-			if (endsWith(local19, ")")){
-				auto withoutParamEnd = substring(local6, /* 0 */, /*  beforeContent.length() - ")".length() */);
-				auto paramStart = indexOf(local7, "(");
+	auto local0 = withoutContentEnd;
+	auto local1 = substring(local0, /* 0 */, contentStart);
+	auto local2 = withoutContentEnd;
+	auto local3 = beforeContent;
+			auto beforeContent = strip(local1, );
+			auto right = substring(local2, /* contentStart + "{".length() */);
+			if (endsWith(local3, ")")){
+	auto local0 = beforeContent;
+	auto local1 = withoutParamEnd;
+				auto withoutParamEnd = substring(local0, /* 0 */, /*  beforeContent.length() - ")".length() */);
+				auto paramStart = indexOf(local1, "(");
 				if (/* paramStart >= 0 */){
-					auto definitionString = substring(local8, /* 0 */, paramStart);
-					auto inputParams = substring(local9, /* paramStart + "(".length() */);
+	auto local0 = withoutParamEnd;
+	auto local1 = withoutParamEnd;
+					auto definitionString = substring(local0, /* 0 */, paramStart);
+					auto inputParams = substring(local1, /* paramStart + "(".length() */);
 					if (/* parseDefinition(state, definitionString) instanceof Some(var definitionTuple) */){
+	auto local0 = definition.modifiers;
+	auto local1 = paramsState;
+	auto local2 = paramsState;
+	auto local3 = statementsState;
+	auto local4 = frames(local3, );
+	auto local5 = oldStatements;
+	auto local6 = oldStatements;
+	auto local7 = statementsState;
+	auto local8 = exit(local7, );
 						auto definition = definitionTuple.right;
 						auto paramsTuple = compileValues(definitionTuple.left, inputParams, struct Main::compileDefinitionOrPlaceholder);
 						auto paramsState = paramsTuple.left;
 						auto paramsString = paramsTuple.right;
 						auto header = /*  definition.generate() + "(" + paramsString + ")" */;
-						if (contains(local10, "expect")){
+						if (contains(local0, "expect")){
 							return /* Tuple<> */::new(paramsState, /*  header + ";\n" */);
 						}
-						auto statementsTuple = parseStatements(enter(local12, ), right, /*  (state1 */, /*  input1) -> compileFunctionSegment(state1 */, /*  input1 */, /*  1) */);
+						auto statementsTuple = parseStatements(enter(local2, ), right, /*  (state1 */, /*  input1) -> compileFunctionSegment(state1 */, /*  input1 */, /*  1) */);
 						auto statementsState = statementsTuple.left;
 						auto statements = statementsTuple.right;
 						auto oldStatements = /* ArrayList<String> */::new();
-						addAll(local15, getLast(local14, ).statements);
-						addAll(local16, statements);
+						addAll(local5, getLast(local4, ).statements);
+						addAll(local6, statements);
 						auto generated = /*  header + "{" + generateStatements(oldStatements) + "\n}\n" */;
-						return /* Tuple<> */::new(addFunction(local18, generated), "");
+						return /* Tuple<> */::new(addFunction(local8, generated), "");
 					}
 				}
 			}
@@ -315,48 +315,62 @@ auto next = /*  popped.left;
 	auto local1 = stripped;
 	auto local2 = "\n" + "\t";
 	auto local3 = stripped;
-	auto local4 = stripped;
-	auto local5 = stripped;
-	auto local6 = withoutEnd;
-	auto local7 = withoutEnd;
-	auto local8 = withoutEnd;
-	auto local9 = stripped;
+	auto local4 = compileBlock(state, depth, stripped, indent);
 	auto stripped = strip(local0, );
 	if (isEmpty(local1, )){
 		return /* Tuple<> */::new(state, "");
 	}
 	auto indent = repeat(local2, depth);
-	if (endsWith(local4, ";")){
-		auto withoutEnd = substring(local3, /* 0 */, /*  stripped.length() - ";".length() */);
+	if (endsWith(local3, ";")){
+	auto local0 = stripped;
+		auto withoutEnd = substring(local0, /* 0 */, /*  stripped.length() - ";".length() */);
 		auto statements = compileFunctionStatementValue(withoutEnd, state, depth);
 		return /* Tuple<> */::new(statements.left, /*  indent + statements.right + ";" */);
 	}
-	if (endsWith(local9, "}")){
-		auto withoutEnd = substring(local5, /* 0 */, /*  stripped.length() - "}".length() */);
-		auto contentStart = indexOf(local6, "{");
-		if (/* contentStart >= 0 */){
-			auto beforeContent = substring(local7, /* 0 */, contentStart);
-			auto content = substring(local8, /* contentStart + "{".length() */);
-			auto newContent = compileStatements(state, content, /*  (state1 */, /*  input1) -> compileFunctionSegment(state1 */, /*  input1 */, /*  depth + 1) */);
-			auto string = compileBlockHeader(newContent.left, beforeContent, depth);
-			return /* Tuple<> */::new(string.left, /*  indent + string.right + "{" + newContent.right + indent + "}" */);
-		}
+	return orElseGet(local4, /* () -> new Tuple<>(state */, generatePlaceholder(/* stripped) */));
+}
+/* private static Option<Tuple<CompileState, *//* String>> */ compileBlock(struct CompileState state, struct int depth, char* stripped, char* indent){
+	auto local0 = stripped;
+	auto local1 = withoutEnd;
+	auto local2 = withoutEnd;
+	auto local3 = withoutEnd;
+	auto local4 = state;
+	auto local5 = tuple.left.frames;
+	auto local6 = oldStatements;
+	auto local7 = oldStatements;
+	auto local8 = tuple.left;
+	auto local9 = tuple.left;
+	if (/* !stripped.endsWith("}") */){
+		return /* None<> */::new();
 	}
-	return /* Tuple<> */::new(state, generatePlaceholder(stripped));
+	auto withoutEnd = substring(local0, /* 0 */, /*  stripped.length() - "}".length() */);
+	auto contentStart = indexOf(local1, "{");
+	if (/* contentStart < 0 */){
+		return /* None<> */::new();
+	}
+	auto beforeContent = substring(local2, /* 0 */, contentStart);
+	auto content = substring(local3, /* contentStart + "{".length() */);
+	struct CompileState state2 = enter(local4, );
+	auto tuple = parseStatements(/* state2 */, content, /*  (state1 */, /*  input1) -> compileFunctionSegment(state1 */, /*  input1 */, /*  depth + 1) */);
+	auto oldStatements = /* ArrayList<String> */::new();
+	addAll(local6, getLast(local5, ).statements);
+	addAll(local7, tuple.right);
+	auto string = compileBlockHeader(exit(local9, ), beforeContent, depth);
+	return /* Some<> */::new(/* new Tuple<>(string.left */, /*  indent + string.right + "{" + generateStatements(oldStatements) + indent + "}") */);
 }
 /* private static Tuple<CompileState, *//* String> */ compileBlockHeader(struct CompileState state, char* input, struct int depth){
 	auto local0 = input;
-	auto local1 = "if";
-	auto local2 = "if";
-	auto local3 = stripped;
-	auto local4 = substring(local3, length(local2, ));
-	auto local5 = withoutPrefix;
-	auto local6 = stripped;
+	auto local1 = stripped;
 	auto stripped = strip(local0, );
-	if (startsWith(local6, "if")){
-		auto withoutPrefix = strip(local4, );
+	if (startsWith(local1, "if")){
+	auto local0 = "if";
+	auto local1 = "if";
+	auto local2 = stripped;
+	auto local3 = substring(local2, length(local1, ));
+		auto withoutPrefix = strip(local3, );
 		if (/* withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")") */){
-			auto value = substring(local5, /* 1 */, /*  withoutPrefix.length() - 1 */);
+	auto local0 = withoutPrefix;
+			auto value = substring(local0, /* 1 */, /*  withoutPrefix.length() - 1 */);
 			auto tuple = compileValueOrPlaceholder(state, value, depth);
 			return /* Tuple<> */::new(tuple.left, "if (" + tuple.right + ")");
 		}
@@ -372,13 +386,13 @@ auto next = /*  popped.left;
 }
 /* private static Option<Tuple<CompileState, *//* String>> */ compileReturn(struct CompileState state, char* input, struct int depth){
 	auto local0 = input;
-	auto local1 = "return ";
-	auto local2 = "return ";
-	auto local3 = stripped;
-	auto local4 = stripped;
+	auto local1 = stripped;
 	auto stripped = strip(local0, );
-	if (startsWith(local4, "return ")){
-		auto right = substring(local3, length(local2, ));
+	if (startsWith(local1, "return ")){
+	auto local0 = "return ";
+	auto local1 = "return ";
+	auto local2 = stripped;
+		auto right = substring(local2, length(local1, ));
 		if (/* compileValue(state, right, depth) instanceof Some(var other) */){
 			return /* Some<> */::new(/* new Tuple<>(other.left */, /*  "return " + other.right) */);
 		}
@@ -415,32 +429,32 @@ auto lambda0(auto tuple){
 /* private static Option<Tuple<CompileState, *//* Definition>> */ parseDefinition(struct CompileState state, char* input){
 	auto local0 = input;
 	auto local1 = stripped;
-	auto local2 = stripped;
-	auto local3 = stripped;
-	auto local4 = substring(local3, /* valueSeparator + " ".length() */);
-	auto local5 = beforeName;
-	auto local6 = Collections;
-	auto local7 = Pattern;
-	auto local8 = Pattern;
-	auto local9 = beforeName;
-	auto local10 = substring(local9, /* 0 */, annotationSeparator);
-	auto local11 = strip(local10, );
-	auto local12 = /* var annotations = Arrays.stream(annotationsArray)
-                    .map(String */::strip);
-	auto local13 = map(local12, /* slice -> slice.isEmpty() ? "" : slice.substring(1) */);
-	auto local14 = beforeName;
 	auto stripped = strip(local0, );
 	auto valueSeparator = lastIndexOf(local1, " ");
 	if (/* valueSeparator >= 0 */){
-		auto beforeName = substring(local2, /* 0 */, valueSeparator);
-		auto name = strip(local4, );
-		auto annotationSeparator = lastIndexOf(local5, "\n");
+	auto local0 = stripped;
+	auto local1 = stripped;
+	auto local2 = substring(local1, /* valueSeparator + " ".length() */);
+	auto local3 = beforeName;
+	auto local4 = Pattern;
+	auto local5 = Pattern;
+	auto local6 = beforeName;
+	auto local7 = substring(local6, /* 0 */, annotationSeparator);
+	auto local8 = strip(local7, );
+	auto local9 = /* var annotations = Arrays.stream(annotationsArray)
+                    .map(String */::strip);
+	auto local10 = map(local9, /* slice -> slice.isEmpty() ? "" : slice.substring(1) */);
+	auto local11 = beforeName;
+		auto beforeName = substring(local0, /* 0 */, valueSeparator);
+		auto name = strip(local2, );
+		auto annotationSeparator = lastIndexOf(local3, "\n");
 		if (/* annotationSeparator < 0 */){
-			return definitionWithAnnotations(state, emptyList(local6, ), beforeName, name);
+	auto local0 = Collections;
+			return definitionWithAnnotations(state, emptyList(local0, ), beforeName, name);
 		}
-		auto annotationsArray = split(local11, quote(local8, "\n"));
-		toList(local13, );
-		auto beforeName0 = substring(local14, /* annotationSeparator + "\n".length() */);
+		auto annotationsArray = split(local8, quote(local5, "\n"));
+		toList(local10, );
+		auto beforeName0 = substring(local11, /* annotationSeparator + "\n".length() */);
 		return definitionWithAnnotations(state, annotations, /*  beforeName0 */, name);
 	}
 	return /* None<> */::new();
@@ -448,30 +462,30 @@ auto lambda0(auto tuple){
 /* private static Option<Tuple<CompileState, *//* Definition>> */ definitionWithAnnotations(struct CompileState state, /* List<String> */ annotations, char* withoutAnnotations, char* name){
 	auto local0 = withoutAnnotations;
 	auto local1 = stripped;
-	auto local2 = stripped;
-	auto local3 = stripped;
 	auto stripped = strip(local0, );
 	auto typeSeparator = lastIndexOf(local1, " ");
 	if (/* typeSeparator >= 0 */){
-		auto beforeType = substring(local2, /* 0 */, typeSeparator);
-		auto type = substring(local3, /* typeSeparator + " ".length() */);
+	auto local0 = stripped;
+	auto local1 = stripped;
+		auto beforeType = substring(local0, /* 0 */, typeSeparator);
+		auto type = substring(local1, /* typeSeparator + " ".length() */);
 		return definitionWithBeforeType(state, annotations, beforeType, type, name);
 	}
 	return definitionWithBeforeType(state, annotations, "", stripped, name);
 }
 /* private static Some<Tuple<CompileState, *//* Definition>> */ definitionWithBeforeType(struct CompileState state, /* List<String> */ annotations, char* beforeType, char* type, char* name){
-	auto local0 = newModifiers;
-	auto local1 = annotation;
-	auto local2 = newAnnotations;
 	auto typeResult = compileType(state, type);
 	auto newAnnotations = /* ArrayList<String> */::new();
 	auto newModifiers = /* ArrayList<String> */::new();
 	/* for (var annotation : annotations) */{
-		if (equals(local1, "Actual")){
+	auto local0 = annotation;
+		if (equals(local0, "Actual")){
+	auto local0 = newModifiers;
 			add(local0, "expect");
 		}
 		/* else */{
-			add(local2, annotation);
+	auto local0 = newAnnotations;
+			add(local0, annotation);
 		}
 	}
 	return /* Some<> */::new(/* new Tuple<>(typeResult.left */, /*  new Definition(newAnnotations */, newModifiers, beforeType, typeResult.right, /*  name)) */);
@@ -504,14 +518,7 @@ auto lambda0(auto tuple){
 	auto local4 = String;
 	auto local5 = joined;
 	auto local6 = divisions;
-	auto local7 = "new ";
-	auto local8 = "new ";
-	auto local9 = callerString;
-	auto local10 = callerString;
-	auto local11 = nextState;
-	auto local12 = newArguments;
-	auto local13 = localTuple.right;
-	auto local14 = newArguments;
+	auto local7 = callerString;
 	auto stripped = strip(local0, );
 	if (/* !stripped.endsWith(")") */){
 		return /* None<> */::new();
@@ -528,24 +535,31 @@ auto lambda0(auto tuple){
                 .orElseGet(() -> new Tuple<>(state1 */, struct Content::new(/* input1)) */));
 	auto argumentState = argumentsTuple.left;
 	auto oldArguments = argumentsTuple.right;
-	if (startsWith(local10, "new ")){
-		auto withoutPrefix = substring(local9, length(local8, ));
+	if (startsWith(local7, "new ")){
+	auto local0 = "new ";
+	auto local1 = "new ";
+	auto local2 = callerString;
+		auto withoutPrefix = substring(local2, length(local1, ));
 		auto callerTuple = compileType(argumentState, withoutPrefix);
 		return /* Some<> */::new(/* new Tuple<>(callerTuple.left */, /*  new Invocation(new MethodAccess(callerTuple.right */, /*  "new") */, /*  oldArguments)) */);
 	}
 	if (/* parseValue(argumentState, callerString, depth) instanceof Some(var callerTuple) */){
+	auto local0 = newArguments;
 		auto callerState = callerTuple.left;
 		auto oldCaller = callerTuple.right;
 		auto nextState = callerState;
 		struct Value newCaller = oldCaller;
 		auto newArguments = /* ArrayList<Value> */::new();
 		if (/* oldCaller instanceof DataAccess(Value parent, var property) */){
-			auto localTuple = createName(local11, "local");
-			add(local12, struct Symbol::new(localTuple.left));
+	auto local0 = nextState;
+	auto local1 = newArguments;
+	auto local2 = localTuple.right;
+			auto localTuple = createName(local0, "local");
+			add(local1, struct Symbol::new(localTuple.left));
 			/* newCaller  */ = struct Symbol::new(property);
-			/* nextState  */ = addStatement(local13, "\n\tauto " + localTuple.left + " = " + parent.generate() + ";");
+			/* nextState  */ = addStatement(local2, "\n\tauto " + localTuple.left + " = " + parent.generate() + ";");
 		}
-		addAll(local14, oldArguments);
+		addAll(local0, oldArguments);
 		return /* Some<> */::new(/* new Tuple<>(nextState */, /*  new Invocation(newCaller */, /*  newArguments)) */);
 	}
 	return /* None<> */::new();
@@ -564,20 +578,20 @@ auto lambda0(auto tuple){
 /* private static */struct StringBuilder mergeValues(struct StringBuilder cache, char* element){
 	auto local0 = cache;
 	auto local1 = cache;
-	auto local2 = cache;
-	auto local3 = append(local2, ", ");
-	if (isEmpty(local1, )){
+	auto local2 = append(local1, ", ");
+	if (isEmpty(local0, )){
+	auto local0 = cache;
 		return append(local0, element);
 	}
-	return append(local3, element);
+	return append(local2, element);
 }
 /* private static */struct DivideState foldValueChar(struct DivideState state, struct char c){
 	auto local0 = state;
-	auto local1 = state;
 	if (/* c == ' && state.isLevel() */){
+	auto local0 = state;
 		return advance(local0, );
 	}
-	return append(local1, c);
+	return append(local0, c);
 }
 /* private static Tuple<CompileState, *//* String> */ compileValueOrPlaceholder(struct CompileState state, char* input, struct int depth){
 	auto local0 = compileValue(state, input, depth);
@@ -599,9 +613,9 @@ auto lambda0(auto tuple){
 }
 /* private static Option<Tuple<CompileState, *//* Value>> */ or(struct CompileState state, char* input, /* 
             List<BiFunction<CompileState */, /*  String */, /*  Option<Tuple<CompileState */, /* Value>>>> */ rules){
+	/* for (var rule : rules) */{
 	auto local0 = rule;
 	auto local1 = applied;
-	/* for (var rule : rules) */{
 		auto applied = apply(local0, state, input);
 		if (isPresent(local1, )){
 			return applied;
@@ -665,16 +679,16 @@ auto lambda0(auto tuple){
 }
 /* private static Option<Tuple<CompileState, *//* Symbol>> */ compileLambda(struct CompileState state, char* input, struct int depth){
 	auto local0 = input;
-	auto local1 = input;
-	auto local2 = substring(local1, /* 0 */, arrowIndex);
-	auto local3 = input;
-	auto local4 = afterArrow;
 	auto arrowIndex = indexOf(local0, "->");
 	if (/* arrowIndex >= 0 */){
-		auto beforeArrow = strip(local2, );
-		auto afterArrow = substring(local3, /* arrowIndex + "->".length() */);
+	auto local0 = input;
+	auto local1 = substring(local0, /* 0 */, arrowIndex);
+	auto local2 = input;
+		auto beforeArrow = strip(local1, );
+		auto afterArrow = substring(local2, /* arrowIndex + "->".length() */);
 		if (isSymbol(beforeArrow)){
-			auto withBraces = strip(local4, );
+	auto local0 = afterArrow;
+			auto withBraces = strip(local0, );
 			/* if (withBraces.startsWith(" */{
 				@) && withBraces.endsWith("}")) {
 auto content = /*  withBraces.substring(1, withBraces.length() - 1);
@@ -698,12 +712,12 @@ auto content = /*  withBraces.substring(1, withBraces.length() - 1);
 }
 /* private static */struct boolean isSymbol(char* input){
 	auto local0 = input;
-	auto local1 = stripped;
-	auto local2 = Character;
 	auto stripped = strip(local0, );
 	/* for (var i = 0; i < stripped.length(); i++) */{
-		auto c = charAt(local1, i);
-		if (isLetter(local2, c)){
+	auto local0 = stripped;
+	auto local1 = Character;
+		auto c = charAt(local0, i);
+		if (isLetter(local1, c)){
 			/* continue */;
 		}
 		return false;
