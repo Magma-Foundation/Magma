@@ -2,19 +2,50 @@
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class Main  */{
 };
-/* public static void main() */{/* 
-        try {
-            var source = Paths.get(".", "src", "java", "magma", "Main.java");
-            var target = source.resolveSibling("main.c");
+/* private interface Result<T, X> */{/* 
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+     */}
+/* private record Ok<T, X>(T value) implements Result<T, X> */{/* 
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+     */}
+/* private record Err<T, X>(X error) implements Result<T, X> */{/* 
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+     */}
+/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
+    public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
-            var input = Files.readString(source);
-            Files.writeString(target, compile(input));
+    public static void main() */{/* 
+        readSource().match(input -> {
+            var output = compile(input);
+            return writeTarget(output);
+        }, Optional::of).ifPresent(Throwable::printStackTrace);
+     */}
+/* private static Optional<IOException> writeTarget(String output) */{/* 
+        try {
+            Files.writeString(TARGET, output);
+            return Optional.empty();
         } catch (IOException e) {
-            e.printStackTrace();
+            return Optional.of(e);
+        }
+     */}
+/* private static Result<String, IOException> readSource() */{/* 
+        try {
+            return new Ok<>(Files.readString(SOURCE));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
      */}
 /* private static String compile(String input) */{/* 
