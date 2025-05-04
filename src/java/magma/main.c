@@ -58,7 +58,7 @@ auto lambda1(auto input){
 }
 /* private static */char* compile(char* input){
 	auto state = struct CompileState::new();
-	/* var stripped = input */.strip();/* if (stripped.endsWith("}")) {
+	auto stripped = input.strip();/* if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
             var contentStart = withoutEnd.indexOf("{");
             if (contentStart >= 0) {
@@ -107,7 +107,7 @@ auto lambda1(auto input){
 /* private static *//* Option<DivideState> */ foldDoubleQuotes(struct DivideState state, struct char maybeDoubleQuotes){/* if (maybeDoubleQuotes != '') {
             return new None<>();
         } */
-	/* var current = state */.append(maybeDoubleQuotes);
+	auto current = state.append(maybeDoubleQuotes);
 	@hile (true) {
 @f (!(current.popAndAppendToTuple() instanceof Some(var popped))) {
 @reak;
@@ -128,11 +128,11 @@ auto next = /*  popped.left;
 /* private static *//* Option<DivideState> */ foldSingleQuotes(struct DivideState state, struct char c){/* if (c != '') {
             return new None<>();
         } */
-	/* var appended = state */.append(c);
+	auto appended = state.append(c);
 	return appended.pop().flatMap(/* popped -> popped.left == ' popped.right.popAndAppendToOption() : new Some<>(popped.right) */).flatMap(struct DivideState::popAndAppendToOption);
 }
 /* private static */struct DivideState foldStatementChar(struct DivideState state, struct char c){
-	/* var appended = state */.append(c);/* if (c == ' && appended.isLevel()) {
+	auto appended = state.append(c);/* if (c == ' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == ' && appended.isShallow()) {
             return appended.advance().exit();
@@ -146,7 +146,7 @@ auto next = /*  popped.left;
         return appended */;
 }
 /* private static Tuple<CompileState, *//* String> */ compileClassSegment(struct CompileState state, char* input){
-	/* var stripped = input */.strip();/* if (stripped.endsWith("}")) {
+	auto stripped = input.strip();/* if (stripped.endsWith("}")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
             var contentStart = withoutContentEnd.indexOf("{");
             if (contentStart >= 0) {
@@ -183,7 +183,7 @@ auto next = /*  popped.left;
 	return /* Tuple<> */::new(state, /*  generatePlaceholder(stripped) + "\n" */);
 }
 /* private static Tuple<CompileState, *//* String> */ compileFunctionSegment(struct CompileState state, char* input){
-	/* var stripped = input */.strip();/* if (stripped.isEmpty()) {
+	auto stripped = input.strip();/* if (stripped.isEmpty()) {
             return new Tuple<>(state, "");
         } *//* if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
@@ -196,7 +196,7 @@ auto next = /*  popped.left;
 	return compileReturn(state, input).or(/* () -> compileInvokable(state */, /*  input) */).or(/* () -> compileAssignment(state */, /*  input) */).orElseGet(/* () -> new Tuple<>(state */, generatePlaceholder(/* input) */));
 }
 /* private static Option<Tuple<CompileState, *//* String>> */ compileReturn(struct CompileState state, char* input){
-	/* var stripped = input */.strip();/* if (stripped.startsWith("return ")) {
+	auto stripped = input.strip();/* if (stripped.startsWith("return ")) {
             var right = stripped.substring("return ".length());
             if (compileValue(state, right) instanceof Some(var other)) {
                 return new Some<>(new Tuple<>(other.left, "return " + other.right));
@@ -205,14 +205,14 @@ auto next = /*  popped.left;
 	return /* None<> */::new();
 }
 /* private static Option<Tuple<CompileState, *//* String>> */ compileAssignment(struct CompileState state, char* input){
-	/* var valueSeparator = input */.indexOf(/* "=" */);/* if (valueSeparator < 0) {
+	auto valueSeparator = input.indexOf(/* "=" */);/* if (valueSeparator < 0) {
             return new None<>();
         } */
-	/* var left = input */.substring(/* 0 */, valueSeparator);
-	/* var right = input */.substring(/* valueSeparator + "=" */.length());
+	auto left = input.substring(/* 0 */, valueSeparator);
+	auto right = input.substring(/* valueSeparator + "=".length() */);
 	auto definitionTuple = compileDefinitionOrPlaceholder(state, left);
 	auto valueTuple = compileValueOrPlaceholder(definitionTuple.left, right);
-	return /* Some<> */::new(/* new Tuple<>(valueTuple */.left, /*  definitionTuple.right + " = " + valueTuple.right) */);
+	return /* Some<> */::new(/* new Tuple<>(valueTuple.left */, /*  definitionTuple.right + " = " + valueTuple.right) */);
 }
 /* private static Tuple<CompileState, *//* String> */ compileDefinitionOrPlaceholder(struct CompileState state, char* input){
 	return compileDefinition(state, input).orElseGet(/* () -> new Tuple<>(state */, generatePlaceholder(/* input) */));
@@ -224,8 +224,8 @@ auto lambda2(auto tuple){
 	return parseDefinition(state, input).map(lambda2, tuple.right().generate(/* ) */));
 }
 /* private static Option<Tuple<CompileState, *//* Definition>> */ parseDefinition(struct CompileState state, char* input){
-	/* var stripped = input */.strip();
-	/* var valueSeparator = stripped */.lastIndexOf(/* " " */);/* if (valueSeparator >= 0) {
+	auto stripped = input.strip();
+	auto valueSeparator = stripped.lastIndexOf(/* " " */);/* if (valueSeparator >= 0) {
             var beforeName = stripped.substring(0, valueSeparator);
             var name = stripped.substring(valueSeparator + " ".length()).strip();
             var annotationSeparator = beforeName.lastIndexOf("\n");
@@ -245,8 +245,8 @@ auto lambda2(auto tuple){
 	return /* None<> */::new();
 }
 /* private static Option<Tuple<CompileState, *//* Definition>> */ definitionWithAnnotations(struct CompileState state, /* List<String> */ annotations, char* withoutAnnotations, char* name){
-	/* var stripped = withoutAnnotations */.strip();
-	/* var typeSeparator = stripped */.lastIndexOf(/* " " */);/* if (typeSeparator >= 0) {
+	auto stripped = withoutAnnotations.strip();
+	auto typeSeparator = stripped.lastIndexOf(/* " " */);/* if (typeSeparator >= 0) {
             var beforeType = stripped.substring(0, typeSeparator);
             var type = stripped.substring(typeSeparator + " ".length());
             return definitionWithBeforeType(state, annotations, beforeType, type, name);
@@ -264,10 +264,10 @@ auto lambda2(auto tuple){
                 newAnnotations.add(annotation);
             }
         } */
-	return /* Some<> */::new(/* new Tuple<>(typeResult */.left, /*  new Definition(newAnnotations */, newModifiers, beforeType, typeResult.right, /*  name)) */);
+	return /* Some<> */::new(/* new Tuple<>(typeResult.left */, /*  new Definition(newAnnotations */, newModifiers, beforeType, typeResult.right, /*  name)) */);
 }
 /* private static Tuple<CompileState, *//* String> */ compileType(struct CompileState state, char* input){
-	/* var stripped = input */.strip();/* if (stripped.equals("var")) {
+	auto stripped = input.strip();/* if (stripped.equals("var")) {
             return new Tuple<>(state, "auto");
         } *//* if (stripped.equals("String")) {
             return new Tuple<>(state, "char*");
@@ -279,13 +279,13 @@ auto lambda2(auto tuple){
 /* private static Option<Tuple<CompileState, *//* String>> */ compileInvokable(struct CompileState state, char* stripped){/* if (!stripped.endsWith(")")) {
             return new None<>();
         } */
-	/* var withoutEnd = stripped */.substring(/* 0 */, /* stripped.length() - ")" */.length());
+	auto withoutEnd = stripped.substring(/* 0 */, /*  stripped.length() - ")".length() */);
 	auto divisions = divideAll(withoutEnd, struct Main::foldInvocationStart);/* if (divisions.size() < 2) {
             return new None<>();
         } */
-	/* var joined = String */.join(/* "" */, /*  divisions.subList(0 */, divisions.size(/* ) - 1 */));
-	/* var caller = joined */.substring(/* 0 */, /* joined.length() - ")" */.length());
-	/* var arguments = divisions */.getLast();
+	auto joined = String.join(/* "" */, /*  divisions.subList(0 */, divisions.size(/* ) - 1 */));
+	auto caller = joined.substring(/* 0 */, /*  joined.length() - ")".length() */);
+	auto arguments = divisions.getLast();
 	auto argumentsTuple = compileValues(state, arguments, struct Main::compileValueOrPlaceholder);
 	auto argumentState = argumentsTuple.left;
 	auto argumentsString = argumentsTuple.right;/* if(caller.startsWith("new ")) {
@@ -319,8 +319,8 @@ auto lambda2(auto tuple){
         } */);
 }
 /* private static Option<Tuple<CompileState, *//* String>> */ compileValue(struct CompileState state, char* input){
-	/* var stripped = input */.strip();
-	/* var arrowIndex = stripped */.indexOf(/* "->" */);/* if (arrowIndex >= 0) {
+	auto stripped = input.strip();
+	auto arrowIndex = stripped.indexOf(/* "->" */);/* if (arrowIndex >= 0) {
             var beforeArrow = stripped.substring(0, arrowIndex).strip();
             var afterArrow = stripped.substring(arrowIndex + "->".length());
             if (isSymbol(beforeArrow)) {
@@ -340,19 +340,20 @@ auto lambda2(auto tuple){
 	auto maybeInvocation = compileInvokable(state, stripped);/* if (maybeInvocation.isPresent()) {
             return maybeInvocation;
         } */
-	/* var separator = stripped */.lastIndexOf(/* "." */);/* if (separator >= 0) {
+	auto separator = stripped.lastIndexOf(/* "." */);/* if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var child = stripped.substring(separator + ".".length());
             if (isSymbol(child)) {
-                var tuple = compileValueOrPlaceholder(state, parent);
-                var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
-                return new Some<>(compileStateStringTuple);
+                if (compileValue(state, parent) instanceof Some(var tuple)) {
+                    var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
+                    return new Some<>(compileStateStringTuple);
+                }
             }
         } *//* if (isSymbol(stripped)) {
             var compileStateStringTuple = new Tuple<CompileState, String>(state, stripped);
             return new Some<>(compileStateStringTuple);
         } */
-	/* var functionSeparator = stripped */.indexOf(/* " */::");/* if (functionSeparator >= 0) {
+	auto functionSeparator = stripped.indexOf(/* " */::");/* if (functionSeparator >= 0) {
             var left = stripped.substring(0, functionSeparator);
             var right = stripped.substring(functionSeparator + "::".length()).strip();
             var leftTuple = compileType(state, left);
@@ -361,12 +362,12 @@ auto lambda2(auto tuple){
 	return /* None<> */::new();
 }
 /* private static Some<Tuple<CompileState, *//* String>> */ assembleLambda(struct CompileState state, char* beforeArrow, char* content){
-	/* var nameTuple = state */.createName(/* "lambda" */);
+	auto nameTuple = state.createName(/* "lambda" */);
 	auto name = nameTuple.left;
 	return /* Some<> */::new(/* new Tuple<CompileState */, /*  String>(nameTuple.right.addFunction("auto " + name + "(auto " + beforeArrow + "){" + content + "\n}\n") */, /*  name) */);
 }
 /* private static */struct boolean isSymbol(char* input){
-	/* var stripped = input */.strip();/* for (var i = 0; i < stripped.length(); i++) {
+	auto stripped = input.strip();/* for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
             if (Character.isLetter(c)) {
                 continue;
@@ -376,7 +377,7 @@ auto lambda2(auto tuple){
 	return true;
 }
 /* private static */struct DivideState foldInvocationStart(struct DivideState state, struct char c){
-	/* var appended = state */.append(c);
+	auto appended = state.append(c);
 	struct if (c = /* = ') {
             var entered = appended.enter();
             if (appended.isShallow()) {

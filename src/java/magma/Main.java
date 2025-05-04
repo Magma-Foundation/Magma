@@ -584,7 +584,7 @@ public class Main {
         var argumentState = argumentsTuple.left;
         var argumentsString = argumentsTuple.right;
 
-        if(caller.startsWith("new ")) {
+        if (caller.startsWith("new ")) {
             var withoutPrefix = caller.substring("new ".length());
             var callerTuple = compileType(argumentState, withoutPrefix);
 
@@ -654,8 +654,7 @@ public class Main {
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var child = stripped.substring(separator + ".".length());
-            if (isSymbol(child)) {
-                var tuple = compileValueOrPlaceholder(state, parent);
+            if (isSymbol(child) && compileValue(state, parent) instanceof Some(var tuple)) {
                 var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
                 return new Some<>(compileStateStringTuple);
             }
