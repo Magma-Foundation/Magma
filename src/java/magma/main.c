@@ -93,10 +93,10 @@ public class Main  */{
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	readSource().match(/* input -> {
+	readSource().match(/* input  */ -> /*  {
             var output = compile(input);
             return writeTarget(output);
-        } */, /* Some::new */).ifPresent(/* error -> System */.err.println(error.display()));
+        } */, /* Some::new */).ifPresent(/* error  */ -> /*  System.err.println */(error.display()));
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -226,6 +226,15 @@ public class Main  */{
         var maybeInvocation = compileInvocation(stripped);
         if (maybeInvocation instanceof Some(var invocation)) {
             return invocation;
+        }
+
+        var arrowIndex = stripped.indexOf("->".toString());
+        if(arrowIndex >= 0) {
+            var left = stripped.substring(0, arrowIndex);
+            var right = stripped.substring(arrowIndex + "->".length());
+            if (isSymbol(left)) {
+                return generatePlaceholder(left) + " -> " + generatePlaceholder(right);
+            }
         }
 
         var separator = stripped.lastIndexOf(".");

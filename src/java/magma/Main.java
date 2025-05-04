@@ -278,6 +278,15 @@ public class Main {
             return invocation;
         }
 
+        var arrowIndex = stripped.indexOf("->");
+        if (arrowIndex >= 0) {
+            var left = stripped.substring(0, arrowIndex);
+            var right = stripped.substring(arrowIndex + "->".length());
+            if (isSymbol(left)) {
+                return generatePlaceholder(left) + " -> " + generatePlaceholder(right);
+            }
+        }
+
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
