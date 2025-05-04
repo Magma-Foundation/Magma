@@ -462,7 +462,22 @@ public class Main {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
                 var newContent = compileStatements(state, content, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
-                return new Tuple<>(newContent.left, indent + generatePlaceholder(beforeContent) + "{" + newContent.right + indent + "}");
+                var string = compileBlockHeader(newContent.left, beforeContent, depth);
+                return new Tuple<>(string.left, indent + string.right + "{" + newContent.right + indent + "}");
+            }
+        }
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
+    }
+
+    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input, int depth) {
+        var stripped = input.strip();
+        if (stripped.startsWith("if")) {
+            var withoutPrefix = stripped.substring("if".length()).strip();
+            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+                var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+                var tuple = compileValueOrPlaceholder(state, value, depth);
+                return new Tuple<>(tuple.left, "if (" + tuple.right + ")");
             }
         }
 
