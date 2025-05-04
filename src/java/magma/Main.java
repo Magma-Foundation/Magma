@@ -56,7 +56,17 @@ public class Main {
     }
 
     private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+        var stripped = input.strip();
+        if (stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart >= 0) {
+                var left = withoutEnd.substring(0, contentStart);
+                var right = withoutEnd.substring(contentStart + "{".length());
+                return generatePlaceholder(left.strip()) + "{" + generatePlaceholder(right) + "}\n";
+            }
+        }
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String stripped) {

@@ -6,8 +6,7 @@ import java.nio.file.Paths;
 
 public class Main  */{
 };
-/* 
-    public static void main() {
+/* public static void main() */{/* 
         try {
             var source = Paths.get(".", "src", "java", "magma", "Main.java");
             var target = source.resolveSibling("main.c");
@@ -17,13 +16,14 @@ public class Main  */{
         } catch (IOException e) {
             e.printStackTrace();
         }
-    } *//* 
-
-    private static String compile(String input) {
+     */}
+/* private static String compile(String input) */{/* 
         var stripped = input.strip();
-        if (stripped.endsWith("} *//* ")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "} *//* ".length());
-            var contentStart = withoutEnd.indexOf("{");
+        if (stripped.endsWith(" */}
+/* ")) */{/* 
+            var withoutEnd = stripped.substring(0, stripped.length() - " */}
+/* ".length());
+            var contentStart = withoutEnd.indexOf(" */{/* ");
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
@@ -32,9 +32,8 @@ public class Main  */{
         }
 
         return generatePlaceholder(stripped);
-    } *//* 
-
-    private static String getString(String input) {
+     */}
+/* private static String getString(String input) */{/* 
         var buffer = new StringBuilder();
         var output = new StringBuilder();
         var depth = 0;
@@ -52,16 +51,24 @@ public class Main  */{
             else if (c == '}') {
                 depth--;
             }
-        } *//* 
-
-        return output.append(compileClassSegment(buffer.toString())).toString();
+         */}
+/* return output.append(compileClassSegment(buffer.toString())).toString();
     }
 
-    private static String compileClassSegment(String input) {
-        return generatePlaceholder(input);
+    private static String compileClassSegment(String input) */{/* 
+        var stripped = input.strip();
+        if (stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart >= 0) {
+                var left = withoutEnd.substring(0, contentStart);
+                var right = withoutEnd.substring(contentStart + "{".length());
+                return generatePlaceholder(left.strip()) + "{" + generatePlaceholder(right) + "}\n";
+            }
+         */}
+/* return generatePlaceholder(stripped);
     }
 
-    private static String generatePlaceholder(String stripped) {
+    private static String generatePlaceholder(String stripped) */{/* 
         return "/* " + stripped + " */";
-    }
- */
+     */}
