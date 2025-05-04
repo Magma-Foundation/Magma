@@ -60,6 +60,71 @@ public class Main {
         }
     }
 
+    private static class State {
+        private final List<String> segments;
+        private StringBuilder buffer;
+        private int depth;
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private State(List<String> segments, StringBuilder buffer, int depth) {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        }
+
+        private State enter() {
+            this.setDepth(this.getDepth() + 1);
+            return this;
+        }
+
+        public int getDepth() {
+            return this.depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        private State exit() {
+            this.setDepth(this.getDepth() - 1);
+            return this;
+        }
+
+        private State advance() {
+            this.segments().add(this.getBuffer().toString());
+            this.setBuffer(new StringBuilder());
+            return this;
+        }
+
+        public StringBuilder getBuffer() {
+            return this.buffer;
+        }
+
+        public void setBuffer(StringBuilder buffer) {
+            this.buffer = buffer;
+        }
+
+        public List<String> segments() {
+            return this.segments;
+        }
+
+        private boolean isShallow() {
+            return this.getDepth() == 1;
+        }
+
+        private State append(char c) {
+            this.getBuffer().append(c);
+            return this;
+        }
+
+        public List<String> getSegments() {
+            return this.segments;
+        }
+    }
+
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
@@ -117,28 +182,27 @@ public class Main {
     }
 
     private static List<String> divideAll(String input) {
-        var segments = new ArrayList<String>();
-        var buffer = new StringBuilder();
-        var depth = 0;
-
+        var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            buffer.append(c);
-            if (c == '}' && depth == 1) {
-                segments.add(buffer.toString());
-                buffer = new StringBuilder();
-                depth--;
-            }
-            else if (c == '{' || c == '(') {
-                depth++;
-            }
-            else if (c == '}' || c == ')') {
-                depth--;
-            }
+            current = foldStatementChar(current, c);
         }
 
-        segments.add(buffer.toString());
-        return segments;
+        return current.advance().segments;
+    }
+
+    private static State foldStatementChar(State state, char c) {
+        var appended = state.append(c);
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
+        else if (c == '{' || c == '(') {
+            return appended.enter();
+        }
+        else if (c == '}' || c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String compileClassSegment(String input) {
