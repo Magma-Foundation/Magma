@@ -908,29 +908,15 @@ public class Main {
             var callerState = callerTuple.left;
             var oldCaller = callerTuple.right;
 
-            var nextState = callerState;
             Value newCaller = oldCaller;
             var newArguments = new ArrayList<Value>();
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                Value thisArgument;
-                if (parent instanceof Symbol symbol) {
-                    thisArgument = symbol;
-                }
-                else if (parent instanceof DataAccess access) {
-                    thisArgument = access;
-                }
-                else {
-                    var localTuple = nextState.createName("local");
-
-                    thisArgument = new Symbol(localTuple.left);
-                    newCaller = new Symbol(property);
-                    nextState = localTuple.right.addStatement("\n\tauto " + localTuple.left + " = " + parent.generate() + ";");
-                }
-                newArguments.add(thisArgument);
+                newArguments.add(parent);
+                newCaller = new Symbol(property);
             }
 
             newArguments.addAll(oldArguments);
-            return new Some<>(new Tuple<>(nextState, new Invocation(newCaller, newArguments)));
+            return new Some<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
         }
 
         return new None<>();
