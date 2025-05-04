@@ -34,6 +34,8 @@ public class Main {
         <R> Option<R> map(Function<T, R> mapper);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        T orElse(T other);
     }
 
     private interface Error {
@@ -81,6 +83,11 @@ public class Main {
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
         }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -111,7 +118,12 @@ public class Main {
 
         @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return mapper.apply(value);
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
         }
     }
 
@@ -176,9 +188,13 @@ public class Main {
             return this.depth == 0;
         }
 
-        public Option<DivideState> popAndAppend() {
+        public Option<DivideState> popAndAppendToOption() {
+            return this.popAndAppendToTuple().map(Tuple::right);
+        }
+
+        public Option<Tuple<Character, DivideState>> popAndAppendToTuple() {
             return this.pop().map(tuple -> {
-                return tuple.right.append(tuple.left);
+                return new Tuple<>(tuple.left, tuple.right.append(tuple.left));
             });
         }
 
@@ -317,10 +333,37 @@ public class Main {
             }
 
             current = foldSingleQuotes(popped.right, popped.left)
+                    .or(() -> foldDoubleQuotes(popped.right, popped.left))
                     .orElseGet(() -> folder.apply(popped.right, popped.left));
         }
 
         return current.advance().segments;
+    }
+
+    private static Option<DivideState> foldDoubleQuotes(DivideState state, char maybeDoubleQuotes) {
+        if (maybeDoubleQuotes != '\"') {
+            return new None<>();
+        }
+
+        var current = state.append(maybeDoubleQuotes);
+        while (true) {
+            if (!(current.popAndAppendToTuple() instanceof Some(var popped))) {
+                break;
+            }
+
+            var next = popped.left;
+            current = popped.right;
+
+            if (next == '\\') {
+                current = current.popAndAppendToOption().orElse(current);
+            }
+            if (next == '\"') {
+                break;
+            }
+        }
+
+        return new Some<>(current);
+
     }
 
     private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
@@ -330,8 +373,8 @@ public class Main {
 
         var appended = state.append(c);
         return appended.pop()
-                .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppend() : new Some<>(popped.right))
-                .flatMap(DivideState::popAndAppend);
+                .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
+                .flatMap(DivideState::popAndAppendToOption);
 
     }
 
