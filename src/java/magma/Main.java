@@ -355,6 +355,22 @@ public class Main {
         }
     }
 
+    private record Operation(Value left, Operator operator, Value right) implements Value {
+        @Override
+        public String generate() {
+            return this.left.generate() + " " + this.operator.representation + " " + this.right.generate();
+        }
+    }
+
+    private enum Operator {
+        ADD("+");
+        private final String representation;
+
+        Operator(String representation) {
+            this.representation = representation;
+        }
+    }
+
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
@@ -407,7 +423,7 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                if (left.contains(infix)) {
+                if (left.indexOf(infix) >= 0) {
                     var result = compileStatements(state, right, Main::compileStructSegment);
                     var generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
                     return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
@@ -888,7 +904,25 @@ public class Main {
                 type((state0, input0) -> compileInvokable(state0, input0, depth)),
                 type((state0, input0) -> compileAccess(state0, input0, depth)),
                 type(Main::compileSymbolValue),
-                type(Main::compileMethodReference)));
+                type(Main::compileMethodReference),
+                type((state1, input1) -> compileOperator(state1, input1, depth))
+        ));
+    }
+
+    private static Option<Tuple<CompileState, Value>> compileOperator(CompileState state, String input, int depth) {
+        var index = input.indexOf("+");
+        if (index >= 0) {
+            var left = input.substring(0, index);
+            var right = input.substring(index + "+".length());
+            if (parseValue(state, left, depth) instanceof Some(var leftTuple)) {
+                if (parseValue(leftTuple.left, right, depth) instanceof Some(var rightTuple)) {
+                    var operation = new Operation(leftTuple.right, Operator.ADD, rightTuple.right);
+                    return new Some<>(new Tuple<>(rightTuple.left, operation));
+                }
+            }
+        }
+
+        return new None<>();
     }
 
     private static <T> Option<Tuple<CompileState, T>> or(

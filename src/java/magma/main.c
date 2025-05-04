@@ -82,7 +82,18 @@
 /* private record Content(String input) implements Value  */{/*  */
 
 };
-/* public class Main  */{/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
+/* private record Operation(Value left, Operator operator, Value right) implements Value  */{/*  */
+
+};
+/* public class Main  */{/* private enum Operator {
+        ADD("+");
+        private final String representation;
+
+        Operator(String representation) {
+            this.representation = representation;
+        }
+    } */
+/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
 /* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 expect /* private static *//* Option<IOError> */ writeTarget(char* output);
 expect /* private static Result<String, *//* IOError> */ readSource();
@@ -507,7 +518,25 @@ expect /* private static Result<String, *//* IOError> */ readSource();
                 type((state0, input0) -> compileInvokable(state0, input0, depth)),
                 type((state0, input0) -> compileAccess(state0, input0, depth)),
                 type(Main::compileSymbolValue),
-                type(Main::compileMethodReference)));
+                type(Main::compileMethodReference),
+                type((state1, input1) -> compileOperator(state1, input1, depth))
+        ));
+    }
+
+    private static Option<Tuple<CompileState, Value>> compileOperator(CompileState state, String input, int depth) {
+        var index = input.indexOf("+");
+        if (index >= 0) {
+            var left = input.substring(0, index);
+            var right = input.substring(index + "+".length());
+            if (parseValue(state, left, depth) instanceof Some(var leftTuple)) {
+                if (parseValue(leftTuple.left, right, depth) instanceof Some(var rightTuple)) {
+                    var operation = new Operation(leftTuple.right, Operator.ADD, rightTuple.right);
+                    return new Some<>(new Tuple<>(rightTuple.left, operation));
+                }
+            }
+        }
+
+        return new None<>();
     }
 
     private static <T> Option<Tuple<CompileState, T>> or(
@@ -771,7 +800,7 @@ struct public Frame(){
 		this.counters.put(this.counters, category, /*  0 */);
 	}
 	auto oldCounter = this.counters.get(this.counters, category);
-	auto name = /*  category + oldCounter */;
+	auto name = category + oldCounter;
 	auto newCounter = /*  oldCounter + 1 */;
 	this.counters.put(this.counters, category, newCounter);
 	return /* Tuple<> */::new(name, this);
@@ -820,7 +849,7 @@ struct public CompileState(){
 	}
 	auto modifiersString = /*  this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " " */;
 	auto beforeTypeString = /*  this.beforeType.isEmpty() ? "" : generatePlaceholder(this.beforeType) */;
-	return /* annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name */;
+	return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name;
 }
 @Override
 /* public */char* generate(){
@@ -835,11 +864,11 @@ struct public CompileState(){
 	auto local0 = /* var joined = this.arguments.stream()
                     .map(Value */::generate);
 	collect(local0, Collectors.joining(Collectors, ", "));
-	return /* this.caller.generate() + "(" + joined + ")" */;
+	return this.caller.generate(this.caller, ) + "(" + joined + ")";
 }
 @Override
 /* public */char* generate(){
-	return /* this.parent.generate() + "." + this.child */;
+	return this.parent.generate(this.parent, ) + "." + this.child;
 }
 @Override
 /* public */char* generate(){
@@ -849,6 +878,10 @@ struct public CompileState(){
 @Override
 /* public */char* generate(){
 	return generatePlaceholder(this.input);
+}
+@Override
+/* public */char* generate(){
+	return this.left.generate(this.left, ) + " " + this.operator.representation + " " + this.right.generate(this.left.generate(this.left, ) + " " + this.operator.representation + " " + this.right, );
 }
 auto lambda0(auto error){
 	return System.err.println(System.err, error.display(error, ));
@@ -867,7 +900,7 @@ auto lambda1(auto input){
 	auto tuple = compileStatements(state, input, struct Main::compileRootSegment);
 	auto joinedStructs = String.join(String, "", tuple.left.structs);
 	auto joinedFunctions = String.join(String, "", tuple.left.functions);
-	return /* joinedStructs + joinedFunctions + tuple.right */;
+	return joinedStructs + joinedFunctions + tuple.right;
 }
 /* private static Tuple<CompileState, *//* String> */ compileRootSegment(struct CompileState state, char* input){
 	auto local0 = compileStructure(state, input, "class ");
@@ -881,11 +914,13 @@ auto lambda1(auto input){
 		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
 		auto contentStart = withoutEnd.indexOf(withoutEnd, "{");
 		if (/* contentStart >= 0 */){
+	auto local0 = contentStart + "{";
+	auto local1 = contentStart + "{";
 			auto left = withoutEnd.substring(withoutEnd, /* 0 */, contentStart);
-			auto right = withoutEnd.substring(withoutEnd, /* contentStart + "{".length() */);
-			if (left.contains(left, infix)){
+			auto right = withoutEnd.substring(withoutEnd, length(local1, ));
+			if (/* left.indexOf(infix) >= 0 */){
 				auto result = compileStatements(state, right, struct Main::compileStructSegment);
-				auto generated = /*  generatePlaceholder(left) + "{" + result.right + "\n};\n" */;
+				auto generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
 				return /* Some<> */::new(/* Tuple<> */::new(/* result.left.addStruct(generated */), /*  "") */);
 			}
 		}
