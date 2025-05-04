@@ -675,8 +675,11 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState state2, String input) {
-        return compileWhitespace(state2, input)
-                .or(() -> compileContent(state2, input));
+       return or(state2, input, List.of(
+               type(Main::compileWhitespace),
+               type(Main::compileDefinition),
+               type(Main::compileContent)
+       ));
     }
 
     private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
