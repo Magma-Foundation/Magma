@@ -679,9 +679,8 @@ public class Main {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var right = stripped.substring("return ".length());
-            if (compileValue(state, right, depth) instanceof Some(var other)) {
-                return new Some<>(new Tuple<>(other.left, "return " + other.right));
-            }
+            var tuple = compileValueOrPlaceholder(state, right, depth);
+            return new Some<>(new Tuple<>(tuple.left, "return " + tuple.right));
         }
 
         return new None<>();

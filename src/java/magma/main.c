@@ -298,9 +298,8 @@ expect /* private static Result<String, *//* IOError> */ readSource();
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var right = stripped.substring("return ".length());
-            if (compileValue(state, right, depth) instanceof Some(var other)) {
-                return new Some<>(new Tuple<>(other.left, "return " + other.right));
-            }
+            var tuple = compileValueOrPlaceholder(state, right, depth);
+            return new Some<>(new Tuple<>(tuple.left, "return " + tuple.right));
         }
 
         return new None<>();
@@ -736,10 +735,10 @@ struct public DivideState(char* input, /* List<String> */ segments, struct Strin
 	return this.segments;
 }
 /* private */struct boolean isShallow(){
-	struct return this.depth = /* = 1 */;
+	return /* this.depth == 1 */;
 }
 /* public */struct boolean isLevel(){
-	struct return this.depth = /* = 0 */;
+	return /* this.depth == 0 */;
 }
 /* public *//* Option<DivideState> */ popAndAppendToOption(){
 	auto local0 = this.popAndAppendToTuple(this, );
@@ -821,7 +820,7 @@ struct public CompileState(){
 	}
 	auto modifiersString = /*  this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " " */;
 	auto beforeTypeString = /*  this.beforeType.isEmpty() ? "" : generatePlaceholder(this.beforeType) */;
-	/* return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name */;
+	return /* annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name */;
 }
 @Override
 /* public */char* generate(){
@@ -836,11 +835,11 @@ struct public CompileState(){
 	auto local0 = /* var joined = this.arguments.stream()
                     .map(Value */::generate);
 	collect(local0, Collectors.joining(Collectors, ", "));
-	/* return this.caller.generate() + "(" + joined + ")" */;
+	return /* this.caller.generate() + "(" + joined + ")" */;
 }
 @Override
 /* public */char* generate(){
-	/* return this.parent.generate() + "." + this.child */;
+	return /* this.parent.generate() + "." + this.child */;
 }
 @Override
 /* public */char* generate(){
@@ -868,7 +867,7 @@ auto lambda1(auto input){
 	auto tuple = compileStatements(state, input, struct Main::compileRootSegment);
 	auto joinedStructs = String.join(String, "", tuple.left.structs);
 	auto joinedFunctions = String.join(String, "", tuple.left.functions);
-	/* return joinedStructs + joinedFunctions + tuple.right */;
+	return /* joinedStructs + joinedFunctions + tuple.right */;
 }
 /* private static Tuple<CompileState, *//* String> */ compileRootSegment(struct CompileState state, char* input){
 	auto local0 = compileStructure(state, input, "class ");
