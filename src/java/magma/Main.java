@@ -245,9 +245,9 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> functions, List<Frame> frames) {
+    private record CompileState(List<String> structs, List<String> functions, List<Frame> frames) {
         public CompileState() {
-            this(new ArrayList<>(), new ArrayList<>(Collections.singletonList(new Frame())));
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(Collections.singletonList(new Frame())));
         }
 
         public CompileState addFunction(String generated) {
@@ -275,6 +275,11 @@ public class Main {
 
         public CompileState exit() {
             this.frames.removeLast();
+            return this;
+        }
+
+        public CompileState addStruct(String generated) {
+            this.structs.add(generated);
             return this;
         }
     }
@@ -381,9 +386,11 @@ public class Main {
 
     private static String compile(String input) {
         var state = new CompileState();
-        var tuple = compileStatements(state, input, (state1, input1) -> compileRootSegment(state1, input1));
-        var joined = String.join("", tuple.left.functions);
-        return joined + tuple.right;
+        var tuple = compileStatements(state, input, Main::compileRootSegment);
+
+        var joinedStructs = String.join("", tuple.left.structs);
+        var joinedFunctions = String.join("", tuple.left.functions);
+        return joinedStructs + joinedFunctions + tuple.right;
     }
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
@@ -402,7 +409,8 @@ public class Main {
                 var right = withoutEnd.substring(contentStart + "{".length());
                 if (left.contains(infix)) {
                     var result = compileStatements(state, right, Main::compileClassSegment);
-                    return new Some<>(new Tuple<>(result.left, generatePlaceholder(left) + "{" + result.right + "\n};\n"));
+                    var generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
+                    return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
                 }
             }
         }

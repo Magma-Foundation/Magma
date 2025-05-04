@@ -1,3 +1,158 @@
+/* private record IOError(IOException exception) implements Error  */{/*  */
+
+};
+/* record None<T>() implements Option<T>  */{/*  */
+
+};
+/* private record Some<T>(T value) implements Option<T>  */{/*  */
+
+};
+/* private record Ok<T, X>(T value) implements Result<T, X>  */{/*  */
+
+};
+/* private record Err<T, X>(X error) implements Result<T, X>  */{/*  */
+
+};
+/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{/*  */
+
+};
+/* private record CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */{/*  */
+
+};
+/* private record Tuple<A, B>(A left, B right)  */{/*  */
+
+};
+/* private record Definition(
+            List<String> annotations,
+            List<String> modifiers,
+            String beforeType,
+            String type,
+            String name
+    )  */{/*  */
+
+};
+/* private record StringValue(String value) implements Value  */{/*  */
+
+};
+/* private record Symbol(String value) implements Value  */{/*  */
+
+};
+/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{/*  */
+
+};
+/* private record DataAccess(Value parent, String child) implements Value  */{/*  */
+
+};
+/* private record MethodAccess(String parent, String child) implements Value  */{/*  */
+
+};
+/* private record Content(String input) implements Value  */{/*  */
+
+};
+/* public class Main  */{/* private interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    } */
+/* private interface Option<T> {
+        void ifPresent(Consumer<T> consumer);
+
+        T orElseGet(Supplier<T> supplier);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        boolean isPresent();
+
+        <R> Option<R> map(Function<T, R> mapper);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        T orElse(T other);
+    } */
+/* private interface Error {
+        String display();
+    } */
+/* private @interface Actual {
+    } */
+/* private interface Value {
+        String generate();
+    } */
+/* private static class DivideState {
+        private final String input;
+        private final List<String> segments;
+        private final int index;
+        private StringBuilder buffer;
+        private int depth;
+
+        public DivideState(String input) {
+            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
+        }
+
+        public DivideState(String input, List<String> segments, StringBuilder buffer, int index, int depth) {
+            this.input = input;
+            this.segments = segments;
+            this.index = index;
+            this.depth = depth;
+            this.buffer = buffer;
+        }
+
+        private DivideState enter() {
+            this.depth = this.depth + 1;
+            return this;
+        }
+
+        private DivideState exit() {
+            this.depth = this.depth - 1;
+            return this;
+        }
+
+        private DivideState advance() {
+            this.segments().add(this.buffer.toString());
+            this.buffer = new StringBuilder();
+            return this;
+        }
+
+        public List<String> segments() {
+            return this.segments;
+        }
+
+        private boolean isShallow() {
+            return this.depth == 1;
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public Option<DivideState> popAndAppendToOption() {
+            return this.popAndAppendToTuple().map(Tuple::right);
+        }
+
+        public Option<Tuple<Character, DivideState>> popAndAppendToTuple() {
+            return this.pop().map(tuple -> {
+                return new Tuple<>(tuple.left, tuple.right.append(tuple.left));
+            });
+        }
+
+        private DivideState append(char c) {
+            this.buffer.append(c);
+            return this;
+        }
+
+        public Option<Tuple<Character, DivideState>> pop() {
+            if (this.index < this.input.length()) {
+                var c = this.input.charAt(this.index);
+                return new Some<>(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
+            }
+            else {
+                return new None<>();
+            }
+        }
+    } */
+/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
+/* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
+expect /* private static *//* Option<IOError> */ writeTarget(char* output);
+expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
+
+};
 @Override
 /* public */char* display(/*  */){
 	auto writer = struct StringWriter::new();
@@ -85,7 +240,7 @@ struct public Frame(/*  */){
 	return this;
 }
 struct public CompileState(/*  */){
-	this(/* ArrayList<> */::new(), /* ArrayList<> */::new(Collections.singletonList(Collections, struct Frame::new())));
+	this(/* ArrayList<> */::new(), /* ArrayList<> */::new(), /* ArrayList<> */::new(Collections.singletonList(Collections, struct Frame::new())));
 }
 /* public */struct CompileState addFunction(char* generated){
 	this.functions.add(this.functions, generated);
@@ -108,6 +263,10 @@ struct public CompileState(/*  */){
 }
 /* public */struct CompileState exit(/*  */){
 	this.frames.removeLast(this.frames, );
+	return this;
+}
+/* public */struct CompileState addStruct(char* generated){
+	this.structs.add(this.structs, generated);
 	return this;
 }
 /* private */char* generate(/*  */){
@@ -164,9 +323,10 @@ auto lambda1(auto input){
 }
 /* private static */char* compile(char* input){
 	auto state = struct CompileState::new();
-	auto tuple = compileStatements(state, input, /*  (state1 */, /*  input1) -> compileRootSegment(state1 */, /*  input1) */);
-	auto joined = String.join(String, "", tuple.left.functions);
-	/* return joined + tuple.right */;
+	auto tuple = compileStatements(state, input, struct Main::compileRootSegment);
+	auto joinedStructs = String.join(String, "", tuple.left.structs);
+	auto joinedFunctions = String.join(String, "", tuple.left.functions);
+	/* return joinedStructs + joinedFunctions + tuple.right */;
 }
 /* private static Tuple<CompileState, *//* String> */ compileRootSegment(struct CompileState state, char* input){
 	auto local0 = compileStructure(state, input, "class ");
@@ -184,7 +344,8 @@ auto lambda1(auto input){
 			auto right = withoutEnd.substring(withoutEnd, /* contentStart + "{".length() */);
 			if (left.contains(left, infix)){
 				auto result = compileStatements(state, right, struct Main::compileClassSegment);
-				return /* Some<> */::new(/* new Tuple<>(result.left */, generatePlaceholder(/* left) + "{" + result.right + "\n};\n" */));
+				auto generated = /*  generatePlaceholder(left) + "{" + result.right + "\n};\n" */;
+				return /* Some<> */::new(/* Tuple<> */::new(/* result.left.addStruct(generated */), /*  "") */);
 			}
 		}
 	}
@@ -776,160 +937,5 @@ import java.util.function.Consumer; *//*
 import java.util.function.Function; *//* 
 import java.util.function.Supplier; *//* 
 import java.util.regex.Pattern; *//* 
-import java.util.stream.Collectors; *//* public class Main  */{/* private interface Result<T, X> {
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
-    } */
-/* private interface Option<T> {
-        void ifPresent(Consumer<T> consumer);
-
-        T orElseGet(Supplier<T> supplier);
-
-        Option<T> or(Supplier<Option<T>> other);
-
-        boolean isPresent();
-
-        <R> Option<R> map(Function<T, R> mapper);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        T orElse(T other);
-    } */
-/* private interface Error {
-        String display();
-    } */
-/* private @interface Actual {
-    } */
-/* private interface Value {
-        String generate();
-    } */
-/* private record IOError(IOException exception) implements Error  */{/*  */
-
-};
-/* record None<T>() implements Option<T>  */{/*  */
-
-};
-/* private record Some<T>(T value) implements Option<T>  */{/*  */
-
-};
-/* private record Ok<T, X>(T value) implements Result<T, X>  */{/*  */
-
-};
-/* private record Err<T, X>(X error) implements Result<T, X>  */{/*  */
-
-};
-/* private static class DivideState {
-        private final String input;
-        private final List<String> segments;
-        private final int index;
-        private StringBuilder buffer;
-        private int depth;
-
-        public DivideState(String input) {
-            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
-        }
-
-        public DivideState(String input, List<String> segments, StringBuilder buffer, int index, int depth) {
-            this.input = input;
-            this.segments = segments;
-            this.index = index;
-            this.depth = depth;
-            this.buffer = buffer;
-        }
-
-        private DivideState enter() {
-            this.depth = this.depth + 1;
-            return this;
-        }
-
-        private DivideState exit() {
-            this.depth = this.depth - 1;
-            return this;
-        }
-
-        private DivideState advance() {
-            this.segments().add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
-        }
-
-        public List<String> segments() {
-            return this.segments;
-        }
-
-        private boolean isShallow() {
-            return this.depth == 1;
-        }
-
-        public boolean isLevel() {
-            return this.depth == 0;
-        }
-
-        public Option<DivideState> popAndAppendToOption() {
-            return this.popAndAppendToTuple().map(Tuple::right);
-        }
-
-        public Option<Tuple<Character, DivideState>> popAndAppendToTuple() {
-            return this.pop().map(tuple -> {
-                return new Tuple<>(tuple.left, tuple.right.append(tuple.left));
-            });
-        }
-
-        private DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
-        }
-
-        public Option<Tuple<Character, DivideState>> pop() {
-            if (this.index < this.input.length()) {
-                var c = this.input.charAt(this.index);
-                return new Some<>(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
-            }
-            else {
-                return new None<>();
-            }
-        }
-    } */
-/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{/*  */
-
-};
-/* private record CompileState(List<String> functions, List<Frame> frames)  */{/*  */
-
-};
-/* private record Tuple<A, B>(A left, B right)  */{/*  */
-
-};
-/* private record Definition(
-            List<String> annotations,
-            List<String> modifiers,
-            String beforeType,
-            String type,
-            String name
-    )  */{/*  */
-
-};
-/* private record StringValue(String value) implements Value  */{/*  */
-
-};
-/* private record Symbol(String value) implements Value  */{/*  */
-
-};
-/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{/*  */
-
-};
-/* private record DataAccess(Value parent, String child) implements Value  */{/*  */
-
-};
-/* private record MethodAccess(String parent, String child) implements Value  */{/*  */
-
-};
-/* private record Content(String input) implements Value  */{/*  */
-
-};
-/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
-/* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
-expect /* private static *//* Option<IOError> */ writeTarget(char* output);
-expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
-
-};
-/* 
+import java.util.stream.Collectors; *//* 
  */
