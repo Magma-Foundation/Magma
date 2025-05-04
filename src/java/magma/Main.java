@@ -888,6 +888,10 @@ public class Main {
             return new Some<>(new Tuple<>(state, "auto"));
         }
 
+        if (stripped.equals("char")) {
+            return new Some<>(new Tuple<>(state, "char"));
+        }
+
         if (stripped.equals("void")) {
             return new Some<>(new Tuple<>(state, "void"));
         }

@@ -257,7 +257,7 @@ auto lambda0(auto tuple){
 /* public */template Option<(struct Character, struct DivideState)> popAndAppendToTuple(){
 	return map(pop(this), lambda0);
 }
-/* private */struct DivideState append(struct char c){
+/* private */struct DivideState append(char c){
 	append(this.buffer, c);
 	return this;
 }
@@ -270,7 +270,7 @@ auto lambda0(auto tuple){
 		return template None<struct >::new();
 	}
 }
-/* public */struct char peek(){
+/* public */char peek(){
 	return charAt(this.input, this.index);
 }
 struct public Frame(){
@@ -460,7 +460,7 @@ auto lambda3(){
 	}
 	return advance(current).segments;
 }
-/* private static */template Option<struct DivideState> foldDoubleQuotes(struct DivideState state, struct char maybeDoubleQuotes){
+/* private static */template Option<struct DivideState> foldDoubleQuotes(struct DivideState state, char maybeDoubleQuotes){
 	if (/* maybeDoubleQuotes != '\"' */){
 		return template None<struct >::new();
 	}
@@ -486,7 +486,7 @@ auto lambda0(auto popped){
 auto lambda1(auto popped){
 	return popped.left;
 }
-/* private static */template Option<struct DivideState> foldSingleQuotes(struct DivideState state, struct char c){
+/* private static */template Option<struct DivideState> foldSingleQuotes(struct DivideState state, char c){
 	if (/* c != '\'' */){
 		return template None<struct >::new();
 	}
@@ -505,7 +505,7 @@ auto lambda1(auto popped){
 /* private static */struct StringBuilder mergeStatements(struct StringBuilder output, char* mapped){
 	return append(output, mapped);
 }
-/* private static */struct DivideState foldStatementChar(struct DivideState state, struct char c){
+/* private static */struct DivideState foldStatementChar(struct DivideState state, char c){
 	auto appended = append(state, c);
 	if (/* c == ';' && appended.isLevel() */){
 		return advance(appended);
@@ -755,6 +755,9 @@ auto lambda0(auto typeResult){
 	if (equals(stripped, "var")){
 		return template Some<struct >::new((state, "auto"));
 	}
+	if (equals(stripped, "char")){
+		return template Some<struct >::new((state, "char"));
+	}
 	if (equals(stripped, "void")){
 		return template Some<struct >::new((state, "void"));
 	}
@@ -861,7 +864,7 @@ auto lambda0(auto tuple){
 	}
 	return append(append(cache, ", "), element);
 }
-/* private static */struct DivideState foldValueChar(struct DivideState state, struct char c){
+/* private static */struct DivideState foldValueChar(struct DivideState state, char c){
 	if (/* c == ',' && state.isLevel() */){
 		return advance(state);
 	}
@@ -1053,7 +1056,7 @@ auto lambda1(auto name){
 	}
 	return true;
 }
-/* private static */struct DivideState foldInvocationStart(struct DivideState state, struct char c){
+/* private static */struct DivideState foldInvocationStart(struct DivideState state, char c){
 	auto appended = append(state, c);
 	if (c == '('){
 		auto entered = enter(appended);
