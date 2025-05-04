@@ -22,6 +22,10 @@ public class Main {
         void ifPresent(Consumer<T> consumer);
 
         T orElseGet(Supplier<T> supplier);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        boolean isPresent();
     }
 
     private interface Error {
@@ -46,6 +50,16 @@ public class Main {
         public T orElseGet(Supplier<T> supplier) {
             return supplier.get();
         }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -57,6 +71,16 @@ public class Main {
         @Override
         public T orElseGet(Supplier<T> supplier) {
             return this.value;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
         }
     }
 
@@ -257,18 +281,32 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
-            var s = compileFunctionSegmentValue(slice, state);
+            var s = compileFunctionStatementValue(slice, state);
             return new Tuple<>(s.left, "\n\t" + s.right + ";");
         }
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static Tuple<CompileState, String> compileFunctionSegmentValue(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileFunctionStatementValue(String input, CompileState state) {
         var stripped = input.strip();
-        return compileInvocation(stripped, state).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileInvocation(state, stripped)
+                .or(() -> compileAssignment(state, stripped))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Option<Tuple<CompileState, String>> compileInvocation(String stripped, CompileState state) {
+    private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
+        var valueSeparator = input.indexOf("=");
+        if (valueSeparator >= 0) {
+            var left = input.substring(0, valueSeparator);
+            var right = input.substring(valueSeparator + "=".length());
+            var tuple = compileValueOrPlaceholder(state, right);
+            return new Some<>(new Tuple<>(tuple.left, generatePlaceholder(left) + " = " + tuple.right));
+        }
+
+        return new None<>();
+    }
+
+    private static Option<Tuple<CompileState, String>> compileInvocation(CompileState state, String stripped) {
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
 
@@ -278,10 +316,11 @@ public class Main {
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                var callerTuple = compileValue(state, caller);
-                var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValue, Main::mergeValues);
-                var generated = callerTuple.right + "(" + argumentsTuple.right + ")";
-                return new Some<>(new Tuple<>(argumentsTuple.left, generated));
+                if (compileValue(state, caller) instanceof Some(var callerTuple)){
+                    var argumentsTuple = compileAll(callerTuple.left, arguments, Main::foldValueChar, Main::compileValueOrPlaceholder, Main::mergeValues);
+                    var generated = callerTuple.right + "(" + argumentsTuple.right + ")";
+                    return new Some<>(new Tuple<>(argumentsTuple.left, generated));
+                }
             }
         }
 
@@ -302,11 +341,17 @@ public class Main {
         return state.append(c);
     }
 
-    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileValueOrPlaceholder(CompileState state, String input) {
+        return compileValue(state, input).orElseGet(() -> {
+            return new Tuple<>(state, generatePlaceholder(input));
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         var stripped = input.strip();
-        var maybeInvocation = compileInvocation(stripped, state);
-        if (maybeInvocation instanceof Some(var invocation)) {
-            return invocation;
+        var maybeInvocation = compileInvocation(state, stripped);
+        if (maybeInvocation.isPresent()) {
+            return maybeInvocation;
         }
 
         var arrowIndex = stripped.indexOf("->");
@@ -318,7 +363,8 @@ public class Main {
                 if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                     var content = withBraces.substring(1, withBraces.length() - 1);
                     var result = compileStatements(state, content, Main::compileFunctionSegment);
-                    return new Tuple<>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "\n}\n"), "lambda");
+                    var compileStateStringTuple = new Tuple<CompileState, String>(result.left.addFunction("auto lambda(auto " + beforeArrow + "){" + result.right + "\n}\n"), "lambda");
+                    return new Some<>(compileStateStringTuple);
                 }
             }
         }
@@ -328,16 +374,18 @@ public class Main {
             var parent = stripped.substring(0, separator);
             var child = stripped.substring(separator + ".".length());
             if (isSymbol(child)) {
-                var tuple = compileValue(state, parent);
-                return new Tuple<>(tuple.left, tuple.right + "." + child);
+                var tuple = compileValueOrPlaceholder(state, parent);
+                var compileStateStringTuple = new Tuple<CompileState, String>(tuple.left, tuple.right + "." + child);
+                return new Some<>(compileStateStringTuple);
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Tuple<>(state, stripped);
+            var compileStateStringTuple = new Tuple<CompileState, String>(state, stripped);
+            return new Some<>(compileStateStringTuple);
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        return new None<>();
     }
 
     private static boolean isSymbol(String input) {
