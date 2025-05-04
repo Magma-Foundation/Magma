@@ -16,23 +16,23 @@ import java.util.function.Supplier;
 public class Main  */{
 };
 /* private interface Result<T, X> */{
-	/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) */;/*  */
+	/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) */;
 }
 /* private interface Option<T> */{
 	/* void ifPresent(Consumer<T> consumer) */;
 	/* T orElseGet(Supplier<T> supplier) */;
 	/* Option<T> or(Supplier<Option<T>> other) */;
-	/* boolean isPresent() */;/*  */
+	/* boolean isPresent() */;
 }
 /* private interface Error */{
-	/* String display() */;/*  */
+	/* String display() */;
 }
 /* private record IOError(IOException exception) implements Error */{/* @Override
         public String display() {
             var writer = new StringWriter();
             this.exception.printStackTrace(new PrintWriter(writer));
             return writer.toString();
-        } *//*  */
+        } */
 }
 /* record None<T>() implements Option<T> */{/* @Override
         public void ifPresent(Consumer<T> consumer) {
@@ -45,7 +45,7 @@ public class Main  */{
         } *//* @Override
         public boolean isPresent() {
             return false;
-        } *//*  */
+        } */
 }
 /* private record Some<T>(T value) implements Option<T> */{/* @Override
         public void ifPresent(Consumer<T> consumer) {
@@ -59,17 +59,17 @@ public class Main  */{
         } *//* @Override
         public boolean isPresent() {
             return true;
-        } *//*  */
+        } */
 }
 /* private record Ok<T, X>(T value) implements Result<T, X> */{/* @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(this.value);
-        } *//*  */
+        } */
 }
 /* private record Err<T, X>(X error) implements Result<T, X> */{/* @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(this.error);
-        } *//*  */
+        } */
 }
 /* private static class DivideState */{
 	/* private final List<String> segments */;
@@ -99,36 +99,36 @@ public class Main  */{
             return this;
         } *//* public boolean isLevel() {
             return this.depth == 0;
-        } *//*  */
+        } */
 }
 /* private record CompileState(List<String> functions) */{/* public CompileState() {
             this(new ArrayList<>());
         } *//* public CompileState addFunction(String generated) {
             this.functions.add(generated);
             return this;
-        } *//*  */
+        } */
 }
-/* private record Tuple<A, B>(A left, B right) */{/*  */
+/* private record Tuple<A, B>(A left, B right) */{
 }
 auto lambda(auto input){
 	auto output = compile(input);
-	return writeTarget(output);/*  */
+	return writeTarget(output);
 }
 /* public static void main() */{
-	readSource().match(lambda, /*  Some::new */).ifPresent(/* error -> System */.err.println(error.display()));/*  */
+	readSource().match(lambda, /*  Some::new */).ifPresent(/* error -> System */.err.println(error.display()));
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
             return new None<>();
         } *//* catch (IOException e) {
             return new Some<>(new IOError(e));
-        } *//*  */
+        } */
 }
 /* private static Result<String, IOError> readSource() */{/* try {
             return new Ok<>(Files.readString(SOURCE));
         } *//* catch (IOException e) {
             return new Err<>(new IOError(e));
-        } *//*  */
+        } */
 }
 /* var contentStart = withoutEnd.indexOf(" */{
 	");
@@ -143,10 +143,10 @@ auto lambda(auto input){
         return generatePlaceholder(stripped) */;
 }
 /* private static Tuple<CompileState, String> compileRoot(String input, CompileState state) */{
-	return compileStatements(state, input, /*  Main::compileClassSegment */);/*  */
+	return compileStatements(state, input, /*  Main::compileClassSegment */);
 }
 /* private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) */{
-	return compileAll(state, input, /*  Main::foldStatementChar */, mapper, /*  Main::mergeStatements */);/*  */
+	return compileAll(state, input, /*  Main::foldStatementChar */, mapper, /*  Main::mergeStatements */);
 }
 /* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{
 	auto segments = divideAll(input, folder);
@@ -156,24 +156,24 @@ auto lambda(auto input){
             current = mapped.left;
             output = merger.apply(output, mapped.right);
         } */
-	/* return new Tuple<>(current, output.toString()) */;/*  */
+	/* return new Tuple<>(current, output.toString()) */;
 }
 /* private static StringBuilder mergeStatements(StringBuilder output, String mapped) */{
-	return output.append(mapped);/*  */
+	return output.append(mapped);
 }
 /* private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) */{
 	auto current = /*  new DivideState() */;/* for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
         } */
-	return current.advance().segments;/*  */
+	return current.advance().segments;
 }
 /* private static DivideState foldStatementChar(DivideState state, char c) */{
 	/* var appended = state */.append(c);/* if (c == ';' && appended.isLevel()) {
             return appended.advance();
         } *//* if (c == '} */
 	/* ' && appended */.isShallow(/* )) {
-            return appended.advance().exit( */);/*  */
+            return appended.advance().exit( */);
 }
 /* else if (c == ' */{/* ' || c == '(') {
             return appended.enter();
@@ -188,26 +188,35 @@ auto lambda(auto input){
                 var tuple0 = compileStatements(state, right, Main::compileFunctionSegment);
                 var generated = generatePlaceholder(left.strip()) + "{" + tuple0.right + "\n}\n";
                 return new Tuple<>(tuple0.left.addFunction(generated), "");
-            } *//*  */
+            } */
+}
+/* if (stripped.isEmpty()) */{
+	/* return new Tuple<>(state, "") */;
 }
 /* if (stripped.endsWith(";")) */{
 	/* var slice = stripped */.substring(/* 0 */, /* stripped.length() - ";" */.length());
 	auto s = compileFunctionStatementValue(slice, state);
-	/* return new Tuple<>(s.left, "\n\t" + s.right + ";") */;/*  */
+	/* return new Tuple<>(s.left, "\n\t" + s.right + ";") */;
+}
+/* }
+
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) */{
+	/* if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, "")) */;
 }
 /* if (stripped.startsWith("return ")) */{
 	/* var right = stripped */.substring(/* "return " */.length());/* if (compileValue(state, right) instanceof Some(var other)) {
                 return new Some<>(new Tuple<>(other.left, "return " + other.right));
-            } *//*  */
+            } */
 }
 /* if (valueSeparator < 0) */{
-	/* return new None<>() */;/*  */
+	/* return new None<>() */;
 }
 /* if (valueSeparator >= 0) */{
 	/* var type = stripped */.substring(/* 0 */, valueSeparator);
 	/* var name = stripped */.substring(/* valueSeparator + " " */.length()).strip();
 	auto typeResult = compileType(state, type);
-	/* return new Tuple<>(typeResult.left, typeResult.right + " " + name) */;/*  */
+	/* return new Tuple<>(typeResult.left, typeResult.right + " " + name) */;
 }
 /* }
 
@@ -244,7 +253,7 @@ auto lambda(auto input){
         return compileReturn(state, input)
                 .or(() -> compileInvocation(state, input))
                 .or(() -> compileAssignment(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* }
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))); *//* return new None<>(); *//* }
 
     private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
         var stripped = input.strip(); *//* return new None<>(); *//* }

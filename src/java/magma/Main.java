@@ -279,6 +279,10 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return new Tuple<>(state, "");
+        }
+
         if (stripped.endsWith(";")) {
             var slice = stripped.substring(0, stripped.length() - ";".length());
             var s = compileFunctionStatementValue(slice, state);
@@ -292,6 +296,13 @@ public class Main {
                 .or(() -> compileInvocation(state, input))
                 .or(() -> compileAssignment(state, input))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, ""));
+        }
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
