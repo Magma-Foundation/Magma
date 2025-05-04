@@ -522,7 +522,7 @@ public class Main {
         }
 
         var appended = state.append(c);
-        return appended.pop()
+        return appended.popAndAppendToTuple()
                 .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
                 .flatMap(DivideState::popAndAppendToOption);
 
