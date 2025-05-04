@@ -32,6 +32,9 @@ public class Main {
         String display();
     }
 
+    private @interface Actual {
+    }
+
     private record IOError(IOException exception) implements Error {
         @Override
         public String display() {
@@ -177,6 +180,7 @@ public class Main {
         }, Some::new).ifPresent(error -> System.err.println(error.display()));
     }
 
+    @Actual
     private static Option<IOError> writeTarget(String output) {
         try {
             Files.writeString(TARGET, output);
@@ -269,14 +273,25 @@ public class Main {
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
+            var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutContentEnd.indexOf("{");
             if (contentStart >= 0) {
-                var left = withoutEnd.substring(0, contentStart);
-                var right = withoutEnd.substring(contentStart + "{".length());
-                var tuple0 = compileStatements(state, right, Main::compileFunctionSegment);
-                var generated = generatePlaceholder(left.strip()) + "{" + tuple0.right + "\n}\n";
-                return new Tuple<>(tuple0.left.addFunction(generated), "");
+                var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
+                var right = withoutContentEnd.substring(contentStart + "{".length());
+
+                if (beforeContent.endsWith(")")) {
+                    var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
+                    var paramStart = withoutParamEnd.indexOf("(");
+                    if (paramStart >= 0) {
+                        var definition = withoutParamEnd.substring(0, paramStart);
+                        var params = withoutParamEnd.substring(paramStart + "(".length());
+
+                        var definitionTuple = compileDefinition(state, definition);
+                        var statementsTuple = compileStatements(definitionTuple.left, right, Main::compileFunctionSegment);
+                        var generated = definitionTuple.right + "(" + generatePlaceholder(params) + "){" + statementsTuple.right + "\n}\n";
+                        return new Tuple<>(statementsTuple.left.addFunction(generated), "");
+                    }
+                }
             }
         }
 
