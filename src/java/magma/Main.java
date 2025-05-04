@@ -25,11 +25,38 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left) + "{\n};\n" + generatePlaceholder(right);
+                return generatePlaceholder(left) + "{\n};\n" + getString(right);
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String getString(String input) {
+        var buffer = new StringBuilder();
+        var output = new StringBuilder();
+        var depth = 0;
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            buffer.append(c);
+            if (c == '}' && depth == 1) {
+                output = output.append(compileClassSegment(buffer.toString()));
+                buffer = new StringBuilder();
+                depth--;
+            }
+            else if (c == '{') {
+                depth++;
+            }
+            else if (c == '}') {
+                depth--;
+            }
+        }
+
+        return output.append(compileClassSegment(buffer.toString())).toString();
+    }
+
+    private static String compileClassSegment(String input) {
+        return generatePlaceholder(input);
     }
 
     private static String generatePlaceholder(String stripped) {
