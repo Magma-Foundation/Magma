@@ -1060,14 +1060,7 @@ auto lambda1(auto name){
 }
 /* private static */int isSymbol(char* input){
 	auto stripped = strip(input);
-	/* for (var i = 0; i < stripped.length(); i++) */{
-		auto c = charAt(stripped, i);
-		if (isLetter(Character, c)){
-			/* continue */;
-		}
-		return 0;
-	}
-	return 1;
+	return allMatch(mapToObj(range(IntStream, 0, length(stripped)), struct stripped::charAt), struct Character::isLetter);
 }
 /* private static */struct DivideState foldInvocationStart(struct DivideState state, char c){
 	auto appended = append(state, c);

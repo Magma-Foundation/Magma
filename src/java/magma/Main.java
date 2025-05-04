@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private interface Result<T, X> {
@@ -1256,14 +1257,10 @@ public class Main {
 
     private static boolean isSymbol(String input) {
         var stripped = input.strip();
-        for (var i = 0; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (Character.isLetter(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
+
+        return IntStream.range(0, stripped.length())
+                .mapToObj(stripped::charAt)
+                .allMatch(Character::isLetter);
     }
 
     private static DivideState foldInvocationStart(DivideState state, char c) {
