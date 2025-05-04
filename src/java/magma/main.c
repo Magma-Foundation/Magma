@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public class Main  */{
 };
 /* private interface Result<T, X> */{
-	/* <R> R match */(/* Function<T, R> whenOk, Function<X, R> whenErr */);
+	/* <R> R match */(/* Function<T */, /* R> whenOk */, /* Function<X */, /* R> whenErr */);
 }
 /* private interface Option<T> */{
 	/* void ifPresent(Consumer<T> consumer);
@@ -24,7 +24,7 @@ public class Main  */{
         T orElseGet */(/* Supplier<T> supplier */);
 }
 /* private interface Error */{
-	/* String display */(/*  */);
+	/* String display */();
 }
 /* private record IOError(IOException exception) implements Error */{/* @Override
         public String display() {
@@ -85,16 +85,18 @@ public class Main  */{
         } *//* private State append(char c) {
             this.buffer.append(c);
             return this;
+        } *//* public boolean isLevel() {
+            return this.depth == 0;
         } *//*  */
 }
 /* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	readSource(/*  */).match(/* input -> {
+	readSource().match(/* input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Some::new */).ifPresent(/* error -> System.err.println(error.display()) */);
+        } */, /* Some::new */).ifPresent(/* error -> System */.err.println(error.display()));
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -119,17 +121,24 @@ public class Main  */{
                 return generatePlaceholder(left) + "{\n};\n" + compileRoot(right);
             }
         } */
-	/* return generatePlaceholder */(/* stripped */);
+	/* return generatePlaceholder */(stripped);
 }
 /* private static String compileRoot(String input) */{
-	/* return compileAll */(/* input, Main::compileClassSegment */);
+	/* return compileStatements */(input, /* Main::compileClassSegment */);
 }
-/* private static String compileAll(String input, Function<String, String> mapper) */{/* var segments = divideAll(input, Main::foldStatementChar);
+/* private static String compileStatements(String input, Function<String, String> mapper) */{
+	/* return compileAll */(input, /* Main::foldStatementChar */, mapper, /* Main::mergeStatements */);
+}
+/* private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) */{/* var segments = divideAll(input, folder);
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(mapper.apply(segment));
+            var mapped = mapper.apply(segment);
+            output = merger.apply(output, mapped);
         } */
-	/* return output */.toString(/*  */);
+	/* return output */.toString();
+}
+/* private static StringBuilder mergeStatements(StringBuilder output, String mapped) */{
+	/* return output */.append(mapped);
 }
 /* private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) */{/* var current = new State();
         for (var i = 0; i < input.length(); i++) {
@@ -161,7 +170,7 @@ public class Main  */{
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left.strip()) + "{" + compileAll(right, Main::compileFunctionSegment) + "\n}\n";
+                return generatePlaceholder(left.strip()) + "{" + compileStatements(right, Main::compileFunctionSegment) + "\n}\n";
             } *//*  */
 }
 /* return generatePlaceholder(stripped);
@@ -191,11 +200,25 @@ public class Main  */{
                 var caller = joined.substring(0, joined.length() - ")".length());
                 var arguments = divisions.getLast();
 
-                return new Some<>(compileValue(caller) + "(" + generatePlaceholder(arguments) + ")");
+                return new Some<>(compileValue(caller) + "(" + compileAll(arguments, Main::foldValueChar, Main::compileValue, Main::mergeValues) + ")");
             }
         }
 
         return new None<>();
+    }
+
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
+    }
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
+        return state.append(c);
     }
 
     private static String compileValue(String input) {
@@ -214,7 +237,7 @@ public class Main  */{
             }
         }
 
-        if(isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             return stripped;
         }
 
