@@ -1260,6 +1260,9 @@ public class Main {
 
     private static boolean isSymbol(String input) {
         var stripped = input.strip();
+        if (stripped.isEmpty()) {
+            return false;
+        }
 
         return IntStream.range(0, stripped.length())
                 .mapToObj(stripped::charAt)
