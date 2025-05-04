@@ -91,10 +91,10 @@ public class Main  */{
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() */{
-	/* readSource().match(input -> {
+	/* readSource */(/*  */).match(/* input -> {
             var output = compile(input);
             return writeTarget(output);
-        }, Some::new) */.ifPresent(/* error -> System.err.println(error.display()) */);
+        }, Some::new */).ifPresent(/* error -> System.err.println(error.display()) */);
 }
 /* private static Option<IOError> writeTarget(String output) */{/* try {
             Files.writeString(TARGET, output);
@@ -200,6 +200,11 @@ public class Main  */{
 
     private static String compileValue(String input) {
         var stripped = input.strip();
+        var maybeInvocation = compileInvocation(stripped);
+        if (maybeInvocation instanceof Some(var invocation)) {
+            return invocation;
+        }
+
         var separator = stripped.lastIndexOf(".");
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
@@ -216,7 +221,7 @@ public class Main  */{
         var stripped = input.strip();
         for (var i = 0; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
-            if(Character.isLetter(c)) {
+            if (Character.isLetter(c)) {
                 continue;
             }
             return false;
