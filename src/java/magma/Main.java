@@ -101,6 +101,10 @@ public class Main {
     }
 
     private static String getString(String input) {
+        return compileAll(input, Main::compileClassSegment);
+    }
+
+    private static String compileAll(String input, Function<String, String> mapper) {
         var buffer = new StringBuilder();
         var output = new StringBuilder();
         var depth = 0;
@@ -108,7 +112,7 @@ public class Main {
             var c = input.charAt(i);
             buffer.append(c);
             if (c == '}' && depth == 1) {
-                output = output.append(compileClassSegment(buffer.toString()));
+                output = output.append(mapper.apply(buffer.toString()));
                 buffer = new StringBuilder();
                 depth--;
             }
@@ -120,7 +124,7 @@ public class Main {
             }
         }
 
-        return output.append(compileClassSegment(buffer.toString())).toString();
+        return output.append(mapper.apply(buffer.toString())).toString();
     }
 
     private static String compileClassSegment(String input) {
@@ -131,10 +135,14 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left.strip()) + "{" + generatePlaceholder(right) + "}\n";
+                return generatePlaceholder(left.strip()) + "{" + compileAll(right, Main::compileFunctionSegment) + "}\n";
             }
         }
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileFunctionSegment(String input) {
+        return generatePlaceholder(input.strip());
     }
 
     private static String generatePlaceholder(String stripped) {
