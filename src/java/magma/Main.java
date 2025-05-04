@@ -135,14 +135,19 @@ public class Main {
             if (contentStart >= 0) {
                 var left = withoutEnd.substring(0, contentStart);
                 var right = withoutEnd.substring(contentStart + "{".length());
-                return generatePlaceholder(left.strip()) + "{" + compileAll(right, Main::compileFunctionSegment) + "}\n";
+                return generatePlaceholder(left.strip()) + "{" + compileAll(right, Main::compileFunctionSegment) + "\n}\n";
             }
         }
         return generatePlaceholder(stripped);
     }
 
     private static String compileFunctionSegment(String input) {
-        return generatePlaceholder(input.strip());
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var slice = stripped.substring(0, stripped.length() - ";".length());
+            return "\n\t" + generatePlaceholder(slice) + ";";
+        }
+        return generatePlaceholder(stripped);
     }
 
     private static String generatePlaceholder(String stripped) {
