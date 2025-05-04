@@ -431,17 +431,6 @@ public class Main {
         return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
-    private static Tuple<CompileState, String> compileAll(
-            CompileState initial,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Tuple<CompileState, String>> mapper,
-            BiFunction<StringBuilder, String, StringBuilder> merger
-    ) {
-        var tuple = parseAll(initial, input, folder, mapper);
-        return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
-    }
-
     private static <T> Tuple<CompileState, List<T>> parseAll(
             CompileState initial,
             String input,
@@ -548,53 +537,68 @@ public class Main {
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         var stripped = input.strip();
-        if (compileStructure(state, input, "record ") instanceof Some(var recordTuple)) {
-            return recordTuple;
+
+        return or(state, input, List.of(
+                type((state0, input0) -> compileStructure(state0, input0, "record")),
+                type((state0, input0) -> compileStructure(state0, input0, "class")),
+                type((state0, input0) -> compileStructure(state0, input0, "interface")),
+                type(Main::compileMethod)
+        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped) + "\n"));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String stripped) {
+        if (!stripped.endsWith("}")) {
+            return new None<>();
         }
 
-        if (stripped.endsWith("}")) {
-            var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutContentEnd.indexOf("{");
-            if (contentStart >= 0) {
-                var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
-                var right = withoutContentEnd.substring(contentStart + "{".length());
-
-                if (beforeContent.endsWith(")")) {
-                    var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
-                    var paramStart = withoutParamEnd.indexOf("(");
-                    if (paramStart >= 0) {
-                        var definitionString = withoutParamEnd.substring(0, paramStart);
-                        var inputParams = withoutParamEnd.substring(paramStart + "(".length());
-
-                        if (parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) {
-                            var definition = definitionTuple.right;
-
-                            var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
-                            var paramsState = paramsTuple.left;
-                            var paramsString = paramsTuple.right;
-
-                            var header = definition.generate() + "(" + paramsString + ")";
-                            if (definition.modifiers.contains("expect")) {
-                                return new Tuple<>(paramsState, header + ";\n");
-                            }
-
-                            var statementsTuple = parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1, 1));
-                            var statementsState = statementsTuple.left;
-                            var statements = statementsTuple.right;
-
-                            var oldStatements = new ArrayList<String>();
-                            oldStatements.addAll(statementsState.frames().getLast().statements);
-                            oldStatements.addAll(statements);
-
-                            var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-                            return new Tuple<>(statementsState.exit().addFunction(generated), "");
-                        }
-                    }
-                }
-            }
+        var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
+        var contentStart = withoutContentEnd.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped) + "\n");
+        var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
+        var right = withoutContentEnd.substring(contentStart + "{".length());
+
+        if (!beforeContent.endsWith(")")) {
+            return new None<>();
+        }
+
+        var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
+        var paramStart = withoutParamEnd.indexOf("(");
+        if (paramStart < 0) {
+            return new None<>();
+        }
+
+        var definitionString = withoutParamEnd.substring(0, paramStart);
+        var inputParams = withoutParamEnd.substring(paramStart + "(".length());
+
+        if (!(parseDefinition(state, definitionString) instanceof Some(var definitionTuple))) {
+            return new None<>();
+        }
+
+        var definition = definitionTuple.right;
+
+        var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
+        var paramsState = paramsTuple.left;
+        var paramsString = paramsTuple.right;
+
+        var header = definition.generate() + "(" + paramsString + ")";
+        if (definition.modifiers.contains("expect")) {
+            return new Some<>(new Tuple<>(paramsState, header + ";\n"));
+        }
+
+        var statementsTuple = parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1, 1));
+        var statementsState = statementsTuple.left;
+        var statements = statementsTuple.right;
+
+        var oldStatements = new ArrayList<String>();
+        oldStatements.addAll(statementsState.frames().getLast().statements);
+        oldStatements.addAll(statements);
+
+        var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+        return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
+
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
@@ -876,10 +880,10 @@ public class Main {
                 type(Main::compileMethodReference)));
     }
 
-    private static Option<Tuple<CompileState, Value>> or(
+    private static <T> Option<Tuple<CompileState, T>> or(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> rules
+            List<BiFunction<CompileState, String, Option<Tuple<CompileState, T>>>> rules
     ) {
         for (var rule : rules) {
             var applied = rule.apply(state, input);

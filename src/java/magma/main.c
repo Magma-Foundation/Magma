@@ -1,3 +1,28 @@
+/* private interface Result<T, X>  */{/* <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); */
+/*  */
+
+};
+/* private interface Option<T>  */{/* void ifPresent(Consumer<T> consumer); */
+/* T orElseGet(Supplier<T> supplier); */
+/* Option<T> or(Supplier<Option<T>> other); */
+/* boolean isPresent(); */
+/* <R> Option<R> map(Function<T, R> mapper); */
+/* <R> Option<R> flatMap(Function<T, Option<R>> mapper); */
+/* T orElse(T other); */
+/*  */
+
+};
+/* private interface Error  */{/* String display(); */
+/*  */
+
+};
+/* private @interface Actual  */{/*  */
+
+};
+/* private interface Value  */{/* String generate(); */
+/*  */
+
+};
 /* private record IOError(IOException exception) implements Error  */{/*  */
 
 };
@@ -11,6 +36,14 @@
 
 };
 /* private record Err<T, X>(X error) implements Result<T, X>  */{/*  */
+
+};
+/* private static class DivideState  */{/* private final String input; */
+/* private final List<String> segments; */
+/* private final int index; */
+/* private StringBuilder buffer; */
+/* private int depth; */
+/*  */
 
 };
 /* private record Frame(Map<String, Integer> counters, List<String> statements)  */{/*  */
@@ -49,353 +82,12 @@
 /* private record Content(String input) implements Value  */{/*  */
 
 };
-/* public class Main  */{/* private interface Result<T, X> {
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
-    } */
-/* private interface Option<T> {
-        void ifPresent(Consumer<T> consumer);
-
-        T orElseGet(Supplier<T> supplier);
-
-        Option<T> or(Supplier<Option<T>> other);
-
-        boolean isPresent();
-
-        <R> Option<R> map(Function<T, R> mapper);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        T orElse(T other);
-    } */
-/* private interface Error {
-        String display();
-    } */
-/* private @interface Actual {
-    } */
-/* private interface Value {
-        String generate();
-    } */
-/* private static class DivideState {
-        private final String input;
-        private final List<String> segments;
-        private final int index;
-        private StringBuilder buffer;
-        private int depth;
-
-        public DivideState(String input) {
-            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
-        }
-
-        public DivideState(String input, List<String> segments, StringBuilder buffer, int index, int depth) {
-            this.input = input;
-            this.segments = segments;
-            this.index = index;
-            this.depth = depth;
-            this.buffer = buffer;
-        }
-
-        private DivideState enter() {
-            this.depth = this.depth + 1;
-            return this;
-        }
-
-        private DivideState exit() {
-            this.depth = this.depth - 1;
-            return this;
-        }
-
-        private DivideState advance() {
-            this.segments().add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
-        }
-
-        public List<String> segments() {
-            return this.segments;
-        }
-
-        private boolean isShallow() {
-            return this.depth == 1;
-        }
-
-        public boolean isLevel() {
-            return this.depth == 0;
-        }
-
-        public Option<DivideState> popAndAppendToOption() {
-            return this.popAndAppendToTuple().map(Tuple::right);
-        }
-
-        public Option<Tuple<Character, DivideState>> popAndAppendToTuple() {
-            return this.pop().map(tuple -> {
-                return new Tuple<>(tuple.left, tuple.right.append(tuple.left));
-            });
-        }
-
-        private DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
-        }
-
-        public Option<Tuple<Character, DivideState>> pop() {
-            if (this.index < this.input.length()) {
-                var c = this.input.charAt(this.index);
-                return new Some<>(new Tuple<>(c, new DivideState(this.input, this.segments, this.buffer, this.index + 1, this.depth)));
-            }
-            else {
-                return new None<>();
-            }
-        }
-    } */
-/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
+/* public class Main  */{/* public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); */
 /* public static final Path TARGET = SOURCE.resolveSibling("main.c"); */
 expect /* private static *//* Option<IOError> */ writeTarget(char* output);
 expect /* private static Result<String, *//* IOError> */ readSource(/*  */);
-
-};
-@Override
-/* public */char* display(/*  */){
-	auto writer = struct StringWriter::new();
-	this.exception.printStackTrace(this.exception, struct PrintWriter::new(writer));
-	return writer.toString(writer, );
-}
-@Override
-/* public */void ifPresent(/* Consumer<T> */ consumer){
-}
-@Override
-/* public */struct T orElseGet(/* Supplier<T> */ supplier){
-	return supplier.get(supplier, );
-}
-@Override
-/* public *//* Option<T> */ or(/* Supplier<Option<T>> */ other){
-	return other.get(other, );
-}
-@Override
-/* public */struct boolean isPresent(/*  */){
-	return false;
-}
-@Override
-/* public <R> *//* Option<R> */ map(/* Function<T */, /* R> */ mapper){
-	return /* None<> */::new();
-}
-@Override
-/* public <R> *//* Option<R> */ flatMap(/* Function<T */, /* Option<R>> */ mapper){
-	return /* None<> */::new();
-}
-@Override
-/* public */struct T orElse(struct T other){
-	return other;
-}
-@Override
-/* public */void ifPresent(/* Consumer<T> */ consumer){
-	consumer.accept(consumer, this.value);
-}
-@Override
-/* public */struct T orElseGet(/* Supplier<T> */ supplier){
-	return this.value;
-}
-@Override
-/* public *//* Option<T> */ or(/* Supplier<Option<T>> */ other){
-	return this;
-}
-@Override
-/* public */struct boolean isPresent(/*  */){
-	return true;
-}
-@Override
-/* public <R> *//* Option<R> */ map(/* Function<T */, /* R> */ mapper){
-	return /* Some<> */::new(mapper.apply(mapper, this.value));
-}
-@Override
-/* public <R> *//* Option<R> */ flatMap(/* Function<T */, /* Option<R>> */ mapper){
-	return mapper.apply(mapper, this.value);
-}
-@Override
-/* public */struct T orElse(struct T other){
-	return this.value;
-}
-@Override
-/* public <R> */struct R match(/* Function<T */, /* R> */ whenOk, /*  Function<X */, /* R> */ whenErr){
-	return whenOk.apply(whenOk, this.value);
-}
-@Override
-/* public <R> */struct R match(/* Function<T */, /* R> */ whenOk, /*  Function<X */, /* R> */ whenErr){
-	return whenErr.apply(whenErr, this.error);
-}
-struct public Frame(/*  */){
-	this(/* HashMap<> */::new(), /* ArrayList<> */::new());
-}
-/* public Tuple<String, *//* Frame> */ createName(char* category){
-	if (/* !this.counters.containsKey(category) */){
-		this.counters.put(this.counters, category, /*  0 */);
-	}
-	auto oldCounter = this.counters.get(this.counters, category);
-	auto name = /*  category + oldCounter */;
-	auto newCounter = /*  oldCounter + 1 */;
-	this.counters.put(this.counters, category, newCounter);
-	return /* Tuple<> */::new(name, this);
-}
-/* public */struct Frame addStatement(char* statement){
-	this.statements.add(this.statements, statement);
-	return this;
-}
-struct public CompileState(/*  */){
-	this(/* ArrayList<> */::new(), /* ArrayList<> */::new(), /* ArrayList<> */::new(Collections.singletonList(Collections, struct Frame::new())));
-}
-/* public */struct CompileState addFunction(char* generated){
-	this.functions.add(this.functions, generated);
-	return this;
-}
-/* public Tuple<String, *//* CompileState> */ createName(char* category){
-	auto frame = this.frames.getLast(this.frames, );
-	auto nameTuple = frame.createName(frame, category);
-	this.frames.set(this.frames, /* this.frames.size() - 1 */, nameTuple.right);
-	return /* Tuple<> */::new(nameTuple.left, this);
-}
-/* public */struct CompileState addStatement(char* statement){
-	auto local0 = this.frames.getLast(this.frames, );
-	addStatement(local0, statement);
-	return this;
-}
-/* public */struct CompileState enter(/*  */){
-	this.frames.add(this.frames, struct Frame::new());
-	return this;
-}
-/* public */struct CompileState exit(/*  */){
-	this.frames.removeLast(this.frames, );
-	return this;
-}
-/* public */struct CompileState addStruct(char* generated){
-	this.structs.add(this.structs, generated);
-	return this;
-}
-/* private */char* generate(/*  */){
-	/* String annotationsStrings */;
-	if (this.annotations.isEmpty(this.annotations, )){
-		/* annotationsStrings  */ = "";
-	}
-	/* else */{
-		/* annotationsStrings  */ = /*  this.annotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n" */;
-	}
-	auto modifiersString = /*  this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " " */;
-	auto beforeTypeString = /*  this.beforeType.isEmpty() ? "" : generatePlaceholder(this.beforeType) */;
-	/* return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name */;
-}
-@Override
-/* public */char* generate(/*  */){
-	return "\"" + this.value + "\"";
-}
-@Override
-/* public */char* generate(/*  */){
-	return this.value;
-}
-@Override
-/* public */char* generate(/*  */){
-	auto local0 = /* var joined = this.arguments.stream()
-                    .map(Value */::generate);
-	collect(local0, Collectors.joining(Collectors, ", "));
-	/* return this.caller.generate() + "(" + joined + ")" */;
-}
-@Override
-/* public */char* generate(/*  */){
-	/* return this.parent.generate() + "." + this.child */;
-}
-@Override
-/* public */char* generate(/*  */){
-	auto local0 = /* this.parent() + " */::" + this;
-	return child(local0, );
-}
-@Override
-/* public */char* generate(/*  */){
-	return generatePlaceholder(this.input);
-}
-auto lambda0(auto error){
-	return System.err.println(System.err, error.display(error, ));
-}
-auto lambda1(auto input){
-	auto output = compile(input);
-	return writeTarget(output);
-}
-/* public static */void main(/*  */){
-	auto local0 = readSource();
-	auto local1 = match(local0, lambda1, struct Some::new);
-	ifPresent(local1, lambda0);
-}
-/* private static */char* compile(char* input){
-	auto state = struct CompileState::new();
-	auto tuple = compileStatements(state, input, struct Main::compileRootSegment);
-	auto joinedStructs = String.join(String, "", tuple.left.structs);
-	auto joinedFunctions = String.join(String, "", tuple.left.functions);
-	/* return joinedStructs + joinedFunctions + tuple.right */;
-}
-/* private static Tuple<CompileState, *//* String> */ compileRootSegment(struct CompileState state, char* input){
-	auto local0 = compileStructure(state, input, "class ");
-	return orElseGet(local0, /* () -> {
-            return new Tuple<>(state */, /*  generatePlaceholder(input));
-        } */);
-}
-/* private static Option<Tuple<CompileState, *//* String>> */ compileStructure(struct CompileState state, char* input, char* infix){
-	auto stripped = input.strip(input, );
-	if (stripped.endsWith(stripped, "}")){
-		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
-		auto contentStart = withoutEnd.indexOf(withoutEnd, "{");
-		if (/* contentStart >= 0 */){
-			auto left = withoutEnd.substring(withoutEnd, /* 0 */, contentStart);
-			auto right = withoutEnd.substring(withoutEnd, /* contentStart + "{".length() */);
-			if (left.contains(left, infix)){
-				auto result = compileStatements(state, right, struct Main::compileClassSegment);
-				auto generated = /*  generatePlaceholder(left) + "{" + result.right + "\n};\n" */;
-				return /* Some<> */::new(/* Tuple<> */::new(/* result.left.addStruct(generated */), /*  "") */);
-			}
-		}
-	}
-	return /* None<> */::new();
-}
-/* private static Tuple<CompileState, *//* String> */ compileStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
-	auto tuple = parseStatements(state, input, mapper);
-	return /* Tuple<> */::new(tuple.left, generateStatements(tuple.right));
-}
-/* private static */char* generateStatements(/* List<String> */ elements){
-	return generateAll(elements, struct Main::mergeStatements);
-}
-/* private static Tuple<CompileState, *//* List<String>> */ parseStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
-	return parseAll(state, input, struct Main::foldStatementChar, mapper);
-}
-/* private static Tuple<CompileState, *//* String> */ compileAll(struct CompileState initial, char* input, /* 
-            BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder, /* 
-            BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper, /* 
-            BiFunction<StringBuilder */, /*  String */, /* StringBuilder> */ merger){
-	auto tuple = parseAll(initial, input, folder, mapper);
-	return /* Tuple<> */::new(tuple.left, /*  generateAll(tuple.right */, /*  merger) */);
-}
-/* private static <T> Tuple<CompileState, *//* List<T>> */ parseAll(struct CompileState initial, char* input, /* 
-            BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder, /* 
-            BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* T>> */ mapper){
-	auto segments = divideAll(input, folder);
-	auto current = initial;
-	auto compiled = /* ArrayList<T> */::new();
-	/* for (var segment : segments) */{
-		auto mapped = mapper.apply(mapper, current, segment);
-		/* current  */ = mapped.left;
-		compiled.add(compiled, mapped.right);
-	}
-	return /* Tuple<> */::new(current, compiled);
-}
-/* private static *//* List<String> */ divideAll(char* input, /*  BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder){
-	auto current = struct DivideState::new(input);
-	/* while (true) */{
-	auto local0 = foldSingleQuotes(popped.right, popped.left);
-	auto local1 = or(local0, /* () -> foldDoubleQuotes(popped.right */, /*  popped.left) */);
-		auto maybePopped = current.pop(current, );
-		if (/* !(maybePopped instanceof Some(var popped)) */){
-			/* break */;
-		}
-		/* current  */ = orElseGet(local1, /* () -> folder.apply(popped.right */, /*  popped.left) */);
-	}
-	return current.advance(current, ).segments;
-}
-/* private static *//* Option<DivideState> */ foldDoubleQuotes(struct DivideState state, struct char maybeDoubleQuotes){
-	/* if *//* (maybeDoubleQuotes */ ! = /* ') {
+/* private static Option<DivideState> foldDoubleQuotes(DivideState state, char maybeDoubleQuotes) {
+        if (maybeDoubleQuotes != '') {
             return new None<>();
         }
 
@@ -408,10 +100,10 @@ auto lambda1(auto input){
             var next = popped.left;
             current = popped.right;
 
-            if (next == ') {
+            if (next == '') {
                 current = current.popAndAppendToOption().orElse(current);
             }
-            if (next == ') {
+            if (next == '') {
                 break;
             }
         }
@@ -421,14 +113,14 @@ auto lambda1(auto input){
     }
 
     private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
-        if (c != ') {
+        if (c != '') {
             return new None<>();
         }
 
         var appended = state.append(c);
         return appended.pop()
-                .flatMap(popped -> popped.left == ' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
-                .flatMap(DivideState */::popAndAppendToOption);
+                .flatMap(popped -> popped.left == '' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
+                .flatMap(DivideState::popAndAppendToOption);
 
     }
 
@@ -447,16 +139,16 @@ auto lambda1(auto input){
 
     private static DivideState foldStatementChar(DivideState state, char c) {
         var appended = state.append(c);
-        if (c == '&& appended.isLevel()) {
+        if (c == ' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '&& appended.isShallow()) {
+        if (c == ' && appended.isShallow()) {
             return appended.advance().exit();
         }
-        else if (c == '|| c == ' {
+        else if (c == ' || c == ') {
             return appended.enter();
         }
-        else if (c == '|| c == ' {
+        else if (c == ' || c == ') {
             return appended.exit();
         }
         return appended;
@@ -464,53 +156,68 @@ auto lambda1(auto input){
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         var stripped = input.strip();
-        if (compileStructure(state, input, "record ") instanceof Some(var recordTuple)) {
-            return recordTuple;
+
+        return or(state, input, List.of(
+                type((state0, input0) -> compileStructure(state0, input0, "record")),
+                type((state0, input0) -> compileStructure(state0, input0, "class")),
+                type((state0, input0) -> compileStructure(state0, input0, "interface")),
+                type(Main::compileMethod)
+        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped) + "\n"));
+    }
+
+    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String stripped) {
+        if (!stripped.endsWith("}")) {
+            return new None<>();
         }
 
-        if (stripped.endsWith("}")) {
-            var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutContentEnd.indexOf("{");
-            if (contentStart >= 0) {
-                var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
-                var right = withoutContentEnd.substring(contentStart + "{".length());
-
-                if (beforeContent.endsWith(")")) {
-                    var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
-                    var paramStart = withoutParamEnd.indexOf("(");
-                    if (paramStart >= 0) {
-                        var definitionString = withoutParamEnd.substring(0, paramStart);
-                        var inputParams = withoutParamEnd.substring(paramStart + "(".length());
-
-                        if (parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) {
-                            var definition = definitionTuple.right;
-
-                            var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
-                            var paramsState = paramsTuple.left;
-                            var paramsString = paramsTuple.right;
-
-                            var header = definition.generate() + "(" + paramsString + ")";
-                            if (definition.modifiers.contains("expect")) {
-                                return new Tuple<>(paramsState, header + ";\n");
-                            }
-
-                            var statementsTuple = parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1, 1));
-                            var statementsState = statementsTuple.left;
-                            var statements = statementsTuple.right;
-
-                            var oldStatements = new ArrayList<String>();
-                            oldStatements.addAll(statementsState.frames().getLast().statements);
-                            oldStatements.addAll(statements);
-
-                            var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-                            return new Tuple<>(statementsState.exit().addFunction(generated), "");
-                        }
-                    }
-                }
-            }
+        var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
+        var contentStart = withoutContentEnd.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped) + "\n");
+        var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
+        var right = withoutContentEnd.substring(contentStart + "{".length());
+
+        if (!beforeContent.endsWith(")")) {
+            return new None<>();
+        }
+
+        var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
+        var paramStart = withoutParamEnd.indexOf("(");
+        if (paramStart < 0) {
+            return new None<>();
+        }
+
+        var definitionString = withoutParamEnd.substring(0, paramStart);
+        var inputParams = withoutParamEnd.substring(paramStart + "(".length());
+
+        if (!(parseDefinition(state, definitionString) instanceof Some(var definitionTuple))) {
+            return new None<>();
+        }
+
+        var definition = definitionTuple.right;
+
+        var paramsTuple = compileValues(definitionTuple.left, inputParams, Main::compileDefinitionOrPlaceholder);
+        var paramsState = paramsTuple.left;
+        var paramsString = paramsTuple.right;
+
+        var header = definition.generate() + "(" + paramsString + ")";
+        if (definition.modifiers.contains("expect")) {
+            return new Some<>(new Tuple<>(paramsState, header + ";\n"));
+        }
+
+        var statementsTuple = parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1, 1));
+        var statementsState = statementsTuple.left;
+        var statements = statementsTuple.right;
+
+        var oldStatements = new ArrayList<String>();
+        oldStatements.addAll(statementsState.frames().getLast().statements);
+        oldStatements.addAll(statements);
+
+        var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+        return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
+
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
@@ -766,7 +473,7 @@ auto lambda1(auto input){
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {
-        if (c == '&& state.isLevel()) {
+        if (c == ' && state.isLevel()) {
             return state.advance();
         }
         return state.append(c);
@@ -792,10 +499,10 @@ auto lambda1(auto input){
                 type(Main::compileMethodReference)));
     }
 
-    private static Option<Tuple<CompileState, Value>> or(
+    private static <T> Option<Tuple<CompileState, T>> or(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> rules
+            List<BiFunction<CompileState, String, Option<Tuple<CompileState, T>>>> rules
     ) {
         for (var rule : rules) {
             var applied = rule.apply(state, input);
@@ -900,7 +607,7 @@ auto lambda1(auto input){
 
     private static DivideState foldInvocationStart(DivideState state, char c) {
         var appended = state.append(c);
-        if (c == ' {
+        if (c == ') {
             var entered = appended.enter();
             if (appended.isShallow()) {
                 return entered.advance();
@@ -909,7 +616,7 @@ auto lambda1(auto input){
                 return entered;
             }
         }
-        if (c == ' {
+        if (c == ') {
             return appended.exit();
         }
         return appended;
@@ -917,6 +624,298 @@ auto lambda1(auto input){
 
     private static String generatePlaceholder(String stripped) {
         return "/* " + stripped + " */";
+    } */
+
+};
+@Override
+/* public */char* display(/*  */){
+	auto writer = struct StringWriter::new();
+	this.exception.printStackTrace(this.exception, struct PrintWriter::new(writer));
+	return writer.toString(writer, );
+}
+@Override
+/* public */void ifPresent(/* Consumer<T> */ consumer){
+}
+@Override
+/* public */struct T orElseGet(/* Supplier<T> */ supplier){
+	return supplier.get(supplier, );
+}
+@Override
+/* public *//* Option<T> */ or(/* Supplier<Option<T>> */ other){
+	return other.get(other, );
+}
+@Override
+/* public */struct boolean isPresent(/*  */){
+	return false;
+}
+@Override
+/* public <R> *//* Option<R> */ map(/* Function<T */, /* R> */ mapper){
+	return /* None<> */::new();
+}
+@Override
+/* public <R> *//* Option<R> */ flatMap(/* Function<T */, /* Option<R>> */ mapper){
+	return /* None<> */::new();
+}
+@Override
+/* public */struct T orElse(struct T other){
+	return other;
+}
+@Override
+/* public */void ifPresent(/* Consumer<T> */ consumer){
+	consumer.accept(consumer, this.value);
+}
+@Override
+/* public */struct T orElseGet(/* Supplier<T> */ supplier){
+	return this.value;
+}
+@Override
+/* public *//* Option<T> */ or(/* Supplier<Option<T>> */ other){
+	return this;
+}
+@Override
+/* public */struct boolean isPresent(/*  */){
+	return true;
+}
+@Override
+/* public <R> *//* Option<R> */ map(/* Function<T */, /* R> */ mapper){
+	return /* Some<> */::new(mapper.apply(mapper, this.value));
+}
+@Override
+/* public <R> *//* Option<R> */ flatMap(/* Function<T */, /* Option<R>> */ mapper){
+	return mapper.apply(mapper, this.value);
+}
+@Override
+/* public */struct T orElse(struct T other){
+	return this.value;
+}
+@Override
+/* public <R> */struct R match(/* Function<T */, /* R> */ whenOk, /*  Function<X */, /* R> */ whenErr){
+	return whenOk.apply(whenOk, this.value);
+}
+@Override
+/* public <R> */struct R match(/* Function<T */, /* R> */ whenOk, /*  Function<X */, /* R> */ whenErr){
+	return whenErr.apply(whenErr, this.error);
+}
+struct public DivideState(char* input){
+	this(input, /* ArrayList<> */::new(), struct StringBuilder::new(), /*  0 */, /*  0 */);
+}
+struct public DivideState(char* input, /* List<String> */ segments, struct StringBuilder buffer, struct int index, struct int depth){
+	/* this.input  */ = input;
+	/* this.segments  */ = segments;
+	/* this.index  */ = index;
+	/* this.depth  */ = depth;
+	/* this.buffer  */ = buffer;
+}
+/* private */struct DivideState enter(/*  */){
+	/* this.depth  */ = /*  this.depth + 1 */;
+	return this;
+}
+/* private */struct DivideState exit(/*  */){
+	/* this.depth  */ = /*  this.depth - 1 */;
+	return this;
+}
+/* private */struct DivideState advance(/*  */){
+	auto local0 = this.segments(this, );
+	add(local0, this.buffer.toString(this.buffer, ));
+	/* this.buffer  */ = struct StringBuilder::new();
+	return this;
+}
+/* public *//* List<String> */ segments(/*  */){
+	return this.segments;
+}
+/* private */struct boolean isShallow(/*  */){
+	struct return this.depth = /* = 1 */;
+}
+/* public */struct boolean isLevel(/*  */){
+	struct return this.depth = /* = 0 */;
+}
+/* public *//* Option<DivideState> */ popAndAppendToOption(/*  */){
+	auto local0 = this.popAndAppendToTuple(this, );
+	return map(local0, struct Tuple::right);
+}
+/* public Option<Tuple<Character, *//* DivideState>> */ popAndAppendToTuple(/*  */){
+	auto local0 = this.pop(this, );
+	return map(local0, /* tuple -> {
+                return new Tuple<>(tuple.left */, /*  tuple.right.append(tuple.left));
+            } */);
+}
+/* private */struct DivideState append(struct char c){
+	this.buffer.append(this.buffer, c);
+	return this;
+}
+/* public Option<Tuple<Character, *//* DivideState>> */ pop(/*  */){
+	if (/* this.index < this.input.length() */){
+		auto c = this.input.charAt(this.input, this.index);
+		return /* Some<> */::new(/* new Tuple<>(c */, /*  new DivideState(this.input */, this.segments, this.buffer, /*  this.index + 1 */, /*  this.depth)) */);
+	}
+	/* else */{
+		return /* None<> */::new();
+	}
+}
+struct public Frame(/*  */){
+	this(/* HashMap<> */::new(), /* ArrayList<> */::new());
+}
+/* public Tuple<String, *//* Frame> */ createName(char* category){
+	if (/* !this.counters.containsKey(category) */){
+		this.counters.put(this.counters, category, /*  0 */);
+	}
+	auto oldCounter = this.counters.get(this.counters, category);
+	auto name = /*  category + oldCounter */;
+	auto newCounter = /*  oldCounter + 1 */;
+	this.counters.put(this.counters, category, newCounter);
+	return /* Tuple<> */::new(name, this);
+}
+/* public */struct Frame addStatement(char* statement){
+	this.statements.add(this.statements, statement);
+	return this;
+}
+struct public CompileState(/*  */){
+	this(/* ArrayList<> */::new(), /* ArrayList<> */::new(), /* ArrayList<> */::new(Collections.singletonList(Collections, struct Frame::new())));
+}
+/* public */struct CompileState addFunction(char* generated){
+	this.functions.add(this.functions, generated);
+	return this;
+}
+/* public Tuple<String, *//* CompileState> */ createName(char* category){
+	auto frame = this.frames.getLast(this.frames, );
+	auto nameTuple = frame.createName(frame, category);
+	this.frames.set(this.frames, /* this.frames.size() - 1 */, nameTuple.right);
+	return /* Tuple<> */::new(nameTuple.left, this);
+}
+/* public */struct CompileState addStatement(char* statement){
+	auto local0 = this.frames.getLast(this.frames, );
+	addStatement(local0, statement);
+	return this;
+}
+/* public */struct CompileState enter(/*  */){
+	this.frames.add(this.frames, struct Frame::new());
+	return this;
+}
+/* public */struct CompileState exit(/*  */){
+	this.frames.removeLast(this.frames, );
+	return this;
+}
+/* public */struct CompileState addStruct(char* generated){
+	this.structs.add(this.structs, generated);
+	return this;
+}
+/* private */char* generate(/*  */){
+	/* String annotationsStrings */;
+	if (this.annotations.isEmpty(this.annotations, )){
+		/* annotationsStrings  */ = "";
+	}
+	/* else */{
+		/* annotationsStrings  */ = /*  this.annotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n" */;
+	}
+	auto modifiersString = /*  this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " " */;
+	auto beforeTypeString = /*  this.beforeType.isEmpty() ? "" : generatePlaceholder(this.beforeType) */;
+	/* return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name */;
+}
+@Override
+/* public */char* generate(/*  */){
+	return "\"" + this.value + "\"";
+}
+@Override
+/* public */char* generate(/*  */){
+	return this.value;
+}
+@Override
+/* public */char* generate(/*  */){
+	auto local0 = /* var joined = this.arguments.stream()
+                    .map(Value */::generate);
+	collect(local0, Collectors.joining(Collectors, ", "));
+	/* return this.caller.generate() + "(" + joined + ")" */;
+}
+@Override
+/* public */char* generate(/*  */){
+	/* return this.parent.generate() + "." + this.child */;
+}
+@Override
+/* public */char* generate(/*  */){
+	auto local0 = /* this.parent() + " */::" + this;
+	return child(local0, );
+}
+@Override
+/* public */char* generate(/*  */){
+	return generatePlaceholder(this.input);
+}
+auto lambda0(auto error){
+	return System.err.println(System.err, error.display(error, ));
+}
+auto lambda1(auto input){
+	auto output = compile(input);
+	return writeTarget(output);
+}
+/* public static */void main(/*  */){
+	auto local0 = readSource();
+	auto local1 = match(local0, lambda1, struct Some::new);
+	ifPresent(local1, lambda0);
+}
+/* private static */char* compile(char* input){
+	auto state = struct CompileState::new();
+	auto tuple = compileStatements(state, input, struct Main::compileRootSegment);
+	auto joinedStructs = String.join(String, "", tuple.left.structs);
+	auto joinedFunctions = String.join(String, "", tuple.left.functions);
+	/* return joinedStructs + joinedFunctions + tuple.right */;
+}
+/* private static Tuple<CompileState, *//* String> */ compileRootSegment(struct CompileState state, char* input){
+	auto local0 = compileStructure(state, input, "class ");
+	return orElseGet(local0, /* () -> {
+            return new Tuple<>(state */, /*  generatePlaceholder(input));
+        } */);
+}
+/* private static Option<Tuple<CompileState, *//* String>> */ compileStructure(struct CompileState state, char* input, char* infix){
+	auto stripped = input.strip(input, );
+	if (stripped.endsWith(stripped, "}")){
+		auto withoutEnd = stripped.substring(stripped, /* 0 */, /*  stripped.length() - "}".length() */);
+		auto contentStart = withoutEnd.indexOf(withoutEnd, "{");
+		if (/* contentStart >= 0 */){
+			auto left = withoutEnd.substring(withoutEnd, /* 0 */, contentStart);
+			auto right = withoutEnd.substring(withoutEnd, /* contentStart + "{".length() */);
+			if (left.contains(left, infix)){
+				auto result = compileStatements(state, right, struct Main::compileClassSegment);
+				auto generated = /*  generatePlaceholder(left) + "{" + result.right + "\n};\n" */;
+				return /* Some<> */::new(/* Tuple<> */::new(/* result.left.addStruct(generated */), /*  "") */);
+			}
+		}
+	}
+	return /* None<> */::new();
+}
+/* private static Tuple<CompileState, *//* String> */ compileStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
+	auto tuple = parseStatements(state, input, mapper);
+	return /* Tuple<> */::new(tuple.left, generateStatements(tuple.right));
+}
+/* private static */char* generateStatements(/* List<String> */ elements){
+	return generateAll(elements, struct Main::mergeStatements);
+}
+/* private static Tuple<CompileState, *//* List<String>> */ parseStatements(struct CompileState state, char* input, /*  BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* String>> */ mapper){
+	return parseAll(state, input, struct Main::foldStatementChar, mapper);
+}
+/* private static <T> Tuple<CompileState, *//* List<T>> */ parseAll(struct CompileState initial, char* input, /* 
+            BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder, /* 
+            BiFunction<CompileState */, /*  String */, /*  Tuple<CompileState */, /* T>> */ mapper){
+	auto segments = divideAll(input, folder);
+	auto current = initial;
+	auto compiled = /* ArrayList<T> */::new();
+	/* for (var segment : segments) */{
+		auto mapped = mapper.apply(mapper, current, segment);
+		/* current  */ = mapped.left;
+		compiled.add(compiled, mapped.right);
+	}
+	return /* Tuple<> */::new(current, compiled);
+}
+/* private static *//* List<String> */ divideAll(char* input, /*  BiFunction<DivideState */, /*  Character */, /* DivideState> */ folder){
+	auto current = struct DivideState::new(input);
+	/* while (true) */{
+	auto local0 = foldSingleQuotes(popped.right, popped.left);
+	auto local1 = or(local0, /* () -> foldDoubleQuotes(popped.right */, /*  popped.left) */);
+		auto maybePopped = current.pop(current, );
+		if (/* !(maybePopped instanceof Some(var popped)) */){
+			/* break */;
+		}
+		/* current  */ = orElseGet(local1, /* () -> folder.apply(popped.right */, /*  popped.left) */);
+	}
+	return current.advance(current, ).segments;
 }
 /* package magma; *//* 
 
