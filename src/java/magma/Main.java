@@ -814,7 +814,7 @@ public class Main {
         }
 
         var withParams = input.substring(0, paramEnd);
-        return compileMethodHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
+        return methodHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
             var afterParams = input.substring(paramEnd + ")".length()).strip();
             return or(methodHeaderTuple.left, afterParams, List.of(
                     (state1, s) -> methodWithBraces(state1, s, methodHeaderTuple.right),
@@ -839,28 +839,34 @@ public class Main {
         return new Err<>(new CompileError("No braces present", withBraces));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileMethodHeader(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> methodHeader(CompileState state, String input) {
         var paramStart = input.indexOf("(");
-        if (paramStart >= 0) {
-            var definitionString = input.substring(0, paramStart);
-            var inputParams = input.substring(paramStart + "(".length());
+        if (paramStart < 0) {
+            return createInfixErr(input, "(");
+        }
 
-            if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
-                var definition = definitionTuple.right;
-                var maybeParamsTuple = compileValues(definitionTuple.left, inputParams, Main::compileParameter);
-                if (maybeParamsTuple instanceof Ok(var paramsTuple)) {
-                    var paramsState = paramsTuple.left;
-                    var paramsString = paramsTuple.right;
+        var definitionString = input.substring(0, paramStart).strip();
+        var inputParams = input.substring(paramStart + "(".length());
 
-                    var header = definition.generate() + "(" + paramsString + ")";
-                    if (definition.modifiers.contains("expect")) {
-                        return new Ok<>(new Tuple<>(paramsState, header + ";\n"));
-                    }
+        if (isSymbol(definitionString)) {
+            return new Ok<>(new Tuple<>(state, definitionString));
+        }
 
-                    return new Ok<>(new Tuple<>(paramsState, header));
+        if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
+            var definition = definitionTuple.right;
+            var maybeParamsTuple = compileValues(definitionTuple.left, inputParams, Main::compileParameter);
+            if (maybeParamsTuple instanceof Ok(var paramsTuple)) {
+                var paramsState = paramsTuple.left;
+                var paramsString = paramsTuple.right;
+
+                var header = definition.generate() + "(" + paramsString + ")";
+                if (definition.modifiers.contains("expect")) {
+                    return new Ok<>(new Tuple<>(paramsState, header + ";\n"));
                 }
 
+                return new Ok<>(new Tuple<>(paramsState, header));
             }
+
         }
 
         return new Err<>(new CompileError("Not a method header", input));
