@@ -113,6 +113,22 @@ public class Main {
     private interface Parameter {
     }
 
+    private interface Iterator<T> {
+        <C> C collect(Collector<T, C> collector);
+
+        <C> C fold(C initial, BiFunction<C, T, C> folder);
+
+        Iterator<T> filter(Predicate<T> predicate);
+
+        <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+
+        Iterator<T> concat(Iterator<T> other);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        Option<T> next();
+    }
+
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
@@ -242,12 +258,14 @@ public class Main {
         }
     }
 
-    private record Iterator<T>(Head<T> head) {
+    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
         public <C> C collect(Collector<T, C> collector) {
             return this.fold(collector.createInitial(), collector::fold);
         }
 
-        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
+        @Override
+        public <C> C fold(C initial, BiFunction<C, T, C> folder) {
             var current = initial;
             while (true) {
                 C finalCurrent = current;
@@ -261,25 +279,34 @@ public class Main {
             }
         }
 
+        @Override
         public Iterator<T> filter(Predicate<T> predicate) {
             return this.flatMap(element -> {
                 if (predicate.test(element)) {
-                    return new Iterator<>(new SingleHead<>(element));
+                    return new HeadedIterator<>(new SingleHead<>(element));
                 }
-                return new Iterator<>(new EmptyHead<>());
+                return new HeadedIterator<>(new EmptyHead<>());
             });
         }
 
+        @Override
         public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+            return this.map(mapper).fold(Iterators.empty(), Iterator::concat);
         }
 
-        private Iterator<T> concat(Iterator<T> other) {
-            return new Iterator<>(() -> this.head.next().or(other.head::next));
+        @Override
+        public Iterator<T> concat(Iterator<T> other) {
+            return new HeadedIterator<>(() -> this.head.next().or(other::next));
         }
 
+        @Override
         public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new Iterator<>(() -> this.head.next().map(mapper));
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public Option<T> next() {
+            return this.head.next();
         }
     }
 
@@ -403,7 +430,7 @@ public class Main {
 
             @Override
             public Iterator<T> iter() {
-                return new Iterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
+                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
 
             @Override
@@ -872,11 +899,11 @@ public class Main {
 
     private static class Iterators {
         public static <T> Iterator<T> of(T... elements) {
-            return new Iterator<>(new RangeHead(elements.length)).map(index -> elements[index]);
+            return new HeadedIterator<>(new RangeHead(elements.length)).map(index -> elements[index]);
         }
 
         public static <T> Iterator<T> empty() {
-            return new Iterator<>(new EmptyHead<>());
+            return new HeadedIterator<>(new EmptyHead<>());
         }
     }
 
@@ -1438,9 +1465,7 @@ public class Main {
         }
 
         var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
-        return compileValue(state, value).flatMapValue(tuple0 -> {
-            return new Ok<>(new Tuple<>(tuple0.left, prefix + " (" + tuple0.right + ")"));
-        });
+        return compileValue(state, value).flatMapValue(tuple0 -> new Ok<>(new Tuple<>(tuple0.left, prefix + " (" + tuple0.right + ")")));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileElse(CompileState state, String input) {
