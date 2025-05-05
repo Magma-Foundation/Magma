@@ -8,6 +8,8 @@ struct Actual {
 };
 struct Value {
 };
+struct Parameter {
+};
 struct IOError {
 };
 struct None {
@@ -60,6 +62,8 @@ struct CompileError {
 struct OrState {
 };
 struct ApplicationError {
+};
+struct FunctionProto {
 };
 struct Operator {
 		ADD("+"), SUBTRACT("-"), LESS_THAN("<"), AND("&&"), OR("||"), GREATER_THAN_OR_EQUALS(">="), EQUALS("=="), NOT_EQUALS("!=");
@@ -254,7 +258,7 @@ char peek(){
 			return charAt(this.input, this.index);
 }
 struct public Frame(){
-			this(template HashMap<>::new(), template ArrayList<>::new());
+			this(template HashMap<>::new(), template ArrayList<>::new(), template None<>::new());
 }
 (char*, struct Frame) createName(char* category){
 				if (!containsKey(this.counters, category)){
@@ -265,6 +269,9 @@ struct public Frame(){
 			auto newCounter = oldCounter + 1;
 			put(this.counters, category, newCounter);
 			return (name, this);
+}
+struct Frame withProto(struct FunctionProto proto){
+			return struct Frame::new(this.counters, this.statements, template Some<>::new(proto));
 }
 struct public CompileState(){
 			this(template ArrayList<>::new(), template ArrayList<>::new(), template ArrayList<>::new(singletonList(Collections, struct Frame::new())));
@@ -293,6 +300,12 @@ struct CompileState addStruct(char* generated){
 }
 int depth(){
 			return size(this.frames);
+}
+struct CompileState mapLast(template Function<struct Frame, struct Frame> mapper){
+			auto last = getLast(this.frames);
+			auto newLast = apply(mapper, last);
+			set(this.frames, size(this.frames) - 1, newLast);
+			return this;
 }
 struct public Definition(char* type, char* name){
 			this(emptyList(Collections), emptyList(Collections), type, name);
@@ -690,7 +703,7 @@ template Result<(struct CompileState, struct T), struct CompileError> createSuff
 			return template Err<>::new(struct CompileError::new("Suffix '" + suffix + "' not present", stripped));
 }
 auto lambda0(auto state1, auto s){
-	return methodWithBraces(state1, s, generatedHeader);
+	return methodWithBraces(state1, s, generatedHeader, header);
 }
 auto lambda1(auto state2, auto s){
 	return methodWithoutBraces(state2, s, generatedHeader);
@@ -698,8 +711,9 @@ auto lambda1(auto state2, auto s){
 auto lambda2(auto methodHeaderTuple){
 			auto afterParams = strip(substring(input, paramEnd + length(")")));
 			auto header = methodHeaderTuple.right;
-			auto generatedHeader = generate(header.left) + "(" + header.right + ")";
-				if (contains(header.left.annotations, "Actual")){
+			auto joinedParams = collect(map(stream(header.params), struct Definition::generate), joining(Collectors, ", "));
+			auto generatedHeader = generate(header.definition) + "(" + joinedParams + ")";
+				if (contains(header.definition.annotations, "Actual")){
 				auto generated = generatedHeader + ";";
 				return template Ok<>::new((addFunction(methodHeaderTuple.left, generated), ""));
 				}
@@ -720,34 +734,6 @@ template Result<(struct CompileState, char*), struct CompileError> methodWithout
 				}
 			return template Err<>::new(struct CompileError::new("Content ';' not present", content));
 }
-template Result<(struct CompileState, char*), struct CompileError> methodWithBraces(struct CompileState state, char* withBraces, char* header){
-				if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
-				auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
-				return assembleMethod(state, content, header);
-				}
-			return template Err<>::new(struct CompileError::new("No braces present", withBraces));
-}
-template Result<(struct CompileState, (struct Definition, char*)), struct CompileError> methodHeader(struct CompileState state, char* input){
-			auto paramStart = indexOf(input, "(");
-				if (paramStart < 0){
-				return createInfixErr(input, "(");
-				}
-			auto definitionString = strip(substring(input, 0, paramStart));
-			auto inputParams = substring(input, paramStart + length("("));
-			auto maybeParamsTuple = compileValues(state, inputParams, struct Main::compileParameter);
-				if (maybeParamsTuple == 0){
-					if (isSymbol(definitionString)){
-					return template Ok<>::new((paramsTuple.left, (struct Definition::new("auto", definitionString), paramsTuple.right)));
-					}
-					if (parseDefinition(state, definitionString) == 0){
-					auto definition = definitionTuple.right;
-					auto paramsState = paramsTuple.left;
-					auto paramsString = paramsTuple.right;
-					return template Ok<>::new((paramsState, (definition, paramsString)));
-					}
-				}
-			return template Err<>::new(struct CompileError::new("Not a method header", input));
-}
 auto lambda0(auto statementsTuple){
 			auto statementsState = statementsTuple.left;
 			auto statements = statementsTuple.right;
@@ -757,11 +743,48 @@ auto lambda0(auto statementsTuple){
 			auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
 			return template Ok<>::new((addFunction(exit(statementsState), generated), ""));
 }
-template Result<(struct CompileState, char*), struct CompileError> assembleMethod(struct CompileState state, char* content, char* header){
-			return flatMapValue(parseStatements(enter(state), content, struct Main::compileFunctionSegment), lambda0);
+auto lambda1(auto last){
+	return withProto(last, proto);
 }
-template Result<(struct CompileState, char*), struct CompileError> compileParameter(struct CompileState state2, char* input){
-			return or(state2, input, of(List, typed("?", struct Main::whitespace), typed("?", struct Main::definition)));
+template Result<(struct CompileState, char*), struct CompileError> methodWithBraces(struct CompileState state, char* withBraces, char* header, struct FunctionProto proto){
+				if (!startsWith(withBraces, "{") || !endsWith(withBraces, "}")){
+				return template Err<>::new(struct CompileError::new("No braces present", withBraces));
+				}
+			auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
+			return flatMapValue(parseStatements(mapLast(enter(state), lambda1), content, struct Main::compileFunctionSegment), lambda0);
+}
+auto lambda0(auto paramsTuple){
+			auto paramsState = paramsTuple.left;
+			auto params = toList(flatMap(stream(paramsTuple.right), struct Main::retainDefinition));
+				if (isSymbol(definitionString)){
+				auto definition = struct Definition::new("auto", definitionString);
+				return template Ok<>::new((paramsState, struct FunctionProto::new(definition, params)));
+				}
+				if (parseDefinition(state, definitionString) == 0){
+				auto definition = definitionTuple.right;
+				return template Ok<>::new((paramsState, struct FunctionProto::new(definition, params)));
+				}
+			return template Err<>::new(struct CompileError::new("Not a method header", input));
+}
+template Result<(struct CompileState, struct FunctionProto), struct CompileError> methodHeader(struct CompileState state, char* input){
+			auto paramStart = indexOf(input, "(");
+				if (paramStart < 0){
+				return createInfixErr(input, "(");
+				}
+			auto definitionString = strip(substring(input, 0, paramStart));
+			auto inputParams = substring(input, paramStart + length("("));
+			return flatMapValue(parseValues(state, inputParams, struct Main::compileParameter), lambda0);
+}
+template Stream<struct Definition> retainDefinition(struct Parameter parameter){
+				if (parameter == 0){
+				return of(Stream, definition1);
+				}
+				else {
+				return empty(Stream);
+				}
+}
+template Result<(struct CompileState, struct Parameter), struct CompileError> compileParameter(struct CompileState state2, char* input){
+			return or(state2, input, of(List, typed("?", struct Main::parseWhitespace), typed("?", struct Main::parseDefinition)));
 }
 template Result<(struct CompileState, char*), struct CompileError> whitespace(struct CompileState state, char* input){
 				if (isBlank(input)){

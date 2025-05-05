@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Main {
     private sealed interface Result<T, X> permits Ok, Err {
@@ -58,6 +59,9 @@ public class Main {
 
     private interface Value {
         String generate();
+    }
+
+    private interface Parameter {
     }
 
     private record IOError(IOException exception) implements Error {
@@ -271,9 +275,9 @@ public class Main {
         }
     }
 
-    private record Frame(Map<String, Integer> counters, List<String> statements) {
+    private record Frame(Map<String, Integer> counters, List<String> statements, Option<FunctionProto> functionProto) {
         public Frame() {
-            this(new HashMap<>(), new ArrayList<>());
+            this(new HashMap<>(), new ArrayList<>(), new None<>());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -288,6 +292,10 @@ public class Main {
             this.counters.put(category, newCounter);
 
             return new Tuple<>(name, this);
+        }
+
+        public Frame withProto(FunctionProto proto) {
+            return new Frame(this.counters, this.statements, new Some<>(proto));
         }
     }
 
@@ -327,6 +335,13 @@ public class Main {
         public int depth() {
             return this.frames.size();
         }
+
+        public CompileState mapLast(Function<Frame, Frame> mapper) {
+            var last = this.frames.getLast();
+            var newLast = mapper.apply(last);
+            this.frames.set(this.frames.size() - 1, newLast);
+            return this;
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -337,7 +352,7 @@ public class Main {
             List<String> modifiers,
             String type,
             String name
-    ) {
+    ) implements Parameter {
         public Definition(String type, String name) {
             this(Collections.emptyList(), Collections.emptyList(), type, name);
         }
@@ -416,7 +431,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Value {
+    private static class Whitespace implements Value, Parameter {
         @Override
         public String generate() {
             return "";
@@ -503,6 +518,9 @@ public class Main {
         public String display() {
             return this.childError().display();
         }
+    }
+
+    private record FunctionProto(Definition definition, List<Definition> params) {
     }
 
     private enum Operator {
@@ -829,14 +847,19 @@ public class Main {
             var afterParams = input.substring(paramEnd + ")".length()).strip();
 
             var header = methodHeaderTuple.right;
-            var generatedHeader = header.left.generate() + "(" + header.right + ")";
-            if (header.left.annotations.contains("Actual")) {
+            var joinedParams = header.params
+                    .stream()
+                    .map(Definition::generate)
+                    .collect(Collectors.joining(", "));
+
+            var generatedHeader = header.definition.generate() + "(" + joinedParams + ")";
+            if (header.definition.annotations.contains("Actual")) {
                 var generated = generatedHeader + ";";
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
             return or(methodHeaderTuple.left, afterParams, List.of(
-                    (state1, s) -> methodWithBraces(state1, s, generatedHeader),
+                    (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
                     (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
             ));
         });
@@ -850,43 +873,13 @@ public class Main {
         return new Err<>(new CompileError("Content ';' not present", content));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, String header) {
-        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-            var content = withBraces.substring(1, withBraces.length() - 1).strip();
-            return assembleMethod(state, content, header);
-        }
-        return new Err<>(new CompileError("No braces present", withBraces));
-    }
-
-    private static Result<Tuple<CompileState, Tuple<Definition, String>>, CompileError> methodHeader(CompileState state, String input) {
-        var paramStart = input.indexOf("(");
-        if (paramStart < 0) {
-            return createInfixErr(input, "(");
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, String header, FunctionProto proto) {
+        if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+            return new Err<>(new CompileError("No braces present", withBraces));
         }
 
-        var definitionString = input.substring(0, paramStart).strip();
-        var inputParams = input.substring(paramStart + "(".length());
-
-        var maybeParamsTuple = compileValues(state, inputParams, Main::compileParameter);
-        if (maybeParamsTuple instanceof Ok(var paramsTuple)) {
-            if (isSymbol(definitionString)) {
-                return new Ok<>(new Tuple<>(paramsTuple.left, new Tuple<>(new Definition("auto", definitionString), paramsTuple.right)));
-            }
-
-            if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
-                var definition = definitionTuple.right;
-                var paramsState = paramsTuple.left;
-                var paramsString = paramsTuple.right;
-
-                return new Ok<>(new Tuple<>(paramsState, new Tuple<>(definition, paramsString)));
-            }
-        }
-
-        return new Err<>(new CompileError("Not a method header", input));
-    }
-
-    private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, String content, String header) {
-        return parseStatements(state.enter(), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
+        var content = withBraces.substring(1, withBraces.length() - 1).strip();
+        return parseStatements(state.enter().mapLast(last -> last.withProto(proto)), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
 
@@ -899,10 +892,49 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
+    private static Result<Tuple<CompileState, FunctionProto>, CompileError> methodHeader(CompileState state, String input) {
+        var paramStart = input.indexOf("(");
+        if (paramStart < 0) {
+            return createInfixErr(input, "(");
+        }
+
+        var definitionString = input.substring(0, paramStart).strip();
+        var inputParams = input.substring(paramStart + "(".length());
+
+        return parseValues(state, inputParams, Main::compileParameter).flatMapValue(paramsTuple -> {
+            var paramsState = paramsTuple.left;
+            var params = paramsTuple.right
+                    .stream()
+                    .flatMap(Main::retainDefinition)
+                    .toList();
+
+            if (isSymbol(definitionString)) {
+                var definition = new Definition("auto", definitionString);
+                return new Ok<>(new Tuple<>(paramsState, new FunctionProto(definition, params)));
+            }
+
+            if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
+                var definition = definitionTuple.right;
+                return new Ok<>(new Tuple<>(paramsState, new FunctionProto(definition, params)));
+            }
+
+            return new Err<>(new CompileError("Not a method header", input));
+        });
+    }
+
+    private static Stream<Definition> retainDefinition(Parameter parameter) {
+        if (parameter instanceof Definition definition1) {
+            return Stream.of(definition1);
+        }
+        else {
+            return Stream.empty();
+        }
+    }
+
+    private static Result<Tuple<CompileState, Parameter>, CompileError> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
-                typed("?", Main::whitespace),
-                typed("?", Main::definition)
+                typed("?", Main::parseWhitespace),
+                typed("?", Main::parseDefinition)
         ));
     }
 
