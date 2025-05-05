@@ -20,6 +20,19 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
+    private interface Rule<T> extends BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> {
+    }
+
+    private interface Type extends Scoped {
+    }
+
+    private interface Node {
+        String generate();
+    }
+
+    private interface Scoped extends Node {
+    }
+
     private sealed interface Option<T> permits Some, None {
         void ifPresent(Consumer<T> consumer);
 
@@ -46,47 +59,6 @@ public class Main {
         C createInitial();
 
         C fold(C current, T element);
-    }
-
-    private record Iterator<T>(Head<T> head) {
-        public <C> C collect(Collector<T, C> collector) {
-            return this.fold(collector.createInitial(), collector::fold);
-        }
-
-        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
-            var current = initial;
-            while (true) {
-                C finalCurrent = current;
-                var map = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (map instanceof Some(var value)) {
-                    current = value;
-                }
-                else {
-                    return current;
-                }
-            }
-        }
-
-        public Iterator<T> filter(Predicate<T> predicate) {
-            return this.flatMap(new Function<T, Iterator<T>>() {
-                @Override
-                public Iterator<T> apply(T t) {
-                    return predicate.test(t) ? new Iterator<>(new SingleHead<>(t)) : new Iterator<>(new EmptyHead<>());
-                }
-            });
-        }
-
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
-        }
-
-        private Iterator<T> concat(Iterator<T> other) {
-            return new Iterator<>(() -> this.head.next().or(other.head::next));
-        }
-
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new Iterator<>(() -> this.head.next().map(mapper));
-        }
     }
 
     private interface List<T> {
@@ -134,50 +106,29 @@ public class Main {
     private @interface Actual {
     }
 
-    private interface Value {
+    private interface Value extends Scoped {
         String generate();
     }
 
     private interface Parameter {
     }
 
-    private interface Type {
-    }
-
-    private static class EmptyHead<T> implements Head<T> {
+    private record Template(String base, List<Type> arguments) implements Type {
         @Override
-        public Option<T> next() {
-            return new None<>();
+        public String generate() {
+            var joinedArguments = this.arguments.iter()
+                    .map(Node::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "template " + this.base + "<" + joinedArguments + ">";
         }
     }
 
-
-    private static class SingleHead<T> implements Head<T> {
-        private final T value;
-        private boolean retrieved = false;
-
-        public SingleHead(T value) {
-            this.value = value;
-        }
-
+    private record StructRef(String name) implements Type {
         @Override
-        public Option<T> next() {
-            if (this.retrieved) {
-                return new None<>();
-            }
-
-            this.retrieved = true;
-            return new Some<>(this.value);
-        }
-    }
-
-    @Actual
-    private record IOError(IOException exception) implements Error {
-        @Override
-        public String display() {
-            var writer = new StringWriter();
-            this.exception.printStackTrace(new PrintWriter(writer));
-            return writer.toString();
+        public String generate() {
+            return "struct " + this.name;
         }
     }
 
@@ -261,6 +212,84 @@ public class Main {
         @Override
         public <R> R match(Function<T, R> whenSome, Supplier<R> whenNone) {
             return whenSome.apply(this.value);
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved;
+
+        public SingleHead(T value) {
+            this.value = value;
+            this.retrieved = false;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+
+            this.retrieved = true;
+            return new Some<>(this.value);
+        }
+    }
+
+    private record Iterator<T>(Head<T> head) {
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
+            var current = initial;
+            while (true) {
+                C finalCurrent = current;
+                var map = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (map instanceof Some(var value)) {
+                    current = value;
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> {
+                if (predicate.test(element)) {
+                    return new Iterator<>(new SingleHead<>(element));
+                }
+                return new Iterator<>(new EmptyHead<>());
+            });
+        }
+
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other.head::next));
+        }
+
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+    }
+
+    @Actual
+    private record IOError(IOException exception) implements Error {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.exception.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
         }
     }
 
@@ -651,10 +680,10 @@ public class Main {
     private record Definition(
             List<String> annotations,
             List<String> modifiers,
-            String type,
+            Type type,
             String name
     ) implements Parameter {
-        public Definition(String type, String name) {
+        public Definition(Type type, String name) {
             this(Lists.empty(), Lists.empty(), type, name);
         }
 
@@ -712,10 +741,10 @@ public class Main {
         }
     }
 
-    private record MethodAccess(String parent, String child) implements Value {
+    private record MethodAccess(Scoped parent, String child) implements Value {
         @Override
         public String generate() {
-            return this.parent() + "::" + this.child();
+            return this.parent.generate() + "::" + this.child();
         }
     }
 
@@ -726,7 +755,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Value, Parameter {
+    private static class Whitespace implements Value, Parameter, Type {
         @Override
         public String generate() {
             return "";
@@ -835,6 +864,10 @@ public class Main {
     }
 
     private record StructureType(StructPrototype prototype) implements Type {
+        @Override
+        public String generate() {
+            return "struct " + this.prototype.name;
+        }
     }
 
     private static class Iterators {
@@ -859,20 +892,29 @@ public class Main {
         }
     }
 
-    private enum Operator {
-        ADD("+"),
-        SUBTRACT("-"),
-        LESS_THAN("<"),
-        AND("&&"),
-        OR("||"),
-        GREATER_THAN_OR_EQUALS(">="),
-        EQUALS("=="),
-        NOT_EQUALS("!=");
+    private record Ref(Type childType) implements Type {
+        @Override
+        public String generate() {
+            return this.childType.generate() + "*";
+        }
+    }
 
-        private final String representation;
+    private record FunctionType(List<Type> arguments, Type returnType) implements Type {
+        @Override
+        public String generate() {
+            var joinedArguments = this.arguments().iter()
+                    .map(Node::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
 
-        Operator(String representation) {
-            this.representation = representation;
+            return this.returnType.generate() + " (*)(" + joinedArguments + ")";
+        }
+    }
+
+    private record TupleType(Type first, Type second) implements Type {
+        @Override
+        public String generate() {
+            return "(" + this.first.generate() + ", " + this.second.generate() + ")";
         }
     }
 
@@ -923,7 +965,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", Main::whitespace),
+                typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("namespaced", Main::namespaced),
                 typed("class", (state0, input0) -> structure(state0, input0, "class"))
         ));
@@ -937,7 +979,7 @@ public class Main {
         return new Err<>(new CompileError("Not namespaced", input));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> mapper) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileStatements(CompileState state, String input, Rule<String> mapper) {
         return parseStatements(state, input, mapper).mapValue(tuple -> new Tuple<>(tuple.left, generateStatements(tuple.right)));
     }
 
@@ -945,7 +987,7 @@ public class Main {
         return generateAll(elements, Main::mergeStatements);
     }
 
-    private static Result<Tuple<CompileState, List<String>>, CompileError> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> mapper) {
+    private static Result<Tuple<CompileState, List<String>>, CompileError> parseStatements(CompileState state, String input, Rule<String> mapper) {
         return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
@@ -953,7 +995,7 @@ public class Main {
             CompileState initial,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper
+            Rule<T> mapper
     ) {
         return divideAll(input, folder).iter().fold(createInitial(initial),
                 (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)));
@@ -963,7 +1005,7 @@ public class Main {
         return new Ok<>(new Tuple<CompileState, List<T>>(initial, Lists.empty()));
     }
 
-    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, Rule<T> mapper) {
         return mapper.apply(current.left, segment).mapValue(mapped -> {
             var elements = current.right;
             var newElement = mapped.right;
@@ -1062,7 +1104,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", Main::whitespace),
+                typed("whitespace", (state4, input4) -> whitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("enum", (state3, input3) -> structure(state3, input3, "enum ")),
                 typed("class", (state2, input2) -> structure(state2, input2, "class ")),
                 typed("record", (state1, input1) -> structure(state1, input1, "record ")),
@@ -1147,7 +1189,8 @@ public class Main {
         var prototype = new StructPrototype(name);
         return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(prototype)), right, Main::compileStructSegment).mapValue(result -> {
             var generated = "struct " + name + " {" + result.right + "\n};\n";
-            return new Tuple<>(result.left.exitStruct().addStruct(generated), "");
+            var withStruct = result.left.exitStruct().addStruct(generated);
+            return new Tuple<>(withStruct, "");
         });
     }
 
@@ -1270,7 +1313,7 @@ public class Main {
         if (!isSymbol(definitionString)) {
             return new Err<>(new CompileError("Not a symbol", definitionString));
         }
-        var definition = new Definition("auto", definitionString);
+        var definition = new Definition(Primitive.Auto, definitionString);
         return new Ok<>(new Tuple<>(state, new FunctionProto(definition, params)));
     }
 
@@ -1290,9 +1333,9 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> whitespace(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> whitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return new Ok<>(new Tuple<>(state, ""));
+            return new Ok<>(new Tuple<>(state, new Whitespace()));
         }
 
         return new Err<>(new CompileError("Not whitespace", input));
@@ -1300,7 +1343,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", Main::whitespace),
+                typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("statement", Main::functionStatement),
                 typed("block", Main::compileBlock)
         ));
@@ -1356,7 +1399,7 @@ public class Main {
         return statement(state, input, Main::functionStatementValue);
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> statement(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> mapper) {
+    private static Result<Tuple<CompileState, String>, CompileError> statement(CompileState state, String input, Rule<String> mapper) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return createSuffixErr(input, ";");
@@ -1532,15 +1575,26 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> type(CompileState state, String input) {
-        return or(state, input, Lists.of(
-                Main::primitive,
-                Main::symbolType,
-                Main::template
+    private static Result<Tuple<CompileState, Type>, CompileError> type(CompileState state, String input) {
+        return Main.or(state, input, Lists.of(
+                typed("primitive", Main::primitive),
+                typed("string", (state1, s) -> stringType(state1, s)),
+                typed("symbol", Main::symbolType),
+                typed("template", Main::template)
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> template(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Ref>, CompileError> stringType(CompileState state1, String s) {
+        var stripped = s.strip();
+        if (stripped.equals("String")) {
+            return new Ok<>(new Tuple<>(state1, new Ref(Primitive.I8)));
+        }
+        else {
+            return new Err<>(new CompileError("Not a string", stripped));
+        }
+    }
+
+    private static Result<Tuple<CompileState, Type>, CompileError> template(CompileState state, String input) {
         var stripped = input.strip();
         if (!stripped.endsWith(">")) {
             return createSuffixErr(stripped, ">");
@@ -1555,28 +1609,37 @@ public class Main {
         var base = withoutEnd.substring(0, argsStart).strip();
         var argsString = withoutEnd.substring(argsStart + "<".length());
         return parseValues(state, argsString, Main::argumentType).flatMapValue(argsTuple -> {
+            var argsState = argsTuple.left;
             var args = argsTuple.right;
 
             if (base.equals("Tuple") && args.size() >= 2) {
                 var first = args.get(0);
                 var second = args.get(1);
-                return new Ok<>(new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")"));
+                return new Ok<>(new Tuple<>(argsState, new TupleType(first, second)));
             }
 
             if (base.equals("Consumer")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional("void", Lists.of(args.first()))));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), Primitive.Void)));
             }
 
             if (base.equals("Supplier")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.first(), Lists.empty())));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.empty(), args.first())));
             }
 
             if (base.equals("Function")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.get(1), Lists.of(args.first()))));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), args.get(1))));
             }
 
-            if (state.resolve(base) instanceof Some(var resolved)) {
-                return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
+            if (base.equals("BiFunction")) {
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first(), args.get(1)), args.get(2))));
+            }
+
+            if (base.equals("Predicate")) {
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), Primitive.I32)));
+            }
+
+            if (argsState.resolve(base) instanceof Some(var resolved)) {
+                return new Ok<>(new Tuple<>(argsState, new Template(base, args)));
             }
             else {
                 return new Err<>(new CompileError("Struct not defined", base));
@@ -1585,45 +1648,34 @@ public class Main {
 
     }
 
-    private static String generateFunctional(String returnType, List<String> arguments) {
-        var joinedArguments = arguments.iter()
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        return returnType + " (*)(" + joinedArguments + ")";
-    }
-
-    private static Result<Tuple<CompileState, String>, CompileError> argumentType(CompileState state1, String input1) {
-        return or(state1, input1, Lists.of(
-                Main::whitespace,
-                Main::type
+    private static Result<Tuple<CompileState, Type>, CompileError> argumentType(CompileState state1, String input1) {
+        return Main.or(state1, input1, Lists.of(
+                typed("whitespace", (state, input) -> whitespace(state, input)),
+                typed("type", Main::type)
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> symbolType(CompileState state, String input) {
+    private static Result<Tuple<CompileState, StructRef>, CompileError> symbolType(CompileState state, String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
-            return new Ok<>(new Tuple<>(state, "struct " + stripped));
+            return new Ok<>(new Tuple<>(state, new StructRef(stripped)));
         }
         return new Err<>(new CompileError("Not a symbol", stripped));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> primitive(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Primitive>, CompileError> primitive(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.equals("var")) {
-            return new Ok<>(new Tuple<>(state, "auto"));
+            return new Ok<>(new Tuple<>(state, Primitive.Auto));
         }
         if (stripped.equals("char")) {
-            return new Ok<>(new Tuple<>(state, "char"));
+            return new Ok<>(new Tuple<>(state, Primitive.I8));
         }
         if (stripped.equals("void")) {
-            return new Ok<>(new Tuple<>(state, "void"));
-        }
-        if (stripped.equals("String")) {
-            return new Ok<>(new Tuple<>(state, "char*"));
+            return new Ok<>(new Tuple<>(state, Primitive.Void));
         }
         if (stripped.equals("boolean") || stripped.equals("int")) {
-            return new Ok<>(new Tuple<>(state, "int"));
+            return new Ok<>(new Tuple<>(state, Primitive.I32));
         }
         return new Err<>(new CompileError("Not a primitive", input));
     }
@@ -1710,7 +1762,7 @@ public class Main {
         }
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileValues(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> compiler) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileValues(CompileState state, String input, Rule<String> compiler) {
         return parseValues(state, input, compiler).mapValue(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
     }
 
@@ -1721,7 +1773,7 @@ public class Main {
     private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseValues(
             CompileState state,
             String input,
-            BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> compiler
+            Rule<T> compiler
     ) {
         return parseAll(state, input, Main::foldValueChar, compiler);
     }
@@ -1757,7 +1809,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> value(CompileState state, String input) {
-        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = Lists.of(
+        List<Rule<Value>> beforeOperators = Lists.of(
                 typed("?", Main::compileNot),
                 typed("?", Main::compileString),
                 typed("?", Main::compileChar),
@@ -1768,12 +1820,12 @@ public class Main {
                 .map(Main::createOperatorRule)
                 .collect(new ListCollector<>());
 
-        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = Lists.of(
+        List<Rule<Value>> afterOperators = Lists.of(
                 typed("invokable", Main::compileInvokable),
                 typed("?", Main::compileAccess),
                 typed("?", Main::parseBooleanValue),
                 typed("?", Main::compileSymbolValue),
-                typed("?", Main::compileMethodReference),
+                typed("?", Main::methodAccess),
                 typed("?", Main::parseNumber),
                 typed("instanceof", Main::instanceOfNode)
         );
@@ -1785,7 +1837,7 @@ public class Main {
         return or(state, input, biFunctionList);
     }
 
-    private static BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>> createOperatorRule(Operator value) {
+    private static Rule<Value> createOperatorRule(Operator value) {
         return typed(value.name(), (state1, input1) -> operator(state1, input1, value));
     }
 
@@ -1865,35 +1917,38 @@ public class Main {
     private static <T> Result<Tuple<CompileState, T>, CompileError> or(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>>> rules
+            List<Rule<T>> rules
     ) {
         return rules.iter().fold(new OrState<T>(), (orState, mapper) -> foldOr(orState, mapper, state, input))
                 .toResult()
                 .mapErr(errs -> new CompileError("No valid rule present", input, errs));
     }
 
-    private static <T> OrState<T> foldOr(OrState<T> tOrState, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper, CompileState state, String input) {
+    private static <T> OrState<T> foldOr(OrState<T> tOrState, Rule<T> mapper, CompileState state, String input) {
         if (tOrState.option.isPresent()) {
             return tOrState;
         }
         return mapper.apply(state, input).match(tOrState::withValue, tOrState::withError);
     }
 
-    private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> typed(
-            String type, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
+    private static <S, T extends S> Rule<S> typed(String type, Rule<T> mapper) {
         return (state, input) -> mapper.apply(state, input)
                 .mapValue(value -> new Tuple<CompileState, S>(value.left, value.right))
                 .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
     }
 
-    private static Result<Tuple<CompileState, MethodAccess>, CompileError> compileMethodReference(CompileState state, String input) {
+    private static Result<Tuple<CompileState, MethodAccess>, CompileError> methodAccess(CompileState state, String input) {
         var functionSeparator = input.strip().indexOf("::");
         if (functionSeparator >= 0) {
             var left = input.strip().substring(0, functionSeparator);
             var right = input.strip().substring(functionSeparator + "::".length()).strip();
-            var maybeLeftTuple = type(state, left);
-            if (maybeLeftTuple instanceof Ok(var leftTuple)) {
-                if (isSymbol(right)) {
+            if (isSymbol(right)) {
+                var maybeLeftTuple = Main.or(state, left, Lists.of(
+                        typed("type", Main::type),
+                        typed("value", Main::value)
+                ));
+
+                if (maybeLeftTuple instanceof Ok(var leftTuple)) {
                     return new Ok<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
                 }
             }
@@ -2011,5 +2066,39 @@ public class Main {
             return appended.exit();
         }
         return appended;
+    }
+
+    private enum Primitive implements Type {
+        Auto("auto"),
+        I8("char"),
+        Void("void"),
+        I32("int");
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
+    private enum Operator {
+        ADD("+"),
+        SUBTRACT("-"),
+        LESS_THAN("<"),
+        AND("&&"),
+        OR("||"),
+        GREATER_THAN_OR_EQUALS(">="),
+        EQUALS("=="),
+        NOT_EQUALS("!=");
+
+        private final String representation;
+
+        Operator(String representation) {
+            this.representation = representation;
+        }
     }
 }
