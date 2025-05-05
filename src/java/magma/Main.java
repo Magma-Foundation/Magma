@@ -1265,7 +1265,7 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> enumValues(CompileState state, String input) {
         return statement(state, input,
                 (state0, input0) -> compileValues(state0, input0,
-                        (state1, input1) -> compileInvokable(state1, input1).mapValue(
+                        (state1, input1) -> parseInvokable(state1, input1).mapValue(
                                 tuple -> new Tuple<>(tuple.left, tuple.right.generate()))));
     }
 
@@ -1613,7 +1613,7 @@ public class Main {
                 (state1, input1) -> compileKeyword(state1, input1, "break"),
                 (state1, input1) -> compileKeyword(state1, input1, "continue"),
                 Main::compileReturn,
-                (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
+                (state0, input0) -> parseInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
                 Main::assignment,
                 Main::compilePostfix
         ));
@@ -1672,7 +1672,7 @@ public class Main {
     private static Result<Tuple<CompileState, Assignable>, CompileError> compileAssignable(CompileState state, String left) {
         return Main.or(state, left, Lists.of(
                 typed("definition", Main::parseDefinition),
-                typed("value", Main::value)
+                typed("value", Main::parseValue)
         ));
     }
 
@@ -1883,7 +1883,7 @@ public class Main {
         return new Err<>(new CompileError("Not a primitive", input));
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> compileInvokable(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> parseInvokable(CompileState state, String input) {
         var stripped = input.strip();
         if (!stripped.endsWith(")")) {
             return createSuffixErr(stripped, ")");
@@ -1932,7 +1932,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Invocation>, CompileError> invocationCaller(CompileState state, String input, List<Value> arguments) {
-        return value(state, input).flatMapValue(callerTuple -> {
+        return parseValue(state, input).flatMapValue(callerTuple -> {
             var callerState = callerTuple.left;
             var oldCaller = callerTuple.right;
 
@@ -1954,7 +1954,7 @@ public class Main {
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, Lists.of(
                 typed("?", Main::parseWhitespace),
-                typed("?", Main::value)
+                typed("?", Main::parseValue)
         ));
     }
 
@@ -2010,15 +2010,15 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileValue(CompileState state, String input) {
-        return value(state, input).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+        return parseValue(state, input).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> value(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> parseValue(CompileState state, String input) {
         List<Rule<Value>> beforeOperators = Lists.of(
-                typed("?", Main::compileNot),
-                typed("?", Main::compileString),
-                typed("?", Main::compileChar),
-                typed("lambda", Main::lambda)
+                typed("?", Main::parseNot),
+                typed("?", Main::parseString),
+                typed("?", Main::parseChar),
+                typed("lambda", Main::parseLambda)
         );
 
         var operatorRules = Iterators.of(Operator.values())
@@ -2026,14 +2026,14 @@ public class Main {
                 .collect(new ListCollector<>());
 
         List<Rule<Value>> afterOperators = Lists.of(
-                typed("invokable", Main::compileInvokable),
-                typed("?", Main::dataAccess),
+                typed("invokable", Main::parseInvokable),
+                typed("?", Main::parseDataAccess),
                 typed("?", Main::parseBooleanValue),
-                typed("?", Main::symbolValue),
-                typed("?", Main::methodAccess),
+                typed("?", Main::parseSymbolValue),
+                typed("?", Main::parseMethodAccess),
                 typed("?", Main::parseNumber),
-                typed("instanceof", Main::instanceOfNode),
-                typed("index", Main::index)
+                typed("instanceof", Main::parseInstanceOf),
+                typed("index", Main::parseIndex)
         );
 
         var biFunctionList = beforeOperators
@@ -2043,7 +2043,7 @@ public class Main {
         return or(state, input, biFunctionList);
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> index(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> parseIndex(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith("]")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "]".length());
@@ -2051,8 +2051,8 @@ public class Main {
             if (index >= 0) {
                 var parent = withoutEnd.substring(0, index);
                 var child = withoutEnd.substring(index + "[".length());
-                return value(state, parent).flatMapValue(parentTuple -> {
-                    return value(parentTuple.left, child).mapValue(childTuple -> {
+                return parseValue(state, parent).flatMapValue(parentTuple -> {
+                    return parseValue(parentTuple.left, child).mapValue(childTuple -> {
                         return new Tuple<>(childTuple.left, new IndexValue(parentTuple.right, childTuple.right));
                     });
                 });
@@ -2066,7 +2066,7 @@ public class Main {
         return typed(value.name(), (state1, input1) -> operator(state1, input1, value));
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> instanceOfNode(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOf(CompileState state, String input) {
         return infix(input, "instanceof", (beforeKeyword, afterKeyword) -> {
             var strippedAfterKeyword = afterKeyword.strip();
             if (strippedAfterKeyword.endsWith(")")) {
@@ -2074,7 +2074,7 @@ public class Main {
                 var paramsStart = left.indexOf("(");
                 if (paramsStart >= 0) {
                     var params = left.substring(paramsStart + 1);
-                    return value(state, beforeKeyword).flatMapValue(valueResult -> {
+                    return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
                         return parseParameters(state, params).mapValue(parameterTuple -> {
                             var left1 = valueResult.left.defineValues(parameterTuple.right);
                             var value = valueResult.right;
@@ -2089,13 +2089,13 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, Not>, CompileError> compileNot(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Not>, CompileError> parseNot(CompileState state, String input) {
         var stripped = input.strip();
         if (!stripped.startsWith("!")) {
             return new Err<>(new CompileError("Not not", input));
         }
 
-        return value(state, stripped.substring(1)).mapValue(inner -> new Tuple<>(inner.left, new Not(inner.right)));
+        return parseValue(state, stripped.substring(1)).mapValue(inner -> new Tuple<>(inner.left, new Not(inner.right)));
     }
 
     private static Result<Tuple<CompileState, NumberValue>, CompileError> parseBooleanValue(CompileState state, String input) {
@@ -2111,7 +2111,7 @@ public class Main {
         return new Err<>(new CompileError("Not a valid boolean value", input));
     }
 
-    private static Result<Tuple<CompileState, CharValue>, CompileError> compileChar(CompileState state, String input) {
+    private static Result<Tuple<CompileState, CharValue>, CompileError> parseChar(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3) {
             return new Ok<>(new Tuple<>(state, new CharValue(stripped.substring(1, stripped.length() - 1))));
@@ -2146,8 +2146,8 @@ public class Main {
         var left = input.substring(0, index);
         var right = input.substring(index + operator.representation.length());
 
-        return value(state, left).flatMapValue(leftTuple -> {
-            return value(leftTuple.left, right).mapValue(rightTuple -> {
+        return parseValue(state, left).flatMapValue(leftTuple -> {
+            return parseValue(leftTuple.left, right).mapValue(rightTuple -> {
                 var operation = new Operation(leftTuple.right, operator, rightTuple.right);
                 return new Tuple<>(rightTuple.left, operation);
             });
@@ -2177,7 +2177,7 @@ public class Main {
                 .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
     }
 
-    private static Result<Tuple<CompileState, MethodAccess>, CompileError> methodAccess(CompileState state, String input) {
+    private static Result<Tuple<CompileState, MethodAccess>, CompileError> parseMethodAccess(CompileState state, String input) {
         var functionSeparator = input.strip().indexOf("::");
         if (functionSeparator >= 0) {
             var left = input.strip().substring(0, functionSeparator);
@@ -2185,7 +2185,7 @@ public class Main {
             if (isSymbol(right)) {
                 var maybeLeftTuple = Main.or(state, left, Lists.of(
                         typed("type", Main::type),
-                        typed("value", Main::value)
+                        typed("value", Main::parseValue)
                 ));
 
                 if (maybeLeftTuple instanceof Ok(var leftTuple)) {
@@ -2196,7 +2196,7 @@ public class Main {
         return new Err<>(new CompileError("Not a method reference", input));
     }
 
-    private static Result<Tuple<CompileState, Symbol>, CompileError> symbolValue(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> parseSymbolValue(CompileState state, String input) {
         var stripped = input.strip();
         if (!isSymbol(stripped)) {
             return new Err<>(new CompileError("Not a symbol", input));
@@ -2209,7 +2209,7 @@ public class Main {
         return new Err<>(new CompileError("Undefined symbol", stripped));
     }
 
-    private static Result<Tuple<CompileState, DataAccess>, CompileError> dataAccess(CompileState state, String input) {
+    private static Result<Tuple<CompileState, DataAccess>, CompileError> parseDataAccess(CompileState state, String input) {
         var separator = input.strip().lastIndexOf(".");
         if (separator < 0) {
             return new Err<>(new CompileError("Not data access", input));
@@ -2221,12 +2221,12 @@ public class Main {
             return new Err<>(new CompileError("Not data access", input));
         }
 
-        return value(state, parent).flatMapValue(tuple -> {
+        return parseValue(state, parent).flatMapValue(tuple -> {
             return new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
         });
     }
 
-    private static Result<Tuple<CompileState, StringValue>, CompileError> compileString(CompileState state, String input) {
+    private static Result<Tuple<CompileState, StringValue>, CompileError> parseString(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"") && stripped.length() >= 2) {
             return new Ok<>(new Tuple<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
@@ -2234,7 +2234,7 @@ public class Main {
         return new Err<>(new CompileError("Not a string", input));
     }
 
-    private static Result<Tuple<CompileState, Symbol>, CompileError> lambda(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> parseLambda(CompileState state, String input) {
         var arrowIndex = input.indexOf("->");
         if (arrowIndex < 0) {
             return createInfixErr(input, "->");
