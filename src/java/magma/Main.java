@@ -706,8 +706,16 @@ public class Main {
                 typed("record", structure("record")),
                 typed("interface", structure("interface")),
                 typed("method", Main::compileMethod),
-                typed("definition", Main::definitionStatement)
+                typed("definition", Main::definitionStatement),
+                typed("enum-values", Main::enumValues)
         ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> enumValues(CompileState state, String input) {
+        return statement(state, input,
+                (state0, input0) -> compileValues(state0, input0,
+                        (state1, input1) -> compileInvokable(state1, input1).mapValue(
+                                tuple -> new Tuple<>(tuple.left, tuple.right.generate()))));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> definitionStatement(CompileState state, String input) {
@@ -1515,9 +1523,10 @@ public class Main {
             return false;
         }
 
-        return IntStream.range(0, stripped.length())
-                .mapToObj(stripped::charAt)
-                .allMatch(Character::isLetter);
+        return IntStream.range(0, stripped.length()).allMatch(index -> {
+            var c = input.charAt(index);
+            return Character.isLetter(c) || c == '_';
+        });
     }
 
     private static DivideState foldInvocationStart(DivideState state, char c) {
