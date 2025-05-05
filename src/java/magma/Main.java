@@ -282,8 +282,8 @@ public class Main {
     private record Frame(
             Map<String, Integer> counters,
             List<String> statements,
-            Option<FunctionProto> functionProto,
-            Option<StructPrototype> structProto,
+            Option<FunctionProto> maybeFunctionProto,
+            Option<StructPrototype> maybeStructProto,
             Map<String, Type> types
     ) {
         public Frame() {
@@ -305,20 +305,28 @@ public class Main {
         }
 
         public Frame withFunctionProto(FunctionProto proto) {
-            return new Frame(this.counters, this.statements, new Some<>(proto), this.structProto, this.types);
+            return new Frame(this.counters, this.statements, new Some<>(proto), this.maybeStructProto, this.types);
         }
 
         public Frame withStructProto(StructPrototype proto) {
-            return new Frame(this.counters, this.statements, this.functionProto, new Some<>(proto), this.types);
+            return new Frame(this.counters, this.statements, this.maybeFunctionProto, new Some<>(proto), this.types);
         }
 
         public Option<Type> resolveType(String name) {
+            if (this.maybeStructProto instanceof Some(var structProto) && name.equals(structProto.name)) {
+                return new Some<>(new StructureType(structProto));
+            }
+
             if (this.types.containsKey(name)) {
                 return new Some<>(this.types.get(name));
             }
-            else {
-                return new None<>();
-            }
+
+            return new None<>();
+        }
+
+        public Frame defineType(String name, Type type) {
+            this.types.put(name, type);
+            return this;
         }
     }
 
@@ -345,11 +353,6 @@ public class Main {
             return this;
         }
 
-        public CompileState exit() {
-            this.frames.removeLast();
-            return this;
-        }
-
         public CompileState addStruct(String generated) {
             this.structs.add(generated);
             return this;
@@ -366,10 +369,6 @@ public class Main {
             return this;
         }
 
-        public Frame last() {
-            return this.frames.getLast();
-        }
-
         public Option<Type> resolve(String name) {
             return IntStream.range(0, this.frames.size())
                     .map(index -> this.frames.size() - index - 1)
@@ -379,6 +378,31 @@ public class Main {
                     .findFirst()
                     .<Option<Type>>map(Some::new)
                     .orElseGet(None::new);
+        }
+
+        public CompileState exitStruct() {
+            var last = this.frames.getLast();
+            var maybeStructureProto = last.maybeStructProto;
+            var exited = this.exit();
+            if (maybeStructureProto instanceof Some(var structProto)) {
+                return exited.defineType(structProto.name, new StructureType(structProto));
+            }
+            return exited;
+        }
+
+        public CompileState exit() {
+            this.frames.removeLast();
+            return this;
+        }
+
+        private CompileState defineType(String name, StructureType type) {
+            var newLast = this.last().defineType(name, type);
+            this.frames.set(this.frames.size() - 1, newLast);
+            return this;
+        }
+
+        public Frame last() {
+            return this.frames.getLast();
         }
     }
 
@@ -559,7 +583,7 @@ public class Main {
     private record StructPrototype(String name) {
     }
 
-    private record StructureType(StructPrototype prototype) {
+    private record StructureType(StructPrototype prototype) implements Type {
     }
 
     private enum Operator {
@@ -844,9 +868,10 @@ public class Main {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
-        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(new StructPrototype(name))), right, Main::compileStructSegment).mapValue(result -> {
+        var prototype = new StructPrototype(name);
+        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(prototype)), right, Main::compileStructSegment).mapValue(result -> {
             var generated = "struct " + name + " {" + result.right + "\n};\n";
-            return new Tuple<>(result.left.exit().addStruct(generated), "");
+            return new Tuple<>(result.left.exitStruct().addStruct(generated), "");
         });
     }
 
@@ -888,7 +913,7 @@ public class Main {
                     .map(Definition::generate)
                     .collect(Collectors.joining(", "));
 
-            var structName = state.last().structProto.orElse(new StructPrototype("?")).name;
+            var structName = state.last().maybeStructProto.orElse(new StructPrototype("?")).name;
             var withStructName = header.definition
                     .mapName(name -> structName + "::" + name)
                     .generate();
