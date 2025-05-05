@@ -943,15 +943,18 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileReturn(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.startsWith("return ")) {
-            var right = stripped.substring("return ".length());
-            var tuple = compileValue(state, right);
-            if (tuple instanceof Ok(var tuple0)) {
-                return new Ok<>(new Tuple<>(tuple0.left, "return " + tuple0.right));
-            }
+        if (!stripped.startsWith("return ")) {
+            return createPrefixErr(stripped, "return ");
         }
 
-        return new Err<>(new CompileError("Not a return statement", input));
+        var right = stripped.substring("return ".length());
+        return compileValue(state, right).flatMapValue(tuple0 -> {
+            return new Ok<>(new Tuple<>(tuple0.left, "return " + tuple0.right));
+        });
+    }
+
+    private static Err<Tuple<CompileState, String>, CompileError> createPrefixErr(String input, String prefix) {
+        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileAssignment(CompileState state, String input) {
