@@ -594,14 +594,12 @@ public class Main {
 
     private record Frame(
             Map<String, Integer> counters,
-            List<String> statements,
-            Option<FunctionProto> maybeFunctionProto,
-            Option<StructPrototype> maybeStructProto,
-            Map<String, Type> types,
-            List<Definition> definitions
+            Option<FunctionProto> maybeFunctionProto, Option<StructPrototype> maybeStructProto, List<String> statements,
+            Map<String, Type> definedTypes,
+            List<Definition> definedValues
     ) {
         public Frame() {
-            this(Maps.empty(), Lists.empty(), new None<>(), new None<>(), Maps.empty(), Lists.empty());
+            this(Maps.empty(), new None<>(), new None<>(), Lists.empty(), Maps.empty(), Lists.empty());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -619,38 +617,42 @@ public class Main {
         }
 
         public Frame withFunctionProto(FunctionProto proto) {
-            return new Frame(this.counters, this.statements, new Some<>(proto), this.maybeStructProto, this.types, this.definitions);
+            return new Frame(this.counters, new Some<>(proto), this.maybeStructProto, this.statements, this.definedTypes, this.definedValues);
         }
 
         public Frame withStructProto(StructPrototype proto) {
-            return new Frame(this.counters, this.statements, this.maybeFunctionProto, new Some<>(proto), this.types, this.definitions);
+            return new Frame(this.counters, this.maybeFunctionProto, new Some<>(proto), this.statements, this.definedTypes, this.definedValues);
         }
 
         public Option<Type> resolveType(String name) {
             if (this.maybeStructProto instanceof Some(var structProto) && name.equals(structProto.name)) {
-                return new Some<>(new StructureType(structProto, this.definitions));
+                return new Some<>(new StructureType(structProto, this.definedValues));
             }
 
-            if (this.types.containsKey(name)) {
-                return new Some<>(this.types.get(name));
+            if (this.definedTypes.containsKey(name)) {
+                return new Some<>(this.definedTypes.get(name));
             }
 
             return new None<>();
         }
 
         public Frame defineType(String name, Type type) {
-            this.types.put(name, type);
+            this.definedTypes.put(name, type);
             return this;
         }
 
         public Option<Definition> resolveValue(String name) {
-            return this.definitions.iterator()
+            return this.definedValues.iterator()
                     .filter(definition -> definition.name.equals(name))
                     .next();
         }
 
         public Option<StructureType> toStructureType() {
-            return this.maybeStructProto.map(proto -> new StructureType(proto, this.definitions));
+            return this.maybeStructProto.map(proto -> new StructureType(proto, this.definedValues));
+        }
+
+        public Frame defineValues(List<Definition> values) {
+            return new Frame(this.counters, this.maybeFunctionProto, this.maybeStructProto, this.statements, this.definedTypes, this.definedValues.addAllLast(values));
         }
     }
 
@@ -738,6 +740,12 @@ public class Main {
                     .map(frame -> frame.resolveValue(name))
                     .flatMap(Iterators::fromOption)
                     .next();
+        }
+
+        public CompileState defineValues(List<Definition> values) {
+            return this.mapLast(last -> {
+                return last.defineValues(values);
+            });
         }
     }
 
@@ -1436,7 +1444,7 @@ public class Main {
                     .flatMap(Main::retainDefinition)
                     .collect(new ListCollector<>());
 
-            return or(paramsState, definitionString, Lists.of(
+            return or(paramsState.defineValues(params), definitionString, Lists.of(
                     (state1, s) -> constructor(state1, s, params),
                     (state2, s) -> method(state2, s, params)
             ));
