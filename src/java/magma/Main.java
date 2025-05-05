@@ -338,6 +338,10 @@ public class Main {
             String type,
             String name
     ) {
+        public Definition(String type, String name) {
+            this(Collections.emptyList(), Collections.emptyList(), type, name);
+        }
+
         private String generate() {
             var annotationsStrings = this.generateAnnotations();
             var modifiersString = this.generateModifiers();
@@ -812,14 +816,21 @@ public class Main {
         var withParams = input.substring(0, paramEnd);
         return methodHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
             var afterParams = input.substring(paramEnd + ")".length()).strip();
+
+            var header = methodHeaderTuple.right;
+            if (header.left.annotations.contains("Actual")) {
+                var generated = header + ";";
+                return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
+            }
+
             return or(methodHeaderTuple.left, afterParams, List.of(
-                    (state1, s) -> methodWithBraces(state1, s, methodHeaderTuple.right),
-                    (state2, s) -> methodWithoutBraces(state2, s, methodHeaderTuple.right)
+                    (state1, s) -> methodWithBraces(state1, s, header),
+                    (state2, s) -> methodWithoutBraces(state2, s, header)
             ));
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithoutBraces(CompileState state, String content, String right) {
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithoutBraces(CompileState state, String content, Tuple<Definition, String> right) {
         if (content.equals(";")) {
             var generated = right + " {\n}\n";
             return new Ok<>(new Tuple<>(state.addFunction(generated), ""));
@@ -827,7 +838,7 @@ public class Main {
         return new Err<>(new CompileError("Content ';' not present", content));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, String header) {
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, Tuple<Definition, String> header) {
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var content = withBraces.substring(1, withBraces.length() - 1).strip();
             return assembleMethod(state, header, content);
@@ -835,7 +846,7 @@ public class Main {
         return new Err<>(new CompileError("No braces present", withBraces));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodHeader(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Tuple<Definition, String>>, CompileError> methodHeader(CompileState state, String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return createInfixErr(input, "(");
@@ -844,31 +855,25 @@ public class Main {
         var definitionString = input.substring(0, paramStart).strip();
         var inputParams = input.substring(paramStart + "(".length());
 
-        if (isSymbol(definitionString)) {
-            return new Ok<>(new Tuple<>(state, definitionString));
-        }
+        var maybeParamsTuple = compileValues(state, inputParams, Main::compileParameter);
+        if (maybeParamsTuple instanceof Ok(var paramsTuple)) {
+            if (isSymbol(definitionString)) {
+                return new Ok<>(new Tuple<>(paramsTuple.left, new Tuple<>(new Definition("auto", definitionString), paramsTuple.right)));
+            }
 
-        if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
-            var definition = definitionTuple.right;
-            var maybeParamsTuple = compileValues(definitionTuple.left, inputParams, Main::compileParameter);
-            if (maybeParamsTuple instanceof Ok(var paramsTuple)) {
+            if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
+                var definition = definitionTuple.right;
                 var paramsState = paramsTuple.left;
                 var paramsString = paramsTuple.right;
 
-                var header = definition.generate() + "(" + paramsString + ")";
-                if (definition.modifiers.contains("expect")) {
-                    return new Ok<>(new Tuple<>(paramsState, header + ";\n"));
-                }
-
-                return new Ok<>(new Tuple<>(paramsState, header));
+                return new Ok<>(new Tuple<>(paramsState, new Tuple<>(definition, paramsString)));
             }
-
         }
 
         return new Err<>(new CompileError("Not a method header", input));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, String header, String content) {
+    private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, Tuple<Definition, String> header, String content) {
         return parseStatements(state.enter(), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
@@ -877,7 +882,8 @@ public class Main {
             oldStatements.addAll(statementsState.frames().getLast().statements);
             oldStatements.addAll(statements);
 
-            var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+            var generatedHeader = header.left.generate() + "(" + header.right + ")";
+            var generated = generatedHeader + "{" + generateStatements(oldStatements) + "\n}\n";
             return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
         });
     }
@@ -1098,18 +1104,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
         return type(state, type).mapValue(typeResult -> {
-            var newAnnotations = new ArrayList<String>();
-            var newModifiers = new ArrayList<String>();
-            for (var annotation : annotations) {
-                if (annotation.equals("Actual")) {
-                    newModifiers.add("expect");
-                }
-                else {
-                    newAnnotations.add(annotation);
-                }
-            }
-
-            return new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name));
+            return new Tuple<>(typeResult.left, new Definition(annotations, Collections.emptyList(), typeResult.right, name));
         });
     }
 
