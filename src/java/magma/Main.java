@@ -632,11 +632,7 @@ public class Main {
 
     private record CompileState(List<String> structs, List<String> functions, List<Frame> frames) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty());
-        }
-
-        public static CompileState createInitial() {
-            return new CompileState().enter();
+            this(Lists.empty(), Lists.empty(), Lists.<Frame>empty().addLast(new Frame()));
         }
 
         public CompileState addFunction(String generated) {
@@ -1015,7 +1011,7 @@ public class Main {
     }
 
     private static Result<String, CompileError> compile(String input) {
-        var state = CompileState.createInitial();
+        var state = new CompileState();
         return compileStatements(state, input, Main::compileRootSegment).mapValue(tuple -> {
             var joinedStructs = join(tuple.left.structs);
             var joinedFunctions = join(tuple.left.functions);
