@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
     private interface Rule<T> extends BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> {
@@ -248,9 +247,13 @@ public class Main {
         private final T value;
         private boolean retrieved;
 
-        public SingleHead(T value) {
+        private SingleHead(T value) {
             this.value = value;
             this.retrieved = false;
+        }
+
+        public static <T> Head<T> createNew(T value) {
+            return new SingleHead<T>(value);
         }
 
         @Override
@@ -289,7 +292,7 @@ public class Main {
         public Iterator<T> filter(Predicate<T> predicate) {
             return this.flatMap(element -> {
                 if (predicate.test(element)) {
-                    return new HeadedIterator<>(new SingleHead<>(element));
+                    return new HeadedIterator<>(SingleHead.createNew(element));
                 }
                 return new HeadedIterator<>(new EmptyHead<>());
             });
@@ -674,14 +677,12 @@ public class Main {
         }
 
         public Option<Type> resolve(String name) {
-            return IntStream.range(0, this.frames.size())
+            return new HeadedIterator<>(new RangeHead(this.frames.size()))
                     .map(index -> this.frames.size() - index - 1)
-                    .mapToObj(this.frames::get)
+                    .map(this.frames::get)
                     .map(frame -> frame.resolveType(name))
-                    .flatMap(Options::toStream)
-                    .findFirst()
-                    .<Option<Type>>map(Some::new)
-                    .orElseGet(None::new);
+                    .flatMap(Iterators::fromOption)
+                    .next();
         }
 
         public CompileState exitStruct() {
@@ -707,12 +708,6 @@ public class Main {
 
         public Frame last() {
             return this.frames.last();
-        }
-    }
-
-    private static class Options {
-        public static <T> Stream<T> toStream(Option<T> option) {
-            return option.match(Stream::of, Stream::empty);
         }
     }
 
@@ -941,6 +936,10 @@ public class Main {
 
         public static <T> Iterator<T> empty() {
             return new HeadedIterator<>(new EmptyHead<>());
+        }
+
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            return new HeadedIterator<>(option.map(SingleHead::createNew).orElseGet(EmptyHead::new));
         }
     }
 
