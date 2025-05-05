@@ -347,6 +347,10 @@ public class Main {
             this.frames.set(this.frames.size() - 1, newLast);
             return this;
         }
+
+        public Frame last() {
+            return frames.getLast();
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -387,6 +391,10 @@ public class Main {
             return this.annotations.stream()
                     .map(value -> "@" + value)
                     .collect(Collectors.joining("\n"));
+        }
+
+        public Definition mapName(Function<String, String> mapper) {
+            return new Definition(annotations, modifiers, type, mapper.apply(name));
         }
     }
 
@@ -744,7 +752,7 @@ public class Main {
                 typed("interface", (state0, input0) -> {
                     return structure(state0, input0, "interface");
                 }),
-                typed("method", Main::compileMethod),
+                typed("method", Main::method),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
         ));
@@ -844,7 +852,7 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileMethod(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> method(CompileState state, String input) {
         var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
             return new Err<>(new CompileError("Not a method", input));
@@ -860,7 +868,13 @@ public class Main {
                     .map(Definition::generate)
                     .collect(Collectors.joining(", "));
 
-            var generatedHeader = header.definition.generate() + "(" + joinedParams + ")";
+            var structName = state.last().structProto.orElse(new StructProto("?")).name;
+            var withStructName = header.definition
+                    .mapName(name -> structName + "::" + name)
+                    .generate();
+
+            var generatedHeader = withStructName + "(" + joinedParams + ")";
+
             if (header.definition.annotations.contains("Actual")) {
                 var generated = generatedHeader + ";";
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
