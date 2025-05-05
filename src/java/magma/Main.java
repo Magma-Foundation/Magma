@@ -567,9 +567,7 @@ public class Main {
         return or(state, input, List.of(
                 typed("whitespace", Main::whitespace),
                 typed("namespaced", Main::namespaced),
-                typed("class", (state0, input0) -> {
-                    return structure(state0, input0, "class");
-                })
+                typed("class", (state0, input0) -> structure(state0, input0, "class"))
         ));
     }
 
@@ -792,9 +790,9 @@ public class Main {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
-        return compileStatements(nameState, right, Main::compileStructSegment).mapValue(result -> {
+        return compileStatements(nameState.enter(), right, Main::compileStructSegment).mapValue(result -> {
             var generated = "struct " + name + " {" + result.right + "\n};\n";
-            return new Tuple<>(result.left.addStruct(generated), "");
+            return new Tuple<>(result.left.exit().addStruct(generated), "");
         });
     }
 
@@ -925,7 +923,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlock(CompileState state, String input) {
-        String indent = "\n" + "\t".repeat(state.depth() - 1);
+        String indent = "\n" + "\t".repeat(state.depth());
         if (!input.endsWith("}")) {
             return new Err<>(new CompileError("Not a block", input));
         }
@@ -1198,19 +1196,20 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> primitive(CompileState state, String input) {
-        if (input.strip().equals("var")) {
+        var stripped = input.strip();
+        if (stripped.equals("var")) {
             return new Ok<>(new Tuple<>(state, "auto"));
         }
-        if (input.strip().equals("char")) {
+        if (stripped.equals("char")) {
             return new Ok<>(new Tuple<>(state, "char"));
         }
-        if (input.strip().equals("void")) {
+        if (stripped.equals("void")) {
             return new Ok<>(new Tuple<>(state, "void"));
         }
-        if (input.strip().equals("String")) {
+        if (stripped.equals("String")) {
             return new Ok<>(new Tuple<>(state, "char*"));
         }
-        if (input.strip().equals("boolean")) {
+        if (stripped.equals("boolean") || stripped.equals("int")) {
             return new Ok<>(new Tuple<>(state, "int"));
         }
         return new Err<>(new CompileError("Not a primitive", input));
