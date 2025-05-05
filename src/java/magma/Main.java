@@ -677,7 +677,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type("whitespace", Main::compileWhitespace),
+                type("whitespace", Main::whitespace),
                 type("record", structure("record")),
                 type("class", structure("class")),
                 type("interface", structure("interface")),
@@ -827,12 +827,12 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
-                type("?", Main::compileWhitespace),
+                type("?", Main::whitespace),
                 type("?", Main::compileDefinition)
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileWhitespace(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> whitespace(CompileState state, String input) {
         if (input.isBlank()) {
             return new Ok<>(new Tuple<>(state, ""));
         }
@@ -842,7 +842,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type("whitespace", Main::compileWhitespace),
+                type("whitespace", Main::whitespace),
                 type("statement", Main::compileStatement),
                 type("block", Main::compileBlock)
         ));
@@ -1039,7 +1039,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
-        return compileType(state, type).mapValue(typeResult -> {
+        return type(state, type).mapValue(typeResult -> {
             var newAnnotations = new ArrayList<String>();
             var newModifiers = new ArrayList<String>();
             for (var annotation : annotations) {
@@ -1055,7 +1055,7 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileType(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> type(CompileState state, String input) {
         return or(state, input, List.of(
                 Main::primitive,
                 Main::symbolType,
@@ -1063,8 +1063,8 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> templateType(CompileState state, String s) {
-        var stripped = s.strip();
+    private static Result<Tuple<CompileState, String>, CompileError> templateType(CompileState state, String input) {
+        var stripped = input.strip();
         if (!stripped.endsWith(">")) {
             return createSuffixErr(stripped, ">");
         }
@@ -1077,7 +1077,7 @@ public class Main {
 
         var base = withoutEnd.substring(0, argsStart).strip();
         var argsString = withoutEnd.substring(argsStart + "<".length());
-        return parseValues(state, argsString, Main::compileType).flatMapValue(argsTuple -> {
+        return parseValues(state, argsString, Main::argumentType).flatMapValue(argsTuple -> {
             var args = argsTuple.right;
 
             if (base.equals("Tuple") && args.size() >= 2) {
@@ -1088,6 +1088,13 @@ public class Main {
 
             return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
         });
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> argumentType(CompileState state1, String input1) {
+        return or(state1, input1, List.of(
+                Main::whitespace,
+                Main::type
+        ));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> symbolType(CompileState state, String input) {
@@ -1161,7 +1168,7 @@ public class Main {
             return new Ok<>(new Tuple<>(state, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
         }
 
-        return compileType(state, withoutPrefix).flatMapValue(callerTuple -> {
+        return type(state, withoutPrefix).flatMapValue(callerTuple -> {
             var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
             return new Ok<>(new Tuple<>(callerTuple.left, invocation));
         });
@@ -1368,7 +1375,7 @@ public class Main {
         if (functionSeparator >= 0) {
             var left = input.strip().substring(0, functionSeparator);
             var right = input.strip().substring(functionSeparator + "::".length()).strip();
-            var maybeLeftTuple = compileType(state, left);
+            var maybeLeftTuple = type(state, left);
             if (maybeLeftTuple instanceof Ok(var leftTuple)) {
                 if (isSymbol(right)) {
                     return new Ok<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
