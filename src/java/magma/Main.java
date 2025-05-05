@@ -140,7 +140,6 @@ public class Main {
     }
 
     private interface StructSegment extends Node {
-        Option<Definition> findDefinition();
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -827,10 +826,6 @@ public class Main {
             return new Definition(this.annotations, this.modifiers, this.type, mapper.apply(this.name));
         }
 
-        @Override
-        public Option<Definition> findDefinition() {
-            return new Some<>(this);
-        }
     }
 
     private record StringValue(String value) implements Value {
@@ -886,10 +881,6 @@ public class Main {
             return "";
         }
 
-        @Override
-        public Option<Definition> findDefinition() {
-            return new None<>();
-        }
     }
 
     private record TupleNode(Value first, Value second) implements Value {
@@ -1014,10 +1005,6 @@ public class Main {
             return this.definition.generate() + "(" + joinedParams + ")";
         }
 
-        @Override
-        public Option<Definition> findDefinition() {
-            return new Some<>(this.definition);
-        }
     }
 
     private record StructPrototype(String name) {
@@ -1139,10 +1126,6 @@ public class Main {
                     .orElse("");
         }
 
-        @Override
-        public Option<Definition> findDefinition() {
-            return new None<>();
-        }
     }
 
     @Actual

@@ -212,8 +212,6 @@ template Map<struct K, struct V> Map::put(struct K key, struct V value) {
 }
 struct V Map::get(struct K key) {
 }
-template Option<struct Definition> StructSegment::findDefinition() {
-}
 char* Template::generate(){
 		auto joinedArguments = orElse(collect(map(iterator(this.arguments), struct Node::generate), struct Joiner::new(", ")), "");
 		return "template " + this.base + "<" + joinedArguments + ">";
@@ -601,9 +599,6 @@ char* Definition::getJoin(){
 struct Definition Definition::mapName(char* (*)(char*) mapper){
 		return struct Definition::new(this.annotations, this.modifiers, this.type, apply(mapper, this.name));
 }
-template Option<struct Definition> Definition::findDefinition(){
-		return template Some<>::new(this);
-}
 char* StringValue::generate(){
 		return "\"" + this.value + "\"";
 }
@@ -625,9 +620,6 @@ char* Operation::generate(){
 }
 char* Whitespace::generate(){
 		return "";
-}
-template Option<struct Definition> Whitespace::findDefinition(){
-		return template None<>::new();
 }
 char* TupleNode::generate(){
 		return "(" + this.first.generate() + ", " + this.second.generate() + ")";
@@ -707,9 +699,6 @@ char* FunctionProto::generate(){
 		auto joinedParams = joinParameters(this);
 		return generate(this.definition) + "(" + joinedParams + ")";
 }
-template Option<struct Definition> FunctionProto::findDefinition(){
-		return template Some<>::new(this.definition);
-}
 char* StructureType::generate(){
 		return "struct " + this.prototype.name;
 }
@@ -775,9 +764,6 @@ char* EnumValues::generate(){
 }
 char* EnumValues::joinValues(){
 		return orElse(collect(map(iterator(this.values), struct Value::generate), struct Joiner::new(", ")), "");
-}
-template Option<struct Definition> EnumValues::findDefinition(){
-		return template None<>::new();
 }
 auto Primitive::Primitive(char* value){
 		this.value = value;
