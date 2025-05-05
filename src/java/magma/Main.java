@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -878,7 +877,7 @@ public class Main {
         }
 
         private String format(int depth) {
-            var copy = this.errors.sort(Comparator.comparingInt(CompileError::depth)::compare);
+            var copy = this.errors.sort((error, error2) -> error.depth() - error2.depth());
 
             return this.message + ": " + this.context + copy.iter()
                     .map(error -> error.format(depth + 1))
