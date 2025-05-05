@@ -1214,11 +1214,83 @@ public class Main {
         }
     }
 
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> parseWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Ok<>(new Tuple<>(state, new Whitespace()));
+        }
+        else {
+            return new Err<>(new CompileError("Not whitespace", input));
+        }
+    }
+
+    private static <S, T extends S> Rule<S> typed(String type, Rule<T> mapper) {
+        return (state, input) -> mapper.apply(state, input)
+                .mapValue(value -> new Tuple<CompileState, S>(value.left, value.right))
+                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
+    }
+
+    private static <T> Result<Tuple<CompileState, T>, CompileError> createSuffixErr(String stripped, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
+    }
+
+    private static <T> Result<Tuple<CompileState, T>, CompileError> createInfixErr(String withoutEnd, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
+        var nameState = nameTuple.left;
+        var name = nameTuple.right;
+
+        if (!isSymbol(name)) {
+            return new Err<>(new CompileError("Not a symbol", name));
+        }
+
+        var prototype = new StructPrototype(name);
+        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(prototype)), right, Main::compileStructSegment).mapValue(result -> {
+            var generated = "struct " + name + " {" + result.right + "\n};\n";
+            var withStruct = result.left.exitStruct().addStruct(generated);
+            return new Tuple<>(withStruct, "");
+        });
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> compileStructure(CompileState state, String input, String infix) {
+        var stripped = input.strip();
+        if (!stripped.endsWith("}")) {
+            return createSuffixErr(stripped, "}");
+        }
+
+        var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+        var contentStart = withoutEnd.indexOf("{");
+        if (contentStart < 0) {
+            return createInfixErr(withoutEnd, "{");
+        }
+
+        var left = withoutEnd.substring(0, contentStart);
+        var right = withoutEnd.substring(contentStart + "{".length());
+        var infixIndex = left.indexOf(infix);
+        if (infixIndex < 0) {
+            return createInfixErr(withoutEnd, infix);
+        }
+
+        var beforeInfix = left.substring(0, infixIndex).strip();
+        if (beforeInfix.contains("\n")) {
+            return new Ok<>(new Tuple<>(state, ""));
+        }
+
+        var afterInfix = left.substring(infixIndex + infix.length()).strip();
+
+        return removeImplements(state, afterInfix)
+                .flatMapValue(Main::removeExtends)
+                .flatMapValue(Main::removeParams)
+                .flatMapValue(Main::removeTypeParams)
+                .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
+    }
+
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
                 typed("whitespace", (state1, input1) -> parseWhitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("namespaced", Main::namespaced),
-                typed("class", (state0, input0) -> structure(state0, input0, "class"))
+                typed("class", (state0, input0) -> compileStructure(state0, input0, "class"))
         ));
     }
 
@@ -1254,10 +1326,10 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
                 typed("whitespace", (state4, input4) -> parseWhitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
-                typed("enum", (state3, input3) -> structure(state3, input3, "enum ")),
-                typed("class", (state2, input2) -> structure(state2, input2, "class ")),
-                typed("record", (state1, input1) -> structure(state1, input1, "record ")),
-                typed("interface", (state0, input0) -> structure(state0, input0, "interface ")),
+                typed("enum", (state3, input3) -> compileStructure(state3, input3, "enum ")),
+                typed("class", (state2, input2) -> compileStructure(state2, input2, "class ")),
+                typed("record", (state1, input1) -> compileStructure(state1, input1, "record ")),
+                typed("interface", (state0, input0) -> compileStructure(state0, input0, "interface ")),
                 typed("method", Main::parseFunction),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
@@ -1273,39 +1345,6 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> definitionStatement(CompileState state, String input) {
         return statement(state, input, Main::definition);
-    }
-
-    private static Result<Tuple<CompileState, String>, CompileError> structure(CompileState state, String input, String infix) {
-        var stripped = input.strip();
-        if (!stripped.endsWith("}")) {
-            return createSuffixErr(stripped, "}");
-        }
-
-        var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-        var contentStart = withoutEnd.indexOf("{");
-        if (contentStart < 0) {
-            return createInfixErr(withoutEnd, "{");
-        }
-
-        var left = withoutEnd.substring(0, contentStart);
-        var right = withoutEnd.substring(contentStart + "{".length());
-        var infixIndex = left.indexOf(infix);
-        if (infixIndex < 0) {
-            return createInfixErr(withoutEnd, infix);
-        }
-
-        var beforeInfix = left.substring(0, infixIndex).strip();
-        if (beforeInfix.contains("\n")) {
-            return new Ok<>(new Tuple<>(state, ""));
-        }
-
-        var afterInfix = left.substring(infixIndex + infix.length()).strip();
-
-        return removeImplements(state, afterInfix)
-                .flatMapValue(Main::removeExtends)
-                .flatMapValue(Main::removeParams)
-                .flatMapValue(Main::removeTypeParams)
-                .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeExtends(Tuple<CompileState, String> tuple) {
@@ -1335,22 +1374,6 @@ public class Main {
                 (state, s) -> new Ok<>(new Tuple<>(state, s))));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
-        var nameState = nameTuple.left;
-        var name = nameTuple.right;
-
-        if (!isSymbol(name)) {
-            return new Err<>(new CompileError("Not a symbol", name));
-        }
-
-        var prototype = new StructPrototype(name);
-        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(prototype)), right, Main::compileStructSegment).mapValue(result -> {
-            var generated = "struct " + name + " {" + result.right + "\n};\n";
-            var withStruct = result.left.exitStruct().addStruct(generated);
-            return new Tuple<>(withStruct, "");
-        });
-    }
-
     private static <T> Result<Tuple<CompileState, T>, CompileError> infix(
             String input,
             String infix,
@@ -1363,14 +1386,6 @@ public class Main {
             return mapper.apply(left, right);
         }
         return createInfixErr(input, infix);
-    }
-
-    private static <T> Result<Tuple<CompileState, T>, CompileError> createInfixErr(String withoutEnd, String infix) {
-        return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
-    }
-
-    private static <T> Result<Tuple<CompileState, T>, CompileError> createSuffixErr(String stripped, String suffix) {
-        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> parseFunction(CompileState state, String input) {
@@ -1953,15 +1968,6 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompileState, Whitespace>, CompileError> parseWhitespace(CompileState state, String input) {
-        if (input.isBlank()) {
-            return new Ok<>(new Tuple<>(state, new Whitespace()));
-        }
-        else {
-            return new Err<>(new CompileError("Not whitespace", input));
-        }
-    }
-
     private static Result<Tuple<CompileState, String>, CompileError> compileValues(CompileState state, String input, Rule<String> compiler) {
         return parseValues(state, input, compiler).mapValue(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
     }
@@ -2164,12 +2170,6 @@ public class Main {
             return tOrState;
         }
         return mapper.apply(state, input).match(tOrState::withValue, tOrState::withError);
-    }
-
-    private static <S, T extends S> Rule<S> typed(String type, Rule<T> mapper) {
-        return (state, input) -> mapper.apply(state, input)
-                .mapValue(value -> new Tuple<CompileState, S>(value.left, value.right))
-                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
     }
 
     private static Result<Tuple<CompileState, MethodAccess>, CompileError> parseMethodAccess(CompileState state, String input) {
