@@ -619,11 +619,11 @@ public class Main {
         }
 
         public Frame withFunctionProto(FunctionProto proto) {
-            return new Frame(this.counters, this.statements, new Some<>(proto), this.maybeStructProto, this.types, definitions);
+            return new Frame(this.counters, this.statements, new Some<>(proto), this.maybeStructProto, this.types, this.definitions);
         }
 
         public Frame withStructProto(StructPrototype proto) {
-            return new Frame(this.counters, this.statements, this.maybeFunctionProto, new Some<>(proto), this.types, definitions);
+            return new Frame(this.counters, this.statements, this.maybeFunctionProto, new Some<>(proto), this.types, this.definitions);
         }
 
         public Option<Type> resolveType(String name) {
@@ -1864,8 +1864,8 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return or(argumentState, callerString, Lists.of(
-                    (state2, callerString1) -> constructorCaller(state2, callerString1, oldArguments),
-                    (state1, s) -> invocationCaller(state1, s, oldArguments)
+                    typed("constructor", (state2, callerString1) -> constructorCaller(state2, callerString1, oldArguments)),
+                    typed("invocation", (state1, s) -> invocationCaller(state1, s, oldArguments))
             ));
         });
     }
@@ -1887,8 +1887,8 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> invocationCaller(CompileState state, String input, List<Value> arguments) {
-        if (value(state, input) instanceof Ok(var callerTuple)) {
+    private static Result<Tuple<CompileState, Invocation>, CompileError> invocationCaller(CompileState state, String input, List<Value> arguments) {
+        return value(state, input).flatMapValue(callerTuple -> {
             var callerState = callerTuple.left;
             var oldCaller = callerTuple.right;
 
@@ -1900,9 +1900,7 @@ public class Main {
             }
 
             return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments.addAllLast(arguments))));
-        }
-
-        return new Err<>(new CompileError("Not an invocation", input));
+        });
     }
 
     private static List<Value> createEmptyValueList() {
@@ -1985,7 +1983,7 @@ public class Main {
 
         List<Rule<Value>> afterOperators = Lists.of(
                 typed("invokable", Main::compileInvokable),
-                typed("?", Main::compileAccess),
+                typed("?", Main::dataAccess),
                 typed("?", Main::parseBooleanValue),
                 typed("?", Main::symbolValue),
                 typed("?", Main::methodAccess),
@@ -2152,17 +2150,21 @@ public class Main {
         return new Err<>(new CompileError("Undefined symbol", stripped));
     }
 
-    private static Result<Tuple<CompileState, DataAccess>, CompileError> compileAccess(CompileState state, String input) {
+    private static Result<Tuple<CompileState, DataAccess>, CompileError> dataAccess(CompileState state, String input) {
         var separator = input.strip().lastIndexOf(".");
-        if (separator >= 0) {
-            var parent = input.strip().substring(0, separator);
-            var child = input.strip().substring(separator + ".".length());
-            if (isSymbol(child) && value(state, parent) instanceof Ok(var tuple)) {
-                return new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
-            }
+        if (separator < 0) {
+            return new Err<>(new CompileError("Not data access", input));
         }
 
-        return new Err<>(new CompileError("Not data access", input));
+        var parent = input.strip().substring(0, separator);
+        var child = input.strip().substring(separator + ".".length());
+        if (!isSymbol(child)) {
+            return new Err<>(new CompileError("Not data access", input));
+        }
+
+        return value(state, parent).flatMapValue(tuple -> {
+            return new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
+        });
     }
 
     private static Result<Tuple<CompileState, StringValue>, CompileError> compileString(CompileState state, String input) {
