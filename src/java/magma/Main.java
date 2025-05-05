@@ -867,7 +867,7 @@ public class Main {
             var generatedHeader = withStructName + "(" + joinedParams + ")";
 
             if (header.definition.annotations.contains("Actual")) {
-                var generated = generatedHeader + ";";
+                var generated = generatedHeader + ";\n";
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 

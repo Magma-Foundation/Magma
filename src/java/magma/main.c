@@ -387,7 +387,9 @@ auto lambda0(auto output){
 template Option<struct ApplicationError> Main::compileAndWrite(char* input){
 		return match(mapErr(compile(input), struct ApplicationError::new), lambda0, struct Some::new);
 }
-template Option<struct IOError> Main::writeTarget(char* output);template Result<char*, struct IOError> Main::readSource();auto lambda0(auto tuple){
+template Option<struct IOError> Main::writeTarget(char* output);
+template Result<char*, struct IOError> Main::readSource();
+auto lambda0(auto tuple){
 		auto joinedStructs = join(String, "", tuple.left.structs);
 		auto joinedFunctions = join(String, "", tuple.left.functions);
 		return joinedStructs + joinedFunctions + tuple.right;
@@ -680,7 +682,7 @@ auto lambda4(auto methodHeaderTuple){
 			auto withStructName = generate(mapName(header.definition, lambda1));
 			auto generatedHeader = withStructName + "(" + joinedParams + ")";
 				if (contains(header.definition.annotations, "Actual")){
-				auto generated = generatedHeader + ";";
+				auto generated = generatedHeader + ";\n";
 				return template Ok<>::new((addFunction(methodHeaderTuple.left, generated), ""));
 				}
 			return or(methodHeaderTuple.left, afterParams, of(List, lambda2, lambda3));
