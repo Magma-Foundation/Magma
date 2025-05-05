@@ -983,6 +983,18 @@ public class Main {
     }
 
     private record FunctionProto(Definition definition, List<Definition> params) {
+        private static String joinParameters(FunctionProto header) {
+            return header.params
+                    .iterator()
+                    .map(Definition::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+        }
+
+        private String generate() {
+            var joinedParams = joinParameters(this);
+            return this.definition.generate() + "(" + joinedParams + ")";
+        }
     }
 
     private record StructPrototype(String name) {
@@ -1446,20 +1458,13 @@ public class Main {
     private static Result<Tuple<CompileState, StructSegment>, CompileError> getResult(String input, int paramEnd, CompileState state, FunctionProto header) {
         var afterParams = input.substring(paramEnd + ")".length()).strip();
 
-        var joinedParams = header.params
-                .iterator()
-                .map(Definition::generate)
-                .collect(new Joiner(", "))
-                .orElse("");
-
         var structName = state.last().maybeStructProto.orElse(new StructPrototype("?")).name;
-        var withStructName = header.definition
-                .mapName(name -> structName + "::" + name)
-                .generate();
+        var definition = header.definition
+                .mapName(name -> structName + "::" + name);
 
-        var generatedHeader = withStructName + "(" + joinedParams + ")";
-
+        var generatedHeader = new FunctionProto(definition, header.params).generate();
         var left = state.defineValue(header.definition);
+
         if (header.definition.annotations.contains("Actual")) {
             var generated = generatedHeader + ";\n";
             return new Ok<>(new Tuple<>(left.addFunction(generated), new Whitespace()));
