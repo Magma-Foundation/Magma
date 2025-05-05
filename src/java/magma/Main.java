@@ -269,6 +269,10 @@ public class Main {
     }
 
     private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        private static <R> Iterator<R> createEmpty() {
+            return new HeadedIterator<R>(new EmptyHead<>());
+        }
+
         @Override
         public <C> C collect(Collector<T, C> collector) {
             return this.fold(collector.createInitial(), collector::fold);
@@ -307,10 +311,6 @@ public class Main {
         @Override
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
-        }
-
-        private static <R> Iterator<R> createEmpty() {
-            return new HeadedIterator<R>(new EmptyHead<>());
         }
 
         @Override
@@ -1084,6 +1084,104 @@ public class Main {
         }
     }
 
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, Rule<T> mapper) {
+        return mapper.apply(current.left, segment).mapValue(mapped -> {
+            var elements = current.right;
+            var newElement = mapped.right;
+            elements.addLast(newElement);
+            return new Tuple<>(mapped.left, elements);
+        });
+    }
+
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> createInitial(CompileState initial) {
+        return new Ok<>(new Tuple<CompileState, List<T>>(initial, Lists.empty()));
+    }
+
+    private static Option<DivideState> foldDoubleQuotes(DivideState state, char maybeDoubleQuotes) {
+        if (maybeDoubleQuotes != '\"') {
+            return new None<>();
+        }
+
+        var current = state.append(maybeDoubleQuotes);
+        while (true) {
+            if (!(current.popAndAppendToTuple() instanceof Some(var popped))) {
+                break;
+            }
+
+            var next = popped.left;
+            current = popped.right;
+
+            if (next == '\\') {
+                current = current.popAndAppendToOption().orElse(current);
+            }
+            if (next == '\"') {
+                break;
+            }
+        }
+
+        return new Some<>(current);
+
+    }
+
+    private static Option<DivideState> foldEscape(DivideState state, char c) {
+        if (c == '\\') {
+            return state.popAndAppendToOption();
+        }
+        return new Some<>(state);
+    }
+
+    private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
+        if (c != '\'') {
+            return new None<>();
+        }
+
+        var appended = state.append(c);
+        return appended.popAndAppendToTuple()
+                .flatMap(popped -> foldEscape(popped.right, popped.left))
+                .flatMap(DivideState::popAndAppendToOption);
+
+    }
+
+    private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
+        var current = new DivideState(input);
+        while (true) {
+            var maybePopped = current.pop();
+            if (!(maybePopped instanceof Some(var popped))) {
+                break;
+            }
+
+            current = foldSingleQuotes(popped.right, popped.left)
+                    .or(() -> foldDoubleQuotes(popped.right, popped.left))
+                    .orElseGet(() -> folder.apply(popped.right, popped.left));
+        }
+
+        return current.advance().segments;
+    }
+
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseAll(
+            CompileState initial,
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            Rule<T> mapper
+    ) {
+        return divideAll(input, folder).iterator().fold(createInitial(initial),
+                (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)));
+    }
+
+    private static Result<Tuple<CompileState, List<String>>, CompileError> parseStatements(CompileState state, String input, Rule<String> mapper) {
+        return parseAll(state, input, Main::foldStatementChar, mapper);
+    }
+
+    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return elements.iterator()
+                .fold(new StringBuilder(), merger)
+                .toString();
+    }
+
+    private static String generateStatements(List<String> elements) {
+        return generateAll(elements, Main::mergeStatements);
+    }
+
     private static String join(List<String> structs) {
         return structs.iterator().collect(new Joiner()).orElse("");
     }
@@ -1118,7 +1216,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
+                typed("whitespace", (state1, input1) -> parseWhitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("namespaced", Main::namespaced),
                 typed("class", (state0, input0) -> structure(state0, input0, "class"))
         ));
@@ -1130,104 +1228,6 @@ public class Main {
             return new Ok<>(new Tuple<>(state, ""));
         }
         return new Err<>(new CompileError("Not namespaced", input));
-    }
-
-    private static String generateStatements(List<String> elements) {
-        return generateAll(elements, Main::mergeStatements);
-    }
-
-    private static Result<Tuple<CompileState, List<String>>, CompileError> parseStatements(CompileState state, String input, Rule<String> mapper) {
-        return parseAll(state, input, Main::foldStatementChar, mapper);
-    }
-
-    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseAll(
-            CompileState initial,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            Rule<T> mapper
-    ) {
-        return divideAll(input, folder).iterator().fold(createInitial(initial),
-                (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)));
-    }
-
-    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> createInitial(CompileState initial) {
-        return new Ok<>(new Tuple<CompileState, List<T>>(initial, Lists.empty()));
-    }
-
-    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, Rule<T> mapper) {
-        return mapper.apply(current.left, segment).mapValue(mapped -> {
-            var elements = current.right;
-            var newElement = mapped.right;
-            elements.addLast(newElement);
-            return new Tuple<>(mapped.left, elements);
-        });
-    }
-
-    private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState(input);
-        while (true) {
-            var maybePopped = current.pop();
-            if (!(maybePopped instanceof Some(var popped))) {
-                break;
-            }
-
-            current = foldSingleQuotes(popped.right, popped.left)
-                    .or(() -> foldDoubleQuotes(popped.right, popped.left))
-                    .orElseGet(() -> folder.apply(popped.right, popped.left));
-        }
-
-        return current.advance().segments;
-    }
-
-    private static Option<DivideState> foldDoubleQuotes(DivideState state, char maybeDoubleQuotes) {
-        if (maybeDoubleQuotes != '\"') {
-            return new None<>();
-        }
-
-        var current = state.append(maybeDoubleQuotes);
-        while (true) {
-            if (!(current.popAndAppendToTuple() instanceof Some(var popped))) {
-                break;
-            }
-
-            var next = popped.left;
-            current = popped.right;
-
-            if (next == '\\') {
-                current = current.popAndAppendToOption().orElse(current);
-            }
-            if (next == '\"') {
-                break;
-            }
-        }
-
-        return new Some<>(current);
-
-    }
-
-    private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
-        if (c != '\'') {
-            return new None<>();
-        }
-
-        var appended = state.append(c);
-        return appended.popAndAppendToTuple()
-                .flatMap(popped -> foldEscape(popped.right, popped.left))
-                .flatMap(DivideState::popAndAppendToOption);
-
-    }
-
-    private static Option<DivideState> foldEscape(DivideState state, Character c) {
-        if (c == '\\') {
-            return state.popAndAppendToOption();
-        }
-        return new Some<>(state);
-    }
-
-    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return elements.iterator()
-                .fold(new StringBuilder(), merger)
-                .toString();
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String mapped) {
@@ -1253,7 +1253,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", (state4, input4) -> whitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
+                typed("whitespace", (state4, input4) -> parseWhitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("enum", (state3, input3) -> structure(state3, input3, "enum ")),
                 typed("class", (state2, input2) -> structure(state2, input2, "class ")),
                 typed("record", (state1, input1) -> structure(state1, input1, "record ")),
@@ -1503,17 +1503,9 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompileState, Whitespace>, CompileError> whitespace(CompileState state, String input) {
-        if (input.isBlank()) {
-            return new Ok<>(new Tuple<>(state, new Whitespace()));
-        }
-
-        return new Err<>(new CompileError("Not whitespace", input));
-    }
-
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
+                typed("whitespace", (state1, input1) -> parseWhitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("statement", Main::functionStatement),
                 typed("block", Main::compileBlock)
         ));
@@ -1856,7 +1848,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, Type>, CompileError> argumentType(CompileState state1, String input1) {
         return Main.or(state1, input1, Lists.of(
-                typed("whitespace", (state, input) -> whitespace(state, input)),
+                typed("whitespace", (state, input) -> parseWhitespace(state, input)),
                 typed("type", Main::type)
         ));
     }
