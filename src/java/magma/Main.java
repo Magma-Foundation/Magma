@@ -346,7 +346,7 @@ public class Main {
             }
 
             return this.joinAnnotations() + "\n";
-        }J
+        }
 
         private String joinAnnotations() {
             return this.annotations.stream()
@@ -726,27 +726,45 @@ public class Main {
 
             var afterInfix = left.substring(infixIndex + infix.length()).strip();
 
-            return Main.or(state0, afterInfix, List.of(
-                    (BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>>) (state, s) -> infix(s, "(", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
-                    (state, s) -> new Ok<>(new Tuple<>(state, s))
-            )).flatMapValue(withoutParams -> {
-                return Main.or(withoutParams.left, withoutParams.right, List.of(
-                        (BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>>) (state, s) -> infix(s, "<", (left1, _) -> new Ok<>(new Tuple<>(state, left1))),
-                        (state, s) -> new Ok<>(new Tuple<>(state, s)))).flatMapValue(nameTuple -> {
-                    var nameState = nameTuple.left;
-                    var name = nameTuple.right;
-
-                    if (!isSymbol(name)) {
-                        return new Err<>(new CompileError("Not a symbol", name));
-                    }
-
-                    return compileStatements(nameState, right, Main::compileStructSegment).mapValue(result -> {
-                        var generated = "struct " + name + " {" + result.right + "\n};\n";
-                        return new Tuple<>(result.left.addStruct(generated), "");
-                    });
-                });
-            });
+            return removeImplements(state0, afterInfix)
+                    .flatMapValue(Main::removeParams)
+                    .flatMapValue(Main::removeTypeParams)
+                    .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
         };
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> removeParams(Tuple<CompileState, String> state1) {
+        return Main.or(state1.left, state1.right, List.of(
+                (state, s) -> infix(s, "(", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
+                (state, s) -> new Ok<>(new Tuple<>(state, s))
+        ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> removeImplements(CompileState state0, String afterInfix) {
+        return Main.or(state0, afterInfix, List.of(
+                (state, s) -> infix(s, " implements ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
+                (state, s) -> new Ok<>(new Tuple<>(state, s))
+        ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> removeTypeParams(Tuple<CompileState, String> withoutParams) {
+        return Main.or(withoutParams.left, withoutParams.right, List.of(
+                (state, s) -> infix(s, "<", (left1, _) -> new Ok<>(new Tuple<>(state, left1))),
+                (state, s) -> new Ok<>(new Tuple<>(state, s))));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
+        var nameState = nameTuple.left;
+        var name = nameTuple.right;
+
+        if (!isSymbol(name)) {
+            return new Err<>(new CompileError("Not a symbol", name));
+        }
+
+        return compileStatements(nameState, right, Main::compileStructSegment).mapValue(result -> {
+            var generated = "struct " + name + " {" + result.right + "\n};\n";
+            return new Tuple<>(result.left.addStruct(generated), "");
+        });
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> infix(
