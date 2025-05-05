@@ -1298,7 +1298,7 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, Whitespace>, CompileError> compileStructure(CompileState state, String input, String infix) {
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> parseStructure(CompileState state, String input, String infix) {
         var stripped = input.strip();
         if (!stripped.endsWith("}")) {
             return createSuffixErr(stripped, "}");
@@ -1335,7 +1335,7 @@ public class Main {
         return or(state, input, Lists.of(
                 typed("whitespace", (state1, input1) -> parseWhitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("namespaced", Main::namespaced),
-                typed("class", (state0, input0) -> compileStructure(state0, input0, "class").mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
+                typed("class", (state0, input0) -> parseStructure(state0, input0, "class").mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
         ));
     }
 
@@ -1370,11 +1370,11 @@ public class Main {
 
     private static Result<Tuple<CompileState, StructSegment>, CompileError> parseStructSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", (state4, input4) -> parseWhitespace(state4, input4)),
-                typed("enum", (state3, input3) -> compileStructure(state3, input3, "enum ")),
-                typed("class", (state2, input2) -> compileStructure(state2, input2, "class ")),
-                typed("record", (state1, input1) -> compileStructure(state1, input1, "record ")),
-                typed("interface", (state0, input0) -> compileStructure(state0, input0, "interface ")),
+                typed("whitespace", Main::parseWhitespace),
+                typed("enum", (state3, input3) -> parseStructure(state3, input3, "enum ")),
+                typed("class", (state2, input2) -> parseStructure(state2, input2, "class ")),
+                typed("record", (state1, input1) -> parseStructure(state1, input1, "record ")),
+                typed("interface", (state0, input0) -> parseStructure(state0, input0, "interface ")),
                 typed("method", Main::parseFunction),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
