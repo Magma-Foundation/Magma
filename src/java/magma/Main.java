@@ -121,7 +121,7 @@ public class Main {
     private @interface Actual {
     }
 
-    private interface Value extends Scoped, Assignable {
+    private sealed interface Value extends Scoped, Assignable, Argument permits CharValue, DataAccess, IndexValue, Invocation, MethodAccess, Not, NumberValue, Operation, StringValue, Symbol, TupleNode {
         String generate();
     }
 
@@ -140,6 +140,9 @@ public class Main {
     }
 
     private interface StructSegment extends Node {
+    }
+
+    private interface Argument extends Node {
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -875,7 +878,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Value, Parameter, Type, StructSegment {
+    private static final class Whitespace implements Parameter, Type, StructSegment, Argument {
         @Override
         public String generate() {
             return "";
@@ -1014,6 +1017,20 @@ public class Main {
         @Override
         public String generate() {
             return "struct " + this.prototype.name;
+        }
+
+        public Result<Type, CompileError> findPropertyType(String propertyName) {
+            var maybeDefinition = this.definitions.iterator()
+                    .filter(definition -> definition.name.equals(propertyName))
+                    .next()
+                    .map(Definition::type);
+
+            if (maybeDefinition instanceof Some(var definition)) {
+                return new Ok<>(definition);
+            }
+            else {
+                return new Err<>(new CompileError("No property present", propertyName));
+            }
         }
     }
 
@@ -1445,15 +1462,19 @@ public class Main {
         var inputArguments = divisions.last();
         return parseValues(state1, inputArguments, Main::parseArgument).flatMapValue(argumentsTuple -> {
             var argumentState = argumentsTuple.left;
-            var oldArguments = argumentsTuple.right
-                    .iterator()
-                    .filter(arg -> !(arg instanceof Whitespace))
-                    .collect(new ListCollector<>());
+            var oldArguments = preserveValues(argumentsTuple.right);
 
             var caller = new Symbol(callerString);
             var newArguments = createEmptyValueList();
             return new Ok<>(new Tuple<>(argumentState, new Invocation(caller, newArguments.addAllLast(oldArguments))));
         });
+    }
+
+    private static Option<Value> preserveValue(Argument arg) {
+        if (arg instanceof Value value) {
+            return new Some<>(value);
+        }
+        return new None<>();
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionStatement(CompileState state, String input) {
@@ -2032,16 +2053,20 @@ public class Main {
         var tupleCompileErrorResult = parseValues(state, inputArguments, Main::parseArgument);
         return tupleCompileErrorResult.flatMapValue(argumentsTuple -> {
             var argumentState = argumentsTuple.left;
-            var oldArguments = argumentsTuple.right
-                    .iterator()
-                    .filter(arg -> !(arg instanceof Whitespace))
-                    .collect(new ListCollector<>());
+            var oldArguments = preserveValues(argumentsTuple.right);
 
             return or(argumentState, callerString, Lists.of(
                     typed("constructor", (state2, callerString1) -> constructorCaller(state2, callerString1, oldArguments)),
                     typed("invocation", (state1, s) -> invocationCaller(state1, s, oldArguments))
             ));
         });
+    }
+
+    private static List<Value> preserveValues(List<Argument> arguments) {
+        return arguments.iterator()
+                .map(Main::preserveValue)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> constructorCaller(CompileState state, String callerString, List<Value> oldArguments) {
@@ -2066,14 +2091,104 @@ public class Main {
             var callerState = callerTuple.left;
             var oldCaller = callerTuple.right;
 
-            Value newCaller = oldCaller;
-            var newArguments = createEmptyValueList();
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                newArguments = newArguments.addLast(parent);
-                newCaller = new Symbol(property);
+                List<Value> newArguments = Lists.of(parent);
+               return resolveType(state, parent).flatMapValue(parentType -> {
+                    Value newCaller = new MethodAccess(parentType, property);
+                    return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments.addAllLast(arguments))));
+                });
             }
 
-            return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments.addAllLast(arguments))));
+            return new Ok<>(new Tuple<>(callerState, new Invocation(oldCaller, arguments)));
+        });
+    }
+
+    private static Result<Type, CompileError> resolveType(CompileState state, Value parent) {
+        return switch (parent) {
+            case CharValue _ -> new Ok<>(Primitive.I8);
+            case DataAccess dataAccess -> resolveDataAccess(state, dataAccess);
+            case IndexValue indexValue -> resolveIndexValue(state, indexValue);
+            case Invocation invocation -> resolveInvocation(state, invocation);
+            case MethodAccess methodAccess -> resolveMethodAccess(state, methodAccess);
+            case Not _, NumberValue _ -> new Ok<>(Primitive.I32);
+            case Operation operation -> resolveOperation(state, operation);
+            case StringValue _ -> new Ok<>(new Ref(Primitive.I8));
+            case Symbol symbol -> resolveSymbol(state, symbol);
+            case TupleNode tupleNode -> resolveTuple(state, tupleNode);
+        };
+    }
+
+    private static Result<Type, CompileError> resolveTuple(CompileState state, TupleNode node) {
+        return resolveType(state, node.first).flatMapValue(firstResult -> {
+            return resolveType(state, node.second).mapValue(secondResult -> {
+                return new TupleType(firstResult, secondResult);
+            });
+        });
+    }
+
+    private static Result<Type, CompileError> resolveOperation(CompileState state, Operation operation) {
+        return resolveType(state, operation.left);
+    }
+
+    private static Result<Type, CompileError> resolveMethodAccess(CompileState state, MethodAccess methodAccess) {
+        return resolveScoped(state, methodAccess.parent).flatMapValue(parent -> {
+            if (parent instanceof StructureType structureType) {
+                return structureType.findPropertyType(methodAccess.child);
+            }
+
+            return new Err<>(new CompileError("Not a structure type", parent.generate()));
+        });
+    }
+
+    private static Result<Type, CompileError> resolveScoped(CompileState state, Scoped scoped) {
+        if (scoped instanceof Value value) {
+            return resolveType(state, value);
+        }
+
+        if (scoped instanceof Type type) {
+            return new Ok<>(type);
+        }
+
+        return new Err<>(new CompileError("Invalid scoped", scoped.generate()));
+    }
+
+    private static Result<Type, CompileError> resolveSymbol(CompileState state, Symbol symbol) {
+        var maybeFound = state.resolveType(symbol.value);
+        if (maybeFound instanceof Some(var found)) {
+            return new Ok<>(found);
+        }
+
+        return new Err<>(new CompileError("Undefined symbol", symbol.value));
+    }
+
+    private static Result<Type, CompileError> resolveInvocation(CompileState state, Invocation invocation) {
+        return resolveType(state, invocation.caller).flatMapValue(caller -> {
+            if (caller instanceof FunctionType functionType) {
+                return new Ok<>(functionType.returnType);
+            }
+
+            return new Err<>(new CompileError("Not a function type", caller.generate()));
+        });
+    }
+
+    private static Result<Type, CompileError> resolveIndexValue(CompileState state, IndexValue indexValue) {
+        return resolveType(state, indexValue.parent).flatMapValue(parent -> {
+            if (parent instanceof Ref ref) {
+                return new Ok<>(ref.childType);
+            }
+
+            return new Err<>(new CompileError("Not a reference", parent.generate()));
+        });
+    }
+
+    private static Result<Type, CompileError> resolveDataAccess(CompileState state, DataAccess access) {
+        return resolveType(state, access.parent).flatMapValue(parentType -> {
+            if (parentType instanceof StructureType struct) {
+                return struct.findPropertyType(access.child);
+            }
+            else {
+                return new Err<>(new CompileError("Not a struct type", parentType.generate()));
+            }
         });
     }
 
@@ -2081,7 +2196,7 @@ public class Main {
         return Lists.empty();
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
+    private static Result<Tuple<CompileState, Argument>, CompileError> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, Lists.of(
                 typed("?", Main::parseWhitespace),
                 typed("?", Main::parseValue)
