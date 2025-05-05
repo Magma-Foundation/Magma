@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 public class Main {
     private interface Rule<T> extends BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> {
@@ -71,6 +70,8 @@ public class Main {
         <R> Iterator<R> map(Function<T, R> mapper);
 
         Option<T> next();
+
+        boolean allMatch(Predicate<T> predicate);
     }
 
     private interface List<T> {
@@ -324,6 +325,11 @@ public class Main {
         @Override
         public Option<T> next() {
             return this.head.next();
+        }
+
+        @Override
+        public boolean allMatch(Predicate<T> predicate) {
+            return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
         }
     }
 
@@ -1065,6 +1071,14 @@ public class Main {
             var head = toHead(option);
             return new HeadedIterator<>(head);
         }
+
+        public static Iterator<Character> fromString(String input) {
+            return fromStringWithIndices(input).map(Tuple::right);
+        }
+
+        public static Iterator<Tuple<Integer, Character>> fromStringWithIndices(String input) {
+            return new HeadedIterator<>(new RangeHead(input.length())).map(index -> new Tuple<>(index, input.charAt(index)));
+        }
     }
 
     private static class ListCollector<T> implements Collector<T, List<T>> {
@@ -1303,7 +1317,7 @@ public class Main {
         var nameState = nameTuple.left;
         var name = nameTuple.right;
 
-        if (!isSymbol(name)) {
+        if (!isSymbol(name.strip())) {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
@@ -1611,7 +1625,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, FunctionProto>, CompileError> constructor(CompileState state, String definitionString, List<Definition> params) {
-        if (!isSymbol(definitionString)) {
+        if (!isSymbol(definitionString.strip())) {
             return new Err<>(new CompileError("Not a symbol", definitionString));
         }
         var definition = new Definition(Primitive.Auto, definitionString);
@@ -1992,7 +2006,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, StructRef>, CompileError> symbolType(CompileState state, String input) {
         var stripped = input.strip();
-        if (isSymbol(stripped)) {
+        if (isSymbol(stripped.strip())) {
             return new Ok<>(new Tuple<>(state, new StructRef(stripped)));
         }
         return new Err<>(new CompileError("Not a symbol", stripped));
@@ -2279,9 +2293,7 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        return IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .allMatch(Character::isDigit);
+        return Iterators.fromString(input).allMatch(Character::isDigit);
     }
 
     private static Result<Tuple<CompileState, Operation>, CompileError> operator(CompileState state, String input, Operator operator) {
@@ -2323,7 +2335,7 @@ public class Main {
         if (functionSeparator >= 0) {
             var left = input.strip().substring(0, functionSeparator);
             var right = input.strip().substring(functionSeparator + "::".length()).strip();
-            if (isSymbol(right)) {
+            if (isSymbol(right.strip())) {
                 var maybeLeftTuple = Main.or(state, left, Lists.of(
                         typed("type", Main::parseType),
                         typed("value", Main::parseValue)
@@ -2339,7 +2351,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, Symbol>, CompileError> parseSymbolValue(CompileState state, String input) {
         var stripped = input.strip();
-        if (!isSymbol(stripped)) {
+        if (!isSymbol(stripped.strip())) {
             return new Err<>(new CompileError("Not a symbol", input));
         }
 
@@ -2362,7 +2374,7 @@ public class Main {
 
         var parent = input.strip().substring(0, separator);
         var child = input.strip().substring(separator + ".".length());
-        if (!isSymbol(child)) {
+        if (!isSymbol(child.strip())) {
             return new Err<>(new CompileError("Not data access", input));
         }
 
@@ -2409,7 +2421,7 @@ public class Main {
     }
 
     private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
-        if (isSymbol(beforeArrow)) {
+        if (isSymbol(beforeArrow.strip())) {
             return new Some<>(Lists.of(beforeArrow));
         }
 
@@ -2440,16 +2452,28 @@ public class Main {
                 .addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
     }
 
-    private static boolean isSymbol(String input) {
-        var stripped = input.strip();
+    private static boolean isSymbol(String stripped) {
         if (stripped.isEmpty()) {
             return false;
         }
 
-        return IntStream.range(0, stripped.length()).allMatch(index -> {
-            var c = input.charAt(index);
-            return Character.isLetter(c) || c == '_' || (index != 0 && Character.isDigit(c));
-        });
+        return Iterators.fromStringWithIndices(stripped).allMatch(Main::isSymbolChar);
+    }
+
+    private static boolean isSymbolChar(Tuple<Integer, Character> tuple) {
+        var index = tuple.left;
+        var c = tuple.right;
+        return isLetter(c) || c == '_' || (index != 0 && isDigit(c));
+    }
+
+    @Actual
+    private static boolean isDigit(Character c) {
+        return Character.isDigit(c);
+    }
+
+    @Actual
+    private static boolean isLetter(Character c) {
+        return Character.isLetter(c);
     }
 
     private static DivideState foldInvocationStart(DivideState state, char c) {
