@@ -1688,8 +1688,19 @@ public class Main {
                 typed("string", Main::stringType),
                 typed("symbol", Main::symbolType),
                 typed("template", Main::template),
-                typed("var-args", Main::varArgs)
+                typed("var-args", Main::varArgs),
+                typed("array", Main::array)
         ));
+    }
+
+    private static Result<Tuple<CompileState, Type>, CompileError> array(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("[]")) {
+            return type(state, stripped.substring(0, stripped.length() - "[]".length()))
+                    .mapValue(inner -> new Tuple<>(inner.left, new Ref(inner.right)));
+        }
+
+        return new Err<>(new CompileError("Not array", input));
     }
 
     private static Result<Tuple<CompileState, Type>, CompileError> varArgs(CompileState state, String input) {
