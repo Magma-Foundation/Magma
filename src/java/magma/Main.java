@@ -595,22 +595,18 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder,
             BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper
     ) {
-        var segments = divideAll(input, folder);
+        return divideAll(input, folder).stream().<Result<Tuple<CompileState, List<T>>, CompileError>>reduce(new Ok<>(new Tuple<CompileState, List<T>>(initial, new ArrayList<T>())),
+                (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)),
+                (_, next) -> next);
+    }
 
-        Tuple<CompileState, List<T>> current = new Tuple<>(initial, new ArrayList<T>());
-        for (var segment : segments) {
-            var maybeMapped = mapper.apply(current.left, segment);
-            if (maybeMapped instanceof Err<Tuple<CompileState, T>, CompileError>(var error)) {
-                return new Err<>(error);
-            }
-
-            if (maybeMapped instanceof Ok<Tuple<CompileState, T>, CompileError>(var mapped)) {
-                current.right.add(mapped.right);
-                current = new Tuple<>(mapped.left, current.right);
-            }
-        }
-
-        return new Ok<>(current);
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
+        return mapper.apply(current.left, segment).mapValue(mapped -> {
+            var elements = current.right;
+            var newElement = mapped.right;
+            elements.add(newElement);
+            return new Tuple<>(mapped.left, elements);
+        });
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
