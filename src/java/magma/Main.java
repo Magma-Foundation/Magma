@@ -842,9 +842,9 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type("?", Main::compileWhitespace),
-                type("?", Main::compileStatement),
-                type("?", Main::compileBlock)
+                type("whitespace", Main::compileWhitespace),
+                type("statement", Main::compileStatement),
+                type("block", Main::compileBlock)
         ));
     }
 
@@ -896,14 +896,14 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStatement(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-            var statements = compileFunctionStatementValue(state, withoutEnd);
-            if (statements instanceof Ok(var temp)) {
-                return new Ok<>(new Tuple<>(temp.left, "\n" + "\t".repeat(state.depth() - 1) + temp.right + ";"));
-            }
+        if (!stripped.endsWith(";")) {
+            return createSuffixErr(input, ";");
         }
-        return new Err<>(new CompileError("Not a statement", input));
+
+        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
+        return compileFunctionStatementValue(state, withoutEnd).flatMapValue(statements -> {
+            return new Ok<>(new Tuple<>(statements.left, "\n" + "\t".repeat(state.depth() - 1) + statements.right + ";"));
+        });
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
