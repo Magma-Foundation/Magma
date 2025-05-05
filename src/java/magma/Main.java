@@ -600,14 +600,13 @@ public class Main {
         Tuple<CompileState, List<T>> current = new Tuple<>(initial, new ArrayList<T>());
         for (var segment : segments) {
             var maybeMapped = mapper.apply(current.left, segment);
-            switch (maybeMapped) {
-                case Err<Tuple<CompileState, T>, CompileError>(var error) -> {
-                    return new Err<>(error);
-                }
-                case Ok<Tuple<CompileState, T>, CompileError>(var mapped) -> {
-                    current.right.add(mapped.right);
-                    current = new Tuple<>(mapped.left, current.right);
-                }
+            if (maybeMapped instanceof Err<Tuple<CompileState, T>, CompileError>(var error)) {
+                return new Err<>(error);
+            }
+
+            if (maybeMapped instanceof Ok<Tuple<CompileState, T>, CompileError>(var mapped)) {
+                current.right.add(mapped.right);
+                current = new Tuple<>(mapped.left, current.right);
             }
         }
 
@@ -977,18 +976,20 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileIf(CompileState state, String input) {
-        if (input.strip().startsWith("if")) {
-            var withoutPrefix = input.strip().substring("if".length()).strip();
-            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
-                var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
-                var tuple = compileValue(state, value);
-                if (tuple instanceof Ok(var tuple0)) {
-                    return new Ok<>(new Tuple<>(tuple0.left, "if (" + tuple0.right + ")"));
-                }
-            }
+        var stripped = input.strip();
+        if (!stripped.startsWith("if")) {
+            return createPrefixErr(stripped, "if");
         }
 
-        return new Err<>(new CompileError("Not an if statement", input));
+        var withoutPrefix = stripped.substring("if".length()).strip();
+        if (!withoutPrefix.startsWith("(") || !withoutPrefix.endsWith(")")) {
+            return new Err<>(new CompileError("No condition present", input));
+        }
+
+        var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+        return compileValue(state, value).flatMapValue(tuple0 -> {
+            return new Ok<>(new Tuple<>(tuple0.left, "if (" + tuple0.right + ")"));
+        });
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileElse(CompileState state, String input) {
