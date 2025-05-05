@@ -968,7 +968,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlock(CompileState state, String input) {
-        String indent = "\n" + "\t".repeat(state.depth());
+        String indent = "\n" + "\t".repeat(state.depth() - 2);
         if (!input.endsWith("}")) {
             return new Err<>(new CompileError("Not a block", input));
         }
@@ -1025,7 +1025,7 @@ public class Main {
 
         var slice = stripped.substring(0, stripped.length() - ";".length());
         return mapper.apply(state, slice).flatMapValue(result ->
-                new Ok<>(new Tuple<>(result.left, "\n" + "\t".repeat(state.depth() - 1) + result.right + ";")));
+                new Ok<>(new Tuple<>(result.left, "\n" + "\t".repeat(state.depth() - 2) + result.right + ";")));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
