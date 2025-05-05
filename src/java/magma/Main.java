@@ -748,7 +748,7 @@ public class Main {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
     }
 
-    private static Err<Tuple<CompileState, String>, CompileError> createSuffixErr(String stripped, String suffix) {
+    private static <T> Result<Tuple<CompileState, T>, CompileError> createSuffixErr(String stripped, String suffix) {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
     }
 
@@ -953,7 +953,7 @@ public class Main {
         });
     }
 
-    private static Err<Tuple<CompileState, String>, CompileError> createPrefixErr(String input, String prefix) {
+    private static <T> Result<Tuple<CompileState, T>, CompileError> createPrefixErr(String input, String prefix) {
         return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
@@ -1105,53 +1105,69 @@ public class Main {
 
     private static Result<Tuple<CompileState, Value>, CompileError> compileInvokable(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.endsWith(")")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
-            if (divisions.size() >= 2) {
-                var joined = String.join("", divisions.subList(0, divisions.size() - 1));
-                var callerString = joined.substring(0, joined.length() - ")".length());
-
-                var inputArguments = divisions.getLast();
-                if (parseValues(state, inputArguments, Main::parseArgument) instanceof Ok(var argumentsTuple)) {
-                    var argumentState = argumentsTuple.left;
-                    var oldArguments = argumentsTuple.right
-                            .stream()
-                            .filter(arg -> !(arg instanceof Whitespace))
-                            .toList();
-
-                    if (callerString.startsWith("new ")) {
-                        var withoutPrefix = callerString.substring("new ".length());
-                        if (withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2) {
-                            return new Ok<>(new Tuple<>(argumentState, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
-                        }
-
-                        var maybeCallerTuple = compileType(argumentState, withoutPrefix);
-                        if (maybeCallerTuple instanceof Ok(var callerTuple)) {
-                            var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
-                            return new Ok<>(new Tuple<>(callerTuple.left, invocation));
-                        }
-                    }
-
-                    if (parseValue(argumentState, callerString) instanceof Ok(var callerTuple)) {
-                        var callerState = callerTuple.left;
-                        var oldCaller = callerTuple.right;
-
-                        Value newCaller = oldCaller;
-                        var newArguments = new ArrayList<Value>();
-                        if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                            newArguments.add(parent);
-                            newCaller = new Symbol(property);
-                        }
-
-                        newArguments.addAll(oldArguments);
-                        return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
-                    }
-                }
-            }
+        if (!stripped.endsWith(")")) {
+            return createSuffixErr(stripped, ")");
         }
 
-        return new Err<>(new CompileError("Not invokable", input));
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
+        if (divisions.size() < 2) {
+            return new Err<>(new CompileError("Insufficient divisions", withoutEnd));
+        }
+
+        var joined = String.join("", divisions.subList(0, divisions.size() - 1));
+        var callerString = joined.substring(0, joined.length() - ")".length());
+
+        var inputArguments = divisions.getLast();
+        var tupleCompileErrorResult = parseValues(state, inputArguments, Main::parseArgument);
+        return tupleCompileErrorResult.flatMapValue(argumentsTuple -> {
+            var argumentState = argumentsTuple.left;
+            var oldArguments = argumentsTuple.right
+                    .stream()
+                    .filter(arg -> !(arg instanceof Whitespace))
+                    .toList();
+
+            return or(argumentState, callerString, List.of(
+                    (state2, callerString1) -> constructorCaller(state2, callerString1, oldArguments),
+                    (state1, s) -> invocationCaller(state1, s, oldArguments)
+            ));
+        });
+    }
+
+    private static Result<Tuple<CompileState, Value>, CompileError> constructorCaller(CompileState state, String callerString, List<Value> oldArguments) {
+        var stripped = callerString.strip();
+        if (!stripped.startsWith("new ")) {
+            return createPrefixErr(stripped, "new ");
+        }
+
+        var withoutPrefix = stripped.substring("new ".length());
+        if (withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2) {
+            return new Ok<>(new Tuple<>(state, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
+        }
+
+        return compileType(state, withoutPrefix).flatMapValue(callerTuple -> {
+            var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
+            return new Ok<>(new Tuple<>(callerTuple.left, invocation));
+        });
+    }
+
+    private static Result<Tuple<CompileState, Value>, CompileError> invocationCaller(CompileState state, String input, List<Value> arguments) {
+        if (parseValue(state, input) instanceof Ok(var callerTuple)) {
+            var callerState = callerTuple.left;
+            var oldCaller = callerTuple.right;
+
+            Value newCaller = oldCaller;
+            var newArguments = new ArrayList<Value>();
+            if (oldCaller instanceof DataAccess(Value parent, var property)) {
+                newArguments.add(parent);
+                newCaller = new Symbol(property);
+            }
+
+            newArguments.addAll(arguments);
+            return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
+        }
+
+        return new Err<>(new CompileError("Not an invocation", input));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
@@ -1225,7 +1241,7 @@ public class Main {
         );
 
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = List.of(
-                type("?", Main::compileInvokable),
+                type("invokable", Main::compileInvokable),
                 type("?", Main::compileAccess),
                 type("?", Main::parseBooleanValue),
                 type("?", Main::compileSymbolValue),
