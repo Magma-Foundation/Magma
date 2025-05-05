@@ -67,33 +67,33 @@ char* representation;
 };
 struct Main {
 };
-Tuple[left=Definition[annotations=[], modifiers=[], type=struct R, name=match], right=template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr] {
+struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=template Result<struct R, struct X>, name=mapValue], right=template Function<struct T, struct R> mapper] {
+template Result<struct R, struct X> mapValue(template Function<struct T, struct R> mapper) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=template Result<struct T, struct R>, name=mapErr], right=template Function<struct X, struct R> mapper] {
+template Result<struct T, struct R> mapErr(template Function<struct X, struct R> mapper) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=template Result<struct R, struct X>, name=flatMapValue], right=template Function<struct T, template Result<struct R, struct X>> mapper] {
+template Result<struct R, struct X> flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=void, name=ifPresent], right=template Consumer<struct T> consumer] {
+void ifPresent(template Consumer<struct T> consumer) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=struct T, name=orElseGet], right=template Supplier<struct T> supplier] {
+struct T orElseGet(template Supplier<struct T> supplier) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=template Option<struct T>, name=or], right=template Supplier<template Option<struct T>> other] {
+template Option<struct T> or(template Supplier<template Option<struct T>> other) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=int, name=isPresent], right=] {
+int isPresent() {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=template Option<struct R>, name=map], right=template Function<struct T, struct R> mapper] {
+template Option<struct R> map(template Function<struct T, struct R> mapper) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=template Option<struct R>, name=flatMap], right=template Function<struct T, template Option<struct R>> mapper] {
+template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=struct T, name=orElse], right=struct T other] {
+struct T orElse(struct T other) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=struct R, name=match], right=template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone] {
+struct R match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone) {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=char*, name=display], right=] {
+char* display() {
 }
-Tuple[left=Definition[annotations=[], modifiers=[], type=char*, name=generate], right=] {
+char* generate() {
 }
 @Override
 char* display(){
@@ -421,7 +421,9 @@ auto lambda0(auto output){
 template Option<struct ApplicationError> compileAndWrite(char* input){
 	return match(mapErr(compile(input), struct ApplicationError::new), lambda0, struct Some::new);
 }
-Tuple[left=Definition[annotations=[Actual], modifiers=[], type=template Option<struct IOError>, name=writeTarget], right=char* output];Tuple[left=Definition[annotations=[Actual], modifiers=[], type=template Result<char*, struct IOError>, name=readSource], right=];auto lambda0(auto tuple){
+@Actual
+template Option<struct IOError> writeTarget(char* output);@Actual
+template Result<char*, struct IOError> readSource();auto lambda0(auto tuple){
 	auto joinedStructs = join(String, "", tuple.left.structs);
 	auto joinedFunctions = join(String, "", tuple.left.functions);
 	return joinedStructs + joinedFunctions + tuple.right;
@@ -688,16 +690,17 @@ template Result<(struct CompileState, struct T), struct CompileError> createSuff
 	return template Err<>::new(struct CompileError::new("Suffix '" + suffix + "' not present", stripped));
 }
 auto lambda0(auto state1, auto s){
-	return methodWithBraces(state1, s, header);
+	return methodWithBraces(state1, s, generatedHeader);
 }
 auto lambda1(auto state2, auto s){
-	return methodWithoutBraces(state2, s, header);
+	return methodWithoutBraces(state2, s, generatedHeader);
 }
 auto lambda2(auto methodHeaderTuple){
 	auto afterParams = strip(substring(input, paramEnd + length(")")));
 	auto header = methodHeaderTuple.right;
+	auto generatedHeader = generate(header.left) + "(" + header.right + ")";
 	if (contains(header.left.annotations, "Actual")){
-		auto generated = header + ";";
+		auto generated = generatedHeader + ";";
 		return template Ok<>::new((addFunction(methodHeaderTuple.left, generated), ""));
 	}
 	return or(methodHeaderTuple.left, afterParams, of(List, lambda0, lambda1));
@@ -710,17 +713,17 @@ template Result<(struct CompileState, char*), struct CompileError> compileMethod
 	auto withParams = substring(input, 0, paramEnd);
 	return flatMapValue(methodHeader(state, withParams), lambda2);
 }
-template Result<(struct CompileState, char*), struct CompileError> methodWithoutBraces(struct CompileState state, char* content, (struct Definition, char*) right){
+template Result<(struct CompileState, char*), struct CompileError> methodWithoutBraces(struct CompileState state, char* content, char* header){
 	if (equals(content, ";")){
-		auto generated = right + " {\n}\n";
+		auto generated = header + " {\n}\n";
 		return template Ok<>::new((addFunction(state, generated), ""));
 	}
 	return template Err<>::new(struct CompileError::new("Content ';' not present", content));
 }
-template Result<(struct CompileState, char*), struct CompileError> methodWithBraces(struct CompileState state, char* withBraces, (struct Definition, char*) header){
+template Result<(struct CompileState, char*), struct CompileError> methodWithBraces(struct CompileState state, char* withBraces, char* header){
 	if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
 		auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
-		return assembleMethod(state, header, content);
+		return assembleMethod(state, content, header);
 	}
 	return template Err<>::new(struct CompileError::new("No braces present", withBraces));
 }
@@ -751,11 +754,10 @@ auto lambda0(auto statementsTuple){
 	auto oldStatements = template ArrayList<char*>::new();
 	addAll(oldStatements, getLast(frames(statementsState)).statements);
 	addAll(oldStatements, statements);
-	auto generatedHeader = generate(header.left) + "(" + header.right + ")";
-	auto generated = generatedHeader + "{" + generateStatements(oldStatements) + "\n}\n";
+	auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
 	return template Ok<>::new((addFunction(exit(statementsState), generated), ""));
 }
-template Result<(struct CompileState, char*), struct CompileError> assembleMethod(struct CompileState state, (struct Definition, char*) header, char* content){
+template Result<(struct CompileState, char*), struct CompileError> assembleMethod(struct CompileState state, char* content, char* header){
 	return flatMapValue(parseStatements(enter(state), content, struct Main::compileFunctionSegment), lambda0);
 }
 template Result<(struct CompileState, char*), struct CompileError> compileParameter(struct CompileState state2, char* input){

@@ -831,30 +831,31 @@ public class Main {
             var afterParams = input.substring(paramEnd + ")".length()).strip();
 
             var header = methodHeaderTuple.right;
+            var generatedHeader = header.left.generate() + "(" + header.right + ")";
             if (header.left.annotations.contains("Actual")) {
-                var generated = header + ";";
+                var generated = generatedHeader + ";";
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
             return or(methodHeaderTuple.left, afterParams, List.of(
-                    (state1, s) -> methodWithBraces(state1, s, header),
-                    (state2, s) -> methodWithoutBraces(state2, s, header)
+                    (state1, s) -> methodWithBraces(state1, s, generatedHeader),
+                    (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
             ));
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithoutBraces(CompileState state, String content, Tuple<Definition, String> right) {
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithoutBraces(CompileState state, String content, String header) {
         if (content.equals(";")) {
-            var generated = right + " {\n}\n";
+            var generated = header + " {\n}\n";
             return new Ok<>(new Tuple<>(state.addFunction(generated), ""));
         }
         return new Err<>(new CompileError("Content ';' not present", content));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, Tuple<Definition, String> header) {
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, String header) {
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var content = withBraces.substring(1, withBraces.length() - 1).strip();
-            return assembleMethod(state, header, content);
+            return assembleMethod(state, content, header);
         }
         return new Err<>(new CompileError("No braces present", withBraces));
     }
@@ -886,7 +887,7 @@ public class Main {
         return new Err<>(new CompileError("Not a method header", input));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, Tuple<Definition, String> header, String content) {
+    private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, String content, String header) {
         return parseStatements(state.enter(), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
@@ -895,8 +896,7 @@ public class Main {
             oldStatements.addAll(statementsState.frames().getLast().statements);
             oldStatements.addAll(statements);
 
-            var generatedHeader = header.left.generate() + "(" + header.right + ")";
-            var generated = generatedHeader + "{" + generateStatements(oldStatements) + "\n}\n";
+            var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
             return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
         });
     }
