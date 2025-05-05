@@ -526,8 +526,8 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type(Main::namespaced),
-                type(structure("class"))
+                type("?", Main::namespaced),
+                type("?", structure("class"))
         ));
     }
 
@@ -662,39 +662,52 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type(Main::compileWhitespace),
-                type(structure("record")),
-                type(structure("class")),
-                type(structure("interface")),
-                type(Main::compileMethod)
+                type("whitespace", Main::compileWhitespace),
+                type("record", structure("record")),
+                type("class", structure("class")),
+                type("interface", structure("interface")),
+                type("method", Main::compileMethod)
         ));
     }
 
     private static BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> structure(String infix) {
         return (state0, input0) -> {
             var stripped = input0.strip();
-            if (stripped.endsWith("}")) {
-                var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-                var contentStart = withoutEnd.indexOf("{");
-                if (contentStart >= 0) {
-                    var left = withoutEnd.substring(0, contentStart);
-                    var right = withoutEnd.substring(contentStart + "{".length());
-                    var infixIndex = left.indexOf(infix);
-                    if (infixIndex >= 0) {
-                        var afterInfix = left.substring(infixIndex + infix.length()).strip();
-                        if (isSymbol(afterInfix)) {
-                            return compileStatements(state0, right, Main::compileStructSegment)
-                                    .mapValue(result -> {
-                                        var generated = "struct " + afterInfix + " {" + result.right + "\n};\n";
-                                        return new Tuple<>(result.left.addStruct(generated), "");
-                                    });
-                        }
-                    }
-                }
+            if (!stripped.endsWith("}")) {
+                return createSuffixErr(stripped, "}");
             }
 
-            return new Err<>(new CompileError("Not a struct", input0));
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart < 0) {
+                return createInfixErr(withoutEnd, "{");
+            }
+
+            var left = withoutEnd.substring(0, contentStart);
+            var right = withoutEnd.substring(contentStart + "{".length());
+            var infixIndex = left.indexOf(infix);
+            if (infixIndex < 0) {
+                return createInfixErr(withoutEnd, infix);
+            }
+
+            var afterInfix = left.substring(infixIndex + infix.length()).strip();
+            if (!isSymbol(afterInfix)) {
+                return new Err<>(new CompileError("Not a symbol", afterInfix));
+            }
+
+            return compileStatements(state0, right, Main::compileStructSegment).mapValue(result -> {
+                var generated = "struct " + afterInfix + " {" + result.right + "\n};\n";
+                return new Tuple<>(result.left.addStruct(generated), "");
+            });
         };
+    }
+
+    private static Err<Tuple<CompileState, String>, CompileError> createInfixErr(String withoutEnd, String infix) {
+        return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
+    }
+
+    private static Err<Tuple<CompileState, String>, CompileError> createSuffixErr(String stripped, String suffix) {
+        return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileMethod(CompileState state, String input) {
@@ -775,8 +788,8 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
-                type(Main::compileWhitespace),
-                type(Main::compileDefinition)
+                type("?", Main::compileWhitespace),
+                type("?", Main::compileDefinition)
         ));
     }
 
@@ -790,9 +803,9 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type(Main::compileWhitespace),
-                type(Main::compileStatement),
-                type(Main::compileBlock)
+                type("?", Main::compileWhitespace),
+                type("?", Main::compileStatement),
+                type("?", Main::compileBlock)
         ));
     }
 
@@ -1101,8 +1114,8 @@ public class Main {
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, List.of(
-                type(Main::parseWhitespace),
-                type(Main::parseValue)
+                type("?", Main::parseWhitespace),
+                type("?", Main::parseValue)
         ));
     }
 
@@ -1163,24 +1176,24 @@ public class Main {
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseValue(CompileState state, String input) {
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = List.of(
-                type(Main::compileNot),
-                type(Main::compileString),
-                type(Main::compileChar),
-                type(Main::compileLambda)
+                type("?", Main::compileNot),
+                type("?", Main::compileString),
+                type("?", Main::compileChar),
+                type("?", Main::compileLambda)
         );
 
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = List.of(
-                type(Main::compileInvokable),
-                type(Main::compileAccess),
-                type(Main::parseBooleanValue),
-                type(Main::compileSymbolValue),
-                type(Main::compileMethodReference),
-                type(Main::parseNumber)
+                type("?", Main::compileInvokable),
+                type("?", Main::compileAccess),
+                type("?", Main::parseBooleanValue),
+                type("?", Main::compileSymbolValue),
+                type("?", Main::compileMethodReference),
+                type("?", Main::parseNumber)
         );
 
         var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
         for (var value : Operator.values()) {
-            rules.add(type((state1, input1) -> compileOperator(state1, input1, value)));
+            rules.add(type("?", (state1, input1) -> compileOperator(state1, input1, value)));
         }
         rules.addAll(afterOperators);
 
@@ -1270,8 +1283,10 @@ public class Main {
     }
 
     private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> type(
-            BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
-        return (state, input) -> mapper.apply(state, input).mapValue(value -> new Tuple<>(value.left, value.right));
+            String type, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
+        return (state, input) -> mapper.apply(state, input)
+                .<Tuple<CompileState, S>>mapValue(value -> new Tuple<>(value.left, value.right))
+                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Collections.singletonList(err)));
     }
 
     private static Result<Tuple<CompileState, MethodAccess>, CompileError> compileMethodReference(CompileState state, String input) {
