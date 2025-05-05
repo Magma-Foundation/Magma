@@ -566,7 +566,9 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 typed("?", Main::namespaced),
-                typed("?", structure("class"))
+                typed("?", (state0, input0) -> {
+                    return structure(state0, input0, "class");
+                })
         ));
     }
 
@@ -676,12 +678,9 @@ public class Main {
     }
 
     private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        var output = new StringBuilder();
-        for (var element : elements) {
-            output = merger.apply(output, element);
-        }
-
-        return output.toString();
+        return elements.stream()
+                .reduce(new StringBuilder(), merger, (_, next) -> next)
+                .toString();
     }
 
     private static StringBuilder mergeStatements(StringBuilder output, String mapped) {
@@ -696,10 +695,10 @@ public class Main {
         if (c == '}' && appended.isShallow()) {
             return appended.advance().exit();
         }
-        else if (c == '{' || c == '(') {
+        if (c == '{' || c == '(') {
             return appended.enter();
         }
-        else if (c == '}' || c == ')') {
+        if (c == '}' || c == ')') {
             return appended.exit();
         }
         return appended;
@@ -708,10 +707,18 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 typed("whitespace", Main::whitespace),
-                typed("enum", structure("enum")),
-                typed("class", structure("class")),
-                typed("record", structure("record")),
-                typed("interface", structure("interface")),
+                typed("enum", (state3, input3) -> {
+                    return structure(state3, input3, "enum");
+                }),
+                typed("class", (state2, input2) -> {
+                    return structure(state2, input2, "class");
+                }),
+                typed("record", (state1, input1) -> {
+                    return structure(state1, input1, "record");
+                }),
+                typed("interface", (state0, input0) -> {
+                    return structure(state0, input0, "interface");
+                }),
                 typed("method", Main::compileMethod),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
@@ -729,33 +736,31 @@ public class Main {
         return statement(state, input, Main::definition);
     }
 
-    private static BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> structure(String infix) {
-        return (state0, input0) -> {
-            var stripped = input0.strip();
-            if (!stripped.endsWith("}")) {
-                return createSuffixErr(stripped, "}");
-            }
+    private static Result<Tuple<CompileState, String>, CompileError> structure(CompileState state, String input, String infix) {
+        var stripped = input.strip();
+        if (!stripped.endsWith("}")) {
+            return createSuffixErr(stripped, "}");
+        }
 
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
-            if (contentStart < 0) {
-                return createInfixErr(withoutEnd, "{");
-            }
+        var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+        var contentStart = withoutEnd.indexOf("{");
+        if (contentStart < 0) {
+            return createInfixErr(withoutEnd, "{");
+        }
 
-            var left = withoutEnd.substring(0, contentStart);
-            var right = withoutEnd.substring(contentStart + "{".length());
-            var infixIndex = left.indexOf(infix);
-            if (infixIndex < 0) {
-                return createInfixErr(withoutEnd, infix);
-            }
+        var left = withoutEnd.substring(0, contentStart);
+        var right = withoutEnd.substring(contentStart + "{".length());
+        var infixIndex = left.indexOf(infix);
+        if (infixIndex < 0) {
+            return createInfixErr(withoutEnd, infix);
+        }
 
-            var afterInfix = left.substring(infixIndex + infix.length()).strip();
+        var afterInfix = left.substring(infixIndex + infix.length()).strip();
 
-            return removeImplements(state0, afterInfix)
-                    .flatMapValue(Main::removeParams)
-                    .flatMapValue(Main::removeTypeParams)
-                    .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
-        };
+        return removeImplements(state, afterInfix)
+                .flatMapValue(Main::removeParams)
+                .flatMapValue(Main::removeTypeParams)
+                .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeParams(Tuple<CompileState, String> state1) {
@@ -1014,16 +1019,17 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> functionStatementValue(CompileState state, String input) {
         return or(state, input, List.of(
-                Main::compileBreak,
+                (state1, input1) -> compileKeyword(state1, input1, "break"),
+                (state1, input1) -> compileKeyword(state1, input1, "continue"),
                 Main::compileReturn,
                 (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
                 Main::compileAssignment
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileBreak(CompileState state, String input) {
-        if (input.equals("break")) {
-            return new Ok<>(new Tuple<>(state, "break"));
+    private static Result<Tuple<CompileState, String>, CompileError> compileKeyword(CompileState state, String input, String equals) {
+        if (input.equals(equals)) {
+            return new Ok<>(new Tuple<>(state, equals));
         }
         return new Err<>(new CompileError("Not break", input));
     }
@@ -1052,11 +1058,15 @@ public class Main {
 
         var left = input.substring(0, valueSeparator);
         var right = input.substring(valueSeparator + "=".length());
-        return Main.<String>or(state, left, List.of(Main::definition, Main::compileValue)).flatMapValue(definitionTuple -> {
+        return compileAssignable(state, left).flatMapValue(definitionTuple -> {
             return compileValue(definitionTuple.left, right).mapValue(valueTuple -> {
                 return new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right);
             });
         });
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> compileAssignable(CompileState state, String left) {
+        return Main.or(state, left, List.of(Main::definition, Main::compileValue));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> definition(CompileState state, String input) {
@@ -1078,7 +1088,7 @@ public class Main {
             var annotationsArray = beforeName.substring(0, annotationSeparator).strip().split(Pattern.quote("\n"));
             var annotations = Arrays.stream(annotationsArray)
                     .map(String::strip)
-                    .map(slice -> slice.isEmpty() ? "" : slice.substring(1))
+                    .map(Main::truncateAnnotationValue)
                     .toList();
 
             var beforeName0 = beforeName.substring(annotationSeparator + "\n".length());
@@ -1086,6 +1096,13 @@ public class Main {
         }
 
         return new Err<>(new CompileError("Invalid definition", input));
+    }
+
+    private static String truncateAnnotationValue(String slice) {
+        if (slice.isEmpty()) {
+            return "";
+        }
+        return slice.substring(1);
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithAnnotations(CompileState state, List<String> annotations, String withoutAnnotations, String name) {
@@ -1180,22 +1197,20 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> primitive(CompileState state, String input) {
-        switch (input.strip()) {
-            case "var" -> {
-                return new Ok<>(new Tuple<>(state, "auto"));
-            }
-            case "char" -> {
-                return new Ok<>(new Tuple<>(state, "char"));
-            }
-            case "void" -> {
-                return new Ok<>(new Tuple<>(state, "void"));
-            }
-            case "String" -> {
-                return new Ok<>(new Tuple<>(state, "char*"));
-            }
-            case "boolean" -> {
-                return new Ok<>(new Tuple<>(state, "int"));
-            }
+        if (input.strip().equals("var")) {
+            return new Ok<>(new Tuple<>(state, "auto"));
+        }
+        if (input.strip().equals("char")) {
+            return new Ok<>(new Tuple<>(state, "char"));
+        }
+        if (input.strip().equals("void")) {
+            return new Ok<>(new Tuple<>(state, "void"));
+        }
+        if (input.strip().equals("String")) {
+            return new Ok<>(new Tuple<>(state, "char*"));
+        }
+        if (input.strip().equals("boolean")) {
+            return new Ok<>(new Tuple<>(state, "int"));
         }
         return new Err<>(new CompileError("Not a primitive", input));
     }
@@ -1348,12 +1363,17 @@ public class Main {
         );
 
         var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
-        for (var value : Operator.values()) {
-            rules.add(typed(value.name(), (state1, input1) -> operator(state1, input1, value)));
-        }
+        rules.addAll(Arrays.stream(Operator.values())
+                .map(Main::createOperatorRule)
+                .toList());
+
         rules.addAll(afterOperators);
 
         return or(state, input, rules);
+    }
+
+    private static BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>> createOperatorRule(Operator value) {
+        return typed(value.name(), (state1, input1) -> operator(state1, input1, value));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> instanceOfNode(CompileState state, String input) {
