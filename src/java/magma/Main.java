@@ -16,7 +16,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Main {
     private interface Rule<T> extends BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> {
@@ -77,6 +76,8 @@ public class Main {
     }
 
     private interface List<T> {
+        Iterator<T> iteratorReverse();
+
         List<T> addLast(T element);
 
         T last();
@@ -467,6 +468,13 @@ public class Main {
                 var slice = this.elements.subList(startInclusive, endInclusive);
                 return new JavaList<>(new ArrayList<>(slice));
             }
+
+            @Override
+            public Iterator<T> iteratorReverse() {
+                return new HeadedIterator<>(new RangeHead(this.size()))
+                        .map(index -> this.size() - index - 1)
+                        .map(this::get);
+            }
         }
 
         @Actual
@@ -676,14 +684,10 @@ public class Main {
         }
 
         public Option<Type> resolve(String name) {
-            return IntStream.range(0, this.frames.size())
-                    .map(index -> this.frames.size() - index - 1)
-                    .mapToObj(this.frames::get)
+            return this.frames.iteratorReverse()
                     .map(frame -> frame.resolveType(name))
-                    .flatMap(Options::toStream)
-                    .findFirst()
-                    .<Option<Type>>map(Some::new)
-                    .orElseGet(None::new);
+                    .flatMap(Iterators::fromOption)
+                    .next();
         }
 
         public CompileState exitStruct() {
@@ -709,12 +713,6 @@ public class Main {
 
         public Frame last() {
             return this.frames.last();
-        }
-    }
-
-    private static class Options {
-        public static <T> Stream<T> toStream(Option<T> option) {
-            return option.match(Stream::of, Stream::empty);
         }
     }
 
@@ -943,6 +941,15 @@ public class Main {
 
         public static <T> Iterator<T> empty() {
             return new HeadedIterator<>(new EmptyHead<>());
+        }
+
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            Head<T> head = switch (option) {
+                case None<T> _ -> new EmptyHead<>();
+                case Some<T>(var value) -> new SingleHead<>(value);
+            };
+
+            return new HeadedIterator<>(head);
         }
     }
 
