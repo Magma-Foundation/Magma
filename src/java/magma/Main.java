@@ -708,7 +708,7 @@ public class Main {
             var afterInfix = left.substring(infixIndex + infix.length()).strip();
 
             return Main.or(state0, afterInfix, List.of(
-                    (BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>>) (state, s) -> infix(s, "(", (s1, s2) -> new Ok<>(new Tuple<>(state, s1))),
+                    (BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>>) (state, s) -> infix(s, "(", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
                     (state, s) -> new Ok<>(new Tuple<>(state, s))
             )).flatMapValue(withoutParams -> {
                 return Main.or(withoutParams.left, withoutParams.right, List.of(
@@ -812,8 +812,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, String header, String content) {
-        var maybeStatementsTuple = parseStatements(state.enter(), content, Main::compileFunctionSegment);
-        if (maybeStatementsTuple instanceof Ok(var statementsTuple)) {
+        return parseStatements(state.enter(), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
 
@@ -823,9 +822,7 @@ public class Main {
 
             var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
             return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
-        }
-
-        return new Err<>(new CompileError("Not method statements", content));
+        });
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
