@@ -1056,8 +1056,50 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileType(CompileState state, String input) {
+        return or(state, input, List.of(
+                Main::primitive,
+                Main::symbolType,
+                Main::templateType
+        ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> templateType(CompileState state, String s) {
+        var stripped = s.strip();
+        if (!stripped.endsWith(">")) {
+            return createSuffixErr(stripped, ">");
+        }
+
+        var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
+        var argsStart = withoutEnd.indexOf("<");
+        if (argsStart < 0) {
+            return createInfixErr(withoutEnd, "<");
+        }
+
+        var base = withoutEnd.substring(0, argsStart).strip();
+        var argsString = withoutEnd.substring(argsStart + "<".length());
+        return parseValues(state, argsString, Main::compileType).flatMapValue(argsTuple -> {
+            var args = argsTuple.right;
+
+            if (base.equals("Tuple") && args.size() >= 2) {
+                var first = args.get(0);
+                var second = args.get(1);
+                return new Ok<>(new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")"));
+            }
+
+            return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
+        });
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> symbolType(CompileState state, String input) {
         var stripped = input.strip();
-        switch (stripped) {
+        if (isSymbol(stripped)) {
+            return new Ok<>(new Tuple<>(state, "struct " + stripped));
+        }
+        return new Err<>(new CompileError("Not a symbol", stripped));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> primitive(CompileState state, String input) {
+        switch (input.strip()) {
             case "var" -> {
                 return new Ok<>(new Tuple<>(state, "auto"));
             }
@@ -1074,33 +1116,7 @@ public class Main {
                 return new Ok<>(new Tuple<>(state, "int"));
             }
         }
-
-        if (isSymbol(stripped)) {
-            return new Ok<>(new Tuple<>(state, "struct " + stripped));
-        }
-
-        if (stripped.endsWith(">")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ">".length());
-            var argsStart = withoutEnd.indexOf("<");
-            if (argsStart >= 0) {
-                var base = withoutEnd.substring(0, argsStart).strip();
-                var argsString = withoutEnd.substring(argsStart + "<".length());
-                var maybeArgsTuple = parseValues(state, argsString, Main::compileType);
-                if (maybeArgsTuple instanceof Ok(var argsTuple)) {
-                    var args = argsTuple.right;
-
-                    if (base.equals("Tuple") && args.size() >= 2) {
-                        var first = args.get(0);
-                        var second = args.get(1);
-                        return new Ok<>(new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")"));
-                    }
-
-                    return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
-                }
-            }
-        }
-
-        return new Err<>(new CompileError("Not a valid type", input));
+        return new Err<>(new CompileError("Not a primitive", input));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> compileInvokable(CompileState state, String input) {
