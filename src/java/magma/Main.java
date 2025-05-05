@@ -1428,8 +1428,37 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, StructSegment>, CompileError> enumValues(CompileState state, String input) {
-        return statement(input, slice1 -> parseValues(state, slice1, Main::parseInvokable)
+        return statement(input, slice1 -> parseValues(state, slice1, (state1, input1) -> parseEnumValue(state1, input1))
                 .mapValue(tuple -> new Tuple<>(tuple.left, new EnumValues(tuple.right))));
+    }
+
+    private static Result<Tuple<CompileState, Value>, CompileError> parseEnumValue(CompileState state1, String input1) {
+        var stripped = input1.strip();
+        if (!stripped.endsWith(")")) {
+            return createSuffixErr(stripped, ")");
+        }
+
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
+        if (divisions.size() < 2) {
+            return new Err<>(new CompileError("Insufficient divisions", withoutEnd));
+        }
+
+        var joined = join(divisions.slice(0, divisions.size() - 1));
+        var callerString = joined.substring(0, joined.length() - ")".length());
+
+        var inputArguments = divisions.last();
+        return parseValues(state1, inputArguments, Main::parseArgument).flatMapValue(argumentsTuple -> {
+            var argumentState = argumentsTuple.left;
+            var oldArguments = argumentsTuple.right
+                    .iterator()
+                    .filter(arg -> !(arg instanceof Whitespace))
+                    .collect(new ListCollector<>());
+
+            var caller = new Symbol(callerString);
+            var newArguments = createEmptyValueList();
+            return new Ok<>(new Tuple<>(argumentState, new Invocation(caller, newArguments.addAllLast(oldArguments))));
+        });
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionStatement(CompileState state, String input) {
