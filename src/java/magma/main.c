@@ -148,9 +148,7 @@
     } *//* 
 
     public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
-    public static final Path TARGET = SOURCE.resolveSibling("main.c"); */expect /* private static */template Option<struct IOError> writeTarget(char* output);
-expect /* private static */template Result<char*, struct IOError> readSource();
-/* 
+    public static final Path TARGET = SOURCE.resolveSibling("main.c"); *//* 
  */
 };
 @Override
@@ -399,6 +397,25 @@ auto lambda1(auto input){
 /* public static */void main(){
 	ifPresent(match(readSource(), lambda1, struct Some::new), lambda0);
 }
+expect /* private static */template Option<struct IOError> writeTarget(char* output);
+{
+	/* try */{
+		writeString(Files, TARGET, output);
+		return template None</*  */>::new();
+	}
+	/* catch (IOException e) */{
+		return template Some</*  */>::new(struct IOError::new(e));
+	}
+}
+expect /* private static */template Result<char*, struct IOError> readSource();
+{
+	/* try */{
+		return template Ok</*  */>::new(readString(Files, SOURCE));
+	}
+	/* catch (IOException e) */{
+		return template Err</*  */>::new(struct IOError::new(e));
+	}
+}
 /* private static */char* compile(char* input){
 	auto state = struct CompileState::new();
 	auto maybeTuple = compileStatements(state, input, struct Main::compileRootSegment);
@@ -539,21 +556,26 @@ auto lambda3(auto popped){
 /* private static */template Option<(struct CompileState, char*)> compileStructSegment(struct CompileState state, char* input){
 	return or(state, input, of(List, type(structure("record")), type(structure("class")), type(structure("interface")), type(struct Main::compileMethod), type(struct Main::compileContent)));
 }
+auto lambda0(auto methodHeaderTuple){
+	auto withBraces = strip(substring(stripped, paramEnd + length(")")));
+	if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
+		auto content = substring(withBraces, 1, length(withBraces) - 1);
+		return getTupleSome(methodHeaderTuple.left, methodHeaderTuple.right, content);
+	}
+	else {
+		return template None</*  */>::new();
+	}
+}
 /* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* stripped){
-	if (!endsWith(stripped, "}")){
+	auto paramEnd = indexOf(stripped, ")");
+	if (paramEnd < 0){
 		return template None</*  */>::new();
 	}
-	auto withoutContentEnd = substring(stripped, 0, length(stripped) - length("}"));
-	auto contentStart = indexOf(withoutContentEnd, "{");
-	if (contentStart < 0){
-		return template None</*  */>::new();
-	}
-	auto beforeContent = strip(substring(withoutContentEnd, 0, contentStart));
-	auto right = substring(withoutContentEnd, contentStart + length("{"));
-	if (!endsWith(beforeContent, ")")){
-		return template None</*  */>::new();
-	}
-	auto withoutParamEnd = substring(beforeContent, 0, length(beforeContent) - length(")"));
+	auto withParams = substring(stripped, 0, paramEnd);
+	return flatMap(compileMethodHeader(state, withParams), lambda0);
+}
+/* private static */template Option<(struct CompileState, char*)> compileMethodHeader(struct CompileState state, char* substring){
+	auto withoutParamEnd = substring;
 	auto paramStart = indexOf(withoutParamEnd, "(");
 	if (paramStart < 0){
 		return template None</*  */>::new();
@@ -572,18 +594,22 @@ auto lambda3(auto popped){
 		if (contains(definition.modifiers, "expect")){
 			return template Some</*  */>::new((paramsState, header + ";\n"));
 		}
-		auto maybeStatementsTuple = /*  parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1)) */;
-		if (/* maybeStatementsTuple instanceof Some(var statementsTuple) */){
-			auto statementsState = statementsTuple.left;
-			auto statements = statementsTuple.right;
-			auto oldStatements = template ArrayList<char*>::new();
-			addAll(oldStatements, getLast(frames(statementsState)).statements);
-			addAll(oldStatements, statements);
-			auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-			return template Some</*  */>::new((addFunction(exit(statementsState), generated), ""));
-		}
+		return template Some</*  */>::new((paramsState, header));
 	}
 	return template None</*  */>::new();
+}
+/* private static */template Option<(struct CompileState, char*)> getTupleSome(struct CompileState paramsState, char* header, char* content){
+	auto maybeStatementsTuple = parseStatements(enter(paramsState), content, struct Main::compileFunctionSegment);
+	if (/* !(maybeStatementsTuple instanceof Some(var statementsTuple)) */){
+		return template None</*  */>::new();
+	}
+	auto statementsState = statementsTuple.left;
+	auto statements = statementsTuple.right;
+	auto oldStatements = template ArrayList<char*>::new();
+	addAll(oldStatements, getLast(frames(statementsState)).statements);
+	addAll(oldStatements, statements);
+	auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+	return template Some</*  */>::new((addFunction(exit(statementsState), generated), ""));
 }
 /* private static */template Option<(struct CompileState, char*)> compileParameter(struct CompileState state2, char* input){
 	return /* or(state2, input, List.of(

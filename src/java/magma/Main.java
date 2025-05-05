@@ -634,24 +634,25 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String stripped) {
-        if (!stripped.endsWith("}")) {
+        var paramEnd = stripped.indexOf(")");
+        if (paramEnd < 0) {
             return new None<>();
         }
 
-        var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
-        var contentStart = withoutContentEnd.indexOf("{");
-        if (contentStart < 0) {
-            return new None<>();
-        }
+        var withParams = stripped.substring(0, paramEnd);
+        return compileMethodHeader(state, withParams).flatMap(methodHeaderTuple -> {
+            var withBraces = stripped.substring(paramEnd + ")".length()).strip();
+            if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
+                return new None<>();
+            }
 
-        var beforeContent = withoutContentEnd.substring(0, contentStart).strip();
-        var right = withoutContentEnd.substring(contentStart + "{".length());
+            var content = withBraces.substring(1, withBraces.length() - 1);
+            return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
+        });
+    }
 
-        if (!beforeContent.endsWith(")")) {
-            return new None<>();
-        }
-
-        var withoutParamEnd = beforeContent.substring(0, beforeContent.length() - ")".length());
+    private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String substring) {
+        var withoutParamEnd = substring;
         var paramStart = withoutParamEnd.indexOf("(");
         if (paramStart < 0) {
             return new None<>();
@@ -665,7 +666,6 @@ public class Main {
         }
 
         var definition = definitionTuple.right;
-
         var maybeParamsTuple = compileValues(definitionTuple.left, inputParams, Main::compileParameter);
         if (maybeParamsTuple instanceof Some(var paramsTuple)) {
             var paramsState = paramsTuple.left;
@@ -676,21 +676,26 @@ public class Main {
                 return new Some<>(new Tuple<>(paramsState, header + ";\n"));
             }
 
-            var maybeStatementsTuple = parseStatements(paramsState.enter(), right, (state1, input1) -> compileFunctionSegment(state1, input1));
-            if (maybeStatementsTuple instanceof Some(var statementsTuple)) {
-                var statementsState = statementsTuple.left;
-                var statements = statementsTuple.right;
-
-                var oldStatements = new ArrayList<String>();
-                oldStatements.addAll(statementsState.frames().getLast().statements);
-                oldStatements.addAll(statements);
-
-                var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-                return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
-            }
+            return new Some<>(new Tuple<>(paramsState, header));
         }
 
         return new None<>();
+    }
+
+    private static Option<Tuple<CompileState, String>> assembleMethod(CompileState state, String header, String content) {
+        var maybeStatementsTuple = parseStatements(state.enter(), content, Main::compileFunctionSegment);
+        if (!(maybeStatementsTuple instanceof Some(var statementsTuple))) {
+            return new None<>();
+        }
+        var statementsState = statementsTuple.left;
+        var statements = statementsTuple.right;
+
+        var oldStatements = new ArrayList<String>();
+        oldStatements.addAll(statementsState.frames().getLast().statements);
+        oldStatements.addAll(statements);
+
+        var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+        return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
     }
 
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState state2, String input) {
