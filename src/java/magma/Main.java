@@ -642,24 +642,26 @@ public class Main {
         var withParams = stripped.substring(0, paramEnd);
         return compileMethodHeader(state, withParams).flatMap(methodHeaderTuple -> {
             var withBraces = stripped.substring(paramEnd + ")".length()).strip();
-            if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
-                return new None<>();
+            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                var content = withBraces.substring(1, withBraces.length() - 1).strip();
+                return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
+            }
+            if(withBraces.equals(";")) {
+                return new Some<>(new Tuple<>(methodHeaderTuple.left, "\n\t" + methodHeaderTuple.right + ";"));
             }
 
-            var content = withBraces.substring(1, withBraces.length() - 1);
-            return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
+            return new None<>();
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String substring) {
-        var withoutParamEnd = substring;
-        var paramStart = withoutParamEnd.indexOf("(");
+    private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String input) {
+        var paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return new None<>();
         }
 
-        var definitionString = withoutParamEnd.substring(0, paramStart);
-        var inputParams = withoutParamEnd.substring(paramStart + "(".length());
+        var definitionString = input.substring(0, paramStart);
+        var inputParams = input.substring(paramStart + "(".length());
 
         if (!(parseDefinition(state, definitionString) instanceof Some(var definitionTuple))) {
             return new None<>();

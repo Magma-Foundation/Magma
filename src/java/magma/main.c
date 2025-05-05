@@ -1,32 +1,26 @@
-/* private interface Result<T, X>  */{/* 
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr); *//* 
+/* private interface Result<T, X>  */{
+	/* <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr);/* 
      */
 };
-/* private interface Option<T>  */{/* 
-        void ifPresent(Consumer<T> consumer); *//* 
-
-        T orElseGet(Supplier<T> supplier); *//* 
-
-        Option<T> or(Supplier<Option<T>> other); *//* 
-
-        boolean isPresent(); *//* 
-
-        <R> Option<R> map(Function<T, R> mapper); *//* 
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper); *//* 
-
-        T orElse(T other); *//* 
+/* private interface Option<T>  */{
+	void ifPresent(template Consumer<struct T> consumer);
+	struct T orElseGet(template Supplier<struct T> supplier);
+	template Option<struct T> or(template Supplier<template Option<struct T>> other);
+	int isPresent();
+	/* <R> */template Option<struct R> map(template Function<struct T, struct R> mapper);
+	/* <R> */template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper);
+	struct T orElse(struct T other);/* 
      */
 };
-/* private interface Error  */{/* 
-        String display(); *//* 
+/* private interface Error  */{
+	char* display();/* 
      */
 };
 /* private @interface Actual  */{/* 
      */
 };
-/* private interface Value  */{/* 
-        String generate(); *//* 
+/* private interface Value  */{
+	char* generate();/* 
      */
 };
 /* private record IOError(IOException exception) implements Error  */{/* 
@@ -145,10 +139,9 @@
         Operator(String representation) {
             this.representation = representation;
         }
-    } *//* 
-
-    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java"); *//* 
-    public static final Path TARGET = SOURCE.resolveSibling("main.c"); *//* 
+    } */
+	/* public static final Path SOURCE *//* = */ Paths.get(/* "." */, /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main.java" */);
+	/* public static final Path TARGET *//* = */ SOURCE.resolveSibling(/* "main.c" */);/* 
  */
 };
 @Override
@@ -559,12 +552,13 @@ auto lambda3(auto popped){
 auto lambda0(auto methodHeaderTuple){
 	auto withBraces = strip(substring(stripped, paramEnd + length(")")));
 	if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
-		auto content = substring(withBraces, 1, length(withBraces) - 1);
-		return getTupleSome(methodHeaderTuple.left, methodHeaderTuple.right, content);
+		auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
+		return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
 	}
-	else {
-		return template None</*  */>::new();
+	if (equals(withBraces, ";")){
+		return template Some</*  */>::new((methodHeaderTuple.left, "\n\t" + methodHeaderTuple.right + ";"));
 	}
+	return template None</*  */>::new();
 }
 /* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* stripped){
 	auto paramEnd = indexOf(stripped, ")");
@@ -574,14 +568,13 @@ auto lambda0(auto methodHeaderTuple){
 	auto withParams = substring(stripped, 0, paramEnd);
 	return flatMap(compileMethodHeader(state, withParams), lambda0);
 }
-/* private static */template Option<(struct CompileState, char*)> compileMethodHeader(struct CompileState state, char* substring){
-	auto withoutParamEnd = substring;
-	auto paramStart = indexOf(withoutParamEnd, "(");
+/* private static */template Option<(struct CompileState, char*)> compileMethodHeader(struct CompileState state, char* input){
+	auto paramStart = indexOf(input, "(");
 	if (paramStart < 0){
 		return template None</*  */>::new();
 	}
-	auto definitionString = substring(withoutParamEnd, 0, paramStart);
-	auto inputParams = substring(withoutParamEnd, paramStart + length("("));
+	auto definitionString = substring(input, 0, paramStart);
+	auto inputParams = substring(input, paramStart + length("("));
 	if (/* !(parseDefinition(state, definitionString) instanceof Some(var definitionTuple)) */){
 		return template None</*  */>::new();
 	}
@@ -598,8 +591,8 @@ auto lambda0(auto methodHeaderTuple){
 	}
 	return template None</*  */>::new();
 }
-/* private static */template Option<(struct CompileState, char*)> getTupleSome(struct CompileState paramsState, char* header, char* content){
-	auto maybeStatementsTuple = parseStatements(enter(paramsState), content, struct Main::compileFunctionSegment);
+/* private static */template Option<(struct CompileState, char*)> assembleMethod(struct CompileState state, char* header, char* content){
+	auto maybeStatementsTuple = parseStatements(enter(state), content, struct Main::compileFunctionSegment);
 	if (/* !(maybeStatementsTuple instanceof Some(var statementsTuple)) */){
 		return template None</*  */>::new();
 	}
