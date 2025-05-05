@@ -663,9 +663,16 @@ public class Main {
 
         var appended = state.append(c);
         return appended.popAndAppendToTuple()
-                .flatMap(popped -> popped.left == '\\' ? popped.right.popAndAppendToOption() : new Some<>(popped.right))
+                .flatMap(popped -> foldEscape(popped.right, popped.left))
                 .flatMap(DivideState::popAndAppendToOption);
 
+    }
+
+    private static Option<DivideState> foldEscape(DivideState state, Character c) {
+        if (c == '\\') {
+            return state.popAndAppendToOption();
+        }
+        return new Some<>(state);
     }
 
     private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
