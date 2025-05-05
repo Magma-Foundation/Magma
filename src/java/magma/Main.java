@@ -784,10 +784,10 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> infix(
+    private static <T> Result<Tuple<CompileState, T>, CompileError> infix(
             String input,
             String infix,
-            BiFunction<String, String, Ok<Tuple<CompileState, String>, CompileError>> mapper
+            BiFunction<String, String, Result<Tuple<CompileState, T>, CompileError>> mapper
     ) {
         var typeParamStart = input.indexOf(infix);
         if (typeParamStart >= 0) {
@@ -1229,7 +1229,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> invocationCaller(CompileState state, String input, List<Value> arguments) {
-        if (parseValue(state, input) instanceof Ok(var callerTuple)) {
+        if (value(state, input) instanceof Ok(var callerTuple)) {
             var callerState = callerTuple.left;
             var oldCaller = callerTuple.right;
 
@@ -1250,7 +1250,7 @@ public class Main {
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, List.of(
                 typed("?", Main::parseWhitespace),
-                typed("?", Main::parseValue)
+                typed("?", Main::value)
         ));
     }
 
@@ -1306,10 +1306,10 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileValue(CompileState state, String input) {
-        return parseValue(state, input).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+        return value(state, input).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Result<Tuple<CompileState, Value>, CompileError> parseValue(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> value(CompileState state, String input) {
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = List.of(
                 typed("?", Main::compileNot),
                 typed("?", Main::compileString),
@@ -1323,7 +1323,8 @@ public class Main {
                 typed("?", Main::parseBooleanValue),
                 typed("?", Main::compileSymbolValue),
                 typed("?", Main::compileMethodReference),
-                typed("?", Main::parseNumber)
+                typed("?", Main::parseNumber),
+                typed("instanceof", Main::instanceOfNode)
         );
 
         var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
@@ -1335,13 +1336,21 @@ public class Main {
         return or(state, input, rules);
     }
 
+    private static Result<Tuple<CompileState, Value>, CompileError> instanceOfNode(CompileState state, String input) {
+        return infix(input, "instanceof", (beforeKeyword, _) -> {
+            return value(state, beforeKeyword).mapValue(valueResult -> {
+                return new Tuple<>(valueResult.left, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0")));
+            });
+        });
+    }
+
     private static Result<Tuple<CompileState, Not>, CompileError> compileNot(CompileState state, String input) {
         var stripped = input.strip();
         if (!stripped.startsWith("!")) {
             return new Err<>(new CompileError("Not not", input));
         }
 
-        return parseValue(state, stripped.substring(1)).mapValue(inner -> new Tuple<>(inner.left, new Not(inner.right)));
+        return value(state, stripped.substring(1)).mapValue(inner -> new Tuple<>(inner.left, new Not(inner.right)));
     }
 
     private static Result<Tuple<CompileState, NumberValue>, CompileError> parseBooleanValue(CompileState state, String input) {
@@ -1397,8 +1406,8 @@ public class Main {
         var left = input.substring(0, index);
         var right = input.substring(index + operator.representation.length());
 
-        return parseValue(state, left).flatMapValue(leftTuple -> {
-            return parseValue(leftTuple.left, right).mapValue(rightTuple -> {
+        return value(state, left).flatMapValue(leftTuple -> {
+            return value(leftTuple.left, right).mapValue(rightTuple -> {
                 var operation = new Operation(leftTuple.right, operator, rightTuple.right);
                 return new Tuple<>(rightTuple.left, operation);
             });
@@ -1454,7 +1463,7 @@ public class Main {
         if (separator >= 0) {
             var parent = input.strip().substring(0, separator);
             var child = input.strip().substring(separator + ".".length());
-            if (isSymbol(child) && parseValue(state, parent) instanceof Ok(var tuple)) {
+            if (isSymbol(child) && value(state, parent) instanceof Ok(var tuple)) {
                 return new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
             }
         }
