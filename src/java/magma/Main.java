@@ -61,6 +61,22 @@ public class Main {
         C fold(C current, T element);
     }
 
+    private interface Iterator<T> {
+        <C> C collect(Collector<T, C> collector);
+
+        <C> C fold(C initial, BiFunction<C, T, C> folder);
+
+        Iterator<T> filter(Predicate<T> predicate);
+
+        <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+
+        Iterator<T> concat(Iterator<T> other);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        Option<T> next();
+    }
+
     private interface List<T> {
         List<T> addLast(T element);
 
@@ -111,22 +127,6 @@ public class Main {
     }
 
     private interface Parameter {
-    }
-
-    private interface Iterator<T> {
-        <C> C collect(Collector<T, C> collector);
-
-        <C> C fold(C initial, BiFunction<C, T, C> folder);
-
-        Iterator<T> filter(Predicate<T> predicate);
-
-        <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
-
-        Iterator<T> concat(Iterator<T> other);
-
-        <R> Iterator<R> map(Function<T, R> mapper);
-
-        Option<T> next();
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -366,10 +366,11 @@ public class Main {
 
     private static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter = 0;
+        private int counter;
 
         public RangeHead(int length) {
             this.length = length;
+            this.counter = 0;
         }
 
         @Override
@@ -1482,8 +1483,18 @@ public class Main {
                 (state1, input1) -> compileKeyword(state1, input1, "continue"),
                 Main::compileReturn,
                 (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
-                Main::compileAssignment
+                Main::compileAssignment,
+                Main::compilePostfix
         ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> compilePostfix(CompileState state, String s) {
+        var stripped = s.strip();
+        if (stripped.endsWith("++")) {
+            var slice = stripped.substring(0, stripped.length() - "++".length());
+            return compileValue(state, slice).mapValue(result -> new Tuple<>(result.left, result.right + "++"));
+        }
+        return createSuffixErr(stripped, "++");
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileKeyword(CompileState state, String input, String equals) {
