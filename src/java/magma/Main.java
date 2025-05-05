@@ -345,9 +345,13 @@ public class Main {
                 return "";
             }
 
+            return this.joinAnnotations() + "\n";
+        }J
+
+        private String joinAnnotations() {
             return this.annotations.stream()
                     .map(value -> "@" + value)
-                    .collect(Collectors.joining("\n")) + "\n";
+                    .collect(Collectors.joining("\n"));
         }
     }
 
