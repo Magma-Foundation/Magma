@@ -2186,23 +2186,38 @@ public class Main {
     private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOf(CompileState state, String input) {
         return infix(input, "instanceof", (beforeKeyword, afterKeyword) -> {
             var strippedAfterKeyword = afterKeyword.strip();
-            if (strippedAfterKeyword.endsWith(")")) {
-                var left = strippedAfterKeyword.substring(0, strippedAfterKeyword.length() - ")".length());
-                var paramsStart = left.indexOf("(");
-                if (paramsStart >= 0) {
-                    var params = left.substring(paramsStart + 1);
-                    return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
-                        return parseParameters(state, params).mapValue(parameterTuple -> {
-                            var left1 = valueResult.left.defineValues(parameterTuple.right);
-                            var value = valueResult.right;
-                            return new Tuple<>(left1, new Operation(value, Operator.EQUALS, new NumberValue("0")));
-                        });
+
+            return or(state, strippedAfterKeyword, Lists.of(
+                    (state0, s) -> parseInstanceOfWithParams(state0, beforeKeyword, s),
+                    (state0, s) -> parseInstanceOfAsAlias(state0, beforeKeyword, s)
+            ));
+        });
+    }
+
+    private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOfWithParams(CompileState state, String beforeKeyword, String input) {
+        if (input.endsWith(")")) {
+            var left = input.substring(0, input.length() - ")".length());
+            var paramsStart = left.indexOf("(");
+            if (paramsStart >= 0) {
+                var params = left.substring(paramsStart + 1);
+                return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
+                    return parseParameters(state, params).mapValue(parameterTuple -> {
+                        var left1 = valueResult.left.defineValues(parameterTuple.right);
+                        var value = valueResult.right;
+                        return new Tuple<>(left1, new Operation(value, Operator.EQUALS, new NumberValue("0")));
                     });
-
-                }
+                });
             }
+        }
+        return new Err<>(new CompileError("Invalid instanceof right", input));
+    }
 
-            return new Err<>(new CompileError("Invalid instanceof", strippedAfterKeyword));
+    private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOfAsAlias(CompileState state, String beforeKeyword, String input) {
+        return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
+            return parseDefinition(valueResult.left, input).flatMapValue(definition -> {
+                var defined = definition.left.defineValue(definition.right);
+                return new Ok<>(new Tuple<>(defined, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0"))));
+            });
         });
     }
 
