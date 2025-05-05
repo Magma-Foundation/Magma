@@ -79,7 +79,7 @@ template Result<struct T, struct R> Result::mapErr(template Function<struct X, s
 }
 template Result<struct R, struct X> Result::flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper) {
 }
-void Option::ifPresent(template Consumer<struct T> consumer) {
+void Option::ifPresent(void (*)(struct T) consumer) {
 }
 struct T Option::orElseGet(template Supplier<struct T> supplier) {
 }
@@ -99,7 +99,7 @@ char* Error::display() {
 }
 char* Value::generate() {
 }
-void None::ifPresent(template Consumer<struct T> consumer){
+void None::ifPresent(void (*)(struct T) consumer){
 }
 struct T None::orElseGet(template Supplier<struct T> supplier){
 			return get(supplier);
@@ -122,7 +122,7 @@ struct T None::orElse(struct T other){
 struct R None::match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone){
 			return get(whenNone);
 }
-void Some::ifPresent(template Consumer<struct T> consumer){
+void Some::ifPresent(void (*)(struct T) consumer){
 			accept(consumer, this.value);
 }
 struct T Some::orElseGet(template Supplier<struct T> supplier){
@@ -968,7 +968,7 @@ template Result<(struct CompileState, struct Definition), struct CompileError> V
 			return mapValue(type(state, type), lambda0);
 }
 template Result<(struct CompileState, char*), struct CompileError> Values::type(struct CompileState state, char* input){
-			return or(state, input, of(List, struct Main::primitive, struct Main::symbolType, struct Main::templateType));
+			return or(state, input, of(List, struct Main::primitive, struct Main::symbolType, struct Main::template));
 }
 auto lambda0(auto argsTuple){
 			auto args = argsTuple.right;
@@ -977,9 +977,12 @@ auto lambda0(auto argsTuple){
 				auto second = get(args, 1);
 				return template Ok<>::new((argsTuple.left, "(" + first + ", " + second + ")"));
 				}
+				if (equals(base, "Consumer")){
+				return template Ok<>::new((argsTuple.left, "void (*)(" + args.getFirst() + ")"));
+				}
 			return template Ok<>::new((argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::templateType(struct CompileState state, char* input){
+template Result<(struct CompileState, char*), struct CompileError> Values::template(struct CompileState state, char* input){
 			auto stripped = strip(input);
 				if (!endsWith(stripped, ">")){
 				return createSuffixErr(stripped, ">");

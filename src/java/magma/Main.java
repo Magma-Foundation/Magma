@@ -1197,11 +1197,11 @@ public class Main {
         return or(state, input, List.of(
                 Main::primitive,
                 Main::symbolType,
-                Main::templateType
+                Main::template
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> templateType(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> template(CompileState state, String input) {
         var stripped = input.strip();
         if (!stripped.endsWith(">")) {
             return createSuffixErr(stripped, ">");
@@ -1222,6 +1222,10 @@ public class Main {
                 var first = args.get(0);
                 var second = args.get(1);
                 return new Ok<>(new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")"));
+            }
+
+            if (base.equals("Consumer")) {
+                return new Ok<>(new Tuple<>(argsTuple.left, "void (*)(" + args.getFirst() + ")"));
             }
 
             return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
