@@ -1324,15 +1324,15 @@ public class Main {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
     }
 
-    private static Result<Tuple<CompileState, Whitespace>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
-        var nameState = nameTuple.left;
-        var name = nameTuple.right;
-
+    private static Result<Tuple<CompileState, StructPrototype>, CompileError> createPrototype(CompileState left, String name) {
         if (!isSymbol(name.strip())) {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
-        var prototype = new StructPrototype(name);
+        return new Ok<>(new Tuple<>(left, new StructPrototype(name)));
+    }
+
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> getTupleCompileErrorResult(CompileState nameState, StructPrototype prototype, String right) {
         var state = nameState.enter().mapLast(last -> last.withStructProto(prototype));
         return parseStatements(state, right, Main::parseStructSegment).flatMapValue(result -> {
             var segments = result.right;
@@ -1348,7 +1348,7 @@ public class Main {
                         .collect(new Joiner())
                         .orElse("");
 
-                var generated = "struct " + name + " {" + joined + "\n};\n";
+                var generated = "struct " + prototype.name + " {" + joined + "\n};\n";
                 return inner.left.exitStruct().<Result<Tuple<CompileState, Whitespace>, CompileError>>map(exited -> {
                     var withStruct = exited.addStruct(generated);
                     return new Ok<>(new Tuple<>(withStruct, new Whitespace()));
@@ -1397,12 +1397,15 @@ public class Main {
         }
 
         var afterInfix = left.substring(infixIndex + infix.length()).strip();
+        return parseStructProto(state, afterInfix).flatMapValue(prototype -> getTupleCompileErrorResult(prototype.left, prototype.right, right));
+    }
 
+    private static Result<Tuple<CompileState, StructPrototype>, CompileError> parseStructProto(CompileState state, String afterInfix) {
         return removeImplements(state, afterInfix)
                 .flatMapValue(Main::removeExtends)
                 .flatMapValue(Main::removeParams)
                 .flatMapValue(Main::removeTypeParams)
-                .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
+                .flatMapValue(nameTuple -> createPrototype(nameTuple.left, nameTuple.right));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
