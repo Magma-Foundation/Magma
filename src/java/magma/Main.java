@@ -299,7 +299,6 @@ public class Main {
     private record Definition(
             List<String> annotations,
             List<String> modifiers,
-            String beforeType,
             String type,
             String name
     ) {
@@ -313,8 +312,7 @@ public class Main {
             }
 
             var modifiersString = this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " ";
-            var beforeTypeString = this.beforeType.isEmpty() ? "" : generatePlaceholder(this.beforeType);
-            return annotationsStrings + modifiersString + beforeTypeString + this.type + " " + this.name;
+            return annotationsStrings + modifiersString + this.type + " " + this.name;
         }
     }
 
@@ -354,13 +352,6 @@ public class Main {
         @Override
         public String generate() {
             return this.parent() + "::" + this.child();
-        }
-    }
-
-    private record Content(String input) implements Value {
-        @Override
-        public String generate() {
-            return generatePlaceholder(this.input);
         }
     }
 
@@ -632,15 +623,17 @@ public class Main {
             }
 
             var beforeInfix = left.substring(0, infixIndex);
-            var afterInfix = left.substring(infixIndex + infix.length());
-            var s = generatePlaceholder(afterInfix);
+            var afterInfix = left.substring(infixIndex + infix.length()).strip();
+            if (!isSymbol(afterInfix)) {
+                return new None<>();
+            }
 
             var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
             if (!(maybeResult instanceof Some(var result))) {
                 return new None<>();
             }
 
-            var generated = generatePlaceholder(beforeInfix) + "struct " + s + " {" + result.right + "\n};\n";
+            var generated = "struct " + afterInfix + " {" + result.right + "\n};\n";
             return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
         };
     }
@@ -927,7 +920,7 @@ public class Main {
                 }
             }
 
-            return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, beforeType, typeResult.right, name)));
+            return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name)));
         });
     }
 
