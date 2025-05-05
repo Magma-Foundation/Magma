@@ -595,9 +595,13 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder,
             BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper
     ) {
-        return divideAll(input, folder).stream().<Result<Tuple<CompileState, List<T>>, CompileError>>reduce(new Ok<>(new Tuple<CompileState, List<T>>(initial, new ArrayList<T>())),
+        return divideAll(input, folder).stream().reduce(createInitial(initial),
                 (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)),
                 (_, next) -> next);
+    }
+
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> createInitial(CompileState initial) {
+        return new Ok<>(new Tuple<CompileState, List<T>>(initial, new ArrayList<T>()));
     }
 
     private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
@@ -1310,7 +1314,7 @@ public class Main {
                 typed("?", Main::compileNot),
                 typed("?", Main::compileString),
                 typed("?", Main::compileChar),
-                typed("?", Main::compileLambda)
+                typed("lambda", Main::compileLambda)
         );
 
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = List.of(
@@ -1477,24 +1481,26 @@ public class Main {
 
     private static Result<Tuple<CompileState, Symbol>, CompileError> compileLambda(CompileState state, String input) {
         var arrowIndex = input.indexOf("->");
-        if (arrowIndex >= 0) {
-            var beforeArrow = input.substring(0, arrowIndex).strip();
-            var afterArrow = input.substring(arrowIndex + "->".length());
-
-            if (findLambdaParamNames(beforeArrow) instanceof Some(var paramNames)) {
-                var withBraces = afterArrow.strip();
-                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                    var content = withBraces.substring(1, withBraces.length() - 1);
-                    return compileStatements(state, content, Main::compileFunctionSegment).flatMapValue(result -> assembleLambda(result.left, paramNames, result.right));
-                }
-
-                if (compileValue(state, afterArrow) instanceof Ok(var valueTuple)) {
-                    return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
-                }
-            }
+        if (arrowIndex < 0) {
+            return createInfixErr(input, "->");
         }
 
-        return new Err<>(new CompileError("Not a lambda statement", input));
+        var beforeArrow = input.substring(0, arrowIndex).strip();
+        var afterArrow = input.substring(arrowIndex + "->".length());
+
+        if (!(findLambdaParamNames(beforeArrow) instanceof Some(var paramNames))) {
+            return new Err<>(new CompileError("No valid lambda parameter names found", beforeArrow));
+        }
+
+        var withBraces = afterArrow.strip();
+        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+            var content = withBraces.substring(1, withBraces.length() - 1);
+            return compileStatements(state, content, Main::compileFunctionSegment).flatMapValue(result -> assembleLambda(result.left, paramNames, result.right));
+        }
+
+        return compileValue(state, afterArrow).flatMapValue(valueTuple -> {
+            return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+        });
     }
 
     private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
@@ -1502,8 +1508,13 @@ public class Main {
             return new Some<>(Collections.singletonList(beforeArrow));
         }
 
-        if (beforeArrow.equals("()")) {
-            return new Some<>(Collections.emptyList());
+        if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
+            var paramNames = Arrays.stream(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList();
+
+            return new Some<>(paramNames);
         }
 
         return new None<>();
