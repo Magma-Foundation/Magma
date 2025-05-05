@@ -46,6 +46,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         T orElse(T other);
+
+        <R> R match(Function<T, R> whenSome, Supplier<R> whenNone);
     }
 
     private interface Error {
@@ -102,6 +104,11 @@ public class Main {
         public T orElse(T other) {
             return other;
         }
+
+        @Override
+        public <R> R match(Function<T, R> whenSome, Supplier<R> whenNone) {
+            return whenNone.get();
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -138,6 +145,11 @@ public class Main {
         @Override
         public T orElse(T other) {
             return this.value;
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenSome, Supplier<R> whenNone) {
+            return whenSome.apply(this.value);
         }
     }
 
@@ -479,10 +491,7 @@ public class Main {
         }
 
         public Result<Tuple<CompileState, T>, List<CompileError>> toResult() {
-            return switch (this.option) {
-                case None<Tuple<CompileState, T>> _ -> new Err<>(this.errors);
-                case Some(var value) -> new Ok<>(value);
-            };
+            return this.option.match(Ok::new, () -> new Err<>(this.errors));
         }
     }
 
