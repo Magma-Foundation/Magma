@@ -148,12 +148,15 @@ public class Main {
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments.iterator()
+            var joinedArguments = this.joinArguments();
+            return "template " + this.base + "<" + joinedArguments + ">";
+        }
+
+        private String joinArguments() {
+            return this.arguments.iterator()
                     .map(Node::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
-
-            return "template " + this.base + "<" + joinedArguments + ">";
         }
     }
 
@@ -1552,10 +1555,11 @@ public class Main {
             return new Ok<>(new Tuple<>(state.addFunction(generated), new Whitespace()));
         }
 
-        return Main.or(state, prototype.content.orElse(""), Lists.of(
-                (state1, s) -> methodWithBraces(state1, s, generatedHeader, prototype),
-                (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
-        ));
+        var contentString = prototype.content.orElse("");
+        return Main.or(state, contentString, Lists.of(
+                typed("with-braces", (state1, s) -> methodWithBraces(state1, s, generatedHeader, prototype)),
+                typed("without-braces", (state2, s) -> methodWithoutBraces(state2, s, generatedHeader))
+        )).mapErr(err -> new CompileError("Failed to complete function", prototype.generate(), Lists.of(err)));
     }
 
     private static Result<Tuple<CompileState, StructSegment>, CompileError> methodWithoutBraces(CompileState state, String content, String header) {
@@ -1828,20 +1832,25 @@ public class Main {
     private static Result<Tuple<CompileState, Definition>, CompileError> parseDefinition(CompileState state, String input) {
         var stripped = input.strip();
         var valueSeparator = stripped.lastIndexOf(" ");
-        if (valueSeparator >= 0) {
-            var beforeName = stripped.substring(0, valueSeparator);
-            var name = stripped.substring(valueSeparator + " ".length()).strip();
-            var annotationSeparator = beforeName.lastIndexOf("\n");
-            if (annotationSeparator < 0) {
-                return definitionWithAnnotations(state, Lists.empty(), beforeName, name);
-            }
-
-            var annotations = parseAnnotations(beforeName.substring(0, annotationSeparator));
-            var beforeName0 = beforeName.substring(annotationSeparator + "\n".length());
-            return definitionWithAnnotations(state, annotations, beforeName0, name);
+        if (valueSeparator < 0) {
+            return createInfixErr(stripped, " ");
         }
 
-        return new Err<>(new CompileError("Invalid definition", input));
+        var beforeName = stripped.substring(0, valueSeparator);
+        var name = stripped.substring(valueSeparator + " ".length()).strip();
+        if(!isSymbol(name)) {
+            return new Err<>(new CompileError("Not a symbol", name));
+        }
+
+        var annotationSeparator = beforeName.lastIndexOf("\n");
+        if (annotationSeparator < 0) {
+            return definitionWithAnnotations(state, Lists.empty(), beforeName, name);
+        }
+
+        var annotations = parseAnnotations(beforeName.substring(0, annotationSeparator));
+        var beforeName0 = beforeName.substring(annotationSeparator + "\n".length());
+        return definitionWithAnnotations(state, annotations, beforeName0, name);
+
     }
 
     private static List<String> parseAnnotations(String annotationsString) {
@@ -2093,7 +2102,7 @@ public class Main {
 
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
                 List<Value> newArguments = Lists.of(parent);
-               return resolveType(state, parent).flatMapValue(parentType -> {
+                return resolveType(state, parent).flatMapValue(parentType -> {
                     Value newCaller = new MethodAccess(parentType, property);
                     return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments.addAllLast(arguments))));
                 });
