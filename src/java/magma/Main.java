@@ -933,9 +933,30 @@ public class Main {
         }
     }
 
+    private static class ArrayHead<T> implements Head<T> {
+        private final T[] elements;
+        private int counter;
+
+        public ArrayHead(T[] elements) {
+            this.elements = elements;
+            this.counter = 0;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.counter >= this.elements.length) {
+                return new None<>();
+            }
+            var index = this.counter;
+            var element = this.elements[index];
+            this.counter++;
+            return new Some<>(element);
+        }
+    }
+
     private static class Iterators {
         public static <T> Iterator<T> of(T... elements) {
-            return new HeadedIterator<>(new RangeHead(elements.length)).map(index -> elements[index]);
+            return new HeadedIterator<>(new ArrayHead<T>(elements));
         }
 
         public static <T> Iterator<T> empty() {
