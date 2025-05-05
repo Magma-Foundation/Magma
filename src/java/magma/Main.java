@@ -7,31 +7,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
-    private sealed interface Result<T, X> permits Ok, Err {
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
-
-        <R> Result<R, X> mapValue(Function<T, R> mapper);
-
-        <R> Result<T, R> mapErr(Function<X, R> mapper);
-
-        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
-    }
-
     private sealed interface Option<T> permits Some, None {
         void ifPresent(Consumer<T> consumer);
 
@@ -50,6 +38,95 @@ public class Main {
         <R> R match(Function<T, R> whenSome, Supplier<R> whenNone);
     }
 
+    private interface Head<T> {
+        Option<T> next();
+    }
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
+    private record Iterator<T>(Head<T> head) {
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        private <C> C fold(C initial, BiFunction<C, T, C> folder) {
+            var current = initial;
+            while (true) {
+                C finalCurrent = current;
+                var map = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (map instanceof Some(var value)) {
+                    current = value;
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(new Function<T, Iterator<T>>() {
+                @Override
+                public Iterator<T> apply(T t) {
+                    return predicate.test(t) ? new Iterator<>(new SingleHead<>(t)) : new Iterator<>(new EmptyHead<>());
+                }
+            });
+        }
+
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).fold(new Iterator<>(new EmptyHead<>()), Iterator::concat);
+        }
+
+        private Iterator<T> concat(Iterator<T> other) {
+            return new Iterator<>(() -> this.head.next().or(other.head::next));
+        }
+
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new Iterator<>(() -> this.head.next().map(mapper));
+        }
+    }
+
+    private interface List<T> {
+        List<T> addLast(T element);
+
+        T last();
+
+        int size();
+
+        List<T> set(int index, T element);
+
+        T get(int index);
+
+        List<T> removeLast();
+
+        boolean isEmpty();
+
+        Iterator<T> iter();
+
+        List<T> sort(BiFunction<T, T, Integer> mapper);
+
+        boolean contains(T element);
+
+        List<T> addAllLast(List<T> others);
+
+        T first();
+
+        List<T> slice(int startInclusive, int endInclusive);
+    }
+
+    private sealed interface Result<T, X> permits Ok, Err {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
+    }
+
     private interface Error {
         String display();
     }
@@ -65,6 +142,33 @@ public class Main {
     }
 
     private interface Type {
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
+        }
+    }
+
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+
+            this.retrieved = true;
+            return new Some<>(this.value);
+        }
     }
 
     @Actual
@@ -204,15 +308,122 @@ public class Main {
         }
     }
 
+    private static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Option<Integer> next() {
+            if (this.counter >= this.length) {
+                return new None<>();
+            }
+            var value = this.counter;
+            this.counter++;
+            return new Some<>(value);
+        }
+    }
+
+    private static class Lists {
+        @Actual
+        private record JavaList<T>(java.util.List<T> elements) implements List<T> {
+            public JavaList() {
+                this(new ArrayList<>());
+            }
+
+            @Override
+            public List<T> addLast(T element) {
+                this.elements.add(element);
+                return this;
+            }
+
+            @Override
+            public T last() {
+                return this.elements.getLast();
+            }
+
+            @Override
+            public int size() {
+                return this.elements.size();
+            }
+
+            @Override
+            public List<T> set(int index, T element) {
+                this.elements.set(index, element);
+                return this;
+            }
+
+            @Override
+            public T get(int index) {
+                return this.elements.get(index);
+            }
+
+            @Override
+            public List<T> removeLast() {
+                this.elements.removeLast();
+                return this;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return this.elements.isEmpty();
+            }
+
+            @Override
+            public Iterator<T> iter() {
+                return new Iterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
+            }
+
+            @Override
+            public List<T> sort(BiFunction<T, T, Integer> mapper) {
+                var copy = new ArrayList<T>(this.elements);
+                copy.sort(mapper::apply);
+                return new JavaList<>(copy);
+            }
+
+            @Override
+            public boolean contains(T element) {
+                return this.elements.contains(element);
+            }
+
+            @Override
+            public List<T> addAllLast(List<T> others) {
+                return others.iter().<List<T>>fold(this, List::addLast);
+            }
+
+            @Override
+            public T first() {
+                return this.elements.getFirst();
+            }
+
+            public List<T> slice(int startInclusive, int endInclusive) {
+                var slice = this.elements.subList(startInclusive, endInclusive);
+                return new JavaList<>(new ArrayList<>(slice));
+            }
+        }
+
+        @Actual
+        public static <T> List<T> empty() {
+            return new JavaList<>();
+        }
+
+        public static <T> List<T> of(T... elements) {
+            return new JavaList<>(new ArrayList<>(Arrays.asList(elements)));
+        }
+    }
+
     private static class DivideState {
         private final String input;
-        private final List<String> segments;
         private final int index;
+        private List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
         public DivideState(String input) {
-            this(input, new ArrayList<>(), new StringBuilder(), 0, 0);
+            this(input, Lists.empty(), new StringBuilder(), 0, 0);
         }
 
         public DivideState(String input, List<String> segments, StringBuilder buffer, int index, int depth) {
@@ -234,7 +445,7 @@ public class Main {
         }
 
         private DivideState advance() {
-            this.segments().add(this.buffer.toString());
+            this.segments = this.segments.addLast(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -287,7 +498,7 @@ public class Main {
             Map<String, Type> types
     ) {
         public Frame() {
-            this(new HashMap<>(), new ArrayList<>(), new None<>(), new None<>(), new HashMap<>());
+            this(new HashMap<>(), Lists.empty(), new None<>(), new None<>(), new HashMap<>());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -332,16 +543,16 @@ public class Main {
 
     private record CompileState(List<String> structs, List<String> functions, List<Frame> frames) {
         public CompileState() {
-            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(Collections.singletonList(new Frame())));
+            this(Lists.empty(), Lists.empty(), Lists.of(new Frame()));
         }
 
         public CompileState addFunction(String generated) {
-            this.functions.add(generated);
+            this.functions.addLast(generated);
             return this;
         }
 
         public Tuple<String, CompileState> createName(String category) {
-            var frame = this.frames.getLast();
+            var frame = this.frames.last();
             var nameTuple = frame.createName(category);
 
             this.frames.set(this.frames.size() - 1, nameTuple.right);
@@ -349,12 +560,12 @@ public class Main {
         }
 
         public CompileState enter() {
-            this.frames.add(new Frame());
+            this.frames.addLast(new Frame());
             return this;
         }
 
         public CompileState addStruct(String generated) {
-            this.structs.add(generated);
+            this.structs.addLast(generated);
             return this;
         }
 
@@ -363,7 +574,7 @@ public class Main {
         }
 
         public CompileState mapLast(Function<Frame, Frame> mapper) {
-            var last = this.frames.getLast();
+            var last = this.frames.last();
             var newLast = mapper.apply(last);
             this.frames.set(this.frames.size() - 1, newLast);
             return this;
@@ -381,7 +592,7 @@ public class Main {
         }
 
         public CompileState exitStruct() {
-            var last = this.frames.getLast();
+            var last = this.frames.last();
             var maybeStructureProto = last.maybeStructProto;
             var exited = this.exit();
             if (maybeStructureProto instanceof Some(var structProto)) {
@@ -402,7 +613,7 @@ public class Main {
         }
 
         public Frame last() {
-            return this.frames.getLast();
+            return this.frames.last();
         }
     }
 
@@ -415,6 +626,28 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
+    private static class Joiner implements Collector<String, Option<String>> {
+        private final String delimiter;
+
+        public Joiner() {
+            this("");
+        }
+
+        public Joiner(String delimiter) {
+            this.delimiter = delimiter;
+        }
+
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> maybeCurrent, String element) {
+            return new Some<>(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
+        }
+    }
+
     private record Definition(
             List<String> annotations,
             List<String> modifiers,
@@ -422,7 +655,7 @@ public class Main {
             String name
     ) implements Parameter {
         public Definition(String type, String name) {
-            this(Collections.emptyList(), Collections.emptyList(), type, name);
+            this(Lists.empty(), Lists.empty(), type, name);
         }
 
         private String generate() {
@@ -434,7 +667,11 @@ public class Main {
             if (this.modifiers.isEmpty()) {
                 return "";
             }
-            return String.join(" ", this.modifiers) + " ";
+            return this.getJoin() + " ";
+        }
+
+        private String getJoin() {
+            return this.modifiers.iter().collect(new Joiner("")).orElse("");
         }
 
         public Definition mapName(Function<String, String> mapper) {
@@ -459,9 +696,10 @@ public class Main {
     private record Invocation(Value caller, List<Value> arguments) implements Value {
         @Override
         public String generate() {
-            var joined = this.arguments.stream()
+            var joined = this.arguments.iter()
                     .map(Value::generate)
-                    .collect(Collectors.joining(", "));
+                    .collect(new Joiner(", "))
+                    .orElse("");
 
             return this.caller.generate() + "(" + joined + ")";
         }
@@ -523,9 +761,22 @@ public class Main {
         }
     }
 
+    private static class Max implements Collector<Integer, Option<Integer>> {
+        @Override
+        public Option<Integer> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Integer> fold(Option<Integer> maybeCurrent, Integer element) {
+            return new Some<>(maybeCurrent.map(inner -> inner + element).orElse(element));
+        }
+    }
+
     private record CompileError(String message, String context, List<CompileError> errors) implements Error {
+
         public CompileError(String message, String context) {
-            this(message, context, Collections.emptyList());
+            this(message, context, Lists.empty());
         }
 
         @Override
@@ -534,26 +785,26 @@ public class Main {
         }
 
         private String format(int depth) {
-            var copy = new ArrayList<>(this.errors);
-            copy.sort(Comparator.comparingInt(CompileError::depth));
+            var copy = this.errors.sort(Comparator.comparingInt(CompileError::depth)::compare);
 
-            return this.message + ": " + this.context + copy.stream()
+            return this.message + ": " + this.context + copy.iter()
                     .map(error -> error.format(depth + 1))
                     .map(statement -> "\n" + "\t".repeat(depth) + statement)
-                    .collect(Collectors.joining());
+                    .collect(new Joiner())
+                    .orElse("");
         }
 
         private int depth() {
-            return 1 + this.errors.stream()
-                    .mapToInt(CompileError::depth)
-                    .max()
+            return 1 + this.errors.iter()
+                    .map(CompileError::depth)
+                    .collect(new Max())
                     .orElse(0);
         }
     }
 
     private record OrState<T>(Option<Tuple<CompileState, T>> option, List<CompileError> errors) {
         public OrState() {
-            this(new None<>(), new ArrayList<>());
+            this(new None<>(), Lists.empty());
         }
 
         public OrState<T> withValue(Tuple<CompileState, T> pair) {
@@ -561,7 +812,7 @@ public class Main {
         }
 
         public OrState<T> withError(CompileError error) {
-            this.errors.add(error);
+            this.errors.addLast(error);
             return this;
         }
 
@@ -584,6 +835,28 @@ public class Main {
     }
 
     private record StructureType(StructPrototype prototype) implements Type {
+    }
+
+    private static class Iterators {
+        public static <T> Iterator<T> of(T... elements) {
+            return new Iterator<>(new RangeHead(elements.length)).map(index -> elements[index]);
+        }
+
+        public static <T> Iterator<T> empty() {
+            return new Iterator<>(new EmptyHead<>());
+        }
+    }
+
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.addLast(element);
+        }
     }
 
     private enum Operator {
@@ -638,14 +911,18 @@ public class Main {
     private static Result<String, CompileError> compile(String input) {
         var state = new CompileState();
         return compileStatements(state, input, Main::compileRootSegment).mapValue(tuple -> {
-            var joinedStructs = String.join("", tuple.left.structs);
-            var joinedFunctions = String.join("", tuple.left.functions);
+            var joinedStructs = join(tuple.left.structs);
+            var joinedFunctions = join(tuple.left.functions);
             return joinedStructs + joinedFunctions + tuple.right;
         });
     }
 
+    private static String join(List<String> structs) {
+        return structs.iter().collect(new Joiner()).orElse("");
+    }
+
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 typed("whitespace", Main::whitespace),
                 typed("namespaced", Main::namespaced),
                 typed("class", (state0, input0) -> structure(state0, input0, "class"))
@@ -678,20 +955,19 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder,
             BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper
     ) {
-        return divideAll(input, folder).stream().reduce(createInitial(initial),
-                (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)),
-                (_, next) -> next);
+        return divideAll(input, folder).iter().fold(createInitial(initial),
+                (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)));
     }
 
     private static <T> Result<Tuple<CompileState, List<T>>, CompileError> createInitial(CompileState initial) {
-        return new Ok<>(new Tuple<CompileState, List<T>>(initial, new ArrayList<T>()));
+        return new Ok<>(new Tuple<CompileState, List<T>>(initial, Lists.empty()));
     }
 
     private static <T> Result<Tuple<CompileState, List<T>>, CompileError> foldElement(Tuple<CompileState, List<T>> current, String segment, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
         return mapper.apply(current.left, segment).mapValue(mapped -> {
             var elements = current.right;
             var newElement = mapped.right;
-            elements.add(newElement);
+            elements.addLast(newElement);
             return new Tuple<>(mapped.left, elements);
         });
     }
@@ -758,8 +1034,8 @@ public class Main {
     }
 
     private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return elements.stream()
-                .reduce(new StringBuilder(), merger, (_, next) -> next)
+        return elements.iter()
+                .fold(new StringBuilder(), merger)
                 .toString();
     }
 
@@ -785,7 +1061,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 typed("whitespace", Main::whitespace),
                 typed("enum", (state3, input3) -> structure(state3, input3, "enum ")),
                 typed("class", (state2, input2) -> structure(state2, input2, "class ")),
@@ -841,21 +1117,21 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeParams(Tuple<CompileState, String> state1) {
-        return Main.or(state1.left, state1.right, List.of(
+        return Main.or(state1.left, state1.right, Lists.of(
                 (state, s) -> infix(s, "(", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
                 (state, s) -> new Ok<>(new Tuple<>(state, s))
         ));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeImplements(CompileState state0, String afterInfix) {
-        return Main.or(state0, afterInfix, List.of(
+        return Main.or(state0, afterInfix, Lists.of(
                 (state, s) -> infix(s, " implements ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
                 (state, s) -> new Ok<>(new Tuple<>(state, s))
         ));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeTypeParams(Tuple<CompileState, String> withoutParams) {
-        return Main.or(withoutParams.left, withoutParams.right, List.of(
+        return Main.or(withoutParams.left, withoutParams.right, Lists.of(
                 (state, s) -> infix(s, "<", (left1, _) -> new Ok<>(new Tuple<>(state, left1))),
                 (state, s) -> new Ok<>(new Tuple<>(state, s))));
     }
@@ -909,9 +1185,10 @@ public class Main {
 
             var header = methodHeaderTuple.right;
             var joinedParams = header.params
-                    .stream()
+                    .iter()
                     .map(Definition::generate)
-                    .collect(Collectors.joining(", "));
+                    .collect(new Joiner(", "))
+                    .orElse("");
 
             var structName = state.last().maybeStructProto.orElse(new StructPrototype("?")).name;
             var withStructName = header.definition
@@ -925,7 +1202,7 @@ public class Main {
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
-            return or(methodHeaderTuple.left, afterParams, List.of(
+            return or(methodHeaderTuple.left, afterParams, Lists.of(
                     (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
                     (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
             ));
@@ -950,9 +1227,9 @@ public class Main {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
 
-            var oldStatements = new ArrayList<String>();
-            oldStatements.addAll(statementsState.frames().getLast().statements);
-            oldStatements.addAll(statements);
+            var oldStatements = Lists.<String>empty()
+                    .addAllLast(statementsState.frames().last().statements)
+                    .addAllLast(statements);
 
             var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
             return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
@@ -971,11 +1248,11 @@ public class Main {
         return parseValues(state, inputParams, Main::compileParameter).flatMapValue(paramsTuple -> {
             var paramsState = paramsTuple.left;
             var params = paramsTuple.right
-                    .stream()
+                    .iter()
                     .flatMap(Main::retainDefinition)
-                    .toList();
+                    .collect(new ListCollector<>());
 
-            return or(paramsState, definitionString, List.of(
+            return or(paramsState, definitionString, Lists.of(
                     (state1, s) -> constructor(state1, s, params),
                     (state2, s) -> method(state2, s, params)
             ));
@@ -997,17 +1274,17 @@ public class Main {
         return new Ok<>(new Tuple<>(state, new FunctionProto(definition, params)));
     }
 
-    private static Stream<Definition> retainDefinition(Parameter parameter) {
+    private static Iterator<Definition> retainDefinition(Parameter parameter) {
         if (parameter instanceof Definition definition1) {
-            return Stream.of(definition1);
+            return Iterators.of(definition1);
         }
         else {
-            return Stream.empty();
+            return Iterators.empty();
         }
     }
 
     private static Result<Tuple<CompileState, Parameter>, CompileError> compileParameter(CompileState state2, String input) {
-        return or(state2, input, List.of(
+        return or(state2, input, Lists.of(
                 typed("?", Main::parseWhitespace),
                 typed("?", Main::parseDefinition)
         ));
@@ -1022,7 +1299,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 typed("whitespace", Main::whitespace),
                 typed("statement", Main::functionStatement),
                 typed("block", Main::compileBlock)
@@ -1044,9 +1321,9 @@ public class Main {
             var entered = state.enter();
             return parseStatements(entered, content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
 
-                var oldStatements = new ArrayList<String>();
-                oldStatements.addAll(statementsTuple.left.frames.getLast().statements);
-                oldStatements.addAll(statementsTuple.right);
+                var oldStatements = Lists.<String>empty()
+                        .addAllLast(statementsTuple.left.frames.last().statements)
+                        .addAllLast(statementsTuple.right);
 
                 return compileBlockHeader(statementsTuple.left.exit(), beforeContent).mapValue(result -> new Tuple<>(result.left, indent + result.right + "{" + generateStatements(oldStatements) + indent + "}"));
             });
@@ -1061,9 +1338,9 @@ public class Main {
             return new None<>();
         }
 
-        var first = divisions.getFirst();
-        var after = divisions.subList(1, divisions.size());
-        var joined = String.join("", after);
+        var first = divisions.first();
+        var after = divisions.slice(1, divisions.size());
+        var joined = join(after);
         return new Some<>(new Tuple<>(first, joined));
     }
 
@@ -1091,7 +1368,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
-        return Main.or(state, input, List.of(
+        return Main.or(state, input, Lists.of(
                 Main::compileElse,
                 (state1, input1) -> compileConditional(state1, input1, "if"),
                 (state1, input1) -> compileConditional(state1, input1, "while")
@@ -1124,7 +1401,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> functionStatementValue(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 (state1, input1) -> compileKeyword(state1, input1, "break"),
                 (state1, input1) -> compileKeyword(state1, input1, "continue"),
                 Main::compileReturn,
@@ -1172,7 +1449,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileAssignable(CompileState state, String left) {
-        return Main.or(state, left, List.of(Main::definition, Main::compileValue));
+        return Main.or(state, left, Lists.of(Main::definition, Main::compileValue));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> definition(CompileState state, String input) {
@@ -1188,7 +1465,7 @@ public class Main {
             var name = stripped.substring(valueSeparator + " ".length()).strip();
             var annotationSeparator = beforeName.lastIndexOf("\n");
             if (annotationSeparator < 0) {
-                return definitionWithAnnotations(state, Collections.emptyList(), beforeName, name);
+                return definitionWithAnnotations(state, Lists.empty(), beforeName, name);
             }
 
             var annotations = parseAnnotations(beforeName.substring(0, annotationSeparator));
@@ -1201,10 +1478,10 @@ public class Main {
 
     private static List<String> parseAnnotations(String annotationsString) {
         var annotationsArray = annotationsString.strip().split(Pattern.quote("\n"));
-        return Arrays.stream(annotationsArray)
+        return Iterators.of(annotationsArray)
                 .map(String::strip)
                 .map(Main::truncateAnnotationValue)
-                .toList();
+                .collect(new ListCollector<>());
     }
 
     private static String truncateAnnotationValue(String slice) {
@@ -1227,9 +1504,9 @@ public class Main {
     private static Option<Tuple<String, String>> findTypeSeparator(String input) {
         var divisions = divideAll(input.strip(), Main::foldTypeSeparator);
         if (divisions.size() >= 2) {
-            var left = divisions.subList(0, divisions.size() - 1);
-            var joinedLeft = String.join(" ", left);
-            return new Some<>(new Tuple<>(joinedLeft, divisions.getLast()));
+            var left = divisions.slice(0, divisions.size() - 1);
+            var joinedLeft = left.iter().collect(new Joiner(" ")).orElse("");
+            return new Some<>(new Tuple<>(joinedLeft, divisions.last()));
         }
         return new None<>();
     }
@@ -1251,12 +1528,12 @@ public class Main {
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
         return type(state, type).mapValue(typeResult -> {
-            return new Tuple<>(typeResult.left, new Definition(annotations, Collections.emptyList(), typeResult.right, name));
+            return new Tuple<>(typeResult.left, new Definition(annotations, Lists.empty(), typeResult.right, name));
         });
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> type(CompileState state, String input) {
-        return or(state, input, List.of(
+        return or(state, input, Lists.of(
                 Main::primitive,
                 Main::symbolType,
                 Main::template
@@ -1287,15 +1564,15 @@ public class Main {
             }
 
             if (base.equals("Consumer")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional("void", Collections.singletonList(args.getFirst()))));
+                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional("void", Lists.of(args.first()))));
             }
 
             if (base.equals("Supplier")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.getFirst(), Collections.emptyList())));
+                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.first(), Lists.empty())));
             }
 
             if (base.equals("Function")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.get(1), Collections.singletonList(args.getFirst()))));
+                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.get(1), Lists.of(args.first()))));
             }
 
             if (state.resolve(base) instanceof Some(var resolved)) {
@@ -1309,11 +1586,15 @@ public class Main {
     }
 
     private static String generateFunctional(String returnType, List<String> arguments) {
-        return returnType + " (*)(" + String.join(", ", arguments) + ")";
+        var joinedArguments = arguments.iter()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return returnType + " (*)(" + joinedArguments + ")";
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> argumentType(CompileState state1, String input1) {
-        return or(state1, input1, List.of(
+        return or(state1, input1, Lists.of(
                 Main::whitespace,
                 Main::type
         ));
@@ -1359,19 +1640,19 @@ public class Main {
             return new Err<>(new CompileError("Insufficient divisions", withoutEnd));
         }
 
-        var joined = String.join("", divisions.subList(0, divisions.size() - 1));
+        var joined = join(divisions.slice(0, divisions.size() - 1));
         var callerString = joined.substring(0, joined.length() - ")".length());
 
-        var inputArguments = divisions.getLast();
+        var inputArguments = divisions.last();
         var tupleCompileErrorResult = parseValues(state, inputArguments, Main::parseArgument);
         return tupleCompileErrorResult.flatMapValue(argumentsTuple -> {
             var argumentState = argumentsTuple.left;
             var oldArguments = argumentsTuple.right
-                    .stream()
+                    .iter()
                     .filter(arg -> !(arg instanceof Whitespace))
-                    .toList();
+                    .collect(new ListCollector<>());
 
-            return or(argumentState, callerString, List.of(
+            return or(argumentState, callerString, Lists.of(
                     (state2, callerString1) -> constructorCaller(state2, callerString1, oldArguments),
                     (state1, s) -> invocationCaller(state1, s, oldArguments)
             ));
@@ -1401,21 +1682,20 @@ public class Main {
             var oldCaller = callerTuple.right;
 
             Value newCaller = oldCaller;
-            var newArguments = new ArrayList<Value>();
+            var newArguments = Lists.<Value>empty();
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                newArguments.add(parent);
+                newArguments = newArguments.addLast(parent);
                 newCaller = new Symbol(property);
             }
 
-            newArguments.addAll(arguments);
-            return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
+            return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments.addAllLast(arguments))));
         }
 
         return new Err<>(new CompileError("Not an invocation", input));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
-        return or(state1, input1, List.of(
+        return or(state1, input1, Lists.of(
                 typed("?", Main::parseWhitespace),
                 typed("?", Main::value)
         ));
@@ -1477,14 +1757,18 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> value(CompileState state, String input) {
-        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = List.of(
+        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = Lists.of(
                 typed("?", Main::compileNot),
                 typed("?", Main::compileString),
                 typed("?", Main::compileChar),
                 typed("lambda", Main::compileLambda)
         );
 
-        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = List.of(
+        var operatorRules = Iterators.of(Operator.values())
+                .map(Main::createOperatorRule)
+                .collect(new ListCollector<>());
+
+        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = Lists.of(
                 typed("invokable", Main::compileInvokable),
                 typed("?", Main::compileAccess),
                 typed("?", Main::parseBooleanValue),
@@ -1494,14 +1778,11 @@ public class Main {
                 typed("instanceof", Main::instanceOfNode)
         );
 
-        var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
-        rules.addAll(Arrays.stream(Operator.values())
-                .map(Main::createOperatorRule)
-                .toList());
+        var biFunctionList = beforeOperators
+                .addAllLast(operatorRules)
+                .addAllLast(afterOperators);
 
-        rules.addAll(afterOperators);
-
-        return or(state, input, rules);
+        return or(state, input, biFunctionList);
     }
 
     private static BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>> createOperatorRule(Operator value) {
@@ -1586,19 +1867,23 @@ public class Main {
             String input,
             List<BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>>> rules
     ) {
-        return rules.stream().reduce(new OrState<T>(), (tOrState, mapper) -> {
-            if (tOrState.option.isPresent()) {
-                return tOrState;
-            }
-            return mapper.apply(state, input).match(tOrState::withValue, tOrState::withError);
-        }, (_, next) -> next).toResult().mapErr(errs -> new CompileError("No valid rule present", input, errs));
+        return rules.iter().fold(new OrState<T>(), (orState, mapper) -> foldOr(orState, mapper, state, input))
+                .toResult()
+                .mapErr(errs -> new CompileError("No valid rule present", input, errs));
+    }
+
+    private static <T> OrState<T> foldOr(OrState<T> tOrState, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper, CompileState state, String input) {
+        if (tOrState.option.isPresent()) {
+            return tOrState;
+        }
+        return mapper.apply(state, input).match(tOrState::withValue, tOrState::withError);
     }
 
     private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> typed(
             String type, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
         return (state, input) -> mapper.apply(state, input)
                 .mapValue(value -> new Tuple<CompileState, S>(value.left, value.right))
-                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Collections.singletonList(err)));
+                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
     }
 
     private static Result<Tuple<CompileState, MethodAccess>, CompileError> compileMethodReference(CompileState state, String input) {
@@ -1672,14 +1957,14 @@ public class Main {
 
     private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
         if (isSymbol(beforeArrow)) {
-            return new Some<>(Collections.singletonList(beforeArrow));
+            return new Some<>(Lists.of(beforeArrow));
         }
 
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-            var paramNames = Arrays.stream(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
+            var paramNames = Iterators.of(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
-                    .toList();
+                    .collect(new ListCollector<>());
 
             return new Some<>(paramNames);
         }
@@ -1691,9 +1976,10 @@ public class Main {
         var nameTuple = state.createName("lambda");
         var generatedName = nameTuple.left;
 
-        var joinedParams = paramNames.stream()
+        var joinedParams = paramNames.iter()
                 .map(name -> "auto " + name)
-                .collect(Collectors.joining(", "));
+                .collect(new Joiner(", "))
+                .orElse("");
 
         return new Ok<>(new Tuple<>(nameTuple.right.addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
     }
