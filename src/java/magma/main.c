@@ -1,22 +1,12 @@
 /* private interface Result<T, X>  */{
-	/* <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr);
 };
 /* private interface Option<T>  */{
-	void ifPresent(template Consumer<struct T> consumer);
-	struct T orElseGet(template Supplier<struct T> supplier);
-	template Option<struct T> or(template Supplier<template Option<struct T>> other);
-	int isPresent();
-	/* <R> */template Option<struct R> map(template Function<struct T, struct R> mapper);
-	/* <R> */template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper);
-	struct T orElse(struct T other);
 };
 /* private interface Error  */{
-	char* display();
 };
 /* private @interface Actual  */{
 };
 /* private interface Value  */{
-	char* generate();
 };
 /* private record IOError(IOException exception) implements Error  */{
 };
@@ -112,9 +102,27 @@
             this.representation = representation;
         }
     } */
-	/* public static final Path SOURCE *//* = */ Paths.get(/* "." */, /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main.java" */);
-	/* public static final Path TARGET *//* = */ SOURCE.resolveSibling(/* "main.c" */);
 };
+/* <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr) {
+}
+void ifPresent(template Consumer<struct T> consumer) {
+}
+struct T orElseGet(template Supplier<struct T> supplier) {
+}
+template Option<struct T> or(template Supplier<template Option<struct T>> other) {
+}
+int isPresent() {
+}
+/* <R> */template Option<struct R> map(template Function<struct T, struct R> mapper) {
+}
+/* <R> */template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper) {
+}
+struct T orElse(struct T other) {
+}
+char* display() {
+}
+char* generate() {
+}
 @Override
 /* public */char* display(){
 	auto writer = struct StringWriter::new();
@@ -351,6 +359,10 @@ struct public CompileState(){
 /* public */char* generate(){
 	return "!" + generate(this.value);
 }
+/* public static final Path SOURCE *//* = */ Paths.get(/* "." */, /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main.java" */) {
+}
+/* public static final Path TARGET *//* = */ SOURCE.resolveSibling(/* "main.c" */) {
+}
 auto lambda0(auto error){
 	return println(System.err, display(error));
 }
@@ -527,7 +539,8 @@ auto lambda0(auto methodHeaderTuple){
 		return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
 	}
 	if (equals(withBraces, ";")){
-		return template Some</*  */>::new((methodHeaderTuple.left, "\n\t" + methodHeaderTuple.right + ";"));
+		auto generated = methodHeaderTuple.right + " {\n}\n";
+		return template Some</*  */>::new((addFunction(methodHeaderTuple.left, generated), ""));
 	}
 	return template None</*  */>::new();
 }

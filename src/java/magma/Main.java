@@ -648,7 +648,8 @@ public class Main {
                 return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
             }
             if (withBraces.equals(";")) {
-                return new Some<>(new Tuple<>(methodHeaderTuple.left, "\n\t" + methodHeaderTuple.right + ";"));
+                var generated = methodHeaderTuple.right + " {\n}\n";
+                return new Some<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
             return new None<>();
