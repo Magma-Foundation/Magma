@@ -474,6 +474,7 @@ public class Main {
             return new JavaList<>();
         }
 
+        @Actual
         public static <T> List<T> of(T... elements) {
             return new JavaList<>(new ArrayList<>(Arrays.asList(elements)));
         }
@@ -1657,10 +1658,21 @@ public class Main {
     private static Result<Tuple<CompileState, Type>, CompileError> type(CompileState state, String input) {
         return Main.or(state, input, Lists.of(
                 typed("primitive", Main::primitive),
-                typed("string", (state1, s) -> stringType(state1, s)),
+                typed("string", Main::stringType),
                 typed("symbol", Main::symbolType),
-                typed("template", Main::template)
+                typed("template", Main::template),
+                typed("var-args", Main::varArgs)
         ));
+    }
+
+    private static Result<Tuple<CompileState, Type>, CompileError> varArgs(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("...")) {
+            return type(state, stripped.substring(0, stripped.length() - "...".length()))
+                    .mapValue(inner -> new Tuple<>(inner.left, new Ref(inner.right)));
+        }
+
+        return new Err<>(new CompileError("Not var args", input));
     }
 
     private static Result<Tuple<CompileState, Ref>, CompileError> stringType(CompileState state1, String s) {
