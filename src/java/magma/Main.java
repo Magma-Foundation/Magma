@@ -705,18 +705,28 @@ public class Main {
 
         var withParams = input.substring(0, paramEnd);
         return compileMethodHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
-            var withBraces = input.substring(paramEnd + ")".length()).strip();
-            if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-                var content = withBraces.substring(1, withBraces.length() - 1).strip();
-                return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
-            }
-            if (withBraces.equals(";")) {
-                var generated = methodHeaderTuple.right + " {\n}\n";
-                return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
-            }
-
-            return new Err<>(new CompileError("Invalid content", withBraces));
+            var afterParams = input.substring(paramEnd + ")".length()).strip();
+            return or(methodHeaderTuple.left, afterParams, List.of(
+                    (state1, s) -> methodWithBraces(state1, s, methodHeaderTuple.right),
+                    (state2, s) -> methodWithoutBraces(state2, s, methodHeaderTuple.right)
+            ));
         });
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithoutBraces(CompileState state, String content, String right) {
+        if (content.equals(";")) {
+            var generated = right + " {\n}\n";
+            return new Ok<>(new Tuple<>(state.addFunction(generated), ""));
+        }
+        return new Err<>(new CompileError("Content ';' not present", content));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, String header) {
+        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+            var content = withBraces.substring(1, withBraces.length() - 1).strip();
+            return assembleMethod(state, header, content);
+        }
+        return new Err<>(new CompileError("No braces present", withBraces));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileMethodHeader(CompileState state, String input) {
