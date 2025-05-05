@@ -304,6 +304,11 @@ public class Main {
             return this.map(mapper).fold(HeadedIterator.createEmpty(), Iterator::concat);
         }
 
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
         private static <R> Iterator<R> createEmpty() {
             return new HeadedIterator<R>(new EmptyHead<>());
         }
@@ -311,11 +316,6 @@ public class Main {
         @Override
         public Iterator<T> concat(Iterator<T> other) {
             return new HeadedIterator<>(() -> this.head.next().or(other::next));
-        }
-
-        @Override
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new HeadedIterator<>(() -> this.head.next().map(mapper));
         }
 
         @Override
@@ -417,19 +417,9 @@ public class Main {
             }
 
             @Override
-            public int size() {
-                return this.elements.size();
-            }
-
-            @Override
             public List<T> set(int index, T element) {
                 this.elements.set(index, element);
                 return this;
-            }
-
-            @Override
-            public T get(int index) {
-                return this.elements.get(index);
             }
 
             @Override
@@ -480,6 +470,16 @@ public class Main {
                 return new HeadedIterator<>(new RangeHead(this.size()))
                         .map(index -> this.size() - index - 1)
                         .map(this::get);
+            }
+
+            @Override
+            public int size() {
+                return this.elements.size();
+            }
+
+            @Override
+            public T get(int index) {
+                return this.elements.get(index);
             }
         }
 
@@ -549,11 +549,6 @@ public class Main {
             return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
         }
 
-        private DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
-        }
-
         public Option<Tuple<Character, DivideState>> pop() {
             if (this.index < this.input.length()) {
                 var c = this.input.charAt(this.index);
@@ -562,6 +557,11 @@ public class Main {
             else {
                 return new None<>();
             }
+        }
+
+        private DivideState append(char c) {
+            this.buffer.append(c);
+            return this;
         }
 
         public char peek() {
@@ -699,13 +699,6 @@ public class Main {
             return this.frames.size();
         }
 
-        public CompileState mapLast(Function<Frame, Frame> mapper) {
-            var last = this.frames.last();
-            var newLast = mapper.apply(last);
-            this.frames.set(this.frames.size() - 1, newLast);
-            return this;
-        }
-
         public Option<Type> resolveType(String name) {
             return this.frames.iteratorReverse()
                     .map(frame -> frame.resolveType(name))
@@ -755,6 +748,13 @@ public class Main {
 
         public CompileState defineValues(List<Definition> values) {
             return this.mapLast(last -> last.defineValues(values));
+        }
+
+        public CompileState mapLast(Function<Frame, Frame> mapper) {
+            var last = this.frames.last();
+            var newLast = mapper.apply(last);
+            this.frames.set(this.frames.size() - 1, newLast);
+            return this;
         }
 
         public CompileState defineValue(Definition value) {
@@ -1069,17 +1069,9 @@ public class Main {
         }
     }
 
-    public static void main() {
-        readSource()
-                .mapErr(ApplicationError::new)
-                .match(Main::compileAndWrite, Some::new)
-                .ifPresent(error -> System.err.println(error.display()));
-    }
-
-    private static Option<ApplicationError> compileAndWrite(String input) {
-        return compile(input)
-                .mapErr(ApplicationError::new)
-                .match(output -> writeTarget(output).map(ApplicationError::new), Some::new);
+    @Actual
+    private static void printlnErr(String display) {
+        System.err.println(display);
     }
 
     @Actual
@@ -1092,13 +1084,12 @@ public class Main {
         }
     }
 
-    @Actual
-    private static Result<String, IOError> readSource() {
-        try {
-            return new Ok<>(Files.readString(Paths.get(".", "src", "java", "magma", "Main.java")));
-        } catch (IOException e) {
-            return new Err<>(new IOError(e));
-        }
+    private static String join(List<String> structs) {
+        return structs.iterator().collect(new Joiner()).orElse("");
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> compileStatements(CompileState state, String input, Rule<String> mapper) {
+        return parseStatements(state, input, mapper).mapValue(tuple -> new Tuple<>(tuple.left, generateStatements(tuple.right)));
     }
 
     private static Result<String, CompileError> compile(String input) {
@@ -1110,8 +1101,19 @@ public class Main {
         });
     }
 
-    private static String join(List<String> structs) {
-        return structs.iterator().collect(new Joiner()).orElse("");
+    private static Option<ApplicationError> compileAndWrite(String input) {
+        return compile(input)
+                .mapErr(ApplicationError::new)
+                .match(output -> writeTarget(output).map(ApplicationError::new), Some::new);
+    }
+
+    @Actual
+    private static Result<String, IOError> readSource() {
+        try {
+            return new Ok<>(Files.readString(Paths.get(".", "src", "java", "magma", "Main.java")));
+        } catch (IOException e) {
+            return new Err<>(new IOError(e));
+        }
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
@@ -1128,10 +1130,6 @@ public class Main {
             return new Ok<>(new Tuple<>(state, ""));
         }
         return new Err<>(new CompileError("Not namespaced", input));
-    }
-
-    private static Result<Tuple<CompileState, String>, CompileError> compileStatements(CompileState state, String input, Rule<String> mapper) {
-        return parseStatements(state, input, mapper).mapValue(tuple -> new Tuple<>(tuple.left, generateStatements(tuple.right)));
     }
 
     private static String generateStatements(List<String> elements) {
@@ -1399,12 +1397,13 @@ public class Main {
 
             var generatedHeader = withStructName + "(" + joinedParams + ")";
 
+            var left = methodHeaderTuple.left.defineValue(header.definition);
             if (header.definition.annotations.contains("Actual")) {
                 var generated = generatedHeader + ";\n";
-                return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
+                return new Ok<>(new Tuple<>(left.addFunction(generated), ""));
             }
 
-            return or(methodHeaderTuple.left.defineValue(header.definition), afterParams, Lists.of(
+            return or(left, afterParams, Lists.of(
                     (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
                     (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
             ));
@@ -2328,6 +2327,13 @@ public class Main {
             return appended.exit();
         }
         return appended;
+    }
+
+    public static void main() {
+        readSource()
+                .mapErr(ApplicationError::new)
+                .match(Main::compileAndWrite, Some::new)
+                .ifPresent(error -> printlnErr(error.display()));
     }
 
     private enum Primitive implements Type {
