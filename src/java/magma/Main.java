@@ -597,10 +597,11 @@ public class Main {
             List<String> statements,
             Option<FunctionProto> maybeFunctionProto,
             Option<StructPrototype> maybeStructProto,
-            Map<String, Type> types
+            Map<String, Type> types,
+            Map<String, Definition> definitions
     ) {
         public Frame() {
-            this(Maps.empty(), Lists.empty(), new None<>(), new None<>(), Maps.empty());
+            this(Maps.empty(), Lists.empty(), new None<>(), new None<>(), Maps.empty(), Maps.empty());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -618,11 +619,11 @@ public class Main {
         }
 
         public Frame withFunctionProto(FunctionProto proto) {
-            return new Frame(this.counters, this.statements, new Some<>(proto), this.maybeStructProto, this.types);
+            return new Frame(this.counters, this.statements, new Some<>(proto), this.maybeStructProto, this.types, definitions);
         }
 
         public Frame withStructProto(StructPrototype proto) {
-            return new Frame(this.counters, this.statements, this.maybeFunctionProto, new Some<>(proto), this.types);
+            return new Frame(this.counters, this.statements, this.maybeFunctionProto, new Some<>(proto), this.types, definitions);
         }
 
         public Option<Type> resolveType(String name) {
@@ -640,6 +641,14 @@ public class Main {
         public Frame defineType(String name, Type type) {
             this.types.put(name, type);
             return this;
+        }
+
+        public Option<Definition> resolveValue(String name) {
+            if (this.definitions.containsKey(name)) {
+                return new Some<>(this.definitions.get(name));
+            }
+
+            return new None<>();
         }
     }
 
@@ -682,7 +691,7 @@ public class Main {
             return this;
         }
 
-        public Option<Type> resolve(String name) {
+        public Option<Type> resolveType(String name) {
             return this.frames.iteratorReverse()
                     .map(frame -> frame.resolveType(name))
                     .flatMap(Iterators::fromOption)
@@ -712,6 +721,13 @@ public class Main {
 
         public Frame last() {
             return this.frames.last();
+        }
+
+        public Option<Definition> resolveValue(String name) {
+            return this.frames.iteratorReverse()
+                    .map(frame -> frame.resolveValue(name))
+                    .flatMap(Iterators::fromOption)
+                    .next();
         }
     }
 
@@ -1781,7 +1797,7 @@ public class Main {
                 return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), Primitive.I32)));
             }
 
-            if (argsState.resolve(base) instanceof Some(var resolved)) {
+            if (argsState.resolveType(base) instanceof Some(var resolved)) {
                 return new Ok<>(new Tuple<>(argsState, new Template(base, args)));
             }
             else {
@@ -1971,7 +1987,7 @@ public class Main {
                 typed("invokable", Main::compileInvokable),
                 typed("?", Main::compileAccess),
                 typed("?", Main::parseBooleanValue),
-                typed("?", Main::compileSymbolValue),
+                typed("?", Main::symbolValue),
                 typed("?", Main::methodAccess),
                 typed("?", Main::parseNumber),
                 typed("instanceof", Main::instanceOfNode),
@@ -2123,13 +2139,17 @@ public class Main {
         return new Err<>(new CompileError("Not a method reference", input));
     }
 
-    private static Result<Tuple<CompileState, Symbol>, CompileError> compileSymbolValue(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> symbolValue(CompileState state, String input) {
         var stripped = input.strip();
-        if (isSymbol(stripped)) {
+        if (!isSymbol(stripped)) {
+            return new Err<>(new CompileError("Not a symbol", input));
+        }
+
+        if (state.resolveValue(stripped) instanceof Some(var _)) {
             return new Ok<>(new Tuple<CompileState, Symbol>(state, new Symbol(stripped)));
         }
 
-        return new Err<>(new CompileError("Not a symbol", input));
+        return new Err<>(new CompileError("Undefined symbol", stripped));
     }
 
     private static Result<Tuple<CompileState, DataAccess>, CompileError> compileAccess(CompileState state, String input) {
