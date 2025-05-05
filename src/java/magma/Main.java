@@ -1427,14 +1427,9 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (Character.isDigit(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
+        return IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .allMatch(Character::isDigit);
     }
 
     private static Result<Tuple<CompileState, Operation>, CompileError> operator(CompileState state, String input, Operator operator) {
