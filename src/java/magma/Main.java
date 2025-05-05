@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -466,10 +465,6 @@ public class Main {
         public static <T> List<T> empty() {
             return new JavaList<>();
         }
-
-        public static <T> List<T> of(T... elements) {
-            return new JavaList<>(new ArrayList<>(Arrays.asList(elements)));
-        }
     }
 
     private static class DivideState {
@@ -600,7 +595,7 @@ public class Main {
 
     private record CompileState(List<String> structs, List<String> functions, List<Frame> frames) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.of(new Frame()));
+            this(Lists.empty(), Lists.empty(), Lists.<Frame>empty().addLast(new Frame()));
         }
 
         public CompileState addFunction(String generated) {
@@ -992,11 +987,11 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
-        return or(state, input, Lists.of(
-                typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
-                typed("namespaced", Main::namespaced),
-                typed("class", (state0, input0) -> structure(state0, input0, "class"))
-        ));
+        return or(state, input, Lists.<Rule<String>>empty()
+                .addLast(typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))))
+                .addLast(typed("namespaced", Main::namespaced))
+                .addLast(typed("class", (state0, input0) -> structure(state0, input0, "class")))
+        );
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> namespaced(CompileState state, String input) {
@@ -1131,16 +1126,16 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
-        return or(state, input, Lists.of(
-                typed("whitespace", (state4, input4) -> whitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
-                typed("enum", (state3, input3) -> structure(state3, input3, "enum ")),
-                typed("class", (state2, input2) -> structure(state2, input2, "class ")),
-                typed("record", (state1, input1) -> structure(state1, input1, "record ")),
-                typed("interface", (state0, input0) -> structure(state0, input0, "interface ")),
-                typed("method", Main::functionNode),
-                typed("definition", Main::definitionStatement),
-                typed("enum-values", Main::enumValues)
-        ));
+        return or(state, input, Lists.<Rule<String>>empty()
+                .addLast(typed("whitespace", (state4, input4) -> whitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))))
+                .addLast(typed("enum", (state3, input3) -> structure(state3, input3, "enum ")))
+                .addLast(typed("class", (state2, input2) -> structure(state2, input2, "class ")))
+                .addLast(typed("record", (state1, input1) -> structure(state1, input1, "record ")))
+                .addLast(typed("interface", (state0, input0) -> structure(state0, input0, "interface ")))
+                .addLast(typed("method", Main::functionNode))
+                .addLast(typed("definition", Main::definitionStatement))
+                .addLast(typed("enum-values", Main::enumValues))
+        );
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> enumValues(CompileState state, String input) {
@@ -1188,30 +1183,28 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeExtends(Tuple<CompileState, String> tuple) {
-        return Main.or(tuple.left, tuple.right, Lists.of(
-                (state, s) -> infix(s, " extends ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
-                (state, s) -> new Ok<>(new Tuple<>(state, s))
-        ));
+        return Main.or(tuple.left, tuple.right, Lists.<Rule<String>>empty()
+                .addLast((state, s) -> infix(s, " extends ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))))
+                .addLast((state, s) -> new Ok<>(new Tuple<>(state, s))));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeParams(Tuple<CompileState, String> state1) {
-        return Main.or(state1.left, state1.right, Lists.of(
-                (state, s) -> infix(s, "(", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
-                (state, s) -> new Ok<>(new Tuple<>(state, s))
-        ));
+        return Main.or(state1.left, state1.right, Lists.<Rule<String>>empty()
+                .addLast((state, s) -> infix(s, "(", (s1, _) -> new Ok<>(new Tuple<>(state, s1))))
+                .addLast((state, s) -> new Ok<>(new Tuple<>(state, s)))
+        );
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeImplements(CompileState state0, String afterInfix) {
-        return Main.or(state0, afterInfix, Lists.of(
-                (state, s) -> infix(s, " implements ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
-                (state, s) -> new Ok<>(new Tuple<>(state, s))
-        ));
+        return Main.or(state0, afterInfix, Lists.<Rule<String>>empty()
+                .addLast((state, s) -> infix(s, " implements ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))))
+                .addLast((state, s) -> new Ok<>(new Tuple<>(state, s))));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeTypeParams(Tuple<CompileState, String> withoutParams) {
-        return Main.or(withoutParams.left, withoutParams.right, Lists.of(
-                (state, s) -> infix(s, "<", (left1, _) -> new Ok<>(new Tuple<>(state, left1))),
-                (state, s) -> new Ok<>(new Tuple<>(state, s))));
+        return Main.or(withoutParams.left, withoutParams.right, Lists.<Rule<String>>empty()
+                .addLast((state, s) -> infix(s, "<", (left1, _) -> new Ok<>(new Tuple<>(state, left1))))
+                .addLast((state, s) -> new Ok<>(new Tuple<>(state, s))));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
@@ -1281,10 +1274,9 @@ public class Main {
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
-            return or(methodHeaderTuple.left, afterParams, Lists.of(
-                    (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
-                    (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
-            ));
+            return or(methodHeaderTuple.left, afterParams, Lists.<Rule<String>>empty()
+                    .addLast((state1, s) -> methodWithBraces(state1, s, generatedHeader, header))
+                    .addLast((state2, s) -> methodWithoutBraces(state2, s, generatedHeader)));
         });
     }
 
@@ -1331,10 +1323,9 @@ public class Main {
                     .flatMap(Main::retainDefinition)
                     .collect(new ListCollector<>());
 
-            return or(paramsState, definitionString, Lists.of(
-                    (state1, s) -> constructor(state1, s, params),
-                    (state2, s) -> method(state2, s, params)
-            ));
+            return or(paramsState, definitionString, Lists.<Rule<FunctionProto>>empty()
+                    .addLast((state1, s) -> constructor(state1, s, params))
+                    .addLast((state2, s) -> method(state2, s, params)));
         });
     }
 
@@ -1363,10 +1354,9 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Parameter>, CompileError> compileParameter(CompileState state2, String input) {
-        return or(state2, input, Lists.of(
-                typed("?", Main::parseWhitespace),
-                typed("?", Main::parseDefinition)
-        ));
+        return or(state2, input, Lists.<Rule<Parameter>>empty()
+                .addLast(typed("?", Main::parseWhitespace))
+                .addLast(typed("?", Main::parseDefinition)));
     }
 
     private static Result<Tuple<CompileState, Whitespace>, CompileError> whitespace(CompileState state, String input) {
@@ -1378,11 +1368,11 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
-        return or(state, input, Lists.of(
-                typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
-                typed("statement", Main::functionStatement),
-                typed("block", Main::compileBlock)
-        ));
+        return or(state, input, Lists.<Rule<String>>empty()
+                .addLast(typed("whitespace", (state1, input1) -> whitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))))
+                .addLast(typed("statement", Main::functionStatement))
+                .addLast(typed("block", Main::compileBlock))
+        );
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlock(CompileState state, String input) {
@@ -1447,11 +1437,11 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
-        return Main.or(state, input, Lists.of(
-                Main::compileElse,
-                (state1, input1) -> compileConditional(state1, input1, "if"),
-                (state1, input1) -> compileConditional(state1, input1, "while")
-        ));
+        return Main.or(state, input, Lists.<Rule<String>>empty()
+                .addLast(Main::compileElse)
+                .addLast((state1, input1) -> compileConditional(state1, input1, "if"))
+                .addLast((state1, input1) -> compileConditional(state1, input1, "while"))
+        );
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileConditional(CompileState state, String input, String prefix) {
@@ -1478,14 +1468,14 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> functionStatementValue(CompileState state, String input) {
-        return or(state, input, Lists.of(
-                (state1, input1) -> compileKeyword(state1, input1, "break"),
-                (state1, input1) -> compileKeyword(state1, input1, "continue"),
-                Main::compileReturn,
-                (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
-                Main::compileAssignment,
-                Main::compilePostfix
-        ));
+        return or(state, input, Lists.<Rule<String>>empty()
+                .addLast((state1, input1) -> compileKeyword(state1, input1, "break"))
+                .addLast((state1, input1) -> compileKeyword(state1, input1, "continue"))
+                .addLast(Main::compileReturn)
+                .addLast((state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
+                .addLast(Main::compileAssignment)
+                .addLast(Main::compilePostfix)
+        );
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compilePostfix(CompileState state, String s) {
@@ -1536,7 +1526,9 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileAssignable(CompileState state, String left) {
-        return Main.or(state, left, Lists.of(Main::definition, Main::compileValue));
+        return Main.or(state, left, Lists.<Rule<String>>empty()
+                .addLast(Main::definition)
+                .addLast(Main::compileValue));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> definition(CompileState state, String input) {
@@ -1620,12 +1612,12 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Type>, CompileError> type(CompileState state, String input) {
-        return Main.or(state, input, Lists.of(
-                typed("primitive", Main::primitive),
-                typed("string", (state1, s) -> stringType(state1, s)),
-                typed("symbol", Main::symbolType),
-                typed("template", Main::template)
-        ));
+        return Main.or(state, input, Lists.<Rule<Type>>empty()
+                .addLast(typed("primitive", Main::primitive))
+                .addLast(typed("string", Main::stringType))
+                .addLast(typed("symbol", Main::symbolType))
+                .addLast(typed("template", Main::template))
+        );
     }
 
     private static Result<Tuple<CompileState, Ref>, CompileError> stringType(CompileState state1, String s) {
@@ -1663,7 +1655,7 @@ public class Main {
             }
 
             if (base.equals("Consumer")) {
-                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), Primitive.Void)));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.<Type>empty().addLast(args.first()), Primitive.Void)));
             }
 
             if (base.equals("Supplier")) {
@@ -1671,15 +1663,17 @@ public class Main {
             }
 
             if (base.equals("Function")) {
-                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), args.get(1))));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.<Type>empty().addLast(args.first()), args.get(1))));
             }
 
             if (base.equals("BiFunction")) {
-                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first(), args.get(1)), args.get(2))));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.<Type>empty()
+                        .addLast(args.first())
+                        .addLast(args.get(1)), args.get(2))));
             }
 
             if (base.equals("Predicate")) {
-                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.of(args.first()), Primitive.I32)));
+                return new Ok<>(new Tuple<>(argsState, new FunctionType(Lists.<Type>empty().addLast(args.first()), Primitive.I32)));
             }
 
             if (argsState.resolve(base) instanceof Some(var resolved)) {
@@ -1693,10 +1687,9 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Type>, CompileError> argumentType(CompileState state1, String input1) {
-        return Main.or(state1, input1, Lists.of(
-                typed("whitespace", (state, input) -> whitespace(state, input)),
-                typed("type", Main::type)
-        ));
+        return Main.or(state1, input1, Lists.<Rule<Type>>empty()
+                .addLast(typed("whitespace", Main::whitespace))
+                .addLast(typed("type", Main::type)));
     }
 
     private static Result<Tuple<CompileState, StructRef>, CompileError> symbolType(CompileState state, String input) {
@@ -1748,10 +1741,9 @@ public class Main {
                     .filter(arg -> !(arg instanceof Whitespace))
                     .collect(new ListCollector<>());
 
-            return or(argumentState, callerString, Lists.of(
-                    (state2, callerString1) -> constructorCaller(state2, callerString1, oldArguments),
-                    (state1, s) -> invocationCaller(state1, s, oldArguments)
-            ));
+            return or(argumentState, callerString, Lists.<Rule<Value>>empty()
+                    .addLast((state1, callerString1) -> constructorCaller(state1, callerString1, oldArguments))
+                    .addLast((state1, callerString1) -> invocationCaller(state1, callerString1, oldArguments)));
         });
     }
 
@@ -1791,10 +1783,9 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
-        return or(state1, input1, Lists.of(
-                typed("?", Main::parseWhitespace),
-                typed("?", Main::value)
-        ));
+        return or(state1, input1, Lists.<Rule<Value>>empty()
+                .addLast(typed("?", Main::parseWhitespace))
+                .addLast(typed("?", Main::value)));
     }
 
     private static Result<Tuple<CompileState, Whitespace>, CompileError> parseWhitespace(CompileState state, String input) {
@@ -1853,26 +1844,24 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> value(CompileState state, String input) {
-        List<Rule<Value>> beforeOperators = Lists.of(
-                typed("?", Main::compileNot),
-                typed("?", Main::compileString),
-                typed("?", Main::compileChar),
-                typed("lambda", Main::compileLambda)
-        );
+        List<Rule<Value>> beforeOperators = Lists.<Rule<Value>>empty()
+                .addLast(typed("?", Main::compileNot))
+                .addLast(typed("?", Main::compileString))
+                .addLast(typed("?", Main::compileChar))
+                .addLast(typed("lambda", Main::compileLambda));
 
         var operatorRules = Iterators.of(Operator.values())
                 .map(Main::createOperatorRule)
                 .collect(new ListCollector<>());
 
-        List<Rule<Value>> afterOperators = Lists.of(
-                typed("invokable", Main::compileInvokable),
-                typed("?", Main::compileAccess),
-                typed("?", Main::parseBooleanValue),
-                typed("?", Main::compileSymbolValue),
-                typed("?", Main::methodAccess),
-                typed("?", Main::parseNumber),
-                typed("instanceof", Main::instanceOfNode)
-        );
+        List<Rule<Value>> afterOperators = Lists.<Rule<Value>>empty()
+                .addLast(typed("invokable", Main::compileInvokable))
+                .addLast(typed("?", Main::compileAccess))
+                .addLast(typed("?", Main::parseBooleanValue))
+                .addLast(typed("?", Main::compileSymbolValue))
+                .addLast(typed("?", Main::methodAccess))
+                .addLast(typed("?", Main::parseNumber))
+                .addLast(typed("instanceof", Main::instanceOfNode));
 
         var biFunctionList = beforeOperators
                 .addAllLast(operatorRules)
@@ -1978,7 +1967,7 @@ public class Main {
     private static <S, T extends S> Rule<S> typed(String type, Rule<T> mapper) {
         return (state, input) -> mapper.apply(state, input)
                 .mapValue(value -> new Tuple<CompileState, S>(value.left, value.right))
-                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.of(err)));
+                .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Lists.<CompileError>empty().addLast(err)));
     }
 
     private static Result<Tuple<CompileState, MethodAccess>, CompileError> methodAccess(CompileState state, String input) {
@@ -1987,10 +1976,9 @@ public class Main {
             var left = input.strip().substring(0, functionSeparator);
             var right = input.strip().substring(functionSeparator + "::".length()).strip();
             if (isSymbol(right)) {
-                var maybeLeftTuple = Main.or(state, left, Lists.of(
-                        typed("type", Main::type),
-                        typed("value", Main::value)
-                ));
+                var maybeLeftTuple = Main.or(state, left, Lists.<Rule<Scoped>>empty()
+                        .addLast(typed("type", Main::type))
+                        .addLast(typed("value", Main::value)));
 
                 if (maybeLeftTuple instanceof Ok(var leftTuple)) {
                     return new Ok<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
@@ -2056,7 +2044,7 @@ public class Main {
 
     private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
         if (isSymbol(beforeArrow)) {
-            return new Some<>(Lists.of(beforeArrow));
+            return new Some<>(Lists.<String>empty().addLast(beforeArrow));
         }
 
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
