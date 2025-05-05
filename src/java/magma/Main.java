@@ -565,8 +565,9 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                typed("?", Main::namespaced),
-                typed("?", (state0, input0) -> {
+                typed("whitespace", Main::whitespace),
+                typed("namespaced", Main::namespaced),
+                typed("class", (state0, input0) -> {
                     return structure(state0, input0, "class");
                 })
         ));
@@ -1465,7 +1466,7 @@ public class Main {
     private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> typed(
             String type, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
         return (state, input) -> mapper.apply(state, input)
-                .<Tuple<CompileState, S>>mapValue(value -> new Tuple<>(value.left, value.right))
+                .mapValue(value -> new Tuple<CompileState, S>(value.left, value.right))
                 .mapErr(err -> new CompileError("Invalid type '" + type + "'", input, Collections.singletonList(err)));
     }
 
