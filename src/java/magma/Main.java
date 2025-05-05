@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -432,10 +433,20 @@ public class Main {
         }
 
         private String format(int depth) {
-            return this.message + ": " + this.context + this.errors.stream()
+            var copy = new ArrayList<>(this.errors);
+            copy.sort(Comparator.comparingInt(CompileError::depth));
+
+            return this.message + ": " + this.context + copy.stream()
                     .map(error -> error.format(depth + 1))
                     .map(statement -> "\n" + "\t".repeat(depth) + statement)
                     .collect(Collectors.joining());
+        }
+
+        private int depth() {
+            return 1 + this.errors.stream()
+                    .mapToInt(CompileError::depth)
+                    .max()
+                    .orElse(0);
         }
     }
 
