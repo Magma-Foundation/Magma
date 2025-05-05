@@ -276,15 +276,15 @@ public class Main {
 
         @Override
         public <C> C fold(C initial, BiFunction<C, T, C> folder) {
-            var current = initial;
+            var currentCollection = initial;
             while (true) {
-                C finalCurrent = current;
+                C finalCurrent = currentCollection;
                 var map = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (map instanceof Some(var value)) {
-                    current = value;
+                if (map instanceof Some(var nextCollection)) {
+                    currentCollection = nextCollection;
                 }
                 else {
-                    return current;
+                    return currentCollection;
                 }
             }
         }
@@ -1447,17 +1447,25 @@ public class Main {
         var definitionString = input.substring(0, paramStart).strip();
         var inputParams = input.substring(paramStart + "(".length());
 
-        return parseValues(state, inputParams, Main::compileParameter).flatMapValue(paramsTuple -> {
+        return parseParameters(state, inputParams).flatMapValue(paramsTuple -> {
             var paramsState = paramsTuple.left;
-            var params = paramsTuple.right
-                    .iterator()
-                    .flatMap(Main::retainDefinition)
-                    .collect(new ListCollector<>());
+            var params = paramsTuple.right;
 
             return or(paramsState.defineValues(params), definitionString, Lists.of(
                     (state1, s) -> constructor(state1, s, params),
                     (state2, s) -> method(state2, s, params)
             ));
+        });
+    }
+
+    private static Result<Tuple<CompileState, List<Definition>>, CompileError> parseParameters(CompileState state, String inputParams) {
+        return parseValues(state, inputParams, Main::compileParameter).mapValue(values -> {
+            var collect = values.right
+                    .iterator()
+                    .flatMap(Main::retainDefinition)
+                    .collect(new ListCollector<>());
+
+            return new Tuple<>(values.left, collect);
         });
     }
 
@@ -1520,14 +1528,14 @@ public class Main {
             var beforeContent = contentStart.left.substring(0, contentStart.left.length() - "{".length());
             var content = contentStart.right;
 
-            var entered = state.enter();
-            return parseStatements(entered, content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
+            return compileBlockHeader(state, beforeContent).flatMapValue(beforeContentTuple -> {
+                return parseStatements(state.enter(), content, Main::compileFunctionSegment).mapValue(contentTuple -> {
+                    var oldStatements = createEmptyStringList()
+                            .addAllLast(contentTuple.left.frames.last().statements)
+                            .addAllLast(contentTuple.right);
 
-                var oldStatements = createEmptyStringList()
-                        .addAllLast(statementsTuple.left.frames.last().statements)
-                        .addAllLast(statementsTuple.right);
-
-                return compileBlockHeader(statementsTuple.left.exit(), beforeContent).mapValue(result -> new Tuple<>(result.left, indent + result.right + "{" + generateStatements(oldStatements) + indent + "}"));
+                    return new Tuple<>(beforeContentTuple.left.exit(), indent + beforeContentTuple.right + "{" + generateStatements(oldStatements) + indent + "}");
+                });
             });
         }
 
@@ -2059,10 +2067,25 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> instanceOfNode(CompileState state, String input) {
-        return infix(input, "instanceof", (beforeKeyword, _) -> {
-            return value(state, beforeKeyword).mapValue(valueResult -> {
-                return new Tuple<>(valueResult.left, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0")));
-            });
+        return infix(input, "instanceof", (beforeKeyword, afterKeyword) -> {
+            var strippedAfterKeyword = afterKeyword.strip();
+            if (strippedAfterKeyword.endsWith(")")) {
+                var left = strippedAfterKeyword.substring(0, strippedAfterKeyword.length() - ")".length());
+                var paramsStart = left.indexOf("(");
+                if (paramsStart >= 0) {
+                    var params = left.substring(paramsStart + 1);
+                    return value(state, beforeKeyword).flatMapValue(valueResult -> {
+                        return parseParameters(state, params).mapValue(parameterTuple -> {
+                            var left1 = valueResult.left.defineValues(parameterTuple.right);
+                            var value = valueResult.right;
+                            return new Tuple<>(left1, new Operation(value, Operator.EQUALS, new NumberValue("0")));
+                        });
+                    });
+
+                }
+            }
+
+            return new Err<>(new CompileError("Invalid instanceof", strippedAfterKeyword));
         });
     }
 
