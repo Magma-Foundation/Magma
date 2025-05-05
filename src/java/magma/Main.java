@@ -602,6 +602,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
+                type(Main::compileWhitespace),
                 type(structure("record")),
                 type(structure("class")),
                 type(structure("interface")),
@@ -633,20 +634,20 @@ public class Main {
         };
     }
 
-    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String stripped) {
-        var paramEnd = stripped.indexOf(")");
+    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+        var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
             return new None<>();
         }
 
-        var withParams = stripped.substring(0, paramEnd);
+        var withParams = input.substring(0, paramEnd);
         return compileMethodHeader(state, withParams).flatMap(methodHeaderTuple -> {
-            var withBraces = stripped.substring(paramEnd + ")".length()).strip();
+            var withBraces = input.substring(paramEnd + ")".length()).strip();
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var content = withBraces.substring(1, withBraces.length() - 1).strip();
                 return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
             }
-            if(withBraces.equals(";")) {
+            if (withBraces.equals(";")) {
                 return new Some<>(new Tuple<>(methodHeaderTuple.left, "\n\t" + methodHeaderTuple.right + ";"));
             }
 

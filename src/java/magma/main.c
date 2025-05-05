@@ -1,6 +1,5 @@
 /* private interface Result<T, X>  */{
-	/* <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr);/* 
-     */
+	/* <R> */struct R match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr);
 };
 /* private interface Option<T>  */{
 	void ifPresent(template Consumer<struct T> consumer);
@@ -9,51 +8,38 @@
 	int isPresent();
 	/* <R> */template Option<struct R> map(template Function<struct T, struct R> mapper);
 	/* <R> */template Option<struct R> flatMap(template Function<struct T, template Option<struct R>> mapper);
-	struct T orElse(struct T other);/* 
-     */
+	struct T orElse(struct T other);
 };
 /* private interface Error  */{
-	char* display();/* 
-     */
+	char* display();
 };
-/* private @interface Actual  */{/* 
-     */
+/* private @interface Actual  */{
 };
 /* private interface Value  */{
-	char* generate();/* 
-     */
+	char* generate();
 };
-/* private record IOError(IOException exception) implements Error  */{/* 
-     */
+/* private record IOError(IOException exception) implements Error  */{
 };
-/* record None<T>() implements Option<T>  */{/* 
-     */
+/* record None<T>() implements Option<T>  */{
 };
-/* private record Some<T>(T value) implements Option<T>  */{/* 
-     */
+/* private record Some<T>(T value) implements Option<T>  */{
 };
-/* private record Ok<T, X>(T value) implements Result<T, X>  */{/* 
-     */
+/* private record Ok<T, X>(T value) implements Result<T, X>  */{
 };
-/* private record Err<T, X>(X error) implements Result<T, X>  */{/* 
-     */
+/* private record Err<T, X>(X error) implements Result<T, X>  */{
 };
 /* private static class DivideState  */{/* 
         private final String input; *//* 
         private final List<String> segments; *//* 
         private final int index; *//* 
         private StringBuilder buffer; *//* 
-        private int depth; *//* 
-     */
+        private int depth; */
 };
-/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{/* 
-     */
+/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{
 };
-/* private record CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */{/* 
-     */
+/* private record CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */{
 };
-/* private record Tuple<A, B>(A left, B right)  */{/* 
-     */
+/* private record Tuple<A, B>(A left, B right)  */{
 };
 /* private record Definition(
             List<String> annotations,
@@ -61,44 +47,31 @@
             String beforeType,
             String type,
             String name
-    )  */{/* 
-     */
+    )  */{
 };
-/* private record StringValue(String value) implements Value  */{/* 
-     */
+/* private record StringValue(String value) implements Value  */{
 };
-/* private record Symbol(String value) implements Value  */{/* 
-     */
+/* private record Symbol(String value) implements Value  */{
 };
-/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{/* 
-     */
+/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{
 };
-/* private record DataAccess(Value parent, String child) implements Value  */{/* 
-     */
+/* private record DataAccess(Value parent, String child) implements Value  */{
 };
-/* private record MethodAccess(String parent, String child) implements Value  */{/* 
-     */
+/* private record MethodAccess(String parent, String child) implements Value  */{
 };
-/* private record Content(String input) implements Value  */{/* 
-     */
+/* private record Content(String input) implements Value  */{
 };
-/* private record Operation(Value left, Operator operator, Value right) implements Value  */{/* 
-     */
+/* private record Operation(Value left, Operator operator, Value right) implements Value  */{
 };
-/* private static class Whitespace implements Value  */{/* 
-     */
+/* private static class Whitespace implements Value  */{
 };
-/* private record TupleNode(Value first, Value second) implements Value  */{/* 
-     */
+/* private record TupleNode(Value first, Value second) implements Value  */{
 };
-/* private record NumberValue(String value) implements Value  */{/* 
-     */
+/* private record NumberValue(String value) implements Value  */{
 };
-/* private record CharValue(String value) implements Value  */{/* 
-     */
+/* private record CharValue(String value) implements Value  */{
 };
-/* private record Not(Value value) implements Value  */{/* 
-     */
+/* private record Not(Value value) implements Value  */{
 };
 /* private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String record)  */{/* 
         return (state0, input0) -> {
@@ -120,8 +93,7 @@
             }
 
             return new None<>();
-        } *//* ; *//* 
-     */
+        } *//* ; */
 };
 /* public class Main  */{/* 
 
@@ -141,8 +113,7 @@
         }
     } */
 	/* public static final Path SOURCE *//* = */ Paths.get(/* "." */, /*  "src" */, /*  "java" */, /*  "magma" */, /*  "Main.java" */);
-	/* public static final Path TARGET *//* = */ SOURCE.resolveSibling(/* "main.c" */);/* 
- */
+	/* public static final Path TARGET *//* = */ SOURCE.resolveSibling(/* "main.c" */);
 };
 @Override
 /* public */char* display(){
@@ -547,10 +518,10 @@ auto lambda3(auto popped){
 	return appended;
 }
 /* private static */template Option<(struct CompileState, char*)> compileStructSegment(struct CompileState state, char* input){
-	return or(state, input, of(List, type(structure("record")), type(structure("class")), type(structure("interface")), type(struct Main::compileMethod), type(struct Main::compileContent)));
+	return or(state, input, of(List, type(struct Main::compileWhitespace), type(structure("record")), type(structure("class")), type(structure("interface")), type(struct Main::compileMethod), type(struct Main::compileContent)));
 }
 auto lambda0(auto methodHeaderTuple){
-	auto withBraces = strip(substring(stripped, paramEnd + length(")")));
+	auto withBraces = strip(substring(input, paramEnd + length(")")));
 	if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
 		auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
 		return assembleMethod(methodHeaderTuple.left, methodHeaderTuple.right, content);
@@ -560,12 +531,12 @@ auto lambda0(auto methodHeaderTuple){
 	}
 	return template None</*  */>::new();
 }
-/* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* stripped){
-	auto paramEnd = indexOf(stripped, ")");
+/* private static */template Option<(struct CompileState, char*)> compileMethod(struct CompileState state, char* input){
+	auto paramEnd = indexOf(input, ")");
 	if (paramEnd < 0){
 		return template None</*  */>::new();
 	}
-	auto withParams = substring(stripped, 0, paramEnd);
+	auto withParams = substring(input, 0, paramEnd);
 	return flatMap(compileMethodHeader(state, withParams), lambda0);
 }
 /* private static */template Option<(struct CompileState, char*)> compileMethodHeader(struct CompileState state, char* input){
