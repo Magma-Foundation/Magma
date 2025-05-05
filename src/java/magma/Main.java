@@ -972,23 +972,27 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
-        return Main.or(state, input, List.of(Main::compileElse, Main::compileIf));
+        return Main.or(state, input, List.of(
+                Main::compileElse,
+                (state1, input1) -> compileConditional(state1, input1, "if"),
+                (state1, input1) -> compileConditional(state1, input1, "while")
+        ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileIf(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileConditional(CompileState state, String input, String prefix) {
         var stripped = input.strip();
-        if (!stripped.startsWith("if")) {
-            return createPrefixErr(stripped, "if");
+        if (!stripped.startsWith(prefix)) {
+            return createPrefixErr(stripped, prefix);
         }
 
-        var withoutPrefix = stripped.substring("if".length()).strip();
+        var withoutPrefix = stripped.substring(prefix.length()).strip();
         if (!withoutPrefix.startsWith("(") || !withoutPrefix.endsWith(")")) {
             return new Err<>(new CompileError("No condition present", input));
         }
 
         var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
         return compileValue(state, value).flatMapValue(tuple0 -> {
-            return new Ok<>(new Tuple<>(tuple0.left, "if (" + tuple0.right + ")"));
+            return new Ok<>(new Tuple<>(tuple0.left, prefix + " (" + tuple0.right + ")"));
         });
     }
 
@@ -1010,7 +1014,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBreak(CompileState state, String input) {
-        if(input.equals("break")) {
+        if (input.equals("break")) {
             return new Ok<>(new Tuple<>(state, "break"));
         }
         return new Err<>(new CompileError("Not break", input));
