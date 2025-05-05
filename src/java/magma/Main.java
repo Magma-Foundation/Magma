@@ -2153,9 +2153,9 @@ public class Main {
     }
 
     private static Result<Type, CompileError> resolveSymbol(CompileState state, Symbol symbol) {
-        var maybeFound = state.resolveType(symbol.value);
+        var maybeFound = state.resolveValue(symbol.value);
         if (maybeFound instanceof Some(var found)) {
-            return new Ok<>(found);
+            return new Ok<>(found.type);
         }
 
         return new Err<>(new CompileError("Undefined symbol", symbol.value));
