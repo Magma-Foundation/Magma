@@ -752,7 +752,7 @@ public class Main {
 
         private String generate() {
             var modifiersString = this.generateModifiers();
-            return modifiersString + this.type + " " + this.name;
+            return modifiersString + this.type.generate() + " " + this.name;
         }
 
         private String generateModifiers() {
@@ -964,12 +964,15 @@ public class Main {
         }
 
         public static <T> Iterator<T> fromOption(Option<T> option) {
-            Head<T> head = switch (option) {
-                case None<T> _ -> new EmptyHead<>();
-                case Some<T>(var value) -> new SingleHead<>(value);
-            };
-
+            var head = toHead(option);
             return new HeadedIterator<>(head);
+        }
+
+        private static <T> Head<T> toHead(Option<T> option) {
+            if (option instanceof Some<T>(var value)) {
+                return new SingleHead<>(value);
+            }
+            return new EmptyHead<>();
         }
     }
 
@@ -1008,6 +1011,13 @@ public class Main {
         @Override
         public String generate() {
             return "(" + this.first.generate() + ", " + this.second.generate() + ")";
+        }
+    }
+
+    private record IndexValue(Value parent, Value child) implements Value {
+        @Override
+        public String generate() {
+            return this.parent.generate() + "[" + this.child.generate() + "]";
         }
     }
 
@@ -1371,13 +1381,17 @@ public class Main {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
 
-            var oldStatements = Lists.<String>empty()
+            var oldStatements = createEmptyStringList()
                     .addAllLast(statementsState.frames().last().statements)
                     .addAllLast(statements);
 
             var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
             return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
         });
+    }
+
+    private static List<String> createEmptyStringList() {
+        return Lists.empty();
     }
 
     private static Result<Tuple<CompileState, FunctionProto>, CompileError> functionHeader(CompileState state, String input) {
@@ -1465,7 +1479,7 @@ public class Main {
             var entered = state.enter();
             return parseStatements(entered, content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
 
-                var oldStatements = Lists.<String>empty()
+                var oldStatements = createEmptyStringList()
                         .addAllLast(statementsTuple.left.frames.last().statements)
                         .addAllLast(statementsTuple.right);
 
@@ -1863,7 +1877,7 @@ public class Main {
             var oldCaller = callerTuple.right;
 
             Value newCaller = oldCaller;
-            var newArguments = Lists.<Value>empty();
+            var newArguments = createEmptyValueList();
             if (oldCaller instanceof DataAccess(Value parent, var property)) {
                 newArguments = newArguments.addLast(parent);
                 newCaller = new Symbol(property);
@@ -1873,6 +1887,10 @@ public class Main {
         }
 
         return new Err<>(new CompileError("Not an invocation", input));
+    }
+
+    private static List<Value> createEmptyValueList() {
+        return Lists.empty();
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
@@ -1956,7 +1974,8 @@ public class Main {
                 typed("?", Main::compileSymbolValue),
                 typed("?", Main::methodAccess),
                 typed("?", Main::parseNumber),
-                typed("instanceof", Main::instanceOfNode)
+                typed("instanceof", Main::instanceOfNode),
+                typed("index", Main::index)
         );
 
         var biFunctionList = beforeOperators
@@ -1964,6 +1983,25 @@ public class Main {
                 .addAllLast(afterOperators);
 
         return or(state, input, biFunctionList);
+    }
+
+    private static Result<Tuple<CompileState, Value>, CompileError> index(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("]")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "]".length());
+            var index = withoutEnd.indexOf("[");
+            if (index >= 0) {
+                var parent = withoutEnd.substring(0, index);
+                var child = withoutEnd.substring(index + "[".length());
+                return value(state, parent).flatMapValue(parentTuple -> {
+                    return value(parentTuple.left, child).mapValue(childTuple -> {
+                        return new Tuple<>(childTuple.left, new IndexValue(parentTuple.right, childTuple.right));
+                    });
+                });
+            }
+        }
+
+        return new Err<>(new CompileError("Not an index", input));
     }
 
     private static Rule<Value> createOperatorRule(Operator value) {
