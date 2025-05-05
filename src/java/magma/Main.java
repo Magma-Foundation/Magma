@@ -1528,7 +1528,7 @@ public class Main {
 
         return IntStream.range(0, stripped.length()).allMatch(index -> {
             var c = input.charAt(index);
-            return Character.isLetter(c) || c == '_';
+            return Character.isLetter(c) || c == '_' || (index != 0 && Character.isDigit(c));
         });
     }
 
