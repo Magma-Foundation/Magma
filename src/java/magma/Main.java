@@ -512,7 +512,8 @@ public class Main {
         AND("&&"),
         OR("||"),
         GREATER_THAN_OR_EQUALS(">="),
-        EQUALS("==");
+        EQUALS("=="),
+        NOT_EQUALS("!=");
 
         private final String representation;
 
