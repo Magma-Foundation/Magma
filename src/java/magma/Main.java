@@ -1441,8 +1441,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, StructSegment>, CompileError> enumValues(CompileState state, String input) {
-        return statement(input, slice1 -> parseValues(state, slice1, (state1, input1) -> parseEnumValue(state1, input1))
-                .mapValue(tuple -> new Tuple<>(tuple.left, new EnumValues(tuple.right))));
+        return statement(input, slice1 -> parseValues(state, slice1, Main::parseEnumValue).mapValue(tuple -> new Tuple<>(tuple.left, new EnumValues(tuple.right))));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseEnumValue(CompileState state1, String input1) {
@@ -1668,15 +1667,14 @@ public class Main {
             var beforeContent = contentStart.left.substring(0, contentStart.left.length() - "{".length());
             var content = contentStart.right;
 
-            return compileBlockHeader(state, beforeContent).flatMapValue(beforeContentTuple -> {
-                return parseStatements(state.enter(), content, Main::compileFunctionSegment).mapValue(contentTuple -> {
-                    var oldStatements = createEmptyStringList()
-                            .addAllLast(contentTuple.left.frames.last().statements)
-                            .addAllLast(contentTuple.right);
+            return compileBlockHeader(state, beforeContent).flatMapValue(beforeContentTuple ->
+                    parseStatements(state.enter(), content, Main::compileFunctionSegment).mapValue(contentTuple -> {
+                        var oldStatements = createEmptyStringList()
+                                .addAllLast(contentTuple.left.frames.last().statements)
+                                .addAllLast(contentTuple.right);
 
-                    return new Tuple<>(beforeContentTuple.left.exit(), indent + beforeContentTuple.right + "{" + generateStatements(oldStatements) + indent + "}");
-                });
-            });
+                        return new Tuple<>(beforeContentTuple.left.exit(), indent + beforeContentTuple.right + "{" + generateStatements(oldStatements) + indent + "}");
+                    }));
         }
 
         return new Err<>(new CompileError("No content start present", withoutEnd));
@@ -1801,14 +1799,18 @@ public class Main {
         var left = input.substring(0, valueSeparator);
         var right = input.substring(valueSeparator + "=".length());
         return compileAssignable(state, left).flatMapValue(definitionTuple -> {
-            CompileState left1 = definitionTuple.left;
+            var oldState = definitionTuple.left;
+
+            CompileState newState;
             if (definitionTuple.right instanceof Definition definition) {
-                left1 = left1.defineValue(definition);
+                newState = oldState.defineValue(definition);
+            }
+            else {
+                newState = oldState;
             }
 
-            return compileValue(left1, right).mapValue(valueTuple -> {
-                return new Tuple<>(valueTuple.left, definitionTuple.right.generate() + " = " + valueTuple.right);
-            });
+            return compileValue(newState, right).mapValue(
+                    valueTuple -> new Tuple<>(valueTuple.left, definitionTuple.right.generate() + " = " + valueTuple.right));
         });
     }
 
@@ -1897,9 +1899,8 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
-        return parseType(state, type).mapValue(typeResult -> {
-            return new Tuple<>(typeResult.left, new Definition(annotations, Lists.empty(), typeResult.right, name));
-        });
+        return parseType(state, type).mapValue(
+                typeResult -> new Tuple<>(typeResult.left, new Definition(annotations, Lists.empty(), typeResult.right, name)));
     }
 
     private static Result<Tuple<CompileState, Type>, CompileError> parseType(CompileState state, String input) {
@@ -1999,7 +2000,7 @@ public class Main {
 
     private static Result<Tuple<CompileState, Type>, CompileError> argumentType(CompileState state1, String input1) {
         return Main.or(state1, input1, Lists.of(
-                typed("whitespace", (state, input) -> parseWhitespace(state, input)),
+                typed("whitespace", Main::parseWhitespace),
                 typed("type", Main::parseType)
         ));
     }
@@ -2104,27 +2105,12 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileValues(CompileState state, String input, Rule<String> compiler) {
-        return parseValues(state, input, compiler).mapValue(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
-    }
-
-    private static String generateValues(List<String> elements) {
-        return generateAll(elements, Main::mergeValues);
-    }
-
     private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseValues(
             CompileState state,
             String input,
             Rule<T> compiler
     ) {
         return parseAll(state, input, Main::foldValueChar, compiler);
-    }
-
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
-        if (cache.isEmpty()) {
-            return cache.append(element);
-        }
-        return cache.append(", ").append(element);
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {
@@ -2188,11 +2174,9 @@ public class Main {
             if (index >= 0) {
                 var parent = withoutEnd.substring(0, index);
                 var child = withoutEnd.substring(index + "[".length());
-                return parseValue(state, parent).flatMapValue(parentTuple -> {
-                    return parseValue(parentTuple.left, child).mapValue(childTuple -> {
-                        return new Tuple<>(childTuple.left, new IndexValue(parentTuple.right, childTuple.right));
-                    });
-                });
+                return parseValue(state, parent).flatMapValue(
+                        parentTuple -> parseValue(parentTuple.left, child).mapValue(
+                                childTuple -> new Tuple<>(childTuple.left, new IndexValue(parentTuple.right, childTuple.right))));
             }
         }
 
@@ -2216,11 +2200,9 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOfAsType(CompileState state, String beforeKeyword, String input) {
-        return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
-            return parseType(valueResult.left, input).flatMapValue(definition -> {
-                return new Ok<>(new Tuple<>(definition.left, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0"))));
-            });
-        });
+        return parseValue(state, beforeKeyword).flatMapValue(
+                valueResult -> parseType(valueResult.left, input).flatMapValue(
+                        definition -> new Ok<>(new Tuple<>(definition.left, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0"))))));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOfWithParams(CompileState state, String beforeKeyword, String input) {
@@ -2229,25 +2211,21 @@ public class Main {
             var paramsStart = left.indexOf("(");
             if (paramsStart >= 0) {
                 var params = left.substring(paramsStart + 1);
-                return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
-                    return parseParameters(state, params).mapValue(parameterTuple -> {
-                        var left1 = valueResult.left.defineValues(parameterTuple.right);
-                        var value = valueResult.right;
-                        return new Tuple<>(left1, new Operation(value, Operator.EQUALS, new NumberValue("0")));
-                    });
-                });
+                return parseValue(state, beforeKeyword).flatMapValue(valueResult -> parseParameters(state, params).mapValue(parameterTuple -> {
+                    var left1 = valueResult.left.defineValues(parameterTuple.right);
+                    var value = valueResult.right;
+                    return new Tuple<>(left1, new Operation(value, Operator.EQUALS, new NumberValue("0")));
+                }));
             }
         }
         return new Err<>(new CompileError("Invalid instanceof right", input));
     }
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOfAsAlias(CompileState state, String beforeKeyword, String input) {
-        return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
-            return parseDefinition(valueResult.left, input).flatMapValue(definition -> {
-                var defined = definition.left.defineValue(definition.right);
-                return new Ok<>(new Tuple<>(defined, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0"))));
-            });
-        });
+        return parseValue(state, beforeKeyword).flatMapValue(valueResult -> parseDefinition(valueResult.left, input).flatMapValue(definition -> {
+            var defined = definition.left.defineValue(definition.right);
+            return new Ok<>(new Tuple<>(defined, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0"))));
+        }));
     }
 
     private static Result<Tuple<CompileState, Not>, CompileError> parseNot(CompileState state, String input) {
@@ -2305,12 +2283,10 @@ public class Main {
         var left = input.substring(0, index);
         var right = input.substring(index + operator.representation.length());
 
-        return parseValue(state, left).flatMapValue(leftTuple -> {
-            return parseValue(leftTuple.left, right).mapValue(rightTuple -> {
-                var operation = new Operation(leftTuple.right, operator, rightTuple.right);
-                return new Tuple<>(rightTuple.left, operation);
-            });
-        });
+        return parseValue(state, left).flatMapValue(leftTuple -> parseValue(leftTuple.left, right).mapValue(rightTuple -> {
+            var operation = new Operation(leftTuple.right, operator, rightTuple.right);
+            return new Tuple<>(rightTuple.left, operation);
+        }));
     }
 
     private static <T> Result<Tuple<CompileState, T>, CompileError> or(
@@ -2378,9 +2354,7 @@ public class Main {
             return new Err<>(new CompileError("Not data access", input));
         }
 
-        return parseValue(state, parent).flatMapValue(tuple -> {
-            return new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
-        });
+        return parseValue(state, parent).flatMapValue(tuple -> new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child))));
     }
 
     private static Result<Tuple<CompileState, StringValue>, CompileError> parseString(CompileState state, String input) {
@@ -2415,9 +2389,7 @@ public class Main {
             return compileStatements(state1, content, Main::compileFunctionSegment).flatMapValue(result -> assembleLambda(result.left, result.right, params));
         }
 
-        return compileValue(state1, afterArrow).flatMapValue(valueTuple -> {
-            return assembleLambda(valueTuple.left, "\n\treturn " + valueTuple.right + ";", params);
-        });
+        return compileValue(state1, afterArrow).flatMapValue(valueTuple -> assembleLambda(valueTuple.left, "\n\treturn " + valueTuple.right + ";", params));
     }
 
     private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
