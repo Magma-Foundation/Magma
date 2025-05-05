@@ -10,8 +10,6 @@ struct Value {
 };
 struct Parameter {
 };
-struct IOError {
-};
 struct None {
 };
 struct Some {
@@ -100,11 +98,6 @@ struct R Option::match(template Function<struct T, struct R> whenSome, template 
 char* Error::display() {
 }
 char* Value::generate() {
-}
-char* IOError::display(){
-			auto writer = struct StringWriter::new();
-			printStackTrace(this.exception, struct PrintWriter::new(writer));
-			return toString(writer);
 }
 void None::ifPresent(template Consumer<struct T> consumer){
 }
@@ -594,6 +587,10 @@ template Result<(struct CompileState, char*), struct CompileError> Values::struc
 				if (infixIndex < 0){
 				return createInfixErr(withoutEnd, infix);
 				}
+			auto beforeInfix = strip(substring(left, 0, infixIndex));
+				if (contains(beforeInfix, "\n")){
+				return template Ok<>::new((state, ""));
+				}
 			auto afterInfix = strip(substring(left, infixIndex + length(infix)));
 			return flatMapValue(flatMapValue(flatMapValue(removeImplements(state, afterInfix), struct Main::removeParams), struct Main::removeTypeParams), lambda0);
 }
@@ -918,12 +915,15 @@ template Result<(struct CompileState, struct Definition), struct CompileError> V
 					if (annotationSeparator < 0){
 					return definitionWithAnnotations(state, emptyList(Collections), beforeName, name);
 					}
-				auto annotationsArray = split(strip(substring(beforeName, 0, annotationSeparator)), quote(Pattern, "\n"));
-				auto annotations = toList(map(map(stream(Arrays, annotationsArray), char*::strip), struct Main::truncateAnnotationValue));
+				auto annotations = parseAnnotations(substring(beforeName, 0, annotationSeparator));
 				auto beforeName0 = substring(beforeName, annotationSeparator + length("\n"));
 				return definitionWithAnnotations(state, annotations, beforeName0, name);
 				}
 			return template Err<>::new(struct CompileError::new("Invalid definition", input));
+}
+template List<char*> Values::parseAnnotations(char* annotationsString){
+			auto annotationsArray = split(strip(annotationsString), quote(Pattern, "\n"));
+			return toList(map(map(stream(Arrays, annotationsArray), char*::strip), struct Main::truncateAnnotationValue));
 }
 char* Values::truncateAnnotationValue(char* slice){
 				if (isEmpty(slice)){

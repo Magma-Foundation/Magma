@@ -64,6 +64,7 @@ public class Main {
     private interface Parameter {
     }
 
+    @Actual
     private record IOError(IOException exception) implements Error {
         @Override
         public String display() {
@@ -773,6 +774,11 @@ public class Main {
             return createInfixErr(withoutEnd, infix);
         }
 
+        var beforeInfix = left.substring(0, infixIndex).strip();
+        if (beforeInfix.contains("\n")) {
+            return new Ok<>(new Tuple<>(state, ""));
+        }
+
         var afterInfix = left.substring(infixIndex + infix.length()).strip();
 
         return removeImplements(state, afterInfix)
@@ -1123,17 +1129,20 @@ public class Main {
                 return definitionWithAnnotations(state, Collections.emptyList(), beforeName, name);
             }
 
-            var annotationsArray = beforeName.substring(0, annotationSeparator).strip().split(Pattern.quote("\n"));
-            var annotations = Arrays.stream(annotationsArray)
-                    .map(String::strip)
-                    .map(Main::truncateAnnotationValue)
-                    .toList();
-
+            var annotations = parseAnnotations(beforeName.substring(0, annotationSeparator));
             var beforeName0 = beforeName.substring(annotationSeparator + "\n".length());
             return definitionWithAnnotations(state, annotations, beforeName0, name);
         }
 
         return new Err<>(new CompileError("Invalid definition", input));
+    }
+
+    private static List<String> parseAnnotations(String annotationsString) {
+        var annotationsArray = annotationsString.strip().split(Pattern.quote("\n"));
+        return Arrays.stream(annotationsArray)
+                .map(String::strip)
+                .map(Main::truncateAnnotationValue)
+                .toList();
     }
 
     private static String truncateAnnotationValue(String slice) {
