@@ -328,16 +328,26 @@ public class Main {
             String name
     ) {
         private String generate() {
-            String annotationsStrings;
-            if (this.annotations.isEmpty()) {
-                annotationsStrings = "";
+            var annotationsStrings = this.generateAnnotations();
+            var modifiersString = this.generateModifiers();
+            return annotationsStrings + modifiersString + this.type + " " + this.name;
+        }
+
+        private String generateModifiers() {
+            if (this.modifiers.isEmpty()) {
+                return "";
             }
-            else {
-                annotationsStrings = this.annotations.stream().map(value -> "@" + value).collect(Collectors.joining("\n")) + "\n";
+            return String.join(" ", this.modifiers) + " ";
+        }
+
+        private String generateAnnotations() {
+            if (this.annotations.isEmpty()) {
+                return "";
             }
 
-            var modifiersString = this.modifiers.isEmpty() ? "" : String.join(" ", this.modifiers) + " ";
-            return annotationsStrings + modifiersString + this.type + " " + this.name;
+            return this.annotations.stream()
+                    .map(value -> "@" + value)
+                    .collect(Collectors.joining("\n")) + "\n";
         }
     }
 
@@ -687,7 +697,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> definitionStatement(CompileState state, String input) {
-        return statement(state, input, Main::compileDefinition);
+        return statement(state, input, Main::definition);
     }
 
     private static BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> structure(String infix) {
@@ -749,7 +759,7 @@ public class Main {
         return createInfixErr(input, infix);
     }
 
-    private static Err<Tuple<CompileState, String>, CompileError> createInfixErr(String withoutEnd, String infix) {
+    private static <T> Result<Tuple<CompileState, T>, CompileError> createInfixErr(String withoutEnd, String infix) {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
     }
 
@@ -833,7 +843,7 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
                 typed("?", Main::whitespace),
-                typed("?", Main::compileDefinition)
+                typed("?", Main::definition)
         ));
     }
 
@@ -967,22 +977,20 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileAssignment(CompileState state, String input) {
         var valueSeparator = input.indexOf("=");
-        if (valueSeparator >= 0) {
-            var left = input.substring(0, valueSeparator);
-            var right = input.substring(valueSeparator + "=".length());
-            var definitionTuple = compileDefinition(state, left);
-            if (definitionTuple instanceof Ok(var definitionTuple0)) {
-                var valueTuple = compileValue(definitionTuple0.left, right);
-                if (valueTuple instanceof Ok(var valueTuple0)) {
-                    return new Ok<>(new Tuple<>(valueTuple0.left, definitionTuple0.right + " = " + valueTuple0.right));
-                }
-            }
+        if (valueSeparator < 0) {
+            return createInfixErr(input, "=");
         }
 
-        return new Err<>(new CompileError("Not an assignment", input));
+        var left = input.substring(0, valueSeparator);
+        var right = input.substring(valueSeparator + "=".length());
+        return Main.<String>or(state, left, List.of(Main::definition, Main::compileValue)).flatMapValue(definitionTuple -> {
+            return compileValue(definitionTuple.left, right).mapValue(valueTuple -> {
+                return new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right);
+            });
+        });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileDefinition(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> definition(CompileState state, String input) {
         return parseDefinition(state, input)
                 .mapValue(tuple -> new Tuple<>(tuple.left(), tuple.right().generate()));
     }
@@ -1282,7 +1290,7 @@ public class Main {
 
         var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
         for (var value : Operator.values()) {
-            rules.add(typed("?", (state1, input1) -> compileOperator(state1, input1, value)));
+            rules.add(typed(value.name(), (state1, input1) -> operator(state1, input1, value)));
         }
         rules.addAll(afterOperators);
 
@@ -1342,20 +1350,21 @@ public class Main {
         return true;
     }
 
-    private static Result<Tuple<CompileState, Operation>, CompileError> compileOperator(CompileState state, String input, Operator operator) {
+    private static Result<Tuple<CompileState, Operation>, CompileError> operator(CompileState state, String input, Operator operator) {
         var index = input.indexOf(operator.representation);
-        if (index >= 0) {
-            var left = input.substring(0, index);
-            var right = input.substring(index + operator.representation.length());
-            if (parseValue(state, left) instanceof Ok(var leftTuple)) {
-                if (parseValue(leftTuple.left, right) instanceof Ok(var rightTuple)) {
-                    var operation = new Operation(leftTuple.right, operator, rightTuple.right);
-                    return new Ok<>(new Tuple<>(rightTuple.left, operation));
-                }
-            }
+        if (index < 0) {
+            return createInfixErr(input, operator.representation);
         }
 
-        return new Err<>(new CompileError("Not an operation", input));
+        var left = input.substring(0, index);
+        var right = input.substring(index + operator.representation.length());
+
+        return parseValue(state, left).flatMapValue(leftTuple -> {
+            return parseValue(leftTuple.left, right).mapValue(rightTuple -> {
+                var operation = new Operation(leftTuple.right, operator, rightTuple.right);
+                return new Tuple<>(rightTuple.left, operation);
+            });
+        });
     }
 
     private static <T> Result<Tuple<CompileState, T>, CompileError> or(
