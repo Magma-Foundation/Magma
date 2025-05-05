@@ -21,11 +21,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
-    private interface Result<T, X> {
+    private sealed interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> Result<T, R> mapErr(Function<X, R> mapper);
+
+        <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
     }
 
-    private interface Option<T> {
+    private sealed interface Option<T> permits Some, None {
         void ifPresent(Consumer<T> consumer);
 
         T orElseGet(Supplier<T> supplier);
@@ -61,7 +67,7 @@ public class Main {
         }
     }
 
-    record None<T>() implements Option<T> {
+    private record None<T>() implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
         }
@@ -139,12 +145,42 @@ public class Main {
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(this.value);
         }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Ok<>(this.value);
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return mapper.apply(this.value);
+        }
     }
 
     private record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(this.error);
+        }
+
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> Result<T, R> mapErr(Function<X, R> mapper) {
+            return new Err<>(mapper.apply(this.error));
+        }
+
+        @Override
+        public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
+            return new Err<>(this.error);
         }
     }
 
@@ -200,9 +236,7 @@ public class Main {
         }
 
         public Option<Tuple<Character, DivideState>> popAndAppendToTuple() {
-            return this.pop().map(tuple -> {
-                return new Tuple<>(tuple.left, tuple.right.append(tuple.left));
-            });
+            return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
         }
 
         private DivideState append(char c) {
@@ -243,11 +277,6 @@ public class Main {
 
             return new Tuple<>(name, this);
         }
-
-        public Frame addStatement(String statement) {
-            this.statements.add(statement);
-            return this;
-        }
     }
 
     private record CompileState(List<String> structs, List<String> functions, List<Frame> frames) {
@@ -266,11 +295,6 @@ public class Main {
 
             this.frames.set(this.frames.size() - 1, nameTuple.right);
             return new Tuple<>(nameTuple.left, this);
-        }
-
-        public CompileState addStatement(String statement) {
-            this.frames.getLast().addStatement(statement);
-            return this;
         }
 
         public CompileState enter() {
@@ -398,12 +422,45 @@ public class Main {
     }
 
     private record CompileError(String message, String context, List<CompileError> errors) implements Error {
+        public CompileError(String message, String context) {
+            this(message, context, Collections.emptyList());
+        }
+
         @Override
         public String display() {
             return this.message + ": " + this.context + this.errors.stream()
                     .map(CompileError::display)
                     .map(statement -> "\n\t" + statement)
                     .collect(Collectors.joining());
+        }
+    }
+
+    private record OrState<T>(Option<Tuple<CompileState, T>> option, List<CompileError> errors) {
+        public OrState() {
+            this(new None<>(), new ArrayList<>());
+        }
+
+        public OrState<T> withValue(Tuple<CompileState, T> pair) {
+            return new OrState<>(new Some<>(pair), this.errors);
+        }
+
+        public OrState<T> withError(CompileError error) {
+            this.errors.add(error);
+            return this;
+        }
+
+        public Result<Tuple<CompileState, T>, List<CompileError>> toResult() {
+            return switch (this.option) {
+                case None<Tuple<CompileState, T>> _ -> new Err<>(this.errors);
+                case Some(var value) -> new Ok<>(value);
+            };
+        }
+    }
+
+    private record ApplicationError(Error childError) implements Error {
+        @Override
+        public String display() {
+            return this.childError().display();
         }
     }
 
@@ -427,10 +484,16 @@ public class Main {
     public static final Path TARGET = SOURCE.resolveSibling("main.c");
 
     public static void main() {
-        readSource().match(input -> {
-            var output = compile(input);
-            return writeTarget(output);
-        }, Some::new).ifPresent(error -> System.err.println(error.display()));
+        readSource()
+                .mapErr(ApplicationError::new)
+                .match(Main::compileAndWrite, Some::new)
+                .ifPresent(error -> System.err.println(error.display()));
+    }
+
+    private static Option<ApplicationError> compileAndWrite(String input) {
+        return compile(input)
+                .mapErr(ApplicationError::new)
+                .match(output -> writeTarget(output).map(ApplicationError::new), Some::new);
     }
 
     @Actual
@@ -452,68 +515,65 @@ public class Main {
         }
     }
 
-    private static String compile(String input) {
+    private static Result<String, CompileError> compile(String input) {
         var state = new CompileState();
-        var maybeTuple = compileStatements(state, input, Main::compileRootSegment);
-        if (!(maybeTuple instanceof Some(var tuple))) {
-            return "";
-        }
-
-        var joinedStructs = String.join("", tuple.left.structs);
-        var joinedFunctions = String.join("", tuple.left.functions);
-        return joinedStructs + joinedFunctions + tuple.right;
+        return compileStatements(state, input, Main::compileRootSegment).mapValue(tuple -> {
+            var joinedStructs = String.join("", tuple.left.structs);
+            var joinedFunctions = String.join("", tuple.left.functions);
+            return joinedStructs + joinedFunctions + tuple.right;
+        });
     }
 
-    private static Option<Tuple<CompileState, String>> compileRootSegment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 type(Main::namespaced),
                 type(structure("class"))
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> namespaced(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> namespaced(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return new Some<>(new Tuple<>(state, ""));
+            return new Ok<>(new Tuple<>(state, ""));
         }
-        return new None<>();
+        return new Err<>(new CompileError("Not namespaced", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper) {
-        return parseStatements(state, input, mapper).map(tuple -> {
-            return new Tuple<>(tuple.left, generateStatements(tuple.right));
-        });
+    private static Result<Tuple<CompileState, String>, CompileError> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> mapper) {
+        return parseStatements(state, input, mapper).mapValue(tuple -> new Tuple<>(tuple.left, generateStatements(tuple.right)));
     }
 
     private static String generateStatements(List<String> elements) {
         return generateAll(elements, Main::mergeStatements);
     }
 
-    private static Option<Tuple<CompileState, List<String>>> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> mapper) {
+    private static Result<Tuple<CompileState, List<String>>, CompileError> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> mapper) {
         return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
-    private static <T> Option<Tuple<CompileState, List<T>>> parseAll(
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseAll(
             CompileState initial,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
+            BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper
     ) {
         var segments = divideAll(input, folder);
 
         Tuple<CompileState, List<T>> current = new Tuple<>(initial, new ArrayList<T>());
         for (var segment : segments) {
             var maybeMapped = mapper.apply(current.left, segment);
-            if (maybeMapped instanceof Some(var mapped)) {
-                current.right.add(mapped.right);
-                current = new Tuple<>(mapped.left, current.right);
-            }
-            else {
-                return new None<>();
+            switch (maybeMapped) {
+                case Err<Tuple<CompileState, T>, CompileError>(var error) -> {
+                    return new Err<>(error);
+                }
+                case Ok<Tuple<CompileState, T>, CompileError>(var mapped) -> {
+                    current.right.add(mapped.right);
+                    current = new Tuple<>(mapped.left, current.right);
+                }
             }
         }
 
-        return new Some<>(current);
+        return new Ok<>(current);
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
@@ -600,7 +660,7 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, String>> compileStructSegment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 type(Main::compileWhitespace),
                 type(structure("record")),
@@ -610,50 +670,41 @@ public class Main {
         ));
     }
 
-    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String infix) {
+    private static BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> structure(String infix) {
         return (state0, input0) -> {
             var stripped = input0.strip();
-            if (!stripped.endsWith("}")) {
-                return new None<>();
+            if (stripped.endsWith("}")) {
+                var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+                var contentStart = withoutEnd.indexOf("{");
+                if (contentStart >= 0) {
+                    var left = withoutEnd.substring(0, contentStart);
+                    var right = withoutEnd.substring(contentStart + "{".length());
+                    var infixIndex = left.indexOf(infix);
+                    if (infixIndex >= 0) {
+                        var afterInfix = left.substring(infixIndex + infix.length()).strip();
+                        if (isSymbol(afterInfix)) {
+                            return compileStatements(state0, right, Main::compileStructSegment)
+                                    .mapValue(result -> {
+                                        var generated = "struct " + afterInfix + " {" + result.right + "\n};\n";
+                                        return new Tuple<>(result.left.addStruct(generated), "");
+                                    });
+                        }
+                    }
+                }
             }
 
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
-            if (contentStart < 0) {
-                return new None<>();
-            }
-
-            var left = withoutEnd.substring(0, contentStart);
-            var right = withoutEnd.substring(contentStart + "{".length());
-            var infixIndex = left.indexOf(infix);
-            if (infixIndex < 0) {
-                return new None<>();
-            }
-
-            var beforeInfix = left.substring(0, infixIndex);
-            var afterInfix = left.substring(infixIndex + infix.length()).strip();
-            if (!isSymbol(afterInfix)) {
-                return new None<>();
-            }
-
-            var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
-            if (!(maybeResult instanceof Some(var result))) {
-                return new None<>();
-            }
-
-            var generated = "struct " + afterInfix + " {" + result.right + "\n};\n";
-            return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
+            return new Err<>(new CompileError("Not a struct", input0));
         };
     }
 
-    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileMethod(CompileState state, String input) {
         var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
-            return new None<>();
+            return new Err<>(new CompileError("Not a method", input));
         }
 
         var withParams = input.substring(0, paramEnd);
-        return compileMethodHeader(state, withParams).flatMap(methodHeaderTuple -> {
+        return compileMethodHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
             var withBraces = input.substring(paramEnd + ")".length()).strip();
             if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
                 var content = withBraces.substring(1, withBraces.length() - 1).strip();
@@ -661,74 +712,73 @@ public class Main {
             }
             if (withBraces.equals(";")) {
                 var generated = methodHeaderTuple.right + " {\n}\n";
-                return new Some<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
+                return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
-            return new None<>();
+            return new Err<>(new CompileError("Invalid content", withBraces));
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileMethodHeader(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileMethodHeader(CompileState state, String input) {
         var paramStart = input.indexOf("(");
-        if (paramStart < 0) {
-            return new None<>();
-        }
+        if (paramStart >= 0) {
+            var definitionString = input.substring(0, paramStart);
+            var inputParams = input.substring(paramStart + "(".length());
 
-        var definitionString = input.substring(0, paramStart);
-        var inputParams = input.substring(paramStart + "(".length());
+            if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
+                var definition = definitionTuple.right;
+                var maybeParamsTuple = compileValues(definitionTuple.left, inputParams, Main::compileParameter);
+                if (maybeParamsTuple instanceof Ok(var paramsTuple)) {
+                    var paramsState = paramsTuple.left;
+                    var paramsString = paramsTuple.right;
 
-        if (!(parseDefinition(state, definitionString) instanceof Some(var definitionTuple))) {
-            return new None<>();
-        }
+                    var header = definition.generate() + "(" + paramsString + ")";
+                    if (definition.modifiers.contains("expect")) {
+                        return new Ok<>(new Tuple<>(paramsState, header + ";\n"));
+                    }
 
-        var definition = definitionTuple.right;
-        var maybeParamsTuple = compileValues(definitionTuple.left, inputParams, Main::compileParameter);
-        if (maybeParamsTuple instanceof Some(var paramsTuple)) {
-            var paramsState = paramsTuple.left;
-            var paramsString = paramsTuple.right;
+                    return new Ok<>(new Tuple<>(paramsState, header));
+                }
 
-            var header = definition.generate() + "(" + paramsString + ")";
-            if (definition.modifiers.contains("expect")) {
-                return new Some<>(new Tuple<>(paramsState, header + ";\n"));
             }
-
-            return new Some<>(new Tuple<>(paramsState, header));
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a method header", input));
     }
 
-    private static Option<Tuple<CompileState, String>> assembleMethod(CompileState state, String header, String content) {
+    private static Result<Tuple<CompileState, String>, CompileError> assembleMethod(CompileState state, String header, String content) {
         var maybeStatementsTuple = parseStatements(state.enter(), content, Main::compileFunctionSegment);
-        if (!(maybeStatementsTuple instanceof Some(var statementsTuple))) {
-            return new None<>();
+        if (maybeStatementsTuple instanceof Ok(var statementsTuple)) {
+            var statementsState = statementsTuple.left;
+            var statements = statementsTuple.right;
+
+            var oldStatements = new ArrayList<String>();
+            oldStatements.addAll(statementsState.frames().getLast().statements);
+            oldStatements.addAll(statements);
+
+            var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+            return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
         }
-        var statementsState = statementsTuple.left;
-        var statements = statementsTuple.right;
 
-        var oldStatements = new ArrayList<String>();
-        oldStatements.addAll(statementsState.frames().getLast().statements);
-        oldStatements.addAll(statements);
-
-        var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-        return new Some<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
+        return new Err<>(new CompileError("Not method statements", content));
     }
 
-    private static Option<Tuple<CompileState, String>> compileParameter(CompileState state2, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
                 type(Main::compileWhitespace),
                 type(Main::compileDefinition)
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return new Some<>(new Tuple<>(state, ""));
+            return new Ok<>(new Tuple<>(state, ""));
         }
-        return new None<>();
+
+        return new Err<>(new CompileError("Not whitespace", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileFunctionSegment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 type(Main::compileWhitespace),
                 type(Main::compileStatement),
@@ -736,35 +786,30 @@ public class Main {
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> compileBlock(CompileState state, String s) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileBlock(CompileState state, String input) {
         String indent = "\n" + "\t".repeat(state.depth() - 1);
-        if (!s.endsWith("}")) {
-            return new None<>();
+        if (!input.endsWith("}")) {
+            return new Err<>(new CompileError("Not a block", input));
         }
 
-        var withoutEnd = s.substring(0, s.length() - "}".length());
-
-        return findContentStart(withoutEnd).flatMap(contentStart -> {
+        var withoutEnd = input.substring(0, input.length() - "}".length());
+        var contentStart1 = findContentStart(withoutEnd);
+        if (contentStart1 instanceof Some(var contentStart)) {
             var beforeContent = contentStart.left.substring(0, contentStart.left.length() - "{".length());
             var content = contentStart.right;
 
             var entered = state.enter();
-            var maybeStatements = parseStatements(entered, content, Main::compileFunctionSegment);
-            if (!(maybeStatements instanceof Some(var statementsTuple))) {
-                return new None<>();
-            }
+            return parseStatements(entered, content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
 
-            var oldStatements = new ArrayList<String>();
-            oldStatements.addAll(statementsTuple.left.frames.getLast().statements);
-            oldStatements.addAll(statementsTuple.right);
+                var oldStatements = new ArrayList<String>();
+                oldStatements.addAll(statementsTuple.left.frames.getLast().statements);
+                oldStatements.addAll(statementsTuple.right);
 
-            if (compileBlockHeader(statementsTuple.left.exit(), beforeContent) instanceof Some(var header)) {
-                return new Some<>(new Tuple<>(header.left, indent + header.right + "{" + generateStatements(oldStatements) + indent + "}"));
-            }
-            else {
-                return new None<>();
-            }
-        });
+                return compileBlockHeader(statementsTuple.left.exit(), beforeContent).mapValue(result -> new Tuple<>(result.left, indent + result.right + "{" + generateStatements(oldStatements) + indent + "}"));
+            });
+        }
+
+        return new Err<>(new CompileError("No content start present", withoutEnd));
     }
 
     private static Option<Tuple<String, String>> findContentStart(String input) {
@@ -787,88 +832,89 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, String>> compileStatement(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileStatement(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             var statements = compileFunctionStatementValue(state, withoutEnd);
-            if (statements instanceof Some(var temp)) {
-                return new Some<>(new Tuple<>(temp.left, "\n" + "\t".repeat(state.depth() - 1) + temp.right + ";"));
+            if (statements instanceof Ok(var temp)) {
+                return new Ok<>(new Tuple<>(temp.left, "\n" + "\t".repeat(state.depth() - 1) + temp.right + ";"));
             }
         }
-        return new None<>();
+        return new Err<>(new CompileError("Not a statement", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
         return Main.or(state, input, List.of(Main::compileElse, Main::compileIf));
     }
 
-    private static Option<Tuple<CompileState, String>> compileIf(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileIf(CompileState state, String input) {
         if (input.strip().startsWith("if")) {
             var withoutPrefix = input.strip().substring("if".length()).strip();
             if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
                 var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
                 var tuple = compileValue(state, value);
-                if (tuple instanceof Some(var tuple0)) {
-                    return new Some<>(new Tuple<>(tuple0.left, "if (" + tuple0.right + ")"));
+                if (tuple instanceof Ok(var tuple0)) {
+                    return new Ok<>(new Tuple<>(tuple0.left, "if (" + tuple0.right + ")"));
                 }
             }
         }
-        return new None<>();
+
+        return new Err<>(new CompileError("Not an if statement", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileElse(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileElse(CompileState state, String input) {
         if (input.strip().equals("else")) {
-            return new Some<>(new Tuple<>(state, "else "));
+            return new Ok<>(new Tuple<>(state, "else "));
         }
-        else {
-            return new None<>();
-        }
+
+        return new Err<>(new CompileError("Not an else statement", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileFunctionStatementValue(CompileState state, String input) {
-        return compileReturn(state, input)
-                .or(() -> compileInvokable(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
-                .or(() -> compileAssignment(state, input));
+    private static Result<Tuple<CompileState, String>, CompileError> compileFunctionStatementValue(CompileState state, String input) {
+        return or(state, input, List.of(
+                Main::compileReturn,
+                (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
+                Main::compileAssignment
+        ));
     }
 
-    private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileReturn(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var right = stripped.substring("return ".length());
             var tuple = compileValue(state, right);
-            if (tuple instanceof Some(var tuple0)) {
-                return new Some<>(new Tuple<>(tuple0.left, "return " + tuple0.right));
+            if (tuple instanceof Ok(var tuple0)) {
+                return new Ok<>(new Tuple<>(tuple0.left, "return " + tuple0.right));
             }
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a return statement", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileAssignment(CompileState state, String input) {
         var valueSeparator = input.indexOf("=");
-        if (valueSeparator < 0) {
-            return new None<>();
-        }
-
-        var left = input.substring(0, valueSeparator);
-        var right = input.substring(valueSeparator + "=".length());
-        var definitionTuple = compileDefinition(state, left);
-        if (definitionTuple instanceof Some(var definitionTuple0)) {
-            var valueTuple = compileValue(definitionTuple0.left, right);
-            if (valueTuple instanceof Some(var valueTuple0)) {
-                return new Some<>(new Tuple<>(valueTuple0.left, definitionTuple0.right + " = " + valueTuple0.right));
+        if (valueSeparator >= 0) {
+            var left = input.substring(0, valueSeparator);
+            var right = input.substring(valueSeparator + "=".length());
+            var definitionTuple = compileDefinition(state, left);
+            if (definitionTuple instanceof Ok(var definitionTuple0)) {
+                var valueTuple = compileValue(definitionTuple0.left, right);
+                if (valueTuple instanceof Ok(var valueTuple0)) {
+                    return new Ok<>(new Tuple<>(valueTuple0.left, definitionTuple0.right + " = " + valueTuple0.right));
+                }
             }
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not an assignment", input));
     }
 
-    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
-        return parseDefinition(state, input).map(tuple -> new Tuple<>(tuple.left(), tuple.right().generate()));
+    private static Result<Tuple<CompileState, String>, CompileError> compileDefinition(CompileState state, String input) {
+        return parseDefinition(state, input)
+                .mapValue(tuple -> new Tuple<>(tuple.left(), tuple.right().generate()));
     }
 
-    private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Definition>, CompileError> parseDefinition(CompileState state, String input) {
         var stripped = input.strip();
         var valueSeparator = stripped.lastIndexOf(" ");
         if (valueSeparator >= 0) {
@@ -889,13 +935,12 @@ public class Main {
             return definitionWithAnnotations(state, annotations, beforeName0, name);
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Invalid definition", input));
     }
 
-    private static Option<Tuple<CompileState, Definition>> definitionWithAnnotations(CompileState state, List<String> annotations, String withoutAnnotations, String name) {
+    private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithAnnotations(CompileState state, List<String> annotations, String withoutAnnotations, String name) {
         var stripped = withoutAnnotations.strip();
         if (findTypeSeparator(stripped) instanceof Some(var slices)) {
-            var beforeType = slices.left;
             var type = slices.right;
             return definitionWithBeforeType(state, annotations, type, name);
         }
@@ -928,8 +973,8 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, Definition>> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
-        return compileType(state, type).flatMap(typeResult -> {
+    private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
+        return compileType(state, type).mapValue(typeResult -> {
             var newAnnotations = new ArrayList<String>();
             var newModifiers = new ArrayList<String>();
             for (var annotation : annotations) {
@@ -941,32 +986,32 @@ public class Main {
                 }
             }
 
-            return new Some<>(new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name)));
+            return new Tuple<>(typeResult.left, new Definition(newAnnotations, newModifiers, typeResult.right, name));
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> compileType(CompileState state, String input) {
         var stripped = input.strip();
         switch (stripped) {
             case "var" -> {
-                return new Some<>(new Tuple<>(state, "auto"));
+                return new Ok<>(new Tuple<>(state, "auto"));
             }
             case "char" -> {
-                return new Some<>(new Tuple<>(state, "char"));
+                return new Ok<>(new Tuple<>(state, "char"));
             }
             case "void" -> {
-                return new Some<>(new Tuple<>(state, "void"));
+                return new Ok<>(new Tuple<>(state, "void"));
             }
             case "String" -> {
-                return new Some<>(new Tuple<>(state, "char*"));
+                return new Ok<>(new Tuple<>(state, "char*"));
             }
             case "boolean" -> {
-                return new Some<>(new Tuple<>(state, "int"));
+                return new Ok<>(new Tuple<>(state, "int"));
             }
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, "struct " + stripped));
+            return new Ok<>(new Tuple<>(state, "struct " + stripped));
         }
 
         if (stripped.endsWith(">")) {
@@ -976,105 +1021,102 @@ public class Main {
                 var base = withoutEnd.substring(0, argsStart).strip();
                 var argsString = withoutEnd.substring(argsStart + "<".length());
                 var maybeArgsTuple = parseValues(state, argsString, Main::compileType);
-                if (maybeArgsTuple instanceof Some(var argsTuple)) {
+                if (maybeArgsTuple instanceof Ok(var argsTuple)) {
                     var args = argsTuple.right;
 
                     if (base.equals("Tuple") && args.size() >= 2) {
                         var first = args.get(0);
                         var second = args.get(1);
-                        return new Some<>(new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")"));
+                        return new Ok<>(new Tuple<>(argsTuple.left, "(" + first + ", " + second + ")"));
                     }
 
-                    return new Some<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
+                    return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
                 }
             }
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a valid type", input));
     }
 
-    private static Option<Tuple<CompileState, Value>> compileInvokable(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> compileInvokable(CompileState state, String input) {
         var stripped = input.strip();
-        if (!stripped.endsWith(")")) {
-            return new None<>();
-        }
+        if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
+            if (divisions.size() >= 2) {
+                var joined = String.join("", divisions.subList(0, divisions.size() - 1));
+                var callerString = joined.substring(0, joined.length() - ")".length());
 
-        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-        var divisions = divideAll(withoutEnd, Main::foldInvocationStart);
-        if (divisions.size() < 2) {
-            return new None<>();
-        }
-        var joined = String.join("", divisions.subList(0, divisions.size() - 1));
-        var callerString = joined.substring(0, joined.length() - ")".length());
+                var inputArguments = divisions.getLast();
+                if (parseValues(state, inputArguments, Main::parseArgument) instanceof Ok(var argumentsTuple)) {
+                    var argumentState = argumentsTuple.left;
+                    var oldArguments = argumentsTuple.right
+                            .stream()
+                            .filter(arg -> !(arg instanceof Whitespace))
+                            .toList();
 
-        var inputArguments = divisions.getLast();
-        if (parseValues(state, inputArguments, Main::parseArgument) instanceof Some(var argumentsTuple)) {
-            var argumentState = argumentsTuple.left;
-            var oldArguments = argumentsTuple.right
-                    .stream()
-                    .filter(arg -> !(arg instanceof Whitespace))
-                    .toList();
+                    if (callerString.startsWith("new ")) {
+                        var withoutPrefix = callerString.substring("new ".length());
+                        if (withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2) {
+                            return new Ok<>(new Tuple<>(argumentState, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
+                        }
 
-            if (callerString.startsWith("new ")) {
-                var withoutPrefix = callerString.substring("new ".length());
-                if (withoutPrefix.equals("Tuple<>") && oldArguments.size() >= 2) {
-                    return new Some<>(new Tuple<>(argumentState, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
+                        var maybeCallerTuple = compileType(argumentState, withoutPrefix);
+                        if (maybeCallerTuple instanceof Ok(var callerTuple)) {
+                            var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
+                            return new Ok<>(new Tuple<>(callerTuple.left, invocation));
+                        }
+                    }
+
+                    if (parseValue(argumentState, callerString) instanceof Ok(var callerTuple)) {
+                        var callerState = callerTuple.left;
+                        var oldCaller = callerTuple.right;
+
+                        Value newCaller = oldCaller;
+                        var newArguments = new ArrayList<Value>();
+                        if (oldCaller instanceof DataAccess(Value parent, var property)) {
+                            newArguments.add(parent);
+                            newCaller = new Symbol(property);
+                        }
+
+                        newArguments.addAll(oldArguments);
+                        return new Ok<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
+                    }
                 }
-
-                var maybeCallerTuple = compileType(argumentState, withoutPrefix);
-                if (maybeCallerTuple instanceof Some(var callerTuple)) {
-                    var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
-                    return new Some<>(new Tuple<>(callerTuple.left, invocation));
-                }
-            }
-
-            if (parseValue(argumentState, callerString) instanceof Some(var callerTuple)) {
-                var callerState = callerTuple.left;
-                var oldCaller = callerTuple.right;
-
-                Value newCaller = oldCaller;
-                var newArguments = new ArrayList<Value>();
-                if (oldCaller instanceof DataAccess(Value parent, var property)) {
-                    newArguments.add(parent);
-                    newCaller = new Symbol(property);
-                }
-
-                newArguments.addAll(oldArguments);
-                return new Some<>(new Tuple<>(callerState, new Invocation(newCaller, newArguments)));
             }
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not invokable", input));
     }
 
-    private static Option<Tuple<CompileState, Value>> parseArgument(CompileState state1, String input1) {
+    private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, List.of(
                 type(Main::parseWhitespace),
                 type(Main::parseValue)
         ));
     }
 
-    private static Option<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> parseWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return new Some<>(new Tuple<>(state, new Whitespace()));
+            return new Ok<>(new Tuple<>(state, new Whitespace()));
         }
         else {
-            return new None<>();
+            return new Err<>(new CompileError("Not whitespace", input));
         }
     }
 
-    private static Option<Tuple<CompileState, String>> compileValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
-        return parseValues(state, input, compiler).map(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
+    private static Result<Tuple<CompileState, String>, CompileError> compileValues(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> compiler) {
+        return parseValues(state, input, compiler).mapValue(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
     }
 
     private static String generateValues(List<String> elements) {
         return generateAll(elements, Main::mergeValues);
     }
 
-    private static <T> Option<Tuple<CompileState, List<T>>> parseValues(
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseValues(
             CompileState state,
             String input,
-            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> compiler
+            BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> compiler
     ) {
         return parseAll(state, input, Main::foldValueChar, compiler);
     }
@@ -1105,19 +1147,19 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
-        return parseValue(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+    private static Result<Tuple<CompileState, String>, CompileError> compileValue(CompileState state, String input) {
+        return parseValue(state, input).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Option<Tuple<CompileState, Value>> parseValue(CompileState state, String input) {
-        List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> beforeOperators = List.of(
+    private static Result<Tuple<CompileState, Value>, CompileError> parseValue(CompileState state, String input) {
+        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = List.of(
                 type(Main::compileNot),
                 type(Main::compileString),
                 type(Main::compileChar),
                 type(Main::compileLambda)
         );
 
-        List<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>> afterOperators = List.of(
+        List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = List.of(
                 type(Main::compileInvokable),
                 type(Main::compileAccess),
                 type(Main::parseBooleanValue),
@@ -1126,7 +1168,7 @@ public class Main {
                 type(Main::parseNumber)
         );
 
-        var rules = new ArrayList<BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>>>(beforeOperators);
+        var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
         for (var value : Operator.values()) {
             rules.add(type((state1, input1) -> compileOperator(state1, input1, value)));
         }
@@ -1135,45 +1177,45 @@ public class Main {
         return or(state, input, rules);
     }
 
-    private static Option<Tuple<CompileState, Value>> compileNot(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Not>, CompileError> compileNot(CompileState state, String input) {
         var stripped = input.strip();
         if (!stripped.startsWith("!")) {
-            return new None<>();
+            return new Err<>(new CompileError("Not not", input));
         }
 
-        return parseValue(state, stripped.substring(1)).map(inner -> new Tuple<>(inner.left, new Not(inner.right)));
+        return parseValue(state, stripped.substring(1)).mapValue(inner -> new Tuple<>(inner.left, new Not(inner.right)));
     }
 
-    private static Option<Tuple<CompileState, Value>> parseBooleanValue(CompileState state, String input) {
+    private static Result<Tuple<CompileState, NumberValue>, CompileError> parseBooleanValue(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.equals("false")) {
-            return new Some<>(new Tuple<>(state, new NumberValue("0")));
+            return new Ok<>(new Tuple<>(state, new NumberValue("0")));
         }
 
         if (stripped.equals("true")) {
-            return new Some<>(new Tuple<>(state, new NumberValue("1")));
+            return new Ok<>(new Tuple<>(state, new NumberValue("1")));
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a valid boolean value", input));
     }
 
-    private static Option<Tuple<CompileState, Value>> compileChar(CompileState state, String input) {
+    private static Result<Tuple<CompileState, CharValue>, CompileError> compileChar(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 3) {
-            return new Some<>(new Tuple<>(state, new CharValue(stripped.substring(1, stripped.length() - 1))));
+            return new Ok<>(new Tuple<>(state, new CharValue(stripped.substring(1, stripped.length() - 1))));
         }
         else {
-            return new None<>();
+            return new Err<>(new CompileError("Not a char", input));
         }
     }
 
-    private static Option<Tuple<CompileState, Value>> parseNumber(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Value>, CompileError> parseNumber(CompileState state, String input) {
         var stripped = input.strip();
         if (isNumber(stripped)) {
-            return new Some<>(new Tuple<>(state, new NumberValue(stripped)));
+            return new Ok<>(new Tuple<>(state, new NumberValue(stripped)));
         }
         else {
-            return new None<>();
+            return new Err<>(new CompileError("Not a valid number", stripped));
         }
     }
 
@@ -1188,115 +1230,105 @@ public class Main {
         return true;
     }
 
-    private static Option<Tuple<CompileState, Value>> compileOperator(CompileState state, String input, Operator operator) {
+    private static Result<Tuple<CompileState, Operation>, CompileError> compileOperator(CompileState state, String input, Operator operator) {
         var index = input.indexOf(operator.representation);
         if (index >= 0) {
             var left = input.substring(0, index);
             var right = input.substring(index + operator.representation.length());
-            if (parseValue(state, left) instanceof Some(var leftTuple)) {
-                if (parseValue(leftTuple.left, right) instanceof Some(var rightTuple)) {
+            if (parseValue(state, left) instanceof Ok(var leftTuple)) {
+                if (parseValue(leftTuple.left, right) instanceof Ok(var rightTuple)) {
                     var operation = new Operation(leftTuple.right, operator, rightTuple.right);
-                    return new Some<>(new Tuple<>(rightTuple.left, operation));
+                    return new Ok<>(new Tuple<>(rightTuple.left, operation));
                 }
             }
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not an operation", input));
     }
 
-    private static <T> Option<Tuple<CompileState, T>> or(
+    private static <T> Result<Tuple<CompileState, T>, CompileError> or(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Option<Tuple<CompileState, T>>>> rules
+            List<BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>>> rules
     ) {
-        for (var rule : rules) {
-            var applied = rule.apply(state, input);
-            if (applied.isPresent()) {
-                return applied;
+        return rules.stream().reduce(new OrState<T>(), (tOrState, mapper) -> {
+            if (tOrState.option.isPresent()) {
+                return tOrState;
             }
-        }
-
-        return new None<>();
+            return mapper.apply(state, input).match(tOrState::withValue, tOrState::withError);
+        }, (_, next) -> next).toResult().mapErr(errs -> new CompileError("No valid rule present", input, errs));
     }
 
-    private static <S, T extends S> BiFunction<CompileState, String, Option<Tuple<CompileState, S>>> type(BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper) {
-        return (state, input) -> mapper.apply(state, input).map(value -> new Tuple<>(value.left, value.right));
+    private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> type(
+            BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
+        return (state, input) -> mapper.apply(state, input).mapValue(value -> new Tuple<>(value.left, value.right));
     }
 
-    private static Option<Tuple<CompileState, MethodAccess>> compileMethodReference(CompileState state, String input) {
+    private static Result<Tuple<CompileState, MethodAccess>, CompileError> compileMethodReference(CompileState state, String input) {
         var functionSeparator = input.strip().indexOf("::");
-        if (functionSeparator < 0) {
-            return new None<>();
-        }
-
-        var left = input.strip().substring(0, functionSeparator);
-        var right = input.strip().substring(functionSeparator + "::".length()).strip();
-        var maybeLeftTuple = compileType(state, left);
-        if (maybeLeftTuple instanceof Some(var leftTuple)) {
-            if (isSymbol(right)) {
-                return new Some<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
+        if (functionSeparator >= 0) {
+            var left = input.strip().substring(0, functionSeparator);
+            var right = input.strip().substring(functionSeparator + "::".length()).strip();
+            var maybeLeftTuple = compileType(state, left);
+            if (maybeLeftTuple instanceof Ok(var leftTuple)) {
+                if (isSymbol(right)) {
+                    return new Ok<>(new Tuple<>(leftTuple.left, new MethodAccess(leftTuple.right, right)));
+                }
             }
         }
-        return new None<>();
+        return new Err<>(new CompileError("Not a method reference", input));
     }
 
-    private static Option<Tuple<CompileState, Symbol>> compileSymbolValue(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> compileSymbolValue(CompileState state, String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<CompileState, Symbol>(state, new Symbol(stripped)));
+            return new Ok<>(new Tuple<CompileState, Symbol>(state, new Symbol(stripped)));
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a symbol", input));
     }
 
-    private static Option<Tuple<CompileState, DataAccess>> compileAccess(CompileState state, String input) {
+    private static Result<Tuple<CompileState, DataAccess>, CompileError> compileAccess(CompileState state, String input) {
         var separator = input.strip().lastIndexOf(".");
-        if (separator < 0) {
-            return new None<>();
+        if (separator >= 0) {
+            var parent = input.strip().substring(0, separator);
+            var child = input.strip().substring(separator + ".".length());
+            if (isSymbol(child) && parseValue(state, parent) instanceof Ok(var tuple)) {
+                return new Ok<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
+            }
         }
 
-        var parent = input.strip().substring(0, separator);
-        var child = input.strip().substring(separator + ".".length());
-        if (!isSymbol(child) || !(parseValue(state, parent) instanceof Some(var tuple))) {
-            return new None<>();
-        }
-
-        return new Some<>(new Tuple<CompileState, DataAccess>(tuple.left, new DataAccess(tuple.right, child)));
-
+        return new Err<>(new CompileError("Not data access", input));
     }
 
-    private static Option<Tuple<CompileState, StringValue>> compileString(CompileState state, String input) {
+    private static Result<Tuple<CompileState, StringValue>, CompileError> compileString(CompileState state, String input) {
         var stripped = input.strip();
-        if (!stripped.startsWith("\"") || !stripped.endsWith("\"") || stripped.length() < 2) {
-            return new None<>();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"") && stripped.length() >= 2) {
+            return new Ok<>(new Tuple<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
         }
-
-        return new Some<>(new Tuple<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
+        return new Err<>(new CompileError("Not a string", input));
     }
 
-    private static Option<Tuple<CompileState, Symbol>> compileLambda(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> compileLambda(CompileState state, String input) {
         var arrowIndex = input.indexOf("->");
-        if (arrowIndex < 0) {
-            return new None<>();
-        }
-        var beforeArrow = input.substring(0, arrowIndex).strip();
-        var afterArrow = input.substring(arrowIndex + "->".length());
+        if (arrowIndex >= 0) {
+            var beforeArrow = input.substring(0, arrowIndex).strip();
+            var afterArrow = input.substring(arrowIndex + "->".length());
 
-        if (!(findLambdaParamNames(beforeArrow) instanceof Some(var paramNames))) {
-            return new None<>();
-        }
+            if (findLambdaParamNames(beforeArrow) instanceof Some(var paramNames)) {
+                var withBraces = afterArrow.strip();
+                if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
+                    var content = withBraces.substring(1, withBraces.length() - 1);
+                    return compileStatements(state, content, Main::compileFunctionSegment).flatMapValue(result -> assembleLambda(result.left, paramNames, result.right));
+                }
 
-        var withBraces = afterArrow.strip();
-        if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
-            var content = withBraces.substring(1, withBraces.length() - 1);
-            return compileStatements(state, content, Main::compileFunctionSegment).flatMap(result -> assembleLambda(result.left, paramNames, result.right));
-        }
-
-        if (compileValue(state, afterArrow) instanceof Some(var valueTuple)) {
-            return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+                if (compileValue(state, afterArrow) instanceof Ok(var valueTuple)) {
+                    return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+                }
+            }
         }
 
-        return new None<>();
+        return new Err<>(new CompileError("Not a lambda statement", input));
     }
 
     private static Option<List<String>> findLambdaParamNames(String beforeArrow) {
@@ -1311,7 +1343,7 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, Symbol>> assembleLambda(CompileState state, List<String> paramNames, String content) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> assembleLambda(CompileState state, List<String> paramNames, String content) {
         var nameTuple = state.createName("lambda");
         var generatedName = nameTuple.left;
 
@@ -1319,7 +1351,7 @@ public class Main {
                 .map(name -> "auto " + name)
                 .collect(Collectors.joining(", "));
 
-        return new Some<>(new Tuple<>(nameTuple.right.addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
+        return new Ok<>(new Tuple<>(nameTuple.right.addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
     }
 
     private static boolean isSymbol(String input) {
