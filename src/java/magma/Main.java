@@ -646,8 +646,9 @@ public class Main {
         }
 
         public Option<Type> resolveType(String name) {
+
             if (this.maybeStructProto instanceof Some(var structProto) && name.equals(structProto.name)) {
-                return new Some<>(new StructureType(structProto, this.definedValues));
+                return this.toStructureType().map(type -> type);
             }
 
             if (this.definedTypes.containsKey(name)) {
@@ -1021,7 +1022,7 @@ public class Main {
         public String generate() {
             var joined = this.definitions.iterator()
                     .map(Definition::generate)
-                    .map(display -> "\n\t"+ display + ";")
+                    .map(display -> "\n\t" + display + ";")
                     .collect(new Joiner())
                     .orElse("");
 
