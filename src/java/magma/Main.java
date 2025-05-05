@@ -139,6 +139,9 @@ public class Main {
     private interface Assignable extends Node {
     }
 
+    private interface StructSegment extends Node {
+    }
+
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
@@ -792,7 +795,7 @@ public class Main {
             List<String> modifiers,
             Type type,
             String name
-    ) implements Parameter, Assignable {
+    ) implements Parameter, Assignable, StructSegment {
         public Definition(Type type, String name) {
             this(Lists.empty(), Lists.empty(), type, name);
         }
@@ -866,7 +869,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Value, Parameter, Type {
+    private static class Whitespace implements Value, Parameter, Type, StructSegment {
         @Override
         public String generate() {
             return "";
@@ -1069,6 +1072,20 @@ public class Main {
         }
     }
 
+    private record EnumValues(List<Value> values) implements StructSegment {
+        @Override
+        public String generate() {
+            return this.joinValues() + ";";
+        }
+
+        private String joinValues() {
+            return this.values.iterator()
+                    .map(Value::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+        }
+    }
+
     @Actual
     private static void printlnErr(String display) {
         System.err.println(display);
@@ -1168,7 +1185,7 @@ public class Main {
                 (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)));
     }
 
-    private static Result<Tuple<CompileState, List<String>>, CompileError> parseStatements(CompileState state, String input, Rule<String> mapper) {
+    private static <T> Result<Tuple<CompileState, List<T>>, CompileError> parseStatements(CompileState state, String input, Rule<T> mapper) {
         return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
@@ -1237,7 +1254,7 @@ public class Main {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> assembleStructure(Tuple<CompileState, String> nameTuple, String right) {
         var nameState = nameTuple.left;
         var name = nameTuple.right;
 
@@ -1246,14 +1263,21 @@ public class Main {
         }
 
         var prototype = new StructPrototype(name);
-        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(prototype)), right, Main::compileStructSegment).mapValue(result -> {
-            var generated = "struct " + name + " {" + result.right + "\n};\n";
+        var state = nameState.enter().mapLast(last -> last.withStructProto(prototype));
+        return parseStatements(state, right, Main::compileStructSegment).mapValue(result -> {
+            var joined = result.right
+                    .iterator()
+                    .map(Node::generate)
+                    .collect(new Joiner())
+                    .orElse("");
+
+            var generated = "struct " + name + " {" + joined + "\n};\n";
             var withStruct = result.left.exitStruct().addStruct(generated);
-            return new Tuple<>(withStruct, "");
+            return new Tuple<>(withStruct, new Whitespace());
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileStructure(CompileState state, String input, String infix) {
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> compileStructure(CompileState state, String input, String infix) {
         var stripped = input.strip();
         if (!stripped.endsWith("}")) {
             return createSuffixErr(stripped, "}");
@@ -1274,7 +1298,7 @@ public class Main {
 
         var beforeInfix = left.substring(0, infixIndex).strip();
         if (beforeInfix.contains("\n")) {
-            return new Ok<>(new Tuple<>(state, ""));
+            return new Ok<>(new Tuple<>(state, new Whitespace()));
         }
 
         var afterInfix = left.substring(infixIndex + infix.length()).strip();
@@ -1290,7 +1314,7 @@ public class Main {
         return or(state, input, Lists.of(
                 typed("whitespace", (state1, input1) -> parseWhitespace(state1, input1).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
                 typed("namespaced", Main::namespaced),
-                typed("class", (state0, input0) -> compileStructure(state0, input0, "class"))
+                typed("class", (state0, input0) -> compileStructure(state0, input0, "class").mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
         ));
     }
 
@@ -1323,9 +1347,9 @@ public class Main {
         return appended;
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
-                typed("whitespace", (state4, input4) -> parseWhitespace(state4, input4).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))),
+                typed("whitespace", (state4, input4) -> parseWhitespace(state4, input4)),
                 typed("enum", (state3, input3) -> compileStructure(state3, input3, "enum ")),
                 typed("class", (state2, input2) -> compileStructure(state2, input2, "class ")),
                 typed("record", (state1, input1) -> compileStructure(state1, input1, "record ")),
@@ -1336,15 +1360,13 @@ public class Main {
         ));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> enumValues(CompileState state, String input) {
-        return statement(state, input,
-                (state0, input0) -> compileValues(state0, input0,
-                        (state1, input1) -> parseInvokable(state1, input1).mapValue(
-                                tuple -> new Tuple<>(tuple.left, tuple.right.generate()))));
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> enumValues(CompileState state, String input) {
+        return statement(input, slice1 -> parseValues(state, slice1, Main::parseInvokable)
+                .mapValue(tuple -> new Tuple<>(tuple.left, new EnumValues(tuple.right))));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> definitionStatement(CompileState state, String input) {
-        return statement(state, input, Main::definition);
+    private static Result<Tuple<CompileState, Definition>, CompileError> definitionStatement(CompileState state, String input) {
+        return statement(input, slice1 -> parseDefinition(state, slice1));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeExtends(Tuple<CompileState, String> tuple) {
@@ -1388,7 +1410,7 @@ public class Main {
         return createInfixErr(input, infix);
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> parseFunction(CompileState state, String input) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> parseFunction(CompileState state, String input) {
         var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
             return new Err<>(new CompileError("Not a method", input));
@@ -1396,44 +1418,47 @@ public class Main {
 
         var withParams = input.substring(0, paramEnd);
         return functionHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
-            var afterParams = input.substring(paramEnd + ")".length()).strip();
-
-            var header = methodHeaderTuple.right;
-            var joinedParams = header.params
-                    .iterator()
-                    .map(Definition::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            var structName = state.last().maybeStructProto.orElse(new StructPrototype("?")).name;
-            var withStructName = header.definition
-                    .mapName(name -> structName + "::" + name)
-                    .generate();
-
-            var generatedHeader = withStructName + "(" + joinedParams + ")";
-
-            var left = methodHeaderTuple.left.defineValue(header.definition);
-            if (header.definition.annotations.contains("Actual")) {
-                var generated = generatedHeader + ";\n";
-                return new Ok<>(new Tuple<>(left.addFunction(generated), ""));
-            }
-
-            return or(left, afterParams, Lists.of(
-                    (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
-                    (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
-            ));
+            return getResult(input, paramEnd, methodHeaderTuple.left, methodHeaderTuple.right);
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithoutBraces(CompileState state, String content, String header) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> getResult(String input, int paramEnd, CompileState state, FunctionProto header) {
+        var afterParams = input.substring(paramEnd + ")".length()).strip();
+
+        var joinedParams = header.params
+                .iterator()
+                .map(Definition::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var structName = state.last().maybeStructProto.orElse(new StructPrototype("?")).name;
+        var withStructName = header.definition
+                .mapName(name -> structName + "::" + name)
+                .generate();
+
+        var generatedHeader = withStructName + "(" + joinedParams + ")";
+
+        var left = state.defineValue(header.definition);
+        if (header.definition.annotations.contains("Actual")) {
+            var generated = generatedHeader + ";\n";
+            return new Ok<>(new Tuple<>(left.addFunction(generated), new Whitespace()));
+        }
+
+        return Main.or(left, afterParams, Lists.of(
+                (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
+                (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
+        ));
+    }
+
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> methodWithoutBraces(CompileState state, String content, String header) {
         if (content.equals(";")) {
             var generated = header + " {\n}\n";
-            return new Ok<>(new Tuple<>(state.addFunction(generated), ""));
+            return new Ok<>(new Tuple<>(state.addFunction(generated), new Whitespace()));
         }
         return new Err<>(new CompileError("Content ';' not present", content));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> methodWithBraces(CompileState state, String withBraces, String header, FunctionProto proto) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> methodWithBraces(CompileState state, String withBraces, String header, FunctionProto proto) {
         if (!withBraces.startsWith("{") || !withBraces.endsWith("}")) {
             return new Err<>(new CompileError("No braces present", withBraces));
         }
@@ -1448,7 +1473,7 @@ public class Main {
                     .addAllLast(statements);
 
             var generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-            return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), ""));
+            return new Ok<>(new Tuple<>(statementsState.exit().addFunction(generated), new Whitespace()));
         });
     }
 
@@ -1573,18 +1598,22 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> functionStatement(CompileState state, String input) {
-        return statement(state, input, Main::functionStatementValue);
+        return statement(input, slice1 -> ((Rule<String>) Main::functionStatementValue).apply(state, slice1).flatMapValue(result ->
+                new Ok<>(new Tuple<>(result.left, format(state, result)))));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> statement(CompileState state, String input, Rule<String> mapper) {
+    private static <T> Result<Tuple<CompileState, T>, CompileError> statement(String input, Function<String, Result<Tuple<CompileState, T>, CompileError>> function) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return createSuffixErr(input, ";");
         }
 
         var slice = stripped.substring(0, stripped.length() - ";".length());
-        return mapper.apply(state, slice).flatMapValue(result ->
-                new Ok<>(new Tuple<>(result.left, "\n" + "\t".repeat(state.depth() - 2) + result.right + ";")));
+        return function.apply(slice);
+    }
+
+    private static String format(CompileState state, Tuple<CompileState, String> result) {
+        return "\n" + "\t".repeat(state.depth() - 2) + result.right + ";";
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
@@ -1684,11 +1713,6 @@ public class Main {
                 typed("definition", Main::parseDefinition),
                 typed("value", Main::parseValue)
         ));
-    }
-
-    private static Result<Tuple<CompileState, String>, CompileError> definition(CompileState state, String input) {
-        return parseDefinition(state, input)
-                .mapValue(tuple -> new Tuple<>(tuple.left(), tuple.right().generate()));
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> parseDefinition(CompileState state, String input) {
