@@ -301,7 +301,11 @@ public class Main {
 
         @Override
         public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).fold(Iterators.empty(), Iterator::concat);
+            return this.map(mapper).fold(HeadedIterator.createEmpty(), Iterator::concat);
+        }
+
+        private static <R> Iterator<R> createEmpty() {
+            return new HeadedIterator<R>(new EmptyHead<>());
         }
 
         @Override
@@ -1007,16 +1011,16 @@ public class Main {
             return new HeadedIterator<>(new EmptyHead<>());
         }
 
-        public static <T> Iterator<T> fromOption(Option<T> option) {
-            var head = toHead(option);
-            return new HeadedIterator<>(head);
-        }
-
         private static <T> Head<T> toHead(Option<T> option) {
             if (option instanceof Some<T>(var value)) {
                 return new SingleHead<>(value);
             }
             return new EmptyHead<>();
+        }
+
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            var head = toHead(option);
+            return new HeadedIterator<>(head);
         }
     }
 
@@ -1256,7 +1260,7 @@ public class Main {
                 typed("class", (state2, input2) -> structure(state2, input2, "class ")),
                 typed("record", (state1, input1) -> structure(state1, input1, "record ")),
                 typed("interface", (state0, input0) -> structure(state0, input0, "interface ")),
-                typed("method", Main::functionNode),
+                typed("method", Main::parseFunction),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
         ));
@@ -1371,7 +1375,7 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> functionNode(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> parseFunction(CompileState state, String input) {
         var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
             return new Err<>(new CompileError("Not a method", input));
@@ -1400,7 +1404,7 @@ public class Main {
                 return new Ok<>(new Tuple<>(methodHeaderTuple.left.addFunction(generated), ""));
             }
 
-            return or(methodHeaderTuple.left, afterParams, Lists.of(
+            return or(methodHeaderTuple.left.defineValue(header.definition), afterParams, Lists.of(
                     (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
                     (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
             ));
@@ -2203,6 +2207,10 @@ public class Main {
         }
 
         if (state.resolveValue(stripped) instanceof Some(var _)) {
+            return new Ok<>(new Tuple<CompileState, Symbol>(state, new Symbol(stripped)));
+        }
+
+        if (state.resolveType(stripped) instanceof Some(var _)) {
             return new Ok<>(new Tuple<CompileState, Symbol>(state, new Symbol(stripped)));
         }
 
