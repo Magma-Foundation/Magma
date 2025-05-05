@@ -397,6 +397,16 @@ public class Main {
         }
     }
 
+    private record CompileError(String message, String context, List<CompileError> errors) implements Error {
+        @Override
+        public String display() {
+            return this.message + ": " + this.context + this.errors.stream()
+                    .map(CompileError::display)
+                    .map(statement -> "\n\t" + statement)
+                    .collect(Collectors.joining());
+        }
+    }
+
     private enum Operator {
         ADD("+"),
         SUBTRACT("-"),
@@ -457,8 +467,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 type(Main::namespaced),
-                type(structure("class")),
-                type(Main::compileContent)
+                type(structure("class"))
         ));
     }
 
@@ -597,8 +606,7 @@ public class Main {
                 type(structure("record")),
                 type(structure("class")),
                 type(structure("interface")),
-                type(Main::compileMethod),
-                type(Main::compileContent)
+                type(Main::compileMethod)
         ));
     }
 
@@ -709,8 +717,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
                 type(Main::compileWhitespace),
-                type(Main::compileDefinition),
-                type(Main::compileContent)
+                type(Main::compileDefinition)
         ));
     }
 
@@ -725,13 +732,8 @@ public class Main {
         return or(state, input, List.of(
                 type(Main::compileWhitespace),
                 type(Main::compileStatement),
-                type(Main::compileBlock),
-                type(Main::compileContent)
+                type(Main::compileBlock)
         ));
-    }
-
-    private static Some<Tuple<CompileState, String>> compileContent(CompileState state1, String s) {
-        return new Some<>(new Tuple<>(state1, generatePlaceholder(s)));
     }
 
     private static Option<Tuple<CompileState, String>> compileBlock(CompileState state, String s) {
@@ -756,8 +758,12 @@ public class Main {
             oldStatements.addAll(statementsTuple.left.frames.getLast().statements);
             oldStatements.addAll(statementsTuple.right);
 
-            var string = compileBlockHeader(statementsTuple.left.exit(), beforeContent);
-            return new Some<>(new Tuple<>(string.left, indent + string.right + "{" + generateStatements(oldStatements) + indent + "}"));
+            if (compileBlockHeader(statementsTuple.left.exit(), beforeContent) instanceof Some(var header)) {
+                return new Some<>(new Tuple<>(header.left, indent + header.right + "{" + generateStatements(oldStatements) + indent + "}"));
+            }
+            else {
+                return new None<>();
+            }
         });
     }
 
@@ -786,41 +792,54 @@ public class Main {
         if (stripped.endsWith(";")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
             var statements = compileFunctionStatementValue(state, withoutEnd);
-            return new Some<>(new Tuple<>(statements.left, "\n" + "\t".repeat(state.depth() - 1) + statements.right + ";"));
+            if (statements instanceof Some(var temp)) {
+                return new Some<>(new Tuple<>(temp.left, "\n" + "\t".repeat(state.depth() - 1) + temp.right + ";"));
+            }
         }
         return new None<>();
     }
 
-    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.equals("else")) {
-            return new Tuple<>(state, "else ");
-        }
-
-        if (stripped.startsWith("if")) {
-            var withoutPrefix = stripped.substring("if".length()).strip();
-            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
-                var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
-                var tuple = compileValueOrPlaceholder(state, value);
-                return new Tuple<>(tuple.left, "if (" + tuple.right + ")");
-            }
-        }
-        return new Tuple<>(state, generatePlaceholder(stripped));
+    private static Option<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
+        return Main.or(state, input, List.of(Main::compileElse, Main::compileIf));
     }
 
-    private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileIf(CompileState state, String input) {
+        if (input.strip().startsWith("if")) {
+            var withoutPrefix = input.strip().substring("if".length()).strip();
+            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+                var value = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+                var tuple = compileValue(state, value);
+                if (tuple instanceof Some(var tuple0)) {
+                    return new Some<>(new Tuple<>(tuple0.left, "if (" + tuple0.right + ")"));
+                }
+            }
+        }
+        return new None<>();
+    }
+
+    private static Option<Tuple<CompileState, String>> compileElse(CompileState state, String input) {
+        if (input.strip().equals("else")) {
+            return new Some<>(new Tuple<>(state, "else "));
+        }
+        else {
+            return new None<>();
+        }
+    }
+
+    private static Option<Tuple<CompileState, String>> compileFunctionStatementValue(CompileState state, String input) {
         return compileReturn(state, input)
                 .or(() -> compileInvokable(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
-                .or(() -> compileAssignment(state, input))
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .or(() -> compileAssignment(state, input));
     }
 
     private static Option<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var right = stripped.substring("return ".length());
-            var tuple = compileValueOrPlaceholder(state, right);
-            return new Some<>(new Tuple<>(tuple.left, "return " + tuple.right));
+            var tuple = compileValue(state, right);
+            if (tuple instanceof Some(var tuple0)) {
+                return new Some<>(new Tuple<>(tuple0.left, "return " + tuple0.right));
+            }
         }
 
         return new None<>();
@@ -834,13 +853,15 @@ public class Main {
 
         var left = input.substring(0, valueSeparator);
         var right = input.substring(valueSeparator + "=".length());
-        var definitionTuple = compileDefinitionOrPlaceholder(state, left);
-        var valueTuple = compileValueOrPlaceholder(definitionTuple.left, right);
-        return new Some<>(new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right));
-    }
+        var definitionTuple = compileDefinition(state, left);
+        if (definitionTuple instanceof Some(var definitionTuple0)) {
+            var valueTuple = compileValue(definitionTuple0.left, right);
+            if (valueTuple instanceof Some(var valueTuple0)) {
+                return new Some<>(new Tuple<>(valueTuple0.left, definitionTuple0.right + " = " + valueTuple0.right));
+            }
+        }
 
-    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
-        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
@@ -876,10 +897,10 @@ public class Main {
         if (findTypeSeparator(stripped) instanceof Some(var slices)) {
             var beforeType = slices.left;
             var type = slices.right;
-            return definitionWithBeforeType(state, annotations, beforeType, type, name);
+            return definitionWithBeforeType(state, annotations, type, name);
         }
 
-        return definitionWithBeforeType(state, annotations, "", stripped, name);
+        return definitionWithBeforeType(state, annotations, stripped, name);
     }
 
     private static Option<Tuple<String, String>> findTypeSeparator(String input) {
@@ -907,7 +928,7 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, Definition>> definitionWithBeforeType(CompileState state, List<String> annotations, String beforeType, String type, String name) {
+    private static Option<Tuple<CompileState, Definition>> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
         return compileType(state, type).flatMap(typeResult -> {
             var newAnnotations = new ArrayList<String>();
             var newModifiers = new ArrayList<String>();
@@ -926,24 +947,22 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.equals("var")) {
-            return new Some<>(new Tuple<>(state, "auto"));
-        }
-
-        if (stripped.equals("char")) {
-            return new Some<>(new Tuple<>(state, "char"));
-        }
-
-        if (stripped.equals("void")) {
-            return new Some<>(new Tuple<>(state, "void"));
-        }
-
-        if (stripped.equals("String")) {
-            return new Some<>(new Tuple<>(state, "char*"));
-        }
-
-        if (stripped.equals("boolean")) {
-            return new Some<>(new Tuple<>(state, "int"));
+        switch (stripped) {
+            case "var" -> {
+                return new Some<>(new Tuple<>(state, "auto"));
+            }
+            case "char" -> {
+                return new Some<>(new Tuple<>(state, "char"));
+            }
+            case "void" -> {
+                return new Some<>(new Tuple<>(state, "void"));
+            }
+            case "String" -> {
+                return new Some<>(new Tuple<>(state, "char*"));
+            }
+            case "boolean" -> {
+                return new Some<>(new Tuple<>(state, "int"));
+            }
         }
 
         if (isSymbol(stripped)) {
@@ -971,7 +990,7 @@ public class Main {
             }
         }
 
-        return new Some<>(new Tuple<>(state, generatePlaceholder(stripped)));
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, Value>> compileInvokable(CompileState state, String input) {
@@ -1031,7 +1050,7 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, List.of(
                 type(Main::parseWhitespace),
-                type((state2, input2) -> parseValue(state2, input2))
+                type(Main::parseValue)
         ));
     }
 
@@ -1045,9 +1064,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> compiler) {
-        return parseValues(state, input, compiler).map(tuple -> {
-            return new Tuple<>(tuple.left, generateValues(tuple.right));
-        });
+        return parseValues(state, input, compiler).map(tuple -> new Tuple<>(tuple.left, generateValues(tuple.right)));
     }
 
     private static String generateValues(List<String> elements) {
@@ -1086,12 +1103,6 @@ public class Main {
             return appended.exit();
         }
         return appended;
-    }
-
-    private static Tuple<CompileState, String> compileValueOrPlaceholder(CompileState state, String input) {
-        return compileValue(state, input).orElseGet(() -> {
-            return new Tuple<>(state, generatePlaceholder(input));
-        });
     }
 
     private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
@@ -1337,9 +1348,5 @@ public class Main {
             return appended.exit();
         }
         return appended;
-    }
-
-    private static String generatePlaceholder(String stripped) {
-        return "/* " + stripped + " */";
     }
 }
