@@ -1153,9 +1153,17 @@ public class Main {
         var afterInfix = left.substring(infixIndex + infix.length()).strip();
 
         return removeImplements(state, afterInfix)
+                .flatMapValue(Main::removeExtends)
                 .flatMapValue(Main::removeParams)
                 .flatMapValue(Main::removeTypeParams)
                 .flatMapValue(nameTuple -> assembleStructure(nameTuple, right));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> removeExtends(Tuple<CompileState, String> tuple) {
+        return Main.or(tuple.left, tuple.right, Lists.of(
+                (state, s) -> infix(s, " extends ", (s1, _) -> new Ok<>(new Tuple<>(state, s1))),
+                (state, s) -> new Ok<>(new Tuple<>(state, s))
+        ));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> removeParams(Tuple<CompileState, String> state1) {
