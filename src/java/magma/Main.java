@@ -428,7 +428,7 @@ public class Main {
 
         @Override
         public String display() {
-            return format(0);
+            return this.format(0);
         }
 
         private String format(int depth) {
@@ -695,15 +695,37 @@ public class Main {
             }
 
             var afterInfix = left.substring(infixIndex + infix.length()).strip();
-            if (!isSymbol(afterInfix)) {
-                return new Err<>(new CompileError("Not a symbol", afterInfix));
-            }
+            return Main.or(state0, afterInfix, List.of(
+                    (BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>>) (state, s) -> compileInfix(s, "<", (left1, _) -> new Ok<>(new Tuple<>(state, left1))),
+                    (state, s) -> new Ok<>(new Tuple<>(state, s))
+            )).flatMapValue(nameTuple -> {
+                var nameState = nameTuple.left;
+                var name = nameTuple.right;
 
-            return compileStatements(state0, right, Main::compileStructSegment).mapValue(result -> {
-                var generated = "struct " + afterInfix + " {" + result.right + "\n};\n";
-                return new Tuple<>(result.left.addStruct(generated), "");
+                if (!isSymbol(name)) {
+                    return new Err<>(new CompileError("Not a symbol", name));
+                }
+
+                return compileStatements(nameState, right, Main::compileStructSegment).mapValue(result -> {
+                    var generated = "struct " + name + " {" + result.right + "\n};\n";
+                    return new Tuple<>(result.left.addStruct(generated), "");
+                });
             });
         };
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> compileInfix(
+            String input,
+            String infix,
+            BiFunction<String, String, Ok<Tuple<CompileState, String>, CompileError>> mapper
+    ) {
+        var typeParamStart = input.indexOf(infix);
+        if (typeParamStart >= 0) {
+            var left = input.substring(0, typeParamStart);
+            var right = input.substring(typeParamStart + infix.length());
+            return mapper.apply(left, right);
+        }
+        return createInfixErr(input, infix);
     }
 
     private static Err<Tuple<CompileState, String>, CompileError> createInfixErr(String withoutEnd, String infix) {
