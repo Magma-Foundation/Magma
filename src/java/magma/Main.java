@@ -721,14 +721,15 @@ public class Main {
                     .next();
         }
 
-        public CompileState exitStruct() {
+        public Option<CompileState> exitStruct() {
             var last = this.frames.last();
             var maybeStructureType = last.toStructureType();
             var exited = this.exit();
             if (maybeStructureType instanceof Some(var structProto)) {
-                return exited.defineType(structProto.prototype.name, structProto);
+                return new Some<>(exited.defineType(structProto.prototype.name, structProto));
             }
-            return exited;
+
+            return new None<>();
         }
 
         public CompileState exit() {
@@ -1341,15 +1342,19 @@ public class Main {
                     (result1, element) -> result1.flatMapValue(
                             tuple -> completeStructSegment(element, tuple)));
 
-            return fold.mapValue(inner -> {
+            return fold.flatMapValue(inner -> {
                 var joined = inner.right.iterator()
                         .map(Node::generate)
                         .collect(new Joiner())
                         .orElse("");
 
                 var generated = "struct " + name + " {" + joined + "\n};\n";
-                var withStruct = inner.left.exitStruct().addStruct(generated);
-                return new Tuple<>(withStruct, new Whitespace());
+                return inner.left.exitStruct().<Result<Tuple<CompileState, Whitespace>, CompileError>>map(exited -> {
+                    var withStruct = exited.addStruct(generated);
+                    return new Ok<>(new Tuple<>(withStruct, new Whitespace()));
+                }).orElseGet(() -> {
+                    return new Err<>(new CompileError("Could not exit with struct", generated));
+                });
             });
         });
     }
