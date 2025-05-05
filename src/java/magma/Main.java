@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -126,6 +125,14 @@ public class Main {
     }
 
     private interface Parameter {
+    }
+
+    private interface Map<K, V> {
+        boolean containsKey(K key);
+
+        Map<K, V> put(K key, V value);
+
+        V get(K key);
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -542,6 +549,36 @@ public class Main {
         }
     }
 
+    private static class Maps {
+        @Actual
+        private record JavaMap<K, V>(java.util.Map<K, V> map) implements Main.Map<K, V> {
+            public JavaMap() {
+                this(new HashMap<>());
+            }
+
+            @Override
+            public boolean containsKey(K key) {
+                return this.map.containsKey(key);
+            }
+
+            @Override
+            public Map<K, V> put(K key, V value) {
+                this.map.put(key, value);
+                return this;
+            }
+
+            @Override
+            public V get(K key) {
+                return this.map.get(key);
+            }
+        }
+
+        @Actual
+        public static <K, V> Map<K, V> empty() {
+            return new JavaMap<>();
+        }
+    }
+
     private record Frame(
             Map<String, Integer> counters,
             List<String> statements,
@@ -550,7 +587,7 @@ public class Main {
             Map<String, Type> types
     ) {
         public Frame() {
-            this(new HashMap<>(), Lists.empty(), new None<>(), new None<>(), new HashMap<>());
+            this(Maps.empty(), Lists.empty(), new None<>(), new None<>(), Maps.empty());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -1501,9 +1538,7 @@ public class Main {
         }
 
         var right = stripped.substring("return ".length());
-        return compileValue(state, right).flatMapValue(tuple0 -> {
-            return new Ok<>(new Tuple<>(tuple0.left, "return " + tuple0.right));
-        });
+        return compileValue(state, right).flatMapValue(tuple0 -> new Ok<>(new Tuple<>(tuple0.left, "return " + tuple0.right)));
     }
 
     private static <T> Result<Tuple<CompileState, T>, CompileError> createPrefixErr(String input, String prefix) {
