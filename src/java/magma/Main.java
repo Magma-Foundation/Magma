@@ -140,6 +140,7 @@ public class Main {
     }
 
     private interface StructSegment extends Node {
+        Option<Definition> findDefinition();
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -820,6 +821,11 @@ public class Main {
         public Definition mapName(Function<String, String> mapper) {
             return new Definition(this.annotations, this.modifiers, this.type, mapper.apply(this.name));
         }
+
+        @Override
+        public Option<Definition> findDefinition() {
+            return new Some<>(this);
+        }
     }
 
     private record StringValue(String value) implements Value {
@@ -873,6 +879,11 @@ public class Main {
         @Override
         public String generate() {
             return "";
+        }
+
+        @Override
+        public Option<Definition> findDefinition() {
+            return new None<>();
         }
     }
 
@@ -1084,6 +1095,11 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
         }
+
+        @Override
+        public Option<Definition> findDefinition() {
+            return new None<>();
+        }
     }
 
     @Actual
@@ -1264,9 +1280,14 @@ public class Main {
 
         var prototype = new StructPrototype(name);
         var state = nameState.enter().mapLast(last -> last.withStructProto(prototype));
-        return parseStatements(state, right, Main::compileStructSegment).mapValue(result -> {
-            var joined = result.right
-                    .iterator()
+        return parseStatements(state, right, Main::parseStructSegment).mapValue(result -> {
+            var structSegments = result.right;
+            var definitions = structSegments.iterator()
+                    .map(StructSegment::findDefinition)
+                    .flatMap(Iterators::fromOption)
+                    .collect(new ListCollector<>());
+
+            var joined = structSegments.iterator()
                     .map(Node::generate)
                     .collect(new Joiner())
                     .orElse("");
@@ -1347,7 +1368,7 @@ public class Main {
         return appended;
     }
 
-    private static Result<Tuple<CompileState, StructSegment>, CompileError> compileStructSegment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> parseStructSegment(CompileState state, String input) {
         return or(state, input, Lists.of(
                 typed("whitespace", (state4, input4) -> parseWhitespace(state4, input4)),
                 typed("enum", (state3, input3) -> compileStructure(state3, input3, "enum ")),
