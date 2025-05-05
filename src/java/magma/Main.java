@@ -1690,8 +1690,7 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> functionStatement(CompileState state, String input) {
-        return statement(input, slice1 -> ((Rule<String>) Main::functionStatementValue).apply(state, slice1).flatMapValue(result ->
-                new Ok<>(new Tuple<>(result.left, format(state, result)))));
+        return statement(input, slice1 -> functionStatementValue(state, slice1).mapValue(result -> new Tuple<>(result.left, format(state, result))));
     }
 
     private static <T> Result<Tuple<CompileState, T>, CompileError> statement(String input, Function<String, Result<Tuple<CompileState, T>, CompileError>> function) {
