@@ -275,9 +275,10 @@ public class Main {
         }
     }
 
-    private record Frame(Map<String, Integer> counters, List<String> statements, Option<FunctionProto> functionProto) {
+    private record Frame(Map<String, Integer> counters, List<String> statements, Option<FunctionProto> functionProto,
+                         Option<StructProto> structProto) {
         public Frame() {
-            this(new HashMap<>(), new ArrayList<>(), new None<>());
+            this(new HashMap<>(), new ArrayList<>(), new None<>(), new None<>());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -294,8 +295,12 @@ public class Main {
             return new Tuple<>(name, this);
         }
 
-        public Frame withProto(FunctionProto proto) {
-            return new Frame(this.counters, this.statements, new Some<>(proto));
+        public Frame withFunctionProto(FunctionProto proto) {
+            return new Frame(this.counters, this.statements, new Some<>(proto), this.structProto);
+        }
+
+        public Frame withStructProto(StructProto proto) {
+            return new Frame(this.counters, this.statements, this.functionProto, new Some<>(proto));
         }
     }
 
@@ -521,6 +526,9 @@ public class Main {
     }
 
     private record FunctionProto(Definition definition, List<Definition> params) {
+    }
+
+    private record StructProto(String name) {
     }
 
     private enum Operator {
@@ -808,7 +816,7 @@ public class Main {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
-        return compileStatements(nameState.enter(), right, Main::compileStructSegment).mapValue(result -> {
+        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(new StructProto(name))), right, Main::compileStructSegment).mapValue(result -> {
             var generated = "struct " + name + " {" + result.right + "\n};\n";
             return new Tuple<>(result.left.exit().addStruct(generated), "");
         });
@@ -879,7 +887,7 @@ public class Main {
         }
 
         var content = withBraces.substring(1, withBraces.length() - 1).strip();
-        return parseStatements(state.enter().mapLast(last -> last.withProto(proto)), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
+        return parseStatements(state.enter().mapLast(last -> last.withFunctionProto(proto)), content, Main::compileFunctionSegment).flatMapValue(statementsTuple -> {
             var statementsState = statementsTuple.left;
             var statements = statementsTuple.right;
 

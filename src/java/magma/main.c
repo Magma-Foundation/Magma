@@ -65,6 +65,8 @@ struct ApplicationError {
 };
 struct FunctionProto {
 };
+struct StructProto {
+};
 struct Operator {
 		ADD("+"), SUBTRACT("-"), LESS_THAN("<"), AND("&&"), OR("||"), GREATER_THAN_OR_EQUALS(">="), EQUALS("=="), NOT_EQUALS("!=");
 		char* representation;
@@ -258,7 +260,7 @@ char peek(){
 			return charAt(this.input, this.index);
 }
 struct public Frame(){
-			this(template HashMap<>::new(), template ArrayList<>::new(), template None<>::new());
+			this(template HashMap<>::new(), template ArrayList<>::new(), template None<>::new(), template None<>::new());
 }
 (char*, struct Frame) createName(char* category){
 				if (!containsKey(this.counters, category)){
@@ -270,8 +272,11 @@ struct public Frame(){
 			put(this.counters, category, newCounter);
 			return (name, this);
 }
-struct Frame withProto(struct FunctionProto proto){
-			return struct Frame::new(this.counters, this.statements, template Some<>::new(proto));
+struct Frame withFunctionProto(struct FunctionProto proto){
+			return struct Frame::new(this.counters, this.statements, template Some<>::new(proto), this.structProto);
+}
+struct Frame withStructProto(struct StructProto proto){
+			return struct Frame::new(this.counters, this.statements, this.functionProto, template Some<>::new(proto));
 }
 struct public CompileState(){
 			this(template ArrayList<>::new(), template ArrayList<>::new(), template ArrayList<>::new(singletonList(Collections, struct Frame::new())));
@@ -679,13 +684,16 @@ auto lambda0(auto result){
 			auto generated = "struct " + name + " {" + result.right + "\n};\n";
 			return (addStruct(exit(result.left), generated), "");
 }
+auto lambda1(auto last){
+	return withStructProto(last, struct StructProto::new(name));
+}
 template Result<(struct CompileState, char*), struct CompileError> assembleStructure((struct CompileState, char*) nameTuple, char* right){
 			auto nameState = nameTuple.left;
 			auto name = nameTuple.right;
 				if (!isSymbol(name)){
 				return template Err<>::new(struct CompileError::new("Not a symbol", name));
 				}
-			return mapValue(compileStatements(enter(nameState), right, struct Main::compileStructSegment), lambda0);
+			return mapValue(compileStatements(mapLast(enter(nameState), lambda1), right, struct Main::compileStructSegment), lambda0);
 }
 template Result<(struct CompileState, struct T), struct CompileError> infix(char* input, char* infix, template BiFunction<char*, char*, template Result<(struct CompileState, struct T), struct CompileError>> mapper){
 			auto typeParamStart = indexOf(input, infix);
@@ -744,7 +752,7 @@ auto lambda0(auto statementsTuple){
 			return template Ok<>::new((addFunction(exit(statementsState), generated), ""));
 }
 auto lambda1(auto last){
-	return withProto(last, proto);
+	return withFunctionProto(last, proto);
 }
 template Result<(struct CompileState, char*), struct CompileError> methodWithBraces(struct CompileState state, char* withBraces, char* header, struct FunctionProto proto){
 				if (!startsWith(withBraces, "{") || !endsWith(withBraces, "}")){
