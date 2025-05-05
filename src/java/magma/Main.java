@@ -541,8 +541,8 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type("?", Main::namespaced),
-                type("?", structure("class"))
+                typed("?", Main::namespaced),
+                typed("?", structure("class"))
         ));
     }
 
@@ -677,12 +677,17 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type("whitespace", Main::whitespace),
-                type("record", structure("record")),
-                type("class", structure("class")),
-                type("interface", structure("interface")),
-                type("method", Main::compileMethod)
+                typed("whitespace", Main::whitespace),
+                typed("record", structure("record")),
+                typed("class", structure("class")),
+                typed("interface", structure("interface")),
+                typed("method", Main::compileMethod),
+                typed("definition", Main::definitionStatement)
         ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> definitionStatement(CompileState state, String input) {
+        return statement(state, input, Main::compileDefinition);
     }
 
     private static BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> structure(String infix) {
@@ -827,8 +832,8 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileParameter(CompileState state2, String input) {
         return or(state2, input, List.of(
-                type("?", Main::whitespace),
-                type("?", Main::compileDefinition)
+                typed("?", Main::whitespace),
+                typed("?", Main::compileDefinition)
         ));
     }
 
@@ -842,9 +847,9 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> compileFunctionSegment(CompileState state, String input) {
         return or(state, input, List.of(
-                type("whitespace", Main::whitespace),
-                type("statement", Main::compileStatement),
-                type("block", Main::compileBlock)
+                typed("whitespace", Main::whitespace),
+                typed("statement", Main::functionStatement),
+                typed("block", Main::compileBlock)
         ));
     }
 
@@ -894,16 +899,19 @@ public class Main {
         return appended;
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileStatement(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> functionStatement(CompileState state, String input) {
+        return statement(state, input, Main::functionStatementValue);
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> statement(CompileState state, String input, BiFunction<CompileState, String, Result<Tuple<CompileState, String>, CompileError>> mapper) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return createSuffixErr(input, ";");
         }
 
-        var withoutEnd = stripped.substring(0, stripped.length() - ";".length());
-        return compileFunctionStatementValue(state, withoutEnd).flatMapValue(statements -> {
-            return new Ok<>(new Tuple<>(statements.left, "\n" + "\t".repeat(state.depth() - 1) + statements.right + ";"));
-        });
+        var slice = stripped.substring(0, stripped.length() - ";".length());
+        return mapper.apply(state, slice).flatMapValue(result ->
+                new Ok<>(new Tuple<>(result.left, "\n" + "\t".repeat(state.depth() - 1) + result.right + ";")));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileBlockHeader(CompileState state, String input) {
@@ -933,7 +941,7 @@ public class Main {
         return new Err<>(new CompileError("Not an else statement", input));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileFunctionStatementValue(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> functionStatementValue(CompileState state, String input) {
         return or(state, input, List.of(
                 Main::compileReturn,
                 (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
@@ -1195,8 +1203,8 @@ public class Main {
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseArgument(CompileState state1, String input1) {
         return or(state1, input1, List.of(
-                type("?", Main::parseWhitespace),
-                type("?", Main::parseValue)
+                typed("?", Main::parseWhitespace),
+                typed("?", Main::parseValue)
         ));
     }
 
@@ -1257,24 +1265,24 @@ public class Main {
 
     private static Result<Tuple<CompileState, Value>, CompileError> parseValue(CompileState state, String input) {
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> beforeOperators = List.of(
-                type("?", Main::compileNot),
-                type("?", Main::compileString),
-                type("?", Main::compileChar),
-                type("?", Main::compileLambda)
+                typed("?", Main::compileNot),
+                typed("?", Main::compileString),
+                typed("?", Main::compileChar),
+                typed("?", Main::compileLambda)
         );
 
         List<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>> afterOperators = List.of(
-                type("invokable", Main::compileInvokable),
-                type("?", Main::compileAccess),
-                type("?", Main::parseBooleanValue),
-                type("?", Main::compileSymbolValue),
-                type("?", Main::compileMethodReference),
-                type("?", Main::parseNumber)
+                typed("invokable", Main::compileInvokable),
+                typed("?", Main::compileAccess),
+                typed("?", Main::parseBooleanValue),
+                typed("?", Main::compileSymbolValue),
+                typed("?", Main::compileMethodReference),
+                typed("?", Main::parseNumber)
         );
 
         var rules = new ArrayList<BiFunction<CompileState, String, Result<Tuple<CompileState, Value>, CompileError>>>(beforeOperators);
         for (var value : Operator.values()) {
-            rules.add(type("?", (state1, input1) -> compileOperator(state1, input1, value)));
+            rules.add(typed("?", (state1, input1) -> compileOperator(state1, input1, value)));
         }
         rules.addAll(afterOperators);
 
@@ -1363,7 +1371,7 @@ public class Main {
         }, (_, next) -> next).toResult().mapErr(errs -> new CompileError("No valid rule present", input, errs));
     }
 
-    private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> type(
+    private static <S, T extends S> BiFunction<CompileState, String, Result<Tuple<CompileState, S>, CompileError>> typed(
             String type, BiFunction<CompileState, String, Result<Tuple<CompileState, T>, CompileError>> mapper) {
         return (state, input) -> mapper.apply(state, input)
                 .<Tuple<CompileState, S>>mapValue(value -> new Tuple<>(value.left, value.right))
