@@ -91,7 +91,7 @@ public class Main {
 
         boolean isEmpty();
 
-        Iterator<T> iter();
+        Iterator<T> iterator();
 
         List<T> sort(BiFunction<T, T, Integer> mapper);
 
@@ -139,7 +139,7 @@ public class Main {
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments.iter()
+            var joinedArguments = this.arguments.iterator()
                     .map(Node::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -437,7 +437,7 @@ public class Main {
             }
 
             @Override
-            public Iterator<T> iter() {
+            public Iterator<T> iterator() {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
 
@@ -455,7 +455,7 @@ public class Main {
 
             @Override
             public List<T> addAllLast(List<T> others) {
-                return others.iter().<List<T>>fold(this, List::addLast);
+                return others.iterator().<List<T>>fold(this, List::addLast);
             }
 
             @Override
@@ -598,10 +598,10 @@ public class Main {
             Option<FunctionProto> maybeFunctionProto,
             Option<StructPrototype> maybeStructProto,
             Map<String, Type> types,
-            Map<String, Definition> definitions
+            List<Definition> definitions
     ) {
         public Frame() {
-            this(Maps.empty(), Lists.empty(), new None<>(), new None<>(), Maps.empty(), Maps.empty());
+            this(Maps.empty(), Lists.empty(), new None<>(), new None<>(), Maps.empty(), Lists.empty());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -628,7 +628,7 @@ public class Main {
 
         public Option<Type> resolveType(String name) {
             if (this.maybeStructProto instanceof Some(var structProto) && name.equals(structProto.name)) {
-                return new Some<>(new StructureType(structProto));
+                return new Some<>(new StructureType(structProto, this.definitions));
             }
 
             if (this.types.containsKey(name)) {
@@ -644,11 +644,13 @@ public class Main {
         }
 
         public Option<Definition> resolveValue(String name) {
-            if (this.definitions.containsKey(name)) {
-                return new Some<>(this.definitions.get(name));
-            }
+            return this.definitions.iterator()
+                    .filter(definition -> definition.name.equals(name))
+                    .next();
+        }
 
-            return new None<>();
+        public Option<StructureType> toStructureType() {
+            return this.maybeStructProto.map(proto -> new StructureType(proto, this.definitions));
         }
     }
 
@@ -700,10 +702,10 @@ public class Main {
 
         public CompileState exitStruct() {
             var last = this.frames.last();
-            var maybeStructureProto = last.maybeStructProto;
+            var maybeStructureType = last.toStructureType();
             var exited = this.exit();
-            if (maybeStructureProto instanceof Some(var structProto)) {
-                return exited.defineType(structProto.name, new StructureType(structProto));
+            if (maybeStructureType instanceof Some(var structProto)) {
+                return exited.defineType(structProto.prototype.name, structProto);
             }
             return exited;
         }
@@ -724,6 +726,14 @@ public class Main {
         }
 
         public Option<Definition> resolveValue(String name) {
+            if (name.equals("this")) {
+                return this.frames.iteratorReverse()
+                        .map(Frame::toStructureType)
+                        .flatMap(Iterators::fromOption)
+                        .next()
+                        .map(type -> new Definition(type, name));
+            }
+
             return this.frames.iteratorReverse()
                     .map(frame -> frame.resolveValue(name))
                     .flatMap(Iterators::fromOption)
@@ -779,7 +789,7 @@ public class Main {
         }
 
         private String getJoin() {
-            return this.modifiers.iter().collect(new Joiner("")).orElse("");
+            return this.modifiers.iterator().collect(new Joiner("")).orElse("");
         }
 
         public Definition mapName(Function<String, String> mapper) {
@@ -804,7 +814,7 @@ public class Main {
     private record Invocation(Value caller, List<Value> arguments) implements Value {
         @Override
         public String generate() {
-            var joined = this.arguments.iter()
+            var joined = this.arguments.iterator()
                     .map(Value::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -895,7 +905,7 @@ public class Main {
         private String format(int depth) {
             var copy = this.errors.sort((error, error2) -> error.depth() - error2.depth());
 
-            return this.message + ": " + this.context + copy.iter()
+            return this.message + ": " + this.context + copy.iterator()
                     .map(error -> error.format(depth + 1))
                     .map(statement -> "\n" + "\t".repeat(depth) + statement)
                     .collect(new Joiner())
@@ -903,7 +913,7 @@ public class Main {
         }
 
         private int depth() {
-            return 1 + this.errors.iter()
+            return 1 + this.errors.iterator()
                     .map(CompileError::depth)
                     .collect(new Max())
                     .orElse(0);
@@ -942,7 +952,7 @@ public class Main {
     private record StructPrototype(String name) {
     }
 
-    private record StructureType(StructPrototype prototype) implements Type {
+    private record StructureType(StructPrototype prototype, List<Definition> definitions) implements Type {
         @Override
         public String generate() {
             return "struct " + this.prototype.name;
@@ -1014,7 +1024,7 @@ public class Main {
     private record FunctionType(List<Type> arguments, Type returnType) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments().iter()
+            var joinedArguments = this.arguments().iterator()
                     .map(Node::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1079,7 +1089,7 @@ public class Main {
     }
 
     private static String join(List<String> structs) {
-        return structs.iter().collect(new Joiner()).orElse("");
+        return structs.iterator().collect(new Joiner()).orElse("");
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
@@ -1116,7 +1126,7 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder,
             Rule<T> mapper
     ) {
-        return divideAll(input, folder).iter().fold(createInitial(initial),
+        return divideAll(input, folder).iterator().fold(createInitial(initial),
                 (result, segment) -> result.flatMapValue(current0 -> foldElement(current0, segment, mapper)));
     }
 
@@ -1195,7 +1205,7 @@ public class Main {
     }
 
     private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return elements.iter()
+        return elements.iterator()
                 .fold(new StringBuilder(), merger)
                 .toString();
     }
@@ -1355,7 +1365,7 @@ public class Main {
 
             var header = methodHeaderTuple.right;
             var joinedParams = header.params
-                    .iter()
+                    .iterator()
                     .map(Definition::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1422,7 +1432,7 @@ public class Main {
         return parseValues(state, inputParams, Main::compileParameter).flatMapValue(paramsTuple -> {
             var paramsState = paramsTuple.left;
             var params = paramsTuple.right
-                    .iter()
+                    .iterator()
                     .flatMap(Main::retainDefinition)
                     .collect(new ListCollector<>());
 
@@ -1685,7 +1695,7 @@ public class Main {
         var divisions = divideAll(input.strip(), Main::foldTypeSeparator);
         if (divisions.size() >= 2) {
             var left = divisions.slice(0, divisions.size() - 1);
-            var joinedLeft = left.iter().collect(new Joiner(" ")).orElse("");
+            var joinedLeft = left.iterator().collect(new Joiner(" ")).orElse("");
             return new Some<>(new Tuple<>(joinedLeft, divisions.last()));
         }
         return new None<>();
@@ -1859,7 +1869,7 @@ public class Main {
         return tupleCompileErrorResult.flatMapValue(argumentsTuple -> {
             var argumentState = argumentsTuple.left;
             var oldArguments = argumentsTuple.right
-                    .iter()
+                    .iterator()
                     .filter(arg -> !(arg instanceof Whitespace))
                     .collect(new ListCollector<>());
 
@@ -2100,7 +2110,7 @@ public class Main {
             String input,
             List<Rule<T>> rules
     ) {
-        return rules.iter().fold(new OrState<T>(), (orState, mapper) -> foldOr(orState, mapper, state, input))
+        return rules.iterator().fold(new OrState<T>(), (orState, mapper) -> foldOr(orState, mapper, state, input))
                 .toResult()
                 .mapErr(errs -> new CompileError("No valid rule present", input, errs));
     }
@@ -2220,7 +2230,7 @@ public class Main {
         var nameTuple = state.createName("lambda");
         var generatedName = nameTuple.left;
 
-        var joinedParams = paramNames.iter()
+        var joinedParams = paramNames.iterator()
                 .map(name -> "auto " + name)
                 .collect(new Joiner(", "))
                 .orElse("");
