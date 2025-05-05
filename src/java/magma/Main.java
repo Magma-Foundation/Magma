@@ -1019,7 +1019,13 @@ public class Main {
     private record StructureType(StructPrototype prototype, List<Definition> definitions) implements Type {
         @Override
         public String generate() {
-            return "struct " + this.prototype.name;
+            var joined = this.definitions.iterator()
+                    .map(Definition::generate)
+                    .map(display -> "\n\t"+ display + ";")
+                    .collect(new Joiner())
+                    .orElse("");
+
+            return "struct " + this.prototype.name + " {" + joined + "\n}";
         }
 
         public Result<Type, CompileError> findPropertyType(String propertyName) {
@@ -1032,7 +1038,7 @@ public class Main {
                 return new Ok<>(definition);
             }
             else {
-                return new Err<>(new CompileError("No property present", propertyName));
+                return new Err<>(new CompileError("No property present in '" + this.generate() + "'", propertyName));
             }
         }
     }
@@ -1838,7 +1844,7 @@ public class Main {
 
         var beforeName = stripped.substring(0, valueSeparator);
         var name = stripped.substring(valueSeparator + " ".length()).strip();
-        if(!isSymbol(name)) {
+        if (!isSymbol(name)) {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
