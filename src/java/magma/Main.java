@@ -1877,12 +1877,12 @@ public class Main {
     }
 
     private static Result<Tuple<CompileState, Definition>, CompileError> definitionWithBeforeType(CompileState state, List<String> annotations, String type, String name) {
-        return type(state, type).mapValue(typeResult -> {
+        return parseType(state, type).mapValue(typeResult -> {
             return new Tuple<>(typeResult.left, new Definition(annotations, Lists.empty(), typeResult.right, name));
         });
     }
 
-    private static Result<Tuple<CompileState, Type>, CompileError> type(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Type>, CompileError> parseType(CompileState state, String input) {
         return Main.or(state, input, Lists.of(
                 typed("primitive", Main::primitive),
                 typed("string", Main::stringType),
@@ -1896,7 +1896,7 @@ public class Main {
     private static Result<Tuple<CompileState, Type>, CompileError> array(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith("[]")) {
-            return type(state, stripped.substring(0, stripped.length() - "[]".length()))
+            return parseType(state, stripped.substring(0, stripped.length() - "[]".length()))
                     .mapValue(inner -> new Tuple<>(inner.left, new Ref(inner.right)));
         }
 
@@ -1906,7 +1906,7 @@ public class Main {
     private static Result<Tuple<CompileState, Type>, CompileError> varArgs(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.endsWith("...")) {
-            return type(state, stripped.substring(0, stripped.length() - "...".length()))
+            return parseType(state, stripped.substring(0, stripped.length() - "...".length()))
                     .mapValue(inner -> new Tuple<>(inner.left, new Ref(inner.right)));
         }
 
@@ -1980,7 +1980,7 @@ public class Main {
     private static Result<Tuple<CompileState, Type>, CompileError> argumentType(CompileState state1, String input1) {
         return Main.or(state1, input1, Lists.of(
                 typed("whitespace", (state, input) -> parseWhitespace(state, input)),
-                typed("type", Main::type)
+                typed("type", Main::parseType)
         ));
     }
 
@@ -2051,7 +2051,7 @@ public class Main {
             return new Ok<>(new Tuple<>(state, new TupleNode(oldArguments.get(0), oldArguments.get(1))));
         }
 
-        return type(state, withoutPrefix).flatMapValue(callerTuple -> {
+        return parseType(state, withoutPrefix).flatMapValue(callerTuple -> {
             var invocation = new Invocation(new MethodAccess(callerTuple.right, "new"), oldArguments);
             return new Ok<>(new Tuple<>(callerTuple.left, invocation));
         });
@@ -2189,8 +2189,17 @@ public class Main {
 
             return or(state, strippedAfterKeyword, Lists.of(
                     (state0, s) -> parseInstanceOfWithParams(state0, beforeKeyword, s),
-                    (state0, s) -> parseInstanceOfAsAlias(state0, beforeKeyword, s)
+                    (state0, s) -> parseInstanceOfAsAlias(state0, beforeKeyword, s),
+                    (state0, s) -> parseInstanceOfAsType(state0, beforeKeyword, s)
             ));
+        });
+    }
+
+    private static Result<Tuple<CompileState, Value>, CompileError> parseInstanceOfAsType(CompileState state, String beforeKeyword, String input) {
+        return parseValue(state, beforeKeyword).flatMapValue(valueResult -> {
+            return parseType(valueResult.left, input).flatMapValue(definition -> {
+                return new Ok<>(new Tuple<>(definition.left, new Operation(valueResult.right, Operator.EQUALS, new NumberValue("0"))));
+            });
         });
     }
 
@@ -2310,7 +2319,7 @@ public class Main {
             var right = input.strip().substring(functionSeparator + "::".length()).strip();
             if (isSymbol(right)) {
                 var maybeLeftTuple = Main.or(state, left, Lists.of(
-                        typed("type", Main::type),
+                        typed("type", Main::parseType),
                         typed("value", Main::parseValue)
                 ));
 
