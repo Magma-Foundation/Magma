@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -518,9 +517,6 @@ public class Main {
         }
     }
 
-    public static final Path SOURCE = Paths.get(".", "src", "java", "magma", "Main.java");
-    public static final Path TARGET = SOURCE.resolveSibling("main.c");
-
     public static void main() {
         readSource()
                 .mapErr(ApplicationError::new)
@@ -537,7 +533,7 @@ public class Main {
     @Actual
     private static Option<IOError> writeTarget(String output) {
         try {
-            Files.writeString(TARGET, output);
+            Files.writeString(Paths.get(".", "src", "java", "magma", "Main.c"), output);
             return new None<>();
         } catch (IOException e) {
             return new Some<>(new IOError(e));
@@ -547,7 +543,7 @@ public class Main {
     @Actual
     private static Result<String, IOError> readSource() {
         try {
-            return new Ok<>(Files.readString(SOURCE));
+            return new Ok<>(Files.readString(Paths.get(".", "src", "java", "magma", "Main.java")));
         } catch (IOException e) {
             return new Err<>(new IOError(e));
         }
