@@ -1002,10 +1002,18 @@ public class Main {
 
     private static Result<Tuple<CompileState, String>, CompileError> functionStatementValue(CompileState state, String input) {
         return or(state, input, List.of(
+                Main::compileBreak,
                 Main::compileReturn,
                 (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
                 Main::compileAssignment
         ));
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> compileBreak(CompileState state, String input) {
+        if(input.equals("break")) {
+            return new Ok<>(new Tuple<>(state, "break"));
+        }
+        return new Err<>(new CompileError("Not break", input));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileReturn(CompileState state, String input) {
