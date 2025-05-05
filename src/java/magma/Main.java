@@ -121,7 +121,7 @@ public class Main {
     private @interface Actual {
     }
 
-    private interface Value extends Scoped {
+    private interface Value extends Scoped, Assignable {
         String generate();
     }
 
@@ -134,6 +134,9 @@ public class Main {
         Map<K, V> put(K key, V value);
 
         V get(K key);
+    }
+
+    private interface Assignable extends Node {
     }
 
     private record Template(String base, List<Type> arguments) implements Type {
@@ -654,6 +657,10 @@ public class Main {
         public Frame defineValues(List<Definition> values) {
             return new Frame(this.counters, this.maybeFunctionProto, this.maybeStructProto, this.statements, this.definedTypes, this.definedValues.addAllLast(values));
         }
+
+        public Frame defineValue(Definition value) {
+            return new Frame(this.counters, this.maybeFunctionProto, this.maybeStructProto, this.statements, this.definedTypes, this.definedValues.addLast(value));
+        }
     }
 
     private record CompileState(List<String> structs, List<String> functions, List<Frame> frames) {
@@ -743,9 +750,11 @@ public class Main {
         }
 
         public CompileState defineValues(List<Definition> values) {
-            return this.mapLast(last -> {
-                return last.defineValues(values);
-            });
+            return this.mapLast(last -> last.defineValues(values));
+        }
+
+        public CompileState defineValue(Definition value) {
+            return this.mapLast(last -> last.defineValue(value));
         }
     }
 
@@ -779,12 +788,13 @@ public class Main {
             List<String> modifiers,
             Type type,
             String name
-    ) implements Parameter {
+    ) implements Parameter, Assignable {
         public Definition(Type type, String name) {
             this(Lists.empty(), Lists.empty(), type, name);
         }
 
-        private String generate() {
+        @Override
+        public String generate() {
             var modifiersString = this.generateModifiers();
             return modifiersString + this.type.generate() + " " + this.name;
         }
@@ -1596,7 +1606,7 @@ public class Main {
                 (state1, input1) -> compileKeyword(state1, input1, "continue"),
                 Main::compileReturn,
                 (state0, input0) -> compileInvokable(state0, input0).mapValue(tuple -> new Tuple<>(tuple.left, tuple.right.generate())),
-                Main::compileAssignment,
+                Main::assignment,
                 Main::compilePostfix
         ));
     }
@@ -1631,7 +1641,7 @@ public class Main {
         return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileAssignment(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> assignment(CompileState state, String input) {
         var valueSeparator = input.indexOf("=");
         if (valueSeparator < 0) {
             return createInfixErr(input, "=");
@@ -1640,14 +1650,22 @@ public class Main {
         var left = input.substring(0, valueSeparator);
         var right = input.substring(valueSeparator + "=".length());
         return compileAssignable(state, left).flatMapValue(definitionTuple -> {
-            return compileValue(definitionTuple.left, right).mapValue(valueTuple -> {
-                return new Tuple<>(valueTuple.left, definitionTuple.right + " = " + valueTuple.right);
+            CompileState left1 = definitionTuple.left;
+            if (definitionTuple.right instanceof Definition definition) {
+                left1 = left1.defineValue(definition);
+            }
+
+            return compileValue(left1, right).mapValue(valueTuple -> {
+                return new Tuple<>(valueTuple.left, definitionTuple.right.generate() + " = " + valueTuple.right);
             });
         });
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> compileAssignable(CompileState state, String left) {
-        return Main.or(state, left, Lists.of(Main::definition, Main::compileValue));
+    private static Result<Tuple<CompileState, Assignable>, CompileError> compileAssignable(CompileState state, String left) {
+        return Main.or(state, left, Lists.of(
+                typed("definition", Main::parseDefinition),
+                typed("value", Main::value)
+        ));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> definition(CompileState state, String input) {
