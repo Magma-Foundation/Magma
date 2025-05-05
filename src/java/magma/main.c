@@ -101,104 +101,79 @@ char* Error::display() {
 }
 char* Value::generate() {
 }
-@Override
 char* IOError::display(){
 			auto writer = struct StringWriter::new();
 			printStackTrace(this.exception, struct PrintWriter::new(writer));
 			return toString(writer);
 }
-@Override
 void None::ifPresent(template Consumer<struct T> consumer){
 }
-@Override
 struct T None::orElseGet(template Supplier<struct T> supplier){
 			return get(supplier);
 }
-@Override
 template Option<struct T> None::or(template Supplier<template Option<struct T>> other){
 			return get(other);
 }
-@Override
 int None::isPresent(){
 			return 0;
 }
-@Override
 template Option<struct R> None::map(template Function<struct T, struct R> mapper){
 			return template None<>::new();
 }
-@Override
 template Option<struct R> None::flatMap(template Function<struct T, template Option<struct R>> mapper){
 			return template None<>::new();
 }
-@Override
 struct T None::orElse(struct T other){
 			return other;
 }
-@Override
 struct R None::match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone){
 			return get(whenNone);
 }
-@Override
 void Some::ifPresent(template Consumer<struct T> consumer){
 			accept(consumer, this.value);
 }
-@Override
 struct T Some::orElseGet(template Supplier<struct T> supplier){
 			return this.value;
 }
-@Override
 template Option<struct T> Some::or(template Supplier<template Option<struct T>> other){
 			return this;
 }
-@Override
 int Some::isPresent(){
 			return 1;
 }
-@Override
 template Option<struct R> Some::map(template Function<struct T, struct R> mapper){
 			return template Some<>::new(apply(mapper, this.value));
 }
-@Override
 template Option<struct R> Some::flatMap(template Function<struct T, template Option<struct R>> mapper){
 			return apply(mapper, this.value);
 }
-@Override
 struct T Some::orElse(struct T other){
 			return this.value;
 }
-@Override
 struct R Some::match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone){
 			return apply(whenSome, this.value);
 }
-@Override
 struct R Ok::match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr){
 			return apply(whenOk, this.value);
 }
-@Override
 template Result<struct R, struct X> Ok::mapValue(template Function<struct T, struct R> mapper){
 			return template Ok<>::new(apply(mapper, this.value));
 }
-@Override
 template Result<struct T, struct R> Ok::mapErr(template Function<struct X, struct R> mapper){
 			return template Ok<>::new(this.value);
 }
-@Override
 template Result<struct R, struct X> Ok::flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper){
 			return apply(mapper, this.value);
 }
-@Override
 struct R Err::match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr){
 			return apply(whenErr, this.error);
 }
-@Override
 template Result<struct R, struct X> Err::mapValue(template Function<struct T, struct R> mapper){
 			return template Err<>::new(this.error);
 }
-@Override
 template Result<struct T, struct R> Err::mapErr(template Function<struct X, struct R> mapper){
 			return template Err<>::new(apply(mapper, this.error));
 }
-@Override
 template Result<struct R, struct X> Err::flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper){
 			return template Err<>::new(this.error);
 }
@@ -313,15 +288,14 @@ struct CompileState CompileState::mapLast(template Function<struct Frame, struct
 			return this;
 }
 struct Frame CompileState::last(){
-			return getLast(frames);
+			return getLast(this.frames);
 }
 struct public Definition::Definition(char* type, char* name){
 			this(emptyList(Collections), emptyList(Collections), type, name);
 }
 char* Definition::generate(){
-			auto annotationsStrings = generateAnnotations(this);
 			auto modifiersString = generateModifiers(this);
-			return annotationsStrings + modifiersString + this.type + " " + this.name;
+			return modifiersString + this.type + " " + this.name;
 }
 char* Definition::generateModifiers(){
 				if (isEmpty(this.modifiers)){
@@ -329,70 +303,46 @@ char* Definition::generateModifiers(){
 				}
 			return join(String, " ", this.modifiers) + " ";
 }
-char* Definition::generateAnnotations(){
-				if (isEmpty(this.annotations)){
-				return "";
-				}
-			return joinAnnotations(this) + "\n";
-}
-auto lambda0(auto value){
-	return "@" + value;
-}
-char* Definition::joinAnnotations(){
-			return collect(map(stream(this.annotations), lambda0), joining(Collectors, "\n"));
-}
 struct Definition Definition::mapName(template Function<char*, char*> mapper){
-			return struct Definition::new(annotations, modifiers, type, apply(mapper, name));
+			return struct Definition::new(this.annotations, this.modifiers, this.type, apply(mapper, this.name));
 }
-@Override
 char* StringValue::generate(){
 			return "\"" + this.value + "\"";
 }
-@Override
 char* Symbol::generate(){
 			return this.value;
 }
-@Override
 char* Invocation::generate(){
 			auto joined = collect(map(stream(this.arguments), struct Value::generate), joining(Collectors, ", "));
 			return generate(this.caller) + "(" + joined + ")";
 }
-@Override
 char* DataAccess::generate(){
 			return generate(this.parent) + "." + this.child;
 }
-@Override
 char* MethodAccess::generate(){
 			return parent(this) + "::" + child(this);
 }
-@Override
 char* Operation::generate(){
 			return generate(this.left) + " " + this.operator.representation + " " + generate(this.right);
 }
-@Override
 char* Whitespace::generate(){
 			return "";
 }
-@Override
 char* TupleNode::generate(){
 			return "(" + this.first.generate() + ", " + this.second.generate() + ")";
 }
-@Override
 char* NumberValue::generate(){
 			return this.value;
 }
-@Override
 char* CharValue::generate(){
 			return "'" + this.value + "'";
 }
-@Override
 char* Not::generate(){
 			return "!" + generate(this.value);
 }
 struct public CompileError::CompileError(char* message, char* context){
 			this(message, context, emptyList(Collections));
 }
-@Override
 char* CompileError::display(){
 			return format(this, 0);
 }
@@ -426,7 +376,6 @@ auto lambda0(){
 template Result<(struct CompileState, struct T), template List<struct CompileError>> OrState::toResult(){
 			return match(this.option, struct Ok::new, lambda0);
 }
-@Override
 char* ApplicationError::display(){
 			return display(childError(this));
 }
@@ -445,9 +394,7 @@ auto lambda0(auto output){
 template Option<struct ApplicationError> Main::compileAndWrite(char* input){
 		return match(mapErr(compile(input), struct ApplicationError::new), lambda0, struct Some::new);
 }
-@Actual
-template Option<struct IOError> Main::writeTarget(char* output);@Actual
-template Result<char*, struct IOError> Main::readSource();auto lambda0(auto tuple){
+template Option<struct IOError> Main::writeTarget(char* output);template Result<char*, struct IOError> Main::readSource();auto lambda0(auto tuple){
 		auto joinedStructs = join(String, "", tuple.left.structs);
 		auto joinedFunctions = join(String, "", tuple.left.functions);
 		return joinedStructs + joinedFunctions + tuple.right;

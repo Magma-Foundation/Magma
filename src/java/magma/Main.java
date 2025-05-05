@@ -349,7 +349,7 @@ public class Main {
         }
 
         public Frame last() {
-            return frames.getLast();
+            return this.frames.getLast();
         }
     }
 
@@ -367,9 +367,8 @@ public class Main {
         }
 
         private String generate() {
-            var annotationsStrings = this.generateAnnotations();
             var modifiersString = this.generateModifiers();
-            return annotationsStrings + modifiersString + this.type + " " + this.name;
+            return modifiersString + this.type + " " + this.name;
         }
 
         private String generateModifiers() {
@@ -379,22 +378,8 @@ public class Main {
             return String.join(" ", this.modifiers) + " ";
         }
 
-        private String generateAnnotations() {
-            if (this.annotations.isEmpty()) {
-                return "";
-            }
-
-            return this.joinAnnotations() + "\n";
-        }
-
-        private String joinAnnotations() {
-            return this.annotations.stream()
-                    .map(value -> "@" + value)
-                    .collect(Collectors.joining("\n"));
-        }
-
         public Definition mapName(Function<String, String> mapper) {
-            return new Definition(annotations, modifiers, type, mapper.apply(name));
+            return new Definition(this.annotations, this.modifiers, this.type, mapper.apply(this.name));
         }
     }
 
