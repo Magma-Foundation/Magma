@@ -1992,7 +1992,7 @@ public class Main {
                 typed("?", Main::compileNot),
                 typed("?", Main::compileString),
                 typed("?", Main::compileChar),
-                typed("lambda", Main::compileLambda)
+                typed("lambda", Main::lambda)
         );
 
         var operatorRules = Iterators.of(Operator.values())
@@ -2193,7 +2193,7 @@ public class Main {
         return new Err<>(new CompileError("Not a string", input));
     }
 
-    private static Result<Tuple<CompileState, Symbol>, CompileError> compileLambda(CompileState state, String input) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> lambda(CompileState state, String input) {
         var arrowIndex = input.indexOf("->");
         if (arrowIndex < 0) {
             return createInfixErr(input, "->");
@@ -2238,12 +2238,17 @@ public class Main {
         var nameTuple = state.createName("lambda");
         var generatedName = nameTuple.left;
 
-        var joinedParams = paramNames.iterator()
-                .map(name -> "auto " + name)
+        var params = paramNames.iterator()
+                .map(name -> new Definition(Primitive.Auto, name))
+                .collect(new ListCollector<>());
+
+        var joinedParams = params.iterator()
+                .map(Definition::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Ok<>(new Tuple<>(nameTuple.right.addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
+        return new Ok<>(new Tuple<>(nameTuple.right.defineValues(params)
+                .addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
     }
 
     private static boolean isSymbol(String input) {
