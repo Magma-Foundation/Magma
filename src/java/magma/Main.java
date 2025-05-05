@@ -64,6 +64,9 @@ public class Main {
     private interface Parameter {
     }
 
+    private interface Type {
+    }
+
     @Actual
     private record IOError(IOException exception) implements Error {
         @Override
@@ -276,10 +279,15 @@ public class Main {
         }
     }
 
-    private record Frame(Map<String, Integer> counters, List<String> statements, Option<FunctionProto> functionProto,
-                         Option<StructProto> structProto) {
+    private record Frame(
+            Map<String, Integer> counters,
+            List<String> statements,
+            Option<FunctionProto> functionProto,
+            Option<StructPrototype> structProto,
+            Map<String, Type> types
+    ) {
         public Frame() {
-            this(new HashMap<>(), new ArrayList<>(), new None<>(), new None<>());
+            this(new HashMap<>(), new ArrayList<>(), new None<>(), new None<>(), new HashMap<>());
         }
 
         public Tuple<String, Frame> createName(String category) {
@@ -297,11 +305,20 @@ public class Main {
         }
 
         public Frame withFunctionProto(FunctionProto proto) {
-            return new Frame(this.counters, this.statements, new Some<>(proto), this.structProto);
+            return new Frame(this.counters, this.statements, new Some<>(proto), this.structProto, this.types);
         }
 
-        public Frame withStructProto(StructProto proto) {
-            return new Frame(this.counters, this.statements, this.functionProto, new Some<>(proto));
+        public Frame withStructProto(StructPrototype proto) {
+            return new Frame(this.counters, this.statements, this.functionProto, new Some<>(proto), this.types);
+        }
+
+        public Option<Type> resolveType(String name) {
+            if (this.types.containsKey(name)) {
+                return new Some<>(this.types.get(name));
+            }
+            else {
+                return new None<>();
+            }
         }
     }
 
@@ -351,6 +368,23 @@ public class Main {
 
         public Frame last() {
             return this.frames.getLast();
+        }
+
+        public Option<Type> resolve(String name) {
+            return IntStream.range(0, this.frames.size())
+                    .map(index -> this.frames.size() - index - 1)
+                    .mapToObj(this.frames::get)
+                    .map(frame -> frame.resolveType(name))
+                    .flatMap(Options::toStream)
+                    .findFirst()
+                    .<Option<Type>>map(Some::new)
+                    .orElseGet(None::new);
+        }
+    }
+
+    private static class Options {
+        public static <T> Stream<T> toStream(Option<T> option) {
+            return option.match(Stream::of, Stream::empty);
         }
     }
 
@@ -522,7 +556,10 @@ public class Main {
     private record FunctionProto(Definition definition, List<Definition> params) {
     }
 
-    private record StructProto(String name) {
+    private record StructPrototype(String name) {
+    }
+
+    private record StructureType(StructPrototype prototype) {
     }
 
     private enum Operator {
@@ -730,7 +767,7 @@ public class Main {
                 typed("class", (state2, input2) -> structure(state2, input2, "class ")),
                 typed("record", (state1, input1) -> structure(state1, input1, "record ")),
                 typed("interface", (state0, input0) -> structure(state0, input0, "interface ")),
-                typed("method", Main::method),
+                typed("method", Main::functionNode),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
         ));
@@ -807,7 +844,7 @@ public class Main {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
-        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(new StructProto(name))), right, Main::compileStructSegment).mapValue(result -> {
+        return compileStatements(nameState.enter().mapLast(last -> last.withStructProto(new StructPrototype(name))), right, Main::compileStructSegment).mapValue(result -> {
             var generated = "struct " + name + " {" + result.right + "\n};\n";
             return new Tuple<>(result.left.exit().addStruct(generated), "");
         });
@@ -835,14 +872,14 @@ public class Main {
         return new Err<>(new CompileError("Suffix '" + suffix + "' not present", stripped));
     }
 
-    private static Result<Tuple<CompileState, String>, CompileError> method(CompileState state, String input) {
+    private static Result<Tuple<CompileState, String>, CompileError> functionNode(CompileState state, String input) {
         var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
             return new Err<>(new CompileError("Not a method", input));
         }
 
         var withParams = input.substring(0, paramEnd);
-        return methodHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
+        return functionHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
             var afterParams = input.substring(paramEnd + ")".length()).strip();
 
             var header = methodHeaderTuple.right;
@@ -851,7 +888,7 @@ public class Main {
                     .map(Definition::generate)
                     .collect(Collectors.joining(", "));
 
-            var structName = state.last().structProto.orElse(new StructProto("?")).name;
+            var structName = state.last().structProto.orElse(new StructPrototype("?")).name;
             var withStructName = header.definition
                     .mapName(name -> structName + "::" + name)
                     .generate();
@@ -897,7 +934,7 @@ public class Main {
         });
     }
 
-    private static Result<Tuple<CompileState, FunctionProto>, CompileError> methodHeader(CompileState state, String input) {
+    private static Result<Tuple<CompileState, FunctionProto>, CompileError> functionHeader(CompileState state, String input) {
         var paramStart = input.indexOf("(");
         if (paramStart < 0) {
             return createInfixErr(input, "(");
@@ -913,18 +950,26 @@ public class Main {
                     .flatMap(Main::retainDefinition)
                     .toList();
 
-            if (isSymbol(definitionString)) {
-                var definition = new Definition("auto", definitionString);
-                return new Ok<>(new Tuple<>(paramsState, new FunctionProto(definition, params)));
-            }
-
-            if (parseDefinition(state, definitionString) instanceof Ok(var definitionTuple)) {
-                var definition = definitionTuple.right;
-                return new Ok<>(new Tuple<>(paramsState, new FunctionProto(definition, params)));
-            }
-
-            return new Err<>(new CompileError("Not a method header", input));
+            return or(paramsState, definitionString, List.of(
+                    (state1, s) -> constructor(state1, s, params),
+                    (state2, s) -> method(state2, s, params)
+            ));
         });
+    }
+
+    private static Result<Tuple<CompileState, FunctionProto>, CompileError> method(CompileState state2, String s, List<Definition> params) {
+        return parseDefinition(state2, s).mapValue(definitionTuple -> {
+            var definition = definitionTuple.right;
+            return new Tuple<>(definitionTuple.left, new FunctionProto(definition, params));
+        });
+    }
+
+    private static Result<Tuple<CompileState, FunctionProto>, CompileError> constructor(CompileState state, String definitionString, List<Definition> params) {
+        if (!isSymbol(definitionString)) {
+            return new Err<>(new CompileError("Not a symbol", definitionString));
+        }
+        var definition = new Definition("auto", definitionString);
+        return new Ok<>(new Tuple<>(state, new FunctionProto(definition, params)));
     }
 
     private static Stream<Definition> retainDefinition(Parameter parameter) {
@@ -1228,8 +1273,14 @@ public class Main {
                 return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.get(1), Collections.singletonList(args.getFirst()))));
             }
 
-            return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
+            if (state.resolve(base) instanceof Some(var resolved)) {
+                return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
+            }
+            else {
+                return new Err<>(new CompileError("Struct not defined", base));
+            }
         });
+
     }
 
     private static String generateFunctional(String returnType, List<String> arguments) {
