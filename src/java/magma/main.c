@@ -1066,14 +1066,11 @@ template Result<(struct CompileState, struct StructSegment), struct CompileError
 auto lambda0(auto tuple){
 	return (tuple.left, struct EnumValues::new(tuple.right));
 }
-auto lambda1(auto state1, auto input1){
-	return parseEnumValue(state1, input1);
-}
-auto lambda2(auto slice1){
-	return mapValue(parseValues(state, slice1, lambda1), lambda0);
+auto lambda1(auto slice1){
+	return mapValue(parseValues(state, slice1, struct Main::parseEnumValue), lambda0);
 }
 template Result<(struct CompileState, struct StructSegment), struct CompileError> Main::enumValues(struct CompileState state, char* input){
-	return statement(input, lambda2);
+	return statement(input, lambda1);
 }
 auto lambda0(auto arg){
 	return !(arg == 0);
@@ -1297,7 +1294,7 @@ auto lambda0(auto contentTuple){
 		return (exit(beforeContentTuple.left), indent + beforeContentTuple.right + "{" + generateStatements(oldStatements) + indent + "}");
 }
 auto lambda1(auto beforeContentTuple){
-		return mapValue(parseStatements(enter(state), content, struct Main::compileFunctionSegment), lambda0);
+	return mapValue(parseStatements(enter(state), content, struct Main::compileFunctionSegment), lambda0);
 }
 template Result<(struct CompileState, char*), struct CompileError> Main::compileBlock(struct CompileState state, char* input){
 	char* indent = "\n" + repeat("\t", depth(state) - 2);
@@ -1430,11 +1427,9 @@ auto lambda0(auto valueTuple){
 	return (valueTuple.left, generate(definitionTuple.right) + " = " + valueTuple.right);
 }
 auto lambda1(auto definitionTuple){
-	struct CompileState left1 = definitionTuple.left;
-	if (definitionTuple.right == 0){
-		left1 = defineValue(left1, definition);
-	}
-	return mapValue(compileValue(left1, right), lambda0);
+	auto oldState = definitionTuple.left;
+	auto newState = defineAssignable(oldState, definitionTuple.right);
+	return mapValue(compileValue(newState, right), lambda0);
 }
 template Result<(struct CompileState, char*), struct CompileError> Main::assignment(struct CompileState state, char* input){
 	auto valueSeparator = indexOf(input, "=");
@@ -1444,6 +1439,12 @@ template Result<(struct CompileState, char*), struct CompileError> Main::assignm
 	auto left = substring(input, 0, valueSeparator);
 	auto right = substring(input, valueSeparator + length("="));
 	return flatMapValue(compileAssignable(state, left), lambda1);
+}
+struct CompileState Main::defineAssignable(struct CompileState oldState, struct Assignable assignable){
+	if (assignable == 0){
+		return defineValue(oldState, definition);
+	}
+	return oldState;
 }
 template Result<(struct CompileState, struct Assignable), struct CompileError> Main::compileAssignable(struct CompileState state, char* left){
 	return or(Main, state, left, of(Lists, typed("definition", struct Main::parseDefinition), typed("value", struct Main::parseValue)));
@@ -1595,11 +1596,8 @@ template Result<(struct CompileState, struct Type), struct CompileError> Main::t
 	auto argsString = substring(withoutEnd, argsStart + length("<"));
 	return flatMapValue(parseValues(state, argsString, struct Main::argumentType), lambda0);
 }
-auto lambda0(auto state, auto input){
-	return parseWhitespace(state, input);
-}
 template Result<(struct CompileState, struct Type), struct CompileError> Main::argumentType(struct CompileState state1, char* input1){
-	return or(Main, state1, input1, of(Lists, typed("whitespace", lambda0), typed("type", struct Main::parseType)));
+	return or(Main, state1, input1, of(Lists, typed("whitespace", struct Main::parseWhitespace), typed("type", struct Main::parseType)));
 }
 template Result<(struct CompileState, struct StructRef), struct CompileError> Main::symbolType(struct CompileState state, char* input){
 	auto stripped = strip(input);
@@ -1692,23 +1690,8 @@ template List<struct Value> Main::createEmptyValueList(){
 template Result<(struct CompileState, struct Value), struct CompileError> Main::parseArgument(struct CompileState state1, char* input1){
 	return or(state1, input1, of(Lists, typed("?", struct Main::parseWhitespace), typed("?", struct Main::parseValue)));
 }
-auto lambda0(auto tuple){
-	return (tuple.left, generateValues(tuple.right));
-}
-template Result<(struct CompileState, char*), struct CompileError> Main::compileValues(struct CompileState state, char* input, template Rule<char*> compiler){
-	return mapValue(parseValues(state, input, compiler), lambda0);
-}
-char* Main::generateValues(template List<char*> elements){
-	return generateAll(elements, struct Main::mergeValues);
-}
 template Result<(struct CompileState, template List<struct T>), struct CompileError> Main::parseValues(struct CompileState state, char* input, template Rule<struct T> compiler){
 	return parseAll(state, input, struct Main::foldValueChar, compiler);
-}
-struct StringBuilder Main::mergeValues(struct StringBuilder cache, char* element){
-	if (isEmpty(cache)){
-		return append(cache, element);
-	}
-	return append(append(cache, ", "), element);
 }
 struct DivideState Main::foldValueChar(struct DivideState state, char c){
 	if (c == ',' && isLevel(state)){
@@ -1740,10 +1723,10 @@ template Result<(struct CompileState, struct Value), struct CompileError> Main::
 	return or(state, input, biFunctionList);
 }
 auto lambda0(auto childTuple){
-			return (childTuple.left, struct IndexValue::new(parentTuple.right, childTuple.right));
+	return (childTuple.left, struct IndexValue::new(parentTuple.right, childTuple.right));
 }
 auto lambda1(auto parentTuple){
-			return mapValue(parseValue(parentTuple.left, child), lambda0);
+	return mapValue(parseValue(parentTuple.left, child), lambda0);
 }
 template Result<(struct CompileState, struct Value), struct CompileError> Main::parseIndex(struct CompileState state, char* input){
 	auto stripped = strip(input);
@@ -1795,7 +1778,7 @@ auto lambda0(auto parameterTuple){
 			return (left1, struct Operation::new(value, Operator.EQUALS, struct NumberValue::new("0")));
 }
 auto lambda1(auto valueResult){
-			return mapValue(parseParameters(state, params), lambda0);
+	return mapValue(parseParameters(state, params), lambda0);
 }
 template Result<(struct CompileState, struct Value), struct CompileError> Main::parseInstanceOfWithParams(struct CompileState state, char* beforeKeyword, char* input){
 	if (endsWith(input, ")")){

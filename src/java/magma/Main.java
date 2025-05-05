@@ -1800,18 +1800,18 @@ public class Main {
         var right = input.substring(valueSeparator + "=".length());
         return compileAssignable(state, left).flatMapValue(definitionTuple -> {
             var oldState = definitionTuple.left;
-
-            CompileState newState;
-            if (definitionTuple.right instanceof Definition definition) {
-                newState = oldState.defineValue(definition);
-            }
-            else {
-                newState = oldState;
-            }
+            var newState = defineAssignable(oldState, definitionTuple.right);
 
             return compileValue(newState, right).mapValue(
                     valueTuple -> new Tuple<>(valueTuple.left, definitionTuple.right.generate() + " = " + valueTuple.right));
         });
+    }
+
+    private static CompileState defineAssignable(CompileState oldState, Assignable assignable) {
+        if (assignable instanceof Definition definition) {
+            return oldState.defineValue(definition);
+        }
+        return oldState;
     }
 
     private static Result<Tuple<CompileState, Assignable>, CompileError> compileAssignable(CompileState state, String left) {
