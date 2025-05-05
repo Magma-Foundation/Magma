@@ -982,7 +982,11 @@ public class Main {
         }
     }
 
-    private record FunctionProto(Definition definition, List<Definition> params, Option<String> content) {
+    private record FunctionProto(
+            Definition definition,
+            List<Definition> params,
+            Option<String> content
+    ) implements StructSegment {
         public FunctionProto(Definition definition, List<Definition> params) {
             this(definition, params, new None<>());
         }
@@ -999,9 +1003,15 @@ public class Main {
             return this.definition.annotations.contains("Actual");
         }
 
-        private String generate() {
+        @Override
+        public String generate() {
             var joinedParams = joinParameters(this);
             return this.definition.generate() + "(" + joinedParams + ")";
+        }
+
+        @Override
+        public Option<Definition> findDefinition() {
+            return new Some<>(this.definition);
         }
     }
 
@@ -1300,21 +1310,37 @@ public class Main {
 
         var prototype = new StructPrototype(name);
         var state = nameState.enter().mapLast(last -> last.withStructProto(prototype));
-        return parseStatements(state, right, Main::parseStructSegment).mapValue(result -> {
-            var structSegments = result.right;
-            var definitions = structSegments.iterator()
-                    .map(StructSegment::findDefinition)
-                    .flatMap(Iterators::fromOption)
-                    .collect(new ListCollector<>());
+        return parseStatements(state, right, Main::parseStructSegment).flatMapValue(result -> {
+            var segments = result.right;
 
-            var joined = structSegments.iterator()
-                    .map(Node::generate)
-                    .collect(new Joiner())
-                    .orElse("");
+            Result<Tuple<CompileState, List<StructSegment>>, CompileError> initial = new Ok<>(new Tuple<CompileState, List<StructSegment>>(result.left, Lists.empty()));
+            var fold = segments.iterator().fold(initial,
+                    (result1, element) -> result1.flatMapValue(
+                            tuple -> completeStructSegment(element, tuple)));
 
-            var generated = "struct " + name + " {" + joined + "\n};\n";
-            var withStruct = result.left.exitStruct().addStruct(generated);
-            return new Tuple<>(withStruct, new Whitespace());
+            return fold.mapValue(inner -> {
+                var joined = inner.right.iterator()
+                        .map(Node::generate)
+                        .collect(new Joiner())
+                        .orElse("");
+
+                var generated = "struct " + name + " {" + joined + "\n};\n";
+                var withStruct = inner.left.exitStruct().addStruct(generated);
+                return new Tuple<>(withStruct, new Whitespace());
+            });
+        });
+    }
+
+    private static Result<Tuple<CompileState, List<StructSegment>>, CompileError> completeStructSegment(StructSegment element, Tuple<CompileState, List<StructSegment>> tuple) {
+        var left = tuple.left;
+        var right1 = tuple.right;
+
+        if (!(element instanceof FunctionProto proto)) {
+            return new Ok<>(new Tuple<>(left, right1));
+        }
+
+        return completeFunction(left, proto).mapValue(tuple0 -> {
+            return new Tuple<>(tuple0.left, right1.addLast(tuple0.right));
         });
     }
 
@@ -1395,7 +1421,7 @@ public class Main {
                 typed("class", (state2, input2) -> parseStructure(state2, input2, "class ")),
                 typed("record", (state1, input1) -> parseStructure(state1, input1, "record ")),
                 typed("interface", (state0, input0) -> parseStructure(state0, input0, "interface ")),
-                typed("method", Main::parseFunction),
+                typed("method", Main::parseFunctionToProto),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)
         ));
@@ -1451,27 +1477,30 @@ public class Main {
         return createInfixErr(input, infix);
     }
 
-    private static Result<Tuple<CompileState, StructSegment>, CompileError> parseFunction(CompileState state, String input) {
+    private static Result<Tuple<CompileState, FunctionProto>, CompileError> parseFunctionToProto(CompileState state, String input) {
         var paramEnd = input.indexOf(")");
         if (paramEnd < 0) {
             return new Err<>(new CompileError("Not a method", input));
         }
 
         var withParams = input.substring(0, paramEnd);
-        return functionHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
+        return functionHeader(state, withParams).mapValue(headerTuple -> {
             var content = input.substring(paramEnd + ")".length()).strip();
 
-            var structName = methodHeaderTuple.left.last().maybeStructProto.orElse(new StructPrototype("?")).name;
-            var definition = methodHeaderTuple.right.definition
+            var headerState = headerTuple.left;
+            var header = headerTuple.right;
+
+            var structName = headerState.last().maybeStructProto.orElse(new StructPrototype("?")).name;
+            var definition = header.definition
                     .mapName(name -> structName + "::" + name);
 
-            var functionProto = new FunctionProto(definition, methodHeaderTuple.right.params, new Some<>(content));
-            var left = methodHeaderTuple.left.defineValue(methodHeaderTuple.right.definition);
-            return parseStatementsInsideFunction(left, functionProto);
+            var functionProto = new FunctionProto(definition, header.params, new Some<>(content));
+            var left = headerState.defineValue(header.definition);
+            return new Tuple<>(left, functionProto);
         });
     }
 
-    private static Result<Tuple<CompileState, StructSegment>, CompileError> parseStatementsInsideFunction(CompileState state, FunctionProto prototype) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> completeFunction(CompileState state, FunctionProto prototype) {
         var generatedHeader = prototype.generate();
         if (prototype.isPlatformDependent()) {
             var generated = generatedHeader + ";\n";
