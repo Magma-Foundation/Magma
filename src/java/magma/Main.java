@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -1826,11 +1825,19 @@ public class Main {
     }
 
     private static List<String> parseAnnotations(String annotationsString) {
-        var annotationsArray = annotationsString.strip().split(Pattern.quote("\n"));
-        return Iterators.of(annotationsArray)
+        var stripped = annotationsString.strip();
+        return divideAll(stripped, (state, c) -> foldDelimited(state, c, '\n'))
+                .iterator()
                 .map(String::strip)
                 .map(Main::truncateAnnotationValue)
                 .collect(new ListCollector<>());
+    }
+
+    private static DivideState foldDelimited(DivideState state, char c, char delimiter) {
+        if (c == delimiter) {
+            return state.advance();
+        }
+        return state.append(c);
     }
 
     private static String truncateAnnotationValue(String slice) {
@@ -2407,7 +2414,9 @@ public class Main {
         }
 
         if (beforeArrow.startsWith("(") && beforeArrow.endsWith(")")) {
-            var paramNames = Iterators.of(beforeArrow.substring(1, beforeArrow.length() - 1).split(Pattern.quote(",")))
+            var substring = beforeArrow.substring(1, beforeArrow.length() - 1);
+            var paramNames = divideAll(substring, (state, c) -> foldDelimited(state, c, ','))
+                    .iterator()
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .collect(new ListCollector<>());
