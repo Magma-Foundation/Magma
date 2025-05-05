@@ -701,8 +701,9 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 typed("whitespace", Main::whitespace),
-                typed("record", structure("record")),
+                typed("enum", structure("enum")),
                 typed("class", structure("class")),
+                typed("record", structure("record")),
                 typed("interface", structure("interface")),
                 typed("method", Main::compileMethod),
                 typed("definition", Main::definitionStatement)
