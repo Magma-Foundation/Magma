@@ -1,91 +1,69 @@
-/* private interface Result<T, X>  */{
+/* private  */struct /*  Result<T, X>  */ {
 };
-/* private interface Option<T>  */{
+/* private  */struct /*  Option<T>  */ {
 };
-/* private interface Error  */{
+/* private  */struct /*  Error  */ {
 };
-/* private @interface Actual  */{
+/* private @ */struct /*  Actual  */ {
 };
-/* private interface Value  */{
+/* private  */struct /*  Value  */ {
 };
-/* private record IOError(IOException exception) implements Error  */{
+/* private  */struct /*  IOError(IOException exception) implements Error  */ {
 };
-/* record None<T>() implements Option<T>  */{
+/*  */struct /*  None<T>() implements Option<T>  */ {
 };
-/* private record Some<T>(T value) implements Option<T>  */{
+/* private  */struct /*  Some<T>(T value) implements Option<T>  */ {
 };
-/* private record Ok<T, X>(T value) implements Result<T, X>  */{
+/* private  */struct /*  Ok<T, X>(T value) implements Result<T, X>  */ {
 };
-/* private record Err<T, X>(X error) implements Result<T, X>  */{
+/* private  */struct /*  Err<T, X>(X error) implements Result<T, X>  */ {
 };
-/* private static class DivideState  */{/* 
+/* private static  */struct /*  DivideState  */ {/* 
         private final String input; *//* 
         private final List<String> segments; *//* 
         private final int index; *//* 
         private StringBuilder buffer; *//* 
         private int depth; */
 };
-/* private record Frame(Map<String, Integer> counters, List<String> statements)  */{
+/* private  */struct /*  Frame(Map<String, Integer> counters, List<String> statements)  */ {
 };
-/* private record CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */{
+/* private  */struct /*  CompileState(List<String> structs, List<String> functions, List<Frame> frames)  */ {
 };
-/* private record Tuple<A, B>(A left, B right)  */{
+/* private  */struct /*  Tuple<A, B>(A left, B right)  */ {
 };
-/* private record Definition(
+/* private  */struct /*  Definition(
             List<String> annotations,
             List<String> modifiers,
             String beforeType,
             String type,
             String name
-    )  */{
+    )  */ {
 };
-/* private record StringValue(String value) implements Value  */{
+/* private  */struct /*  StringValue(String value) implements Value  */ {
 };
-/* private record Symbol(String value) implements Value  */{
+/* private  */struct /*  Symbol(String value) implements Value  */ {
 };
-/* private record Invocation(Value caller, List<Value> arguments) implements Value  */{
+/* private  */struct /*  Invocation(Value caller, List<Value> arguments) implements Value  */ {
 };
-/* private record DataAccess(Value parent, String child) implements Value  */{
+/* private  */struct /*  DataAccess(Value parent, String child) implements Value  */ {
 };
-/* private record MethodAccess(String parent, String child) implements Value  */{
+/* private  */struct /*  MethodAccess(String parent, String child) implements Value  */ {
 };
-/* private record Content(String input) implements Value  */{
+/* private  */struct /*  Content(String input) implements Value  */ {
 };
-/* private record Operation(Value left, Operator operator, Value right) implements Value  */{
+/* private  */struct /*  Operation(Value left, Operator operator, Value right) implements Value  */ {
 };
-/* private static class Whitespace implements Value  */{
+/* private static  */struct /*  Whitespace implements Value  */ {
 };
-/* private record TupleNode(Value first, Value second) implements Value  */{
+/* private  */struct /*  TupleNode(Value first, Value second) implements Value  */ {
 };
-/* private record NumberValue(String value) implements Value  */{
+/* private  */struct /*  NumberValue(String value) implements Value  */ {
 };
-/* private record CharValue(String value) implements Value  */{
+/* private  */struct /*  CharValue(String value) implements Value  */ {
 };
-/* private record Not(Value value) implements Value  */{
+/* private  */struct /*  Not(Value value) implements Value  */ {
 };
-/* private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String record)  */{/* 
-        return (state0, input0) -> {
-            var stripped = input0.strip();
-            if (stripped.endsWith("}")) {
-                var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-                var contentStart = withoutEnd.indexOf("{");
-                if (contentStart >= 0) {
-                    var left = withoutEnd.substring(0, contentStart);
-                    var right = withoutEnd.substring(contentStart + "{".length());
-                    if (left.indexOf(record) >= 0) {
-                        var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
-                        if (maybeResult instanceof Some(var result)) {
-                            var generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
-                            return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
-                        }
-                    }
-                }
-            }
-
-            return new None<>();
-        } *//* ; */
-};
-/* public class Main  */{/* 
+/* public  */struct /*  Main  */ {/* 
 
     private enum Operator {
         ADD("+"),
@@ -531,6 +509,31 @@ auto lambda3(auto popped){
 }
 /* private static */template Option<(struct CompileState, char*)> compileStructSegment(struct CompileState state, char* input){
 	return or(state, input, of(List, type(struct Main::compileWhitespace), type(structure("record")), type(structure("class")), type(structure("interface")), type(struct Main::compileMethod), type(struct Main::compileContent)));
+}
+/* private static */template BiFunction<struct CompileState, char*, template Option<(struct CompileState, char*)>> structure(char* infix){
+	/* return (state0, input0) -> */{
+		auto stripped = /*  input0.strip() */;
+		if (endsWith(stripped, "}")){
+			auto withoutEnd = substring(stripped, 0, length(stripped) - length("}"));
+			auto contentStart = indexOf(withoutEnd, "{");
+			if (contentStart >= 0){
+				auto left = substring(withoutEnd, 0, contentStart);
+				auto right = substring(withoutEnd, contentStart + length("{"));
+				auto infixIndex = indexOf(left, infix);
+				if (infixIndex >= 0){
+					auto beforeInfix = substring(left, 0, infixIndex);
+					auto afterInfix = substring(left, infixIndex + length(infix));
+					auto maybeResult = /*  compileStatements(state0, right, Main::compileStructSegment) */;
+					if (/* maybeResult instanceof Some(var result) */){
+						auto generated = generatePlaceholder(beforeInfix) + "struct " + generatePlaceholder(afterInfix) + " {" + result.right + "\n};\n";
+						return template Some</*  */>::new((addStruct(result.left, generated), ""));
+					}
+				}
+			}
+		}
+		return template None</*  */>::new();
+	}
+	/*  */;
 }
 auto lambda0(auto methodHeaderTuple){
 	auto withBraces = strip(substring(input, paramEnd + length(")")));

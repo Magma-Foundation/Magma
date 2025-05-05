@@ -611,7 +611,7 @@ public class Main {
         ));
     }
 
-    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String record) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String infix) {
         return (state0, input0) -> {
             var stripped = input0.strip();
             if (stripped.endsWith("}")) {
@@ -620,10 +620,14 @@ public class Main {
                 if (contentStart >= 0) {
                     var left = withoutEnd.substring(0, contentStart);
                     var right = withoutEnd.substring(contentStart + "{".length());
-                    if (left.indexOf(record) >= 0) {
+                    var infixIndex = left.indexOf(infix);
+                    if (infixIndex >= 0) {
+                        var beforeInfix = left.substring(0, infixIndex);
+                        var afterInfix = left.substring(infixIndex + infix.length());
+
                         var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
                         if (maybeResult instanceof Some(var result)) {
-                            var generated = generatePlaceholder(left) + "{" + result.right + "\n};\n";
+                            var generated = generatePlaceholder(beforeInfix) + "struct " + generatePlaceholder(afterInfix) + " {" + result.right + "\n};\n";
                             return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
                         }
                     }
