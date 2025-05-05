@@ -1225,11 +1225,23 @@ public class Main {
             }
 
             if (base.equals("Consumer")) {
-                return new Ok<>(new Tuple<>(argsTuple.left, "void (*)(" + args.getFirst() + ")"));
+                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional("void", Collections.singletonList(args.getFirst()))));
+            }
+
+            if (base.equals("Supplier")) {
+                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.getFirst(), Collections.emptyList())));
+            }
+
+            if (base.equals("Function")) {
+                return new Ok<>(new Tuple<>(argsTuple.left, generateFunctional(args.get(1), Collections.singletonList(args.getFirst()))));
             }
 
             return new Ok<>(new Tuple<>(argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
         });
+    }
+
+    private static String generateFunctional(String returnType, List<String> arguments) {
+        return returnType + " (*)(" + String.join(", ", arguments) + ")";
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> argumentType(CompileState state1, String input1) {

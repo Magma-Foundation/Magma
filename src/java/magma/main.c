@@ -71,29 +71,29 @@ struct Operator {
 };
 struct Main {
 };
-struct R Result::match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr) {
+struct R Result::match(struct R (*)(struct T) whenOk, struct R (*)(struct X) whenErr) {
 }
-template Result<struct R, struct X> Result::mapValue(template Function<struct T, struct R> mapper) {
+template Result<struct R, struct X> Result::mapValue(struct R (*)(struct T) mapper) {
 }
-template Result<struct T, struct R> Result::mapErr(template Function<struct X, struct R> mapper) {
+template Result<struct T, struct R> Result::mapErr(struct R (*)(struct X) mapper) {
 }
-template Result<struct R, struct X> Result::flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper) {
+template Result<struct R, struct X> Result::flatMapValue(template Result<struct R, struct X> (*)(struct T) mapper) {
 }
 void Option::ifPresent(void (*)(struct T) consumer) {
 }
-struct T Option::orElseGet(template Supplier<struct T> supplier) {
+struct T Option::orElseGet(struct T (*)() supplier) {
 }
-template Option<struct T> Option::or(template Supplier<template Option<struct T>> other) {
+template Option<struct T> Option::or(template Option<struct T> (*)() other) {
 }
 int Option::isPresent() {
 }
-template Option<struct R> Option::map(template Function<struct T, struct R> mapper) {
+template Option<struct R> Option::map(struct R (*)(struct T) mapper) {
 }
-template Option<struct R> Option::flatMap(template Function<struct T, template Option<struct R>> mapper) {
+template Option<struct R> Option::flatMap(template Option<struct R> (*)(struct T) mapper) {
 }
 struct T Option::orElse(struct T other) {
 }
-struct R Option::match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone) {
+struct R Option::match(struct R (*)(struct T) whenSome, struct R (*)() whenNone) {
 }
 char* Error::display() {
 }
@@ -101,73 +101,73 @@ char* Value::generate() {
 }
 void None::ifPresent(void (*)(struct T) consumer){
 }
-struct T None::orElseGet(template Supplier<struct T> supplier){
+struct T None::orElseGet(struct T (*)() supplier){
 			return get(supplier);
 }
-template Option<struct T> None::or(template Supplier<template Option<struct T>> other){
+template Option<struct T> None::or(template Option<struct T> (*)() other){
 			return get(other);
 }
 int None::isPresent(){
 			return 0;
 }
-template Option<struct R> None::map(template Function<struct T, struct R> mapper){
+template Option<struct R> None::map(struct R (*)(struct T) mapper){
 			return template None<>::new();
 }
-template Option<struct R> None::flatMap(template Function<struct T, template Option<struct R>> mapper){
+template Option<struct R> None::flatMap(template Option<struct R> (*)(struct T) mapper){
 			return template None<>::new();
 }
 struct T None::orElse(struct T other){
 			return other;
 }
-struct R None::match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone){
+struct R None::match(struct R (*)(struct T) whenSome, struct R (*)() whenNone){
 			return get(whenNone);
 }
 void Some::ifPresent(void (*)(struct T) consumer){
 			accept(consumer, this.value);
 }
-struct T Some::orElseGet(template Supplier<struct T> supplier){
+struct T Some::orElseGet(struct T (*)() supplier){
 			return this.value;
 }
-template Option<struct T> Some::or(template Supplier<template Option<struct T>> other){
+template Option<struct T> Some::or(template Option<struct T> (*)() other){
 			return this;
 }
 int Some::isPresent(){
 			return 1;
 }
-template Option<struct R> Some::map(template Function<struct T, struct R> mapper){
+template Option<struct R> Some::map(struct R (*)(struct T) mapper){
 			return template Some<>::new(apply(mapper, this.value));
 }
-template Option<struct R> Some::flatMap(template Function<struct T, template Option<struct R>> mapper){
+template Option<struct R> Some::flatMap(template Option<struct R> (*)(struct T) mapper){
 			return apply(mapper, this.value);
 }
 struct T Some::orElse(struct T other){
 			return this.value;
 }
-struct R Some::match(template Function<struct T, struct R> whenSome, template Supplier<struct R> whenNone){
+struct R Some::match(struct R (*)(struct T) whenSome, struct R (*)() whenNone){
 			return apply(whenSome, this.value);
 }
-struct R Ok::match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr){
+struct R Ok::match(struct R (*)(struct T) whenOk, struct R (*)(struct X) whenErr){
 			return apply(whenOk, this.value);
 }
-template Result<struct R, struct X> Ok::mapValue(template Function<struct T, struct R> mapper){
+template Result<struct R, struct X> Ok::mapValue(struct R (*)(struct T) mapper){
 			return template Ok<>::new(apply(mapper, this.value));
 }
-template Result<struct T, struct R> Ok::mapErr(template Function<struct X, struct R> mapper){
+template Result<struct T, struct R> Ok::mapErr(struct R (*)(struct X) mapper){
 			return template Ok<>::new(this.value);
 }
-template Result<struct R, struct X> Ok::flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper){
+template Result<struct R, struct X> Ok::flatMapValue(template Result<struct R, struct X> (*)(struct T) mapper){
 			return apply(mapper, this.value);
 }
-struct R Err::match(template Function<struct T, struct R> whenOk, template Function<struct X, struct R> whenErr){
+struct R Err::match(struct R (*)(struct T) whenOk, struct R (*)(struct X) whenErr){
 			return apply(whenErr, this.error);
 }
-template Result<struct R, struct X> Err::mapValue(template Function<struct T, struct R> mapper){
+template Result<struct R, struct X> Err::mapValue(struct R (*)(struct T) mapper){
 			return template Err<>::new(this.error);
 }
-template Result<struct T, struct R> Err::mapErr(template Function<struct X, struct R> mapper){
+template Result<struct T, struct R> Err::mapErr(struct R (*)(struct X) mapper){
 			return template Err<>::new(apply(mapper, this.error));
 }
-template Result<struct R, struct X> Err::flatMapValue(template Function<struct T, template Result<struct R, struct X>> mapper){
+template Result<struct R, struct X> Err::flatMapValue(template Result<struct R, struct X> (*)(struct T) mapper){
 			return template Err<>::new(this.error);
 }
 struct public DivideState::DivideState(char* input){
@@ -274,7 +274,7 @@ struct CompileState CompileState::addStruct(char* generated){
 int CompileState::depth(){
 			return size(this.frames);
 }
-struct CompileState CompileState::mapLast(template Function<struct Frame, struct Frame> mapper){
+struct CompileState CompileState::mapLast(struct Frame (*)(struct Frame) mapper){
 			auto last = getLast(this.frames);
 			auto newLast = apply(mapper, last);
 			set(this.frames, size(this.frames) - 1, newLast);
@@ -296,7 +296,7 @@ char* Definition::generateModifiers(){
 				}
 			return join(String, " ", this.modifiers) + " ";
 }
-struct Definition Definition::mapName(template Function<char*, char*> mapper){
+struct Definition Definition::mapName(char* (*)(char*) mapper){
 			return struct Definition::new(this.annotations, this.modifiers, this.type, apply(mapper, this.name));
 }
 char* StringValue::generate(){
@@ -978,7 +978,13 @@ auto lambda0(auto argsTuple){
 				return template Ok<>::new((argsTuple.left, "(" + first + ", " + second + ")"));
 				}
 				if (equals(base, "Consumer")){
-				return template Ok<>::new((argsTuple.left, "void (*)(" + args.getFirst() + ")"));
+				return template Ok<>::new((argsTuple.left, generateFunctional("void", singletonList(Collections, getFirst(args)))));
+				}
+				if (equals(base, "Supplier")){
+				return template Ok<>::new((argsTuple.left, generateFunctional(getFirst(args), emptyList(Collections))));
+				}
+				if (equals(base, "Function")){
+				return template Ok<>::new((argsTuple.left, generateFunctional(get(args, 1), singletonList(Collections, getFirst(args)))));
 				}
 			return template Ok<>::new((argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
 }
@@ -995,6 +1001,9 @@ template Result<(struct CompileState, char*), struct CompileError> Values::templ
 			auto base = strip(substring(withoutEnd, 0, argsStart));
 			auto argsString = substring(withoutEnd, argsStart + length("<"));
 			return flatMapValue(parseValues(state, argsString, struct Main::argumentType), lambda0);
+}
+char* Values::generateFunctional(char* returnType, template List<char*> arguments){
+			return returnType + " (*)(" + String.join(", ", arguments) + ")";
 }
 template Result<(struct CompileState, char*), struct CompileError> Values::argumentType(struct CompileState state1, char* input1){
 			return or(state1, input1, of(List, struct Main::whitespace, struct Main::type));
