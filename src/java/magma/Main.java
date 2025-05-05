@@ -614,27 +614,34 @@ public class Main {
     private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> structure(String infix) {
         return (state0, input0) -> {
             var stripped = input0.strip();
-            if (stripped.endsWith("}")) {
-                var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-                var contentStart = withoutEnd.indexOf("{");
-                if (contentStart >= 0) {
-                    var left = withoutEnd.substring(0, contentStart);
-                    var right = withoutEnd.substring(contentStart + "{".length());
-                    var infixIndex = left.indexOf(infix);
-                    if (infixIndex >= 0) {
-                        var beforeInfix = left.substring(0, infixIndex);
-                        var afterInfix = left.substring(infixIndex + infix.length());
-
-                        var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
-                        if (maybeResult instanceof Some(var result)) {
-                            var generated = generatePlaceholder(beforeInfix) + "struct " + generatePlaceholder(afterInfix) + " {" + result.right + "\n};\n";
-                            return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
-                        }
-                    }
-                }
+            if (!stripped.endsWith("}")) {
+                return new None<>();
             }
 
-            return new None<>();
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart < 0) {
+                return new None<>();
+            }
+
+            var left = withoutEnd.substring(0, contentStart);
+            var right = withoutEnd.substring(contentStart + "{".length());
+            var infixIndex = left.indexOf(infix);
+            if (infixIndex < 0) {
+                return new None<>();
+            }
+
+            var beforeInfix = left.substring(0, infixIndex);
+            var afterInfix = left.substring(infixIndex + infix.length());
+            var s = generatePlaceholder(afterInfix);
+
+            var maybeResult = compileStatements(state0, right, Main::compileStructSegment);
+            if (!(maybeResult instanceof Some(var result))) {
+                return new None<>();
+            }
+
+            var generated = generatePlaceholder(beforeInfix) + "struct " + s + " {" + result.right + "\n};\n";
+            return new Some<>(new Tuple<>(result.left.addStruct(generated), ""));
         };
     }
 
