@@ -428,9 +428,13 @@ public class Main {
 
         @Override
         public String display() {
+            return format(0);
+        }
+
+        private String format(int depth) {
             return this.message + ": " + this.context + this.errors.stream()
-                    .map(CompileError::display)
-                    .map(statement -> "\n\t" + statement)
+                    .map(error -> error.format(depth + 1))
+                    .map(statement -> "\n" + "\t".repeat(depth) + statement)
                     .collect(Collectors.joining());
         }
     }
