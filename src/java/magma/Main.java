@@ -2225,13 +2225,18 @@ public class Main {
         }
 
         var withBraces = afterArrow.strip();
+        var params = paramNames.iterator()
+                .map(name -> new Definition(Primitive.Auto, name))
+                .collect(new ListCollector<>());
+
+        var state1 = state.defineValues(params);
         if (withBraces.startsWith("{") && withBraces.endsWith("}")) {
             var content = withBraces.substring(1, withBraces.length() - 1);
-            return compileStatements(state, content, Main::compileFunctionSegment).flatMapValue(result -> assembleLambda(result.left, paramNames, result.right));
+            return compileStatements(state1, content, Main::compileFunctionSegment).flatMapValue(result -> assembleLambda(result.left, result.right, params));
         }
 
-        return compileValue(state, afterArrow).flatMapValue(valueTuple -> {
-            return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+        return compileValue(state1, afterArrow).flatMapValue(valueTuple -> {
+            return assembleLambda(valueTuple.left, "\n\treturn " + valueTuple.right + ";", params);
         });
     }
 
@@ -2252,20 +2257,16 @@ public class Main {
         return new None<>();
     }
 
-    private static Result<Tuple<CompileState, Symbol>, CompileError> assembleLambda(CompileState state, List<String> paramNames, String content) {
+    private static Result<Tuple<CompileState, Symbol>, CompileError> assembleLambda(CompileState state, String content, List<Definition> params) {
         var nameTuple = state.createName("lambda");
         var generatedName = nameTuple.left;
-
-        var params = paramNames.iterator()
-                .map(name -> new Definition(Primitive.Auto, name))
-                .collect(new ListCollector<>());
 
         var joinedParams = params.iterator()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Ok<>(new Tuple<>(nameTuple.right.defineValues(params)
+        return new Ok<>(new Tuple<>(nameTuple.right
                 .addFunction("auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), new Symbol(generatedName)));
     }
 
