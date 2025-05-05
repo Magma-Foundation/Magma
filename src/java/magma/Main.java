@@ -982,13 +982,21 @@ public class Main {
         }
     }
 
-    private record FunctionProto(Definition definition, List<Definition> params) {
+    private record FunctionProto(Definition definition, List<Definition> params, Option<String> content) {
+        public FunctionProto(Definition definition, List<Definition> params) {
+            this(definition, params, new None<>());
+        }
+
         private static String joinParameters(FunctionProto header) {
             return header.params
                     .iterator()
                     .map(Definition::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
+        }
+
+        private boolean isPlatformDependent() {
+            return this.definition.annotations.contains("Actual");
         }
 
         private String generate() {
@@ -1451,27 +1459,27 @@ public class Main {
 
         var withParams = input.substring(0, paramEnd);
         return functionHeader(state, withParams).flatMapValue(methodHeaderTuple -> {
-            return getResult(input, paramEnd, methodHeaderTuple.left, methodHeaderTuple.right);
+            var content = input.substring(paramEnd + ")".length()).strip();
+
+            var structName = methodHeaderTuple.left.last().maybeStructProto.orElse(new StructPrototype("?")).name;
+            var definition = methodHeaderTuple.right.definition
+                    .mapName(name -> structName + "::" + name);
+
+            var functionProto = new FunctionProto(definition, methodHeaderTuple.right.params, new Some<>(content));
+            var left = methodHeaderTuple.left.defineValue(methodHeaderTuple.right.definition);
+            return parseStatementsInsideFunction(left, functionProto);
         });
     }
 
-    private static Result<Tuple<CompileState, StructSegment>, CompileError> getResult(String input, int paramEnd, CompileState state, FunctionProto header) {
-        var afterParams = input.substring(paramEnd + ")".length()).strip();
-
-        var structName = state.last().maybeStructProto.orElse(new StructPrototype("?")).name;
-        var definition = header.definition
-                .mapName(name -> structName + "::" + name);
-
-        var generatedHeader = new FunctionProto(definition, header.params).generate();
-        var left = state.defineValue(header.definition);
-
-        if (header.definition.annotations.contains("Actual")) {
+    private static Result<Tuple<CompileState, StructSegment>, CompileError> parseStatementsInsideFunction(CompileState state, FunctionProto prototype) {
+        var generatedHeader = prototype.generate();
+        if (prototype.isPlatformDependent()) {
             var generated = generatedHeader + ";\n";
-            return new Ok<>(new Tuple<>(left.addFunction(generated), new Whitespace()));
+            return new Ok<>(new Tuple<>(state.addFunction(generated), new Whitespace()));
         }
 
-        return Main.or(left, afterParams, Lists.of(
-                (state1, s) -> methodWithBraces(state1, s, generatedHeader, header),
+        return Main.or(state, prototype.content.orElse(""), Lists.of(
+                (state1, s) -> methodWithBraces(state1, s, generatedHeader, prototype),
                 (state2, s) -> methodWithoutBraces(state2, s, generatedHeader)
         ));
     }
