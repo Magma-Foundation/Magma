@@ -726,18 +726,10 @@ public class Main {
     private static Result<Tuple<CompileState, String>, CompileError> compileStructSegment(CompileState state, String input) {
         return or(state, input, List.of(
                 typed("whitespace", Main::whitespace),
-                typed("enum", (state3, input3) -> {
-                    return structure(state3, input3, "enum");
-                }),
-                typed("class", (state2, input2) -> {
-                    return structure(state2, input2, "class");
-                }),
-                typed("record", (state1, input1) -> {
-                    return structure(state1, input1, "record");
-                }),
-                typed("interface", (state0, input0) -> {
-                    return structure(state0, input0, "interface");
-                }),
+                typed("enum", (state3, input3) -> structure(state3, input3, "enum ")),
+                typed("class", (state2, input2) -> structure(state2, input2, "class ")),
+                typed("record", (state1, input1) -> structure(state1, input1, "record ")),
+                typed("interface", (state0, input0) -> structure(state0, input0, "interface ")),
                 typed("method", Main::method),
                 typed("definition", Main::definitionStatement),
                 typed("enum-values", Main::enumValues)

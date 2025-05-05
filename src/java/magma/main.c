@@ -532,16 +532,16 @@ struct DivideState Main::foldStatementChar(struct DivideState state, char c){
 	return appended;
 }
 auto lambda0(auto state3, auto input3){
-	return structure(state3, input3, "enum");
+	return structure(state3, input3, "enum ");
 }
 auto lambda1(auto state2, auto input2){
-	return structure(state2, input2, "class");
+	return structure(state2, input2, "class ");
 }
 auto lambda2(auto state1, auto input1){
-	return structure(state1, input1, "record");
+	return structure(state1, input1, "record ");
 }
 auto lambda3(auto state0, auto input0){
-	return structure(state0, input0, "interface");
+	return structure(state0, input0, "interface ");
 }
 template Result<(struct CompileState, char*), struct CompileError> Main::compileStructSegment(struct CompileState state, char* input){
 	return or(state, input, of(List, typed("whitespace", struct Main::whitespace), typed("enum", lambda0), typed("class", lambda1), typed("record", lambda2), typed("interface", lambda3), typed("method", struct Main::method), typed("definition", struct Main::definitionStatement), typed("enum-values", struct Main::enumValues)));
@@ -555,46 +555,37 @@ auto lambda1(auto state1, auto input1){
 auto lambda2(auto state0, auto input0){
 	return compileValues(state0, input0, lambda1);
 }
-auto lambda0(auto tuple){
-	return (tuple.left, generate(tuple.right));
+template Result<(struct CompileState, char*), struct CompileError> Main::enumValues(struct CompileState state, char* input){
+	return statement(state, input, lambda2);
 }
-auto lambda1(auto state1, auto input1){
-	return mapValue(compileInvokable(state1, input1), lambda0);
-}
-auto lambda2(auto state0, auto input0){
-	return compileValues(state0, input0, lambda1);
-}
-template Result<(struct CompileState, char*), struct CompileError> Values::enumValues(struct CompileState state, char* input){
-		return statement(state, input, lambda2);
-}
-template Result<(struct CompileState, char*), struct CompileError> Values::definitionStatement(struct CompileState state, char* input){
-		return statement(state, input, struct Main::definition);
+template Result<(struct CompileState, char*), struct CompileError> Main::definitionStatement(struct CompileState state, char* input){
+	return statement(state, input, struct Main::definition);
 }
 auto lambda0(auto nameTuple){
 	return assembleStructure(nameTuple, right);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::structure(struct CompileState state, char* input, char* infix){
-		auto stripped = strip(input);
-		if (!endsWith(stripped, "}")){
-			return createSuffixErr(stripped, "}");
-		}
-		auto withoutEnd = substring(stripped, 0, length(stripped) - length("}"));
-		auto contentStart = indexOf(withoutEnd, "{");
-		if (contentStart < 0){
-			return createInfixErr(withoutEnd, "{");
-		}
-		auto left = substring(withoutEnd, 0, contentStart);
-		auto right = substring(withoutEnd, contentStart + length("{"));
-		auto infixIndex = indexOf(left, infix);
-		if (infixIndex < 0){
-			return createInfixErr(withoutEnd, infix);
-		}
-		auto beforeInfix = strip(substring(left, 0, infixIndex));
-		if (contains(beforeInfix, "\n")){
-			return template Ok<>::new((state, ""));
-		}
-		auto afterInfix = strip(substring(left, infixIndex + length(infix)));
-		return flatMapValue(flatMapValue(flatMapValue(removeImplements(state, afterInfix), struct Main::removeParams), struct Main::removeTypeParams), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::structure(struct CompileState state, char* input, char* infix){
+	auto stripped = strip(input);
+	if (!endsWith(stripped, "}")){
+		return createSuffixErr(stripped, "}");
+	}
+	auto withoutEnd = substring(stripped, 0, length(stripped) - length("}"));
+	auto contentStart = indexOf(withoutEnd, "{");
+	if (contentStart < 0){
+		return createInfixErr(withoutEnd, "{");
+	}
+	auto left = substring(withoutEnd, 0, contentStart);
+	auto right = substring(withoutEnd, contentStart + length("{"));
+	auto infixIndex = indexOf(left, infix);
+	if (infixIndex < 0){
+		return createInfixErr(withoutEnd, infix);
+	}
+	auto beforeInfix = strip(substring(left, 0, infixIndex));
+	if (contains(beforeInfix, "\n")){
+		return template Ok<>::new((state, ""));
+	}
+	auto afterInfix = strip(substring(left, infixIndex + length(infix)));
+	return flatMapValue(flatMapValue(flatMapValue(removeImplements(state, afterInfix), struct Main::removeParams), struct Main::removeTypeParams), lambda0);
 }
 auto lambda0(auto s1, auto _){
 	return template Ok<>::new((state, s1));
@@ -605,8 +596,8 @@ auto lambda1(auto state, auto s){
 auto lambda2(auto state, auto s){
 	return template Ok<>::new((state, s));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::removeParams((struct CompileState, char*) state1){
-		return or(Main, state1.left, state1.right, of(List, lambda1, lambda2));
+template Result<(struct CompileState, char*), struct CompileError> Main::removeParams((struct CompileState, char*) state1){
+	return or(Main, state1.left, state1.right, of(List, lambda1, lambda2));
 }
 auto lambda0(auto s1, auto _){
 	return template Ok<>::new((state, s1));
@@ -617,8 +608,8 @@ auto lambda1(auto state, auto s){
 auto lambda2(auto state, auto s){
 	return template Ok<>::new((state, s));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::removeImplements(struct CompileState state0, char* afterInfix){
-		return or(Main, state0, afterInfix, of(List, lambda1, lambda2));
+template Result<(struct CompileState, char*), struct CompileError> Main::removeImplements(struct CompileState state0, char* afterInfix){
+	return or(Main, state0, afterInfix, of(List, lambda1, lambda2));
 }
 auto lambda0(auto left1, auto _){
 	return template Ok<>::new((state, left1));
@@ -629,38 +620,38 @@ auto lambda1(auto state, auto s){
 auto lambda2(auto state, auto s){
 	return template Ok<>::new((state, s));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::removeTypeParams((struct CompileState, char*) withoutParams){
-		return or(Main, withoutParams.left, withoutParams.right, of(List, lambda1, lambda2));
+template Result<(struct CompileState, char*), struct CompileError> Main::removeTypeParams((struct CompileState, char*) withoutParams){
+	return or(Main, withoutParams.left, withoutParams.right, of(List, lambda1, lambda2));
 }
 auto lambda0(auto result){
-		auto generated = "struct " + name + " {" + result.right + "\n};\n";
-		return (addStruct(exit(result.left), generated), "");
+	auto generated = "struct " + name + " {" + result.right + "\n};\n";
+	return (addStruct(exit(result.left), generated), "");
 }
 auto lambda1(auto last){
 	return withStructProto(last, struct StructProto::new(name));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::assembleStructure((struct CompileState, char*) nameTuple, char* right){
-		auto nameState = nameTuple.left;
-		auto name = nameTuple.right;
-		if (!isSymbol(name)){
-			return template Err<>::new(struct CompileError::new("Not a symbol", name));
-		}
-		return mapValue(compileStatements(mapLast(enter(nameState), lambda1), right, struct Main::compileStructSegment), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::assembleStructure((struct CompileState, char*) nameTuple, char* right){
+	auto nameState = nameTuple.left;
+	auto name = nameTuple.right;
+	if (!isSymbol(name)){
+		return template Err<>::new(struct CompileError::new("Not a symbol", name));
+	}
+	return mapValue(compileStatements(mapLast(enter(nameState), lambda1), right, struct Main::compileStructSegment), lambda0);
 }
-template Result<(struct CompileState, struct T), struct CompileError> Values::infix(char* input, char* infix, template BiFunction<char*, char*, template Result<(struct CompileState, struct T), struct CompileError>> mapper){
-		auto typeParamStart = indexOf(input, infix);
-		if (typeParamStart >= 0){
-			auto left = substring(input, 0, typeParamStart);
-			auto right = substring(input, typeParamStart + length(infix));
-			return apply(mapper, left, right);
-		}
-		return createInfixErr(input, infix);
+template Result<(struct CompileState, struct T), struct CompileError> Main::infix(char* input, char* infix, template BiFunction<char*, char*, template Result<(struct CompileState, struct T), struct CompileError>> mapper){
+	auto typeParamStart = indexOf(input, infix);
+	if (typeParamStart >= 0){
+		auto left = substring(input, 0, typeParamStart);
+		auto right = substring(input, typeParamStart + length(infix));
+		return apply(mapper, left, right);
+	}
+	return createInfixErr(input, infix);
 }
-template Result<(struct CompileState, struct T), struct CompileError> Values::createInfixErr(char* withoutEnd, char* infix){
-		return template Err<>::new(struct CompileError::new("Infix '" + infix + "' not present", withoutEnd));
+template Result<(struct CompileState, struct T), struct CompileError> Main::createInfixErr(char* withoutEnd, char* infix){
+	return template Err<>::new(struct CompileError::new("Infix '" + infix + "' not present", withoutEnd));
 }
-template Result<(struct CompileState, struct T), struct CompileError> Values::createSuffixErr(char* stripped, char* suffix){
-		return template Err<>::new(struct CompileError::new("Suffix '" + suffix + "' not present", stripped));
+template Result<(struct CompileState, struct T), struct CompileError> Main::createSuffixErr(char* stripped, char* suffix){
+	return template Err<>::new(struct CompileError::new("Suffix '" + suffix + "' not present", stripped));
 }
 auto lambda0(auto name){
 	return structName + "::" + name;
@@ -675,148 +666,148 @@ auto lambda3(auto state2, auto s){
 	return methodWithoutBraces(state2, s, generatedHeader);
 }
 auto lambda4(auto methodHeaderTuple){
-		auto afterParams = strip(substring(input, paramEnd + length(")")));
-		auto header = methodHeaderTuple.right;
-		auto joinedParams = collect(map(stream(header.params), struct Definition::generate), joining(Collectors, ", "));
-		auto structName = orElse(last(state).structProto, struct StructProto::new("?")).name;
-		auto withStructName = generate(mapName(header.definition, lambda1));
-		auto generatedHeader = withStructName + "(" + joinedParams + ")";
-		if (contains(header.definition.annotations, "Actual")){
-			auto generated = generatedHeader + ";\n";
-			return template Ok<>::new((addFunction(methodHeaderTuple.left, generated), ""));
-		}
-		return or(methodHeaderTuple.left, afterParams, of(List, lambda2, lambda3));
+	auto afterParams = strip(substring(input, paramEnd + length(")")));
+	auto header = methodHeaderTuple.right;
+	auto joinedParams = collect(map(stream(header.params), struct Definition::generate), joining(Collectors, ", "));
+	auto structName = orElse(last(state).structProto, struct StructProto::new("?")).name;
+	auto withStructName = generate(mapName(header.definition, lambda1));
+	auto generatedHeader = withStructName + "(" + joinedParams + ")";
+	if (contains(header.definition.annotations, "Actual")){
+		auto generated = generatedHeader + ";\n";
+		return template Ok<>::new((addFunction(methodHeaderTuple.left, generated), ""));
+	}
+	return or(methodHeaderTuple.left, afterParams, of(List, lambda2, lambda3));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::method(struct CompileState state, char* input){
-		auto paramEnd = indexOf(input, ")");
-		if (paramEnd < 0){
-			return template Err<>::new(struct CompileError::new("Not a method", input));
-		}
-		auto withParams = substring(input, 0, paramEnd);
-		return flatMapValue(methodHeader(state, withParams), lambda4);
+template Result<(struct CompileState, char*), struct CompileError> Main::method(struct CompileState state, char* input){
+	auto paramEnd = indexOf(input, ")");
+	if (paramEnd < 0){
+		return template Err<>::new(struct CompileError::new("Not a method", input));
+	}
+	auto withParams = substring(input, 0, paramEnd);
+	return flatMapValue(methodHeader(state, withParams), lambda4);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::methodWithoutBraces(struct CompileState state, char* content, char* header){
-		if (equals(content, ";")){
-			auto generated = header + " {\n}\n";
-			return template Ok<>::new((addFunction(state, generated), ""));
-		}
-		return template Err<>::new(struct CompileError::new("Content ';' not present", content));
+template Result<(struct CompileState, char*), struct CompileError> Main::methodWithoutBraces(struct CompileState state, char* content, char* header){
+	if (equals(content, ";")){
+		auto generated = header + " {\n}\n";
+		return template Ok<>::new((addFunction(state, generated), ""));
+	}
+	return template Err<>::new(struct CompileError::new("Content ';' not present", content));
 }
 auto lambda0(auto statementsTuple){
-		auto statementsState = statementsTuple.left;
-		auto statements = statementsTuple.right;
-		auto oldStatements = template ArrayList<char*>::new();
-		addAll(oldStatements, getLast(frames(statementsState)).statements);
-		addAll(oldStatements, statements);
-		auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
-		return template Ok<>::new((addFunction(exit(statementsState), generated), ""));
+	auto statementsState = statementsTuple.left;
+	auto statements = statementsTuple.right;
+	auto oldStatements = template ArrayList<char*>::new();
+	addAll(oldStatements, getLast(frames(statementsState)).statements);
+	addAll(oldStatements, statements);
+	auto generated = header + "{" + generateStatements(oldStatements) + "\n}\n";
+	return template Ok<>::new((addFunction(exit(statementsState), generated), ""));
 }
 auto lambda1(auto last){
 	return withFunctionProto(last, proto);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::methodWithBraces(struct CompileState state, char* withBraces, char* header, struct FunctionProto proto){
-		if (!startsWith(withBraces, "{") || !endsWith(withBraces, "}")){
-			return template Err<>::new(struct CompileError::new("No braces present", withBraces));
-		}
-		auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
-		return flatMapValue(parseStatements(mapLast(enter(state), lambda1), content, struct Main::compileFunctionSegment), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::methodWithBraces(struct CompileState state, char* withBraces, char* header, struct FunctionProto proto){
+	if (!startsWith(withBraces, "{") || !endsWith(withBraces, "}")){
+		return template Err<>::new(struct CompileError::new("No braces present", withBraces));
+	}
+	auto content = strip(substring(withBraces, 1, length(withBraces) - 1));
+	return flatMapValue(parseStatements(mapLast(enter(state), lambda1), content, struct Main::compileFunctionSegment), lambda0);
 }
 auto lambda0(auto paramsTuple){
-		auto paramsState = paramsTuple.left;
-		auto params = toList(flatMap(stream(paramsTuple.right), struct Main::retainDefinition));
-		if (isSymbol(definitionString)){
-			auto definition = struct Definition::new("auto", definitionString);
-			return template Ok<>::new((paramsState, struct FunctionProto::new(definition, params)));
-		}
-		if (parseDefinition(state, definitionString) == 0){
-			auto definition = definitionTuple.right;
-			return template Ok<>::new((paramsState, struct FunctionProto::new(definition, params)));
-		}
-		return template Err<>::new(struct CompileError::new("Not a method header", input));
+	auto paramsState = paramsTuple.left;
+	auto params = toList(flatMap(stream(paramsTuple.right), struct Main::retainDefinition));
+	if (isSymbol(definitionString)){
+		auto definition = struct Definition::new("auto", definitionString);
+		return template Ok<>::new((paramsState, struct FunctionProto::new(definition, params)));
+	}
+	if (parseDefinition(state, definitionString) == 0){
+		auto definition = definitionTuple.right;
+		return template Ok<>::new((paramsState, struct FunctionProto::new(definition, params)));
+	}
+	return template Err<>::new(struct CompileError::new("Not a method header", input));
 }
-template Result<(struct CompileState, struct FunctionProto), struct CompileError> Values::methodHeader(struct CompileState state, char* input){
-		auto paramStart = indexOf(input, "(");
-		if (paramStart < 0){
-			return createInfixErr(input, "(");
-		}
-		auto definitionString = strip(substring(input, 0, paramStart));
-		auto inputParams = substring(input, paramStart + length("("));
-		return flatMapValue(parseValues(state, inputParams, struct Main::compileParameter), lambda0);
+template Result<(struct CompileState, struct FunctionProto), struct CompileError> Main::methodHeader(struct CompileState state, char* input){
+	auto paramStart = indexOf(input, "(");
+	if (paramStart < 0){
+		return createInfixErr(input, "(");
+	}
+	auto definitionString = strip(substring(input, 0, paramStart));
+	auto inputParams = substring(input, paramStart + length("("));
+	return flatMapValue(parseValues(state, inputParams, struct Main::compileParameter), lambda0);
 }
-template Stream<struct Definition> Values::retainDefinition(struct Parameter parameter){
-		if (parameter == 0){
-			return of(Stream, definition1);
-		}
-		else {
-			return empty(Stream);
-		}
+template Stream<struct Definition> Main::retainDefinition(struct Parameter parameter){
+	if (parameter == 0){
+		return of(Stream, definition1);
+	}
+	else {
+		return empty(Stream);
+	}
 }
-template Result<(struct CompileState, struct Parameter), struct CompileError> Values::compileParameter(struct CompileState state2, char* input){
-		return or(state2, input, of(List, typed("?", struct Main::parseWhitespace), typed("?", struct Main::parseDefinition)));
+template Result<(struct CompileState, struct Parameter), struct CompileError> Main::compileParameter(struct CompileState state2, char* input){
+	return or(state2, input, of(List, typed("?", struct Main::parseWhitespace), typed("?", struct Main::parseDefinition)));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::whitespace(struct CompileState state, char* input){
-		if (isBlank(input)){
-			return template Ok<>::new((state, ""));
-		}
-		return template Err<>::new(struct CompileError::new("Not whitespace", input));
+template Result<(struct CompileState, char*), struct CompileError> Main::whitespace(struct CompileState state, char* input){
+	if (isBlank(input)){
+		return template Ok<>::new((state, ""));
+	}
+	return template Err<>::new(struct CompileError::new("Not whitespace", input));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileFunctionSegment(struct CompileState state, char* input){
-		return or(state, input, of(List, typed("whitespace", struct Main::whitespace), typed("statement", struct Main::functionStatement), typed("block", struct Main::compileBlock)));
+template Result<(struct CompileState, char*), struct CompileError> Main::compileFunctionSegment(struct CompileState state, char* input){
+	return or(state, input, of(List, typed("whitespace", struct Main::whitespace), typed("statement", struct Main::functionStatement), typed("block", struct Main::compileBlock)));
 }
 auto lambda0(auto result){
 	return (result.left, indent + result.right + "{" + generateStatements(oldStatements) + indent + "}");
 }
 auto lambda1(auto statementsTuple){
-			auto oldStatements = template ArrayList<char*>::new();
-			addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
-			addAll(oldStatements, statementsTuple.right);
-			return mapValue(compileBlockHeader(exit(statementsTuple.left), beforeContent), lambda0);
+		auto oldStatements = template ArrayList<char*>::new();
+		addAll(oldStatements, getLast(statementsTuple.left.frames).statements);
+		addAll(oldStatements, statementsTuple.right);
+		return mapValue(compileBlockHeader(exit(statementsTuple.left), beforeContent), lambda0);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileBlock(struct CompileState state, char* input){
-		char* indent = "\n" + repeat("\t", depth(state) - 2);
-		if (!endsWith(input, "}")){
-			return template Err<>::new(struct CompileError::new("Not a block", input));
-		}
-		auto withoutEnd = substring(input, 0, length(input) - length("}"));
-		auto contentStart1 = findContentStart(withoutEnd);
-		if (contentStart1 == 0){
-			auto beforeContent = substring(contentStart.left, 0, length(contentStart.left) - length("{"));
-			auto content = contentStart.right;
-			auto entered = enter(state);
-			return flatMapValue(parseStatements(entered, content, struct Main::compileFunctionSegment), lambda1);
-		}
-		return template Err<>::new(struct CompileError::new("No content start present", withoutEnd));
+template Result<(struct CompileState, char*), struct CompileError> Main::compileBlock(struct CompileState state, char* input){
+	char* indent = "\n" + repeat("\t", depth(state) - 2);
+	if (!endsWith(input, "}")){
+		return template Err<>::new(struct CompileError::new("Not a block", input));
+	}
+	auto withoutEnd = substring(input, 0, length(input) - length("}"));
+	auto contentStart1 = findContentStart(withoutEnd);
+	if (contentStart1 == 0){
+		auto beforeContent = substring(contentStart.left, 0, length(contentStart.left) - length("{"));
+		auto content = contentStart.right;
+		auto entered = enter(state);
+		return flatMapValue(parseStatements(entered, content, struct Main::compileFunctionSegment), lambda1);
+	}
+	return template Err<>::new(struct CompileError::new("No content start present", withoutEnd));
 }
-template Option<(char*, char*)> Values::findContentStart(char* input){
-		auto divisions = divideAll(input, struct Main::foldContentStart);
-		if (size(divisions) < 2){
-			return template None<>::new();
-		}
-		auto first = getFirst(divisions);
-		auto after = subList(divisions, 1, size(divisions));
-		auto joined = join(String, "", after);
-		return template Some<>::new((first, joined));
+template Option<(char*, char*)> Main::findContentStart(char* input){
+	auto divisions = divideAll(input, struct Main::foldContentStart);
+	if (size(divisions) < 2){
+		return template None<>::new();
+	}
+	auto first = getFirst(divisions);
+	auto after = subList(divisions, 1, size(divisions));
+	auto joined = join(String, "", after);
+	return template Some<>::new((first, joined));
 }
-struct DivideState Values::foldContentStart(struct DivideState state, char c){
-		auto appended = append(state, c);
-		if (c == '{'){
-			return advance(appended);
-		}
-		return appended;
+struct DivideState Main::foldContentStart(struct DivideState state, char c){
+	auto appended = append(state, c);
+	if (c == '{'){
+		return advance(appended);
+	}
+	return appended;
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::functionStatement(struct CompileState state, char* input){
-		return statement(state, input, struct Main::functionStatementValue);
+template Result<(struct CompileState, char*), struct CompileError> Main::functionStatement(struct CompileState state, char* input){
+	return statement(state, input, struct Main::functionStatementValue);
 }
 auto lambda0(auto result){
 	return template Ok<>::new((result.left, "\n" + "\t".repeat(state.depth() - 2) + result.right + ";"));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::statement(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, char*), struct CompileError>> mapper){
-		auto stripped = strip(input);
-		if (!endsWith(stripped, ";")){
-			return createSuffixErr(input, ";");
-		}
-		auto slice = substring(stripped, 0, length(stripped) - length(";"));
-		return flatMapValue(apply(mapper, state, slice), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::statement(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, char*), struct CompileError>> mapper){
+	auto stripped = strip(input);
+	if (!endsWith(stripped, ";")){
+		return createSuffixErr(input, ";");
+	}
+	auto slice = substring(stripped, 0, length(stripped) - length(";"));
+	return flatMapValue(apply(mapper, state, slice), lambda0);
 }
 auto lambda0(auto state1, auto input1){
 	return compileConditional(state1, input1, "if");
@@ -824,29 +815,29 @@ auto lambda0(auto state1, auto input1){
 auto lambda1(auto state1, auto input1){
 	return compileConditional(state1, input1, "while");
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileBlockHeader(struct CompileState state, char* input){
-		return or(Main, state, input, of(List, struct Main::compileElse, lambda0, lambda1));
+template Result<(struct CompileState, char*), struct CompileError> Main::compileBlockHeader(struct CompileState state, char* input){
+	return or(Main, state, input, of(List, struct Main::compileElse, lambda0, lambda1));
 }
 auto lambda0(auto tuple0){
-		return template Ok<>::new((tuple0.left, prefix + " (" + tuple0.right + ")"));
+	return template Ok<>::new((tuple0.left, prefix + " (" + tuple0.right + ")"));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileConditional(struct CompileState state, char* input, char* prefix){
-		auto stripped = strip(input);
-		if (!startsWith(stripped, prefix)){
-			return createPrefixErr(stripped, prefix);
-		}
-		auto withoutPrefix = strip(substring(stripped, length(prefix)));
-		if (!startsWith(withoutPrefix, "(") || !endsWith(withoutPrefix, ")")){
-			return template Err<>::new(struct CompileError::new("No condition present", input));
-		}
-		auto value = substring(withoutPrefix, 1, length(withoutPrefix) - 1);
-		return flatMapValue(compileValue(state, value), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::compileConditional(struct CompileState state, char* input, char* prefix){
+	auto stripped = strip(input);
+	if (!startsWith(stripped, prefix)){
+		return createPrefixErr(stripped, prefix);
+	}
+	auto withoutPrefix = strip(substring(stripped, length(prefix)));
+	if (!startsWith(withoutPrefix, "(") || !endsWith(withoutPrefix, ")")){
+		return template Err<>::new(struct CompileError::new("No condition present", input));
+	}
+	auto value = substring(withoutPrefix, 1, length(withoutPrefix) - 1);
+	return flatMapValue(compileValue(state, value), lambda0);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileElse(struct CompileState state, char* input){
-		if (equals(strip(input), "else")){
-			return template Ok<>::new((state, "else "));
-		}
-		return template Err<>::new(struct CompileError::new("Not an else statement", input));
+template Result<(struct CompileState, char*), struct CompileError> Main::compileElse(struct CompileState state, char* input){
+	if (equals(strip(input), "else")){
+		return template Ok<>::new((state, "else "));
+	}
+	return template Err<>::new(struct CompileError::new("Not an else statement", input));
 }
 auto lambda0(auto state1, auto input1){
 	return compileKeyword(state1, input1, "break");
@@ -860,181 +851,181 @@ auto lambda2(auto tuple){
 auto lambda3(auto state0, auto input0){
 	return mapValue(compileInvokable(state0, input0), lambda2);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::functionStatementValue(struct CompileState state, char* input){
-		return or(state, input, of(List, lambda0, lambda1, struct Main::compileReturn, lambda3, struct Main::compileAssignment));
+template Result<(struct CompileState, char*), struct CompileError> Main::functionStatementValue(struct CompileState state, char* input){
+	return or(state, input, of(List, lambda0, lambda1, struct Main::compileReturn, lambda3, struct Main::compileAssignment));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileKeyword(struct CompileState state, char* input, char* equals){
-		if (equals(input, equals)){
-			return template Ok<>::new((state, equals));
-		}
-		return template Err<>::new(struct CompileError::new("Not break", input));
+template Result<(struct CompileState, char*), struct CompileError> Main::compileKeyword(struct CompileState state, char* input, char* equals){
+	if (equals(input, equals)){
+		return template Ok<>::new((state, equals));
+	}
+	return template Err<>::new(struct CompileError::new("Not break", input));
 }
 auto lambda0(auto tuple0){
-		return template Ok<>::new((tuple0.left, "return " + tuple0.right));
+	return template Ok<>::new((tuple0.left, "return " + tuple0.right));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileReturn(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (!startsWith(stripped, "return ")){
-			return createPrefixErr(stripped, "return ");
-		}
-		auto right = substring(stripped, length("return "));
-		return flatMapValue(compileValue(state, right), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::compileReturn(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (!startsWith(stripped, "return ")){
+		return createPrefixErr(stripped, "return ");
+	}
+	auto right = substring(stripped, length("return "));
+	return flatMapValue(compileValue(state, right), lambda0);
 }
-template Result<(struct CompileState, struct T), struct CompileError> Values::createPrefixErr(char* input, char* prefix){
-		return template Err<>::new(struct CompileError::new("Prefix '" + prefix + "' not present", input));
+template Result<(struct CompileState, struct T), struct CompileError> Main::createPrefixErr(char* input, char* prefix){
+	return template Err<>::new(struct CompileError::new("Prefix '" + prefix + "' not present", input));
 }
 auto lambda0(auto valueTuple){
-		return (valueTuple.left, definitionTuple.right + " = " + valueTuple.right);
+	return (valueTuple.left, definitionTuple.right + " = " + valueTuple.right);
 }
 auto lambda1(auto definitionTuple){
-		return mapValue(compileValue(definitionTuple.left, right), lambda0);
+	return mapValue(compileValue(definitionTuple.left, right), lambda0);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileAssignment(struct CompileState state, char* input){
-		auto valueSeparator = indexOf(input, "=");
-		if (valueSeparator < 0){
-			return createInfixErr(input, "=");
-		}
-		auto left = substring(input, 0, valueSeparator);
-		auto right = substring(input, valueSeparator + length("="));
-		return flatMapValue(compileAssignable(state, left), lambda1);
+template Result<(struct CompileState, char*), struct CompileError> Main::compileAssignment(struct CompileState state, char* input){
+	auto valueSeparator = indexOf(input, "=");
+	if (valueSeparator < 0){
+		return createInfixErr(input, "=");
+	}
+	auto left = substring(input, 0, valueSeparator);
+	auto right = substring(input, valueSeparator + length("="));
+	return flatMapValue(compileAssignable(state, left), lambda1);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileAssignable(struct CompileState state, char* left){
-		return or(Main, state, left, of(List, struct Main::definition, struct Main::compileValue));
+template Result<(struct CompileState, char*), struct CompileError> Main::compileAssignable(struct CompileState state, char* left){
+	return or(Main, state, left, of(List, struct Main::definition, struct Main::compileValue));
 }
 auto lambda0(auto tuple){
 	return (left(tuple), generate(right(tuple)));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::definition(struct CompileState state, char* input){
-		return mapValue(parseDefinition(state, input), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::definition(struct CompileState state, char* input){
+	return mapValue(parseDefinition(state, input), lambda0);
 }
-template Result<(struct CompileState, struct Definition), struct CompileError> Values::parseDefinition(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		auto valueSeparator = lastIndexOf(stripped, " ");
-		if (valueSeparator >= 0){
-			auto beforeName = substring(stripped, 0, valueSeparator);
-			auto name = strip(substring(stripped, valueSeparator + length(" ")));
-			auto annotationSeparator = lastIndexOf(beforeName, "\n");
-			if (annotationSeparator < 0){
-				return definitionWithAnnotations(state, emptyList(Collections), beforeName, name);
-			}
-			auto annotations = parseAnnotations(substring(beforeName, 0, annotationSeparator));
-			auto beforeName0 = substring(beforeName, annotationSeparator + length("\n"));
-			return definitionWithAnnotations(state, annotations, beforeName0, name);
+template Result<(struct CompileState, struct Definition), struct CompileError> Main::parseDefinition(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	auto valueSeparator = lastIndexOf(stripped, " ");
+	if (valueSeparator >= 0){
+		auto beforeName = substring(stripped, 0, valueSeparator);
+		auto name = strip(substring(stripped, valueSeparator + length(" ")));
+		auto annotationSeparator = lastIndexOf(beforeName, "\n");
+		if (annotationSeparator < 0){
+			return definitionWithAnnotations(state, emptyList(Collections), beforeName, name);
 		}
-		return template Err<>::new(struct CompileError::new("Invalid definition", input));
+		auto annotations = parseAnnotations(substring(beforeName, 0, annotationSeparator));
+		auto beforeName0 = substring(beforeName, annotationSeparator + length("\n"));
+		return definitionWithAnnotations(state, annotations, beforeName0, name);
+	}
+	return template Err<>::new(struct CompileError::new("Invalid definition", input));
 }
-template List<char*> Values::parseAnnotations(char* annotationsString){
-		auto annotationsArray = split(strip(annotationsString), quote(Pattern, "\n"));
-		return toList(map(map(stream(Arrays, annotationsArray), char*::strip), struct Main::truncateAnnotationValue));
+template List<char*> Main::parseAnnotations(char* annotationsString){
+	auto annotationsArray = split(strip(annotationsString), quote(Pattern, "\n"));
+	return toList(map(map(stream(Arrays, annotationsArray), char*::strip), struct Main::truncateAnnotationValue));
 }
-char* Values::truncateAnnotationValue(char* slice){
-		if (isEmpty(slice)){
-			return "";
-		}
-		return substring(slice, 1);
+char* Main::truncateAnnotationValue(char* slice){
+	if (isEmpty(slice)){
+		return "";
+	}
+	return substring(slice, 1);
 }
-template Result<(struct CompileState, struct Definition), struct CompileError> Values::definitionWithAnnotations(struct CompileState state, template List<char*> annotations, char* withoutAnnotations, char* name){
-		auto stripped = strip(withoutAnnotations);
-		if (findTypeSeparator(stripped) == 0){
-			auto type = slices.right;
-			return definitionWithBeforeType(state, annotations, type, name);
-		}
-		return definitionWithBeforeType(state, annotations, stripped, name);
+template Result<(struct CompileState, struct Definition), struct CompileError> Main::definitionWithAnnotations(struct CompileState state, template List<char*> annotations, char* withoutAnnotations, char* name){
+	auto stripped = strip(withoutAnnotations);
+	if (findTypeSeparator(stripped) == 0){
+		auto type = slices.right;
+		return definitionWithBeforeType(state, annotations, type, name);
+	}
+	return definitionWithBeforeType(state, annotations, stripped, name);
 }
-template Option<(char*, char*)> Values::findTypeSeparator(char* input){
-		auto divisions = divideAll(strip(input), struct Main::foldTypeSeparator);
-		if (size(divisions) >= 2){
-			auto left = subList(divisions, 0, size(divisions) - 1);
-			auto joinedLeft = join(String, " ", left);
-			return template Some<>::new((joinedLeft, getLast(divisions)));
-		}
-		return template None<>::new();
+template Option<(char*, char*)> Main::findTypeSeparator(char* input){
+	auto divisions = divideAll(strip(input), struct Main::foldTypeSeparator);
+	if (size(divisions) >= 2){
+		auto left = subList(divisions, 0, size(divisions) - 1);
+		auto joinedLeft = join(String, " ", left);
+		return template Some<>::new((joinedLeft, getLast(divisions)));
+	}
+	return template None<>::new();
 }
-struct DivideState Values::foldTypeSeparator(struct DivideState state, struct Character c){
-		if (c == ' ' && isLevel(state)){
-			return advance(state);
-		}
-		auto appended = append(state, c);
-		if (c == '<'){
-			return enter(appended);
-		}
-		if (c == '>'){
-			return exit(appended);
-		}
-		return appended;
+struct DivideState Main::foldTypeSeparator(struct DivideState state, struct Character c){
+	if (c == ' ' && isLevel(state)){
+		return advance(state);
+	}
+	auto appended = append(state, c);
+	if (c == '<'){
+		return enter(appended);
+	}
+	if (c == '>'){
+		return exit(appended);
+	}
+	return appended;
 }
 auto lambda0(auto typeResult){
-		return (typeResult.left, struct Definition::new(annotations, emptyList(Collections), typeResult.right, name));
+	return (typeResult.left, struct Definition::new(annotations, emptyList(Collections), typeResult.right, name));
 }
-template Result<(struct CompileState, struct Definition), struct CompileError> Values::definitionWithBeforeType(struct CompileState state, template List<char*> annotations, char* type, char* name){
-		return mapValue(type(state, type), lambda0);
+template Result<(struct CompileState, struct Definition), struct CompileError> Main::definitionWithBeforeType(struct CompileState state, template List<char*> annotations, char* type, char* name){
+	return mapValue(type(state, type), lambda0);
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::type(struct CompileState state, char* input){
-		return or(state, input, of(List, struct Main::primitive, struct Main::symbolType, struct Main::template));
+template Result<(struct CompileState, char*), struct CompileError> Main::type(struct CompileState state, char* input){
+	return or(state, input, of(List, struct Main::primitive, struct Main::symbolType, struct Main::template));
 }
 auto lambda0(auto argsTuple){
-		auto args = argsTuple.right;
-		if (equals(base, "Tuple") && size(args) >= 2){
-			auto first = get(args, 0);
-			auto second = get(args, 1);
-			return template Ok<>::new((argsTuple.left, "(" + first + ", " + second + ")"));
-		}
-		if (equals(base, "Consumer")){
-			return template Ok<>::new((argsTuple.left, generateFunctional("void", singletonList(Collections, getFirst(args)))));
-		}
-		if (equals(base, "Supplier")){
-			return template Ok<>::new((argsTuple.left, generateFunctional(getFirst(args), emptyList(Collections))));
-		}
-		if (equals(base, "Function")){
-			return template Ok<>::new((argsTuple.left, generateFunctional(get(args, 1), singletonList(Collections, getFirst(args)))));
-		}
-		return template Ok<>::new((argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
+	auto args = argsTuple.right;
+	if (equals(base, "Tuple") && size(args) >= 2){
+		auto first = get(args, 0);
+		auto second = get(args, 1);
+		return template Ok<>::new((argsTuple.left, "(" + first + ", " + second + ")"));
+	}
+	if (equals(base, "Consumer")){
+		return template Ok<>::new((argsTuple.left, generateFunctional("void", singletonList(Collections, getFirst(args)))));
+	}
+	if (equals(base, "Supplier")){
+		return template Ok<>::new((argsTuple.left, generateFunctional(getFirst(args), emptyList(Collections))));
+	}
+	if (equals(base, "Function")){
+		return template Ok<>::new((argsTuple.left, generateFunctional(get(args, 1), singletonList(Collections, getFirst(args)))));
+	}
+	return template Ok<>::new((argsTuple.left, "template " + base + "<" + generateValues(args) + ">"));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::template(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (!endsWith(stripped, ">")){
-			return createSuffixErr(stripped, ">");
-		}
-		auto withoutEnd = substring(stripped, 0, length(stripped) - length(">"));
-		auto argsStart = indexOf(withoutEnd, "<");
-		if (argsStart < 0){
-			return createInfixErr(withoutEnd, "<");
-		}
-		auto base = strip(substring(withoutEnd, 0, argsStart));
-		auto argsString = substring(withoutEnd, argsStart + length("<"));
-		return flatMapValue(parseValues(state, argsString, struct Main::argumentType), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::template(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (!endsWith(stripped, ">")){
+		return createSuffixErr(stripped, ">");
+	}
+	auto withoutEnd = substring(stripped, 0, length(stripped) - length(">"));
+	auto argsStart = indexOf(withoutEnd, "<");
+	if (argsStart < 0){
+		return createInfixErr(withoutEnd, "<");
+	}
+	auto base = strip(substring(withoutEnd, 0, argsStart));
+	auto argsString = substring(withoutEnd, argsStart + length("<"));
+	return flatMapValue(parseValues(state, argsString, struct Main::argumentType), lambda0);
 }
-char* Values::generateFunctional(char* returnType, template List<char*> arguments){
-		return returnType + " (*)(" + String.join(", ", arguments) + ")";
+char* Main::generateFunctional(char* returnType, template List<char*> arguments){
+	return returnType + " (*)(" + String.join(", ", arguments) + ")";
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::argumentType(struct CompileState state1, char* input1){
-		return or(state1, input1, of(List, struct Main::whitespace, struct Main::type));
+template Result<(struct CompileState, char*), struct CompileError> Main::argumentType(struct CompileState state1, char* input1){
+	return or(state1, input1, of(List, struct Main::whitespace, struct Main::type));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::symbolType(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (isSymbol(stripped)){
-			return template Ok<>::new((state, "struct " + stripped));
-		}
-		return template Err<>::new(struct CompileError::new("Not a symbol", stripped));
+template Result<(struct CompileState, char*), struct CompileError> Main::symbolType(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (isSymbol(stripped)){
+		return template Ok<>::new((state, "struct " + stripped));
+	}
+	return template Err<>::new(struct CompileError::new("Not a symbol", stripped));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::primitive(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (equals(stripped, "var")){
-			return template Ok<>::new((state, "auto"));
-		}
-		if (equals(stripped, "char")){
-			return template Ok<>::new((state, "char"));
-		}
-		if (equals(stripped, "void")){
-			return template Ok<>::new((state, "void"));
-		}
-		if (equals(stripped, "String")){
-			return template Ok<>::new((state, "char*"));
-		}
-		if (equals(stripped, "boolean") || equals(stripped, "int")){
-			return template Ok<>::new((state, "int"));
-		}
-		return template Err<>::new(struct CompileError::new("Not a primitive", input));
+template Result<(struct CompileState, char*), struct CompileError> Main::primitive(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (equals(stripped, "var")){
+		return template Ok<>::new((state, "auto"));
+	}
+	if (equals(stripped, "char")){
+		return template Ok<>::new((state, "char"));
+	}
+	if (equals(stripped, "void")){
+		return template Ok<>::new((state, "void"));
+	}
+	if (equals(stripped, "String")){
+		return template Ok<>::new((state, "char*"));
+	}
+	if (equals(stripped, "boolean") || equals(stripped, "int")){
+		return template Ok<>::new((state, "int"));
+	}
+	return template Err<>::new(struct CompileError::new("Not a primitive", input));
 }
 auto lambda0(auto arg){
 	return !(arg == 0);
@@ -1049,201 +1040,201 @@ auto lambda3(auto state1, auto s){
 	return invocationCaller(state1, s, oldArguments);
 }
 auto lambda4(auto argumentsTuple){
-		auto argumentState = argumentsTuple.left;
-		auto oldArguments = toList(filter(stream(argumentsTuple.right), lambda1));
-		return or(argumentState, callerString, of(List, lambda2, lambda3));
+	auto argumentState = argumentsTuple.left;
+	auto oldArguments = toList(filter(stream(argumentsTuple.right), lambda1));
+	return or(argumentState, callerString, of(List, lambda2, lambda3));
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::compileInvokable(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (!endsWith(stripped, ")")){
-			return createSuffixErr(stripped, ")");
-		}
-		auto withoutEnd = substring(stripped, 0, length(stripped) - length(")"));
-		auto divisions = divideAll(withoutEnd, struct Main::foldInvocationStart);
-		if (size(divisions) < 2){
-			return template Err<>::new(struct CompileError::new("Insufficient divisions", withoutEnd));
-		}
-		auto joined = join(String, "", subList(divisions, 0, size(divisions) - 1));
-		auto callerString = substring(joined, 0, length(joined) - length(")"));
-		auto inputArguments = getLast(divisions);
-		auto tupleCompileErrorResult = parseValues(state, inputArguments, struct Main::parseArgument);
-		return flatMapValue(tupleCompileErrorResult, lambda4);
+template Result<(struct CompileState, struct Value), struct CompileError> Main::compileInvokable(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (!endsWith(stripped, ")")){
+		return createSuffixErr(stripped, ")");
+	}
+	auto withoutEnd = substring(stripped, 0, length(stripped) - length(")"));
+	auto divisions = divideAll(withoutEnd, struct Main::foldInvocationStart);
+	if (size(divisions) < 2){
+		return template Err<>::new(struct CompileError::new("Insufficient divisions", withoutEnd));
+	}
+	auto joined = join(String, "", subList(divisions, 0, size(divisions) - 1));
+	auto callerString = substring(joined, 0, length(joined) - length(")"));
+	auto inputArguments = getLast(divisions);
+	auto tupleCompileErrorResult = parseValues(state, inputArguments, struct Main::parseArgument);
+	return flatMapValue(tupleCompileErrorResult, lambda4);
 }
 auto lambda0(auto callerTuple){
-		auto invocation = struct Invocation::new(struct MethodAccess::new(callerTuple.right, "new"), oldArguments);
-		return template Ok<>::new((callerTuple.left, invocation));
+	auto invocation = struct Invocation::new(struct MethodAccess::new(callerTuple.right, "new"), oldArguments);
+	return template Ok<>::new((callerTuple.left, invocation));
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::constructorCaller(struct CompileState state, char* callerString, template List<struct Value> oldArguments){
-		auto stripped = strip(callerString);
-		if (!startsWith(stripped, "new ")){
-			return createPrefixErr(stripped, "new ");
-		}
-		auto withoutPrefix = substring(stripped, length("new "));
-		if (equals(withoutPrefix, "Tuple<>") && size(oldArguments) >= 2){
-			return template Ok<>::new((state, struct TupleNode::new(get(oldArguments, 0), get(oldArguments, 1))));
-		}
-		return flatMapValue(type(state, withoutPrefix), lambda0);
+template Result<(struct CompileState, struct Value), struct CompileError> Main::constructorCaller(struct CompileState state, char* callerString, template List<struct Value> oldArguments){
+	auto stripped = strip(callerString);
+	if (!startsWith(stripped, "new ")){
+		return createPrefixErr(stripped, "new ");
+	}
+	auto withoutPrefix = substring(stripped, length("new "));
+	if (equals(withoutPrefix, "Tuple<>") && size(oldArguments) >= 2){
+		return template Ok<>::new((state, struct TupleNode::new(get(oldArguments, 0), get(oldArguments, 1))));
+	}
+	return flatMapValue(type(state, withoutPrefix), lambda0);
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::invocationCaller(struct CompileState state, char* input, template List<struct Value> arguments){
-		if (value(state, input) == 0){
-			auto callerState = callerTuple.left;
-			auto oldCaller = callerTuple.right;
-			struct Value newCaller = oldCaller;
-			auto newArguments = template ArrayList<struct Value>::new();
-			if (oldCaller == 0){
-				add(newArguments, parent);
-				newCaller = struct Symbol::new(property);
-			}
-			addAll(newArguments, arguments);
-			return template Ok<>::new((callerState, struct Invocation::new(newCaller, newArguments)));
+template Result<(struct CompileState, struct Value), struct CompileError> Main::invocationCaller(struct CompileState state, char* input, template List<struct Value> arguments){
+	if (value(state, input) == 0){
+		auto callerState = callerTuple.left;
+		auto oldCaller = callerTuple.right;
+		struct Value newCaller = oldCaller;
+		auto newArguments = template ArrayList<struct Value>::new();
+		if (oldCaller == 0){
+			add(newArguments, parent);
+			newCaller = struct Symbol::new(property);
 		}
-		return template Err<>::new(struct CompileError::new("Not an invocation", input));
+		addAll(newArguments, arguments);
+		return template Ok<>::new((callerState, struct Invocation::new(newCaller, newArguments)));
+	}
+	return template Err<>::new(struct CompileError::new("Not an invocation", input));
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::parseArgument(struct CompileState state1, char* input1){
-		return or(state1, input1, of(List, typed("?", struct Main::parseWhitespace), typed("?", struct Main::value)));
+template Result<(struct CompileState, struct Value), struct CompileError> Main::parseArgument(struct CompileState state1, char* input1){
+	return or(state1, input1, of(List, typed("?", struct Main::parseWhitespace), typed("?", struct Main::value)));
 }
-template Result<(struct CompileState, struct Whitespace), struct CompileError> Values::parseWhitespace(struct CompileState state, char* input){
-		if (isBlank(input)){
-			return template Ok<>::new((state, struct Whitespace::new()));
-		}
-		else {
-			return template Err<>::new(struct CompileError::new("Not whitespace", input));
-		}
+template Result<(struct CompileState, struct Whitespace), struct CompileError> Main::parseWhitespace(struct CompileState state, char* input){
+	if (isBlank(input)){
+		return template Ok<>::new((state, struct Whitespace::new()));
+	}
+	else {
+		return template Err<>::new(struct CompileError::new("Not whitespace", input));
+	}
 }
 auto lambda0(auto tuple){
 	return (tuple.left, generateValues(tuple.right));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileValues(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, char*), struct CompileError>> compiler){
-		return mapValue(parseValues(state, input, compiler), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::compileValues(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, char*), struct CompileError>> compiler){
+	return mapValue(parseValues(state, input, compiler), lambda0);
 }
-char* Values::generateValues(template List<char*> elements){
-		return generateAll(elements, struct Main::mergeValues);
+char* Main::generateValues(template List<char*> elements){
+	return generateAll(elements, struct Main::mergeValues);
 }
-template Result<(struct CompileState, template List<struct T>), struct CompileError> Values::parseValues(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct T), struct CompileError>> compiler){
-		return parseAll(state, input, struct Main::foldValueChar, compiler);
+template Result<(struct CompileState, template List<struct T>), struct CompileError> Main::parseValues(struct CompileState state, char* input, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct T), struct CompileError>> compiler){
+	return parseAll(state, input, struct Main::foldValueChar, compiler);
 }
-struct StringBuilder Values::mergeValues(struct StringBuilder cache, char* element){
-		if (isEmpty(cache)){
-			return append(cache, element);
-		}
-		return append(append(cache, ", "), element);
+struct StringBuilder Main::mergeValues(struct StringBuilder cache, char* element){
+	if (isEmpty(cache)){
+		return append(cache, element);
+	}
+	return append(append(cache, ", "), element);
 }
-struct DivideState Values::foldValueChar(struct DivideState state, char c){
-		if (c == ',' && isLevel(state)){
-			return advance(state);
-		}
-		auto appended = append(state, c);
-		if (c == '-' && peek(appended) == '>'){
-			return orElse(popAndAppendToOption(appended), appended);
-		}
-		if (c == '(' || c == '<'){
-			return enter(appended);
-		}
-		if (c == ')' || c == '>'){
-			return exit(appended);
-		}
-		return appended;
+struct DivideState Main::foldValueChar(struct DivideState state, char c){
+	if (c == ',' && isLevel(state)){
+		return advance(state);
+	}
+	auto appended = append(state, c);
+	if (c == '-' && peek(appended) == '>'){
+		return orElse(popAndAppendToOption(appended), appended);
+	}
+	if (c == '(' || c == '<'){
+		return enter(appended);
+	}
+	if (c == ')' || c == '>'){
+		return exit(appended);
+	}
+	return appended;
 }
 auto lambda0(auto tuple){
 	return (tuple.left, generate(tuple.right));
 }
-template Result<(struct CompileState, char*), struct CompileError> Values::compileValue(struct CompileState state, char* input){
-		return mapValue(value(state, input), lambda0);
+template Result<(struct CompileState, char*), struct CompileError> Main::compileValue(struct CompileState state, char* input){
+	return mapValue(value(state, input), lambda0);
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::value(struct CompileState state, char* input){
-		template List<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>>> beforeOperators = of(List, typed("?", struct Main::compileNot), typed("?", struct Main::compileString), typed("?", struct Main::compileChar), typed("lambda", struct Main::compileLambda));
-		template List<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>>> afterOperators = of(List, typed("invokable", struct Main::compileInvokable), typed("?", struct Main::compileAccess), typed("?", struct Main::parseBooleanValue), typed("?", struct Main::compileSymbolValue), typed("?", struct Main::compileMethodReference), typed("?", struct Main::parseNumber), typed("instanceof", struct Main::instanceOfNode));
-		auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>>>::new(beforeOperators);
-		addAll(rules, toList(map(stream(Arrays, values(Operator)), struct Main::createOperatorRule)));
-		addAll(rules, afterOperators);
-		return or(state, input, rules);
+template Result<(struct CompileState, struct Value), struct CompileError> Main::value(struct CompileState state, char* input){
+	template List<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>>> beforeOperators = of(List, typed("?", struct Main::compileNot), typed("?", struct Main::compileString), typed("?", struct Main::compileChar), typed("lambda", struct Main::compileLambda));
+	template List<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>>> afterOperators = of(List, typed("invokable", struct Main::compileInvokable), typed("?", struct Main::compileAccess), typed("?", struct Main::parseBooleanValue), typed("?", struct Main::compileSymbolValue), typed("?", struct Main::compileMethodReference), typed("?", struct Main::parseNumber), typed("instanceof", struct Main::instanceOfNode));
+	auto rules = template ArrayList<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>>>::new(beforeOperators);
+	addAll(rules, toList(map(stream(Arrays, values(Operator)), struct Main::createOperatorRule)));
+	addAll(rules, afterOperators);
+	return or(state, input, rules);
 }
 auto lambda0(auto state1, auto input1){
 	return operator(state1, input1, value);
 }
-template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>> Values::createOperatorRule(struct Operator value){
-		return typed(name(value), lambda0);
+template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct Value), struct CompileError>> Main::createOperatorRule(struct Operator value){
+	return typed(name(value), lambda0);
 }
 auto lambda0(auto valueResult){
-		return (valueResult.left, struct Operation::new(valueResult.right, Operator.EQUALS, struct NumberValue::new("0")));
+	return (valueResult.left, struct Operation::new(valueResult.right, Operator.EQUALS, struct NumberValue::new("0")));
 }
 auto lambda1(auto beforeKeyword, auto _){
-		return mapValue(value(state, beforeKeyword), lambda0);
+	return mapValue(value(state, beforeKeyword), lambda0);
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::instanceOfNode(struct CompileState state, char* input){
-		return infix(input, "instanceof", lambda1);
+template Result<(struct CompileState, struct Value), struct CompileError> Main::instanceOfNode(struct CompileState state, char* input){
+	return infix(input, "instanceof", lambda1);
 }
 auto lambda0(auto inner){
 	return (inner.left, struct Not::new(inner.right));
 }
-template Result<(struct CompileState, struct Not), struct CompileError> Values::compileNot(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (!startsWith(stripped, "!")){
-			return template Err<>::new(struct CompileError::new("Not not", input));
-		}
-		return mapValue(value(state, substring(stripped, 1)), lambda0);
+template Result<(struct CompileState, struct Not), struct CompileError> Main::compileNot(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (!startsWith(stripped, "!")){
+		return template Err<>::new(struct CompileError::new("Not not", input));
+	}
+	return mapValue(value(state, substring(stripped, 1)), lambda0);
 }
-template Result<(struct CompileState, struct NumberValue), struct CompileError> Values::parseBooleanValue(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (equals(stripped, "false")){
-			return template Ok<>::new((state, struct NumberValue::new("0")));
-		}
-		if (equals(stripped, "true")){
-			return template Ok<>::new((state, struct NumberValue::new("1")));
-		}
-		return template Err<>::new(struct CompileError::new("Not a valid boolean value", input));
+template Result<(struct CompileState, struct NumberValue), struct CompileError> Main::parseBooleanValue(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (equals(stripped, "false")){
+		return template Ok<>::new((state, struct NumberValue::new("0")));
+	}
+	if (equals(stripped, "true")){
+		return template Ok<>::new((state, struct NumberValue::new("1")));
+	}
+	return template Err<>::new(struct CompileError::new("Not a valid boolean value", input));
 }
-template Result<(struct CompileState, struct CharValue), struct CompileError> Values::compileChar(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (startsWith(stripped, "'") && endsWith(stripped, "'") && length(stripped) >= 3){
-			return template Ok<>::new((state, struct CharValue::new(substring(stripped, 1, length(stripped) - 1))));
-		}
-		else {
-			return template Err<>::new(struct CompileError::new("Not a char", input));
-		}
+template Result<(struct CompileState, struct CharValue), struct CompileError> Main::compileChar(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (startsWith(stripped, "'") && endsWith(stripped, "'") && length(stripped) >= 3){
+		return template Ok<>::new((state, struct CharValue::new(substring(stripped, 1, length(stripped) - 1))));
+	}
+	else {
+		return template Err<>::new(struct CompileError::new("Not a char", input));
+	}
 }
-template Result<(struct CompileState, struct Value), struct CompileError> Values::parseNumber(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (isNumber(stripped)){
-			return template Ok<>::new((state, struct NumberValue::new(stripped)));
-		}
-		else {
-			return template Err<>::new(struct CompileError::new("Not a valid number", stripped));
-		}
+template Result<(struct CompileState, struct Value), struct CompileError> Main::parseNumber(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (isNumber(stripped)){
+		return template Ok<>::new((state, struct NumberValue::new(stripped)));
+	}
+	else {
+		return template Err<>::new(struct CompileError::new("Not a valid number", stripped));
+	}
 }
-int Values::isNumber(char* input){
-		return allMatch(mapToObj(range(IntStream, 0, length(input)), struct input::charAt), struct Character::isDigit);
+int Main::isNumber(char* input){
+	return allMatch(mapToObj(range(IntStream, 0, length(input)), struct input::charAt), struct Character::isDigit);
 }
 auto lambda0(auto rightTuple){
-		auto operation = struct Operation::new(leftTuple.right, operator, rightTuple.right);
-		return (rightTuple.left, operation);
+	auto operation = struct Operation::new(leftTuple.right, operator, rightTuple.right);
+	return (rightTuple.left, operation);
 }
 auto lambda1(auto leftTuple){
-		return mapValue(value(leftTuple.left, right), lambda0);
+	return mapValue(value(leftTuple.left, right), lambda0);
 }
-template Result<(struct CompileState, struct Operation), struct CompileError> Values::operator(struct CompileState state, char* input, struct Operator operator){
-		auto index = indexOf(input, operator.representation);
-		if (index < 0){
-			return createInfixErr(input, operator.representation);
-		}
-		auto left = substring(input, 0, index);
-		auto right = substring(input, index + length(operator.representation));
-		return flatMapValue(value(state, left), lambda1);
+template Result<(struct CompileState, struct Operation), struct CompileError> Main::operator(struct CompileState state, char* input, struct Operator operator){
+	auto index = indexOf(input, operator.representation);
+	if (index < 0){
+		return createInfixErr(input, operator.representation);
+	}
+	auto left = substring(input, 0, index);
+	auto right = substring(input, index + length(operator.representation));
+	return flatMapValue(value(state, left), lambda1);
 }
 auto lambda0(auto errs){
 	return struct CompileError::new("No valid rule present", input, errs);
 }
 auto lambda1(auto tOrState, auto mapper){
-		if (isPresent(tOrState.option)){
-			return tOrState;
-		}
-		return match(apply(mapper, state, input), struct tOrState::withValue, struct tOrState::withError);
+	if (isPresent(tOrState.option)){
+		return tOrState;
+	}
+	return match(apply(mapper, state, input), struct tOrState::withValue, struct tOrState::withError);
 }
 auto lambda2(auto _, auto next){
 	return next;
 }
-template Result<(struct CompileState, struct T), struct CompileError> Values::or(struct CompileState state, char* input, template List<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct T), struct CompileError>>> rules){
-		return mapErr(toResult(reduce(stream(rules), template OrState<struct T>::new(), lambda1, lambda2)), lambda0);
+template Result<(struct CompileState, struct T), struct CompileError> Main::or(struct CompileState state, char* input, template List<template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct T), struct CompileError>>> rules){
+	return mapErr(toResult(reduce(stream(rules), template OrState<struct T>::new(), lambda1, lambda2)), lambda0);
 }
 auto lambda0(auto err){
 	return struct CompileError::new("Invalid type '" + type + "'", input, singletonList(Collections, err));
@@ -1254,70 +1245,70 @@ auto lambda1(auto value){
 auto lambda2(auto state, auto input){
 	return mapErr(mapValue(apply(mapper, state, input), lambda1), lambda0);
 }
-template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct S), struct CompileError>> Values::typed(char* type, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct T), struct CompileError>> mapper){
-		return lambda2;
+template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct S), struct CompileError>> Main::typed(char* type, template BiFunction<struct CompileState, char*, template Result<(struct CompileState, struct T), struct CompileError>> mapper){
+	return lambda2;
 }
-template Result<(struct CompileState, struct MethodAccess), struct CompileError> Values::compileMethodReference(struct CompileState state, char* input){
-		auto functionSeparator = indexOf(strip(input), "::");
-		if (functionSeparator >= 0){
-			auto left = substring(strip(input), 0, functionSeparator);
-			auto right = strip(substring(strip(input), functionSeparator + length("::")));
-			auto maybeLeftTuple = type(state, left);
-			if (maybeLeftTuple == 0){
-				if (isSymbol(right)){
-					return template Ok<>::new((leftTuple.left, struct MethodAccess::new(leftTuple.right, right)));
-				}
+template Result<(struct CompileState, struct MethodAccess), struct CompileError> Main::compileMethodReference(struct CompileState state, char* input){
+	auto functionSeparator = indexOf(strip(input), "::");
+	if (functionSeparator >= 0){
+		auto left = substring(strip(input), 0, functionSeparator);
+		auto right = strip(substring(strip(input), functionSeparator + length("::")));
+		auto maybeLeftTuple = type(state, left);
+		if (maybeLeftTuple == 0){
+			if (isSymbol(right)){
+				return template Ok<>::new((leftTuple.left, struct MethodAccess::new(leftTuple.right, right)));
 			}
 		}
-		return template Err<>::new(struct CompileError::new("Not a method reference", input));
+	}
+	return template Err<>::new(struct CompileError::new("Not a method reference", input));
 }
-template Result<(struct CompileState, struct Symbol), struct CompileError> Values::compileSymbolValue(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (isSymbol(stripped)){
-			return template Ok<>::new((struct CompileState, struct Symbol)::new(state, struct Symbol::new(stripped)));
-		}
-		return template Err<>::new(struct CompileError::new("Not a symbol", input));
+template Result<(struct CompileState, struct Symbol), struct CompileError> Main::compileSymbolValue(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (isSymbol(stripped)){
+		return template Ok<>::new((struct CompileState, struct Symbol)::new(state, struct Symbol::new(stripped)));
+	}
+	return template Err<>::new(struct CompileError::new("Not a symbol", input));
 }
-template Result<(struct CompileState, struct DataAccess), struct CompileError> Values::compileAccess(struct CompileState state, char* input){
-		auto separator = lastIndexOf(strip(input), ".");
-		if (separator >= 0){
-			auto parent = substring(strip(input), 0, separator);
-			auto child = substring(strip(input), separator + length("."));
-			if (isSymbol(child) && value(state, parent) == 0){
-				return template Ok<>::new((struct CompileState, struct DataAccess)::new(tuple.left, struct DataAccess::new(tuple.right, child)));
-			}
+template Result<(struct CompileState, struct DataAccess), struct CompileError> Main::compileAccess(struct CompileState state, char* input){
+	auto separator = lastIndexOf(strip(input), ".");
+	if (separator >= 0){
+		auto parent = substring(strip(input), 0, separator);
+		auto child = substring(strip(input), separator + length("."));
+		if (isSymbol(child) && value(state, parent) == 0){
+			return template Ok<>::new((struct CompileState, struct DataAccess)::new(tuple.left, struct DataAccess::new(tuple.right, child)));
 		}
-		return template Err<>::new(struct CompileError::new("Not data access", input));
+	}
+	return template Err<>::new(struct CompileError::new("Not data access", input));
 }
-template Result<(struct CompileState, struct StringValue), struct CompileError> Values::compileString(struct CompileState state, char* input){
-		auto stripped = strip(input);
-		if (startsWith(stripped, "\"") && endsWith(stripped, "\"") && length(stripped) >= 2){
-			return template Ok<>::new((state, struct StringValue::new(substring(stripped, 1, length(stripped) - 1))));
-		}
-		return template Err<>::new(struct CompileError::new("Not a string", input));
+template Result<(struct CompileState, struct StringValue), struct CompileError> Main::compileString(struct CompileState state, char* input){
+	auto stripped = strip(input);
+	if (startsWith(stripped, "\"") && endsWith(stripped, "\"") && length(stripped) >= 2){
+		return template Ok<>::new((state, struct StringValue::new(substring(stripped, 1, length(stripped) - 1))));
+	}
+	return template Err<>::new(struct CompileError::new("Not a string", input));
 }
 auto lambda0(auto result){
 	return assembleLambda(result.left, paramNames, result.right);
 }
 auto lambda0(auto valueTuple){
-		return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
+	return assembleLambda(valueTuple.left, paramNames, "\n\treturn " + valueTuple.right + ";");
 }
-template Result<(struct CompileState, struct Symbol), struct CompileError> Values::compileLambda(struct CompileState state, char* input){
-		auto arrowIndex = indexOf(input, "->");
-		if (arrowIndex < 0){
-			return createInfixErr(input, "->");
-		}
-		auto beforeArrow = strip(substring(input, 0, arrowIndex));
-		auto afterArrow = substring(input, arrowIndex + length("->"));
-		if (!(findLambdaParamNames(beforeArrow) == 0)){
-			return template Err<>::new(struct CompileError::new("No valid lambda parameter names found", beforeArrow));
-		}
-		auto withBraces = strip(afterArrow);
-		if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
-			auto content = substring(withBraces, 1, length(withBraces) - 1);
-			return flatMapValue(compileStatements(state, content, struct Main::compileFunctionSegment), lambda0);
-		}
-		return flatMapValue(compileValue(state, afterArrow), lambda0);
+template Result<(struct CompileState, struct Symbol), struct CompileError> Main::compileLambda(struct CompileState state, char* input){
+	auto arrowIndex = indexOf(input, "->");
+	if (arrowIndex < 0){
+		return createInfixErr(input, "->");
+	}
+	auto beforeArrow = strip(substring(input, 0, arrowIndex));
+	auto afterArrow = substring(input, arrowIndex + length("->"));
+	if (!(findLambdaParamNames(beforeArrow) == 0)){
+		return template Err<>::new(struct CompileError::new("No valid lambda parameter names found", beforeArrow));
+	}
+	auto withBraces = strip(afterArrow);
+	if (startsWith(withBraces, "{") && endsWith(withBraces, "}")){
+		auto content = substring(withBraces, 1, length(withBraces) - 1);
+		return flatMapValue(compileStatements(state, content, struct Main::compileFunctionSegment), lambda0);
+	}
+	return flatMapValue(compileValue(state, afterArrow), lambda0);
 }
 auto lambda0(auto value){
 	return !isEmpty(value);
@@ -1325,15 +1316,15 @@ auto lambda0(auto value){
 auto lambda1(auto value){
 	return !isEmpty(value);
 }
-template Option<template List<char*>> Values::findLambdaParamNames(char* beforeArrow){
-		if (isSymbol(beforeArrow)){
-			return template Some<>::new(singletonList(Collections, beforeArrow));
-		}
-		if (startsWith(beforeArrow, "(") && endsWith(beforeArrow, ")")){
-			auto paramNames = toList(filter(map(stream(Arrays, split(substring(beforeArrow, 1, length(beforeArrow) - 1), quote(Pattern, ","))), char*::strip), lambda1));
-			return template Some<>::new(paramNames);
-		}
-		return template None<>::new();
+template Option<template List<char*>> Main::findLambdaParamNames(char* beforeArrow){
+	if (isSymbol(beforeArrow)){
+		return template Some<>::new(singletonList(Collections, beforeArrow));
+	}
+	if (startsWith(beforeArrow, "(") && endsWith(beforeArrow, ")")){
+		auto paramNames = toList(filter(map(stream(Arrays, split(substring(beforeArrow, 1, length(beforeArrow) - 1), quote(Pattern, ","))), char*::strip), lambda1));
+		return template Some<>::new(paramNames);
+	}
+	return template None<>::new();
 }
 auto lambda0(auto name){
 	return "auto " + name;
@@ -1341,36 +1332,36 @@ auto lambda0(auto name){
 auto lambda1(auto name){
 	return "auto " + name;
 }
-template Result<(struct CompileState, struct Symbol), struct CompileError> Values::assembleLambda(struct CompileState state, template List<char*> paramNames, char* content){
-		auto nameTuple = createName(state, "lambda");
-		auto generatedName = nameTuple.left;
-		auto joinedParams = collect(map(stream(paramNames), lambda1), joining(Collectors, ", "));
-		return template Ok<>::new((addFunction(nameTuple.right, "auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), struct Symbol::new(generatedName)));
+template Result<(struct CompileState, struct Symbol), struct CompileError> Main::assembleLambda(struct CompileState state, template List<char*> paramNames, char* content){
+	auto nameTuple = createName(state, "lambda");
+	auto generatedName = nameTuple.left;
+	auto joinedParams = collect(map(stream(paramNames), lambda1), joining(Collectors, ", "));
+	return template Ok<>::new((addFunction(nameTuple.right, "auto " + generatedName + "(" + joinedParams + "){" + content + "\n}\n"), struct Symbol::new(generatedName)));
 }
 auto lambda0(auto index){
-		auto c = charAt(input, index);
-		return isLetter(Character, c) || c == '_' || (index != 0 && isDigit(Character, c));
+	auto c = charAt(input, index);
+	return isLetter(Character, c) || c == '_' || (index != 0 && isDigit(Character, c));
 }
-int Values::isSymbol(char* input){
-		auto stripped = strip(input);
-		if (isEmpty(stripped)){
-			return 0;
-		}
-		return allMatch(range(IntStream, 0, length(stripped)), lambda0);
+int Main::isSymbol(char* input){
+	auto stripped = strip(input);
+	if (isEmpty(stripped)){
+		return 0;
+	}
+	return allMatch(range(IntStream, 0, length(stripped)), lambda0);
 }
-struct DivideState Values::foldInvocationStart(struct DivideState state, char c){
-		auto appended = append(state, c);
-		if (c == '('){
-			auto entered = enter(appended);
-			if (isShallow(appended)){
-				return advance(entered);
-			}
-			else {
-				return entered;
-			}
+struct DivideState Main::foldInvocationStart(struct DivideState state, char c){
+	auto appended = append(state, c);
+	if (c == '('){
+		auto entered = enter(appended);
+		if (isShallow(appended)){
+			return advance(entered);
 		}
-		if (c == ')'){
-			return exit(appended);
+		else {
+			return entered;
 		}
-		return appended;
+	}
+	if (c == ')'){
+		return exit(appended);
+	}
+	return appended;
 }
