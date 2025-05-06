@@ -147,10 +147,10 @@ public class Main {
 
     private static class Nodes {
         private static <T extends Node> String joinNodesAsValues(List<T> values) {
-            return values.iterator()
-                    .map(Node::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
+            var iterator = values.iterator();
+            var map = iterator.map(Node::generate);
+            var collect = map.collect(new Joiner(", "));
+            return collect.orElse("");
         }
     }
 
