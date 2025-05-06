@@ -1015,7 +1015,7 @@ public class Main {
 
     }
 
-    private record StructPrototype(String name) {
+    private record StructPrototype(String name, List<Definition> parameters) {
     }
 
     private record StructureType(StructPrototype prototype, List<Definition> definitions) implements Type {
@@ -1324,16 +1324,18 @@ public class Main {
         return new Err<>(new CompileError("Infix '" + infix + "' not present", withoutEnd));
     }
 
-    private static Result<Tuple<CompileState, StructPrototype>, CompileError> createPrototype(CompileState left, String name) {
+    private static Result<Tuple<CompileState, StructPrototype>, CompileError> createPrototype(CompileState left, String name, List<Definition> parameters) {
         if (!isSymbol(name.strip())) {
             return new Err<>(new CompileError("Not a symbol", name));
         }
 
-        return new Ok<>(new Tuple<>(left, new StructPrototype(name)));
+        return new Ok<>(new Tuple<>(left, new StructPrototype(name, parameters)));
     }
 
-    private static Result<Tuple<CompileState, Whitespace>, CompileError> getTupleCompileErrorResult(CompileState nameState, StructPrototype prototype, String right) {
-        var state = nameState.enter().mapLast(last -> last.withStructProto(prototype));
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> assembleStruct(CompileState nameState, StructPrototype prototype, String right) {
+        var state = nameState.enter()
+                .mapLast(last -> last.withStructProto(prototype).defineValues(prototype.parameters));
+
         return parseStatements(state, right, Main::parseStructSegment).flatMapValue(result -> {
             var segments = result.right;
 
@@ -1397,15 +1399,40 @@ public class Main {
         }
 
         var afterInfix = left.substring(infixIndex + infix.length()).strip();
-        return parseStructProto(state, afterInfix).flatMapValue(prototype -> getTupleCompileErrorResult(prototype.left, prototype.right, right));
+        return getTupleCompileErrorResult(state, afterInfix)
+                .flatMapValue(Main::structureMaybeWithParameters)
+                .flatMapValue(prototype -> assembleStruct(prototype.left, prototype.right, right));
     }
 
-    private static Result<Tuple<CompileState, StructPrototype>, CompileError> parseStructProto(CompileState state, String afterInfix) {
+    private static Result<Tuple<CompileState, StructPrototype>, CompileError> structureMaybeWithParameters(Tuple<CompileState, String> state1) {
+        return Main.or(state1.left, state1.right, Lists.of(
+                Main::structureWithParameters,
+                (state, input) -> structureWithoutParameters(state, input, Lists.empty())));
+    }
+
+    private static Result<Tuple<CompileState, StructPrototype>, CompileError> structureWithParameters(CompileState state3, String s) {
+        return infix(s, "(", (s1, paramString) -> {
+            var stripped = paramString.strip();
+            if (stripped.endsWith(")")) {
+                return parseParameters(state3, stripped.substring(0, stripped.length() - ")".length())).flatMapValue(parameters -> {
+                    return structureWithoutParameters(parameters.left, s1, parameters.right);
+                });
+            }
+            else {
+                return createSuffixErr(stripped, ")");
+            }
+        });
+    }
+
+    private static Result<Tuple<CompileState, String>, CompileError> getTupleCompileErrorResult(CompileState state, String afterInfix) {
         return removeImplements(state, afterInfix)
-                .flatMapValue(Main::removeExtends)
-                .flatMapValue(Main::removeParams)
-                .flatMapValue(Main::removeTypeParams)
-                .flatMapValue(nameTuple -> createPrototype(nameTuple.left, nameTuple.right));
+                .flatMapValue(Main::removeExtends);
+    }
+
+    private static Result<Tuple<CompileState, StructPrototype>, CompileError> structureWithoutParameters(CompileState state, String input, List<Definition> parameters) {
+        return Main.or(state, input, Lists.of(
+                (state0, s) -> infix(s, "<", (left1, _) -> createPrototype(state0, left1, parameters)),
+                (left, name) -> createPrototype(left, name, parameters)));
     }
 
     private static Result<Tuple<CompileState, String>, CompileError> compileRootSegment(CompileState state, String input) {
@@ -1547,19 +1574,24 @@ public class Main {
         }
 
         var withParams = input.substring(0, paramEnd);
-        return functionHeader(state, withParams).mapValue(headerTuple -> {
+        return functionHeader(state, withParams).flatMapValue(headerTuple -> {
             var content = input.substring(paramEnd + ")".length()).strip();
 
             var headerState = headerTuple.left;
             var header = headerTuple.right;
 
-            var structName = headerState.last().maybeStructProto.orElse(new StructPrototype("?")).name;
-            var definition = header.definition
-                    .mapName(name -> structName + "::" + name);
+            var maybeStructProto = headerState.last().maybeStructProto;
+            if (maybeStructProto instanceof Some(var structProto)) {
+                var structName = structProto.name;
+                var definition = header.definition
+                        .mapName(name -> structName + "::" + name);
 
-            var functionProto = new FunctionProto(definition, header.params, new Some<>(content));
-            var left = headerState.defineValue(header.definition);
-            return new Tuple<>(left, functionProto);
+                var functionProto = new FunctionProto(definition, header.params, new Some<>(content));
+                var left = headerState.defineValue(header.definition);
+                return new Ok<>(new Tuple<>(left, functionProto));
+            }
+
+            return new Err<>(new CompileError("No struct proto present", content));
         });
     }
 
