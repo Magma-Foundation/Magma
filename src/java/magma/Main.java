@@ -145,6 +145,15 @@ public class Main {
     private interface Argument extends Node {
     }
 
+    private static class Nodes {
+        private static <T extends Node> String joinNodesAsValues(List<T> values) {
+            return values.iterator()
+                    .map(Node::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+        }
+    }
+
     private record Template(String base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
@@ -153,10 +162,7 @@ public class Main {
         }
 
         private String joinArguments() {
-            return this.arguments.iterator()
-                    .map(Node::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
+            return Nodes.joinNodesAsValues(this.arguments);
         }
     }
 
@@ -1118,10 +1124,7 @@ public class Main {
     private record FunctionType(List<Type> arguments, Type returnType) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments().iterator()
-                    .map(Node::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
+            var joinedArguments = Nodes.joinNodesAsValues(this.arguments());
 
             return this.returnType.generate() + " (*)(" + joinedArguments + ")";
         }
@@ -1153,7 +1156,6 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
         }
-
     }
 
     @Actual
@@ -1332,11 +1334,18 @@ public class Main {
         return new Ok<>(new Tuple<>(left, new StructPrototype(name, parameters)));
     }
 
-    private static Result<Tuple<CompileState, Whitespace>, CompileError> assembleStruct(CompileState nameState, StructPrototype prototype, String right) {
-        var state = nameState.enter()
-                .mapLast(last -> last.withStructProto(prototype).defineValues(prototype.parameters));
+    private static Result<Tuple<CompileState, Whitespace>, CompileError> assembleStruct(CompileState nameState, StructPrototype prototype, String content) {
+        var state = nameState.enter().mapLast(last -> last.withStructProto(prototype).defineValues(prototype.parameters));
 
-        return parseStatements(state, right, Main::parseStructSegment).flatMapValue(result -> {
+        return parseStatements(state, content, Main::parseStructSegment).mapErr(err -> {
+            var parameterNames = prototype.parameters
+                    .iterator()
+                    .map(Definition::name)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return new CompileError("Failed to assemble struct with parameters [" + parameterNames + "]", content, Lists.of(err));
+        }).flatMapValue(result -> {
             var segments = result.right;
 
             Result<Tuple<CompileState, List<StructSegment>>, CompileError> initial = new Ok<>(new Tuple<CompileState, List<StructSegment>>(result.left, Lists.empty()));
