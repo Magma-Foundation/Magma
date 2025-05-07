@@ -844,6 +844,10 @@ public class Main {
                     return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), "boolean"));
                 }
 
+                if (base.equals("Supplier")) {
+                    return new Tuple<>(state, generateFunctionalType(Lists.empty(), typeArgs.get(0)));
+                }
+
                 return new Tuple<>(state, compileBaseType(base, state) + "<" + outputTypeArgs + ">");
             }
         }
