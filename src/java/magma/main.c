@@ -11,6 +11,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 public class Main {
+	private interface Pair<A, B> {
+		A left();
+		B right();
+	}
 	private interface Option<T> {
 		Option<R> map<R>(T -> R mapper);
 		boolean isPresent();
@@ -19,7 +23,7 @@ public class Main {
 		Option<T> or(() -> Option<T> other);
 		Option<R> flatMap<R>(T -> Option<R> mapper);
 		Option<T> filter(T -> boolean predicate);
-		Option</* Tuple<T, R> */> and<R>(() -> Option<R> other);
+		Option<Pair<T, R>> and<R>(() -> Option<R> other);
 	}
 	private interface Collector<T, C> {
 		C createInitial();
@@ -29,12 +33,11 @@ public class Main {
 		Iterator<R> map<R>(T -> R mapper);
 		C collect<C>(Collector<T, C> collector);
 		C fold<C>(C initial, (C, T) -> C folder);
-		boolean anyMatch(T -> boolean predicate);
 		Iterator<R> flatMap<R>(T -> Iterator<R> iterator);
 		Iterator<T> concat(Iterator<T> other);
 		Option<T> next();
 		Iterator<T> filter(T -> boolean predicate);
-		Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other);
+		Iterator<Pair<T, R>> zip<R>(Iterator<R> other);
 	}
 	private interface List_<T> {
 		List_<T> mapLast(T -> T mapper);
@@ -80,7 +83,7 @@ public class Main {
 		boolean hasName(String name);
 		Map<String, Type> extractFromTemplate(Type template);
 	}
-	private record Tuple<A, B>(A left, B right) {
+	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
 	private static class Maps {
 		private record JavaMap<K, V>(/* java.util.Map<K, V> */ map) implements Map<K, V> {
@@ -145,7 +148,7 @@ public class Main {
 			return predicate(this.value) ? this : new None<>();
 		}
 		@Override
-        public Option<Tuple<T, R>> and<R>(() -> Option<R> other){
+        public Option<Pair<T, R>> and<R>(() -> Option<R> other){
 			return other(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
 		}
 	}
@@ -179,7 +182,7 @@ public class Main {
 			return new None(/*  */);
 		}
 		@Override
-        public Option<Tuple<T, R>> and<R>(() -> Option<R> other){
+        public Option<Pair<T, R>> and<R>(() -> Option<R> other){
 			return new None(/*  */);
 		}
 	}
@@ -230,10 +233,6 @@ public class Main {
             } */
 		}
 		@Override
-        public boolean anyMatch(T -> boolean predicate){
-			return this.fold(false, /* (aBoolean */, /* t) -> aBoolean || predicate */.test(/* t */));
-		}
-		@Override
         public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
 			return this.map(/* mapper) */.<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<>( */)), /* Iterator::concat */);
 		}
@@ -250,7 +249,7 @@ public class Main {
 			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
 		}
 		@Override
-        public Iterator<Tuple<T, R>> zip<R>(Iterator<R> other){
+        public Iterator<Pair<T, R>> zip<R>(Iterator<R> other){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).and(other::next));
 		}
 	}
@@ -725,7 +724,7 @@ public class Main {
             if (template instanceof Functional functional) {
                 var argumentsEntry = this.arguments.iterate()
                         .zip(functional.arguments.iterate())
-                        .map(tuple -> tuple.left.extractFromTemplate(tuple.right))
+                        .map(tuple -> tuple.left().extractFromTemplate(tuple.right()))
                         .fold(Maps.<String, Type>empty(), Map::putAll);
 
                 var returnsEntry = this.returns.extractFromTemplate(functional.returns);
