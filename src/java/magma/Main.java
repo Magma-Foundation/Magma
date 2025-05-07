@@ -821,12 +821,21 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
         return compileWhitespace(state, input)
-                .or(() -> parseStatement(input, depth, input1 -> compileValue(input1, state)).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
+                .or(() -> parseStatement(input, depth, slice -> compileStatementValue(state, slice)).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate())))
                 .orElseGet(() -> new Tuple<>(state, "\n" + "\t".repeat(depth) + generatePlaceholder(input.strip())));
     }
 
-    private static Option<Tuple<CompileState, String>> compileValue(String input, CompileState state) {
-        return new Some<>(new Tuple<>(state, generatePlaceholder(input)));
+    private static Option<Tuple<CompileState, String>> compileStatementValue(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            return new Some<>(new Tuple<>(state, "return " + compileValue(stripped.substring("return ".length()))));
+        }
+
+        return new Some<>(new Tuple<>(state, generatePlaceholder(stripped)));
+    }
+
+    private static String compileValue(String value) {
+        return generatePlaceholder(value);
     }
 
     private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {
