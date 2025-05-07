@@ -828,14 +828,29 @@ public class Main {
     private static Option<Tuple<CompileState, String>> compileStatementValue(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            return new Some<>(new Tuple<>(state, "return " + compileValue(stripped.substring("return ".length()))));
+            var tuple = compileValue(state, stripped.substring("return ".length()));
+            return new Some<>(new Tuple<>(tuple.left, "return " + tuple.right));
         }
 
         return new Some<>(new Tuple<>(state, generatePlaceholder(stripped)));
     }
 
-    private static String compileValue(String value) {
-        return generatePlaceholder(value);
+    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            var argsStart = withoutEnd.indexOf("(");
+            if (argsStart >= 0) {
+                var beforeArgs = withoutEnd.substring(0, argsStart).strip();
+                var args = withoutEnd.substring(argsStart + "(".length());
+                if (beforeArgs.startsWith("new ")) {
+                    var type = compileType(state, beforeArgs.substring("new ".length()));
+                    return new Tuple<>(type.left, "new " + type.right + "(" + generatePlaceholder(args) + ")");
+                }
+            }
+        }
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
     private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {

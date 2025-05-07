@@ -53,7 +53,7 @@ public class Main {
 	private record Some<T>(T value) implements Option<T> {
 		@Override
         public Option<R> map<R>(T -> R mapper){
-			return /* new Some<>(mapper.apply(this.value)) */;
+			return new Some</*  */>(/* mapper.apply(this.value) */);
 		}
 		@Override
         public boolean isPresent(){
@@ -86,7 +86,7 @@ public class Main {
 	private record None<T>() implements Option<T> {
 		@Override
         public Option<R> map<R>(T -> R mapper){
-			return /* new None<>() */;
+			return new None</*  */>(/*  */);
 		}
 		@Override
         public boolean isPresent(){
@@ -106,11 +106,11 @@ public class Main {
 		}
 		@Override
         public Option<R> flatMap<R>(T -> Option<R> mapper){
-			return /* new None<>() */;
+			return new None</*  */>(/*  */);
 		}
 		@Override
         public Option<T> filter(T -> boolean predicate){
-			return /* new None<>() */;
+			return new None</*  */>(/*  */);
 		}
 	}
 	private static class RangeHead implements Head<Integer> {
@@ -126,13 +126,13 @@ public class Main {
             } */
 		/* var value = this.counter */;
 		/* this.counter++ */;
-		return /* new Some<>(value) */;
+		return new Some</*  */>(/* value */);
 		/* } */
 	}
 	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
 		@Override
         public Iterator<R> map<R>(T -> R mapper){
-			return /* new HeadedIterator<>(() -> this.head.next().map(mapper)) */;
+			return new HeadedIterator</*  */>(/* () -> this.head.next().map(mapper) */);
 		}
 		@Override
         public C collect<C>(Collector<T, C> collector){
@@ -169,7 +169,7 @@ public class Main {
 			}
 			@Override
             public Iterator<T> iterate(){
-				return /* new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get) */;
+				return new HeadedIterator</*  */>(/* new RangeHead(this.elements.size())).map(this.elements::get */);
 			}
 			@Override
             public boolean isEmpty(){
@@ -185,7 +185,7 @@ public class Main {
 			}
 			@Override
             public List<T> subList(int startInclusive, int endExclusive){
-				return /* new MutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive))) */;
+				return new MutableList</*  */>(/* new ArrayList<>(this.elements.subList(startInclusive, endExclusive)) */);
 			}
 			@Override
             public T getLast(){
@@ -197,9 +197,9 @@ public class Main {
 			}
 			@Override
             public Iterator<T> iterateReverse(){
-				return /* new HeadedIterator<>(new RangeHead(this.elements.size()))
+				return new HeadedIterator</*  */>(/* new RangeHead(this.elements.size()))
                         .map(index -> this.elements.size() - index - 1)
-                        .map(this.elements::get) */;
+                        .map(this.elements::get */);
 			}
 			@Override
             public List<T> addAll(List<T> others){
@@ -222,10 +222,10 @@ public class Main {
 			}
 		}
 		public static List<T> empty<T>(){
-			return /* new MutableList<>() */;
+			return new MutableList</*  */>(/*  */);
 		}
 		public static List<T> of<T>(/* T... */ elements){
-			return /* new MutableList<>(new ArrayList<>(Arrays.asList(elements))) */;
+			return new MutableList</*  */>(/* new ArrayList<>(Arrays.asList(elements)) */);
 		}
 	}
 	private static class DivideState {
@@ -321,22 +321,22 @@ public class Main {
 			/* this.frames = frames */;
 		}
 		private CompileState enter(){
-			return /* new CompileState(this.frames.add(new Frame())) */;
+			return new CompileState(/* this.frames.add(new Frame()) */);
 		}
 		private CompileState defineThis(String name){
-			return /* new CompileState(this.frames.mapLast(last -> last.withName(name))) */;
+			return new CompileState(/* this.frames.mapLast(last -> last.withName(name)) */);
 		}
 		private boolean isDefined(String input){
 			return /* this.frames.iterateReverse().anyMatch(frame -> frame.isDefined(input)) */;
 		}
 		public CompileState defineTypeParams(List<String> typeParams){
-			return /* new CompileState(this.frames.mapLast(last -> last.withTypeParams(typeParams))) */;
+			return new CompileState(/* this.frames.mapLast(last -> last.withTypeParams(typeParams)) */);
 		}
 		public CompileState exit(){
-			return /* new CompileState(this.frames.removeLast()) */;
+			return new CompileState(/* this.frames.removeLast() */);
 		}
 		public CompileState defineType(String definition){
-			return /* new CompileState(this.frames.mapLast(last -> last.withDefinition(definition))) */;
+			return new CompileState(/* this.frames.mapLast(last -> last.withDefinition(definition)) */);
 		}
 	}
 	private /* record */ StructurePrototype(String beforeInfix, String infix, String name, List<String> typeParams, Option<String> maybeSuperType, List<String> parameters, List<String> interfaces, String content, int /* depth */ ){
@@ -444,7 +444,7 @@ public class Main {
 	}
 	private static Tuple<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> Tuple<CompileState, String> mapper){
 		/* var parsed = parseStatements(state, input, mapper) */;
-		return /* new Tuple<>(parsed.left, join("", parsed.right)) */;
+		return new Tuple</*  */>(/* parsed.left, join("", parsed.right) */);
 	}
 	private static Tuple<CompileState, List<T>> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){
 		return /* parseAll(state, input, Main::foldStatementValue, mapper) */;
@@ -693,14 +693,29 @@ public class Main {
     private static Option<Tuple<CompileState, String>> compileStatementValue(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            return new Some<>(new Tuple<>(state, "return " + compileValue(stripped.substring("return ".length()))));
+            var tuple = compileValue(state, stripped.substring("return ".length()));
+            return new Some<>(new Tuple<>(tuple.left, "return " + tuple.right));
         }
 
         return new Some<>(new Tuple<>(state, generatePlaceholder(stripped)));
     } *//* 
 
-    private static String compileValue(String value) {
-        return generatePlaceholder(value);
+    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith(")")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+            var argsStart = withoutEnd.indexOf("(");
+            if (argsStart >= 0) {
+                var beforeArgs = withoutEnd.substring(0, argsStart).strip();
+                var args = withoutEnd.substring(argsStart + "(".length());
+                if (beforeArgs.startsWith("new ")) {
+                    var type = compileType(state, beforeArgs.substring("new ".length()));
+                    return new Tuple<>(type.left, "new " + type.right + "(" + generatePlaceholder(args) + ")");
+                }
+            }
+        }
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
     } *//* 
 
     private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {
