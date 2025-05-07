@@ -701,11 +701,11 @@ public class Main {
                 var right = slice.substring(paramStart + "(".length());
                 var parsed = parseValues(state, right, Main::compileParameter);
                 var parameters = parsed.right;
-                return parseStructureWithMaybeTypeParameters(parsed.left, prototype.withParameters(parameters), left);
+                return parseStructureWithMaybeExtends(parsed.left, prototype.withParameters(parameters), left);
             }
         }
 
-        return parseStructureWithMaybeTypeParameters(state, prototype, afterInfix);
+        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeTypeParameters(CompileState state, StructurePrototype prototype, String afterInfix) {
@@ -723,11 +723,11 @@ public class Main {
                 var typeParams = typeParamTuple.right;
 
                 var newPrototype = prototype.withName(name).withTypeParams(typeParams);
-                return parseStructureWithMaybeExtends(typeParamsState, newPrototype, afterTypeParams);
+                return parseStructureWithMaybeParameters(typeParamsState, newPrototype, afterTypeParams);
             }
         }
 
-        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
+        return parseStructureWithMaybeParameters(state, prototype, afterInfix);
     }
 
     private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype) {

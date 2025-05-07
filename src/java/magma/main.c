@@ -423,10 +423,9 @@ public class Main {
         public StructurePrototype withSuperType(String type) {
             return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, new Some<String>(type), this.parameters, this.interfaces, this.content, this.depth);
         }
-    } *//* 
-
-    private record Tuple<A, B>(A left, B right) {
     } */
+	private record Tuple<A, B> {
+	}
 	private static class Whitespace implements StructSegment {
 		@Override
         public String generate()/*  {
@@ -459,8 +458,8 @@ public class Main {
             return generatePlaceholder(this.input);
         }
     } */
-	private /* record */ StructureType(/* StructurePrototype */ prototype)/*  {
-    } */
+	private record StructureType {
+	}
 	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -477,11 +476,11 @@ public class Main {
         CompileState compileState = new CompileState();
         return compileStatements(compileState.enter(), input, Main::compileRootSegment).right;
     } */
-	private static /* Tuple */<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> /* Tuple */<CompileState, String> mapper)/*  {
+	private static Tuple<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> Tuple<CompileState, String> mapper)/*  {
         var parsed = parseStatements(state, input, mapper);
         return new Tuple<>(parsed.left, join("", parsed.right));
     } */
-	private static /* Tuple */<CompileState, List<T>> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>)/*  {
+	private static Tuple<CompileState, List<T>> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>)/*  {
         return parseAll(state, input, Main::foldStatementValue, mapper);
     } */
 	private static String join(String delimiter, List<String> elements)/*  {
@@ -489,7 +488,7 @@ public class Main {
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static /* Tuple */<CompileState, List<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>)/*  {
+	private static Tuple<CompileState, List<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>)/*  {
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
             var currentState = tuple.left;
             var currentElements = tuple.right;
@@ -607,11 +606,11 @@ public class Main {
                 var right = slice.substring(paramStart + "(".length());
                 var parsed = parseValues(state, right, Main::compileParameter);
                 var parameters = parsed.right;
-                return parseStructureWithMaybeTypeParameters(parsed.left, prototype.withParameters(parameters), left);
+                return parseStructureWithMaybeExtends(parsed.left, prototype.withParameters(parameters), left);
             }
         }
 
-        return parseStructureWithMaybeTypeParameters(state, prototype, afterInfix);
+        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
     } *//* 
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeTypeParameters(CompileState state, StructurePrototype prototype, String afterInfix) {
@@ -629,11 +628,11 @@ public class Main {
                 var typeParams = typeParamTuple.right;
 
                 var newPrototype = prototype.withName(name).withTypeParams(typeParams);
-                return parseStructureWithMaybeExtends(typeParamsState, newPrototype, afterTypeParams);
+                return parseStructureWithMaybeParameters(typeParamsState, newPrototype, afterTypeParams);
             }
         }
 
-        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
+        return parseStructureWithMaybeParameters(state, prototype, afterInfix);
     } *//* 
 
     private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype) {
