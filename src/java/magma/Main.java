@@ -249,30 +249,62 @@ public class Main {
     private static String compileClassStatement(String input, int depth) {
         return compileClass(input, depth)
                 .or(() -> compileStructure(input, depth, "interface "))
-                .or(() -> compileDefinition(input, depth))
+                .or(() -> compileDefinitionStatement(input, depth))
+                .or(() -> compileMethod(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileDefinition(String input, int depth) {
+    private static Optional<String> compileMethod(String input, int depth) {
         var stripped = input.strip();
-        if (stripped.endsWith(";")) {
-            var definition = stripped.substring(0, stripped.length() - ";".length());
-            var nameSeparator = definition.lastIndexOf(" ");
-            if (nameSeparator >= 0) {
-                var beforeName = definition.substring(0, nameSeparator).strip();
-                var name = definition.substring(nameSeparator + " ".length()).strip();
-                if (isSymbol(name)) {
-                    var typeSeparator = beforeName.lastIndexOf(" ");
-                    if (typeSeparator >= 0) {
-                        var beforeType = beforeName.substring(0, typeSeparator);
-                        var type = beforeName.substring(typeSeparator + " ".length());
-                        return Optional.of(createIndent(depth) + beforeType + " " + compileType(type) + " " + name + ";");
-                    }
-                }
-            }
+        var paramStart = stripped.indexOf("(");
+        if (paramStart >= 0) {
+            var left = stripped.substring(0, paramStart);
+            var withParams = stripped.substring(paramStart + "(".length());
+            return compileDefinition(left, depth).map(definition -> {
+                return createIndent(depth) + definition + "(" + generatePlaceholder(withParams);
+            });
         }
 
         return Optional.empty();
+    }
+
+    private static Optional<String> compileDefinitionStatement(String input, int depth) {
+        var stripped = input.strip();
+        if (!stripped.endsWith(";")) {
+            return Optional.empty();
+        }
+
+        var definition = stripped.substring(0, stripped.length() - ";".length());
+        return compileDefinition(definition, depth).map(generated -> generateStatement(generated, depth));
+    }
+
+    private static Optional<String> compileDefinition(String input, int depth) {
+        var nameSeparator = input.lastIndexOf(" ");
+        if (nameSeparator >= 0) {
+            var beforeName = input.substring(0, nameSeparator).strip();
+            var name = input.substring(nameSeparator + " ".length()).strip();
+            if (isSymbol(name)) {
+                var typeSeparator = beforeName.lastIndexOf(" ");
+                if (typeSeparator >= 0) {
+                    var beforeType = beforeName.substring(0, typeSeparator);
+                    var type = beforeName.substring(typeSeparator + " ".length());
+                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name));
+                }
+                else {
+                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name) {
+        var beforeTypeString = maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
+        return beforeTypeString + compileType(type) + " " + name;
+    }
+
+    private static String generateStatement(String content, int depth) {
+        return createIndent(depth) + content + ";";
     }
 
     private static String compileType(String type) {
