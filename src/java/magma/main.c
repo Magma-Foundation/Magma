@@ -8,23 +8,23 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 public class Main {
 	private interface Collector<T, C> {
-		C createInitial()/* ; */
-		C fold(C current, T element)/* ; *//* 
-     */}
+		C createInitial();
+		C fold(C current, T element);
+	}
 	private interface Iterator<T> {
-		<R> /* Iterator<R> */ map(Function<T, /* R> */ mapper)/* ; */
-		<C> /* C */ collect(Collector<T, /* C> */ collector)/* ; */
-		<C> /* C */ fold(/* C */ initial, BiFunction<C, T, /* C> */ folder)/* ; *//* 
-     */}
+		<R> /* Iterator<R> */ map(Function<T, /* R> */ mapper);
+		<C> /* C */ collect(Collector<T, /* C> */ collector);
+		<C> /* C */ fold(/* C */ initial, BiFunction<C, T, /* C> */ folder);
+	}
 	private interface List<T> {
-		/* List<T> */ add(T element)/* ; */
-		/* Iterator<T> */ iterate()/* ; */
-		/* boolean */ isEmpty()/* ; */
-		/* boolean */ contains(T element)/* ; *//* 
-     */}
+		/* List<T> */ add(T element);
+		/* Iterator<T> */ iterate();
+		/* boolean */ isEmpty();
+		/* boolean */ contains(T element);
+	}
 	private interface Head<T> {
-		/* Optional<T> */ next()/* ; *//* 
-     */}
+		/* Optional<T> */ next();
+	}
 	private static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter = 0;
@@ -100,8 +100,8 @@ public class Main {
         } */
 		public static <T> /* List<T> */ empty()/*  {
             return new MutableList<>();
-        } *//* 
-     */}
+        } */
+	}
 	private static class State {
 		private /* List<String> */ segments;
 		private /* int */ depth;
@@ -136,8 +136,8 @@ public class Main {
         } */
 		public /* boolean */ isShallow()/*  {
             return this.depth == 1;
-        } *//* 
-     */}
+        } */
+	}
 	private /* record */ Joiner(/* String */ delimiter)/*  implements Collector<String, Optional<String>> {
         @Override
         public Optional<String> createInitial() {
@@ -157,8 +157,8 @@ public class Main {
 		@Override
         public List<T> fold(List<T> current, /* T */ element)/*  {
             return current.add(element);
-        } *//* 
-     */}
+        } */
+	}
 	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -214,8 +214,8 @@ public class Main {
         if (c == '} *//* ') {
             return appended.exit();
         } */
-	/* return */ appended;/* 
-     */}
+	/* return */ appended;
+}
 /* 
 
     private static String compileRootSegment(String input) {
@@ -265,14 +265,15 @@ public class Main {
     private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
         if (isSymbol(name)) {
             var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, typeParams)) + "}";
+            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, typeParams)) + createIndent(depth) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
     } *//* 
 
     private static String compileClassStatement(String input, int depth, List<String> typeParams) {
-        return compileClass(input, depth)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input, depth))
                 .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileDefinitionStatement(input, depth, typeParams))
                 .or(() -> compileMethod(input, depth, typeParams))
@@ -289,8 +290,9 @@ public class Main {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
-                    var content = withParams.substring(paramEnd + ")".length());
-                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, typeParams)) + ")" + generatePlaceholder(content));
+                    var inputContent = withParams.substring(paramEnd + ")".length());
+                    var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
+                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, typeParams)) + ")" + outputContent);
                 }
                 return Optional.empty();
             });

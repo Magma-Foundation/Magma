@@ -298,14 +298,15 @@ public class Main {
     private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
         if (isSymbol(name)) {
             var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, typeParams)) + "}";
+            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, typeParams)) + createIndent(depth) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
     }
 
     private static String compileClassStatement(String input, int depth, List<String> typeParams) {
-        return compileClass(input, depth)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input, depth))
                 .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileDefinitionStatement(input, depth, typeParams))
                 .or(() -> compileMethod(input, depth, typeParams))
@@ -322,8 +323,9 @@ public class Main {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
-                    var content = withParams.substring(paramEnd + ")".length());
-                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, typeParams)) + ")" + generatePlaceholder(content));
+                    var inputContent = withParams.substring(paramEnd + ")".length());
+                    var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
+                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, typeParams)) + ")" + outputContent);
                 }
                 return Optional.empty();
             });
