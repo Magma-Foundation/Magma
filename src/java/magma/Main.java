@@ -101,6 +101,16 @@ public class Main {
             return stripped + "\n";
         }
 
+        if (stripped.endsWith("}")) {
+            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutEnd.indexOf("{");
+            if (contentStart >= 0) {
+                var beforeContent = withoutEnd.substring(0, contentStart);
+                var content = withoutEnd.substring(contentStart + "{".length());
+                return beforeContent + "{" +  generatePlaceholder(content) + "}";
+            }
+        }
+
         return generatePlaceholder(input);
     }
 
