@@ -28,10 +28,10 @@ public class Main {
 		/* int */ size();
 		List<T> subList(/* int */ startInclusive, /* int */ endExclusive);
 		T getLast();
-		List<T> setLast(T element);
 		T get(/* int */ index);
 		/* Iterator */<T> iterateReverse();
 		List<T> addAll(List<T> others);
+		List<T> removeLast();
 	}
 	private interface Head<T> {
 		/* Optional */<T> next();
@@ -145,7 +145,12 @@ public class Main {
             }
 
             @Override
-            public List<T> setLast(T element) {
+            public List<T> removeLast() {
+                this.elements.removeLast();
+                return this;
+            }
+
+            private List<T> setLast(T element) {
                 this.elements.set(this.elements.size() - 1, element);
                 return this;
             }
@@ -244,7 +249,7 @@ public class Main {
             return new Frame(this.maybeStructurePrototype, this.typeParams.addAll(typeParams));
         }
     } */
-	public static final class CompileState {
+	private static final class CompileState {
 		private final /* List */</* Frame */> frames;
 		/* public */ CompileState()/*  {
             this(Lists.empty());
@@ -264,8 +269,14 @@ public class Main {
 		public CompileState defineTypeParams(/* List */</* String */> typeParams)/*  {
             return new CompileState(this.frames.mapLast(last -> last.withTypeParams(typeParams)));
         } */
+		public CompileState exit()/*  {
+            return new CompileState(this.frames.removeLast());
+        } */
 	}
 	public /* record */ StructurePrototype(/* String */ name, /* List */</* String */> typeParams)/*  {
+    } *//* 
+
+    private record Tuple<A, B>(A left, B right) {
     } */
 	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
@@ -280,26 +291,33 @@ public class Main {
         }
     } */
 	private static /* String */ compile(/* String */ input)/*  {
-        return compileStatements(input, Main::compileRootSegment);
+        return compileStatements(new CompileState(), input, Main::compileRootSegment).right;
     } */
-	private static /* String */ compileStatements(/* String */ input, /* String */ -> /* String */ mapper)/*  {
-        return compileAll(input, Main::foldStatementValue, mapper, "");
+	private static /* Tuple */</* CompileState */, /*  String */> compileStatements(/* CompileState */ state, /* String */ input, /* BiFunction */</* CompileState */, /*  String */, /* Tuple */</* CompileState */, /*  String */>> mapper)/*  {
+        return compileAll(input, Main::foldStatementValue, mapper, "", state);
     } */
-	private static /* String */ compileAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* String */ -> /* String */ mapper, /* String */ delimiter)/*  {
-        return join(delimiter, parseAll(input, folder, mapper));
+	private static /* Tuple */</* CompileState */, /*  String */> compileAll(/* String */ input, /* BiFunction */</* DivideState */, /*  Character */, /*  DivideState */> folder, /* BiFunction */</* CompileState */, /*  String */, /* Tuple */</* CompileState */, /*  String */>> mapper, /* String */ delimiter, /* CompileState */ state)/*  {
+        var parsed = parseAll(state, input, folder, mapper);
+        var joined = join(delimiter, parsed.right);
+        return new Tuple<>(parsed.left, joined);
     } */
 	private static /* String */ join(/* String */ delimiter, /* List */</* String */> elements)/*  {
         return elements.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static /* List */</* String */> parseAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* String */ -> /* String */ mapper)/*  {
-        return divide(input, folder)
-                .iterate()
-                .map(mapper)
-                .collect(new ListCollector<>());
+	private static /* Tuple */</* CompileState */, /* List */</* String */>> parseAll(/* CompileState */ state, /* String */ input, /* BiFunction */</* DivideState */, /*  Character */, /*  DivideState */> folder, /* BiFunction */</* CompileState */, /*  String */, /* Tuple */</* CompileState */, /*  String */>> mapper)/*  {
+        return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
+            var currentState = tuple.left;
+            var currentElements = tuple.right;
+
+            var newTuple = mapper.apply(currentState, element);
+            var newState = newTuple.left;
+            var newElement = newTuple.right;
+            return new Tuple<>(newState, currentElements.add(newElement));
+        });
     } */
-	private static /* List */</* String */> divide(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder)/*  {
+	private static /* List */</* String */> divide(/* String */ input, /* BiFunction */</* DivideState */, /*  Character */, /*  DivideState */> folder)/*  {
         DivideState state = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -326,20 +344,20 @@ public class Main {
 }
 /* 
 
-    private static String compileRootSegment(String input) {
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return stripped + "\n";
+            return new Tuple<>(state, stripped + "\n");
         }
 
-        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(state, stripped, 0).orElseGet(() -> compileContent(state, input));
     } *//* 
 
-    private static Optional<String> compileClass(String input, int depth) {
-        return compileStructure(input, depth, "class ");
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input, int depth) {
+        return compileStructure(state, "class ", input, depth);
     } *//* 
 
-    private static Optional<String> compileStructure(String input, int depth, String infix) {
+    private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String infix, String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("} *//* ")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "} *//* ".length()); *//* 
@@ -357,12 +375,13 @@ public class Main {
                         if (typeParamsStart >= 0) {
                             var name = withoutEnd.substring(0, typeParamsStart).strip();
                             var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
-                            var elements = parseValues(typeParamString, String::strip);
-                            return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(name, elements), content);
+                            var elements = parseValues(state, typeParamString, Main::stripToTuple);
+                            var prototype = new StructurePrototype(name, elements.right);
+                            return assembleStructure(elements.left, prototype, beforeInfix, infix, content, depth);
                         }
                     }
 
-                    return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(afterInfix, Lists.empty()), content);
+                    return assembleStructure(state, new StructurePrototype(afterInfix, Lists.empty()), beforeInfix, infix, content, depth);
                 }
             }
         }
@@ -370,38 +389,46 @@ public class Main {
         return Optional.empty();
     } *//* 
 
-    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, StructurePrototype structurePrototype, String content) {
+    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, StructurePrototype structurePrototype, String beforeInfix, String infix, String content, int depth) {
         if (isSymbol(structurePrototype.name())) {
             var outputTypeParams = structurePrototype.typeParams().isEmpty() ? "" : "<" + join(", ", structurePrototype.typeParams()) + ">";
-            var state = new CompileState().enter(structurePrototype);
-            var generated = beforeInfix + infix + structurePrototype.name() + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, state)) + createIndent(depth) + "}";
-            return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
+            var entered = state.enter(structurePrototype);
+            var statements = compileStatements(entered, content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+            var generated = beforeInfix + infix + structurePrototype.name() + outputTypeParams + " {" + statements.right + createIndent(depth) + "}";
+            var formatted = depth == 0 ? generated + "\n" : (createIndent(depth) + generated);
+            return Optional.of(new Tuple<>(statements.left.exit(), formatted));
         }
         return Optional.empty();
     } *//* 
 
-    private static String compileClassStatement(String input, int depth, CompileState state) {
-        return compileWhitespace(input)
-                .or(() -> compileClass(input, depth))
-                .or(() -> compileStructure(input, depth, "interface "))
+    private static Tuple<CompileState, String> compileClassStatement(CompileState state, String input, int depth) {
+        return compileWhitespace(state, input)
+                .or(() -> compileClass(state, input, depth))
+                .or(() -> compileStructure(state, "interface ", input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .or(() -> compileMethod(input, depth, state))
-                .orElseGet(() -> generatePlaceholder(input));
+                .orElseGet(() -> compileContent(state, input));
     } *//* 
 
-    private static Optional<String> compileMethod(String input, int depth, CompileState state) {
+    private static Tuple<CompileState, String> compileContent(CompileState state, String input) {
+        return new Tuple<>(state, generatePlaceholder(input));
+    } *//* 
+
+    private static Optional<Tuple<CompileState, String>> compileMethod(String input, int depth, CompileState state) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var left = stripped.substring(0, paramStart);
             var withParams = stripped.substring(paramStart + "(".length());
-            return compileDefinition(left, state).flatMap(definition -> {
+            return compileDefinition(state, left).flatMap(definitionTuple -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var inputContent = withParams.substring(paramEnd + ")".length());
                     var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
-                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, state)) + ")" + outputContent);
+                    var tuple = compileValues(definitionTuple.left, params, Main::compileParameter);
+                    var value = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")" + outputContent;
+                    return Optional.of(new Tuple<>(tuple.left, value));
                 }
                 return Optional.empty();
             });
@@ -410,12 +437,14 @@ public class Main {
         return Optional.empty();
     } *//* 
 
-    private static String compileValues(String params, Function<String, String> mapper) {
-        return join(", ", parseValues(params, mapper));
+    private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        var parsed = parseValues(state, params, mapper);
+        var joined = join(", ", parsed.right);
+        return new Tuple<>(parsed.left, joined);
     } *//* 
 
-    private static List<String> parseValues(String params, Function<String, String> mapper) {
-        return parseAll(params, Main::foldValueChar, mapper);
+    private static Tuple<CompileState, List<String>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        return parseAll(state, input, Main::foldValueChar, mapper);
     } *//* 
 
     private static DivideState foldValueChar(DivideState state, char c) {
@@ -432,30 +461,31 @@ public class Main {
         return appended;
     } *//* 
 
-    private static String compileParameter(String input, CompileState state) {
-        return compileWhitespace(input)
-                .or(() -> compileDefinition(input, state))
-                .orElseGet(() -> generatePlaceholder(input));
+    private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
+        return compileWhitespace(state, input)
+                .or(() -> compileDefinition(state, input))
+                .orElseGet(() -> compileContent(state, input));
     } *//* 
 
-    private static Optional<String> compileWhitespace(String input) {
+    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return Optional.of("");
+            return Optional.of(new Tuple<>(state, ""));
         }
         return Optional.empty();
     } *//* 
 
-    private static Optional<String> compileDefinitionStatement(String input, int depth, CompileState state) {
+    private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(String input, int depth, CompileState state) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(definition, state).map(generated -> generateStatement(generated, depth));
+        return compileDefinition(state, definition)
+                .map(generated -> generateStatement(depth, generated.left, generated.right));
     } *//* 
 
-    private static Optional<String> compileDefinition(String input, CompileState state) {
+    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = input.substring(0, nameSeparator).strip();
@@ -471,8 +501,8 @@ public class Main {
                         var typeParamStart = withoutTypeParamEnd.indexOf("<");
                         if (typeParamStart >= 0) {
                             var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart);
-                            var typeParams = parseValues(withoutTypeParamEnd.substring(typeParamStart + "<".length()), String::strip);
-                            return Optional.of(generateDefinition(Optional.of(beforeTypeParams), type, name, state, typeParams));
+                            var typeParams = parseValues(state, withoutTypeParamEnd.substring(typeParamStart + "<".length()), Main::stripToTuple);
+                            return Optional.of(generateDefinition(Optional.of(beforeTypeParams), type, name, typeParams.left, typeParams.right));
                         }
                     }
 
@@ -484,6 +514,10 @@ public class Main {
             }
         }
         return Optional.empty();
+    } *//* 
+
+    private static Tuple<CompileState, String> stripToTuple(CompileState t, String u) {
+        return new Tuple<>(t, u.strip());
     } *//* 
 
     private static DivideState foldTypeDivisions(DivideState state, char c) {
@@ -501,20 +535,22 @@ public class Main {
         return appended;
     } *//* 
 
-    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
+    private static Tuple<CompileState, String> generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
         var beforeTypeString = maybeBeforeType.filter(value -> !value.isEmpty()).map(beforeType -> beforeType + " ").orElse("");
         var typeParamString = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-        return beforeTypeString + compileType(type, state.defineTypeParams(typeParams)) + " " + name + typeParamString;
+        var typeTuple = compileType(state.defineTypeParams(typeParams), type);
+        return new Tuple<>(typeTuple.left, beforeTypeString + typeTuple.right + " " + name + typeParamString);
     } *//* 
 
-    private static String generateStatement(String content, int depth) {
-        return createIndent(depth) + content + ";";
+    private static Tuple<CompileState, String> generateStatement(int depth, CompileState state, String content) {
+        var generated = createIndent(depth) + content + ";";
+        return new Tuple<>(state, generated);
     } *//* 
 
-    private static String compileType(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
         if (state.isDefined(stripped)) {
-            return stripped;
+            return new Tuple<>(state, stripped);
         }
 
         if (stripped.endsWith(">")) {
@@ -523,18 +559,19 @@ public class Main {
             if (typeArgsStart >= 0) {
                 var base = withEnd.substring(0, typeArgsStart).strip();
                 var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
-                var typeArgs = parseValues(inputTypeArgs, typeArg -> compileType(typeArg, state));
+                var parsed = parseValues(state, inputTypeArgs, Main::compileType);
+                var typeArgs = parsed.right;
                 var outputTypeArgs = join(", ", typeArgs);
 
                 if (base.equals("Function")) {
-                    return generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1));
+                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
                 }
 
-                return compileBaseType(base, state) + "<" + outputTypeArgs + ">";
+                return new Tuple<>(state, compileBaseType(base, state) + "<" + outputTypeArgs + ">");
             }
         }
 
-        return generatePlaceholder(stripped);
+        return compileContent(state, input);
     } *//* 
 
     private static String generateFunctionalType(List<String> arguments, String returns) {
