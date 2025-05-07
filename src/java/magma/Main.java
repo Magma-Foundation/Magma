@@ -9,15 +9,17 @@ import java.util.List;
 public class Main {
     private static class State {
         private final List<String> segments;
+        private int depth;
         private StringBuilder buffer;
 
-        private State(List<String> segments, StringBuilder buffer) {
+        private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
+            this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State append(char c) {
@@ -28,6 +30,20 @@ public class Main {
         private State advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
+            return this;
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public State enter() {
+            this.depth++;
+            return this;
+        }
+
+        public State exit() {
+            this.depth--;
             return this;
         }
     }
@@ -59,20 +75,24 @@ public class Main {
         State state = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            state = foldChar(state, c);
+            state = fold(state, c);
         }
 
         return state.advance().segments;
     }
 
-    private static State foldChar(State state, char c) {
+    private static State fold(State state, char c) {
         var appended = state.append(c);
-        if (c == ';') {
+        if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        else {
-            return appended;
+        if (c == '{') {
+            return appended.enter();
         }
+        if (c == '}') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String compileRootSegment(String input) {
