@@ -232,21 +232,39 @@ public class Main {
     private static Optional<String> compileStructure(String input, int depth, String infix) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
+            var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
+            var contentStart = withoutContentEnd.indexOf("{");
             if (contentStart >= 0) {
-                var beforeContent = withoutEnd.substring(0, contentStart);
-                var content = withoutEnd.substring(contentStart + "{".length());
+                var beforeContent = withoutContentEnd.substring(0, contentStart);
+                var content = withoutContentEnd.substring(contentStart + "{".length());
                 var keywordIndex = beforeContent.indexOf(infix);
                 if (keywordIndex >= 0) {
-                    var left = beforeContent.substring(0, keywordIndex);
-                    var right = beforeContent.substring(keywordIndex + infix.length()).strip();
-                    var generated = left + infix + right + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
-                    return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
+                    var beforeInfix = beforeContent.substring(0, keywordIndex);
+                    var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
+                    if (afterInfix.endsWith(">")) {
+                        var withoutEnd = afterInfix.substring(0, afterInfix.length() - ">".length());
+                        var typeParamsStart = withoutEnd.indexOf("<");
+                        if (typeParamsStart >= 0) {
+                            var name = withoutEnd.substring(0, typeParamsStart).strip();
+                            var typeParams = withoutEnd.substring(typeParamsStart + "<".length());
+                            var outputTypeParams = "<" + compileValues(typeParams, String::strip) + ">";
+                            return assembleStructure(depth, infix, beforeInfix, outputTypeParams, name, content);
+                        }
+                    }
+
+                    return assembleStructure(depth, infix, beforeInfix, "", afterInfix, content);
                 }
             }
         }
 
+        return Optional.empty();
+    }
+
+    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, String typeParams, String name, String content) {
+        if (isSymbol(name)) {
+            var generated = beforeInfix + infix + name + typeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+            return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
+        }
         return Optional.empty();
     }
 
@@ -269,13 +287,17 @@ public class Main {
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var content = withParams.substring(paramEnd + ")".length());
-                    return Optional.of(createIndent(depth) + definition + "(" + compileAll(params, Main::foldValueChar, Main::compileParameter, ", ") + ")" + generatePlaceholder(content));
+                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, Main::compileParameter) + ")" + generatePlaceholder(content));
                 }
                 return Optional.empty();
             });
         }
 
         return Optional.empty();
+    }
+
+    private static String compileValues(String params, Function<String, String> mapper) {
+        return compileAll(params, Main::foldValueChar, mapper, ", ");
     }
 
     private static State foldValueChar(State state, char c) {
