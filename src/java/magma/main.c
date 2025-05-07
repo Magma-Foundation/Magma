@@ -8,8 +8,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 public class Main {
 	private interface Collector<T, C> {
-		/* C */ createInitial(/*  */)/* ; */
-		/* C */ fold(/* C */ current, /* T */ element)/* ; *//* 
+		C createInitial(/*  */)/* ; */
+		C fold(C current, T element)/* ; *//* 
      */}
 	private interface Iterator<T> {
 		<R> /* Iterator<R> */ map(Function<T, /* R> */ mapper)/* ; */
@@ -17,9 +17,10 @@ public class Main {
 		<C> /* C */ fold(/* C */ initial, BiFunction<C, T, /* C> */ folder)/* ; *//* 
      */}
 	private interface List<T> {
-		/* List<T> */ add(/* T */ element)/* ; */
+		/* List<T> */ add(T element)/* ; */
 		/* Iterator<T> */ iterate(/*  */)/* ; */
-		/* boolean */ isEmpty(/*  */)/* ; *//* 
+		/* boolean */ isEmpty(/*  */)/* ; */
+		/* boolean */ contains(T element)/* ; *//* 
      */}
 	private interface Head<T> {
 		/* Optional<T> */ next(/*  */)/* ; *//* 
@@ -89,7 +90,12 @@ public class Main {
 
             @Override
             public boolean isEmpty() {
-                return elements.isEmpty();
+                return this.elements.isEmpty();
+            }
+
+            @Override
+            public boolean contains(T element) {
+                return this.elements.contains(element);
             }
         } */
 		public static <T> /* List<T> */ empty(/*  */)/*  {
@@ -145,11 +151,11 @@ public class Main {
     } */
 	private static class ListCollector<T> implements Collector<T, List<T>> {
 		@Override
-        public /* List<T> */ createInitial(/*  */)/*  {
+        public List<T> createInitial(/*  */)/*  {
             return Lists.empty();
         } */
 		@Override
-        public /* List<T> */ fold(/* List<T> */ current, /* T */ element)/*  {
+        public List<T> fold(List<T> current, /* T */ element)/*  {
             return current.add(element);
         } *//* 
      */}
@@ -259,32 +265,32 @@ public class Main {
     private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
         if (isSymbol(name)) {
             var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, typeParams)) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
     } *//* 
 
-    private static String compileClassStatement(String input, int depth) {
+    private static String compileClassStatement(String input, int depth, List<String> typeParams) {
         return compileClass(input, depth)
                 .or(() -> compileStructure(input, depth, "interface "))
-                .or(() -> compileDefinitionStatement(input, depth))
-                .or(() -> compileMethod(input, depth))
+                .or(() -> compileDefinitionStatement(input, depth, typeParams))
+                .or(() -> compileMethod(input, depth, typeParams))
                 .orElseGet(() -> generatePlaceholder(input));
     } *//* 
 
-    private static Optional<String> compileMethod(String input, int depth) {
+    private static Optional<String> compileMethod(String input, int depth, List<String> typeParams) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var left = stripped.substring(0, paramStart);
             var withParams = stripped.substring(paramStart + "(".length());
-            return compileDefinition(left).flatMap(definition -> {
+            return compileDefinition(left, typeParams).flatMap(definition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var content = withParams.substring(paramEnd + ")".length());
-                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, Main::compileParameter) + ")" + generatePlaceholder(content));
+                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, typeParams)) + ")" + generatePlaceholder(content));
                 }
                 return Optional.empty();
             });
@@ -315,21 +321,21 @@ public class Main {
         return appended;
     } *//* 
 
-    private static String compileParameter(String input) {
-        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
+    private static String compileParameter(String input, List<String> typeParams) {
+        return compileDefinition(input, typeParams).orElseGet(() -> generatePlaceholder(input));
     } *//* 
 
-    private static Optional<String> compileDefinitionStatement(String input, int depth) {
+    private static Optional<String> compileDefinitionStatement(String input, int depth, List<String> typeParams) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(definition).map(generated -> generateStatement(generated, depth));
+        return compileDefinition(definition, typeParams).map(generated -> generateStatement(generated, depth));
     } *//* 
 
-    private static Optional<String> compileDefinition(String input) {
+    private static Optional<String> compileDefinition(String input, List<String> typeParams) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = input.substring(0, nameSeparator).strip();
@@ -339,27 +345,32 @@ public class Main {
                 if (typeSeparator >= 0) {
                     var beforeType = beforeName.substring(0, typeSeparator);
                     var type = beforeName.substring(typeSeparator + " ".length());
-                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name));
+                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, typeParams));
                 }
                 else {
-                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name));
+                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, typeParams));
                 }
             }
         }
         return Optional.empty();
     } *//* 
 
-    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name) {
+    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, List<String> typeParams) {
         var beforeTypeString = maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
-        return beforeTypeString + compileType(type) + " " + name;
+        return beforeTypeString + compileType(type, typeParams) + " " + name;
     } *//* 
 
     private static String generateStatement(String content, int depth) {
         return createIndent(depth) + content + ";";
     } *//* 
 
-    private static String compileType(String type) {
-        return generatePlaceholder(type);
+    private static String compileType(String input, List<String> typeParams) {
+        var stripped = input.strip();
+        if (typeParams.contains(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     } *//* 
 
     private static boolean isSymbol(String input) {
