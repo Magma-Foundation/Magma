@@ -5,13 +5,28 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
+    private interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        boolean isPresent();
+
+        T orElse(T other);
+
+        T orElseGet(Supplier<T> other);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        Option<T> filter(Predicate<T> predicate);
+    }
+
     private interface Collector<T, C> {
         C createInitial();
 
@@ -55,7 +70,7 @@ public class Main {
     }
 
     private interface Head<T> {
-        Optional<T> next();
+        Option<T> next();
     }
 
     private interface StructSegment extends Node {
@@ -63,6 +78,84 @@ public class Main {
 
     private interface Node {
         String generate();
+    }
+
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        public T get() {
+            return this.value;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+    }
+
+    private record None<T>() implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
     }
 
     private static class RangeHead implements Head<Integer> {
@@ -74,14 +167,14 @@ public class Main {
         }
 
         @Override
-        public Optional<Integer> next() {
+        public Option<Integer> next() {
             if (this.counter >= this.length) {
-                return Optional.empty();
+                return new None<>();
             }
 
             var value = this.counter;
             this.counter++;
-            return Optional.of(value);
+            return new Some<>(value);
         }
     }
 
@@ -103,7 +196,7 @@ public class Main {
                 C finalCurrent = current;
                 var folded = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
                 if (folded.isPresent()) {
-                    current = folded.get();
+                    current = folded.orElse(null);
                 }
                 else {
                     return current;
@@ -249,19 +342,19 @@ public class Main {
         }
     }
 
-    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
         public Joiner() {
             this("");
         }
 
         @Override
-        public Optional<String> createInitial() {
-            return Optional.empty();
+        public Option<String> createInitial() {
+            return new None<>();
         }
 
         @Override
-        public Optional<String> fold(Optional<String> maybeCurrent, String element) {
-            return Optional.of(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
+        public Option<String> fold(Option<String> maybeCurrent, String element) {
+            return new Some<>(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -278,12 +371,12 @@ public class Main {
     }
 
     private record Frame(
-            Optional<StructurePrototype> maybeStructurePrototype,
+            Option<StructurePrototype> maybeStructurePrototype,
             List<String> typeParams,
             List<String> typeNames
     ) {
         public Frame() {
-            this(Optional.empty(), Lists.empty(), Lists.empty());
+            this(new None<StructurePrototype>(), Lists.empty(), Lists.empty());
         }
 
         public boolean isDefined(String typeName) {
@@ -291,13 +384,17 @@ public class Main {
         }
 
         private boolean isThis(String input) {
-            return this.maybeStructurePrototype.isPresent()
-                    && (this.maybeStructurePrototype.get().name.equals(input)
-                    || this.maybeStructurePrototype.get().typeParams().contains(input));
+            if (!this.maybeStructurePrototype.isPresent()) {
+                return false;
+            }
+            if (this.maybeStructurePrototype.orElse(null).name.equals(input)) {
+                return true;
+            }
+            return this.maybeStructurePrototype.orElse(null).typeParams().contains(input);
         }
 
         public Frame withStructurePrototype(StructurePrototype prototype) {
-            return new Frame(Optional.of(prototype), this.typeParams, this.typeNames);
+            return new Frame(new Some<StructurePrototype>(prototype), this.typeParams, this.typeNames);
         }
 
         public Frame withTypeParams(List<String> typeParams) {
@@ -488,11 +585,11 @@ public class Main {
                 .orElseGet(() -> compilePlaceholder(state, input));
     }
 
-    private static Optional<Tuple<CompileState, StructSegment>> parseClass(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, StructSegment>> parseClass(CompileState state, String input, int depth) {
         return parseStructure(state, "class ", input, depth);
     }
 
-    private static Optional<Tuple<CompileState, StructSegment>> parseStructure(CompileState state, String infix, String input, int depth) {
+    private static Option<Tuple<CompileState, StructSegment>> parseStructure(CompileState state, String infix, String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -521,10 +618,10 @@ public class Main {
             }
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
+    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
         if (isSymbol(structurePrototype.name())) {
             var entered = state.enter().defineStructurePrototype(structurePrototype);
             var depth = structurePrototype.depth;
@@ -535,9 +632,9 @@ public class Main {
             var exited = statementsTuple.left.exit();
 
             var defined = exited.defineType(structurePrototype.name);
-            return Optional.of(new Tuple<>(defined, new Structure(structurePrototype, statement, depth)));
+            return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(structurePrototype, statement, depth)));
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Tuple<CompileState, StructSegment> compileClassStatement(CompileState state, String input, int depth) {
@@ -554,7 +651,7 @@ public class Main {
         return new Tuple<>(tuple.left, tuple.right);
     }
 
-    private static <T extends R, R> Optional<Tuple<CompileState, R>> typed(Supplier<Optional<Tuple<CompileState, T>>> supplier) {
+    private static <T extends R, R> Option<Tuple<CompileState, R>> typed(Supplier<Option<Tuple<CompileState, T>>> supplier) {
         return supplier.get().map(tuple -> new Tuple<>(tuple.left, tuple.right));
     }
 
@@ -567,7 +664,7 @@ public class Main {
         return new Tuple<>(state, new Placeholder(input));
     }
 
-    private static Optional<Tuple<CompileState, StructSegment>> parseMethod(String input, int depth, CompileState state) {
+    private static Option<Tuple<CompileState, StructSegment>> parseMethod(String input, int depth, CompileState state) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
@@ -581,13 +678,13 @@ public class Main {
                     var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
                     var tuple = compileValues(definitionTuple.left, params, Main::compileParameter);
                     var value = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")" + outputContent;
-                    return Optional.of(new Tuple<>(tuple.left, new Content(value)));
+                    return new Some<>(new Tuple<CompileState, StructSegment>(tuple.left, new Content(value)));
                 }
-                return Optional.empty();
+                return new None<>();
             });
         }
 
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
@@ -620,25 +717,25 @@ public class Main {
                 .orElseGet(() -> compilePlaceholder(state, input));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
         return generate(() -> parseWhitespace(state, input));
     }
 
-    private static <T extends Node> Optional<Tuple<CompileState, String>> generate(Supplier<Optional<Tuple<CompileState, T>>> parser) {
+    private static <T extends Node> Option<Tuple<CompileState, String>> generate(Supplier<Option<Tuple<CompileState, T>>> parser) {
         return parser.get().map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Optional<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return Optional.of(new Tuple<>(state, new Whitespace()));
+            return new Some<>(new Tuple<CompileState, Whitespace>(state, new Whitespace()));
         }
-        return Optional.empty();
+        return new None<>();
     }
 
-    private static Optional<Tuple<CompileState, StructSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
+    private static Option<Tuple<CompileState, StructSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
-            return Optional.empty();
+            return new None<>();
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
@@ -648,7 +745,7 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = input.substring(0, nameSeparator).strip();
@@ -665,18 +762,18 @@ public class Main {
                         if (typeParamStart >= 0) {
                             var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart);
                             var typeParams = parseValues(state, withoutTypeParamEnd.substring(typeParamStart + "<".length()), Main::stripToTuple);
-                            return Optional.of(generateDefinition(Optional.of(beforeTypeParams), type, name, typeParams.left, typeParams.right));
+                            return new Some<>(generateDefinition(new Some<String>(beforeTypeParams), type, name, typeParams.left, typeParams.right));
                         }
                     }
 
-                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state, Lists.empty()));
+                    return new Some<>(generateDefinition(new Some<String>(beforeType), type, name, state, Lists.empty()));
                 }
                 else {
-                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, state, Lists.empty()));
+                    return new Some<>(generateDefinition(new None<String>(), beforeName, name, state, Lists.empty()));
                 }
             }
         }
-        return Optional.empty();
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> stripToTuple(CompileState t, String u) {
@@ -698,7 +795,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, String> generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
+    private static Tuple<CompileState, String> generateDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
         var beforeTypeString = maybeBeforeType.filter(value -> !value.isEmpty()).map(beforeType -> beforeType + " ").orElse("");
         var typeParamString = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
         var typeTuple = compileType(state.defineTypeParams(typeParams), type);

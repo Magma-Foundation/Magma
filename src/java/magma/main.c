@@ -4,12 +4,26 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 public class Main {
+	private interface Optional<T> {
+		static  Optional<T> empty<T>()/*  {
+            return new None<>();
+        } */
+		static  Optional<T> of<T>(T value)/*  {
+            return new Some<>(value);
+        } */
+		Optional<R> map<R>(T -> R mapper);
+		boolean isPresent();
+		T orElse(T other);
+		T orElseGet(/* Supplier */<T> other);
+		Optional<T> or(/* Supplier */<Optional<T>> other);
+		Optional<R> flatMap<R>(T -> Optional<R> mapper);
+		Optional<T> filter(T -> boolean predicate);
+	}
 	private interface Collector<T, C> {
 		C createInitial();
 		C fold(C current, T element);
@@ -35,14 +49,92 @@ public class Main {
 		List<T> removeLast();
 	}
 	private interface Head<T> {
-		/* Optional */<T> next();
+		Optional<T> next();
 	}/* 
 
     private interface StructSegment extends Node {
     } */
 	private interface Node {
 		/* String */ generate();
-	}
+	}/* 
+
+    private record Some<T>(T value) implements Optional<T> {
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        public T get() {
+            return this.value;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return this.value;
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return this;
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Optional<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+    } *//* 
+
+    private record None<T>() implements Optional<T> {
+        @Override
+        public <R> Optional<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Optional<T> or(Supplier<Optional<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Optional<R> flatMap(Function<T, Optional<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Optional<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
+    } */
 	private static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter = 0; /* public */ RangeHead(int length)/*  {
@@ -79,7 +171,7 @@ public class Main {
                 C finalCurrent = current;
                 var folded = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
                 if (folded.isPresent()) {
-                    current = folded.get();
+                    current = folded.orElse(null);
                 }
                 else {
                     return current;
@@ -237,7 +329,7 @@ public class Main {
             return current.add(element);
         } */
 	}
-	private /* record */ Frame(/* Optional */</* StructurePrototype */> maybeStructurePrototype, List</* String */> typeParams, List /* typeNames */ <String>)/*  {
+	private /* record */ Frame(Optional</* StructurePrototype */> maybeStructurePrototype, List</* String */> typeParams, List /* typeNames */ <String>)/*  {
         public Frame() {
             this(Optional.empty(), Lists.empty(), Lists.empty());
         }
@@ -247,9 +339,13 @@ public class Main {
         }
 
         private boolean isThis(String input) {
-            return this.maybeStructurePrototype.isPresent()
-                    && (this.maybeStructurePrototype.get().name.equals(input)
-                    || this.maybeStructurePrototype.get().typeParams().contains(input));
+            if (!this.maybeStructurePrototype.isPresent()) {
+                return false;
+            }
+            if (this.maybeStructurePrototype.orElse(null).name.equals(input)) {
+                return true;
+            }
+            return this.maybeStructurePrototype.orElse(null).typeParams().contains(input);
         }
 
         public Frame withStructurePrototype(StructurePrototype prototype) {
@@ -635,7 +731,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
-        
+
         if (stripped.equals("boolean")) {
             return new Tuple<>(state, stripped);
         }
