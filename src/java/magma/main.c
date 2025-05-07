@@ -13,29 +13,29 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 public class Main {
 	private interface Option<T> {
-		Option<R> map<R>(T -> /*  R */ mapper);
+		Option<R> map<R>(T -> R mapper);
 		boolean isPresent();
 		T orElse(T other);
 		T orElseGet(() -> T other);
 		Option<T> or(() -> Option<T> other);
-		Option<R> flatMap<R>(T -> Option</* R */> mapper);
+		Option<R> flatMap<R>(T -> Option<R> mapper);
 		Option<T> filter(T -> boolean predicate);
-		Option</* Tuple<T, R> */> and<R>(() -> Option</* R */> other);
+		Option</* Tuple<T, R> */> and<R>(() -> Option<R> other);
 	}
 	private interface Collector<T, C> {
 		C createInitial();
 		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		Iterator<R> map<R>(T -> /*  R */ mapper);
-		C collect<C>(Collector<T, /*  C */> collector);
-		C fold<C>(/* C */ initial, (/* C */, T) -> /*  C */ folder);
+		Iterator<R> map<R>(T -> R mapper);
+		C collect<C>(Collector<T, C> collector);
+		C fold<C>(C initial, (C, T) -> C folder);
 		boolean anyMatch(T -> boolean predicate);
-		Iterator<R> flatMap<R>(T -> Iterator</* R */> iterator);
+		Iterator<R> flatMap<R>(T -> Iterator<R> iterator);
 		Iterator<T> concat(Iterator<T> other);
 		Option<T> next();
 		Iterator<T> filter(T -> boolean predicate);
-		Iterator</* Tuple<T, R> */> zip<R>(Iterator</* R */> other);
+		Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other);
 	}/* 
 
     private interface List_<T> {
@@ -89,8 +89,8 @@ public class Main {
 	}
 	private record Some<T>(T value) implements Option<T> {
 		@Override
-        public Option<R> map<R>(T -> /*  R */ mapper){
-			return new Some</*  R */>(mapper.apply(this.value));
+        public Option<R> map<R>(T -> R mapper){
+			return new Some<R>(mapper.apply(this.value));
 		}
 		@Override
         public boolean isPresent(){
@@ -112,7 +112,7 @@ public class Main {
 			return this;
 		}
 		@Override
-        public Option<R> flatMap<R>(T -> Option</* R */> mapper){
+        public Option<R> flatMap<R>(T -> Option<R> mapper){
 			return mapper.apply(this.value);
 		}
 		@Override
@@ -120,13 +120,13 @@ public class Main {
 			return predicate.test(this.value) ? this : new None<>();
 		}
 		@Override
-        public Option</* Tuple<T, R> */> and<R>(() -> Option</* R */> other){
+        public Option</* Tuple<T, R> */> and<R>(() -> Option<R> other){
 			return other.get(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
 		}
 	}
 	private record None<T> implements Option<T> {
 		@Override
-        public Option<R> map<R>(T -> /*  R */ mapper){
+        public Option<R> map<R>(T -> R mapper){
 			return new None(/*  */);
 		}
 		@Override
@@ -146,7 +146,7 @@ public class Main {
 			return other.get(/*  */);
 		}
 		@Override
-        public Option<R> flatMap<R>(T -> Option</* R */> mapper){
+        public Option<R> flatMap<R>(T -> Option<R> mapper){
 			return new None(/*  */);
 		}
 		@Override
@@ -154,7 +154,7 @@ public class Main {
 			return new None(/*  */);
 		}
 		@Override
-        public Option</* Tuple<T, R> */> and<R>(() -> Option</* R */> other){
+        public Option</* Tuple<T, R> */> and<R>(() -> Option<R> other){
 			return new None(/*  */);
 		}
 	}
@@ -183,15 +183,15 @@ public class Main {
 	}
 	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
 		@Override
-        public Iterator<R> map<R>(T -> /*  R */ mapper){
+        public Iterator<R> map<R>(T -> R mapper){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).map(mapper));
 		}
 		@Override
-        public C collect<C>(Collector<T, /*  C */> collector){
+        public C collect<C>(Collector<T, C> collector){
 			return this.fold(collector.createInitial(/*  */), /* collector::fold */);
 		}
 		@Override
-        public C fold<C>(/* C */ initial, (/* C */, T) -> /*  C */ folder){
+        public C fold<C>(C initial, (C, T) -> C folder){
 			/* var current = initial */;/* 
             while (true) {
                 C finalCurrent = current;
@@ -209,7 +209,7 @@ public class Main {
 			return this.fold(/* false */, /* (aBoolean */, /* t) -> aBoolean || predicate */.test(/* t */));
 		}
 		@Override
-        public Iterator<R> flatMap<R>(T -> Iterator</* R */> mapper){
+        public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
 			return this.map(/* mapper) */.<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<>( */)), /* Iterator::concat */);
 		}
 		@Override
@@ -225,7 +225,7 @@ public class Main {
 			return this.flatMap(/* t -> new HeadedIterator<> */(predicate.test(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
 		}
 		@Override
-        public Iterator</* Tuple<T, R> */> zip<R>(Iterator</* R */> other){
+        public Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/* ) */.and(() -> other.next()));
 		}
 	}
@@ -433,7 +433,7 @@ public class Main {
 			/* this.frames = frames */;
 		}
 		private CompileState enter(){
-			return /* new CompileState */(this.frames.add(/* new Frame */()));
+			return /* new CompileState */(this.frames.add(/* new Frame */(/*  */)));
 		}
 		private CompileState defineThis(String name){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineName(name)));
@@ -553,7 +553,7 @@ public class Main {
 		}
 		@Override
         public /* Map<String, Type> */ extractFromTemplate(Type template){
-			return /* Collections */.emptyMap();
+			return /* Collections */.emptyMap(/*  */);
 		}
 	}/* 
 
@@ -618,7 +618,7 @@ public class Main {
         }
     } */
 	private static class Iterators {
-		public static Iterator<T> fromOption<T>(Option</* T */> option){
+		public static Iterator<T> fromOption<T>(Option<T> option){
 			return /* new HeadedIterator<> */(option.<Head<T>>map(/* SingleHead::new) */.orElseGet(EmptyHead::new));
 		}
 	}
@@ -640,13 +640,13 @@ public class Main {
 	private record Return(Node value) implements StatementValue {
 		@Override
         public String generate(){
-			return /* "return " + this */.value.generate();
+			return /* "return " + this */.value.generate(/*  */);
 		}
 	}
 	private record ConstructionHeader(/* ObjectType */ type) implements Caller {
 		@Override
         public String generate(){
-			return /* "new " + this */.type.generate();
+			return /* "new " + this */.type.generate(/*  */);
 		}
 	}/* 
 
@@ -674,7 +674,7 @@ public class Main {
 		}
 		@Override
         public /* Map<String, Type> */ extractFromTemplate(Type template){
-			return /* Collections */.emptyMap();
+			return /* Collections */.emptyMap(/*  */);
 		}
 	}/* 
 
@@ -731,7 +731,7 @@ public class Main {
 	}
 	private static String compile(String input){
 		/* CompileState compileState = new CompileState() */;
-		return /* compileStatements */(/* compileState */.enter(), input, /* Main::compileRootSegment */).right;
+		return /* compileStatements */(/* compileState */.enter(/*  */), input, /* Main::compileRootSegment */).right;
 	}
 	private static Tuple<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> Tuple<CompileState, String> mapper){
 		/* var parsed = parseStatements(state, input, mapper) */;
@@ -762,7 +762,7 @@ public class Main {
             var c = input.charAt(i);
             state = folder.apply(state, c);
         } */
-		return state.advance().segments;
+		return /* state */.advance(/*  */).segments;
 	}
 	private static DivideState foldStatementValue(DivideState state, /* char */ c){
 		/* var appended = state.append(c) */;
@@ -774,7 +774,7 @@ public class Main {
             return appended.advance().exit();
         } */
 	/* if */ (){
-		return /* appended */.enter();/* 
+		return /* appended */.enter(/*  */);/* 
         }
         if (c == ' */
 	}/* ') {
@@ -958,7 +958,7 @@ public class Main {
                 .or(() -> parseStructure("interface", "interface ", state, input, depth))
                 .or(() -> parseStructure("record", "record ", state, input, depth))
                 .or(() -> typed(() -> parseStatement(input, depth, definition1 -> parseDefinition(state, definition1))))
-                .or(() -> parseMethod(input, depth, state))
+                .or(() -> parseMethod(state, input, depth))
                 .orElseGet(() -> parsePlaceholder0(state, input));
     } *//* 
 
@@ -980,7 +980,7 @@ public class Main {
         return new Tuple<>(state, new Placeholder(input));
     } *//* 
 
-    private static Option<Tuple<CompileState, StructSegment>> parseMethod(String input, int depth, CompileState state) {
+    private static Option<Tuple<CompileState, StructSegment>> parseMethod(CompileState state, String input, int depth) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
@@ -992,23 +992,27 @@ public class Main {
                     var params = withParams.substring(0, paramEnd);
                     var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-                    var paramsTuple = parseParameters(definitionTuple.left, params);
+                    var definitionState = definitionTuple.left;
+                    var definition = definitionTuple.right;
+
+                    var paramsTuple = parseParameters(definitionState.enter().defineTypeParams(definition.typeParams), params);
                     var paramNames = paramsTuple.right;
                     var paramsState = paramsTuple.left.defineValues(paramNames);
 
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
 
-                    var header = createIndent(depth) + definitionTuple.right.generate() + "(" + paramsJoined + ")";
+                    var header = createIndent(depth) + definition.generate() + "(" + paramsJoined + ")";
                     if (maybeWithBraces.equals(";")) {
                         return new Some<>(new Tuple<CompileState, StructSegment>(paramsState, new Content(header + ";")));
                     }
 
                     if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
                         var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
-                        var parsed = parseStatements(paramsState, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
-                        var statementsTuple = new Tuple<>(parsed.left, joinNodes("", parsed.right));
-                        var outputContent = "{" + statementsTuple.right + "\n" + "\t".repeat(depth) + "}";
-                        return new Some<>(new Tuple<CompileState, StructSegment>(statementsTuple.left, new Content(header + outputContent)));
+                        var entered = paramsState;
+
+                        var parsed = parseStatements(entered, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+                        var outputContent = "{" + joinNodes("", parsed.right) + "\n" + "\t".repeat(depth) + "}";
+                        return new Some<>(new Tuple<CompileState, StructSegment>(parsed.left.exit(), new Content(header + outputContent)));
                     }
                 }
                 return new None<>();

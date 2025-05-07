@@ -557,7 +557,7 @@ public class Main {
         }
 
         public CompileState exit() {
-            return new CompileState(this.frames.removeLast().map(Tuple::right).orElse(frames));
+            return new CompileState(this.frames.removeLast().map(Tuple::right).orElse(this.frames));
         }
 
         public CompileState defineType(Type type) {
@@ -1122,7 +1122,7 @@ public class Main {
                 .or(() -> parseStructure("interface", "interface ", state, input, depth))
                 .or(() -> parseStructure("record", "record ", state, input, depth))
                 .or(() -> typed(() -> parseStatement(input, depth, definition1 -> parseDefinition(state, definition1))))
-                .or(() -> parseMethod(input, depth, state))
+                .or(() -> parseMethod(state, input, depth))
                 .orElseGet(() -> parsePlaceholder0(state, input));
     }
 
@@ -1144,7 +1144,7 @@ public class Main {
         return new Tuple<>(state, new Placeholder(input));
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseMethod(String input, int depth, CompileState state) {
+    private static Option<Tuple<CompileState, StructSegment>> parseMethod(CompileState state, String input, int depth) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
@@ -1156,23 +1156,27 @@ public class Main {
                     var params = withParams.substring(0, paramEnd);
                     var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
 
-                    var paramsTuple = parseParameters(definitionTuple.left, params);
+                    var definitionState = definitionTuple.left;
+                    var definition = definitionTuple.right;
+
+                    var paramsTuple = parseParameters(definitionState.enter().defineTypeParams(definition.typeParams), params);
                     var paramNames = paramsTuple.right;
                     var paramsState = paramsTuple.left.defineValues(paramNames);
 
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
 
-                    var header = createIndent(depth) + definitionTuple.right.generate() + "(" + paramsJoined + ")";
+                    var header = createIndent(depth) + definition.generate() + "(" + paramsJoined + ")";
                     if (maybeWithBraces.equals(";")) {
                         return new Some<>(new Tuple<CompileState, StructSegment>(paramsState, new Content(header + ";")));
                     }
 
                     if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
                         var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
-                        var parsed = parseStatements(paramsState, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
-                        var statementsTuple = new Tuple<>(parsed.left, joinNodes("", parsed.right));
-                        var outputContent = "{" + statementsTuple.right + "\n" + "\t".repeat(depth) + "}";
-                        return new Some<>(new Tuple<CompileState, StructSegment>(statementsTuple.left, new Content(header + outputContent)));
+                        var entered = paramsState;
+
+                        var parsed = parseStatements(entered, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+                        var outputContent = "{" + joinNodes("", parsed.right) + "\n" + "\t".repeat(depth) + "}";
+                        return new Some<>(new Tuple<CompileState, StructSegment>(parsed.left.exit(), new Content(header + outputContent)));
                     }
                 }
                 return new None<>();
