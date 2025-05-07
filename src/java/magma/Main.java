@@ -424,11 +424,18 @@ public class Main {
             if (typeArgsStart >= 0) {
                 var base = withEnd.substring(0, typeArgsStart).strip();
                 var typeArgs = withEnd.substring(typeArgsStart + "<".length());
-                return generatePlaceholder(base) + "<" + compileValues(typeArgs, typeArg -> compileType(typeArg, state)) + ">";
+                return compileBaseType(base, state) + "<" + compileValues(typeArgs, typeArg -> compileType(typeArg, state)) + ">";
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String compileBaseType(String base, CompileState state) {
+        if (base.equals(state.name)) {
+            return base;
+        }
+        return generatePlaceholder(base);
     }
 
     private static boolean isSymbol(String input) {
