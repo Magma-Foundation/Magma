@@ -1500,7 +1500,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '_') {
                 continue;
             }
             return false;

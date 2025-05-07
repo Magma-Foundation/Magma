@@ -36,33 +36,21 @@ public class Main {
 		Option<T> next();
 		Iterator<T> filter(T -> boolean predicate);
 		Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other);
-	}/* 
-
-    private interface List_<T> {
-        List_<T> mapLast(Function<T, T> mapper);
-
-        List_<T> add(T element);
-
-        Iterator<T> iterate();
-
-        boolean isEmpty();
-
-        boolean contains(T element);
-
-        int size();
-
-        List_<T> subList(int startInclusive, int endExclusive);
-
-        T getLast();
-
-        T get(int index);
-
-        Iterator<T> iterateReverse();
-
-        List_<T> addAll(List_<T> others);
-
-        Option<Tuple<T, List_<T>>> removeLast();
-    } */
+	}
+	private interface List_<T> {
+		List_<T> mapLast(T -> T mapper);
+		List_<T> add(T element);
+		Iterator<T> iterate();
+		boolean isEmpty();
+		boolean contains(T element);
+		int size();
+		List_<T> subList(int startInclusive, int endExclusive);
+		T getLast();
+		T get(int index);
+		Iterator<T> iterateReverse();
+		List_<T> addAll(List_<T> others);
+		Option</* Tuple<T, List_<T>> */> removeLast();
+	}
 	private interface Head<T> {
 		Option<T> next();
 	}
@@ -230,12 +218,12 @@ public class Main {
 		}
 	}
 	private static class Lists {
-		private record ImmutableList<T>(/* java.util.List<T> */ elements) implements /* List_<T> */ {
+		private record ImmutableList<T>(/* java.util.List<T> */ elements) implements List_<T> {
 			/* public */ ImmutableList(){
 				/* this(new ArrayList<>()) */;
 			}
 			@Override
-            public /* List_<T> */ add(T element){
+            public List_<T> add(T element){
 				/* var copy = new ArrayList<>(this.elements) */;
 				/* copy.add(element) */;
 				return new ImmutableList(/* copy */);
@@ -257,7 +245,7 @@ public class Main {
 				return this.elements.size(/*  */);
 			}
 			@Override
-            public /* List_<T> */ subList(int startInclusive, int endExclusive){
+            public List_<T> subList(int startInclusive, int endExclusive){
 				return new ImmutableList(/* new ArrayList<>(this */.elements.subList(startInclusive, /* endExclusive)) */);
 			}
 			@Override
@@ -273,7 +261,7 @@ public class Main {
 				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/* )) */).map(index -> this.elements.size() - index - 1).map(this.elements::get);
 			}
 			@Override
-            public /* List_<T> */ addAll(/* List_<T> */ others){
+            public List_<T> addAll(List_<T> others){
 				return others.iterate(/* ) */.<List_<T>>fold(this, /* List_::add */);
 			}
 			@Override
@@ -285,30 +273,30 @@ public class Main {
 				/* var removed = copy.removeLast() */;
 				return /* new Some<> */(/* new Tuple<>(removed */, new ImmutableList(/* copy) */));
 			}
-			private /* List_<T> */ setLast(T element){
+			private List_<T> setLast(T element){
 				/* var copy = new ArrayList<>(this.elements) */;
 				/* copy.set(copy.size() - 1, element) */;
 				return new ImmutableList(/* copy */);
 			}
 			@Override
-            public /* List_<T> */ mapLast(T -> T mapper){
+            public List_<T> mapLast(T -> T mapper){
 				/* var oldLast = this.getLast() */;
 				/* var newLast = mapper.apply(oldLast) */;
 				return this.setLast(/* newLast */);
 			}
 		}
-		public static /* List_<T> */ empty<T>(){
+		public static List_<T> empty<T>(){
 			return /* new ImmutableList<> */(/*  */);
 		}
-		public static /* List_<T> */ of<T>(/* T... */ elements){
+		public static List_<T> of<T>(/* T... */ elements){
 			return /* new ImmutableList<> */(/* new ArrayList<> */(/* Arrays */.asList(elements)));
 		}
 	}
 	private static class DivideState {
-		private /* List_<String> */ segments;
+		private List_<String> segments;
 		private int depth;
 		private /* StringBuilder */ buffer;
-		/* private */ DivideState(/* List_<String> */ segments, /* StringBuilder */ buffer, int depth){
+		/* private */ DivideState(List_<String> segments, /* StringBuilder */ buffer, int depth){
 			/* this.segments = segments */;
 			/* this.buffer = buffer */;
 			/* this.depth = depth */;
@@ -356,13 +344,13 @@ public class Main {
             return new Some<>(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     } */
-	private static class ListCollector<T> implements Collector<T, /*  List_<T> */> {
+	private static class ListCollector<T> implements Collector<T, List_<T>> {
 		@Override
-        public /* List_<T> */ createInitial(){
+        public List_<T> createInitial(){
 			return /* Lists */.empty(/*  */);
 		}
 		@Override
-        public /* List_<T> */ fold(/* List_<T> */ current, T element){
+        public List_<T> fold(List_<T> current, T element){
 			return current.add(element);
 		}
 	}
@@ -380,7 +368,7 @@ public class Main {
 			return /* Map */.of(this.name, template);
 		}
 	}
-	private /* record */ Frame(Option<String> maybeName, /* List_<Type> */ typeParams, /* List_<Definition> */ definitions, List_ /* types */ <Type>){/* 
+	private /* record */ Frame(Option<String> maybeName, List_<Type> typeParams, List_</* Definition */> definitions, List_ /* types */ <Type>){/* 
         public Frame() {
             this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
         } *//* 
@@ -425,11 +413,11 @@ public class Main {
         } */
 	}
 	private static final class CompileState {
-		private final /* List_<Frame> */ frames;
+		private final List_</* Frame */> frames;
 		/* public */ CompileState(){
 			/* this(Lists.empty()) */;
 		}
-		/* public */ CompileState(/* List_<Frame> */ frames){
+		/* public */ CompileState(List_</* Frame */> frames){
 			/* this.frames = frames */;
 		}
 		private CompileState enter(){
@@ -441,11 +429,11 @@ public class Main {
 		private Option<Type> findType(String input){
 			return this.frames.iterateReverse(/* ) */.map(/* frame -> frame */.findType(/* input) */).flatMap(Iterators::fromOption).next();
 		}
-		public CompileState defineTypeParams(/* List_<String> */ typeParams){
+		public CompileState defineTypeParams(List_<String> typeParams){
 			return /* new CompileState */(this.frames.mapLast(/* last -> typeParams */.iterate(/* ) */.map(/* TypeParam::new */).fold(last, /* Frame::defineTypeParam */)));
 		}
 		public CompileState exit(){
-			return /* new CompileState */(this.frames.removeLast(/* ) */.map(/* Tuple::right */).orElse(frames));
+			return /* new CompileState */(this.frames.removeLast(/* ) */.map(/* Tuple::right */).orElse(this.frames));
 		}
 		public CompileState defineType(Type type){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineType(type)));
@@ -453,14 +441,14 @@ public class Main {
 		public Option</* Definition */> findValue(String name){
 			return this.frames.iterateReverse(/* ) */.map(/* frame -> frame */.findValue(/* name) */).flatMap(Iterators::fromOption).next();
 		}
-		public CompileState defineValues(/* List_<Definition> */ names){
+		public CompileState defineValues(List_</* Definition */> names){
 			return names.iterate(/* ) */.fold(this, /* CompileState::defineValue */);
 		}
 		private CompileState defineValue(/* Definition */ definition){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineValue(definition)));
 		}
 	}
-	private /* record */ StructurePrototype(String type, String beforeInfix, String infix, String name, /* List_<String> */ typeParams, Option<Type> maybeSuperType, /* List_<Definition> */ parameters, /* List_<Type> */ interfaces, String content, int /* depth */ ){/* 
+	private /* record */ StructurePrototype(String type, String beforeInfix, String infix, String name, List_<String> typeParams, Option<Type> maybeSuperType, List_</* Definition */> parameters, List_<Type> interfaces, String content, int /* depth */ ){/* 
         public StructurePrototype(String type1) {
             this(type1, "", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), "", 0);
         } *//* 
@@ -737,13 +725,13 @@ public class Main {
 		/* var parsed = parseStatements(state, input, mapper) */;
 		return /* new Tuple<> */(/* parsed */.left, /* join("" */, /* parsed */.right));
 	}
-	private static Tuple<CompileState, /*  List_<T> */> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){
+	private static Tuple<CompileState, List_<T>> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){
 		return /* parseAll */(state, input, /* Main::foldStatementValue */, mapper);
 	}
-	private static String join(String delimiter, /* List_<String> */ elements){
+	private static String join(String delimiter, List_<String> elements){
 		return elements.iterate(/* ) */.collect(/* new Joiner */(delimiter)).orElse("");
 	}
-	private static Tuple<CompileState, /*  List_<T> */> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){/* 
+	private static Tuple<CompileState, List_<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){/* 
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
             var currentState = tuple.left;
             var currentElements = tuple.right;
@@ -755,7 +743,7 @@ public class Main {
         } */
 		/* ) */;
 	}
-	private static /* List_<String> */ divide(String input, (DivideState, /*  Character */) -> DivideState folder){
+	private static List_<String> divide(String input, (DivideState, /*  Character */) -> DivideState folder){
 		/* DivideState state = new DivideState() */;
 		/* for (var i = 0 */;
 		/* i < input.length() */;/*  i++) {
@@ -1008,9 +996,8 @@ public class Main {
 
                     if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
                         var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
-                        var entered = paramsState;
 
-                        var parsed = parseStatements(entered, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+                        var parsed = parseStatements(paramsState, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
                         var outputContent = "{" + joinNodes("", parsed.right) + "\n" + "\t".repeat(depth) + "}";
                         return new Some<>(new Tuple<CompileState, StructSegment>(parsed.left.exit(), new Content(header + outputContent)));
                     }
@@ -1337,7 +1324,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || c == '_') {
                 continue;
             }
             return false;
