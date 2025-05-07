@@ -10,40 +10,40 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 public class Main {
 	private interface Option<T> {
-		Option<R> map<R>(/* T */ -> R mapper);
+		Option<R> map<R>(T -> R mapper);
 		boolean isPresent();
-		/* T */ orElse(/* T */ other);
-		/* T */ orElseGet(() -> /* T */ other);
-		Option</* T */> or(() -> Option</* T */> other);
-		Option<R> flatMap<R>(/* T */ -> Option<R> mapper);
-		Option</* T */> filter(/* T */ -> boolean predicate);
+		T orElse(T other);
+		T orElseGet(() -> T other);
+		Option<T> or(() -> Option<T> other);
+		Option<R> flatMap<R>(T -> Option<R> mapper);
+		Option<T> filter(T -> boolean predicate);
 	}
 	private interface Collector<T, C> {
-		/* C */ createInitial();
-		/* C */ fold(/* C */ current, /* T */ element);
+		C createInitial();
+		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		Iterator<R> map<R>(/* T */ -> R mapper);
-		C collect<C>(Collector</* T */, C> collector);
-		C fold<C>(C initial, (C, /*  T */) -> C folder);
-		boolean anyMatch(/* T */ -> boolean predicate);
+		Iterator<R> map<R>(T -> R mapper);
+		C collect<C>(Collector<T, C> collector);
+		C fold<C>(C initial, (C, T) -> C folder);
+		boolean anyMatch(T -> boolean predicate);
 	}
 	private interface List<T> {
-		List</* T */> mapLast(/* T */ -> /*  T */ mapper);
-		List</* T */> add(/* T */ element);
-		Iterator</* T */> iterate();
+		List<T> mapLast(T -> T mapper);
+		List<T> add(T element);
+		Iterator<T> iterate();
 		boolean isEmpty();
-		boolean contains(/* T */ element);
+		boolean contains(T element);
 		int size();
-		List</* T */> subList(int startInclusive, int endExclusive);
-		/* T */ getLast();
-		/* T */ get(int index);
-		Iterator</* T */> iterateReverse();
-		List</* T */> addAll(List</* T */> others);
-		List</* T */> removeLast();
+		List<T> subList(int startInclusive, int endExclusive);
+		T getLast();
+		T get(int index);
+		Iterator<T> iterateReverse();
+		List<T> addAll(List<T> others);
+		List<T> removeLast();
 	}
 	private interface Head<T> {
-		Option</* T */> next();
+		Option<T> next();
 	}
 	private interface Node {
 		String generate();
@@ -312,13 +312,13 @@ public class Main {
             return new Some<>(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     } */
-	private static class <T> implements Collector</* T */, List</* T */>> {
+	private static class <T> implements Collector<T, List<T>> {
 		@Override
-        public List</* T */> createInitial()/*  {
+        public List<T> createInitial()/*  {
             return Lists.empty();
         } */
 		@Override
-        public List</* T */> fold(List</* T */> current, /* T */ element)/*  {
+        public List<T> fold(List<T> current, T element)/*  {
             return current.add(element);
         } */
 	}
@@ -628,7 +628,7 @@ public class Main {
                 var typeParams = typeParamTuple.right;
 
                 var newPrototype = prototype.withName(name).withTypeParams(typeParams);
-                return parseStructureWithMaybeParameters(typeParamsState, newPrototype, afterTypeParams);
+                return parseStructureWithMaybeParameters(typeParamsState.defineTypeParams(typeParams), newPrototype, afterTypeParams);
             }
         }
 

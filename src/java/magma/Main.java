@@ -723,7 +723,7 @@ public class Main {
                 var typeParams = typeParamTuple.right;
 
                 var newPrototype = prototype.withName(name).withTypeParams(typeParams);
-                return parseStructureWithMaybeParameters(typeParamsState, newPrototype, afterTypeParams);
+                return parseStructureWithMaybeParameters(typeParamsState.defineTypeParams(typeParams), newPrototype, afterTypeParams);
             }
         }
 
