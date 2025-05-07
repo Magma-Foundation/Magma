@@ -66,7 +66,7 @@ public class Main {
 	private record Some<T>(T value) implements Option<T> {
 		@Override
         public Option<R> map<R>(T -> R mapper){
-			return new Some<>(/* mapper */.apply(this.value));
+			return new Some<>(mapper.apply(this.value));
 		}
 		@Override
         public boolean isPresent(){
@@ -89,11 +89,11 @@ public class Main {
 		}
 		@Override
         public Option<R> flatMap<R>(T -> Option<R> mapper){
-			return /* mapper */.apply(this.value);
+			return mapper.apply(this.value);
 		}
 		@Override
         public Option<T> filter(T -> boolean predicate){
-			return /* predicate */.test(this.value) ? this : new None<>();
+			return predicate.test(this.value) ? this : new None<>();
 		}
 	}
 	private record None<T> implements Option<T> {
@@ -107,15 +107,15 @@ public class Main {
 		}
 		@Override
         public T orElse(T other){
-			return /* other */;
+			return other;
 		}
 		@Override
         public T orElseGet(() -> T other){
-			return /* other */.get(/*  */);
+			return other.get(/*  */);
 		}
 		@Override
         public Option<T> or(() -> Option<T> other){
-			return /* other */.get(/*  */);
+			return other.get(/*  */);
 		}
 		@Override
         public Option<R> flatMap<R>(T -> Option<R> mapper){
@@ -156,7 +156,7 @@ public class Main {
 		}
 		@Override
         public C collect<C>(Collector<T, C> collector){
-			return this.fold(/* collector */.createInitial(/*  */), /* collector::fold */);
+			return this.fold(collector.createInitial(/*  */), /* collector::fold */);
 		}
 		@Override
         public C fold<C>(C initial, (C, T) -> C folder){
@@ -209,7 +209,7 @@ public class Main {
 			}
 			@Override
             public boolean contains(T element){
-				return this.elements.contains(/* element */);
+				return this.elements.contains(element);
 			}
 			@Override
             public int size(){
@@ -225,7 +225,7 @@ public class Main {
 			}
 			@Override
             public T get(int index){
-				return this.elements.get(/* index */);
+				return this.elements.get(index);
 			}
 			@Override
             public Iterator<T> iterateReverse(){
@@ -233,7 +233,7 @@ public class Main {
 			}
 			@Override
             public List<T> addAll(List<T> others){
-				return /* others */.iterate(/* ) */.<List<T>>fold(this, /* List::add */);
+				return others.iterate(/* ) */.<List<T>>fold(this, /* List::add */);
 			}
 			@Override
             public List<T> removeLast(){
@@ -255,7 +255,7 @@ public class Main {
 			return new MutableList<>(/*  */);
 		}
 		public static List<T> of<T>(/* T... */ elements){
-			return new MutableList<>(new /* ArrayList */<>(/* Arrays */.asList(/* elements */)));
+			return new MutableList<>(new /* ArrayList */<>(/* Arrays */.asList(elements)));
 		}
 	}
 	private static class DivideState {
@@ -317,7 +317,7 @@ public class Main {
 		}
 		@Override
         public List<T> fold(List<T> current, T element){
-			return /* current */.add(/* element */);
+			return current.add(element);
 		}
 	}
 	private /* record */ Frame(Option<String> maybeName, List<String> typeParams, List<String> typeNames, List<String> definitions){/* 
@@ -335,20 +335,24 @@ public class Main {
             return this.maybeName.filter(name -> name.equals(input)).isPresent();
         } *//* 
 
-        public Frame withName(String name) {
+        public Frame defineName(String name) {
             return new Frame(new Some<>(name), this.typeParams, this.typeNames, this.definitions);
         } *//* 
 
-        public Frame withTypeParams(List<String> typeParams) {
+        public Frame defineTypeParam(List<String> typeParams) {
             return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames, this.definitions);
         } *//* 
 
-        public Frame withTypeName(String typeName) {
+        public Frame defineType(String typeName) {
             return new Frame(this.maybeName, this.typeParams, this.typeNames.add(typeName), this.definitions);
         } *//* 
 
         public boolean isValueDefined(String valueName) {
             return this.definitions.contains(valueName);
+        } *//* 
+
+        public Frame defineValue(String name) {
+            return new Frame(this.maybeName, this.typeParams, this.typeNames, this.definitions.add(name));
         } */
 	}
 	private static final class CompileState {
@@ -363,22 +367,28 @@ public class Main {
 			return new CompileState(this.frames.add(new /* Frame */(/*  */)));
 		}
 		private CompileState defineThis(String name){
-			return new CompileState(this.frames.mapLast(/* last -> last */.withName(/* name */)));
+			return new CompileState(this.frames.mapLast(/* last -> last */.defineName(name)));
 		}
 		private boolean isTypeDefined(String input){
 			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isTypeDefined(input));
 		}
 		public CompileState defineTypeParams(List<String> typeParams){
-			return new CompileState(this.frames.mapLast(/* last -> last */.withTypeParams(/* typeParams */)));
+			return new CompileState(this.frames.mapLast(/* last -> last */.defineTypeParam(typeParams)));
 		}
 		public CompileState exit(){
 			return new CompileState(this.frames.removeLast(/*  */));
 		}
 		public CompileState defineType(String name){
-			return new CompileState(this.frames.mapLast(/* last -> last */.withTypeName(/* name */)));
+			return new CompileState(this.frames.mapLast(/* last -> last */.defineType(name)));
 		}
 		public boolean isValueDefined(String name){
 			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isValueDefined(name));
+		}
+		public CompileState defineValues(List<String> names){
+			return names.iterate(/* ) */.fold(this, /* CompileState::defineValue */);
+		}
+		private CompileState defineValue(String name){
+			return new CompileState(this.frames.mapLast(/* last -> last */.defineValue(name)));
 		}
 	}
 	private /* record */ StructurePrototype(String beforeInfix, String infix, String name, List<String> typeParams, Option<String> maybeSuperType, List</* Definition */> parameters, List<String> interfaces, String content, int /* depth */ ){/* 
@@ -494,7 +504,7 @@ public class Main {
     } */
 	private static class Iterators {
 		public static Iterator<T> fromOption<T>(Option<T> option){
-			return new HeadedIterator<>(/* option */.<Head<T>>map(/* SingleHead::new) */.orElseGet(EmptyHead::new));
+			return new HeadedIterator<>(option.<Head<T>>map(/* SingleHead::new) */.orElseGet(EmptyHead::new));
 		}
 	}
 	private static class SingleHead<T> implements Head<T> {
@@ -515,13 +525,13 @@ public class Main {
 	private record Return(Node value) implements StatementValue {
 		@Override
         public String generate(){
-			return /* "return " + this */.value.generate(/*  */);
+			return /* "return " + this */.value.generate();
 		}
 	}
 	private record ConstructionHeader(String type) implements Caller {
 		@Override
         public String generate(){
-			return /* "new " + this */.type(/*  */);
+			return /* "new " + this */.type();
 		}
 	}/* 
 
@@ -560,17 +570,17 @@ public class Main {
 	}
 	private static String compile(String input){
 		/* CompileState compileState = new CompileState() */;
-		return /* compileStatements */(/* compileState */.enter(/*  */), /* input */, /* Main::compileRootSegment */).right;
+		return /* compileStatements */(/* compileState */.enter(), input, /* Main::compileRootSegment */).right;
 	}
 	private static Tuple<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> Tuple<CompileState, String> mapper){
 		/* var parsed = parseStatements(state, input, mapper) */;
 		return new Tuple<>(/* parsed */.left, /* join("" */, /* parsed */.right));
 	}
 	private static Tuple<CompileState, List<T>> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){
-		return /* parseAll */(/* state */, /* input */, /* Main::foldStatementValue */, /* mapper */);
+		return /* parseAll */(state, input, /* Main::foldStatementValue */, mapper);
 	}
 	private static String join(String delimiter, List<String> elements){
-		return /* elements */.iterate(/* ) */.collect(new /* Joiner */(/* delimiter */)).orElse("");
+		return elements.iterate(/* ) */.collect(new /* Joiner */(delimiter)).orElse("");
 	}
 	private static Tuple<CompileState, List<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){/* 
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
@@ -591,7 +601,7 @@ public class Main {
             var c = input.charAt(i);
             state = folder.apply(state, c);
         } */
-		return /* state */.advance(/*  */).segments;
+		return state.advance().segments;
 	}
 	private static DivideState foldStatementValue(DivideState state, /* char */ c){
 		/* var appended = state.append(c) */;
@@ -602,8 +612,8 @@ public class Main {
 	}/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } */
-	/* if */ (/* c == '{' */){
-		return /* appended */.enter(/*  */);/* 
+	/* if */ (){
+		return /* appended */.enter();/* 
         }
         if (c == ' */
 	}/* ') {
@@ -693,8 +703,8 @@ public class Main {
             if (paramStart >= 0) {
                 var name = left.substring(0, paramStart);
                 var paramsString = left.substring(paramStart + "(".length());
-                var result = parseParameters(state, paramsString);
-                return parseStructureWithMaybeExtends(result.left(), prototype.withParameters(result.right()).withName(name), next);
+                var paramsTuple = parseParameters(state, paramsString);
+                return parseStructureWithMaybeExtends(paramsTuple.left(), prototype.withParameters(paramsTuple.right()).withName(name), next);
             }
         }
 
@@ -708,6 +718,7 @@ public class Main {
                 .map(Main::retainDefinition)
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
+
         return new Tuple<>(paramsTuple.left, params);
     } *//* 
 
@@ -801,8 +812,14 @@ public class Main {
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    var paramsTuple = parseValues(definitionTuple.left, params, Main::parseParameter);
-                    var paramsState = paramsTuple.left;
+
+                    var paramsTuple = parseParameters(definitionTuple.left, params);
+                    var paramNames = paramsTuple.right.iterate()
+                            .map(Definition::name)
+                            .collect(new ListCollector<>());
+
+                    var paramsState = paramsTuple.left.defineValues(paramNames);
+
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
 
                     var header = createIndent(depth) + definitionTuple.right.generate() + "(" + paramsJoined + ")";

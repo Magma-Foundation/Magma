@@ -433,20 +433,24 @@ public class Main {
             return this.maybeName.filter(name -> name.equals(input)).isPresent();
         }
 
-        public Frame withName(String name) {
+        public Frame defineName(String name) {
             return new Frame(new Some<>(name), this.typeParams, this.typeNames, this.definitions);
         }
 
-        public Frame withTypeParams(List<String> typeParams) {
+        public Frame defineTypeParam(List<String> typeParams) {
             return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames, this.definitions);
         }
 
-        public Frame withTypeName(String typeName) {
+        public Frame defineType(String typeName) {
             return new Frame(this.maybeName, this.typeParams, this.typeNames.add(typeName), this.definitions);
         }
 
         public boolean isValueDefined(String valueName) {
             return this.definitions.contains(valueName);
+        }
+
+        public Frame defineValue(String name) {
+            return new Frame(this.maybeName, this.typeParams, this.typeNames, this.definitions.add(name));
         }
     }
 
@@ -466,7 +470,7 @@ public class Main {
         }
 
         private CompileState defineThis(String name) {
-            return new CompileState(this.frames.mapLast(last -> last.withName(name)));
+            return new CompileState(this.frames.mapLast(last -> last.defineName(name)));
         }
 
         private boolean isTypeDefined(String input) {
@@ -474,7 +478,7 @@ public class Main {
         }
 
         public CompileState defineTypeParams(List<String> typeParams) {
-            return new CompileState(this.frames.mapLast(last -> last.withTypeParams(typeParams)));
+            return new CompileState(this.frames.mapLast(last -> last.defineTypeParam(typeParams)));
         }
 
         public CompileState exit() {
@@ -482,11 +486,19 @@ public class Main {
         }
 
         public CompileState defineType(String name) {
-            return new CompileState(this.frames.mapLast(last -> last.withTypeName(name)));
+            return new CompileState(this.frames.mapLast(last -> last.defineType(name)));
         }
 
         public boolean isValueDefined(String name) {
             return this.frames.iterateReverse().anyMatch(frame -> frame.isValueDefined(name));
+        }
+
+        public CompileState defineValues(List<String> names) {
+            return names.iterate().fold(this, CompileState::defineValue);
+        }
+
+        private CompileState defineValue(String name) {
+            return new CompileState(this.frames.mapLast(last -> last.defineValue(name)));
         }
     }
 
@@ -842,8 +854,8 @@ public class Main {
             if (paramStart >= 0) {
                 var name = left.substring(0, paramStart);
                 var paramsString = left.substring(paramStart + "(".length());
-                var result = parseParameters(state, paramsString);
-                return parseStructureWithMaybeExtends(result.left(), prototype.withParameters(result.right()).withName(name), next);
+                var paramsTuple = parseParameters(state, paramsString);
+                return parseStructureWithMaybeExtends(paramsTuple.left(), prototype.withParameters(paramsTuple.right()).withName(name), next);
             }
         }
 
@@ -857,6 +869,7 @@ public class Main {
                 .map(Main::retainDefinition)
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
+
         return new Tuple<>(paramsTuple.left, params);
     }
 
@@ -952,7 +965,12 @@ public class Main {
                     var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
 
                     var paramsTuple = parseParameters(definitionTuple.left, params);
-                    var paramsState = paramsTuple.left;
+                    var paramNames = paramsTuple.right.iterate()
+                            .map(Definition::name)
+                            .collect(new ListCollector<>());
+
+                    var paramsState = paramsTuple.left.defineValues(paramNames);
+
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
 
                     var header = createIndent(depth) + definitionTuple.right.generate() + "(" + paramsJoined + ")";
