@@ -260,8 +260,14 @@ public class Main {
         if (paramStart >= 0) {
             var left = stripped.substring(0, paramStart);
             var withParams = stripped.substring(paramStart + "(".length());
-            return compileDefinition(left, depth).map(definition -> {
-                return createIndent(depth) + definition + "(" + generatePlaceholder(withParams);
+            return compileDefinition(left, depth).flatMap(definition -> {
+                var paramEnd = withParams.indexOf(")");
+                if (paramEnd >= 0) {
+                    var params = withParams.substring(0, paramEnd);
+                    var content = withParams.substring(paramEnd + ")".length());
+                    return Optional.of(createIndent(depth) + definition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content));
+                }
+                return Optional.empty();
             });
         }
 
