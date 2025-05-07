@@ -791,17 +791,30 @@ public class Main {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
-                    var inputContent = withParams.substring(paramEnd + ")".length());
-                    var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
+                    var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
                     var tuple = compileParameters(definitionTuple.left, params);
-                    var value = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")" + outputContent;
-                    return new Some<>(new Tuple<CompileState, StructSegment>(tuple.left, new Content(value)));
+
+                    var header = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")";
+                    if (maybeWithBraces.equals(";")) {
+                        return new Some<>(new Tuple<CompileState, StructSegment>(tuple.left, new Content(header + ";")));
+                    }
+                    if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
+                        var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
+                        var statementsTuple = compileStatements(tuple.left, inputContent, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
+                        var outputContent = "{" + statementsTuple.right + "\n" + "\t".repeat(depth) + "}";
+                        return new Some<>(new Tuple<CompileState, StructSegment>(statementsTuple.left, new Content(header + outputContent)));
+                    }
                 }
                 return new None<>();
             });
         }
 
         return new None<>();
+    }
+
+    private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
+        return compileWhitespace(state, input)
+                .orElseGet(() -> new Tuple<>(state, "\n" + "\t".repeat(depth) + generatePlaceholder(input.strip())));
     }
 
     private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {
