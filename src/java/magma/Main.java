@@ -1172,9 +1172,8 @@ public class Main {
 
                     if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
                         var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
-                        var entered = paramsState;
 
-                        var parsed = parseStatements(entered, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+                        var parsed = parseStatements(paramsState, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
                         var outputContent = "{" + joinNodes("", parsed.right) + "\n" + "\t".repeat(depth) + "}";
                         return new Some<>(new Tuple<CompileState, StructSegment>(parsed.left.exit(), new Content(header + outputContent)));
                     }
