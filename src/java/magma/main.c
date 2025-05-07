@@ -3,12 +3,103 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-public class Main {
+public class Main {/* 
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    } *//* 
+
+    private interface Iterator<T> {
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <C> C collect(Collector<T, C> collector);
+
+        <C> C fold(C initial, BiFunction<C, T, C> folder);
+    } *//* 
+
+    private interface List<T> {
+        List<T> add(T element);
+
+        Iterator<T> iterate();
+    } *//* 
+
+    private interface Head<T> {
+        Optional<T> next();
+    } */
+	private static class RangeHead implements Head<Integer> {
+		private final /* int */ length;/* 
+        private int counter = 0; *//* 
+
+        public RangeHead(int length) {
+            this.length = length;
+        } *//* 
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter >= this.length) {
+                return Optional.empty();
+            }
+
+            var value = this.counter;
+            this.counter++;
+            return Optional.of(value);
+        } *//* 
+     */}/* 
+
+    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public <C> C fold(C initial, BiFunction<C, T, C> folder) {
+            var current = initial;
+            while (true) {
+                C finalCurrent = current;
+                var folded = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                if (folded.isPresent()) {
+                    current = folded.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+    } */
+	private static class Lists {/* 
+        private record MutableList<T>(java.util.List<T> elements) implements List<T> {
+            public MutableList() {
+                this(new ArrayList<>());
+            }
+
+            @Override
+            public List<T> add(T element) {
+                this.elements.add(element);
+                return this;
+            }
+
+            @Override
+            public Iterator<T> iterate() {
+                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
+            }
+        } *//* 
+
+        public static <T> List<T> empty() {
+            return new MutableList<>();
+        } *//* 
+     */}
 	private static class State {
-		private final /* List<String> */ segments;
+		private /* List<String> */ segments;
 		private /* int */ depth;
 		private /* StringBuilder */ buffer;/* 
 
@@ -19,7 +110,7 @@ public class Main {
         } *//* 
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(Lists.empty(), new StringBuilder(), 0);
         } *//* 
 
         private State append(char c) {
@@ -28,7 +119,7 @@ public class Main {
         } *//* 
 
         private State advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } *//* 
@@ -50,6 +141,17 @@ public class Main {
         public boolean isShallow() {
             return this.depth == 1;
         } *//* 
+     */}
+	private static class Joiner implements Collector<String, Optional<String>> {/* 
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        } *//* 
+
+        @Override
+        public Optional<String> fold(Optional<String> maybeCurrent, String element) {
+            return Optional.of(maybeCurrent.map(inner -> inner + element).orElse(element));
+        } *//* 
      */}/* 
 
     public static void main() {
@@ -70,13 +172,11 @@ public class Main {
     } *//* 
 
     private static String compileStatements(String input, Function<String, String> mapper) {
-        var segments = divide(input);
-        var output = new StringBuilder();
-        for (var segment : segments) {
-            output.append(mapper.apply(segment));
-        }
-
-        return output.toString();
+        return divide(input)
+                .iterate()
+                .map(mapper)
+                .collect(new Joiner())
+                .orElse("");
     } *//* 
 
     private static List<String> divide(String input) {
@@ -156,13 +256,17 @@ public class Main {
                     if (typeSeparator >= 0) {
                         var beforeType = beforeName.substring(0, typeSeparator);
                         var type = beforeName.substring(typeSeparator + " ".length());
-                        return Optional.of(createIndent(depth) + beforeType + " " + generatePlaceholder(type) + " " + name + ";");
+                        return Optional.of(createIndent(depth) + beforeType + " " + compileType(type) + " " + name + ";");
                     }
                 }
             }
         }
 
         return Optional.empty();
+    } *//* 
+
+    private static String compileType(String type) {
+        return generatePlaceholder(type);
     } *//* 
 
     private static boolean isSymbol(String input) {
