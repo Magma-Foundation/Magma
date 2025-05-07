@@ -1252,8 +1252,15 @@ public class Main {
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length());
-            var tuple = parseValue(state, parent);
-            return new Tuple<>(tuple.left, new DataAccess(tuple.right, property));
+            var valueTuple = parseValue(state, parent);
+            var valueState = valueTuple.left;
+            var value = valueTuple.right;
+
+            var resolved = resolve(valueState, value);
+            if(resolved instanceof Functional) {
+                return new Tuple<>(valueState, value);
+            }
+            return new Tuple<>(valueState, new DataAccess(value, property));
         }
 
         if (stripped.equals("this")) {

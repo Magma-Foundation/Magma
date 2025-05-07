@@ -78,7 +78,7 @@ public class Main {
 	private record Some<T>(T value) implements Option<T> {
 		@Override
         public Option<R> map<R>(T -> R mapper){
-			return new Some<R>(mapper.apply(this.value));
+			return new Some<R>(mapper(this.value));
 		}
 		@Override
         public boolean isPresent(){
@@ -101,15 +101,15 @@ public class Main {
 		}
 		@Override
         public Option<R> flatMap<R>(T -> Option<R> mapper){
-			return mapper.apply(this.value);
+			return mapper(this.value);
 		}
 		@Override
         public Option<T> filter(T -> boolean predicate){
-			return predicate.test(this.value) ? this : new None<>();
+			return predicate(this.value) ? this : new None<>();
 		}
 		@Override
         public Option</* Tuple<T, R> */> and<R>(() -> Option<R> other){
-			return other.get(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
+			return other(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
 		}
 	}
 	private record None<T> implements Option<T> {
@@ -127,11 +127,11 @@ public class Main {
 		}
 		@Override
         public T orElseGet(() -> T other){
-			return other.get(/*  */);
+			return other(/*  */);
 		}
 		@Override
         public Option<T> or(() -> Option<T> other){
-			return other.get(/*  */);
+			return other(/*  */);
 		}
 		@Override
         public Option<R> flatMap<R>(T -> Option<R> mapper){
@@ -210,7 +210,7 @@ public class Main {
 		}
 		@Override
         public Iterator<T> filter(T -> boolean predicate){
-			return this.flatMap(/* t -> new HeadedIterator<> */(predicate.test(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
+			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
 		}
 		@Override
         public Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other){
@@ -1076,8 +1076,15 @@ public class Main {
         if (separator >= 0) {
             var parent = stripped.substring(0, separator);
             var property = stripped.substring(separator + ".".length());
-            var tuple = parseValue(state, parent);
-            return new Tuple<>(tuple.left, new DataAccess(tuple.right, property));
+            var valueTuple = parseValue(state, parent);
+            var valueState = valueTuple.left;
+            var value = valueTuple.right;
+
+            var resolved = resolve(valueState, value);
+            if(resolved instanceof Functional) {
+                return new Tuple<>(valueState, value);
+            }
+            return new Tuple<>(valueState, new DataAccess(value, property));
         }
 
         if (stripped.equals("this")) {
