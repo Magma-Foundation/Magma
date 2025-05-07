@@ -371,38 +371,34 @@ public class Main {
     }
 
     private record Frame(
-            Option<StructurePrototype> maybeStructurePrototype,
+            Option<String> maybeName,
             List<String> typeParams,
             List<String> typeNames
     ) {
         public Frame() {
-            this(new None<StructurePrototype>(), Lists.empty(), Lists.empty());
+            this(new None<>(), Lists.empty(), Lists.empty());
         }
 
         public boolean isDefined(String typeName) {
-            return this.isThis(typeName) || this.typeParams.contains(typeName) || this.typeNames.contains(typeName);
+            return this.isThis(typeName)
+                    || this.typeParams.contains(typeName)
+                    || this.typeNames.contains(typeName);
         }
 
         private boolean isThis(String input) {
-            if (!this.maybeStructurePrototype.isPresent()) {
-                return false;
-            }
-            if (this.maybeStructurePrototype.orElse(null).name.equals(input)) {
-                return true;
-            }
-            return this.maybeStructurePrototype.orElse(null).typeParams().contains(input);
+            return this.maybeName.filter(name -> name.equals(input)).isPresent();
         }
 
-        public Frame withStructurePrototype(StructurePrototype prototype) {
-            return new Frame(new Some<StructurePrototype>(prototype), this.typeParams, this.typeNames);
+        public Frame withName(String name) {
+            return new Frame(new Some<>(name), this.typeParams, this.typeNames);
         }
 
         public Frame withTypeParams(List<String> typeParams) {
-            return new Frame(this.maybeStructurePrototype, this.typeParams.addAll(typeParams), this.typeNames);
+            return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames);
         }
 
         public Frame withDefinition(String definition) {
-            return new Frame(this.maybeStructurePrototype, this.typeParams, this.typeNames.add(definition));
+            return new Frame(this.maybeName, this.typeParams, this.typeNames.add(definition));
         }
     }
 
@@ -421,8 +417,8 @@ public class Main {
             return new CompileState(this.frames.add(new Frame()));
         }
 
-        private CompileState defineStructurePrototype(StructurePrototype structurePrototype) {
-            return new CompileState(this.frames.mapLast(last -> last.withStructurePrototype(structurePrototype)));
+        private CompileState defineThis(String name) {
+            return new CompileState(this.frames.mapLast(last -> last.withName(name)));
         }
 
         private boolean isDefined(String input) {
@@ -612,15 +608,16 @@ public class Main {
                     var beforeInfix = beforeContent.substring(0, keywordIndex);
                     var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
 
+                    var entered = state.enter();
                     var implementsIndex = afterInfix.indexOf(" implements ");
                     if (implementsIndex >= 0) {
                         var left = afterInfix.substring(0, implementsIndex).strip();
                         var right = afterInfix.substring(implementsIndex + " implements ".length());
-                        var tuple = compileType(state, right);
+                        var tuple = compileType(entered, right);
                         return parseStructureWithImplements(tuple.left, infix, depth, beforeInfix, left, Lists.of(tuple.right), content);
                     }
 
-                    return parseStructureWithImplements(state, infix, depth, beforeInfix, afterInfix, Lists.empty(), content);
+                    return parseStructureWithImplements(entered, infix, depth, beforeInfix, afterInfix, Lists.empty(), content);
                 }
             }
         }
@@ -656,14 +653,14 @@ public class Main {
                 var left = slice.substring(0, paramStart);
                 var right = slice.substring(paramStart + "(".length());
                 var parsed = parseValues(state, right, Main::compileParameter);
-                return parseStructureWithParameters(parsed.left, infix, depth, beforeInfix, left, extendsType, interfaces, content, parsed.right);
+                return parseStructureWithMaybeTypeParameters(parsed.left, infix, depth, beforeInfix, left, extendsType, interfaces, content, parsed.right);
             }
         }
 
-        return parseStructureWithParameters(state, infix, depth, beforeInfix, afterInfix, extendsType, interfaces, content, Lists.empty());
+        return parseStructureWithMaybeTypeParameters(state, infix, depth, beforeInfix, afterInfix, extendsType, interfaces, content, Lists.empty());
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithParameters(CompileState state, String infix, int depth, String beforeInfix, String afterInfix, Option<String> extendsType, List<String> interfaces, String content, List<String> parameters) {
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeTypeParameters(CompileState state, String infix, int depth, String beforeInfix, String afterInfix, Option<String> extendsType, List<String> interfaces, String content, List<String> parameters) {
         if (afterInfix.endsWith(">")) {
             var withoutEnd = afterInfix.substring(0, afterInfix.length() - ">".length());
             var typeParamsStart = withoutEnd.indexOf("<");
@@ -679,18 +676,17 @@ public class Main {
         return assembleStructure(state, new StructurePrototype(beforeInfix, infix, afterInfix, Lists.empty(), extendsType, parameters, interfaces, content, depth));
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
-        if (isSymbol(structurePrototype.name())) {
-            var entered = state.enter().defineStructurePrototype(structurePrototype);
-            var depth = structurePrototype.depth;
+    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype) {
+        if (isSymbol(prototype.name())) {
+            var depth = prototype.depth;
 
-            var statementsTuple = parseStatements(entered, structurePrototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+            var statementsTuple = parseStatements(state.defineThis(prototype.name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
 
             var statement = statementsTuple.right;
             var exited = statementsTuple.left.exit();
 
-            var defined = exited.defineType(structurePrototype.name);
-            return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(structurePrototype, statement, depth)));
+            var defined = exited.defineType(prototype.name);
+            return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(prototype, statement, depth)));
         }
         return new None<>();
     }
