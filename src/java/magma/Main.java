@@ -15,6 +15,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
+    private record Tuple<A, B>(A left, B right) {
+    }
+
     private interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
@@ -645,9 +648,6 @@ public class Main {
         }
     }
 
-    private record Tuple<A, B>(A left, B right) {
-    }
-
     private static class Whitespace implements StructSegment, Parameter, FunctionSegment, TypeArgument {
         @Override
         public String generate() {
@@ -1207,7 +1207,7 @@ public class Main {
         if (stripped.equals("true")) {
             return new Tuple<>(state, BooleanNode.True);
         }
-        
+
         if (stripped.equals("false")) {
             return new Tuple<>(state, BooleanNode.False);
         }
@@ -1308,7 +1308,7 @@ public class Main {
             case Symbol symbol ->
                     state.findValue(symbol.value).map(Definition::type).orElseGet(() -> new Placeholder(symbol.value));
             case Placeholder placeholder -> placeholder;
-            case BooleanNode booleanNode -> Primitive.Boolean;
+            case BooleanNode _ -> Primitive.Boolean;
         };
     }
 

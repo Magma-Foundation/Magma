@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 public class Main {
+	private record Tuple<A, B>(A left, B right) {
+	}
 	private interface Option<T> {
 		Option<R> map<R>(T -> R mapper);
 		boolean isPresent();
@@ -21,7 +23,7 @@ public class Main {
 		Option<T> or(() -> Option<T> other);
 		Option<R> flatMap<R>(T -> Option<R> mapper);
 		Option<T> filter(T -> boolean predicate);
-		Option</* Tuple<T, R> */> and<R>(() -> Option<R> other);
+		Option<Tuple<T, R>> and<R>(() -> Option<R> other);
 	}
 	private interface Collector<T, C> {
 		C createInitial();
@@ -36,7 +38,7 @@ public class Main {
 		Iterator<T> concat(Iterator<T> other);
 		Option<T> next();
 		Iterator<T> filter(T -> boolean predicate);
-		Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other);
+		Iterator<Tuple<T, R>> zip<R>(Iterator<R> other);
 	}
 	private interface List_<T> {
 		List_<T> mapLast(T -> T mapper);
@@ -50,7 +52,7 @@ public class Main {
 		T get(int index);
 		Iterator<T> iterateReverse();
 		List_<T> addAll(List_<T> others);
-		Option</* Tuple<T, List_<T>> */> removeLast();
+		Option<Tuple<T, List_<T>>> removeLast();
 	}
 	private interface Head<T> {
 		Option<T> next();
@@ -109,7 +111,7 @@ public class Main {
 			return predicate(this.value) ? this : new None<>();
 		}
 		@Override
-        public Option</* Tuple<T, R> */> and<R>(() -> Option<R> other){
+        public Option<Tuple<T, R>> and<R>(() -> Option<R> other){
 			return other(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
 		}
 	}
@@ -143,7 +145,7 @@ public class Main {
 			return new None(/*  */);
 		}
 		@Override
-        public Option</* Tuple<T, R> */> and<R>(() -> Option<R> other){
+        public Option<Tuple<T, R>> and<R>(() -> Option<R> other){
 			return new None(/*  */);
 		}
 	}
@@ -214,7 +216,7 @@ public class Main {
 			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
 		}
 		@Override
-        public Iterator</* Tuple<T, R> */> zip<R>(Iterator<R> other){
+        public Iterator<Tuple<T, R>> zip<R>(Iterator<R> other){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/* ) */.and(() -> other.next()));
 		}
 	}
@@ -266,7 +268,7 @@ public class Main {
 				return others.iterate(/* ) */.<List_<T>>fold(this, /* List_::add */);
 			}
 			@Override
-            public Option</* Tuple<T, List_<T>> */> removeLast(){/* 
+            public Option<Tuple<T, List_<T>>> removeLast(){/* 
                 if (this.elements.isEmpty()) {
                     return new None<>();
                 } */
@@ -500,8 +502,6 @@ public class Main {
         public StructurePrototype withSuperType(Type superType) {
             return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.content, this.depth);
         } */
-	}
-	private record Tuple<A, B>(A left, B right) {
 	}
 	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment, TypeArgument */ {
 		@Override
@@ -1031,7 +1031,7 @@ public class Main {
         if (stripped.equals("true")) {
             return new Tuple<>(state, BooleanNode.True);
         }
-        
+
         if (stripped.equals("false")) {
             return new Tuple<>(state, BooleanNode.False);
         }
@@ -1132,7 +1132,7 @@ public class Main {
             case Symbol symbol ->
                     state.findValue(symbol.value).map(Definition::type).orElseGet(() -> new Placeholder(symbol.value));
             case Placeholder placeholder -> placeholder;
-            case BooleanNode booleanNode -> Primitive.Boolean;
+            case BooleanNode _ -> Primitive.Boolean;
         };
     } *//* 
 
