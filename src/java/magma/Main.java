@@ -157,13 +157,17 @@ public class Main {
                     if (typeSeparator >= 0) {
                         var beforeType = beforeName.substring(0, typeSeparator);
                         var type = beforeName.substring(typeSeparator + " ".length());
-                        return Optional.of(createIndent(depth) + beforeType + " " + generatePlaceholder(type) + " " + name + ";");
+                        return Optional.of(createIndent(depth) + beforeType + " " + compileType(type) + " " + name + ";");
                     }
                 }
             }
         }
 
         return Optional.empty();
+    }
+
+    private static String compileType(String type) {
+        return generatePlaceholder(type);
     }
 
     private static boolean isSymbol(String input) {
