@@ -864,6 +864,10 @@ public class Main {
             return new Tuple<>(tuple.left, tuple.right + "." + property);
         }
 
+        if (stripped.equals("this") || state.isDefined(stripped)) {
+            return new Tuple<>(state, stripped);
+        }
+
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
