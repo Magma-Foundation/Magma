@@ -13,9 +13,9 @@ public class Main {
 		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		<R> Iterator</* R */> map(T -> /* R */ mapper);
-		<C> /* C */ collect(/* Collector */<T, /* C */> collector);
-		<C> /* C */ fold(/* C */ initial, /* BiFunction */</* C */, T, /* C */> folder);
+		Iterator</* R */> map<R>(T -> /* R */ mapper);
+		/* C */ collect<C>(/* Collector */<T, /* C */> collector);
+		/* C */ fold<C>(/* C */ initial, /* BiFunction */</* C */, T, /* C */> folder);
 	}
 	private interface List<T> {
 		List<T> add(T element);
@@ -32,9 +32,7 @@ public class Main {
 	}
 	private static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter = 0;
-
-        /* public */ RangeHead(/* int */ length)/*  {
+        private int counter = 0; /* public */ RangeHead(/* int */ length)/*  {
             this.length = length;
         }
 
@@ -123,10 +121,10 @@ public class Main {
                 return this.elements.get(index);
             }
         } */
-		public static <T> /* List */</* T */> empty()/*  {
+		public static  /* List */</* T */> empty<T>()/*  {
             return new MutableList<>();
         } */
-		public static <T> /* List */</* T */> of(/* T... */ elements)/*  {
+		public static  /* List */</* T */> of<T>(/* T... */ elements)/*  {
             return new MutableList<>(new ArrayList<>(Arrays.asList(elements)));
         } */
 	}
@@ -385,13 +383,23 @@ public class Main {
             if (isSymbol(name)) {
                 var divisions = divide(beforeName, Main::foldTypeDivisions);
                 if (divisions.size() >= 2) {
-                    var beforeType = join(" ", divisions.subList(0, divisions.size() - 1));
+                    var beforeType = join(" ", divisions.subList(0, divisions.size() - 1)).strip();
                     var type = divisions.last();
 
-                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state));
+                    if (beforeType.endsWith(">")) {
+                        var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
+                        var typeParamStart = withoutTypeParamEnd.indexOf("<");
+                        if (typeParamStart >= 0) {
+                            var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart);
+                            var typeParams = parseValues(withoutTypeParamEnd.substring(typeParamStart + "<".length()), String::strip);
+                            return Optional.of(generateDefinition(Optional.of(beforeTypeParams), type, name, state, typeParams));
+                        }
+                    }
+
+                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state, Lists.empty()));
                 }
                 else {
-                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, state));
+                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, state, Lists.empty()));
                 }
             }
         }
@@ -413,9 +421,10 @@ public class Main {
         return appended;
     } *//* 
 
-    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state) {
-        var beforeTypeString = maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
-        return beforeTypeString + compileType(type, state) + " " + name;
+    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
+        var beforeTypeString = maybeBeforeType.filter(value -> !value.isEmpty()).map(beforeType -> beforeType + " ").orElse("");
+        var typeParamString = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
+        return beforeTypeString + compileType(type, state) + " " + name + typeParamString;
     } *//* 
 
     private static String generateStatement(String content, int depth) {

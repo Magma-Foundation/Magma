@@ -424,13 +424,23 @@ public class Main {
             if (isSymbol(name)) {
                 var divisions = divide(beforeName, Main::foldTypeDivisions);
                 if (divisions.size() >= 2) {
-                    var beforeType = join(" ", divisions.subList(0, divisions.size() - 1));
+                    var beforeType = join(" ", divisions.subList(0, divisions.size() - 1)).strip();
                     var type = divisions.last();
 
-                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state));
+                    if (beforeType.endsWith(">")) {
+                        var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
+                        var typeParamStart = withoutTypeParamEnd.indexOf("<");
+                        if (typeParamStart >= 0) {
+                            var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart);
+                            var typeParams = parseValues(withoutTypeParamEnd.substring(typeParamStart + "<".length()), String::strip);
+                            return Optional.of(generateDefinition(Optional.of(beforeTypeParams), type, name, state, typeParams));
+                        }
+                    }
+
+                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state, Lists.empty()));
                 }
                 else {
-                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, state));
+                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, state, Lists.empty()));
                 }
             }
         }
@@ -452,9 +462,10 @@ public class Main {
         return appended;
     }
 
-    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state) {
-        var beforeTypeString = maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
-        return beforeTypeString + compileType(type, state) + " " + name;
+    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
+        var beforeTypeString = maybeBeforeType.filter(value -> !value.isEmpty()).map(beforeType -> beforeType + " ").orElse("");
+        var typeParamString = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
+        return beforeTypeString + compileType(type, state) + " " + name + typeParamString;
     }
 
     private static String generateStatement(String content, int depth) {
