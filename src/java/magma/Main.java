@@ -648,11 +648,13 @@ public class Main {
                     var beforeInfix = beforeContent.substring(0, keywordIndex);
                     var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
 
-                    return structWithMaybeImplements(state, afterInfix, new StructurePrototype()
+                    var prototype = new StructurePrototype()
                             .withBeforeInfix(beforeInfix)
                             .withInfix(infix)
                             .withContent(content)
-                            .withDepth(depth));
+                            .withDepth(depth);
+
+                    return parseStructureWithMaybeTypeParameters(state, prototype, afterInfix);
                 }
             }
         }
@@ -667,28 +669,29 @@ public class Main {
             var left = afterInfix.substring(0, implementsIndex).strip();
             var right = afterInfix.substring(implementsIndex + " implements ".length());
             var tuple = compileType(entered, right);
-            return parseStructureWithMaybeExtends(tuple.left, left, prototype.withInterfaces(Lists.of(tuple.right)));
+            return assembleStructure(tuple.left, prototype.withName(left).withInterfaces(Lists.of(tuple.right)));
         }
 
-        return parseStructureWithMaybeExtends(entered, afterInfix, prototype);
+        var prototype1 = afterInfix.isEmpty() ? prototype : prototype.withName(afterInfix);
+        return assembleStructure(entered, prototype1);
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeExtends(CompileState state, String afterInfix, StructurePrototype prototype) {
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeExtends(CompileState state, StructurePrototype prototype, String afterInfix) {
         var extendsIndex = afterInfix.indexOf(" extends ");
         if (extendsIndex >= 0) {
             var left = afterInfix.substring(0, extendsIndex).strip();
             var right = afterInfix.substring(extendsIndex + " extends ".length());
             var tuple = compileType(state, right);
-            return parseStructureWithMaybeParameters(tuple.left, left, prototype.withSuperType(tuple.right));
+            return structWithMaybeImplements(tuple.left, left, prototype.withSuperType(tuple.right));
         }
 
-        return parseStructureWithMaybeParameters(state, afterInfix, prototype);
+        return structWithMaybeImplements(state, afterInfix, prototype);
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeParameters(
             CompileState state,
-            String afterInfix,
-            StructurePrototype prototype
+            StructurePrototype prototype,
+            String afterInfix
     ) {
         if (afterInfix.endsWith(")")) {
             var slice = afterInfix.substring(0, afterInfix.length() - ")".length());
@@ -706,34 +709,38 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeTypeParameters(CompileState state, StructurePrototype prototype, String afterInfix) {
-        if (afterInfix.endsWith(">")) {
-            var withoutEnd = afterInfix.substring(0, afterInfix.length() - ">".length());
-            var typeParamsStart = withoutEnd.indexOf("<");
+        var typeParamsEnd = afterInfix.indexOf(">");
+        if (typeParamsEnd >= 0) {
+            var beforeTypeParams = afterInfix.substring(0, typeParamsEnd);
+            var afterTypeParams = afterInfix.substring(typeParamsEnd + ">".length());
+
+            var typeParamsStart = beforeTypeParams.indexOf("<");
             if (typeParamsStart >= 0) {
-                var name = withoutEnd.substring(0, typeParamsStart).strip();
-                var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
+                var name = beforeTypeParams.substring(0, typeParamsStart).strip();
+                var typeParamString = beforeTypeParams.substring(typeParamsStart + "<".length());
                 var typeParamTuple = parseValues(state, typeParamString, Main::stripToTuple);
                 var typeParamsState = typeParamTuple.left;
                 var typeParams = typeParamTuple.right;
 
-                var newPrototype = prototype.withTypeParams(typeParams).withName(name);
-                return assembleStructure(typeParamsState, newPrototype, "");
+                var newPrototype = prototype.withName(name).withTypeParams(typeParams);
+                return parseStructureWithMaybeExtends(typeParamsState, newPrototype, afterTypeParams);
             }
         }
 
-        return assembleStructure(state, prototype.withName(afterInfix), "");
+        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype, String afterInfix) {
-        if (isSymbol(prototype.name())) {
+    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype) {
+        var name = prototype.name;
+        if (isSymbol(name)) {
             var depth1 = prototype.depth;
 
-            var statementsTuple = parseStatements(state.defineThis(prototype.name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth1 + 1));
+            var statementsTuple = parseStatements(state.defineThis(name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth1 + 1));
 
             var statement = statementsTuple.right;
             var exited = statementsTuple.left.exit();
 
-            var defined = exited.defineType(prototype.name);
+            var defined = exited.defineType(name);
             return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(prototype, statement, depth1)));
         }
         return new None<>();
