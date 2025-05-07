@@ -126,7 +126,7 @@ public class Main {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
                 var generated = beforeContent + "{" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
-                return Optional.of(depth == 0 ? generated + "\n" : ("\n" + "\t".repeat(depth) + generated));
+                return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
             }
         }
 
@@ -134,7 +134,41 @@ public class Main {
     }
 
     private static String compileClassStatement(String input, int depth) {
-        return compileStructure(input, depth).orElseGet(() -> generatePlaceholder(input));
+        return compileStructure(input, depth)
+                .or(() -> compileDefinition(input, depth))
+                .orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileDefinition(String input, int depth) {
+        var stripped = input.strip();
+        if (stripped.endsWith(";")) {
+            var definition = stripped.substring(0, stripped.length() - ";".length());
+            var nameSeparator = definition.lastIndexOf(" ");
+            if (nameSeparator >= 0) {
+                var left = definition.substring(0, nameSeparator);
+                var name = definition.substring(nameSeparator + " ".length()).strip();
+                if (isSymbol(name)) {
+                    return Optional.of(createIndent(depth) + generatePlaceholder(left) + " " + name + ";");
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static String createIndent(int depth) {
+        return "\n" + "\t".repeat(depth);
     }
 
     private static String generatePlaceholder(String input) {
