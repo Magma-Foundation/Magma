@@ -544,6 +544,8 @@ public class Main {
 			return this.value;
 		}
 	}
+	private /* record */ Result(Tuple<CompileState, List<Parameter>> paramsTuple, List</* Definition */> params){
+	}
 	public static /* void */ main(){
 		/* var root = Paths.get(".", "src", "java", "magma") */;
 		/* var source = root.resolve("Main.java") */;
@@ -691,19 +693,22 @@ public class Main {
             if (paramStart >= 0) {
                 var name = left.substring(0, paramStart);
                 var paramsString = left.substring(paramStart + "(".length());
-                var paramsTuple = parseValues(state, paramsString, Main::parseParameter);
-                var params = paramsTuple.right
-                        .iterate()
-                        .map(Main::retainDefinition)
-                        .flatMap(Iterators::fromOption)
-                        .collect(new ListCollector<>());
-
-                var s = joinNodes(", ", params);
-                return parseStructureWithMaybeExtends(paramsTuple.left, prototype.withParameters(params).withName(name), next);
+                var result = parseParameters(state, paramsString);
+                return parseStructureWithMaybeExtends(result.left(), prototype.withParameters(result.right()).withName(name), next);
             }
         }
 
         return parseStructureWithMaybeExtends(state, prototype, input);
+    } *//* 
+
+    private static Tuple<CompileState, List<Definition>> parseParameters(CompileState state, String paramsString) {
+        var paramsTuple = parseValues(state, paramsString, Main::parseParameter);
+        var params = paramsTuple.right
+                .iterate()
+                .map(Main::retainDefinition)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+        return new Tuple<>(paramsTuple.left, params);
     } *//* 
 
     private static Option<Definition> retainDefinition(Parameter param) {
@@ -870,12 +875,6 @@ public class Main {
         }
 
         return new Tuple<>(state, new Placeholder(stripped));
-    } *//* 
-
-    private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        var parsed = parseValues(state, params, mapper);
-        var joined = join(", ", parsed.right);
-        return new Tuple<>(parsed.left, joined);
     } *//* 
 
     private static <T> Tuple<CompileState, List<T>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
