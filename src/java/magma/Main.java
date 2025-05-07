@@ -856,6 +856,14 @@ public class Main {
             }
         }
 
+        var separator = stripped.lastIndexOf(".");
+        if (separator >= 0) {
+            var parent = stripped.substring(0, separator);
+            var property = stripped.substring(separator + ".".length());
+            var tuple = compileValue(state, parent);
+            return new Tuple<>(tuple.left, tuple.right + "." + property);
+        }
+
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
