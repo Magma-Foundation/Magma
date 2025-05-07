@@ -114,10 +114,10 @@ public class Main {
             return stripped + "\n";
         }
 
-        return compileStructure(stripped).orElseGet(() -> generatePlaceholder(input));
+        return compileStructure(stripped, 0).orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileStructure(String input) {
+    private static Optional<String> compileStructure(String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -125,15 +125,16 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                return Optional.of(beforeContent + "{" + compileStatements(content, Main::compileClassStatement) + "}");
+                var generated = beforeContent + "{" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+                return Optional.of(depth == 0 ? generated + "\n" : ("\n" + "\t".repeat(depth) + generated));
             }
         }
 
         return Optional.empty();
     }
 
-    private static String compileClassStatement(String input) {
-        return compileStructure(input).orElseGet(() -> generatePlaceholder(input));
+    private static String compileClassStatement(String input, int depth) {
+        return compileStructure(input, depth).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String generatePlaceholder(String input) {
