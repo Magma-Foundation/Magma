@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -12,7 +13,7 @@ public class Main {
 		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		<R> Iterator</* R */> map(/* Function */<T, /* R */> mapper);
+		<R> Iterator</* R */> map(T -> /* R */ mapper);
 		<C> /* C */ collect(/* Collector */<T, /* C */> collector);
 		<C> /* C */ fold(/* C */ initial, /* BiFunction */</* C */, T, /* C */> folder);
 	}
@@ -24,6 +25,7 @@ public class Main {
 		/* int */ size();
 		List<T> subList(/* int */ startInclusive, /* int */ endExclusive);
 		T last();
+		T get(/* int */ index);
 	}
 	private interface Head<T> {
 		/* Optional */<T> next();
@@ -115,9 +117,17 @@ public class Main {
             public T last() {
                 return this.elements.getLast();
             }
+
+            @Override
+            public T get(int index) {
+                return this.elements.get(index);
+            }
         } */
 		public static <T> /* List */</* T */> empty()/*  {
             return new MutableList<>();
+        } */
+		public static <T> /* List */</* T */> of(/* T... */ elements)/*  {
+            return new MutableList<>(new ArrayList<>(Arrays.asList(elements)));
         } */
 	}
 	private static class DivideState {
@@ -194,10 +204,10 @@ public class Main {
 	private static /* String */ compile(/* String */ input)/*  {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	private static /* String */ compileStatements(/* String */ input, /* Function */</* String */, /* String */> mapper)/*  {
+	private static /* String */ compileStatements(/* String */ input, /* String */ -> /* String */ mapper)/*  {
         return compileAll(input, Main::foldStatementValue, mapper, "");
     } */
-	private static /* String */ compileAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* Function */</* String */, /* String */> mapper, /* String */ delimiter)/*  {
+	private static /* String */ compileAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* String */ -> /* String */ mapper, /* String */ delimiter)/*  {
         return join(delimiter, parseAll(input, folder, mapper));
     } */
 	private static /* String */ join(/* String */ delimiter, /* List */</* String */> elements)/*  {
@@ -205,7 +215,7 @@ public class Main {
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static /* List */</* String */> parseAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* Function */</* String */, /* String */> mapper)/*  {
+	private static /* List */</* String */> parseAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* String */ -> /* String */ mapper)/*  {
         return divide(input, folder)
                 .iterate()
                 .map(mapper)
@@ -423,12 +433,24 @@ public class Main {
             var typeArgsStart = withEnd.indexOf("<");
             if (typeArgsStart >= 0) {
                 var base = withEnd.substring(0, typeArgsStart).strip();
-                var typeArgs = withEnd.substring(typeArgsStart + "<".length());
-                return compileBaseType(base, state) + "<" + compileValues(typeArgs, typeArg -> compileType(typeArg, state)) + ">";
+                var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
+                var typeArgs = parseValues(inputTypeArgs, typeArg -> compileType(typeArg, state));
+                var outputTypeArgs = join(", ", typeArgs);
+
+                if (base.equals("Function")) {
+                    return generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1));
+                }
+
+                return compileBaseType(base, state) + "<" + outputTypeArgs + ">";
             }
         }
 
         return generatePlaceholder(stripped);
+    } *//* 
+
+    private static String generateFunctionalType(List<String> arguments, String returns) {
+        var argumentString = arguments.size() == 1 ? arguments.get(0) : "(" + join(", ", arguments) + ")";
+        return argumentString + " -> " + returns;
     } *//* 
 
     private static String compileBaseType(String base, CompileState state) {

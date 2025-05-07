@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,6 +38,8 @@ public class Main {
         List<T> subList(int startInclusive, int endExclusive);
 
         T last();
+
+        T get(int index);
     }
 
     private interface Head<T> {
@@ -131,10 +134,19 @@ public class Main {
             public T last() {
                 return this.elements.getLast();
             }
+
+            @Override
+            public T get(int index) {
+                return this.elements.get(index);
+            }
         }
 
         public static <T> List<T> empty() {
             return new MutableList<>();
+        }
+
+        public static <T> List<T> of(T... elements) {
+            return new MutableList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
@@ -460,12 +472,24 @@ public class Main {
             var typeArgsStart = withEnd.indexOf("<");
             if (typeArgsStart >= 0) {
                 var base = withEnd.substring(0, typeArgsStart).strip();
-                var typeArgs = withEnd.substring(typeArgsStart + "<".length());
-                return compileBaseType(base, state) + "<" + compileValues(typeArgs, typeArg -> compileType(typeArg, state)) + ">";
+                var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
+                var typeArgs = parseValues(inputTypeArgs, typeArg -> compileType(typeArg, state));
+                var outputTypeArgs = join(", ", typeArgs);
+
+                if (base.equals("Function")) {
+                    return generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1));
+                }
+
+                return compileBaseType(base, state) + "<" + outputTypeArgs + ">";
             }
         }
 
         return generatePlaceholder(stripped);
+    }
+
+    private static String generateFunctionalType(List<String> arguments, String returns) {
+        var argumentString = arguments.size() == 1 ? arguments.get(0) : "(" + join(", ", arguments) + ")";
+        return argumentString + " -> " + returns;
     }
 
     private static String compileBaseType(String base, CompileState state) {
