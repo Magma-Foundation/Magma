@@ -321,7 +321,8 @@ public class Main {
         }
     }
 
-    public record StructurePrototype(String name, List<String> typeParams) {
+    public record StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix,
+                                     String content, int depth) {
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -431,12 +432,12 @@ public class Main {
                             var name = withoutEnd.substring(0, typeParamsStart).strip();
                             var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
                             var elements = parseValues(state, typeParamString, Main::stripToTuple);
-                            var prototype = new StructurePrototype(name, elements.right);
-                            return assembleStructure(elements.left, prototype, beforeInfix, infix, content, depth);
+                            var prototype = new StructurePrototype(name, elements.right, beforeInfix, infix, content, depth);
+                            return assembleStructure(elements.left, prototype);
                         }
                     }
 
-                    return assembleStructure(state, new StructurePrototype(afterInfix, Lists.empty()), beforeInfix, infix, content, depth);
+                    return assembleStructure(state, new StructurePrototype(afterInfix, Lists.empty(), beforeInfix, infix, content, depth));
                 }
             }
         }
@@ -444,12 +445,14 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, StructurePrototype structurePrototype, String beforeInfix, String infix, String content, int depth) {
+    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
         if (isSymbol(structurePrototype.name())) {
             var outputTypeParams = structurePrototype.typeParams().isEmpty() ? "" : "<" + join(", ", structurePrototype.typeParams()) + ">";
             var entered = state.enter(structurePrototype);
-            var statements = compileStatements(entered, content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
-            var generated = beforeInfix + infix + structurePrototype.name() + outputTypeParams + " {" + statements.right + createIndent(depth) + "}";
+            var depth = structurePrototype.depth;
+
+            var statements = compileStatements(entered, structurePrototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+            var generated = structurePrototype.beforeInfix + structurePrototype.infix + structurePrototype.name() + outputTypeParams + " {" + statements.right + createIndent(depth) + "}";
             var formatted = depth == 0 ? generated + "\n" : (createIndent(depth) + generated);
             return Optional.of(new Tuple<>(statements.left.exit(), formatted));
         }
