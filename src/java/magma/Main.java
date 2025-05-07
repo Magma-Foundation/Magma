@@ -845,7 +845,13 @@ public class Main {
                 var args = withoutEnd.substring(argsStart + "(".length());
                 if (beforeArgs.startsWith("new ")) {
                     var type = compileType(state, beforeArgs.substring("new ".length()));
-                    return new Tuple<>(type.left, "new " + type.right + "(" + generatePlaceholder(args) + ")");
+                    var tuple = compileValues(type.left, args, Main::compileValue);
+                    return new Tuple<>(tuple.left, "new " + type.right + "(" + tuple.right + ")");
+                }
+                else {
+                    var type = compileValue(state, beforeArgs);
+                    var tuple = compileValues(type.left, args, Main::compileValue);
+                    return new Tuple<>(tuple.left, type.right + "(" + tuple.right + ")");
                 }
             }
         }
