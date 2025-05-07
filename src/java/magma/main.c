@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 public class Main {
 	private interface Collector<T, C> {
-		C createInitial(/*  */)/* ; */
+		C createInitial()/* ; */
 		C fold(C current, T element)/* ; *//* 
      */}
 	private interface Iterator<T> {
@@ -18,12 +18,12 @@ public class Main {
      */}
 	private interface List<T> {
 		/* List<T> */ add(T element)/* ; */
-		/* Iterator<T> */ iterate(/*  */)/* ; */
-		/* boolean */ isEmpty(/*  */)/* ; */
+		/* Iterator<T> */ iterate()/* ; */
+		/* boolean */ isEmpty()/* ; */
 		/* boolean */ contains(T element)/* ; *//* 
      */}
 	private interface Head<T> {
-		/* Optional<T> */ next(/*  */)/* ; *//* 
+		/* Optional<T> */ next()/* ; *//* 
      */}
 	private static class RangeHead implements Head<Integer> {
         private final int length;
@@ -98,7 +98,7 @@ public class Main {
                 return this.elements.contains(element);
             }
         } */
-		public static <T> /* List<T> */ empty(/*  */)/*  {
+		public static <T> /* List<T> */ empty()/*  {
             return new MutableList<>();
         } *//* 
      */}
@@ -111,30 +111,30 @@ public class Main {
             this.buffer = buffer;
             this.depth = depth;
         } */
-		/* public */ State(/*  */)/*  {
+		/* public */ State()/*  {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
 		private /* State */ append(/* char */ c)/*  {
             this.buffer.append(c);
             return this;
         } */
-		private /* State */ advance(/*  */)/*  {
+		private /* State */ advance()/*  {
             this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } */
-		public /* boolean */ isLevel(/*  */)/*  {
+		public /* boolean */ isLevel()/*  {
             return this.depth == 0;
         } */
-		public /* State */ enter(/*  */)/*  {
+		public /* State */ enter()/*  {
             this.depth++;
             return this;
         } */
-		public /* State */ exit(/*  */)/*  {
+		public /* State */ exit()/*  {
             this.depth--;
             return this;
         } */
-		public /* boolean */ isShallow(/*  */)/*  {
+		public /* boolean */ isShallow()/*  {
             return this.depth == 1;
         } *//* 
      */}
@@ -151,7 +151,7 @@ public class Main {
     } */
 	private static class ListCollector<T> implements Collector<T, List<T>> {
 		@Override
-        public List<T> createInitial(/*  */)/*  {
+        public List<T> createInitial()/*  {
             return Lists.empty();
         } */
 		@Override
@@ -159,7 +159,7 @@ public class Main {
             return current.add(element);
         } *//* 
      */}
-	public static /* void */ main(/*  */)/*  {
+	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
         var target = root.resolve("main.c");
@@ -322,7 +322,16 @@ public class Main {
     } *//* 
 
     private static String compileParameter(String input, List<String> typeParams) {
-        return compileDefinition(input, typeParams).orElseGet(() -> generatePlaceholder(input));
+        return compileWhitespace(input)
+                .or(() -> compileDefinition(input, typeParams))
+                .orElseGet(() -> generatePlaceholder(input));
+    } *//* 
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     } *//* 
 
     private static Optional<String> compileDefinitionStatement(String input, int depth, List<String> typeParams) {

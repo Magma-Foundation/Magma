@@ -355,7 +355,16 @@ public class Main {
     }
 
     private static String compileParameter(String input, List<String> typeParams) {
-        return compileDefinition(input, typeParams).orElseGet(() -> generatePlaceholder(input));
+        return compileWhitespace(input)
+                .or(() -> compileDefinition(input, typeParams))
+                .orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     }
 
     private static Optional<String> compileDefinitionStatement(String input, int depth, List<String> typeParams) {
