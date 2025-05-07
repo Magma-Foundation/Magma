@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 public class Main {/* 
     private static class State {
         private final List<String> segments;
@@ -44,7 +45,11 @@ public class Main {/*
             this.depth--;
             return this;
         }
-    }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
+    } *//* 
 
     public static void main() {
         var root = Paths.get(".", "src", "java", "magma");
@@ -57,17 +62,21 @@ public class Main {/*
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    } *//* 
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    } *//* 
+
+    private static String compileStatements(String input, Function<String, String> mapper) {
         var segments = divide(input);
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
         return output.toString();
-    }
+    } *//* 
 
     private static List<String> divide(String input) {
         State state = new State();
@@ -77,42 +86,43 @@ public class Main {/*
         }
 
         return state.advance().segments;
-    }
+    } *//* 
 
     private static State fold(State state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '} *//* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        } *//* 
         if (c == '{') {
             return appended.enter();
         }
-        if (c == '}') {
+        if (c == '} *//* ') {
             return appended.exit();
-        }
-        return appended;
-    }
-
-    private static String compileRootSegment(String input) {
-        var stripped = input.strip();
+        } *//* 
+        return appended; *//* 
+     */}private static String compileRootSegment(String input) {/* 
+        var stripped = input.strip(); *//* 
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return stripped + "\n";
-        }
+        } *//* 
 
-        if (stripped.endsWith("}")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
-            var contentStart = withoutEnd.indexOf("{");
+        if (stripped.endsWith(" */}")) {/* 
+            var withoutEnd = stripped.substring(0, stripped.length() - " */}/* ".length()); */var contentStart = withoutEnd.indexOf("{/* "); *//* 
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                return beforeContent + "{" +  generatePlaceholder(content) + "}";
+                return beforeContent + "{" + compileStatements(content, Main::compileClassStatement) + "}";
             }
-        }
+        } *//* 
 
-        return generatePlaceholder(input);
-    }
-
-    private static String generatePlaceholder(String input) {
-        return "/* " + input + " */";
-    }
- */}
+        return generatePlaceholder(input); *//* 
+     */}private static String compileClassStatement(String input) {/* 
+        return generatePlaceholder(input); *//* 
+     */}private static String generatePlaceholder(String input) {/* 
+        return "/* " + input + " */"; *//* 
+     */}/* 
+}
+ */

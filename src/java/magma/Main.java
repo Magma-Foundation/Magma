@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -46,6 +47,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     public static void main() {
@@ -62,10 +67,14 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> mapper) {
         var segments = divide(input);
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
         return output.toString();
@@ -85,6 +94,9 @@ public class Main {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
         }
         if (c == '{') {
             return appended.enter();
@@ -107,10 +119,14 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                return beforeContent + "{" +  generatePlaceholder(content) + "}";
+                return beforeContent + "{" + compileStatements(content, Main::compileClassStatement) + "}";
             }
         }
 
+        return generatePlaceholder(input);
+    }
+
+    private static String compileClassStatement(String input) {
         return generatePlaceholder(input);
     }
 
