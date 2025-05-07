@@ -284,7 +284,7 @@ public class Main {
         }
     }
 
-    public static final class CompileState {
+    private static final class CompileState {
         private final List<Frame> frames;
 
         public CompileState() {
@@ -386,14 +386,17 @@ public class Main {
             return stripped + "\n";
         }
 
-        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(new CompileState(), stripped, 0).orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileClass(String input, int depth) {
-        return compileStructure(input, depth, "class ");
+    private static Optional<String> compileClass(CompileState state, String input, int depth) {
+        return compileStructure(state, "class ", input, depth);
     }
 
-    private static Optional<String> compileStructure(String input, int depth, String infix) {
+    private record Tuple<A, B>(A left, B right) {
+    }
+
+    private static Optional<String> compileStructure(CompileState state, String infix, String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -412,11 +415,11 @@ public class Main {
                             var name = withoutEnd.substring(0, typeParamsStart).strip();
                             var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
                             var elements = parseValues(typeParamString, String::strip);
-                            return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(name, elements), content);
+                            return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(name, elements), content, state);
                         }
                     }
 
-                    return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(afterInfix, Lists.empty()), content);
+                    return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(afterInfix, Lists.empty()), content, state);
                 }
             }
         }
@@ -424,11 +427,11 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, StructurePrototype structurePrototype, String content) {
+    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, StructurePrototype structurePrototype, String content, CompileState state) {
         if (isSymbol(structurePrototype.name())) {
             var outputTypeParams = structurePrototype.typeParams().isEmpty() ? "" : "<" + join(", ", structurePrototype.typeParams()) + ">";
-            var state = new CompileState().enter(structurePrototype);
-            var generated = beforeInfix + infix + structurePrototype.name() + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, state)) + createIndent(depth) + "}";
+            var entered = state.enter(structurePrototype);
+            var generated = beforeInfix + infix + structurePrototype.name() + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, entered)) + createIndent(depth) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
@@ -436,8 +439,8 @@ public class Main {
 
     private static String compileClassStatement(String input, int depth, CompileState state) {
         return compileWhitespace(input)
-                .or(() -> compileClass(input, depth))
-                .or(() -> compileStructure(input, depth, "interface "))
+                .or(() -> compileClass(state, input, depth))
+                .or(() -> compileStructure(state, "interface ", input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .or(() -> compileMethod(input, depth, state))
                 .orElseGet(() -> generatePlaceholder(input));
