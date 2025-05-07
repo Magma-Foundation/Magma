@@ -544,6 +544,13 @@ public class Main {
     private record StructureType(StructurePrototype prototype) {
     }
 
+    public record Statement(int depth, String content) implements StructSegment {
+        @Override
+        public String generate() {
+            return createIndent(this.depth()) + this.content() + ";";
+        }
+    }
+
     public static void main() {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -758,7 +765,7 @@ public class Main {
                 .or(() -> parseClass(state, input, depth))
                 .or(() -> parseStructure(state, "interface ", input, depth))
                 .or(() -> parseStructure(state, "record ", input, depth))
-                .or(() -> parseDefinitionStatement(input, depth, state))
+                .or(() -> typed(() -> parseStatement(input, depth, definition1 -> compileDefinition(state, definition1))))
                 .or(() -> parseMethod(input, depth, state))
                 .orElseGet(() -> parsePlaceholder0(state, input));
     }
@@ -866,16 +873,15 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
+    private static Option<Tuple<CompileState, Statement>> parseStatement(String input, int depth, Function<String, Option<Tuple<CompileState, String>>> mapper) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return new None<>();
         }
 
-        var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(state, definition).map(generated -> {
-            var tuple = generateStatement(depth, generated.left, generated.right);
-            return new Tuple<>(tuple.left, new Content(tuple.right));
+        var content = stripped.substring(0, stripped.length() - ";".length());
+        return mapper.apply(content).map(generated -> {
+            return new Tuple<>(generated.left, new Statement(depth, generated.right));
         });
     }
 
@@ -934,11 +940,6 @@ public class Main {
         var typeParamString = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
         var typeTuple = compileType(state.defineTypeParams(typeParams), type);
         return new Tuple<>(typeTuple.left, beforeTypeString + typeTuple.right + " " + name + typeParamString);
-    }
-
-    private static Tuple<CompileState, String> generateStatement(int depth, CompileState state, String content) {
-        var generated = createIndent(depth) + content + ";";
-        return new Tuple<>(state, generated);
     }
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
