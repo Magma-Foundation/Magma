@@ -218,10 +218,14 @@ public class Main {
             return stripped + "\n";
         }
 
-        return compileStructure(stripped, 0).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(input));
     }
 
-    private static Optional<String> compileStructure(String input, int depth) {
+    private static Optional<String> compileClass(String input, int depth) {
+        return compileStructure(input, depth, "class ");
+    }
+
+    private static Optional<String> compileStructure(String input, int depth, String infix) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -229,11 +233,11 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                var keywordIndex = beforeContent.indexOf("class ");
+                var keywordIndex = beforeContent.indexOf(infix);
                 if (keywordIndex >= 0) {
                     var left = beforeContent.substring(0, keywordIndex);
-                    var right = beforeContent.substring(keywordIndex + "class ".length()).strip();
-                    var generated = left + "class " + right + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+                    var right = beforeContent.substring(keywordIndex + infix.length()).strip();
+                    var generated = left + infix + right + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
                     return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
                 }
             }
@@ -243,7 +247,8 @@ public class Main {
     }
 
     private static String compileClassStatement(String input, int depth) {
-        return compileStructure(input, depth)
+        return compileClass(input, depth)
+                .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileDefinition(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
     }

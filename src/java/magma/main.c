@@ -6,30 +6,27 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-public class Main {/* 
-    private interface Collector<T, C> {
-        C createInitial();
+public class Main {
+	private interface Collector<T, C> {/* 
+        C createInitial(); *//* 
 
-        C fold(C current, T element);
-    } *//* 
+        C fold(C current, T element); *//* 
+     */}
+	private interface Iterator<T> {/* 
+        <R> Iterator<R> map(Function<T, R> mapper); *//* 
 
-    private interface Iterator<T> {
-        <R> Iterator<R> map(Function<T, R> mapper);
+        <C> C collect(Collector<T, C> collector); *//* 
 
-        <C> C collect(Collector<T, C> collector);
+        <C> C fold(C initial, BiFunction<C, T, C> folder); *//* 
+     */}
+	private interface List<T> {/* 
+        List<T> add(T element); *//* 
 
-        <C> C fold(C initial, BiFunction<C, T, C> folder);
-    } *//* 
-
-    private interface List<T> {
-        List<T> add(T element);
-
-        Iterator<T> iterate();
-    } *//* 
-
-    private interface Head<T> {
-        Optional<T> next();
-    } */
+        Iterator<T> iterate(); *//* 
+     */}
+	private interface Head<T> {/* 
+        Optional<T> next(); *//* 
+     */}
 	private static class RangeHead implements Head<Integer> {
 		private final /* int */ length;/* 
         private int counter = 0; *//* 
@@ -213,10 +210,14 @@ public class Main {/*
             return stripped + "\n";
         }
 
-        return compileStructure(stripped, 0).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(input));
     } *//* 
 
-    private static Optional<String> compileStructure(String input, int depth) {
+    private static Optional<String> compileClass(String input, int depth) {
+        return compileStructure(input, depth, "class ");
+    } *//* 
+
+    private static Optional<String> compileStructure(String input, int depth, String infix) {
         var stripped = input.strip();
         if (stripped.endsWith("} *//* ")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "} *//* ".length()); *//* 
@@ -224,11 +225,11 @@ public class Main {/*
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                var keywordIndex = beforeContent.indexOf("class ");
+                var keywordIndex = beforeContent.indexOf(infix);
                 if (keywordIndex >= 0) {
                     var left = beforeContent.substring(0, keywordIndex);
-                    var right = beforeContent.substring(keywordIndex + "class ".length()).strip();
-                    var generated = left + "class " + right + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+                    var right = beforeContent.substring(keywordIndex + infix.length()).strip();
+                    var generated = left + infix + right + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
                     return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
                 }
             }
@@ -238,7 +239,8 @@ public class Main {/*
     } *//* 
 
     private static String compileClassStatement(String input, int depth) {
-        return compileStructure(input, depth)
+        return compileClass(input, depth)
+                .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileDefinition(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
     } *//* 
