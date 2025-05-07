@@ -5,19 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
-    private record Tuple<A, B>(A left, B right) {
-    }
-
     private interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
@@ -114,13 +109,68 @@ public class Main {
     private interface FunctionSegment extends Node {
     }
 
+    private interface TypeArgument extends Node {
+    }
+
+    private interface Map<K, V> {
+        Map<K, V> put(K key, V value);
+
+        Map<K, V> putAll(Map<K, V> others);
+
+        Iterator<Tuple<K, V>> iterate();
+
+        Option<V> get(K key);
+    }
+
     private interface Type extends TypeArgument {
         boolean hasName(String name);
 
         Map<String, Type> extractFromTemplate(Type template);
     }
 
-    private interface TypeArgument extends Node {
+    private record Tuple<A, B>(A left, B right) {
+    }
+
+    private static class Maps {
+        private record JavaMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
+            public JavaMap() {
+                this(new HashMap<>());
+            }
+
+            @Override
+            public Map<K, V> put(K key, V value) {
+                this.map.put(key, value);
+                return this;
+            }
+
+            @Override
+            public Map<K, V> putAll(Map<K, V> others) {
+                return others.iterate().<Map<K, V>>fold(this, (kvMap, kvTuple) -> kvMap.put(kvTuple.left, kvTuple.right));
+            }
+
+            @Override
+            public Iterator<Tuple<K, V>> iterate() {
+                return new Lists.JavaList<>(new ArrayList<>(this.map.entrySet()))
+                        .iterate()
+                        .map(tuple -> new Tuple<>(tuple.getKey(), tuple.getValue()));
+            }
+
+            @Override
+            public Option<V> get(K key) {
+                if (this.map.containsKey(key)) {
+                    return new Some<>(this.map.get(key));
+                }
+                return new None<>();
+            }
+        }
+
+        public static <K, V> Map<K, V> of(K key, V value) {
+            return new JavaMap<K, V>().put(key, value);
+        }
+
+        public static <K, V> Map<K, V> empty() {
+            return new JavaMap<>();
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -132,10 +182,6 @@ public class Main {
         @Override
         public boolean isPresent() {
             return true;
-        }
-
-        public T get() {
-            return this.value;
         }
 
         @Override
@@ -277,7 +323,7 @@ public class Main {
 
         @Override
         public Iterator<T> concat(Iterator<T> other) {
-            return new HeadedIterator<>(() -> this.head.next().or(() -> other.next()));
+            return new HeadedIterator<>(() -> this.head.next().or(other::next));
         }
 
         @Override
@@ -292,13 +338,13 @@ public class Main {
 
         @Override
         public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
-            return new HeadedIterator<>(() -> this.head.next().and(() -> other.next()));
+            return new HeadedIterator<>(() -> this.head.next().and(other::next));
         }
     }
 
     private static class Lists {
-        private record ImmutableList<T>(List<T> elements) implements List_<T> {
-            public ImmutableList() {
+        private record JavaList<T>(List<T> elements) implements List_<T> {
+            public JavaList() {
                 this(new ArrayList<>());
             }
 
@@ -306,7 +352,7 @@ public class Main {
             public List_<T> add(T element) {
                 var copy = new ArrayList<>(this.elements);
                 copy.add(element);
-                return new ImmutableList<>(copy);
+                return new JavaList<>(copy);
             }
 
             @Override
@@ -331,7 +377,7 @@ public class Main {
 
             @Override
             public List_<T> subList(int startInclusive, int endExclusive) {
-                return new ImmutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
+                return new JavaList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
             }
 
             @Override
@@ -364,13 +410,13 @@ public class Main {
 
                 var copy = new ArrayList<T>(this.elements);
                 var removed = copy.removeLast();
-                return new Some<>(new Tuple<>(removed, new ImmutableList<>(copy)));
+                return new Some<>(new Tuple<>(removed, new JavaList<>(copy)));
             }
 
             private List_<T> setLast(T element) {
                 var copy = new ArrayList<>(this.elements);
                 copy.set(copy.size() - 1, element);
-                return new ImmutableList<>(copy);
+                return new JavaList<>(copy);
             }
 
             @Override
@@ -382,11 +428,11 @@ public class Main {
         }
 
         public static <T> List_<T> empty() {
-            return new ImmutableList<>();
+            return new JavaList<>();
         }
 
         public static <T> List_<T> of(T... elements) {
-            return new ImmutableList<>(new ArrayList<>(Arrays.asList(elements)));
+            return new JavaList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
@@ -476,7 +522,7 @@ public class Main {
 
         @Override
         public Map<String, Type> extractFromTemplate(Type template) {
-            return Map.of(this.name, template);
+            return Maps.of(this.name, template);
         }
     }
 
@@ -693,7 +739,7 @@ public class Main {
 
         @Override
         public Map<String, Type> extractFromTemplate(Type template) {
-            return Collections.emptyMap();
+            return Maps.empty();
         }
     }
 
@@ -705,7 +751,7 @@ public class Main {
 
         @Override
         public Map<String, Type> extractFromTemplate(Type template) {
-            return Collections.emptyMap();
+            return Maps.empty();
         }
 
         @Override
@@ -824,7 +870,7 @@ public class Main {
 
         @Override
         public Map<String, Type> extractFromTemplate(Type template) {
-            return Collections.emptyMap();
+            return Maps.empty();
         }
     }
 
@@ -853,18 +899,13 @@ public class Main {
                 var argumentsEntry = this.arguments.iterate()
                         .zip(functional.arguments.iterate())
                         .map(tuple -> tuple.left.extractFromTemplate(tuple.right))
-                        .fold(new HashMap<String, Type>(), (map, entries) -> {
-                            map.putAll(entries);
-                            return map;
-                        });
+                        .fold(Maps.<String, Type>empty(), Map::putAll);
 
                 var returnsEntry = this.returns.extractFromTemplate(functional.returns);
-                var copy = new HashMap<String, Type>(argumentsEntry);
-                copy.putAll(returnsEntry);
-                return copy;
+                return argumentsEntry.putAll(returnsEntry);
             }
 
-            return Collections.emptyMap();
+            return Maps.empty();
         }
     }
 
@@ -1284,12 +1325,7 @@ public class Main {
     }
 
     private static Option<Type> find(Map<String, Type> self, String key) {
-        if (self.containsKey(key)) {
-            return new Some<>(self.get(key));
-        }
-        else {
-            return new None<>();
-        }
+        return self.get(key);
     }
 
     private static Option<TypeParam> retainTypeParam(Type param) {
@@ -1571,7 +1607,7 @@ public class Main {
 
         @Override
         public Map<String, Type> extractFromTemplate(Type template) {
-            return Collections.emptyMap();
+            return Maps.empty();
         }
     }
 }
