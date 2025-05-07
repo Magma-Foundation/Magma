@@ -13,6 +13,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
+    private interface Pair<A, B> {
+        A left();
+
+        B right();
+    }
+
     private interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
@@ -28,7 +34,7 @@ public class Main {
 
         Option<T> filter(Predicate<T> predicate);
 
-        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
+        <R> Option<Pair<T, R>> and(Supplier<Option<R>> other);
     }
 
     private interface Collector<T, C> {
@@ -44,8 +50,6 @@ public class Main {
 
         <C> C fold(C initial, BiFunction<C, T, C> folder);
 
-        boolean anyMatch(Predicate<T> predicate);
-
         <R> Iterator<R> flatMap(Function<T, Iterator<R>> iterator);
 
         Iterator<T> concat(Iterator<T> other);
@@ -54,7 +58,7 @@ public class Main {
 
         Iterator<T> filter(Predicate<T> predicate);
 
-        <R> Iterator<Tuple<T, R>> zip(Iterator<R> other);
+        <R> Iterator<Pair<T, R>> zip(Iterator<R> other);
     }
 
     private interface List_<T> {
@@ -66,8 +70,6 @@ public class Main {
 
         boolean isEmpty();
 
-        boolean contains(T element);
-
         int size();
 
         List_<T> subList(int startInclusive, int endExclusive);
@@ -78,9 +80,7 @@ public class Main {
 
         Iterator<T> iterateReverse();
 
-        List_<T> addAll(List_<T> others);
-
-        Option<Tuple<T, List_<T>>> removeLast();
+        Option<Pair<T, List_<T>>> removeLast();
     }
 
     private interface Head<T> {
@@ -128,7 +128,7 @@ public class Main {
         Map<String, Type> extractFromTemplate(Type template);
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
     }
 
     private static class Maps {
@@ -210,7 +210,7 @@ public class Main {
         }
 
         @Override
-        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+        public <R> Option<Pair<T, R>> and(Supplier<Option<R>> other) {
             return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
         }
     }
@@ -252,7 +252,7 @@ public class Main {
         }
 
         @Override
-        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+        public <R> Option<Pair<T, R>> and(Supplier<Option<R>> other) {
             return new None<>();
         }
     }
@@ -312,11 +312,6 @@ public class Main {
         }
 
         @Override
-        public boolean anyMatch(Predicate<T> predicate) {
-            return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
-        }
-
-        @Override
         public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
             return this.map(mapper).<Iterator<R>>fold(new HeadedIterator<>(new EmptyHead<>()), Iterator::concat);
         }
@@ -337,7 +332,7 @@ public class Main {
         }
 
         @Override
-        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
+        public <R> Iterator<Pair<T, R>> zip(Iterator<R> other) {
             return new HeadedIterator<>(() -> this.head.next().and(other::next));
         }
     }
@@ -363,11 +358,6 @@ public class Main {
             @Override
             public boolean isEmpty() {
                 return this.elements.isEmpty();
-            }
-
-            @Override
-            public boolean contains(T element) {
-                return this.elements.contains(element);
             }
 
             @Override
@@ -398,12 +388,7 @@ public class Main {
             }
 
             @Override
-            public List_<T> addAll(List_<T> others) {
-                return others.iterate().<List_<T>>fold(this, List_::add);
-            }
-
-            @Override
-            public Option<Tuple<T, List_<T>>> removeLast() {
+            public Option<Pair<T, List_<T>>> removeLast() {
                 if (this.elements.isEmpty()) {
                     return new None<>();
                 }
@@ -607,7 +592,7 @@ public class Main {
         }
 
         public CompileState exit() {
-            return new CompileState(this.frames.removeLast().map(Tuple::right).orElse(this.frames));
+            return new CompileState(this.frames.removeLast().map(Pair::right).orElse(this.frames));
         }
 
         public CompileState defineType(Type type) {
@@ -898,7 +883,7 @@ public class Main {
             if (template instanceof Functional functional) {
                 var argumentsEntry = this.arguments.iterate()
                         .zip(functional.arguments.iterate())
-                        .map(tuple -> tuple.left.extractFromTemplate(tuple.right))
+                        .map(tuple -> tuple.left().extractFromTemplate(tuple.right()))
                         .fold(Maps.<String, Type>empty(), Map::putAll);
 
                 var returnsEntry = this.returns.extractFromTemplate(functional.returns);
@@ -1417,9 +1402,7 @@ public class Main {
         }
 
         var content = stripped.substring(0, stripped.length() - ";".length());
-        return mapper.apply(content).map(tuple -> {
-            return new Tuple<>(tuple.left, new Statement(depth, tuple.right.generate()));
-        });
+        return mapper.apply(content).map(tuple -> new Tuple<>(tuple.left, new Statement(depth, tuple.right.generate())));
     }
 
     private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {

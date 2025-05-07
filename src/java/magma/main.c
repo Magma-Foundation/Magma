@@ -44,14 +44,12 @@ public class Main {
 		List_<T> add(T element);
 		Iterator<T> iterate();
 		boolean isEmpty();
-		boolean contains(T element);
 		int size();
 		List_<T> subList(int startInclusive, int endExclusive);
 		T getLast();
 		T get(int index);
 		Iterator<T> iterateReverse();
-		List_<T> addAll(List_<T> others);
-		Option</* Tuple<T, List_<T>> */> removeLast();
+		Option<Pair<T, List_<T>>> removeLast();
 	}
 	private interface Head<T> {
 		Option<T> next();
@@ -273,10 +271,6 @@ public class Main {
 				return this.elements.isEmpty(/*  */);
 			}
 			@Override
-            public boolean contains(T element){
-				return this.elements.contains(element);
-			}
-			@Override
             public int size(){
 				return this.elements.size(/*  */);
 			}
@@ -297,11 +291,7 @@ public class Main {
 				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/* )) */).map(index -> this.elements.size() - index - 1).map(this.elements::get);
 			}
 			@Override
-            public List_<T> addAll(List_<T> others){
-				return others.iterate(/* ) */.<List_<T>>fold(this, /* List_::add */);
-			}
-			@Override
-            public Option<Tuple<T, List_<T>>> removeLast(){/* 
+            public Option<Pair<T, List_<T>>> removeLast(){/* 
                 if (this.elements.isEmpty()) {
                     return new None<>();
                 } */
@@ -469,7 +459,7 @@ public class Main {
 			return /* new CompileState */(this.frames.mapLast(/* last -> typeParams */.iterate(/* ) */.map(/* TypeParam::new */).fold(last, /* Frame::defineTypeParam */)));
 		}
 		public CompileState exit(){
-			return /* new CompileState */(this.frames.removeLast(/* ) */.map(/* Tuple::right */).orElse(this.frames));
+			return /* new CompileState */(this.frames.removeLast(/* ) */.map(/* Pair::right */).orElse(this.frames));
 		}
 		public CompileState defineType(Type type){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineType(type)));
@@ -1228,9 +1218,7 @@ public class Main {
         }
 
         var content = stripped.substring(0, stripped.length() - ";".length());
-        return mapper.apply(content).map(tuple -> {
-            return new Tuple<>(tuple.left, new Statement(depth, tuple.right.generate()));
-        });
+        return mapper.apply(content).map(tuple -> new Tuple<>(tuple.left, new Statement(depth, tuple.right.generate())));
     } *//* 
 
     private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
