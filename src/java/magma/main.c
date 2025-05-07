@@ -30,6 +30,7 @@ public class Main {
 		Iterator<R> flatMap<R>(T -> Iterator<R> iterator);
 		Iterator<T> concat(Iterator<T> other);
 		Option<T> next();
+		Iterator<T> filter(T -> boolean predicate);
 	}
 	private interface List<T> {
 		List<T> mapLast(T -> T mapper);
@@ -62,6 +63,9 @@ public class Main {
 	private interface StatementValue extends Node {
 	}
 	private interface FunctionSegment extends Node {
+	}
+	private interface Type extends Node {
+		boolean hasName(String name);
 	}
 	private record Some<T>(T value) implements Option<T> {
 		@Override
@@ -188,9 +192,13 @@ public class Main {
         public Option<T> next(){
 			return this.head.next(/*  */);
 		}
+		@Override
+        public Iterator<T> filter(T -> boolean predicate){
+			return this.flatMap(/* t -> new HeadedIterator<> */(predicate.test(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
+		}
 	}
 	private static class Lists {
-		private record MutableList<T>(/* java.util.List */<T> elements) implements List<T> {
+		private record MutableList<T>(java.util.List<T> elements) implements List<T> {
 			/* public */ MutableList(){
 				/* this(new ArrayList<>()) */;
 			}
@@ -255,7 +263,7 @@ public class Main {
 			return new MutableList<>(/*  */);
 		}
 		public static List<T> of<T>(/* T... */ elements){
-			return new MutableList<>(new /* ArrayList */<>(/* Arrays */.asList(elements)));
+			return new MutableList<>(new ArrayList<>(/* Arrays */.asList(elements)));
 		}
 	}
 	private static class DivideState {
@@ -320,39 +328,57 @@ public class Main {
 			return current.add(element);
 		}
 	}
-	private /* record */ Frame(Option<String> maybeName, List<String> typeParams, List<String> typeNames, List /* definitions */ <String>){/* 
+	private record TypeParam(String value) implements Type {
+		@Override
+        public String generate(){
+			return this.value;
+		}
+		@Override
+        public boolean hasName(String name){
+			return this.value.equals(name);
+		}
+	}
+	private /* record */ Frame(Option<String> maybeName, List<Type> types, List /* definitions */ <Definition>){/* 
         public Frame() {
-            this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
+            this(new None<>(), Lists.empty(), Lists.empty());
         } *//* 
 
-        public boolean isTypeDefined(String typeName) {
-            return this.isThis(typeName)
-                    || this.typeParams.contains(typeName)
-                    || this.typeNames.contains(typeName);
+        public Option<Type> findType(String name) {
+            return this.createThisType(this.maybeName.filter(structName -> structName.equals(name)))
+                    .<Type>map(type -> type)
+                    .or(() -> this.findDefinedTyped(name));
         } *//* 
 
-        private boolean isThis(String input) {
-            return this.maybeName.filter(name -> name.equals(input)).isPresent();
+        private Option<Type> findDefinedTyped(String name) {
+            return this.types.iterate()
+                    .filter(type -> type.hasName(name))
+                    .next();
+        } *//* 
+
+        private Option<ObjectType> createThisType(Option<String> maybeName) {
+            return maybeName.map(structName -> new ObjectType(structName, this.definitions));
         } *//* 
 
         public Frame defineName(String name) {
-            return new Frame(new Some<>(name), this.typeParams, this.typeNames, this.definitions);
+            return new Frame(new Some<>(name), this.types, this.definitions);
         } *//* 
 
-        public Frame defineTypeParam(List<String> typeParams) {
-            return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames, this.definitions);
+        public Frame defineType(Type type) {
+            return new Frame(this.maybeName, this.types.add(type), this.definitions);
         } *//* 
 
-        public Frame defineType(String typeName) {
-            return new Frame(this.maybeName, this.typeParams, this.typeNames.add(typeName), this.definitions);
+        public Option<Definition> findValue(String name) {
+            return this.definitions.iterate()
+                    .filter(definition -> definition.name.equals(name))
+                    .next();
         } *//* 
 
-        public boolean isValueDefined(String valueName) {
-            return this.definitions.contains(valueName);
+        public Frame defineValue(Definition name) {
+            return new Frame(this.maybeName, this.types, this.definitions.add(name));
         } *//* 
 
-        public Frame defineValue(String name) {
-            return new Frame(this.maybeName, this.typeParams, this.typeNames, this.definitions.add(name));
+        public Option<ObjectType> findThisType() {
+            return this.createThisType(this.maybeName);
         } */
 	}
 	private static final class CompileState {
@@ -360,7 +386,7 @@ public class Main {
 		/* public */ CompileState(){
 			/* this(Lists.empty()) */;
 		}
-		/* public */ CompileState(/* Main.List */</* Frame */> frames){
+		/* public */ CompileState(Main.List</* Frame */> frames){
 			/* this.frames = frames */;
 		}
 		private CompileState enter(){
@@ -369,38 +395,41 @@ public class Main {
 		private CompileState defineThis(String name){
 			return new CompileState(this.frames.mapLast(/* last -> last */.defineName(name)));
 		}
-		private boolean isTypeDefined(String input){
-			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isTypeDefined(input));
+		private Option<Type> findType(String input){
+			return this.frames.iterateReverse(/* ) */.map(/* frame -> frame */.findType(/* input) */).flatMap(Iterators::fromOption).next();
 		}
 		public CompileState defineTypeParams(List<String> typeParams){
-			return new CompileState(this.frames.mapLast(/* last -> last */.defineTypeParam(typeParams)));
+			return new CompileState(this.frames.mapLast(/* last -> typeParams */.iterate(/* ) */.map(/* TypeParam::new */).fold(last, /* Frame::defineType */)));
 		}
 		public CompileState exit(){
 			return new CompileState(this.frames.removeLast());
 		}
-		public CompileState defineType(String name){
-			return new CompileState(this.frames.mapLast(/* last -> last */.defineType(name)));
+		public CompileState defineType(Type type){
+			return new CompileState(this.frames.mapLast(/* last -> last */.defineType(type)));
 		}
-		public boolean isValueDefined(String name){
-			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isValueDefined(name));
+		public Option<Definition> findValue(String name){
+			return this.frames.iterateReverse(/* ) */.map(/* frame -> frame */.findValue(/* name) */).flatMap(Iterators::fromOption).next();
 		}
-		public CompileState defineValues(List<String> names){
+		public CompileState defineValues(List<Definition> names){
 			return names.iterate(/* ) */.fold(this, /* CompileState::defineValue */);
 		}
-		private CompileState defineValue(String name){
-			return new CompileState(this.frames.mapLast(/* last -> last */.defineValue(name)));
+		private CompileState defineValue(Definition definition){
+			return new CompileState(this.frames.mapLast(/* last -> last */.defineValue(definition)));
+		}
+		public Option</* ObjectType */> findThisType(){
+			return this.frames.iterateReverse(/* ) */.map(/* Frame::findThisType) */.flatMap(Iterators::fromOption).next();
 		}
 	}
-	private /* record */ StructurePrototype(String beforeInfix, String infix, String name, List<String> typeParams, Option<String> maybeSuperType, List</* Definition */> parameters, List<String> interfaces, String content, int /* depth */ ){/* 
+	private /* record */ StructurePrototype(String beforeInfix, String infix, String name, List<String> typeParams, Option<Type> maybeSuperType, List<Definition> parameters, List<Type> interfaces, String content, int /* depth */ ){/* 
         public StructurePrototype() {
             this("", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), "", 0);
         } *//* 
 
         private String generate() {
-            var typeParamsStrings = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
+            var typeParamsStrings = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
             var paramStrings = this.parameters.isEmpty() ? "" : "(" + joinNodes(", ", this.parameters) + ")";
-            var extendsString = this.maybeSuperType.map(extendsSlice -> " extends " + extendsSlice).orElse("");
-            var interfacesString = this.interfaces.iterate().collect(new Joiner(", ")).map(result -> " implements " + result).orElse("");
+            var extendsString = this.maybeSuperType.map(extendsSlice -> " extends " + extendsSlice.generate()).orElse("");
+            var interfacesString = this.interfaces.isEmpty() ? "" : " implements " + joinNodes(", ", this.interfaces);
             return this.beforeInfix + this.infix + this.name() + typeParamsStrings + paramStrings + extendsString + interfacesString;
         } *//* 
 
@@ -420,7 +449,7 @@ public class Main {
             return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.content, this.depth);
         } *//* 
 
-        public StructurePrototype withInterfaces(List<String> interfaces) {
+        public StructurePrototype withInterfaces(List<Type> interfaces) {
             return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.content, this.depth);
         } *//* 
 
@@ -439,21 +468,25 @@ public class Main {
             return new StructurePrototype(this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         } *//* 
 
-        public StructurePrototype withSuperType(String type) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, new Some<String>(type), this.parameters, this.interfaces, this.content, this.depth);
+        public StructurePrototype withSuperType(Type type) {
+            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(type), this.parameters, this.interfaces, this.content, this.depth);
         } */
 	}
 	private record Tuple<A, B>(A left, B right) {
 	}
-	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment */ {
+	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment, Type */ {
 		@Override
         public String generate(){
 			return /* "" */;
 		}
+		@Override
+        public boolean hasName(String name){
+			return /* false */;
+		}
 	}/* 
 
-    private record Structure(StructurePrototype structurePrototype, List<StructSegment> statements,
-                             int depth) implements StructSegment {
+    private record ObjectNode(StructurePrototype structurePrototype, List<StructSegment> statements,
+                              int depth) implements StructSegment {
         @Override
         public String generate() {
             var s1 = this.structurePrototype.generate();
@@ -473,14 +506,28 @@ public class Main {
 			return this.input;
 		}
 	}
-	private record Placeholder(String input) implements /* Node, StructSegment, Parameter, Value, FunctionSegment, StatementValue */ {
+	private record Placeholder(String /* input */ ) implements /* Node, StructSegment, Parameter, Value, FunctionSegment, StatementValue, Type */ {
 		@Override
         public String generate(){
 			return /* generatePlaceholder */(this.input);
 		}
-	}
-	private record StructureType(/* StructurePrototype */ prototype) {
-	}
+		@Override
+        public boolean hasName(String name){
+			return /* false */;
+		}
+	}/* 
+
+    private record ObjectType(String name, List<Definition> definitions) implements Type {
+        @Override
+        public boolean hasName(String name) {
+            return this.name.equals(name);
+        }
+
+        @Override
+        public String generate() {
+            return this.name;
+        }
+    } */
 	public record Statement(int depth, String content) implements /* StructSegment, FunctionSegment */ {
 		@Override
         public String generate(){
@@ -491,15 +538,19 @@ public class Main {
 
     private record Definition(
             Option<String> maybeBeforeType,
-            String type,
+            Type type,
             String name,
             List<String> typeParams
     ) implements Parameter, StatementValue {
         @Override
         public String generate() {
-            var beforeTypeString = this.maybeBeforeType().filter(value -> !value.isEmpty()).map(beforeType -> beforeType + " ").orElse("");
-            var typeParamString = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
-            return beforeTypeString + this.type() + " " + this.name() + typeParamString;
+            var beforeTypeString = this.maybeBeforeType()
+                    .filter(value -> !value.isEmpty())
+                    .map(beforeType -> beforeType + " ")
+                    .orElse("");
+
+            var typeParamString = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
+            return beforeTypeString + this.type.generate() + " " + this.name + typeParamString;
         }
     } */
 	private static class Iterators {
@@ -528,10 +579,10 @@ public class Main {
 			return /* "return " + this */.value.generate();
 		}
 	}
-	private record ConstructionHeader(String type) implements Caller {
+	private record ConstructionHeader(Type type) implements Caller {
 		@Override
         public String generate(){
-			return /* "new " + this */.type();
+			return /* "new " + this */.type.generate();
 		}
 	}/* 
 
@@ -548,14 +599,49 @@ public class Main {
 			return this.parent.generate() + "." + this.property;
 		}
 	}
-	private record Symbol(String value) implements Value {
+	private record Symbol(String value) implements /* Value, Type */ {
 		@Override
         public String generate(){
 			return this.value;
 		}
-	}
-	private /* record */ Result(Tuple<CompileState, List<Parameter>> paramsTuple, List</* Definition */> params){
-	}
+		@Override
+        public boolean hasName(String name){
+			return this.value.equals(name);
+		}
+	}/* 
+
+    private record Functional(List<Type> arguments, Type returns) implements Type {
+        @Override
+        public String generate() {
+            String argumentString;
+            if (this.arguments().size() == 1) {
+                argumentString = this.arguments.get(0).generate();
+            }
+            else {
+                argumentString = "(" + joinNodes(", ", this.arguments()) + ")";
+            }
+
+            return argumentString + " -> " + this.returns.generate();
+        }
+
+        @Override
+        public boolean hasName(String name) {
+            return false;
+        }
+    } *//* 
+
+    private record Generic(String baseType, List<Type> typeArgs) implements Type {
+        @Override
+        public String generate() {
+            var outputTypeArgs = joinNodes(", ", this.typeArgs);
+            return this.baseType + "<" + outputTypeArgs + ">";
+        }
+
+        @Override
+        public boolean hasName(String name) {
+            return this.baseType.equals(name);
+        }
+    } */
 	public static /* void */ main(){
 		/* var root = Paths.get(".", "src", "java", "magma") */;
 		/* var source = root.resolve("Main.java") */;
@@ -670,7 +756,7 @@ public class Main {
         if (implementsIndex >= 0) {
             var left = input.substring(0, implementsIndex).strip();
             var right = input.substring(implementsIndex + " implements ".length());
-            var tuple = compileType(entered, right);
+            var tuple = parseType(entered, right);
             return assembleStructure(tuple.left, prototype.withName(left).withInterfaces(Lists.of(tuple.right)));
         }
 
@@ -682,7 +768,7 @@ public class Main {
         if (extendsIndex >= 0) {
             var left = afterInfix.substring(0, extendsIndex).strip();
             var right = afterInfix.substring(extendsIndex + " extends ".length());
-            var tuple = compileType(state, right);
+            var tuple = parseType(state, right);
             return structWithMaybeImplements(tuple.left, left, prototype.withSuperType(tuple.right));
         }
 
@@ -759,18 +845,18 @@ public class Main {
 
     private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype) {
         var name = prototype.name;
-        if (isSymbol(name)) {
-            var depth1 = prototype.depth;
-
-            var statementsTuple = parseStatements(state.defineThis(name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth1 + 1));
-
-            var statement = statementsTuple.right;
-            var exited = statementsTuple.left.exit();
-
-            var defined = exited.defineType(name);
-            return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(prototype, statement, depth1)));
+        if (!isSymbol(name)) {
+            return new None<>();
         }
-        return new None<>();
+
+        var depth = prototype.depth;
+        var statementsTuple = parseStatements(state.defineThis(name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+
+        var statement = statementsTuple.right;
+        var exited = statementsTuple.left.exit();
+
+        var defined = exited.defineType(new ObjectType(name, Lists.empty()));
+        return new Some<>(new Tuple<CompileState, StructSegment>(defined, new ObjectNode(prototype, statement, depth)));
     } *//* 
 
     private static Tuple<CompileState, StructSegment> compileClassStatement(CompileState state, String input, int depth) {
@@ -814,10 +900,7 @@ public class Main {
                     var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
 
                     var paramsTuple = parseParameters(definitionTuple.left, params);
-                    var paramNames = paramsTuple.right.iterate()
-                            .map(Definition::name)
-                            .collect(new ListCollector<>());
-
+                    var paramNames = paramsTuple.right;
                     var paramsState = paramsTuple.left.defineValues(paramNames);
 
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
@@ -867,7 +950,7 @@ public class Main {
                 var beforeArgs = withoutEnd.substring(0, argsStart).strip();
                 var args = withoutEnd.substring(argsStart + "(".length());
                 if (beforeArgs.startsWith("new ")) {
-                    var type = compileType(state, beforeArgs.substring("new ".length()));
+                    var type = parseType(state, beforeArgs.substring("new ".length()));
                     return assembleInvokable(state, new ConstructionHeader(type.right), args);
                 }
                 else {
@@ -885,7 +968,11 @@ public class Main {
             return new Tuple<>(tuple.left, new DataAccess(tuple.right, property));
         }
 
-        if (stripped.equals("this") || state.isValueDefined(stripped)) {
+        if (stripped.equals("this")) {
+            return new Tuple<>(state, new Symbol("this"));
+        }
+
+        if (state.findValue(stripped) instanceof Some) {
             return new Tuple<>(state, new Symbol(stripped));
         }
 
@@ -999,29 +1086,28 @@ public class Main {
     } *//* 
 
     private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
-        var typeTuple = compileType(state.defineTypeParams(typeParams), type);
+        var typeTuple = parseType(state.defineTypeParams(typeParams), type);
         var definition = new Definition(maybeBeforeType, typeTuple.right, name, typeParams);
         return new Tuple<>(typeTuple.left, definition);
     } *//* 
 
-    private static Tuple<CompileState, String> compileType(CompileState state, String input) {
+    private static Tuple<CompileState, Type> parseType(CompileState state, String input) {
         var stripped = input.strip();
 
         if (stripped.equals("int")) {
-            return new Tuple<>(state, stripped);
+            return new Tuple<>(state, Primitive.Int);
         }
 
         if (stripped.equals("String")) {
-            return new Tuple<>(state, stripped);
+            return new Tuple<>(state, new Symbol("String"));
         }
 
         if (stripped.equals("boolean")) {
-            return new Tuple<>(state, stripped);
+            return new Tuple<>(state, Primitive.Boolean);
         }
 
-
-        if (state.isTypeDefined(stripped)) {
-            return new Tuple<>(state, stripped);
+        if (state.findType(stripped) instanceof Some(var found)) {
+            return new Tuple<>(state, found);
         }
 
         if (stripped.endsWith(">")) {
@@ -1032,46 +1118,41 @@ public class Main {
                 var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
                 var parsed = parseValues(state, inputTypeArgs, Main::compileTypeArgument);
                 var typeArgs = parsed.right;
-                var outputTypeArgs = join(", ", typeArgs);
 
                 if (base.equals("Function")) {
-                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
+                    return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
                 }
 
                 if (base.equals("BiFunction")) {
-                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0), typeArgs.get(1)), typeArgs.get(2)));
+                    return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0), typeArgs.get(1)), typeArgs.get(2)));
                 }
 
                 if (base.equals("Predicate")) {
-                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), "boolean"));
+                    return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), Primitive.Boolean));
                 }
 
                 if (base.equals("Supplier")) {
-                    return new Tuple<>(state, generateFunctionalType(Lists.empty(), typeArgs.get(0)));
+                    return new Tuple<>(state, new Functional(Lists.empty(), typeArgs.get(0)));
                 }
 
-                return new Tuple<>(state, compileBaseType(base, state) + "<" + outputTypeArgs + ">");
+                return new Tuple<>(state, new Generic(base, typeArgs));
             }
         }
 
-        return compilePlaceholder(state, input);
+        return new Tuple<>(state, new Placeholder(input));
     } *//* 
 
-    private static Tuple<CompileState, String> compileTypeArgument(CompileState state1, String input1) {
-        return compileWhitespace(state1, input1).orElseGet(() -> compileType(state1, input1));
+    private static Tuple<CompileState, Type> compileTypeArgument(CompileState state1, String input1) {
+        return Main.<Whitespace, Type>typed(() -> parseWhitespace(state1, input1))
+                .orElseGet(() -> parseType(state1, input1));
     } *//* 
 
-    private static String generateFunctionalType(List<String> arguments, String returns) {
-        var argumentString = arguments.size() == 1 ? arguments.get(0) : "(" + join(", ", arguments) + ")";
-        return argumentString + " -> " + returns;
-    } *//* 
-
-    private static String compileBaseType(String base, CompileState state) {
-        if (state.isTypeDefined(base)) {
-            return base;
+    private static Type compileBaseType(String base, CompileState state) {
+        if (state.findType(base) instanceof Some(var found)) {
+            return found;
         }
 
-        return generatePlaceholder(base);
+        return new Placeholder(base);
     } *//* 
 
     private static boolean isSymbol(String input) {
@@ -1091,6 +1172,27 @@ public class Main {
 
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */";
+    } *//* 
+
+    private enum Primitive implements Type {
+        Int("int"),
+        Boolean("boolean");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+
+        @Override
+        public boolean hasName(String name) {
+            return false;
+        }
     } *//* 
 }
  */
