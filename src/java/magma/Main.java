@@ -608,16 +608,7 @@ public class Main {
                     var beforeInfix = beforeContent.substring(0, keywordIndex);
                     var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
 
-                    var entered = state.enter();
-                    var implementsIndex = afterInfix.indexOf(" implements ");
-                    if (implementsIndex >= 0) {
-                        var left = afterInfix.substring(0, implementsIndex).strip();
-                        var right = afterInfix.substring(implementsIndex + " implements ".length());
-                        var tuple = compileType(entered, right);
-                        return parseStructureWithImplements(tuple.left, infix, depth, beforeInfix, left, Lists.of(tuple.right), content);
-                    }
-
-                    return parseStructureWithImplements(entered, infix, depth, beforeInfix, afterInfix, Lists.empty(), content);
+                    return structWithMaybeImplements(state, infix, depth, afterInfix, beforeInfix, content);
                 }
             }
         }
@@ -625,18 +616,31 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithImplements(CompileState state, String infix, int depth, String beforeInfix, String afterInfix, List<String> maybeInterfaces, String content) {
+    private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String infix, int depth, String afterInfix, String beforeInfix, String content) {
+        var entered = state.enter();
+        var implementsIndex = afterInfix.indexOf(" implements ");
+        if (implementsIndex >= 0) {
+            var left = afterInfix.substring(0, implementsIndex).strip();
+            var right = afterInfix.substring(implementsIndex + " implements ".length());
+            var tuple = compileType(entered, right);
+            return parseStructureWithMaybeExtends(tuple.left, infix, depth, beforeInfix, left, Lists.of(tuple.right), content);
+        }
+
+        return parseStructureWithMaybeExtends(entered, infix, depth, beforeInfix, afterInfix, Lists.empty(), content);
+    }
+
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeExtends(CompileState state, String infix, int depth, String beforeInfix, String afterInfix, List<String> maybeInterfaces, String content) {
         var extendsIndex = afterInfix.indexOf(" extends ");
         if (extendsIndex >= 0) {
             var left = afterInfix.substring(0, extendsIndex).strip();
             var right = afterInfix.substring(extendsIndex + " extends ".length());
             var tuple = compileType(state, right);
-            return parseStructureWithExtends(tuple.left, infix, depth, beforeInfix, left, new Some<>(tuple.right), maybeInterfaces, content);
+            return parseStructureWithMaybeParameters(tuple.left, infix, depth, beforeInfix, left, new Some<>(tuple.right), maybeInterfaces, content);
         }
-        return parseStructureWithExtends(state, infix, depth, beforeInfix, afterInfix, new None<>(), maybeInterfaces, content);
+        return parseStructureWithMaybeParameters(state, infix, depth, beforeInfix, afterInfix, new None<>(), maybeInterfaces, content);
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithExtends(
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeParameters(
             CompileState state,
             String infix,
             int depth,
@@ -668,25 +672,25 @@ public class Main {
                 var name = withoutEnd.substring(0, typeParamsStart).strip();
                 var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
                 var elements = parseValues(state, typeParamString, Main::stripToTuple);
-                var prototype = new StructurePrototype(beforeInfix, infix, name, elements.right, extendsType, parameters, interfaces, content, depth);
-                return assembleStructure(elements.left, prototype);
+                return assembleStructure(infix, depth, beforeInfix, extendsType, interfaces, content, parameters, name, elements.left, elements.right);
             }
         }
 
-        return assembleStructure(state, new StructurePrototype(beforeInfix, infix, afterInfix, Lists.empty(), extendsType, parameters, interfaces, content, depth));
+        return assembleStructure(infix, depth, beforeInfix, extendsType, interfaces, content, parameters, afterInfix, state, Lists.empty());
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype prototype) {
+    private static Option<Tuple<CompileState, StructSegment>> assembleStructure(String infix, int depth, String beforeInfix, Option<String> extendsType, List<String> interfaces, String content, List<String> parameters, String name, CompileState state, List<String> right) {
+        StructurePrototype prototype = new StructurePrototype(beforeInfix, infix, name, right, extendsType, parameters, interfaces, content, depth);
         if (isSymbol(prototype.name())) {
-            var depth = prototype.depth;
+            var depth1 = prototype.depth;
 
-            var statementsTuple = parseStatements(state.defineThis(prototype.name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+            var statementsTuple = parseStatements(state.defineThis(prototype.name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth1 + 1));
 
             var statement = statementsTuple.right;
             var exited = statementsTuple.left.exit();
 
             var defined = exited.defineType(prototype.name);
-            return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(prototype, statement, depth)));
+            return new Some<>(new Tuple<CompileState, StructSegment>(defined, new Structure(prototype, statement, depth1)));
         }
         return new None<>();
     }
