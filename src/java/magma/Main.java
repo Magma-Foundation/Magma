@@ -997,7 +997,7 @@ public class Main {
             if (typeArgsStart >= 0) {
                 var base = withEnd.substring(0, typeArgsStart).strip();
                 var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
-                var parsed = parseValues(state, inputTypeArgs, Main::compileType);
+                var parsed = parseValues(state, inputTypeArgs, Main::compileTypeArgument);
                 var typeArgs = parsed.right;
                 var outputTypeArgs = join(", ", typeArgs);
 
@@ -1022,6 +1022,10 @@ public class Main {
         }
 
         return compilePlaceholder(state, input);
+    }
+
+    private static Tuple<CompileState, String> compileTypeArgument(CompileState state1, String input1) {
+        return compileWhitespace(state1, input1).orElseGet(() -> compileType(state1, input1));
     }
 
     private static String generateFunctionalType(List<String> arguments, String returns) {

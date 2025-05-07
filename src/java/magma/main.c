@@ -53,7 +53,7 @@ public class Main {
 	private record Some<T>(T value) implements Option<T> {
 		@Override
         public Option<R> map<R>(T -> R mapper){
-			return new Some</*  */>(/* mapper.apply(this.value) */);
+			return new Some<>(/* mapper.apply(this.value) */);
 		}
 		@Override
         public boolean isPresent(){
@@ -86,7 +86,7 @@ public class Main {
 	private record None<T>() implements Option<T> {
 		@Override
         public Option<R> map<R>(T -> R mapper){
-			return new None</*  */>(/*  */);
+			return new None<>(/*  */);
 		}
 		@Override
         public boolean isPresent(){
@@ -106,11 +106,11 @@ public class Main {
 		}
 		@Override
         public Option<R> flatMap<R>(T -> Option<R> mapper){
-			return new None</*  */>(/*  */);
+			return new None<>(/*  */);
 		}
 		@Override
         public Option<T> filter(T -> boolean predicate){
-			return new None</*  */>(/*  */);
+			return new None<>(/*  */);
 		}
 	}
 	private static class RangeHead implements Head<Integer> {
@@ -126,13 +126,13 @@ public class Main {
             } */
 		/* var value = this.counter */;
 		/* this.counter++ */;
-		return new Some</*  */>(/* value */);
+		return new Some<>(/* value */);
 		/* } */
 	}
 	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
 		@Override
         public Iterator<R> map<R>(T -> R mapper){
-			return new HeadedIterator</*  */>(/* () -> this.head.next().map(mapper) */);
+			return new HeadedIterator<>(/* () -> this.head.next().map(mapper) */);
 		}
 		@Override
         public C collect<C>(Collector<T, C> collector){
@@ -169,7 +169,7 @@ public class Main {
 			}
 			@Override
             public Iterator<T> iterate(){
-				return new HeadedIterator</*  */>(/* new RangeHead(this.elements.size())).map(this.elements::get */);
+				return new HeadedIterator<>(/* new RangeHead(this.elements.size())).map(this.elements::get */);
 			}
 			@Override
             public boolean isEmpty(){
@@ -185,7 +185,7 @@ public class Main {
 			}
 			@Override
             public List<T> subList(int startInclusive, int endExclusive){
-				return new MutableList</*  */>(/* new ArrayList<>(this.elements.subList(startInclusive, endExclusive)) */);
+				return new MutableList<>(/* new ArrayList<>(this.elements.subList(startInclusive, endExclusive)) */);
 			}
 			@Override
             public T getLast(){
@@ -197,7 +197,7 @@ public class Main {
 			}
 			@Override
             public Iterator<T> iterateReverse(){
-				return new HeadedIterator</*  */>(/* new RangeHead(this.elements.size()))
+				return new HeadedIterator<>(/* new RangeHead(this.elements.size()))
                         .map(index -> this.elements.size() - index - 1)
                         .map(this.elements::get */);
 			}
@@ -222,10 +222,10 @@ public class Main {
 			}
 		}
 		public static List<T> empty<T>(){
-			return new MutableList</*  */>(/*  */);
+			return new MutableList<>(/*  */);
 		}
 		public static List<T> of<T>(/* T... */ elements){
-			return new MutableList</*  */>(/* new ArrayList<>(Arrays.asList(elements)) */);
+			return new MutableList<>(/* new ArrayList<>(Arrays.asList(elements)) */);
 		}
 	}
 	private static class DivideState {
@@ -444,7 +444,7 @@ public class Main {
 	}
 	private static Tuple<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> Tuple<CompileState, String> mapper){
 		/* var parsed = parseStatements(state, input, mapper) */;
-		return new Tuple</*  */>(/* parsed.left, join("", parsed.right) */);
+		return new Tuple<>(/* parsed.left, join("", parsed.right) */);
 	}
 	private static Tuple<CompileState, List<T>> parseStatements<T>(CompileState state, String input, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){
 		return /* parseAll(state, input, Main::foldStatementValue, mapper) */;
@@ -862,7 +862,7 @@ public class Main {
             if (typeArgsStart >= 0) {
                 var base = withEnd.substring(0, typeArgsStart).strip();
                 var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
-                var parsed = parseValues(state, inputTypeArgs, Main::compileType);
+                var parsed = parseValues(state, inputTypeArgs, Main::compileTypeArgument);
                 var typeArgs = parsed.right;
                 var outputTypeArgs = join(", ", typeArgs);
 
@@ -887,6 +887,10 @@ public class Main {
         }
 
         return compilePlaceholder(state, input);
+    } *//* 
+
+    private static Tuple<CompileState, String> compileTypeArgument(CompileState state1, String input1) {
+        return compileWhitespace(state1, input1).orElseGet(() -> compileType(state1, input1));
     } *//* 
 
     private static String generateFunctionalType(List<String> arguments, String returns) {
