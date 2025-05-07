@@ -418,7 +418,8 @@ public class Main {
             Option<String> maybeName,
             List<String> typeParams,
             List<String> typeNames,
-            List<String> definitions) {
+            List<String> definitions
+    ) {
         public Frame() {
             this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
         }
@@ -1019,13 +1020,11 @@ public class Main {
                 var args = withoutEnd.substring(argsStart + "(".length());
                 if (beforeArgs.startsWith("new ")) {
                     var type = compileType(state, beforeArgs.substring("new ".length()));
-                    var parsed = parseValues(type.left, args, Main::parseValue);
-                    return new Tuple<>(parsed.left, new Invokable(new ConstructionHeader(type.right), parsed.right));
+                    return assembleInvokable(state, new ConstructionHeader(type.right), args);
                 }
                 else {
                     var type = parseValue(state, beforeArgs);
-                    var parsed = parseValues(type.left, args, Main::parseValue);
-                    return new Tuple<>(parsed.left, new Invokable(type.right, parsed.right));
+                    return assembleInvokable(type.left, type.right, args);
                 }
             }
         }
@@ -1043,6 +1042,11 @@ public class Main {
         }
 
         return new Tuple<>(state, new Placeholder(stripped));
+    }
+
+    private static Tuple<CompileState, Value> assembleInvokable(CompileState state, Caller caller, String args) {
+        var parsed = parseValues(state, args, Main::parseValue);
+        return new Tuple<>(parsed.left, new Invokable(caller, parsed.right));
     }
 
     private static <T> Tuple<CompileState, List<T>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
