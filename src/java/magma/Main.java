@@ -31,6 +31,12 @@ public class Main {
         boolean isEmpty();
 
         boolean contains(T element);
+
+        int size();
+
+        List<T> subList(int startInclusive, int endExclusive);
+
+        T last();
     }
 
     private interface Head<T> {
@@ -109,6 +115,21 @@ public class Main {
             @Override
             public boolean contains(T element) {
                 return this.elements.contains(element);
+            }
+
+            @Override
+            public int size() {
+                return this.elements.size();
+            }
+
+            @Override
+            public List<T> subList(int startInclusive, int endExclusive) {
+                return new MutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
+            }
+
+            @Override
+            public T last() {
+                return this.elements.getLast();
             }
         }
 
@@ -207,7 +228,7 @@ public class Main {
     }
 
     private static String compileStatements(String input, Function<String, String> mapper) {
-        return compileAll(input, Main::fold, mapper, "");
+        return compileAll(input, Main::foldStatementValue, mapper, "");
     }
 
     private static String compileAll(String input, BiFunction<DivideState, Character, DivideState> folder, Function<String, String> mapper, String delimiter) {
@@ -237,7 +258,7 @@ public class Main {
         return state.advance().segments;
     }
 
-    private static DivideState fold(DivideState state, char c) {
+    private static DivideState foldStatementValue(DivideState state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -389,10 +410,11 @@ public class Main {
             var beforeName = input.substring(0, nameSeparator).strip();
             var name = input.substring(nameSeparator + " ".length()).strip();
             if (isSymbol(name)) {
-                var typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator);
-                    var type = beforeName.substring(typeSeparator + " ".length());
+                var divisions = divide(beforeName, Main::foldTypeDivisions);
+                if (divisions.size() >= 2) {
+                    var beforeType = join(" ", divisions.subList(0, divisions.size() - 1));
+                    var type = divisions.last();
+
                     return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state));
                 }
                 else {
@@ -401,6 +423,21 @@ public class Main {
             }
         }
         return Optional.empty();
+    }
+
+    private static DivideState foldTypeDivisions(DivideState state, char c) {
+        if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state) {

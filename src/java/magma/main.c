@@ -12,15 +12,18 @@ public class Main {
 		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		<R> Iterator</* R */> map(Function<T, /* R> */ mapper);
-		<C> /* C */ collect(Collector<T, /* C> */ collector);
-		<C> /* C */ fold(/* C */ initial, BiFunction<C, T, /* C> */ folder);
+		<R> Iterator</* R */> map(/* Function */<T, /* R */> mapper);
+		<C> /* C */ collect(/* Collector */<T, /* C */> collector);
+		<C> /* C */ fold(/* C */ initial, /* BiFunction */</* C */, T, /* C */> folder);
 	}
 	private interface List<T> {
 		List<T> add(T element);
 		/* Iterator */<T> iterate();
 		/* boolean */ isEmpty();
 		/* boolean */ contains(T element);
+		/* int */ size();
+		List<T> subList(/* int */ startInclusive, /* int */ endExclusive);
+		T last();
 	}
 	private interface Head<T> {
 		/* Optional */<T> next();
@@ -96,6 +99,21 @@ public class Main {
             @Override
             public boolean contains(T element) {
                 return this.elements.contains(element);
+            }
+
+            @Override
+            public int size() {
+                return this.elements.size();
+            }
+
+            @Override
+            public List<T> subList(int startInclusive, int endExclusive) {
+                return new MutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
+            }
+
+            @Override
+            public T last() {
+                return this.elements.getLast();
             }
         } */
 		public static <T> /* List */</* T */> empty()/*  {
@@ -176,10 +194,10 @@ public class Main {
 	private static /* String */ compile(/* String */ input)/*  {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	private static /* String */ compileStatements(/* String */ input, Function<String, /* String> */ mapper)/*  {
-        return compileAll(input, Main::fold, mapper, "");
+	private static /* String */ compileStatements(/* String */ input, /* Function */</* String */, /* String */> mapper)/*  {
+        return compileAll(input, Main::foldStatementValue, mapper, "");
     } */
-	private static /* String */ compileAll(/* String */ input, BiFunction<DivideState, Character, /* DivideState> */ folder, Function<String, /* String> */ mapper, /* String */ delimiter)/*  {
+	private static /* String */ compileAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* Function */</* String */, /* String */> mapper, /* String */ delimiter)/*  {
         return join(delimiter, parseAll(input, folder, mapper));
     } */
 	private static /* String */ join(/* String */ delimiter, /* List */</* String */> elements)/*  {
@@ -187,13 +205,13 @@ public class Main {
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static /* List */</* String */> parseAll(/* String */ input, BiFunction<DivideState, Character, /* DivideState> */ folder, Function<String, /* String> */ mapper)/*  {
+	private static /* List */</* String */> parseAll(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder, /* Function */</* String */, /* String */> mapper)/*  {
         return divide(input, folder)
                 .iterate()
                 .map(mapper)
                 .collect(new ListCollector<>());
     } */
-	private static /* List */</* String */> divide(/* String */ input, BiFunction<DivideState, Character, /* DivideState> */ folder)/*  {
+	private static /* List */</* String */> divide(/* String */ input, /* BiFunction */</* DivideState */, /* Character */, /* DivideState */> folder)/*  {
         DivideState state = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -202,7 +220,7 @@ public class Main {
 
         return state.advance().segments;
     } */
-	private static /* DivideState */ fold(/* DivideState */ state, /* char */ c)/*  {
+	private static /* DivideState */ foldStatementValue(/* DivideState */ state, /* char */ c)/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -355,10 +373,11 @@ public class Main {
             var beforeName = input.substring(0, nameSeparator).strip();
             var name = input.substring(nameSeparator + " ".length()).strip();
             if (isSymbol(name)) {
-                var typeSeparator = beforeName.lastIndexOf(" ");
-                if (typeSeparator >= 0) {
-                    var beforeType = beforeName.substring(0, typeSeparator);
-                    var type = beforeName.substring(typeSeparator + " ".length());
+                var divisions = divide(beforeName, Main::foldTypeDivisions);
+                if (divisions.size() >= 2) {
+                    var beforeType = join(" ", divisions.subList(0, divisions.size() - 1));
+                    var type = divisions.last();
+
                     return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state));
                 }
                 else {
@@ -367,6 +386,21 @@ public class Main {
             }
         }
         return Optional.empty();
+    } *//* 
+
+    private static DivideState foldTypeDivisions(DivideState state, char c) {
+        if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     } *//* 
 
     private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state) {
