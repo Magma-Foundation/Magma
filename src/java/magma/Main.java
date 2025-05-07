@@ -27,6 +27,8 @@ public class Main {
         List<T> add(T element);
 
         Iterator<T> iterate();
+
+        boolean isEmpty();
     }
 
     private interface Head<T> {
@@ -96,6 +98,11 @@ public class Main {
             public Iterator<T> iterate() {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
+
+            @Override
+            public boolean isEmpty() {
+                return this.elements.isEmpty();
+            }
         }
 
         public static <T> List<T> empty() {
@@ -160,6 +167,18 @@ public class Main {
         }
     }
 
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
     public static void main() {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -182,11 +201,20 @@ public class Main {
     }
 
     private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper, String delimiter) {
+        return join(delimiter, parseAll(input, folder, mapper));
+    }
+
+    private static String join(String delimiter, List<String> elements) {
+        return elements.iterate()
+                .collect(new Joiner(delimiter))
+                .orElse("");
+    }
+
+    private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper) {
         return divide(input, folder)
                 .iterate()
                 .map(mapper)
-                .collect(new Joiner(delimiter))
-                .orElse("");
+                .collect(new ListCollector<>());
     }
 
     private static List<String> divide(String input, BiFunction<State, Character, State> folder) {
@@ -246,13 +274,13 @@ public class Main {
                         var typeParamsStart = withoutEnd.indexOf("<");
                         if (typeParamsStart >= 0) {
                             var name = withoutEnd.substring(0, typeParamsStart).strip();
-                            var typeParams = withoutEnd.substring(typeParamsStart + "<".length());
-                            var outputTypeParams = "<" + compileValues(typeParams, String::strip) + ">";
-                            return assembleStructure(depth, infix, beforeInfix, outputTypeParams, name, content);
+                            var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
+                            var elements = parseValues(typeParamString, String::strip);
+                            return assembleStructure(depth, infix, beforeInfix, elements, name, content);
                         }
                     }
 
-                    return assembleStructure(depth, infix, beforeInfix, "", afterInfix, content);
+                    return assembleStructure(depth, infix, beforeInfix, Lists.empty(), afterInfix, content);
                 }
             }
         }
@@ -260,9 +288,10 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, String typeParams, String name, String content) {
+    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
         if (isSymbol(name)) {
-            var generated = beforeInfix + infix + name + typeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+            var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
+            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
@@ -297,7 +326,11 @@ public class Main {
     }
 
     private static String compileValues(String params, Function<String, String> mapper) {
-        return compileAll(params, Main::foldValueChar, mapper, ", ");
+        return join(", ", parseValues(params, mapper));
+    }
+
+    private static List<String> parseValues(String params, Function<String, String> mapper) {
+        return parseAll(params, Main::foldValueChar, mapper);
     }
 
     private static State foldValueChar(State state, char c) {
