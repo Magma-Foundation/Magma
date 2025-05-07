@@ -125,8 +125,13 @@ public class Main {
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                var generated = beforeContent + "{" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
-                return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
+                var keywordIndex = beforeContent.indexOf("class ");
+                if (keywordIndex >= 0) {
+                    var left = beforeContent.substring(0, keywordIndex);
+                    var right = beforeContent.substring(keywordIndex + "class ".length()).strip();
+                    var generated = left + "class " + right + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1)) + "}";
+                    return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
+                }
             }
         }
 
