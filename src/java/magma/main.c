@@ -12,18 +12,18 @@ public class Main {
 		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		<R> /* Iterator<R> */ map(Function<T, /* R> */ mapper);
+		<R> /* Iterator */</* R */> map(Function<T, /* R> */ mapper);
 		<C> /* C */ collect(Collector<T, /* C> */ collector);
 		<C> /* C */ fold(/* C */ initial, BiFunction<C, T, /* C> */ folder);
 	}
 	private interface List<T> {
-		/* List<T> */ add(T element);
-		/* Iterator<T> */ iterate();
+		/* List */<T> add(T element);
+		/* Iterator */<T> iterate();
 		/* boolean */ isEmpty();
 		/* boolean */ contains(T element);
 	}
 	private interface Head<T> {
-		/* Optional<T> */ next();
+		/* Optional */<T> next();
 	}
 	private static class RangeHead implements Head<Integer> {
         private final int length;
@@ -98,27 +98,27 @@ public class Main {
                 return this.elements.contains(element);
             }
         } */
-		public static <T> /* List<T> */ empty()/*  {
+		public static <T> /* List */</* T */> empty()/*  {
             return new MutableList<>();
         } */
 	}
-	private static class State {
-		private /* List<String> */ segments;
+	private static class DivideState {
+		private /* List */</* String */> segments;
 		private /* int */ depth;
 		private /* StringBuilder */ buffer;
-		/* private */ State(/* List<String> */ segments, /* StringBuilder */ buffer, /* int */ depth)/*  {
+		/* private */ DivideState(/* List */</* String */> segments, /* StringBuilder */ buffer, /* int */ depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
-		/* public */ State()/*  {
+		/* public */ DivideState()/*  {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
-		private /* State */ append(/* char */ c)/*  {
+		private /* DivideState */ append(/* char */ c)/*  {
             this.buffer.append(c);
             return this;
         } */
-		private /* State */ advance()/*  {
+		private /* DivideState */ advance()/*  {
             this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
@@ -126,11 +126,11 @@ public class Main {
 		public /* boolean */ isLevel()/*  {
             return this.depth == 0;
         } */
-		public /* State */ enter()/*  {
+		public /* DivideState */ enter()/*  {
             this.depth++;
             return this;
         } */
-		public /* State */ exit()/*  {
+		public /* DivideState */ exit()/*  {
             this.depth--;
             return this;
         } */
@@ -159,6 +159,8 @@ public class Main {
             return current.add(element);
         } */
 	}
+	public /* record */ CompileState(/* String */ name, /* List */</* String */> typeParams)/*  {
+    } */
 	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -177,22 +179,22 @@ public class Main {
 	private static /* String */ compileStatements(/* String */ input, Function<String, /* String> */ mapper)/*  {
         return compileAll(input, Main::fold, mapper, "");
     } */
-	private static /* String */ compileAll(/* String */ input, BiFunction<State, Character, /* State> */ folder, Function<String, /* String> */ mapper, /* String */ delimiter)/*  {
+	private static /* String */ compileAll(/* String */ input, BiFunction<DivideState, Character, /* DivideState> */ folder, Function<String, /* String> */ mapper, /* String */ delimiter)/*  {
         return join(delimiter, parseAll(input, folder, mapper));
     } */
-	private static /* String */ join(/* String */ delimiter, /* List<String> */ elements)/*  {
+	private static /* String */ join(/* String */ delimiter, /* List */</* String */> elements)/*  {
         return elements.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static /* List<String> */ parseAll(/* String */ input, BiFunction<State, Character, /* State> */ folder, Function<String, /* String> */ mapper)/*  {
+	private static /* List */</* String */> parseAll(/* String */ input, BiFunction<DivideState, Character, /* DivideState> */ folder, Function<String, /* String> */ mapper)/*  {
         return divide(input, folder)
                 .iterate()
                 .map(mapper)
                 .collect(new ListCollector<>());
     } */
-	private static /* List<String> */ divide(/* String */ input, BiFunction<State, Character, /* State> */ folder)/*  {
-        State state = new State();
+	private static /* List */</* String */> divide(/* String */ input, BiFunction<DivideState, Character, /* DivideState> */ folder)/*  {
+        DivideState state = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             state = folder.apply(state, c);
@@ -200,7 +202,7 @@ public class Main {
 
         return state.advance().segments;
     } */
-	private static /* State */ fold(/* State */ state, /* char */ c)/*  {
+	private static /* DivideState */ fold(/* DivideState */ state, /* char */ c)/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -265,34 +267,35 @@ public class Main {
     private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
         if (isSymbol(name)) {
             var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, typeParams)) + createIndent(depth) + "}";
+            var state = new CompileState(name, typeParams);
+            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, state)) + createIndent(depth) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
     } *//* 
 
-    private static String compileClassStatement(String input, int depth, List<String> typeParams) {
+    private static String compileClassStatement(String input, int depth, CompileState state) {
         return compileWhitespace(input)
                 .or(() -> compileClass(input, depth))
                 .or(() -> compileStructure(input, depth, "interface "))
-                .or(() -> compileDefinitionStatement(input, depth, typeParams))
-                .or(() -> compileMethod(input, depth, typeParams))
+                .or(() -> compileDefinitionStatement(input, depth, state))
+                .or(() -> compileMethod(input, depth, state))
                 .orElseGet(() -> generatePlaceholder(input));
     } *//* 
 
-    private static Optional<String> compileMethod(String input, int depth, List<String> typeParams) {
+    private static Optional<String> compileMethod(String input, int depth, CompileState state) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
             var left = stripped.substring(0, paramStart);
             var withParams = stripped.substring(paramStart + "(".length());
-            return compileDefinition(left, typeParams).flatMap(definition -> {
+            return compileDefinition(left, state).flatMap(definition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var inputContent = withParams.substring(paramEnd + ")".length());
                     var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
-                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, typeParams)) + ")" + outputContent);
+                    return Optional.of(createIndent(depth) + definition + "(" + compileValues(params, input1 -> compileParameter(input1, state)) + ")" + outputContent);
                 }
                 return Optional.empty();
             });
@@ -309,7 +312,7 @@ public class Main {
         return parseAll(params, Main::foldValueChar, mapper);
     } *//* 
 
-    private static State foldValueChar(State state, char c) {
+    private static DivideState foldValueChar(DivideState state, char c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
         }
@@ -323,9 +326,9 @@ public class Main {
         return appended;
     } *//* 
 
-    private static String compileParameter(String input, List<String> typeParams) {
+    private static String compileParameter(String input, CompileState state) {
         return compileWhitespace(input)
-                .or(() -> compileDefinition(input, typeParams))
+                .or(() -> compileDefinition(input, state))
                 .orElseGet(() -> generatePlaceholder(input));
     } *//* 
 
@@ -336,17 +339,17 @@ public class Main {
         return Optional.empty();
     } *//* 
 
-    private static Optional<String> compileDefinitionStatement(String input, int depth, List<String> typeParams) {
+    private static Optional<String> compileDefinitionStatement(String input, int depth, CompileState state) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(definition, typeParams).map(generated -> generateStatement(generated, depth));
+        return compileDefinition(definition, state).map(generated -> generateStatement(generated, depth));
     } *//* 
 
-    private static Optional<String> compileDefinition(String input, List<String> typeParams) {
+    private static Optional<String> compileDefinition(String input, CompileState state) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = input.substring(0, nameSeparator).strip();
@@ -356,29 +359,39 @@ public class Main {
                 if (typeSeparator >= 0) {
                     var beforeType = beforeName.substring(0, typeSeparator);
                     var type = beforeName.substring(typeSeparator + " ".length());
-                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, typeParams));
+                    return Optional.of(generateDefinition(Optional.of(beforeType), type, name, state));
                 }
                 else {
-                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, typeParams));
+                    return Optional.of(generateDefinition(Optional.empty(), beforeName, name, state));
                 }
             }
         }
         return Optional.empty();
     } *//* 
 
-    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, List<String> typeParams) {
+    private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state) {
         var beforeTypeString = maybeBeforeType.map(beforeType -> beforeType + " ").orElse("");
-        return beforeTypeString + compileType(type, typeParams) + " " + name;
+        return beforeTypeString + compileType(type, state) + " " + name;
     } *//* 
 
     private static String generateStatement(String content, int depth) {
         return createIndent(depth) + content + ";";
     } *//* 
 
-    private static String compileType(String input, List<String> typeParams) {
+    private static String compileType(String input, CompileState state) {
         var stripped = input.strip();
-        if (typeParams.contains(stripped)) {
+        if (state.typeParams().contains(stripped)) {
             return stripped;
+        }
+
+        if (stripped.endsWith(">")) {
+            var withEnd = stripped.substring(0, stripped.length() - ">".length());
+            var typeArgsStart = withEnd.indexOf("<");
+            if (typeArgsStart >= 0) {
+                var base = withEnd.substring(0, typeArgsStart).strip();
+                var typeArgs = withEnd.substring(typeArgsStart + "<".length());
+                return generatePlaceholder(base) + "<" + compileValues(typeArgs, typeArg -> compileType(typeArg, state)) + ">";
+            }
         }
 
         return generatePlaceholder(stripped);

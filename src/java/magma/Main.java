@@ -186,7 +186,7 @@ public class Main {
         }
     }
 
-    public record CompileState(List<String> typeParams) {
+    public record CompileState(String name, List<String> typeParams) {
     }
 
     public static void main() {
@@ -301,7 +301,7 @@ public class Main {
     private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
         if (isSymbol(name)) {
             var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-            var state = new CompileState(typeParams);
+            var state = new CompileState(name, typeParams);
             var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, state)) + createIndent(depth) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
@@ -416,6 +416,16 @@ public class Main {
         var stripped = input.strip();
         if (state.typeParams().contains(stripped)) {
             return stripped;
+        }
+
+        if (stripped.endsWith(">")) {
+            var withEnd = stripped.substring(0, stripped.length() - ">".length());
+            var typeArgsStart = withEnd.indexOf("<");
+            if (typeArgsStart >= 0) {
+                var base = withEnd.substring(0, typeArgsStart).strip();
+                var typeArgs = withEnd.substring(typeArgsStart + "<".length());
+                return generatePlaceholder(base) + "<" + compileValues(typeArgs, typeArg -> compileType(typeArg, state)) + ">";
+            }
         }
 
         return generatePlaceholder(stripped);
