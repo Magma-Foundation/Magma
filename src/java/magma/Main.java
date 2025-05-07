@@ -5,6 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,6 +28,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         Option<T> filter(Predicate<T> predicate);
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
     private interface Collector<T, C> {
@@ -49,12 +54,14 @@ public class Main {
         Option<T> next();
 
         Iterator<T> filter(Predicate<T> predicate);
+
+        <R> Iterator<Tuple<T, R>> zip(Iterator<R> other);
     }
 
-    private interface List<T> {
-        List<T> mapLast(Function<T, T> mapper);
+    private interface List_<T> {
+        List_<T> mapLast(Function<T, T> mapper);
 
-        List<T> add(T element);
+        List_<T> add(T element);
 
         Iterator<T> iterate();
 
@@ -64,7 +71,7 @@ public class Main {
 
         int size();
 
-        List<T> subList(int startInclusive, int endExclusive);
+        List_<T> subList(int startInclusive, int endExclusive);
 
         T getLast();
 
@@ -72,9 +79,9 @@ public class Main {
 
         Iterator<T> iterateReverse();
 
-        List<T> addAll(List<T> others);
+        List_<T> addAll(List_<T> others);
 
-        List<T> removeLast();
+        Option<Tuple<T, List_<T>>> removeLast();
     }
 
     private interface Head<T> {
@@ -91,10 +98,10 @@ public class Main {
     private interface Parameter extends Node {
     }
 
-    private interface Caller extends Node {
+    private sealed interface Caller extends Node {
     }
 
-    private interface Value extends Caller {
+    private sealed interface Value extends Caller permits DataAccess, Invokable, Placeholder, Symbol {
     }
 
     private interface StatementValue extends Node {
@@ -103,8 +110,13 @@ public class Main {
     private interface FunctionSegment extends Node {
     }
 
-    private interface Type extends Node {
+    private interface Type extends TypeArgument {
         boolean hasName(String name);
+
+        Map<String, Type> extractFromTemplate(Type template);
+    }
+
+    private interface TypeArgument extends Node {
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -146,6 +158,11 @@ public class Main {
         public Option<T> filter(Predicate<T> predicate) {
             return predicate.test(this.value) ? this : new None<>();
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
+        }
     }
 
     private record None<T>() implements Option<T> {
@@ -181,6 +198,11 @@ public class Main {
 
         @Override
         public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
             return new None<>();
         }
     }
@@ -263,18 +285,24 @@ public class Main {
         public Iterator<T> filter(Predicate<T> predicate) {
             return this.flatMap(t -> new HeadedIterator<>(predicate.test(t) ? new SingleHead<>(t) : new EmptyHead<>()));
         }
+
+        @Override
+        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
+            return new HeadedIterator<>(() -> this.head.next().and(() -> other.next()));
+        }
     }
 
     private static class Lists {
-        private record MutableList<T>(java.util.List<T> elements) implements List<T> {
-            public MutableList() {
+        private record ImmutableList<T>(java.util.List<T> elements) implements List_<T> {
+            public ImmutableList() {
                 this(new ArrayList<>());
             }
 
             @Override
-            public List<T> add(T element) {
-                this.elements.add(element);
-                return this;
+            public List_<T> add(T element) {
+                var copy = new ArrayList<>(this.elements);
+                copy.add(element);
+                return new ImmutableList<>(copy);
             }
 
             @Override
@@ -298,8 +326,8 @@ public class Main {
             }
 
             @Override
-            public List<T> subList(int startInclusive, int endExclusive) {
-                return new MutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
+            public List_<T> subList(int startInclusive, int endExclusive) {
+                return new ImmutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
             }
 
             @Override
@@ -320,44 +348,50 @@ public class Main {
             }
 
             @Override
-            public List<T> addAll(List<T> others) {
-                return others.iterate().<List<T>>fold(this, List::add);
+            public List_<T> addAll(List_<T> others) {
+                return others.iterate().<List_<T>>fold(this, List_::add);
             }
 
             @Override
-            public List<T> removeLast() {
-                this.elements.removeLast();
-                return this;
+            public Option<Tuple<T, List_<T>>> removeLast() {
+                if (this.elements.isEmpty()) {
+                    return new None<>();
+                }
+
+                var copy = new ArrayList<T>(this.elements);
+                var removed = copy.removeLast();
+                return new Some<>(new Tuple<>(removed, new ImmutableList<>(copy)));
             }
 
-            private List<T> setLast(T element) {
-                this.elements.set(this.elements.size() - 1, element);
-                return this;
+            private List_<T> setLast(T element) {
+                var copy = new ArrayList<>(this.elements);
+                copy.set(copy.size() - 1, element);
+                return new ImmutableList<>(copy);
             }
 
             @Override
-            public List<T> mapLast(Function<T, T> mapper) {
+            public List_<T> mapLast(Function<T, T> mapper) {
                 var oldLast = this.getLast();
                 var newLast = mapper.apply(oldLast);
                 return this.setLast(newLast);
             }
         }
 
-        public static <T> List<T> empty() {
-            return new MutableList<>();
+        public static <T> List_<T> empty() {
+            return new ImmutableList<>();
         }
 
-        public static <T> List<T> of(T... elements) {
-            return new MutableList<>(new ArrayList<>(Arrays.asList(elements)));
+        public static <T> List_<T> of(T... elements) {
+            return new ImmutableList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
     private static class DivideState {
-        private List<String> segments;
+        private List_<String> segments;
         private int depth;
         private StringBuilder buffer;
 
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List_<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -413,61 +447,68 @@ public class Main {
         }
     }
 
-    private static class ListCollector<T> implements Collector<T, List<T>> {
+    private static class ListCollector<T> implements Collector<T, List_<T>> {
         @Override
-        public List<T> createInitial() {
+        public List_<T> createInitial() {
             return Lists.empty();
         }
 
         @Override
-        public List<T> fold(List<T> current, T element) {
+        public List_<T> fold(List_<T> current, T element) {
             return current.add(element);
         }
     }
 
-    private record TypeParam(String value) implements Type {
+    private record TypeParam(String name) implements Type {
         @Override
         public String generate() {
-            return this.value;
+            return this.name;
         }
 
         @Override
         public boolean hasName(String name) {
-            return this.value.equals(name);
+            return this.name.equals(name);
+        }
+
+        @Override
+        public Map<String, Type> extractFromTemplate(Type template) {
+            return Map.of(this.name, template);
         }
     }
 
     private record Frame(
             Option<String> maybeName,
-            List<Type> types,
-            List<Definition> definitions
+            List_<Type> typeParams,
+            List_<Definition> definitions,
+            List_<Type> types
     ) {
         public Frame() {
-            this(new None<>(), Lists.empty(), Lists.empty());
+            this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
         }
 
         public Option<Type> findType(String name) {
             return this.createThisType(this.maybeName.filter(structName -> structName.equals(name)))
                     .<Type>map(type -> type)
-                    .or(() -> this.findDefinedTyped(name));
+                    .or(() -> this.findDefinedTyped(name, this.types))
+                    .or(() -> this.findDefinedTyped(name, this.typeParams));
         }
 
-        private Option<Type> findDefinedTyped(String name) {
-            return this.types.iterate()
+        private Option<Type> findDefinedTyped(String name, List_<Type> list) {
+            return list.iterate()
                     .filter(type -> type.hasName(name))
                     .next();
         }
 
         private Option<ObjectType> createThisType(Option<String> maybeName) {
-            return maybeName.map(structName -> new ObjectType(structName, this.definitions));
+            return maybeName.map(structName -> new ObjectType(structName, this.typeParams, this.definitions));
         }
 
         public Frame defineName(String name) {
-            return new Frame(new Some<>(name), this.types, this.definitions);
+            return new Frame(new Some<>(name), this.typeParams, this.definitions, this.types);
         }
 
         public Frame defineType(Type type) {
-            return new Frame(this.maybeName, this.types.add(type), this.definitions);
+            return new Frame(this.maybeName, this.typeParams, this.definitions, this.types.add(type));
         }
 
         public Option<Definition> findValue(String name) {
@@ -477,22 +518,22 @@ public class Main {
         }
 
         public Frame defineValue(Definition name) {
-            return new Frame(this.maybeName, this.types, this.definitions.add(name));
+            return new Frame(this.maybeName, this.typeParams, this.definitions.add(name), this.types);
         }
 
-        public Option<ObjectType> findThisType() {
-            return this.createThisType(this.maybeName);
+        public Frame defineTypeParam(TypeParam typeParam) {
+            return new Frame(this.maybeName, this.typeParams.add(typeParam), this.definitions, this.types);
         }
     }
 
     private static final class CompileState {
-        private final List<Frame> frames;
+        private final List_<Frame> frames;
 
         public CompileState() {
             this(Lists.empty());
         }
 
-        public CompileState(Main.List<Frame> frames) {
+        public CompileState(List_<Frame> frames) {
             this.frames = frames;
         }
 
@@ -511,12 +552,12 @@ public class Main {
                     .next();
         }
 
-        public CompileState defineTypeParams(List<String> typeParams) {
-            return new CompileState(this.frames.mapLast(last -> typeParams.iterate().map(TypeParam::new).fold(last, Frame::defineType)));
+        public CompileState defineTypeParams(List_<String> typeParams) {
+            return new CompileState(this.frames.mapLast(last -> typeParams.iterate().map(TypeParam::new).fold(last, Frame::defineTypeParam)));
         }
 
         public CompileState exit() {
-            return new CompileState(this.frames.removeLast());
+            return new CompileState(this.frames.removeLast().map(Tuple::right).orElse(frames));
         }
 
         public CompileState defineType(Type type) {
@@ -530,35 +571,29 @@ public class Main {
                     .next();
         }
 
-        public CompileState defineValues(List<Definition> names) {
+        public CompileState defineValues(List_<Definition> names) {
             return names.iterate().fold(this, CompileState::defineValue);
         }
 
         private CompileState defineValue(Definition definition) {
             return new CompileState(this.frames.mapLast(last -> last.defineValue(definition)));
         }
-
-        public Option<ObjectType> findThisType() {
-            return this.frames.iterateReverse()
-                    .map(Frame::findThisType)
-                    .flatMap(Iterators::fromOption)
-                    .next();
-        }
     }
 
     private record StructurePrototype(
+            String type,
             String beforeInfix,
             String infix,
             String name,
-            List<String> typeParams,
+            List_<String> typeParams,
             Option<Type> maybeSuperType,
-            List<Definition> parameters,
-            List<Type> interfaces,
+            List_<Definition> parameters,
+            List_<Type> interfaces,
             String content,
             int depth
     ) {
-        public StructurePrototype() {
-            this("", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), "", 0);
+        public StructurePrototype(String type1) {
+            this(type1, "", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), "", 0);
         }
 
         private String generate() {
@@ -570,61 +605,56 @@ public class Main {
         }
 
         public StructurePrototype withBeforeInfix(String beforeInfix) {
-            return new StructurePrototype(beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         }
 
         public StructurePrototype withInfix(String infix) {
-            return new StructurePrototype(this.beforeInfix, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         }
 
-        public StructurePrototype withTypeParams(List<String> typeParams) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+        public StructurePrototype withTypeParams(List_<String> typeParams) {
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         }
 
-        public StructurePrototype withParameters(List<Definition> parameters) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.content, this.depth);
+        public StructurePrototype withParameters(List_<Definition> parameters) {
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.content, this.depth);
         }
 
-        public StructurePrototype withInterfaces(List<Type> interfaces) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.content, this.depth);
+        public StructurePrototype withInterfaces(List_<Type> interfaces) {
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.content, this.depth);
         }
 
         public StructurePrototype withContent(String content) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, content, this.depth);
         }
 
         public StructurePrototype withDepth(int depth) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, depth);
         }
 
         public StructurePrototype withName(String name) {
             if (name.isEmpty()) {
                 return this;
             }
-            return new StructurePrototype(this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         }
 
-        public StructurePrototype withSuperType(Type type) {
-            return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(type), this.parameters, this.interfaces, this.content, this.depth);
+        public StructurePrototype withSuperType(Type superType) {
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.content, this.depth);
         }
     }
 
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private static class Whitespace implements StructSegment, Parameter, FunctionSegment, Type {
+    private static class Whitespace implements StructSegment, Parameter, FunctionSegment, TypeArgument {
         @Override
         public String generate() {
             return "";
         }
-
-        @Override
-        public boolean hasName(String name) {
-            return false;
-        }
     }
 
-    private record ObjectNode(StructurePrototype structurePrototype, List<StructSegment> statements,
+    private record ObjectNode(StructurePrototype structurePrototype, List_<StructSegment> statements,
                               int depth) implements StructSegment {
         @Override
         public String generate() {
@@ -659,17 +689,42 @@ public class Main {
         public boolean hasName(String name) {
             return false;
         }
+
+        @Override
+        public Map<String, Type> extractFromTemplate(Type template) {
+            return Collections.emptyMap();
+        }
     }
 
-    private record ObjectType(String name, List<Definition> definitions) implements Type {
+    private record ObjectType(String name, List_<Type> typeParams, List_<Definition> definitions) implements Type {
         @Override
         public boolean hasName(String name) {
             return this.name.equals(name);
         }
 
         @Override
+        public Map<String, Type> extractFromTemplate(Type template) {
+            return Collections.emptyMap();
+        }
+
+        @Override
         public String generate() {
-            return this.name;
+            var joined = this.typeParams.isEmpty() ? "" : this.joinTypeParams();
+            return this.name + joined;
+        }
+
+        private String joinTypeParams() {
+            return "<" + joinNodes(", ", this.typeParams) + ">";
+        }
+
+        public ObjectType withTypeArgs(List_<Type> typeArgs) {
+            return new ObjectType(this.name, typeArgs, this.definitions);
+        }
+
+        public Option<Definition> find(String name) {
+            return this.definitions.iterate()
+                    .filter(definition -> definition.name.equals(name))
+                    .next();
         }
     }
 
@@ -684,8 +739,12 @@ public class Main {
             Option<String> maybeBeforeType,
             Type type,
             String name,
-            List<String> typeParams
+            List_<String> typeParams
     ) implements Parameter, StatementValue {
+        public Definition(Type type, String name) {
+            this(new None<>(), type, name, Lists.empty());
+        }
+
         @Override
         public String generate() {
             var beforeTypeString = this.maybeBeforeType()
@@ -729,14 +788,14 @@ public class Main {
         }
     }
 
-    private record ConstructionHeader(Type type) implements Caller {
+    private record ConstructionHeader(ObjectType type) implements Caller {
         @Override
         public String generate() {
             return "new " + this.type.generate();
         }
     }
 
-    private record Invokable(Caller caller, List<Value> args) implements Value {
+    private record Invokable(Caller caller, List_<Value> args) implements Value {
         @Override
         public String generate() {
             var joined = joinNodes(", ", this.args());
@@ -761,9 +820,14 @@ public class Main {
         public boolean hasName(String name) {
             return this.value.equals(name);
         }
+
+        @Override
+        public Map<String, Type> extractFromTemplate(Type template) {
+            return Collections.emptyMap();
+        }
     }
 
-    private record Functional(List<Type> arguments, Type returns) implements Type {
+    private record Functional(List_<Type> arguments, Type returns) implements Type {
         @Override
         public String generate() {
             String argumentString;
@@ -781,18 +845,25 @@ public class Main {
         public boolean hasName(String name) {
             return false;
         }
-    }
-
-    private record Generic(String baseType, List<Type> typeArgs) implements Type {
-        @Override
-        public String generate() {
-            var outputTypeArgs = joinNodes(", ", this.typeArgs);
-            return this.baseType + "<" + outputTypeArgs + ">";
-        }
 
         @Override
-        public boolean hasName(String name) {
-            return this.baseType.equals(name);
+        public Map<String, Type> extractFromTemplate(Type template) {
+            if (template instanceof Functional functional) {
+                var argumentsEntry = this.arguments.iterate()
+                        .zip(functional.arguments.iterate())
+                        .map(tuple -> tuple.left.extractFromTemplate(tuple.right))
+                        .fold(new HashMap<String, Type>(), (map, entries) -> {
+                            map.putAll(entries);
+                            return map;
+                        });
+
+                var returnsEntry = this.returns.extractFromTemplate(functional.returns);
+                var copy = new HashMap<String, Type>(argumentsEntry);
+                copy.putAll(returnsEntry);
+                return copy;
+            }
+
+            return Collections.emptyMap();
         }
     }
 
@@ -819,7 +890,7 @@ public class Main {
         return new Tuple<>(parsed.left, join("", parsed.right));
     }
 
-    private static <T> Tuple<CompileState, List<T>> parseStatements(
+    private static <T> Tuple<CompileState, List_<T>> parseStatements(
             CompileState state,
             String input,
             BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
@@ -827,13 +898,13 @@ public class Main {
         return parseAll(state, input, Main::foldStatementValue, mapper);
     }
 
-    private static String join(String delimiter, List<String> elements) {
+    private static String join(String delimiter, List_<String> elements) {
         return elements.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
     }
 
-    private static <T> Tuple<CompileState, List<T>> parseAll(
+    private static <T> Tuple<CompileState, List_<T>> parseAll(
             CompileState state,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
@@ -850,7 +921,7 @@ public class Main {
         });
     }
 
-    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
+    private static List_<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         DivideState state = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -888,10 +959,10 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseClass(CompileState state, String input, int depth) {
-        return parseStructure(state, "class ", input, depth);
+        return parseStructure("class", "class ", state, input, depth);
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> parseStructure(CompileState state, String infix, String input, int depth) {
+    private static Option<Tuple<CompileState, StructSegment>> parseStructure(String type, String infix, CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -904,13 +975,13 @@ public class Main {
                     var beforeInfix = beforeContent.substring(0, keywordIndex);
                     var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
 
-                    var prototype = new StructurePrototype()
+                    var prototype = new StructurePrototype(type)
                             .withBeforeInfix(beforeInfix)
                             .withInfix(infix)
                             .withContent(content)
                             .withDepth(depth);
 
-                    return parseStructureWithMaybeTypeParameters(state, prototype, afterInfix);
+                    return parseStructureWithMaybeTypeParameters(state.enter(), prototype, afterInfix);
                 }
             }
         }
@@ -919,16 +990,15 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String input, StructurePrototype prototype) {
-        var entered = state.enter();
         var implementsIndex = input.indexOf(" implements ");
         if (implementsIndex >= 0) {
             var left = input.substring(0, implementsIndex).strip();
             var right = input.substring(implementsIndex + " implements ".length());
-            var tuple = parseType(entered, right);
+            var tuple = parseType(state, right);
             return assembleStructure(tuple.left, prototype.withName(left).withInterfaces(Lists.of(tuple.right)));
         }
 
-        return assembleStructure(entered, prototype.withName(input));
+        return assembleStructure(state, prototype.withName(input));
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeExtends(CompileState state, StructurePrototype prototype, String afterInfix) {
@@ -965,7 +1035,7 @@ public class Main {
         return parseStructureWithMaybeExtends(state, prototype, input);
     }
 
-    private static Tuple<CompileState, List<Definition>> parseParameters(CompileState state, String paramsString) {
+    private static Tuple<CompileState, List_<Definition>> parseParameters(CompileState state, String paramsString) {
         var paramsTuple = parseValues(state, paramsString, Main::parseParameter);
         var params = paramsTuple.right
                 .iterate()
@@ -985,7 +1055,7 @@ public class Main {
         }
     }
 
-    private static <T extends Node> String joinNodes(String delimiter, List<T> nodes) {
+    private static <T extends Node> String joinNodes(String delimiter, List_<T> nodes) {
         return nodes.iterate().map(Node::generate).collect(new Joiner(delimiter)).orElse("");
     }
 
@@ -1018,20 +1088,39 @@ public class Main {
         }
 
         var depth = prototype.depth;
-        var statementsTuple = parseStatements(state.defineThis(name), prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+        var typeParams = prototype.typeParams
+                .iterate()
+                .<Type>map(TypeParam::new)
+                .collect(new ListCollector<>());
+
+        var paramTypes = prototype.parameters
+                .iterate()
+                .map(Definition::type)
+                .collect(new ListCollector<>());
+
+        var constructorReturnType = new ObjectType(name, typeParams, Lists.empty());
+        var withThis = state.defineThis(name);
+        CompileState defined;
+        if (prototype.type.equals("record")) {
+            defined = withThis.defineValue(new Definition(new Functional(paramTypes, constructorReturnType), "new"));
+        }
+        else {
+            defined = withThis;
+        }
+
+        var statementsTuple = parseStatements(defined, prototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
 
         var statement = statementsTuple.right;
         var exited = statementsTuple.left.exit();
-
-        var defined = exited.defineType(new ObjectType(name, Lists.empty()));
-        return new Some<>(new Tuple<CompileState, StructSegment>(defined, new ObjectNode(prototype, statement, depth)));
+        var exited0 = exited.defineType(constructorReturnType);
+        return new Some<>(new Tuple<CompileState, StructSegment>(exited0, new ObjectNode(prototype, statement, depth)));
     }
 
     private static Tuple<CompileState, StructSegment> compileClassStatement(CompileState state, String input, int depth) {
         return Main.<Whitespace, StructSegment>typed(() -> parseWhitespace(state, input))
                 .or(() -> parseClass(state, input, depth))
-                .or(() -> parseStructure(state, "interface ", input, depth))
-                .or(() -> parseStructure(state, "record ", input, depth))
+                .or(() -> parseStructure("interface", "interface ", state, input, depth))
+                .or(() -> parseStructure("record", "record ", state, input, depth))
                 .or(() -> typed(() -> parseStatement(input, depth, definition1 -> parseDefinition(state, definition1))))
                 .or(() -> parseMethod(input, depth, state))
                 .orElseGet(() -> parsePlaceholder0(state, input));
@@ -1119,12 +1208,40 @@ public class Main {
                 var args = withoutEnd.substring(argsStart + "(".length());
                 if (beforeArgs.startsWith("new ")) {
                     var type = parseType(state, beforeArgs.substring("new ".length()));
-                    return assembleInvokable(state, new ConstructionHeader(type.right), args);
+                    if (type.right instanceof ObjectType objectType) {
+                        var argumentsTuple = parseValues(type.left, args, Main::parseValue);
+
+                        if (objectType.find("new") instanceof Some(var constructorType)) {
+                            if (constructorType.type instanceof Functional expected) {
+                                var argumentsTypes = argumentsTuple.right
+                                        .iterate()
+                                        .map(argument -> resolve(argumentsTuple.left, argument))
+                                        .collect(new ListCollector<>());
+
+                                var actual = new Functional(argumentsTypes, expected.returns);
+                                var extracted = expected.extractFromTemplate(actual);
+
+                                var typeParams = objectType.typeParams
+                                        .iterate()
+                                        .map(Main::retainTypeParam)
+                                        .flatMap(Iterators::fromOption)
+                                        .map(param -> param.name)
+                                        .collect(new ListCollector<>());
+
+                                var newTypeParams = typeParams.iterate()
+                                        .map(value -> find(extracted, value))
+                                        .flatMap(Iterators::fromOption)
+                                        .collect(new ListCollector<>());
+
+                                var caller = new ConstructionHeader(objectType.withTypeArgs(newTypeParams));
+                                return new Tuple<>(argumentsTuple.left, new Invokable(caller, argumentsTuple.right));
+                            }
+                        }
+                    }
                 }
-                else {
-                    var type = parseValue(state, beforeArgs);
-                    return assembleInvokable(type.left, type.right, args);
-                }
+                var type = parseValue(state, beforeArgs);
+                var parsed = parseValues(type.left, args, Main::parseValue);
+                return new Tuple<>(parsed.left, new Invokable(type.right, parsed.right));
             }
         }
 
@@ -1147,12 +1264,62 @@ public class Main {
         return new Tuple<>(state, new Placeholder(stripped));
     }
 
-    private static Tuple<CompileState, Value> assembleInvokable(CompileState state, Caller caller, String args) {
-        var parsed = parseValues(state, args, Main::parseValue);
-        return new Tuple<>(parsed.left, new Invokable(caller, parsed.right));
+    private static Option<Type> find(Map<String, Type> self, String key) {
+        if (self.containsKey(key)) {
+            return new Some<>(self.get(key));
+        }
+        else {
+            return new None<>();
+        }
     }
 
-    private static <T> Tuple<CompileState, List<T>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
+    private static Option<TypeParam> retainTypeParam(Type param) {
+        if (param instanceof TypeParam typeParam) {
+            return new Some<>(typeParam);
+        }
+        else {
+            return new None<>();
+        }
+    }
+
+    private static Type resolve(CompileState state, Value value) {
+        return switch (value) {
+            case DataAccess dataAccess -> resolveDataAccess(state, dataAccess);
+            case Invokable invokable -> resolveInvokable(state, invokable);
+            case Symbol symbol ->
+                    state.findValue(symbol.value).map(Definition::type).orElseGet(() -> new Placeholder(symbol.value));
+            case Placeholder placeholder -> placeholder;
+        };
+    }
+
+    private static Type resolveDataAccess(CompileState state, DataAccess access) {
+        var parent = access.parent;
+        var parentType = resolve(state, parent);
+        if (parentType instanceof ObjectType type) {
+            if (type.find(access.property) instanceof Some(var definition)) {
+                return definition.type;
+            }
+        }
+
+        return parentType;
+    }
+
+    private static Type resolveInvokable(CompileState state, Invokable value) {
+        var caller = value.caller;
+        return switch (caller) {
+            case ConstructionHeader header -> header.type;
+            case Value callerValue -> {
+                var resolved = resolve(state, callerValue);
+                if (resolved instanceof Functional functional) {
+                    yield functional.returns;
+                }
+
+                yield resolved;
+            }
+        };
+    }
+
+    private static <T> Tuple<CompileState, List_<T>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
         return parseAll(state, input, Main::foldValueChar, mapper);
     }
 
@@ -1174,10 +1341,6 @@ public class Main {
         return Main.<Whitespace, Parameter>typed(() -> parseWhitespace(state, input))
                 .or(() -> typed(() -> parseDefinition(state, input)))
                 .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
-    }
-
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
-        return generate(() -> parseWhitespace(state, input));
     }
 
     private static <T extends Node> Option<Tuple<CompileState, String>> generate(Supplier<Option<Tuple<CompileState, T>>> parser) {
@@ -1253,10 +1416,10 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
-        var typeTuple = parseType(state.defineTypeParams(typeParams), type);
+    private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List_<String> typeParams) {
+        var typeTuple = parseType(state.enter().defineTypeParams(typeParams), type);
         var definition = new Definition(maybeBeforeType, typeTuple.right, name, typeParams);
-        return new Tuple<>(typeTuple.left, definition);
+        return new Tuple<>(typeTuple.left.exit(), definition);
     }
 
     private static Tuple<CompileState, Type> parseType(CompileState state, String input) {
@@ -1285,7 +1448,11 @@ public class Main {
                 var base = withEnd.substring(0, typeArgsStart).strip();
                 var inputTypeArgs = withEnd.substring(typeArgsStart + "<".length());
                 var parsed = parseValues(state, inputTypeArgs, Main::compileTypeArgument);
-                var typeArgs = parsed.right;
+                var typeArgs = parsed.right
+                        .iterate()
+                        .map(Main::retainType)
+                        .flatMap(Iterators::fromOption)
+                        .collect(new ListCollector<>());
 
                 if (base.equals("Function")) {
                     return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
@@ -1303,24 +1470,28 @@ public class Main {
                     return new Tuple<>(state, new Functional(Lists.empty(), typeArgs.get(0)));
                 }
 
-                return new Tuple<>(state, new Generic(base, typeArgs));
+                if (state.findType(base) instanceof Some(var found) && found instanceof ObjectType objectType) {
+                    var objectType1 = typeArgs.isEmpty() ? objectType : objectType.withTypeArgs(typeArgs);
+                    return new Tuple<>(state, objectType1);
+                }
             }
         }
 
         return new Tuple<>(state, new Placeholder(input));
     }
 
-    private static Tuple<CompileState, Type> compileTypeArgument(CompileState state1, String input1) {
-        return Main.<Whitespace, Type>typed(() -> parseWhitespace(state1, input1))
-                .orElseGet(() -> parseType(state1, input1));
+    private static Option<Type> retainType(TypeArgument argument) {
+        if (argument instanceof Type type) {
+            return new Some<>(type);
+        }
+        return new None<>();
     }
 
-    private static Type compileBaseType(String base, CompileState state) {
-        if (state.findType(base) instanceof Some(var found)) {
-            return found;
-        }
-
-        return new Placeholder(base);
+    private static Tuple<CompileState, TypeArgument> compileTypeArgument(CompileState state1, String input1) {
+        return Main.<Whitespace, TypeArgument>typed(() -> parseWhitespace(state1, input1)).orElseGet(() -> {
+            var tuple = parseType(state1, input1);
+            return new Tuple<>(tuple.left, tuple.right);
+        });
     }
 
     private static boolean isSymbol(String input) {
@@ -1360,6 +1531,11 @@ public class Main {
         @Override
         public boolean hasName(String name) {
             return false;
+        }
+
+        @Override
+        public Map<String, Type> extractFromTemplate(Type template) {
+            return Collections.emptyMap();
         }
     }
 }
