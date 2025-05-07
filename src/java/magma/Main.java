@@ -148,7 +148,7 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Optional<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
         @Override
         public Optional<String> createInitial() {
             return Optional.empty();
@@ -156,7 +156,7 @@ public class Main {
 
         @Override
         public Optional<String> fold(Optional<String> maybeCurrent, String element) {
-            return Optional.of(maybeCurrent.map(inner -> inner + element).orElse(element));
+            return Optional.of(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -178,18 +178,22 @@ public class Main {
     }
 
     private static String compileStatements(String input, Function<String, String> mapper) {
-        return divide(input)
+        return compileAll(input, Main::fold, mapper, "");
+    }
+
+    private static String compileAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper, String delimiter) {
+        return divide(input, folder)
                 .iterate()
                 .map(mapper)
-                .collect(new Joiner())
+                .collect(new Joiner(delimiter))
                 .orElse("");
     }
 
-    private static List<String> divide(String input) {
+    private static List<String> divide(String input, BiFunction<State, Character, State> folder) {
         State state = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            state = fold(state, c);
+            state = folder.apply(state, c);
         }
 
         return state.advance().segments;
@@ -260,18 +264,36 @@ public class Main {
         if (paramStart >= 0) {
             var left = stripped.substring(0, paramStart);
             var withParams = stripped.substring(paramStart + "(".length());
-            return compileDefinition(left, depth).flatMap(definition -> {
+            return compileDefinition(left).flatMap(definition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var content = withParams.substring(paramEnd + ")".length());
-                    return Optional.of(createIndent(depth) + definition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content));
+                    return Optional.of(createIndent(depth) + definition + "(" + compileAll(params, Main::foldValueChar, Main::compileParameter, ", ") + ")" + generatePlaceholder(content));
                 }
                 return Optional.empty();
             });
         }
 
         return Optional.empty();
+    }
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
+    }
+
+    private static String compileParameter(String input) {
+        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileDefinitionStatement(String input, int depth) {
@@ -281,10 +303,10 @@ public class Main {
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(definition, depth).map(generated -> generateStatement(generated, depth));
+        return compileDefinition(definition).map(generated -> generateStatement(generated, depth));
     }
 
-    private static Optional<String> compileDefinition(String input, int depth) {
+    private static Optional<String> compileDefinition(String input) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = input.substring(0, nameSeparator).strip();

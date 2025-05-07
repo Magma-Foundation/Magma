@@ -9,15 +9,15 @@ import java.util.function.Function;
 public class Main {
 	private interface Collector<T, C> {
 		/* C */ createInitial(/*  */)/* ; */
-		/* C */ fold(/* C current, T element */)/* ; *//* 
+		/* C */ fold(/* C */ current, /* T */ element)/* ; *//* 
      */}
 	private interface Iterator<T> {
-		<R> /* Iterator<R> */ map(/* Function<T, R> mapper */)/* ; */
-		<C> /* C */ collect(/* Collector<T, C> collector */)/* ; */
-		<C> /* C */ fold(/* C initial, BiFunction<C, T, C> folder */)/* ; *//* 
+		<R> /* Iterator<R> */ map(Function<T, /* R> */ mapper)/* ; */
+		<C> /* C */ collect(Collector<T, /* C> */ collector)/* ; */
+		<C> /* C */ fold(/* C */ initial, BiFunction<C, T, /* C> */ folder)/* ; *//* 
      */}
 	private interface List<T> {
-		/* List<T> */ add(/* T element */)/* ; */
+		/* List<T> */ add(/* T */ element)/* ; */
 		/* Iterator<T> */ iterate(/*  */)/* ; *//* 
      */}
 	private interface Head<T> {
@@ -26,7 +26,7 @@ public class Main {
 	private static class RangeHead implements Head<Integer> {
 		private final /* int */ length;/* 
         private int counter = 0; */
-		/* public */ RangeHead(/* int length */)/*  {
+		/* public */ RangeHead(/* int */ length)/*  {
             this.length = length;
         } */
 		@Override
@@ -92,7 +92,7 @@ public class Main {
 		private /* List<String> */ segments;
 		private /* int */ depth;
 		private /* StringBuilder */ buffer;
-		/* private */ State(/* List<String> segments, StringBuilder buffer, int depth */)/*  {
+		/* private */ State(/* List<String> */ segments, /* StringBuilder */ buffer, /* int */ depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -100,7 +100,7 @@ public class Main {
 		/* public */ State(/*  */)/*  {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
-		private /* State */ append(/* char c */)/*  {
+		private /* State */ append(/* char */ c)/*  {
             this.buffer.append(c);
             return this;
         } */
@@ -124,16 +124,17 @@ public class Main {
             return this.depth == 1;
         } *//* 
      */}
-	private static class Joiner implements Collector<String, Optional<String>> {
-		@Override
-        public /* Optional<String> */ createInitial(/*  */)/*  {
+	private /* record */ Joiner(/* String */ delimiter)/*  implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
             return Optional.empty();
-        } */
-		@Override
-        public /* Optional<String> */ fold(/* Optional<String> maybeCurrent, String element */)/*  {
-            return Optional.of(maybeCurrent.map(inner -> inner + element).orElse(element));
-        } *//* 
-     */}
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> maybeCurrent, String element) {
+            return Optional.of(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
+        }
+    } */
 	public static /* void */ main(/*  */)/*  {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -146,26 +147,29 @@ public class Main {
             e.printStackTrace();
         }
     } */
-	private static /* String */ compile(/* String input */)/*  {
+	private static /* String */ compile(/* String */ input)/*  {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	private static /* String */ compileStatements(/* String input, Function<String, String> mapper */)/*  {
-        return divide(input)
+	private static /* String */ compileStatements(/* String */ input, Function<String, /* String> */ mapper)/*  {
+        return compileAll(input, Main::fold, mapper, "");
+    } */
+	private static /* String */ compileAll(/* String */ input, BiFunction<State, Character, /* State> */ folder, Function<String, /* String> */ mapper, /* String */ delimiter)/*  {
+        return divide(input, folder)
                 .iterate()
                 .map(mapper)
-                .collect(new Joiner())
+                .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static /* List<String> */ divide(/* String input */)/*  {
+	private static /* List<String> */ divide(/* String */ input, BiFunction<State, Character, /* State> */ folder)/*  {
         State state = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            state = fold(state, c);
+            state = folder.apply(state, c);
         }
 
         return state.advance().segments;
     } */
-	private static /* State */ fold(/* State state, char c */)/*  {
+	private static /* State */ fold(/* State */ state, /* char */ c)/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -231,18 +235,36 @@ public class Main {
         if (paramStart >= 0) {
             var left = stripped.substring(0, paramStart);
             var withParams = stripped.substring(paramStart + "(".length());
-            return compileDefinition(left, depth).flatMap(definition -> {
+            return compileDefinition(left).flatMap(definition -> {
                 var paramEnd = withParams.indexOf(")");
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var content = withParams.substring(paramEnd + ")".length());
-                    return Optional.of(createIndent(depth) + definition + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content));
+                    return Optional.of(createIndent(depth) + definition + "(" + compileAll(params, Main::foldValueChar, Main::compileParameter, ", ") + ")" + generatePlaceholder(content));
                 }
                 return Optional.empty();
             });
         }
 
         return Optional.empty();
+    } *//* 
+
+    private static State foldValueChar(State state, char c) {
+        if (c == ',' && state.isLevel()) {
+            return state.advance();
+        }
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
+    } *//* 
+
+    private static String compileParameter(String input) {
+        return compileDefinition(input).orElseGet(() -> generatePlaceholder(input));
     } *//* 
 
     private static Optional<String> compileDefinitionStatement(String input, int depth) {
@@ -252,10 +274,10 @@ public class Main {
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(definition, depth).map(generated -> generateStatement(generated, depth));
+        return compileDefinition(definition).map(generated -> generateStatement(generated, depth));
     } *//* 
 
-    private static Optional<String> compileDefinition(String input, int depth) {
+    private static Optional<String> compileDefinition(String input) {
         var nameSeparator = input.lastIndexOf(" ");
         if (nameSeparator >= 0) {
             var beforeName = input.substring(0, nameSeparator).strip();
