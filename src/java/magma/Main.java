@@ -443,14 +443,15 @@ public class Main {
     }
 
     public record StructurePrototype(
-            String name,
-            List<String> typeParams,
             String beforeInfix,
             String infix,
-            String content,
-            int depth,
+            String name,
+            List<String> typeParams,
             Option<String> maybeSuperType,
-            List<String> interfaces
+            List<String> parameters,
+            List<String> interfaces,
+            String content,
+            int depth
     ) {
         private String generate() {
             var joinedInterfaces = this.interfaces.iterate().collect(new Joiner(", ")).map(result -> " implements " + result).orElse("");
@@ -613,7 +614,7 @@ public class Main {
 
                     var implementsIndex = afterInfix.indexOf(" implements ");
                     if (implementsIndex >= 0) {
-                        var left = afterInfix.substring(0, implementsIndex);
+                        var left = afterInfix.substring(0, implementsIndex).strip();
                         var right = afterInfix.substring(implementsIndex + " implements ".length());
                         var tuple = compileType(state, right);
                         return parseStructureWithImplements(tuple.left, infix, depth, beforeInfix, left, Lists.of(tuple.right), content);
@@ -630,7 +631,7 @@ public class Main {
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithImplements(CompileState state, String infix, int depth, String beforeInfix, String afterInfix, List<String> maybeInterfaces, String content) {
         var extendsIndex = afterInfix.indexOf(" extends ");
         if (extendsIndex >= 0) {
-            var left = afterInfix.substring(0, extendsIndex);
+            var left = afterInfix.substring(0, extendsIndex).strip();
             var right = afterInfix.substring(extendsIndex + " extends ".length());
             var tuple = compileType(state, right);
             return parseStructureWithExtends(tuple.left, infix, depth, beforeInfix, left, new Some<>(tuple.right), maybeInterfaces, content);
@@ -642,9 +643,27 @@ public class Main {
             CompileState state,
             String infix,
             int depth,
-            String beforeInfix, String afterInfix,
-            Option<String> extendsType, List<String> interfaces, String content
+            String beforeInfix,
+            String afterInfix,
+            Option<String> extendsType,
+            List<String> interfaces,
+            String content
     ) {
+        if (afterInfix.endsWith(")")) {
+            var slice = afterInfix.substring(0, afterInfix.length() - ")".length());
+            var paramStart = slice.indexOf("(");
+            if (paramStart >= 0) {
+                var left = slice.substring(0, paramStart);
+                var right = slice.substring(paramStart + "(".length());
+                var parsed = parseValues(state, right, Main::compileParameter);
+                return parseStructureWithParameters(parsed.left, infix, depth, beforeInfix, left, extendsType, interfaces, content, parsed.right);
+            }
+        }
+
+        return parseStructureWithParameters(state, infix, depth, beforeInfix, afterInfix, extendsType, interfaces, content, Lists.empty());
+    }
+
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithParameters(CompileState state, String infix, int depth, String beforeInfix, String afterInfix, Option<String> extendsType, List<String> interfaces, String content, List<String> parameters) {
         if (afterInfix.endsWith(">")) {
             var withoutEnd = afterInfix.substring(0, afterInfix.length() - ">".length());
             var typeParamsStart = withoutEnd.indexOf("<");
@@ -652,12 +671,12 @@ public class Main {
                 var name = withoutEnd.substring(0, typeParamsStart).strip();
                 var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
                 var elements = parseValues(state, typeParamString, Main::stripToTuple);
-                var prototype = new StructurePrototype(name, elements.right, beforeInfix, infix, content, depth, extendsType, interfaces);
+                var prototype = new StructurePrototype(beforeInfix, infix, name, elements.right, extendsType, parameters, interfaces, content, depth);
                 return assembleStructure(elements.left, prototype);
             }
         }
 
-        return assembleStructure(state, new StructurePrototype(afterInfix, Lists.empty(), beforeInfix, infix, content, depth, extendsType, interfaces));
+        return assembleStructure(state, new StructurePrototype(beforeInfix, infix, afterInfix, Lists.empty(), extendsType, parameters, interfaces, content, depth));
     }
 
     private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
@@ -716,7 +735,7 @@ public class Main {
                     var params = withParams.substring(0, paramEnd);
                     var inputContent = withParams.substring(paramEnd + ")".length());
                     var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
-                    var tuple = compileValues(definitionTuple.left, params, Main::compileParameter);
+                    var tuple = compileParameters(definitionTuple.left, params);
                     var value = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")" + outputContent;
                     return new Some<>(new Tuple<CompileState, StructSegment>(tuple.left, new Content(value)));
                 }
@@ -725,6 +744,10 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {
+        return compileValues(state, params, Main::compileParameter);
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
