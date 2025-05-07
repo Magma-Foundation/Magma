@@ -449,11 +449,11 @@ public class Main {
             String infix,
             String content,
             int depth,
-            Option<String> extendsType) {
+            Option<String> maybeExtends) {
         private String generate() {
             var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
-            var s = this.beforeInfix + this.infix + this.name();
-            return s + outputTypeParams;
+            var extendsString = this.maybeExtends.map(extendsSlice -> " extends " + extendsSlice).orElse("");
+            return this.beforeInfix + this.infix + this.name() + outputTypeParams + extendsString;
         }
     }
 

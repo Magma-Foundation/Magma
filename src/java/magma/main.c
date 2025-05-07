@@ -45,7 +45,7 @@ public class Main {
 	private interface Head<T> {
 		Option<T> next();
 	}
-	private interface StructSegment {
+	private interface StructSegment extends /* Node */ {
 	}
 	private interface Node {
 		/* String */ generate();
@@ -380,11 +380,11 @@ public class Main {
             return new CompileState(this.frames.mapLast(last -> last.withDefinition(definition)));
         } */
 	}
-	public /* record */ StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix, String content, int depth, Option<String> extendsType)/*  {
+	public /* record */ StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix, String content, int depth, Option<String> maybeExtends)/*  {
         private String generate() {
             var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
-            var s = this.beforeInfix + this.infix + this.name();
-            return s + outputTypeParams;
+            var extendsString = this.maybeExtends.map(extendsSlice -> " extends " + extendsSlice).orElse("");
+            return this.beforeInfix + this.infix + this.name() + outputTypeParams + extendsString;
         }
     } *//* 
 
