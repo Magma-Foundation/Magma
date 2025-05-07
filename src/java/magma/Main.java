@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class Main {
     private interface Collector<T, C> {
@@ -55,6 +56,13 @@ public class Main {
 
     private interface Head<T> {
         Optional<T> next();
+    }
+
+    private interface StructSegment extends Node {
+    }
+
+    private interface Node {
+        String generate();
     }
 
     private static class RangeHead implements Head<Integer> {
@@ -242,6 +250,10 @@ public class Main {
     }
 
     private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+        public Joiner() {
+            this("");
+        }
+
         @Override
         public Optional<String> createInitial() {
             return Optional.empty();
@@ -323,9 +335,51 @@ public class Main {
 
     public record StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix,
                                      String content, int depth) {
+        private String generate() {
+            var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
+            var s = this.beforeInfix + this.infix + this.name();
+            return s + outputTypeParams;
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
+    }
+
+    private static class Whitespace implements StructSegment {
+        @Override
+        public String generate() {
+            return "";
+        }
+    }
+
+    private record Structure(StructurePrototype structurePrototype, List<StructSegment> statements,
+                             int depth) implements StructSegment {
+        @Override
+        public String generate() {
+            var s1 = this.structurePrototype.generate();
+
+            var joinedStatements = this.statements.iterate()
+                    .map(Node::generate)
+                    .collect(new Joiner())
+                    .orElse("");
+
+            var generated = s1 + " {" + joinedStatements + createIndent(this.depth()) + "}";
+            return this.depth == 0 ? generated + "\n" : (createIndent(this.depth()) + generated);
+        }
+    }
+
+    private record Content(String input) implements StructSegment {
+        @Override
+        public String generate() {
+            return this.input;
+        }
+    }
+
+    private record Placeholder(String input) implements Node, StructSegment {
+        @Override
+        public String generate() {
+            return generatePlaceholder(this.input);
+        }
     }
 
     public static void main() {
@@ -346,13 +400,16 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        return compileAll(input, Main::foldStatementValue, mapper, "", state);
+        var parsed = parseStatements(state, input, mapper);
+        return new Tuple<>(parsed.left, join("", parsed.right));
     }
 
-    private static Tuple<CompileState, String> compileAll(String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, String delimiter, CompileState state) {
-        var parsed = parseAll(state, input, folder, mapper);
-        var joined = join(delimiter, parsed.right);
-        return new Tuple<>(parsed.left, joined);
+    private static <T> Tuple<CompileState, List<T>> parseStatements(
+            CompileState state,
+            String input,
+            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
+    ) {
+        return parseAll(state, input, Main::foldStatementValue, mapper);
     }
 
     private static String join(String delimiter, List<String> elements) {
@@ -361,7 +418,12 @@ public class Main {
                 .orElse("");
     }
 
-    private static Tuple<CompileState, List<String>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+    private static <T> Tuple<CompileState, List<T>> parseAll(
+            CompileState state,
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
+    ) {
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
             var currentState = tuple.left;
             var currentElements = tuple.right;
@@ -406,14 +468,15 @@ public class Main {
             return new Tuple<>(state, stripped + "\n");
         }
 
-        return compileClass(state, stripped, 0).orElseGet(() -> compileContent(state, input));
+        return generate(() -> parseClass(state, stripped, 0))
+                .orElseGet(() -> compilePlaceholder(state, input));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input, int depth) {
-        return compileStructure(state, "class ", input, depth);
+    private static Optional<Tuple<CompileState, StructSegment>> parseClass(CompileState state, String input, int depth) {
+        return parseStructure(state, "class ", input, depth);
     }
 
-    private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String infix, String input, int depth) {
+    private static Optional<Tuple<CompileState, StructSegment>> parseStructure(CompileState state, String infix, String input, int depth) {
         var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutContentEnd = stripped.substring(0, stripped.length() - "}".length());
@@ -445,34 +508,46 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
+    private static Optional<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
         if (isSymbol(structurePrototype.name())) {
-            var outputTypeParams = structurePrototype.typeParams().isEmpty() ? "" : "<" + join(", ", structurePrototype.typeParams()) + ">";
             var entered = state.enter(structurePrototype);
             var depth = structurePrototype.depth;
 
-            var statements = compileStatements(entered, structurePrototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
-            var generated = structurePrototype.beforeInfix + structurePrototype.infix + structurePrototype.name() + outputTypeParams + " {" + statements.right + createIndent(depth) + "}";
-            var formatted = depth == 0 ? generated + "\n" : (createIndent(depth) + generated);
-            return Optional.of(new Tuple<>(statements.left.exit(), formatted));
+            var statementsTuple = parseStatements(entered, structurePrototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+            var statement = statementsTuple.right;
+            return Optional.of(new Tuple<>(statementsTuple.left.exit(), new Structure(structurePrototype, statement, depth)));
         }
         return Optional.empty();
     }
 
-    private static Tuple<CompileState, String> compileClassStatement(CompileState state, String input, int depth) {
-        return compileWhitespace(state, input)
-                .or(() -> compileClass(state, input, depth))
-                .or(() -> compileStructure(state, "interface ", input, depth))
-                .or(() -> compileDefinitionStatement(input, depth, state))
-                .or(() -> compileMethod(input, depth, state))
-                .orElseGet(() -> compileContent(state, input));
+    private static Tuple<CompileState, StructSegment> compileClassStatement(CompileState state, String input, int depth) {
+        return Main.<Whitespace, StructSegment>typed(() -> parseWhitespace(state, input))
+                .or(() -> parseClass(state, input, depth))
+                .or(() -> parseStructure(state, "interface ", input, depth))
+                .or(() -> parseDefinitionStatement(input, depth, state))
+                .or(() -> parseMethod(input, depth, state))
+                .orElseGet(() -> parsePlaceholder0(state, input));
     }
 
-    private static Tuple<CompileState, String> compileContent(CompileState state, String input) {
-        return new Tuple<>(state, generatePlaceholder(input));
+    private static Tuple<CompileState, StructSegment> parsePlaceholder0(CompileState state, String input) {
+        var tuple = parsePlaceholder(state, input);
+        return new Tuple<>(tuple.left, tuple.right);
     }
 
-    private static Optional<Tuple<CompileState, String>> compileMethod(String input, int depth, CompileState state) {
+    private static <T extends R, R> Optional<Tuple<CompileState, R>> typed(Supplier<Optional<Tuple<CompileState, T>>> supplier) {
+        return supplier.get().map(tuple -> new Tuple<>(tuple.left, tuple.right));
+    }
+
+    private static Tuple<CompileState, String> compilePlaceholder(CompileState state, String input) {
+        var tuple = parsePlaceholder(state, input);
+        return new Tuple<>(tuple.left, tuple.right.generate());
+    }
+
+    private static Tuple<CompileState, Placeholder> parsePlaceholder(CompileState state, String input) {
+        return new Tuple<>(state, new Placeholder(input));
+    }
+
+    private static Optional<Tuple<CompileState, StructSegment>> parseMethod(String input, int depth, CompileState state) {
         var stripped = input.strip();
         var paramStart = stripped.indexOf("(");
         if (paramStart >= 0) {
@@ -486,7 +561,7 @@ public class Main {
                     var outputContent = inputContent.equals(";") ? ";" : generatePlaceholder(inputContent);
                     var tuple = compileValues(definitionTuple.left, params, Main::compileParameter);
                     var value = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")" + outputContent;
-                    return Optional.of(new Tuple<>(tuple.left, value));
+                    return Optional.of(new Tuple<>(tuple.left, new Content(value)));
                 }
                 return Optional.empty();
             });
@@ -522,25 +597,35 @@ public class Main {
     private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
         return compileWhitespace(state, input)
                 .or(() -> compileDefinition(state, input))
-                .orElseGet(() -> compileContent(state, input));
+                .orElseGet(() -> compilePlaceholder(state, input));
     }
 
     private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        return generate(() -> parseWhitespace(state, input));
+    }
+
+    private static <T extends Node> Optional<Tuple<CompileState, String>> generate(Supplier<Optional<Tuple<CompileState, T>>> parser) {
+        return parser.get().map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+    }
+
+    private static Optional<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return Optional.of(new Tuple<>(state, ""));
+            return Optional.of(new Tuple<>(state, new Whitespace()));
         }
         return Optional.empty();
     }
 
-    private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(String input, int depth, CompileState state) {
+    private static Optional<Tuple<CompileState, StructSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
         var stripped = input.strip();
         if (!stripped.endsWith(";")) {
             return Optional.empty();
         }
 
         var definition = stripped.substring(0, stripped.length() - ";".length());
-        return compileDefinition(state, definition)
-                .map(generated -> generateStatement(depth, generated.left, generated.right));
+        return compileDefinition(state, definition).map(generated -> {
+            var tuple = generateStatement(depth, generated.left, generated.right);
+            return new Tuple<>(tuple.left, new Content(tuple.right));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
@@ -629,7 +714,7 @@ public class Main {
             }
         }
 
-        return compileContent(state, input);
+        return compilePlaceholder(state, input);
     }
 
     private static String generateFunctionalType(List<String> arguments, String returns) {
