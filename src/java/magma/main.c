@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -63,7 +64,7 @@ public class Main {
 	}
 	private sealed interface Caller extends Node {
 	}
-	private sealed interface Value extends /* Caller permits DataAccess, Invokable, Placeholder, Symbol */ {
+	private sealed interface Value extends /* Caller permits BooleanNode, DataAccess, Invokable, Placeholder, Symbol */ {
 	}
 	private interface StatementValue extends Node {
 	}
@@ -82,7 +83,7 @@ public class Main {
 		}
 		@Override
         public boolean isPresent(){
-			return /* true */;
+			return true;
 		}
 		public T get(){
 			return this.value;
@@ -119,7 +120,7 @@ public class Main {
 		}
 		@Override
         public boolean isPresent(){
-			return /* false */;
+			return false;
 		}
 		@Override
         public T orElse(T other){
@@ -194,7 +195,7 @@ public class Main {
 		}
 		@Override
         public boolean anyMatch(T -> boolean predicate){
-			return this.fold(/* false */, /* (aBoolean */, /* t) -> aBoolean || predicate */.test(/* t */));
+			return this.fold(false, /* (aBoolean */, /* t) -> aBoolean || predicate */.test(/* t */));
 		}
 		@Override
         public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
@@ -218,7 +219,7 @@ public class Main {
 		}
 	}
 	private static class Lists {
-		private record ImmutableList<T>(/* java.util.List<T> */ elements) implements List_<T> {
+		private record ImmutableList<T>(/* List<T> */ elements) implements List_<T> {
 			/* public */ ImmutableList(){
 				/* this(new ArrayList<>()) */;
 			}
@@ -537,7 +538,7 @@ public class Main {
 		}
 		@Override
         public boolean hasName(String name){
-			return /* false */;
+			return false;
 		}
 		@Override
         public /* Map<String, Type> */ extractFromTemplate(Type template){
@@ -1027,6 +1028,14 @@ public class Main {
 
     private static Tuple<CompileState, Value> parseValue(CompileState state, String input) {
         var stripped = input.strip();
+        if (stripped.equals("true")) {
+            return new Tuple<>(state, BooleanNode.True);
+        }
+        
+        if (stripped.equals("false")) {
+            return new Tuple<>(state, BooleanNode.False);
+        }
+
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
             var argsStart = withoutEnd.indexOf("(");
@@ -1081,7 +1090,7 @@ public class Main {
             var value = valueTuple.right;
 
             var resolved = resolve(valueState, value);
-            if(resolved instanceof Functional) {
+            if (resolved instanceof Functional) {
                 return new Tuple<>(valueState, value);
             }
             return new Tuple<>(valueState, new DataAccess(value, property));
@@ -1123,6 +1132,7 @@ public class Main {
             case Symbol symbol ->
                     state.findValue(symbol.value).map(Definition::type).orElseGet(() -> new Placeholder(symbol.value));
             case Placeholder placeholder -> placeholder;
+            case BooleanNode booleanNode -> Primitive.Boolean;
         };
     } *//* 
 
@@ -1345,6 +1355,22 @@ public class Main {
 
     private static String generatePlaceholder(String input) {
         return "/* " + input + " */";
+    } *//* 
+
+    private enum BooleanNode implements Value {
+        True("true"),
+        False("false");
+
+        private final String value;
+
+        BooleanNode(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
     } *//* 
 
     private enum Primitive implements Type {
