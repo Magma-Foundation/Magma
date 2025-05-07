@@ -454,10 +454,11 @@ public class Main {
         }
 
         private String generate() {
-            var joinedInterfaces = this.interfaces.iterate().collect(new Joiner(", ")).map(result -> " implements " + result).orElse("");
-            var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
+            var typeParamsStrings = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
+            var paramStrings = this.parameters.isEmpty() ? "" : "(" + join(", ", this.parameters) + ")";
             var extendsString = this.maybeSuperType.map(extendsSlice -> " extends " + extendsSlice).orElse("");
-            return this.beforeInfix + this.infix + this.name() + outputTypeParams + extendsString + joinedInterfaces;
+            var interfacesString = this.interfaces.iterate().collect(new Joiner(", ")).map(result -> " implements " + result).orElse("");
+            return this.beforeInfix + this.infix + this.name() + typeParamsStrings + paramStrings + extendsString + interfacesString;
         }
 
         public StructurePrototype withBeforeInfix(String beforeInfix) {
@@ -489,6 +490,9 @@ public class Main {
         }
 
         public StructurePrototype withName(String name) {
+            if (name.isEmpty()) {
+                return this;
+            }
             return new StructurePrototype(this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         }
 
@@ -662,18 +666,17 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String afterInfix, StructurePrototype prototype) {
+    private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String input, StructurePrototype prototype) {
         var entered = state.enter();
-        var implementsIndex = afterInfix.indexOf(" implements ");
+        var implementsIndex = input.indexOf(" implements ");
         if (implementsIndex >= 0) {
-            var left = afterInfix.substring(0, implementsIndex).strip();
-            var right = afterInfix.substring(implementsIndex + " implements ".length());
+            var left = input.substring(0, implementsIndex).strip();
+            var right = input.substring(implementsIndex + " implements ".length());
             var tuple = compileType(entered, right);
             return assembleStructure(tuple.left, prototype.withName(left).withInterfaces(Lists.of(tuple.right)));
         }
 
-        var prototype1 = afterInfix.isEmpty() ? prototype : prototype.withName(afterInfix);
-        return assembleStructure(entered, prototype1);
+        return assembleStructure(entered, prototype.withName(input));
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeExtends(CompileState state, StructurePrototype prototype, String afterInfix) {
@@ -691,21 +694,25 @@ public class Main {
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeParameters(
             CompileState state,
             StructurePrototype prototype,
-            String afterInfix
+            String input
     ) {
-        if (afterInfix.endsWith(")")) {
-            var slice = afterInfix.substring(0, afterInfix.length() - ")".length());
-            var paramStart = slice.indexOf("(");
+        var paramEnd = input.lastIndexOf(")");
+        if (paramEnd >= 0) {
+            var left = input.substring(0, paramEnd);
+            var next = input.substring(paramEnd + ")".length());
+
+            var paramStart = left.indexOf("(");
             if (paramStart >= 0) {
-                var left = slice.substring(0, paramStart);
-                var right = slice.substring(paramStart + "(".length());
-                var parsed = parseValues(state, right, Main::compileParameter);
+                var name = left.substring(0, paramStart);
+                var paramsString = left.substring(paramStart + "(".length());
+                var parsed = parseValues(state, paramsString, Main::compileParameter);
                 var parameters = parsed.right;
-                return parseStructureWithMaybeExtends(parsed.left, prototype.withParameters(parameters), left);
+
+                return parseStructureWithMaybeExtends(parsed.left, prototype.withParameters(parameters).withName(name), next);
             }
         }
 
-        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
+        return parseStructureWithMaybeExtends(state, prototype, input);
     }
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeTypeParameters(CompileState state, StructurePrototype prototype, String afterInfix) {

@@ -49,85 +49,70 @@ public class Main {
 		String generate();
 	}
 	private interface StructSegment extends Node {
-	}/* 
-
-    private record Some<T>(T value) implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
+	}
+	private record Some<T>(T value) implements Option<T> {
+		@Override
+        public Option<R> map<R>(T -> R mapper)/*  {
             return new Some<>(mapper.apply(this.value));
-        }
-
-        @Override
-        public boolean isPresent() {
+        } */
+		@Override
+        public boolean isPresent()/*  {
             return true;
-        }
-
-        public T get() {
+        } */
+		public T get()/*  {
             return this.value;
-        }
-
-        @Override
-        public T orElse(T other) {
+        } */
+		@Override
+        public T orElse(T other)/*  {
             return this.value;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
+        } */
+		@Override
+        public T orElseGet(() -> T other)/*  {
             return this.value;
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
+        } */
+		@Override
+        public Option<T> or(() -> Option<T> other)/*  {
             return this;
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        } */
+		@Override
+        public Option<R> flatMap<R>(T -> Option<R> mapper)/*  {
             return mapper.apply(this.value);
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
+        } */
+		@Override
+        public Option<T> filter(T -> boolean predicate)/*  {
             return predicate.test(this.value) ? this : new None<>();
-        }
-    } *//* 
-
-    private record None<T>() implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
+        } */
+	}
+	private record None<T>() implements Option<T> {
+		@Override
+        public Option<R> map<R>(T -> R mapper)/*  {
             return new None<>();
-        }
-
-        @Override
-        public boolean isPresent() {
+        } */
+		@Override
+        public boolean isPresent()/*  {
             return false;
-        }
-
-        @Override
-        public T orElse(T other) {
+        } */
+		@Override
+        public T orElse(T other)/*  {
             return other;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
+        } */
+		@Override
+        public T orElseGet(() -> T other)/*  {
             return other.get();
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
+        } */
+		@Override
+        public Option<T> or(() -> Option<T> other)/*  {
             return other.get();
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        } */
+		@Override
+        public Option<R> flatMap<R>(T -> Option<R> mapper)/*  {
             return new None<>();
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
+        } */
+		@Override
+        public Option<T> filter(T -> boolean predicate)/*  {
             return new None<>();
-        }
-    } */
+        } */
+	}
 	private static class RangeHead implements Head<Integer> {
         private final int length;
         private int counter = 0; /* public */ RangeHead(int length)/*  {
@@ -144,21 +129,18 @@ public class Main {
             this.counter++;
             return new Some<>(value);
         }
-    } *//* 
-
-    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-        @Override
-        public <R> Iterator<R> map(Function<T, R> mapper) {
+    } */
+	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+		@Override
+        public Iterator<R> map<R>(T -> R mapper)/*  {
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
-        }
-
-        @Override
-        public <C> C collect(Collector<T, C> collector) {
+        } */
+		@Override
+        public C collect<C>(Collector<T, C> collector)/*  {
             return this.fold(collector.createInitial(), collector::fold);
-        }
-
-        @Override
-        public <C> C fold(C initial, BiFunction<C, T, C> folder) {
+        } */
+		@Override
+        public C fold<C>(C initial, (C, T) -> C folder)/*  {
             var current = initial;
             while (true) {
                 C finalCurrent = current;
@@ -170,90 +152,76 @@ public class Main {
                     return current;
                 }
             }
-        }
-
-        @Override
-        public boolean anyMatch(Predicate<T> predicate) {
+        } */
+		@Override
+        public boolean anyMatch(T -> boolean predicate)/*  {
             return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
-        }
-    } */
-	private static class Lists {/* 
-        private record MutableList<T>(java.util.List<T> elements) implements List<T> {
-            public MutableList() {
+        } */
+	}
+	private static class Lists {
+		private record MutableList<T>(/* java.util.List */<T> elements) implements List<T> {
+			/* public */ MutableList()/*  {
                 this(new ArrayList<>());
-            }
-
-            @Override
-            public List<T> add(T element) {
+            } */
+			@Override
+            public List<T> add(T element)/*  {
                 this.elements.add(element);
                 return this;
-            }
-
-            @Override
-            public Iterator<T> iterate() {
+            } */
+			@Override
+            public Iterator<T> iterate()/*  {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
-            }
-
-            @Override
-            public boolean isEmpty() {
+            } */
+			@Override
+            public boolean isEmpty()/*  {
                 return this.elements.isEmpty();
-            }
-
-            @Override
-            public boolean contains(T element) {
+            } */
+			@Override
+            public boolean contains(T element)/*  {
                 return this.elements.contains(element);
-            }
-
-            @Override
-            public int size() {
+            } */
+			@Override
+            public int size()/*  {
                 return this.elements.size();
-            }
-
-            @Override
-            public List<T> subList(int startInclusive, int endExclusive) {
+            } */
+			@Override
+            public List<T> subList(int startInclusive, int endExclusive)/*  {
                 return new MutableList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
-            }
-
-            @Override
-            public T getLast() {
+            } */
+			@Override
+            public T getLast()/*  {
                 return this.elements.getLast();
-            }
-
-            @Override
-            public T get(int index) {
+            } */
+			@Override
+            public T get(int index)/*  {
                 return this.elements.get(index);
-            }
-
-            @Override
-            public Iterator<T> iterateReverse() {
+            } */
+			@Override
+            public Iterator<T> iterateReverse()/*  {
                 return new HeadedIterator<>(new RangeHead(this.elements.size()))
                         .map(index -> this.elements.size() - index - 1)
                         .map(this.elements::get);
-            }
-
-            @Override
-            public List<T> addAll(List<T> others) {
+            } */
+			@Override
+            public List<T> addAll(List<T> others)/*  {
                 return others.iterate().<List<T>>fold(this, List::add);
-            }
-
-            @Override
-            public List<T> removeLast() {
+            } */
+			@Override
+            public List<T> removeLast()/*  {
                 this.elements.removeLast();
                 return this;
-            }
-
-            private List<T> setLast(T element) {
+            } */
+			private List<T> setLast(T element)/*  {
                 this.elements.set(this.elements.size() - 1, element);
                 return this;
-            }
-
-            @Override
-            public List<T> mapLast(Function<T, T> mapper) {
+            } */
+			@Override
+            public List<T> mapLast(T -> T mapper)/*  {
                 var oldLast = this.getLast();
                 var newLast = mapper.apply(oldLast);
                 return this.setLast(newLast);
-            }
-        } */
+            } */
+		}
 		public static List<T> empty<T>()/*  {
             return new MutableList<>();
         } */
@@ -312,7 +280,7 @@ public class Main {
             return new Some<>(maybeCurrent.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     } */
-	private static class <T> implements Collector<T, List<T>> {
+	private static class ListCollector<T> implements Collector<T, List<T>> {
 		@Override
         public List<T> createInitial()/*  {
             return Lists.empty();
@@ -382,10 +350,11 @@ public class Main {
         }
 
         private String generate() {
-            var joinedInterfaces = this.interfaces.iterate().collect(new Joiner(", ")).map(result -> " implements " + result).orElse("");
-            var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
+            var typeParamsStrings = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
+            var paramStrings = this.parameters.isEmpty() ? "" : "(" + join(", ", this.parameters) + ")";
             var extendsString = this.maybeSuperType.map(extendsSlice -> " extends " + extendsSlice).orElse("");
-            return this.beforeInfix + this.infix + this.name() + outputTypeParams + extendsString + joinedInterfaces;
+            var interfacesString = this.interfaces.iterate().collect(new Joiner(", ")).map(result -> " implements " + result).orElse("");
+            return this.beforeInfix + this.infix + this.name() + typeParamsStrings + paramStrings + extendsString + interfacesString;
         }
 
         public StructurePrototype withBeforeInfix(String beforeInfix) {
@@ -417,6 +386,9 @@ public class Main {
         }
 
         public StructurePrototype withName(String name) {
+            if (name.isEmpty()) {
+                return this;
+            }
             return new StructurePrototype(this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
         }
 
@@ -424,7 +396,7 @@ public class Main {
             return new StructurePrototype(this.beforeInfix, this.infix, this.name, this.typeParams, new Some<String>(type), this.parameters, this.interfaces, this.content, this.depth);
         }
     } */
-	private record Tuple<A, B> {
+	private record Tuple<A, B>(A left, B right) {
 	}
 	private static class Whitespace implements StructSegment {
 		@Override
@@ -446,19 +418,19 @@ public class Main {
             return this.depth == 0 ? generated + "\n" : (createIndent(this.depth()) + generated);
         }
     } */
-	private /* record */ Content(String input)/*  implements StructSegment {
-        @Override
-        public String generate() {
+	private record Content(String input) implements StructSegment {
+		@Override
+        public String generate()/*  {
             return this.input;
-        }
-    } */
-	private /* record */ Placeholder(String input)/*  implements Node, StructSegment {
-        @Override
-        public String generate() {
+        } */
+	}
+	private record Placeholder(String input) implements /* Node, StructSegment */ {
+		@Override
+        public String generate()/*  {
             return generatePlaceholder(this.input);
-        }
-    } */
-	private record StructureType {
+        } */
+	}
+	private record StructureType(/* StructurePrototype */ prototype) {
 	}
 	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
@@ -567,18 +539,17 @@ public class Main {
         return new None<>();
     } *//* 
 
-    private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String afterInfix, StructurePrototype prototype) {
+    private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String input, StructurePrototype prototype) {
         var entered = state.enter();
-        var implementsIndex = afterInfix.indexOf(" implements ");
+        var implementsIndex = input.indexOf(" implements ");
         if (implementsIndex >= 0) {
-            var left = afterInfix.substring(0, implementsIndex).strip();
-            var right = afterInfix.substring(implementsIndex + " implements ".length());
+            var left = input.substring(0, implementsIndex).strip();
+            var right = input.substring(implementsIndex + " implements ".length());
             var tuple = compileType(entered, right);
             return assembleStructure(tuple.left, prototype.withName(left).withInterfaces(Lists.of(tuple.right)));
         }
 
-        var prototype1 = afterInfix.isEmpty() ? prototype : prototype.withName(afterInfix);
-        return assembleStructure(entered, prototype1);
+        return assembleStructure(entered, prototype.withName(input));
     } *//* 
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeExtends(CompileState state, StructurePrototype prototype, String afterInfix) {
@@ -596,21 +567,25 @@ public class Main {
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeParameters(
             CompileState state,
             StructurePrototype prototype,
-            String afterInfix
+            String input
     ) {
-        if (afterInfix.endsWith(")")) {
-            var slice = afterInfix.substring(0, afterInfix.length() - ")".length());
-            var paramStart = slice.indexOf("(");
+        var paramEnd = input.lastIndexOf(")");
+        if (paramEnd >= 0) {
+            var left = input.substring(0, paramEnd);
+            var next = input.substring(paramEnd + ")".length());
+
+            var paramStart = left.indexOf("(");
             if (paramStart >= 0) {
-                var left = slice.substring(0, paramStart);
-                var right = slice.substring(paramStart + "(".length());
-                var parsed = parseValues(state, right, Main::compileParameter);
+                var name = left.substring(0, paramStart);
+                var paramsString = left.substring(paramStart + "(".length());
+                var parsed = parseValues(state, paramsString, Main::compileParameter);
                 var parameters = parsed.right;
-                return parseStructureWithMaybeExtends(parsed.left, prototype.withParameters(parameters), left);
+
+                return parseStructureWithMaybeExtends(parsed.left, prototype.withParameters(parameters).withName(name), next);
             }
         }
 
-        return parseStructureWithMaybeExtends(state, prototype, afterInfix);
+        return parseStructureWithMaybeExtends(state, prototype, input);
     } *//* 
 
     private static Option<Tuple<CompileState, StructSegment>> parseStructureWithMaybeTypeParameters(CompileState state, StructurePrototype prototype, String afterInfix) {
