@@ -665,6 +665,7 @@ public class Main {
         return Main.<Whitespace, StructSegment>typed(() -> parseWhitespace(state, input))
                 .or(() -> parseClass(state, input, depth))
                 .or(() -> parseStructure(state, "interface ", input, depth))
+                .or(() -> parseStructure(state, "record ", input, depth))
                 .or(() -> parseDefinitionStatement(input, depth, state))
                 .or(() -> parseMethod(input, depth, state))
                 .orElseGet(() -> parsePlaceholder0(state, input));
@@ -784,7 +785,7 @@ public class Main {
                         var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
                         var typeParamStart = withoutTypeParamEnd.indexOf("<");
                         if (typeParamStart >= 0) {
-                            var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart);
+                            var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart).strip();
                             var typeParams = parseValues(state, withoutTypeParamEnd.substring(typeParamStart + "<".length()), Main::stripToTuple);
                             return new Some<>(generateDefinition(new Some<String>(beforeTypeParams), type, name, typeParams.left, typeParams.right));
                         }
