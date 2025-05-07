@@ -7,25 +7,31 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 public class Main {
 	private interface Collector<T, C> {
 		C createInitial();
 		C fold(C current, T element);
 	}
 	private interface Iterator<T> {
-		Iterator</* R */> map<R>(T -> /* R */ mapper);
-		/* C */ collect<C>(/* Collector */<T, /* C */> collector);
-		/* C */ fold<C>(/* C */ initial, /* BiFunction */</* C */, T, /* C */> folder);
+		Iterator<R> map<R>(T -> R mapper);
+		C collect<C>(/* Collector */<T, C> collector);
+		C fold<C>(C initial, /* BiFunction */<C, T, C> folder);
+		/* boolean */ anyMatch(/* Predicate */<T> predicate);
 	}
 	private interface List<T> {
+		List<T> mapLast(T -> T mapper);
 		List<T> add(T element);
 		/* Iterator */<T> iterate();
 		/* boolean */ isEmpty();
 		/* boolean */ contains(T element);
 		/* int */ size();
 		List<T> subList(/* int */ startInclusive, /* int */ endExclusive);
-		T last();
+		T getLast();
+		List<T> setLast(T element);
 		T get(/* int */ index);
+		/* Iterator */<T> iterateReverse();
+		List<T> addAll(List<T> others);
 	}
 	private interface Head<T> {
 		/* Optional */<T> next();
@@ -73,6 +79,11 @@ public class Main {
                 }
             }
         }
+
+        @Override
+        public boolean anyMatch(Predicate<T> predicate) {
+            return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        }
     } */
 	private static class Lists {/* 
         private record MutableList<T>(java.util.List<T> elements) implements List<T> {
@@ -112,7 +123,7 @@ public class Main {
             }
 
             @Override
-            public T last() {
+            public T getLast() {
                 return this.elements.getLast();
             }
 
@@ -120,11 +131,36 @@ public class Main {
             public T get(int index) {
                 return this.elements.get(index);
             }
+
+            @Override
+            public Iterator<T> iterateReverse() {
+                return new HeadedIterator<>(new RangeHead(this.elements.size()))
+                        .map(index -> this.elements.size() - index - 1)
+                        .map(this.elements::get);
+            }
+
+            @Override
+            public List<T> addAll(List<T> others) {
+                return others.iterate().<List<T>>fold(this, List::add);
+            }
+
+            @Override
+            public List<T> setLast(T element) {
+                this.elements.set(this.elements.size() - 1, element);
+                return this;
+            }
+
+            @Override
+            public List<T> mapLast(Function<T, T> mapper) {
+                var oldLast = this.getLast();
+                var newLast = mapper.apply(oldLast);
+                return this.setLast(newLast);
+            }
         } */
-		public static  /* List */</* T */> empty<T>()/*  {
+		public static  /* List */<T> empty<T>()/*  {
             return new MutableList<>();
         } */
-		public static  /* List */</* T */> of<T>(/* T... */ elements)/*  {
+		public static  /* List */<T> of<T>(/* T... */ elements)/*  {
             return new MutableList<>(new ArrayList<>(Arrays.asList(elements)));
         } */
 	}
@@ -140,11 +176,11 @@ public class Main {
 		/* public */ DivideState()/*  {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
-		private /* DivideState */ append(/* char */ c)/*  {
+		private DivideState append(/* char */ c)/*  {
             this.buffer.append(c);
             return this;
         } */
-		private /* DivideState */ advance()/*  {
+		private DivideState advance()/*  {
             this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
@@ -152,11 +188,11 @@ public class Main {
 		public /* boolean */ isLevel()/*  {
             return this.depth == 0;
         } */
-		public /* DivideState */ enter()/*  {
+		public DivideState enter()/*  {
             this.depth++;
             return this;
         } */
-		public /* DivideState */ exit()/*  {
+		public DivideState exit()/*  {
             this.depth--;
             return this;
         } */
@@ -185,7 +221,51 @@ public class Main {
             return current.add(element);
         } */
 	}
-	public /* record */ CompileState(/* String */ name, /* List */</* String */> typeParams)/*  {
+	private /* record */ Frame(/* Optional */</* StructurePrototype */> maybeStructurePrototype, /* List */</* String */> typeParams)/*  {
+        public Frame() {
+            this(Optional.empty(), Lists.empty());
+        }
+
+        public boolean isDefined(String typeName) {
+            return this.isThis(typeName) || this.typeParams.contains(typeName);
+        }
+
+        private boolean isThis(String input) {
+            return this.maybeStructurePrototype.isPresent()
+                    && (this.maybeStructurePrototype.get().name.equals(input)
+                    || this.maybeStructurePrototype.get().typeParams().contains(input));
+        }
+
+        public Frame withStructurePrototype(StructurePrototype prototype) {
+            return new Frame(Optional.of(prototype), this.typeParams);
+        }
+
+        public Frame withTypeParams(List<String> typeParams) {
+            return new Frame(this.maybeStructurePrototype, this.typeParams.addAll(typeParams));
+        }
+    } */
+	public static final class CompileState {
+		private final /* List */</* Frame */> frames;
+		/* public */ CompileState()/*  {
+            this(Lists.empty());
+        } */
+		/* public */ CompileState(/* Main.List */</* Frame */> frames)/*  {
+            this.frames = frames;
+        } */
+		private CompileState enter(/* StructurePrototype */ structurePrototype)/*  {
+            return new CompileState(this.frames.add(new Frame())).defineStructurePrototype(structurePrototype);
+        } */
+		private CompileState defineStructurePrototype(/* StructurePrototype */ structurePrototype)/*  {
+            return new CompileState(this.frames.mapLast(last -> last.withStructurePrototype(structurePrototype)));
+        } */
+		private /* boolean */ isDefined(/* String */ input)/*  {
+            return this.frames.iterateReverse().anyMatch(frame -> frame.isDefined(input));
+        } */
+		public CompileState defineTypeParams(/* List */</* String */> typeParams)/*  {
+            return new CompileState(this.frames.mapLast(last -> last.withTypeParams(typeParams)));
+        } */
+	}
+	public /* record */ StructurePrototype(/* String */ name, /* List */</* String */> typeParams)/*  {
     } */
 	public static /* void */ main()/*  {
         var root = Paths.get(".", "src", "java", "magma");
@@ -278,11 +358,11 @@ public class Main {
                             var name = withoutEnd.substring(0, typeParamsStart).strip();
                             var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
                             var elements = parseValues(typeParamString, String::strip);
-                            return assembleStructure(depth, infix, beforeInfix, elements, name, content);
+                            return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(name, elements), content);
                         }
                     }
 
-                    return assembleStructure(depth, infix, beforeInfix, Lists.empty(), afterInfix, content);
+                    return assembleStructure(depth, infix, beforeInfix, new StructurePrototype(afterInfix, Lists.empty()), content);
                 }
             }
         }
@@ -290,11 +370,11 @@ public class Main {
         return Optional.empty();
     } *//* 
 
-    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, List<String> typeParams, String name, String content) {
-        if (isSymbol(name)) {
-            var outputTypeParams = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-            var state = new CompileState(name, typeParams);
-            var generated = beforeInfix + infix + name + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, state)) + createIndent(depth) + "}";
+    private static Optional<String> assembleStructure(int depth, String infix, String beforeInfix, StructurePrototype structurePrototype, String content) {
+        if (isSymbol(structurePrototype.name())) {
+            var outputTypeParams = structurePrototype.typeParams().isEmpty() ? "" : "<" + join(", ", structurePrototype.typeParams()) + ">";
+            var state = new CompileState().enter(structurePrototype);
+            var generated = beforeInfix + infix + structurePrototype.name() + outputTypeParams + " {" + compileStatements(content, segment -> compileClassStatement(segment, depth + 1, state)) + createIndent(depth) + "}";
             return Optional.of(depth == 0 ? generated + "\n" : (createIndent(depth) + generated));
         }
         return Optional.empty();
@@ -384,7 +464,7 @@ public class Main {
                 var divisions = divide(beforeName, Main::foldTypeDivisions);
                 if (divisions.size() >= 2) {
                     var beforeType = join(" ", divisions.subList(0, divisions.size() - 1)).strip();
-                    var type = divisions.last();
+                    var type = divisions.getLast();
 
                     if (beforeType.endsWith(">")) {
                         var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
@@ -424,7 +504,7 @@ public class Main {
     private static String generateDefinition(Optional<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
         var beforeTypeString = maybeBeforeType.filter(value -> !value.isEmpty()).map(beforeType -> beforeType + " ").orElse("");
         var typeParamString = typeParams.isEmpty() ? "" : "<" + join(", ", typeParams) + ">";
-        return beforeTypeString + compileType(type, state) + " " + name + typeParamString;
+        return beforeTypeString + compileType(type, state.defineTypeParams(typeParams)) + " " + name + typeParamString;
     } *//* 
 
     private static String generateStatement(String content, int depth) {
@@ -433,7 +513,7 @@ public class Main {
 
     private static String compileType(String input, CompileState state) {
         var stripped = input.strip();
-        if (state.typeParams().contains(stripped)) {
+        if (state.isDefined(stripped)) {
             return stripped;
         }
 
@@ -463,9 +543,10 @@ public class Main {
     } *//* 
 
     private static String compileBaseType(String base, CompileState state) {
-        if (base.equals(state.name)) {
+        if (state.isDefined(base)) {
             return base;
         }
+
         return generatePlaceholder(base);
     } *//* 
 
