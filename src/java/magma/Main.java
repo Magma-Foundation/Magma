@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class Main {
@@ -113,21 +114,26 @@ public class Main {
             return stripped + "\n";
         }
 
+        return compileStructure(stripped).orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileStructure(String input) {
+        var stripped = input.strip();
         if (stripped.endsWith("}")) {
             var withoutEnd = stripped.substring(0, stripped.length() - "}".length());
             var contentStart = withoutEnd.indexOf("{");
             if (contentStart >= 0) {
                 var beforeContent = withoutEnd.substring(0, contentStart);
                 var content = withoutEnd.substring(contentStart + "{".length());
-                return beforeContent + "{" + compileStatements(content, Main::compileClassStatement) + "}";
+                return Optional.of(beforeContent + "{" + compileStatements(content, Main::compileClassStatement) + "}");
             }
         }
 
-        return generatePlaceholder(input);
+        return Optional.empty();
     }
 
     private static String compileClassStatement(String input) {
-        return generatePlaceholder(input);
+        return compileStructure(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static String generatePlaceholder(String input) {
