@@ -442,8 +442,14 @@ public class Main {
         }
     }
 
-    public record StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix,
-                                     String content, int depth) {
+    public record StructurePrototype(
+            String name,
+            List<String> typeParams,
+            String beforeInfix,
+            String infix,
+            String content,
+            int depth,
+            Option<String> extendsType) {
         private String generate() {
             var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
             var s = this.beforeInfix + this.infix + this.name();
@@ -601,24 +607,42 @@ public class Main {
                 if (keywordIndex >= 0) {
                     var beforeInfix = beforeContent.substring(0, keywordIndex);
                     var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
-                    if (afterInfix.endsWith(">")) {
-                        var withoutEnd = afterInfix.substring(0, afterInfix.length() - ">".length());
-                        var typeParamsStart = withoutEnd.indexOf("<");
-                        if (typeParamsStart >= 0) {
-                            var name = withoutEnd.substring(0, typeParamsStart).strip();
-                            var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
-                            var elements = parseValues(state, typeParamString, Main::stripToTuple);
-                            var prototype = new StructurePrototype(name, elements.right, beforeInfix, infix, content, depth);
-                            return assembleStructure(elements.left, prototype);
-                        }
-                    }
 
-                    return assembleStructure(state, new StructurePrototype(afterInfix, Lists.empty(), beforeInfix, infix, content, depth));
+                    var extendsIndex = afterInfix.indexOf(" extends ");
+                    if (extendsIndex >= 0) {
+                        var left = afterInfix.substring(0, extendsIndex);
+                        var right = afterInfix.substring(extendsIndex + " extends ".length());
+                        var tuple = compileType(state, right);
+                        return parseStructureWithExtends(tuple.left, infix, depth, beforeInfix, left, new Some<>(tuple.right), content);
+                    }
+                    return parseStructureWithExtends(state, infix, depth, beforeInfix, afterInfix, new None<>(), content);
                 }
             }
         }
 
         return new None<>();
+    }
+
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithExtends(
+            CompileState state,
+            String infix,
+            int depth,
+            String beforeInfix, String afterInfix,
+            Option<String> extendsType, String content
+    ) {
+        if (afterInfix.endsWith(">")) {
+            var withoutEnd = afterInfix.substring(0, afterInfix.length() - ">".length());
+            var typeParamsStart = withoutEnd.indexOf("<");
+            if (typeParamsStart >= 0) {
+                var name = withoutEnd.substring(0, typeParamsStart).strip();
+                var typeParamString = withoutEnd.substring(typeParamsStart + "<".length());
+                var elements = parseValues(state, typeParamString, Main::stripToTuple);
+                var prototype = new StructurePrototype(name, elements.right, beforeInfix, infix, content, depth, extendsType);
+                return assembleStructure(elements.left, prototype);
+            }
+        }
+
+        return assembleStructure(state, new StructurePrototype(afterInfix, Lists.empty(), beforeInfix, infix, content, depth, extendsType));
     }
 
     private static Option<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
