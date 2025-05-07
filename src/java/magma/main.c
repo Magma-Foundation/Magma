@@ -45,10 +45,10 @@ public class Main {
 	private interface Head<T> {
 		Option<T> next();
 	}
-	private interface StructSegment extends /* Node */ {
-	}
 	private interface Node {
-		/* String */ generate();
+		String generate();
+	}
+	private interface StructSegment extends Node {
 	}/* 
 
     private record Some<T>(T value) implements Option<T> {
@@ -262,10 +262,10 @@ public class Main {
         } */
 	}
 	private static class DivideState {
-		private List</* String */> segments;
+		private List<String> segments;
 		private int depth;
 		private /* StringBuilder */ buffer;
-		/* private */ DivideState(List</* String */> segments, /* StringBuilder */ buffer, int depth)/*  {
+		/* private */ DivideState(List<String> segments, /* StringBuilder */ buffer, int depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -297,7 +297,7 @@ public class Main {
             return this.depth == 1;
         } */
 	}
-	private /* record */ Joiner(/* String */ delimiter)/*  implements Collector<String, Option<String>> {
+	private /* record */ Joiner(String delimiter)/*  implements Collector<String, Option<String>> {
         public Joiner() {
             this("");
         }
@@ -322,7 +322,7 @@ public class Main {
             return current.add(element);
         } */
 	}
-	private /* record */ Frame(Option</* StructurePrototype */> maybeStructurePrototype, List</* String */> typeParams, List /* typeNames */ <String>)/*  {
+	private /* record */ Frame(Option</* StructurePrototype */> maybeStructurePrototype, List<String> typeParams, List /* typeNames */ <String>)/*  {
         public Frame() {
             this(new None<StructurePrototype>(), Lists.empty(), Lists.empty());
         }
@@ -743,13 +743,18 @@ public class Main {
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
 
+        if (stripped.equals("int")) {
+            return new Tuple<>(state, stripped);
+        }
+
+        if (stripped.equals("String")) {
+            return new Tuple<>(state, stripped);
+        }
+
         if (stripped.equals("boolean")) {
             return new Tuple<>(state, stripped);
         }
 
-        if (stripped.equals("int")) {
-            return new Tuple<>(state, stripped);
-        }
 
         if (state.isDefined(stripped)) {
             return new Tuple<>(state, stripped);

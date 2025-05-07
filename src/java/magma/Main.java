@@ -73,11 +73,11 @@ public class Main {
         Option<T> next();
     }
 
-    private interface StructSegment extends Node {
-    }
-
     private interface Node {
         String generate();
+    }
+
+    private interface StructSegment extends Node {
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -834,13 +834,18 @@ public class Main {
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
 
+        if (stripped.equals("int")) {
+            return new Tuple<>(state, stripped);
+        }
+
+        if (stripped.equals("String")) {
+            return new Tuple<>(state, stripped);
+        }
+
         if (stripped.equals("boolean")) {
             return new Tuple<>(state, stripped);
         }
 
-        if (stripped.equals("int")) {
-            return new Tuple<>(state, stripped);
-        }
 
         if (state.isDefined(stripped)) {
             return new Tuple<>(state, stripped);
