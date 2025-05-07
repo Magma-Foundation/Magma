@@ -150,10 +150,15 @@ public class Main {
             var definition = stripped.substring(0, stripped.length() - ";".length());
             var nameSeparator = definition.lastIndexOf(" ");
             if (nameSeparator >= 0) {
-                var left = definition.substring(0, nameSeparator);
+                var beforeName = definition.substring(0, nameSeparator).strip();
                 var name = definition.substring(nameSeparator + " ".length()).strip();
                 if (isSymbol(name)) {
-                    return Optional.of(createIndent(depth) + generatePlaceholder(left) + " " + name + ";");
+                    var typeSeparator = beforeName.lastIndexOf(" ");
+                    if (typeSeparator >= 0) {
+                        var beforeType = beforeName.substring(0, typeSeparator);
+                        var type = beforeName.substring(typeSeparator + " ".length());
+                        return Optional.of(createIndent(depth) + beforeType + " " + generatePlaceholder(type) + " " + name + ";");
+                    }
                 }
             }
         }
