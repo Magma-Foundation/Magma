@@ -17,19 +17,19 @@ public class Main {
 	private interface Iterator<T> {
 		Iterator<R> map<R>(T -> R mapper);
 		C collect<C>(Collector<T, C> collector);
-		C fold<C>(C initial, /* BiFunction */<C, T, C> folder);
-		/* boolean */ anyMatch(/* Predicate */<T> predicate);
+		C fold<C>(C initial, (C, T) -> C folder);
+		boolean anyMatch(T -> boolean predicate);
 	}
 	private interface List<T> {
 		List<T> mapLast(T -> T mapper);
 		List<T> add(T element);
 		Iterator<T> iterate();
-		/* boolean */ isEmpty();
-		/* boolean */ contains(T element);
-		/* int */ size();
-		List<T> subList(/* int */ startInclusive, /* int */ endExclusive);
+		boolean isEmpty();
+		boolean contains(T element);
+		int size();
+		List<T> subList(int startInclusive, int endExclusive);
 		T getLast();
-		T get(/* int */ index);
+		T get(int index);
 		Iterator<T> iterateReverse();
 		List<T> addAll(List<T> others);
 		List<T> removeLast();
@@ -45,7 +45,7 @@ public class Main {
 	}
 	private static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter = 0; /* public */ RangeHead(/* int */ length)/*  {
+        private int counter = 0; /* public */ RangeHead(int length)/*  {
             this.length = length;
         }
 
@@ -178,9 +178,9 @@ public class Main {
 	}
 	private static class DivideState {
 		private List</* String */> segments;
-		private /* int */ depth;
+		private int depth;
 		private /* StringBuilder */ buffer;
-		/* private */ DivideState(List</* String */> segments, /* StringBuilder */ buffer, /* int */ depth)/*  {
+		/* private */ DivideState(List</* String */> segments, /* StringBuilder */ buffer, int depth)/*  {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -197,7 +197,7 @@ public class Main {
             this.buffer = new StringBuilder();
             return this;
         } */
-		public /* boolean */ isLevel()/*  {
+		public boolean isLevel()/*  {
             return this.depth == 0;
         } */
 		public DivideState enter()/*  {
@@ -208,7 +208,7 @@ public class Main {
             this.depth--;
             return this;
         } */
-		public /* boolean */ isShallow()/*  {
+		public boolean isShallow()/*  {
             return this.depth == 1;
         } */
 	}
@@ -278,7 +278,7 @@ public class Main {
 		private CompileState defineStructurePrototype(/* StructurePrototype */ structurePrototype)/*  {
             return new CompileState(this.frames.mapLast(last -> last.withStructurePrototype(structurePrototype)));
         } */
-		private /* boolean */ isDefined(String input)/*  {
+		private boolean isDefined(String input)/*  {
             return this.frames.iterateReverse().anyMatch(frame -> frame.isDefined(input));
         } */
 		public CompileState defineTypeParams(List<String> typeParams)/*  {
@@ -291,7 +291,7 @@ public class Main {
             return new CompileState(this.frames.mapLast(last -> last.withDefinition(definition)));
         } */
 	}
-	public /* record */ StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix, String content, /* int */ depth)/*  {
+	public /* record */ StructurePrototype(String name, List<String> typeParams, String beforeInfix, String infix, String content, int depth)/*  {
         private String generate() {
             var outputTypeParams = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams()) + ">";
             var s = this.beforeInfix + this.infix + this.name();
@@ -307,7 +307,7 @@ public class Main {
             return "";
         }
     } */
-	private /* record */ Structure(/* StructurePrototype */ structurePrototype, List</* StructSegment */> statements, /* int */ depth)/*  implements StructSegment {
+	private /* record */ Structure(/* StructurePrototype */ structurePrototype, List</* StructSegment */> statements, int depth)/*  implements StructSegment {
         @Override
         public String generate() {
             var s1 = this.structurePrototype.generate();
@@ -351,7 +351,7 @@ public class Main {
         CompileState compileState = new CompileState();
         return compileStatements(compileState.enter(), input, Main::compileRootSegment).right;
     } */
-	private static /* Tuple */<CompileState, String> compileStatements(CompileState state, String input, /* BiFunction */<CompileState, String, /* Tuple */<CompileState, String>> mapper)/*  {
+	private static /* Tuple */<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> /* Tuple */<CompileState, String> mapper)/*  {
         var parsed = parseStatements(state, input, mapper);
         return new Tuple<>(parsed.left, join("", parsed.right));
     } */
@@ -363,7 +363,7 @@ public class Main {
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
-	private static  /* Tuple */<CompileState, List<T>> parseAll<T>(CompileState state, String input, /* BiFunction */<DivideState, /*  Character */, DivideState> folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>)/*  {
+	private static  /* Tuple */<CompileState, List<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>)/*  {
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
             var currentState = tuple.left;
             var currentElements = tuple.right;
@@ -374,7 +374,7 @@ public class Main {
             return new Tuple<>(newState, currentElements.add(newElement));
         });
     } */
-	private static List<String> divide(String input, /* BiFunction */<DivideState, /*  Character */, DivideState> folder)/*  {
+	private static List<String> divide(String input, (DivideState, /*  Character */) -> DivideState folder)/*  {
         DivideState state = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -635,6 +635,15 @@ public class Main {
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
+        
+        if (stripped.equals("boolean")) {
+            return new Tuple<>(state, stripped);
+        }
+
+        if (stripped.equals("int")) {
+            return new Tuple<>(state, stripped);
+        }
+
         if (state.isDefined(stripped)) {
             return new Tuple<>(state, stripped);
         }
@@ -651,6 +660,14 @@ public class Main {
 
                 if (base.equals("Function")) {
                     return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
+                }
+
+                if (base.equals("BiFunction")) {
+                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0), typeArgs.get(1)), typeArgs.get(2)));
+                }
+
+                if (base.equals("Predicate")) {
+                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), "boolean"));
                 }
 
                 return new Tuple<>(state, compileBaseType(base, state) + "<" + outputTypeArgs + ">");

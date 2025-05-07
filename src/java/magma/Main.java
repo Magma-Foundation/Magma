@@ -712,6 +712,15 @@ public class Main {
 
     private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         var stripped = input.strip();
+
+        if (stripped.equals("boolean")) {
+            return new Tuple<>(state, stripped);
+        }
+
+        if (stripped.equals("int")) {
+            return new Tuple<>(state, stripped);
+        }
+
         if (state.isDefined(stripped)) {
             return new Tuple<>(state, stripped);
         }
@@ -728,6 +737,14 @@ public class Main {
 
                 if (base.equals("Function")) {
                     return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
+                }
+
+                if (base.equals("BiFunction")) {
+                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0), typeArgs.get(1)), typeArgs.get(2)));
+                }
+
+                if (base.equals("Predicate")) {
+                    return new Tuple<>(state, generateFunctionalType(Lists.of(typeArgs.get(0)), "boolean"));
                 }
 
                 return new Tuple<>(state, compileBaseType(base, state) + "<" + outputTypeArgs + ">");
