@@ -373,13 +373,13 @@ public class Main {
     private record Frame(
             Option<String> maybeName,
             List<String> typeParams,
-            List<String> typeNames
-    ) {
+            List<String> typeNames,
+            List<String> definitions) {
         public Frame() {
-            this(new None<>(), Lists.empty(), Lists.empty());
+            this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
         }
 
-        public boolean isDefined(String typeName) {
+        public boolean isTypeDefined(String typeName) {
             return this.isThis(typeName)
                     || this.typeParams.contains(typeName)
                     || this.typeNames.contains(typeName);
@@ -390,15 +390,19 @@ public class Main {
         }
 
         public Frame withName(String name) {
-            return new Frame(new Some<>(name), this.typeParams, this.typeNames);
+            return new Frame(new Some<>(name), this.typeParams, this.typeNames, this.definitions);
         }
 
         public Frame withTypeParams(List<String> typeParams) {
-            return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames);
+            return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames, this.definitions);
         }
 
-        public Frame withDefinition(String definition) {
-            return new Frame(this.maybeName, this.typeParams, this.typeNames.add(definition));
+        public Frame withTypeName(String typeName) {
+            return new Frame(this.maybeName, this.typeParams, this.typeNames.add(typeName), this.definitions);
+        }
+
+        public boolean isValueDefined(String valueName) {
+            return this.definitions.contains(valueName);
         }
     }
 
@@ -421,8 +425,8 @@ public class Main {
             return new CompileState(this.frames.mapLast(last -> last.withName(name)));
         }
 
-        private boolean isDefined(String input) {
-            return this.frames.iterateReverse().anyMatch(frame -> frame.isDefined(input));
+        private boolean isTypeDefined(String input) {
+            return this.frames.iterateReverse().anyMatch(frame -> frame.isTypeDefined(input));
         }
 
         public CompileState defineTypeParams(List<String> typeParams) {
@@ -433,8 +437,12 @@ public class Main {
             return new CompileState(this.frames.removeLast());
         }
 
-        public CompileState defineType(String definition) {
-            return new CompileState(this.frames.mapLast(last -> last.withDefinition(definition)));
+        public CompileState defineType(String name) {
+            return new CompileState(this.frames.mapLast(last -> last.withTypeName(name)));
+        }
+
+        public boolean isValueDefined(String name) {
+            return this.frames.iterateReverse().anyMatch(frame -> frame.isValueDefined(name));
         }
     }
 
@@ -799,15 +807,18 @@ public class Main {
                 if (paramEnd >= 0) {
                     var params = withParams.substring(0, paramEnd);
                     var maybeWithBraces = withParams.substring(paramEnd + ")".length()).strip();
-                    var tuple = compileParameters(definitionTuple.left, params);
+                    var paramsTuple = parseValues(definitionTuple.left, params, Main::compileParameter);
+                    var paramsState = paramsTuple.left;
+                    var paramsJoined = join(", ", paramsTuple.right);
 
-                    var header = createIndent(depth) + definitionTuple.right + "(" + tuple.right + ")";
+                    var header = createIndent(depth) + definitionTuple.right + "(" + paramsJoined + ")";
                     if (maybeWithBraces.equals(";")) {
-                        return new Some<>(new Tuple<CompileState, StructSegment>(tuple.left, new Content(header + ";")));
+                        return new Some<>(new Tuple<CompileState, StructSegment>(paramsState, new Content(header + ";")));
                     }
+
                     if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
                         var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
-                        var statementsTuple = compileStatements(tuple.left, inputContent, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
+                        var statementsTuple = compileStatements(paramsState, inputContent, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
                         var outputContent = "{" + statementsTuple.right + "\n" + "\t".repeat(depth) + "}";
                         return new Some<>(new Tuple<CompileState, StructSegment>(statementsTuple.left, new Content(header + outputContent)));
                     }
@@ -864,7 +875,7 @@ public class Main {
             return new Tuple<>(tuple.left, tuple.right + "." + property);
         }
 
-        if (stripped.equals("this") || state.isDefined(stripped)) {
+        if (stripped.equals("this") || state.isValueDefined(stripped)) {
             return new Tuple<>(state, stripped);
         }
 
@@ -1005,7 +1016,7 @@ public class Main {
         }
 
 
-        if (state.isDefined(stripped)) {
+        if (state.isTypeDefined(stripped)) {
             return new Tuple<>(state, stripped);
         }
 
@@ -1052,7 +1063,7 @@ public class Main {
     }
 
     private static String compileBaseType(String base, CompileState state) {
-        if (state.isDefined(base)) {
+        if (state.isTypeDefined(base)) {
             return base;
         }
 

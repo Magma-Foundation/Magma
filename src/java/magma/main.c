@@ -281,18 +281,18 @@ public class Main {
 	private static class ListCollector<T> implements Collector<T, List<T>> {
 		@Override
         public List<T> createInitial(){
-			return Lists.empty(/*  */);
+			return /* Lists */.empty(/*  */);
 		}
 		@Override
         public List<T> fold(List<T> current, T element){
 			return /* current */.add(/* element */);
 		}
 	}
-	private /* record */ Frame(Option<String> maybeName, List<String> typeParams, List /* typeNames */ <String>){
+	private /* record */ Frame(Option<String> maybeName, List<String> typeParams, List<String> typeNames, List<String> definitions){
 		/* public Frame() {
-            this(new None<>(), Lists.empty(), Lists.empty());
+            this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
         } */
-		/* public boolean isDefined(String typeName) {
+		/* public boolean isTypeDefined(String typeName) {
             return this.isThis(typeName)
                     || this.typeParams.contains(typeName)
                     || this.typeNames.contains(typeName);
@@ -301,13 +301,16 @@ public class Main {
             return this.maybeName.filter(name -> name.equals(input)).isPresent();
         } */
 		/* public Frame withName(String name) {
-            return new Frame(new Some<>(name), this.typeParams, this.typeNames);
+            return new Frame(new Some<>(name), this.typeParams, this.typeNames, this.definitions);
         } */
 		/* public Frame withTypeParams(List<String> typeParams) {
-            return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames);
+            return new Frame(this.maybeName, this.typeParams.addAll(typeParams), this.typeNames, this.definitions);
         } */
-		/* public Frame withDefinition(String definition) {
-            return new Frame(this.maybeName, this.typeParams, this.typeNames.add(definition));
+		/* public Frame withTypeName(String typeName) {
+            return new Frame(this.maybeName, this.typeParams, this.typeNames.add(typeName), this.definitions);
+        } */
+		/* public boolean isValueDefined(String valueName) {
+            return this.definitions.contains(valueName);
         } */
 	}
 	private static final class CompileState {
@@ -324,8 +327,8 @@ public class Main {
 		private CompileState defineThis(String name){
 			return new CompileState(this.frames.mapLast(/* last -> last */.withName(/* name */)));
 		}
-		private boolean isDefined(String input){
-			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isDefined(input));
+		private boolean isTypeDefined(String input){
+			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isTypeDefined(input));
 		}
 		public CompileState defineTypeParams(List<String> typeParams){
 			return new CompileState(this.frames.mapLast(/* last -> last */.withTypeParams(/* typeParams */)));
@@ -333,8 +336,11 @@ public class Main {
 		public CompileState exit(){
 			return new CompileState(this.frames.removeLast(/*  */));
 		}
-		public CompileState defineType(String definition){
-			return new CompileState(this.frames.mapLast(/* last -> last */.withDefinition(/* definition */)));
+		public CompileState defineType(String name){
+			return new CompileState(this.frames.mapLast(/* last -> last */.withTypeName(/* name */)));
+		}
+		public boolean isValueDefined(String name){
+			return this.frames.iterateReverse(/* ) */.anyMatch(/* frame -> frame */.isValueDefined(name));
 		}
 	}
 	private /* record */ StructurePrototype(String beforeInfix, String infix, String name, List<String> typeParams, Option<String> maybeSuperType, List<String> parameters, List<String> interfaces, String content, int /* depth */ ){
@@ -725,7 +731,7 @@ public class Main {
             return new Tuple<>(tuple.left, tuple.right + "." + property);
         }
 
-        if (stripped.equals("this") || state.isDefined(stripped)) {
+        if (stripped.equals("this") || state.isValueDefined(stripped)) {
             return new Tuple<>(state, stripped);
         }
 
@@ -866,7 +872,7 @@ public class Main {
         }
 
 
-        if (state.isDefined(stripped)) {
+        if (state.isTypeDefined(stripped)) {
             return new Tuple<>(state, stripped);
         }
 
@@ -913,7 +919,7 @@ public class Main {
     } *//* 
 
     private static String compileBaseType(String base, CompileState state) {
-        if (state.isDefined(base)) {
+        if (state.isTypeDefined(base)) {
             return base;
         }
 
