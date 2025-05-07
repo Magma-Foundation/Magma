@@ -277,13 +277,17 @@ public class Main {
         }
     }
 
-    private record Frame(Optional<StructurePrototype> maybeStructurePrototype, List<String> typeParams) {
+    private record Frame(
+            Optional<StructurePrototype> maybeStructurePrototype,
+            List<String> typeParams,
+            List<String> typeNames
+    ) {
         public Frame() {
-            this(Optional.empty(), Lists.empty());
+            this(Optional.empty(), Lists.empty(), Lists.empty());
         }
 
         public boolean isDefined(String typeName) {
-            return this.isThis(typeName) || this.typeParams.contains(typeName);
+            return this.isThis(typeName) || this.typeParams.contains(typeName) || this.typeNames.contains(typeName);
         }
 
         private boolean isThis(String input) {
@@ -293,11 +297,15 @@ public class Main {
         }
 
         public Frame withStructurePrototype(StructurePrototype prototype) {
-            return new Frame(Optional.of(prototype), this.typeParams);
+            return new Frame(Optional.of(prototype), this.typeParams, this.typeNames);
         }
 
         public Frame withTypeParams(List<String> typeParams) {
-            return new Frame(this.maybeStructurePrototype, this.typeParams.addAll(typeParams));
+            return new Frame(this.maybeStructurePrototype, this.typeParams.addAll(typeParams), this.typeNames);
+        }
+
+        public Frame withDefinition(String definition) {
+            return new Frame(this.maybeStructurePrototype, this.typeParams, this.typeNames.add(definition));
         }
     }
 
@@ -312,8 +320,8 @@ public class Main {
             this.frames = frames;
         }
 
-        private CompileState enter(StructurePrototype structurePrototype) {
-            return new CompileState(this.frames.add(new Frame())).defineStructurePrototype(structurePrototype);
+        private CompileState enter() {
+            return new CompileState(this.frames.add(new Frame()));
         }
 
         private CompileState defineStructurePrototype(StructurePrototype structurePrototype) {
@@ -330,6 +338,10 @@ public class Main {
 
         public CompileState exit() {
             return new CompileState(this.frames.removeLast());
+        }
+
+        public CompileState defineType(String definition) {
+            return new CompileState(this.frames.mapLast(last -> last.withDefinition(definition)));
         }
     }
 
@@ -382,6 +394,9 @@ public class Main {
         }
     }
 
+    private record StructureType(StructurePrototype prototype) {
+    }
+
     public static void main() {
         var root = Paths.get(".", "src", "java", "magma");
         var source = root.resolve("Main.java");
@@ -396,7 +411,8 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(new CompileState(), input, Main::compileRootSegment).right;
+        CompileState compileState = new CompileState();
+        return compileStatements(compileState.enter(), input, Main::compileRootSegment).right;
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
@@ -510,12 +526,16 @@ public class Main {
 
     private static Optional<Tuple<CompileState, StructSegment>> assembleStructure(CompileState state, StructurePrototype structurePrototype) {
         if (isSymbol(structurePrototype.name())) {
-            var entered = state.enter(structurePrototype);
+            var entered = state.enter().defineStructurePrototype(structurePrototype);
             var depth = structurePrototype.depth;
 
             var statementsTuple = parseStatements(entered, structurePrototype.content, (state0, segment) -> compileClassStatement(state0, segment, depth + 1));
+
             var statement = statementsTuple.right;
-            return Optional.of(new Tuple<>(statementsTuple.left.exit(), new Structure(structurePrototype, statement, depth)));
+            var exited = statementsTuple.left.exit();
+
+            var defined = exited.defineType(structurePrototype.name);
+            return Optional.of(new Tuple<>(defined, new Structure(structurePrototype, statement, depth)));
         }
         return Optional.empty();
     }
