@@ -408,7 +408,7 @@ public class Main {
 
             @Override
             public boolean contains(T element) {
-                return elements.contains(element);
+                return this.elements.contains(element);
             }
 
             private List<T> setLast(T element) {
@@ -824,6 +824,10 @@ public class Main {
             this(new None<>(), type, name, Lists.empty());
         }
 
+        private Definition() {
+            this(new None<>(), new Placeholder("?"), "?", Lists.empty());
+        }
+
         @Override
         public String generate() {
             var beforeTypeString = this.maybeBeforeType()
@@ -833,6 +837,26 @@ public class Main {
 
             var typeParamString = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
             return beforeTypeString + this.type.generate() + " " + this.name + typeParamString;
+        }
+
+        public Definition withMaybeBeforeType(Option<String> maybeBeforeType) {
+            return new Definition(maybeBeforeType, this.type, this.name, this.typeParams);
+        }
+
+        public Definition withName(String name) {
+            return new Definition(this.maybeBeforeType, this.type, name, this.typeParams);
+        }
+
+        public Definition withTypeParams(List<String> typeParams) {
+            return new Definition(this.maybeBeforeType, this.type, this.name, typeParams);
+        }
+
+        public Definition withType(Type type) {
+            return new Definition(this.maybeBeforeType, type, this.name, this.typeParams);
+        }
+
+        public Definition withBeforeType(String beforeType) {
+            return new Definition(new Some<>(beforeType), this.type, this.name, this.typeParams);
         }
     }
 
@@ -1069,7 +1093,7 @@ public class Main {
                             .withContent(content)
                             .withDepth(depth);
 
-                    if(prototype.annotations.contains("Actual")) {
+                    if (prototype.annotations.contains("Actual")) {
                         return new Some<>(new Tuple<>(state, new Whitespace()));
                     }
 
@@ -1526,6 +1550,7 @@ public class Main {
             var name = input.substring(nameSeparator + " ".length()).strip();
             if (isSymbol(name)) {
                 var divisions = divide(beforeName, Main::foldTypeDivisions);
+                var withName = new Definition().withName(name);
                 if (divisions.size() >= 2) {
                     var beforeType = join(" ", divisions.subList(0, divisions.size() - 1)).strip();
                     var type = divisions.getLast();
@@ -1536,14 +1561,17 @@ public class Main {
                         if (typeParamStart >= 0) {
                             var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart).strip();
                             var typeParams = parseValues(state, withoutTypeParamEnd.substring(typeParamStart + "<".length()), Main::stripToTuple);
-                            return new Some<>(assembleDefinition(new Some<String>(beforeTypeParams), type, name, typeParams.left, typeParams.right));
+                            return new Some<>(assembleDefinition(type, typeParams.left, withName
+                                    .withBeforeType(beforeTypeParams)
+                                    .withTypeParams(typeParams.right)));
                         }
                     }
 
-                    return new Some<>(assembleDefinition(new Some<String>(beforeType), type, name, state, Lists.empty()));
+                    return new Some<>(assembleDefinition(type, state, withName
+                            .withBeforeType(beforeType)));
                 }
                 else {
-                    return new Some<>(assembleDefinition(new None<String>(), beforeName, name, state, Lists.empty()));
+                    return new Some<>(assembleDefinition(beforeName, state, withName));
                 }
             }
         }
@@ -1569,9 +1597,9 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
-        var typeTuple = parseType(state.enter().defineTypeParams(typeParams), type);
-        var definition = new Definition(maybeBeforeType, typeTuple.right, name, typeParams);
+    private static Tuple<CompileState, Definition> assembleDefinition(String type, CompileState state, Definition definition1) {
+        var typeTuple = parseType(state.enter().defineTypeParams(definition1.typeParams), type);
+        var definition = definition1.withType(typeTuple.right);
         return new Tuple<>(typeTuple.left.exit(), definition);
     }
 
