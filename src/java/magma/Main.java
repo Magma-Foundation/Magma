@@ -356,6 +356,7 @@ public class Main {
     }
 
     private static class Lists {
+        @Actual
         private record JavaList<T>(java.util.List<T> elements) implements List<T> {
             public JavaList() {
                 this(new ArrayList<>());
@@ -435,10 +436,12 @@ public class Main {
             }
         }
 
+        @Actual
         public static <T> List<T> empty() {
             return new JavaList<>();
         }
 
+        @Actual
         public static <T> List<T> of(T... elements) {
             return new JavaList<>(new ArrayList<>(Arrays.asList(elements)));
         }

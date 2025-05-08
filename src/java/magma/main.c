@@ -177,9 +177,9 @@ public class Main {
 			/* var current = initial */;
 			/* while (true) */{
 				/* C finalCurrent = current */;
-				/* var folded = this.head.next().map(inner -> folder.apply(finalCurrent, inner)) */;
-				if (/* folded */.isPresent()){
-					/* current = folded.orElse(null) */;
+				/* var maybeFolded = this.head.next().map(inner -> folder.apply(finalCurrent, inner)) */;
+				if (/* maybeFolded instanceof Some */(/* var folded */)){
+					/* current = folded */;
 				}
 				/* else */{
 					return /* current */;
@@ -209,64 +209,8 @@ public class Main {
 		}
 	}
 	private static class Lists {
-		private record JavaList<T>(/* java.util.List<T> */ elements) implements List<T> {
-			/* public */ JavaList(){
-				/* this(new ArrayList<>()) */;
-			}
-			@Override public List<T> add(T element){
-				/* var copy = new ArrayList<>(this.elements) */;
-				/* copy.add(element) */;
-				return new JavaList(/* copy */);
-			}
-			@Override public Iterator<T> iterate(){
-				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size())).map(this.elements::get);
-			}
-			@Override public boolean isEmpty(){
-				return this.elements.isEmpty();
-			}
-			@Override public int size(){
-				return this.elements.size();
-			}
-			@Override public List<T> subList(int startInclusive, int endExclusive){
-				return new JavaList(/* new ArrayList<>(this */.elements.subList(startInclusive, /* endExclusive)) */);
-			}
-			@Override public T getLast(){
-				return this.elements.getLast();
-			}
-			@Override public T get(int index){
-				return this.elements.get(index);
-			}
-			@Override public Iterator<T> iterateReverse(){
-				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size())).map(/* index -> this */.elements.size() - index - 1).map(this.elements::get);
-			}
-			@Override public Option<Pair<T, List<T>>> removeLast(){
-				if (this.elements.isEmpty()){
-					return /* new None<> */();
-				}
-				/* var copy = new ArrayList<T>(this.elements) */;
-				/* var removed = copy.removeLast() */;
-				return /* new Some<> */(/* new Tuple<>(removed */, new JavaList(/* copy) */));
-			}
-			@Override public boolean contains(T element){
-				return this.elements.contains(element);
-			}
-			private List<T> setLast(T element){
-				/* var copy = new ArrayList<>(this.elements) */;
-				/* copy.set(copy.size() - 1, element) */;
-				return new JavaList(/* copy */);
-			}
-			@Override public List<T> mapLast(T -> T mapper){
-				/* var oldLast = this.getLast() */;
-				/* var newLast = mapper.apply(oldLast) */;
-				return this.setLast(/* newLast */);
-			}
-		}
-		public static List<T> empty<T>(){
-			return /* new JavaList<> */();
-		}
-		public static List<T> of<T>(/* T... */ elements){
-			return /* new JavaList<> */(/* new ArrayList<> */(/* Arrays */.asList(elements)));
-		}
+		@Actual public static List<T> empty<T>();
+		@Actual public static List<T> of<T>(/* T... */ elements);
 	}
 	private static class DivideState {
 		private List<String> segments;
