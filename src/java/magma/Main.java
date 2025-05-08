@@ -116,7 +116,7 @@ public class Main {
 
         Map<K, V> putAll(Map<K, V> others);
 
-        Iterator<Tuple<K, V>> iterate();
+        Iterator<Pair<K, V>> iterate();
 
         Option<V> get(K key);
     }
@@ -144,11 +144,12 @@ public class Main {
 
             @Override
             public Map<K, V> putAll(Map<K, V> others) {
-                return others.iterate().<Map<K, V>>fold(this, (kvMap, kvTuple) -> kvMap.put(kvTuple.left, kvTuple.right));
+                return others.iterate().<Map<K, V>>fold(this,
+                        (kvMap, kvTuple) -> kvMap.put(kvTuple.left(), kvTuple.right()));
             }
 
             @Override
-            public Iterator<Tuple<K, V>> iterate() {
+            public Iterator<Pair<K, V>> iterate() {
                 return new Lists.JavaList<>(new ArrayList<>(this.map.entrySet()))
                         .iterate()
                         .map(tuple -> new Tuple<>(tuple.getKey(), tuple.getValue()));
