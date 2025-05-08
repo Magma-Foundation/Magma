@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -61,10 +60,10 @@ public class Main {
         <R> Iterator<Pair<T, R>> zip(Iterator<R> other);
     }
 
-    private interface List_<T> {
-        List_<T> mapLast(Function<T, T> mapper);
+    private interface List<T> {
+        List<T> mapLast(Function<T, T> mapper);
 
-        List_<T> add(T element);
+        List<T> add(T element);
 
         Iterator<T> iterate();
 
@@ -72,7 +71,7 @@ public class Main {
 
         int size();
 
-        List_<T> subList(int startInclusive, int endExclusive);
+        List<T> subList(int startInclusive, int endExclusive);
 
         T getLast();
 
@@ -80,7 +79,7 @@ public class Main {
 
         Iterator<T> iterateReverse();
 
-        Option<Pair<T, List_<T>>> removeLast();
+        Option<Pair<T, List<T>>> removeLast();
     }
 
     private interface Head<T> {
@@ -338,13 +337,13 @@ public class Main {
     }
 
     private static class Lists {
-        private record JavaList<T>(List<T> elements) implements List_<T> {
+        private record JavaList<T>(java.util.List<T> elements) implements List<T> {
             public JavaList() {
                 this(new ArrayList<>());
             }
 
             @Override
-            public List_<T> add(T element) {
+            public List<T> add(T element) {
                 var copy = new ArrayList<>(this.elements);
                 copy.add(element);
                 return new JavaList<>(copy);
@@ -366,7 +365,7 @@ public class Main {
             }
 
             @Override
-            public List_<T> subList(int startInclusive, int endExclusive) {
+            public List<T> subList(int startInclusive, int endExclusive) {
                 return new JavaList<>(new ArrayList<>(this.elements.subList(startInclusive, endExclusive)));
             }
 
@@ -388,7 +387,7 @@ public class Main {
             }
 
             @Override
-            public Option<Pair<T, List_<T>>> removeLast() {
+            public Option<Pair<T, List<T>>> removeLast() {
                 if (this.elements.isEmpty()) {
                     return new None<>();
                 }
@@ -398,35 +397,35 @@ public class Main {
                 return new Some<>(new Tuple<>(removed, new JavaList<>(copy)));
             }
 
-            private List_<T> setLast(T element) {
+            private List<T> setLast(T element) {
                 var copy = new ArrayList<>(this.elements);
                 copy.set(copy.size() - 1, element);
                 return new JavaList<>(copy);
             }
 
             @Override
-            public List_<T> mapLast(Function<T, T> mapper) {
+            public List<T> mapLast(Function<T, T> mapper) {
                 var oldLast = this.getLast();
                 var newLast = mapper.apply(oldLast);
                 return this.setLast(newLast);
             }
         }
 
-        public static <T> List_<T> empty() {
+        public static <T> List<T> empty() {
             return new JavaList<>();
         }
 
-        public static <T> List_<T> of(T... elements) {
+        public static <T> List<T> of(T... elements) {
             return new JavaList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
     private static class DivideState {
-        private List_<String> segments;
+        private List<String> segments;
         private int depth;
         private StringBuilder buffer;
 
-        private DivideState(List_<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -482,14 +481,14 @@ public class Main {
         }
     }
 
-    private static class ListCollector<T> implements Collector<T, List_<T>> {
+    private static class ListCollector<T> implements Collector<T, List<T>> {
         @Override
-        public List_<T> createInitial() {
+        public List<T> createInitial() {
             return Lists.empty();
         }
 
         @Override
-        public List_<T> fold(List_<T> current, T element) {
+        public List<T> fold(List<T> current, T element) {
             return current.add(element);
         }
     }
@@ -513,9 +512,9 @@ public class Main {
 
     private record Frame(
             Option<String> maybeName,
-            List_<Type> typeParams,
-            List_<Definition> definitions,
-            List_<Type> types
+            List<Type> typeParams,
+            List<Definition> definitions,
+            List<Type> types
     ) {
         public Frame() {
             this(new None<>(), Lists.empty(), Lists.empty(), Lists.empty());
@@ -528,7 +527,7 @@ public class Main {
                     .or(() -> this.findDefinedTyped(name, this.typeParams));
         }
 
-        private Option<Type> findDefinedTyped(String name, List_<Type> list) {
+        private Option<Type> findDefinedTyped(String name, List<Type> list) {
             return list.iterate()
                     .filter(type -> type.hasName(name))
                     .next();
@@ -562,13 +561,13 @@ public class Main {
     }
 
     private static final class CompileState {
-        private final List_<Frame> frames;
+        private final List<Frame> frames;
 
         public CompileState() {
             this(Lists.empty());
         }
 
-        public CompileState(List_<Frame> frames) {
+        public CompileState(List<Frame> frames) {
             this.frames = frames;
         }
 
@@ -587,7 +586,7 @@ public class Main {
                     .next();
         }
 
-        public CompileState defineTypeParams(List_<String> typeParams) {
+        public CompileState defineTypeParams(List<String> typeParams) {
             return new CompileState(this.frames.mapLast(last -> typeParams.iterate().map(TypeParam::new).fold(last, Frame::defineTypeParam)));
         }
 
@@ -606,7 +605,7 @@ public class Main {
                     .next();
         }
 
-        public CompileState defineValues(List_<Definition> names) {
+        public CompileState defineValues(List<Definition> names) {
             return names.iterate().fold(this, CompileState::defineValue);
         }
 
@@ -620,11 +619,11 @@ public class Main {
             String beforeInfix,
             String infix,
             String name,
-            List_<String> typeParams,
+            List<String> typeParams,
             Option<Type> maybeSuperType,
-            List_<Definition> parameters,
-            List_<Type> interfaces,
-            List_<String> variants,
+            List<Definition> parameters,
+            List<Type> interfaces,
+            List<String> variants,
             String content,
             int depth
     ) {
@@ -648,15 +647,15 @@ public class Main {
             return new StructurePrototype(this.type, this.beforeInfix, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
-        public StructurePrototype withTypeParams(List_<String> typeParams) {
+        public StructurePrototype withTypeParams(List<String> typeParams) {
             return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
-        public StructurePrototype withParameters(List_<Definition> parameters) {
+        public StructurePrototype withParameters(List<Definition> parameters) {
             return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
-        public StructurePrototype withInterfaces(List_<Type> interfaces) {
+        public StructurePrototype withInterfaces(List<Type> interfaces) {
             return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.variants, this.content, this.depth);
         }
 
@@ -679,7 +678,7 @@ public class Main {
             return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
-        public StructurePrototype withVariants(List_<String> variants) {
+        public StructurePrototype withVariants(List<String> variants) {
             return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, variants, this.content, this.depth);
         }
     }
@@ -691,7 +690,7 @@ public class Main {
         }
     }
 
-    private record ObjectNode(StructurePrototype structurePrototype, List_<StructSegment> statements,
+    private record ObjectNode(StructurePrototype structurePrototype, List<StructSegment> statements,
                               int depth) implements StructSegment {
         @Override
         public String generate() {
@@ -733,7 +732,7 @@ public class Main {
         }
     }
 
-    private record ObjectType(String name, List_<Type> typeParams, List_<Definition> definitions) implements Type {
+    private record ObjectType(String name, List<Type> typeParams, List<Definition> definitions) implements Type {
         @Override
         public boolean hasName(String name) {
             return this.name.equals(name);
@@ -754,7 +753,7 @@ public class Main {
             return "<" + joinNodes(", ", this.typeParams) + ">";
         }
 
-        public ObjectType withTypeArgs(List_<Type> typeArgs) {
+        public ObjectType withTypeArgs(List<Type> typeArgs) {
             return new ObjectType(this.name, typeArgs, this.definitions);
         }
 
@@ -776,7 +775,7 @@ public class Main {
             Option<String> maybeBeforeType,
             Type type,
             String name,
-            List_<String> typeParams
+            List<String> typeParams
     ) implements Parameter, StatementValue {
         public Definition(Type type, String name) {
             this(new None<>(), type, name, Lists.empty());
@@ -832,7 +831,7 @@ public class Main {
         }
     }
 
-    private record Invokable(Caller caller, List_<Value> args) implements Value {
+    private record Invokable(Caller caller, List<Value> args) implements Value {
         @Override
         public String generate() {
             var joined = joinNodes(", ", this.args());
@@ -864,7 +863,7 @@ public class Main {
         }
     }
 
-    private record Functional(List_<Type> arguments, Type returns) implements Type {
+    private record Functional(List<Type> arguments, Type returns) implements Type {
         @Override
         public String generate() {
             String argumentString;
@@ -922,7 +921,7 @@ public class Main {
         return new Tuple<>(parsed.left, join("", parsed.right));
     }
 
-    private static <T> Tuple<CompileState, List_<T>> parseStatements(
+    private static <T> Tuple<CompileState, List<T>> parseStatements(
             CompileState state,
             String input,
             BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
@@ -930,13 +929,13 @@ public class Main {
         return parseAll(state, input, Main::foldStatementValue, mapper);
     }
 
-    private static String join(String delimiter, List_<String> elements) {
+    private static String join(String delimiter, List<String> elements) {
         return elements.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
     }
 
-    private static <T> Tuple<CompileState, List_<T>> parseAll(
+    private static <T> Tuple<CompileState, List<T>> parseAll(
             CompileState state,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
@@ -953,7 +952,7 @@ public class Main {
         });
     }
 
-    private static List_<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         DivideState state = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -1033,7 +1032,7 @@ public class Main {
         return parseStructureWithMaybeTypeParameters(state, prototype, input);
     }
 
-    private static List_<String> divideSimpleValues(String input) {
+    private static List<String> divideSimpleValues(String input) {
         return divide(input, Main::foldValueChar)
                 .iterate()
                 .map(String::strip)
@@ -1087,7 +1086,7 @@ public class Main {
         return parseStructureWithMaybeExtends(state, prototype, input);
     }
 
-    private static Tuple<CompileState, List_<Definition>> parseParameters(CompileState state, String paramsString) {
+    private static Tuple<CompileState, List<Definition>> parseParameters(CompileState state, String paramsString) {
         var paramsTuple = parseValues(state, paramsString, Main::parseParameter);
         var params = paramsTuple.right
                 .iterate()
@@ -1107,7 +1106,7 @@ public class Main {
         }
     }
 
-    private static <T extends Node> String joinNodes(String delimiter, List_<T> nodes) {
+    private static <T extends Node> String joinNodes(String delimiter, List<T> nodes) {
         return nodes.iterate().map(Node::generate).collect(new Joiner(delimiter)).orElse("");
     }
 
@@ -1385,7 +1384,7 @@ public class Main {
         };
     }
 
-    private static <T> Tuple<CompileState, List_<T>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
+    private static <T> Tuple<CompileState, List<T>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
         return parseAll(state, input, Main::foldValueChar, mapper);
     }
 
@@ -1480,7 +1479,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List_<String> typeParams) {
+    private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
         var typeTuple = parseType(state.enter().defineTypeParams(typeParams), type);
         var definition = new Definition(maybeBeforeType, typeTuple.right, name, typeParams);
         return new Tuple<>(typeTuple.left.exit(), definition);
@@ -1489,16 +1488,16 @@ public class Main {
     private static Tuple<CompileState, Type> parseType(CompileState state, String input) {
         var stripped = input.strip();
 
-        if (stripped.equals("int")) {
-            return new Tuple<>(state, Primitive.Int);
-        }
-
-        if (stripped.equals("String")) {
-            return new Tuple<>(state, new Symbol("String"));
-        }
-
-        if (stripped.equals("boolean")) {
-            return new Tuple<>(state, Primitive.Boolean);
+        switch (stripped) {
+            case "int" -> {
+                return new Tuple<>(state, Primitive.Int);
+            }
+            case "String" -> {
+                return new Tuple<>(state, new Symbol("String"));
+            }
+            case "boolean" -> {
+                return new Tuple<>(state, Primitive.Boolean);
+            }
         }
 
         if (state.findType(stripped) instanceof Some(var found)) {
@@ -1518,20 +1517,19 @@ public class Main {
                         .flatMap(Iterators::fromOption)
                         .collect(new ListCollector<>());
 
-                if (base.equals("Function")) {
-                    return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
-                }
-
-                if (base.equals("BiFunction")) {
-                    return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0), typeArgs.get(1)), typeArgs.get(2)));
-                }
-
-                if (base.equals("Predicate")) {
-                    return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), Primitive.Boolean));
-                }
-
-                if (base.equals("Supplier")) {
-                    return new Tuple<>(state, new Functional(Lists.empty(), typeArgs.get(0)));
+                switch (base) {
+                    case "Function" -> {
+                        return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), typeArgs.get(1)));
+                    }
+                    case "BiFunction" -> {
+                        return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0), typeArgs.get(1)), typeArgs.get(2)));
+                    }
+                    case "Predicate" -> {
+                        return new Tuple<>(state, new Functional(Lists.of(typeArgs.get(0)), Primitive.Boolean));
+                    }
+                    case "Supplier" -> {
+                        return new Tuple<>(state, new Functional(Lists.empty(), typeArgs.get(0)));
+                    }
                 }
 
                 if (state.findType(base) instanceof Some(var found) && found instanceof ObjectType objectType) {
