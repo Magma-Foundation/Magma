@@ -217,7 +217,10 @@ public class Main {
 
         @Override
         public Option<T> filter(Predicate<T> predicate) {
-            return predicate.test(this.value) ? this : new None<>();
+            if (predicate.test(this.value)) {
+                return this;
+            }
+            return new None<>();
         }
 
         @Override
@@ -339,7 +342,12 @@ public class Main {
 
         @Override
         public Iterator<T> filter(Predicate<T> predicate) {
-            return this.flatMap(t -> new HeadedIterator<>(predicate.test(t) ? new SingleHead<>(t) : new EmptyHead<>()));
+            return this.flatMap(element -> {
+                if (predicate.test(element)) {
+                    return new HeadedIterator<>(new SingleHead<>(element));
+                }
+                return new HeadedIterator<>(new EmptyHead<>());
+            });
         }
 
         @Override
@@ -659,11 +667,17 @@ public class Main {
         }
 
         private String generateTypeParameters() {
-            return this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
+            if (this.typeParams().isEmpty()) {
+                return "";
+            }
+            return "<" + join(", ", this.typeParams) + ">";
         }
 
         private String generateParameters() {
-            return this.parameters.isEmpty() ? "" : "(" + joinNodes(", ", this.parameters) + ")";
+            if (this.parameters.isEmpty()) {
+                return "";
+            }
+            return "(" + joinNodes(", ", this.parameters) + ")";
         }
 
         private Option<String> generateSuperType() {
@@ -671,7 +685,10 @@ public class Main {
         }
 
         private String generateImplements() {
-            return this.interfaces.isEmpty() ? "" : " implements " + joinNodes(", ", this.interfaces);
+            if (this.interfaces.isEmpty()) {
+                return "";
+            }
+            return " implements " + joinNodes(", ", this.interfaces);
         }
 
         private String generateModifiers() {
@@ -748,7 +765,10 @@ public class Main {
                     .orElse("");
 
             var generated = s1 + " {" + joinedStatements + createIndent(this.depth()) + "}";
-            return this.depth == 0 ? generated + "\n" : (createIndent(this.depth()) + generated);
+            if (this.depth == 0) {
+                return generated + "\n";
+            }
+            return createIndent(this.depth()) + generated;
         }
     }
 
@@ -791,11 +811,14 @@ public class Main {
 
         @Override
         public String generate() {
-            var joined = this.typeArguments.isEmpty() ? "" : this.joinTypeParams();
+            var joined = this.generateTypeParams();
             return this.name + joined;
         }
 
-        private String joinTypeParams() {
+        private String generateTypeParams() {
+            if (this.typeArguments.isEmpty()) {
+                return "";
+            }
             return "<" + joinNodes(", ", this.typeArguments) + ">";
         }
 
@@ -854,7 +877,10 @@ public class Main {
         }
 
         private String generateTypeParameters() {
-            return this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
+            if (this.typeParams.isEmpty()) {
+                return "";
+            }
+            return "<" + join(", ", this.typeParams) + ">";
         }
 
         public Definition withName(String name) {
@@ -1757,13 +1783,19 @@ public class Main {
                 }
 
                 if (state.findType(base) instanceof Some(var found) && found instanceof ObjectType objectType) {
-                    var objectType1 = typeArgs.isEmpty() ? objectType : objectType.withTypeArgs(typeArgs);
-                    return new Tuple<>(state, objectType1);
+                    return new Tuple<>(state, attachTypeArgs(objectType, typeArgs));
                 }
             }
         }
 
         return new Tuple<>(state, new Placeholder(input));
+    }
+
+    private static ObjectType attachTypeArgs(ObjectType objectType, List<Type> typeArgs) {
+        if (typeArgs.isEmpty()) {
+            return objectType;
+        }
+        return objectType.withTypeArgs(typeArgs);
     }
 
     private static Option<Type> retainType(TypeArgument argument) {
