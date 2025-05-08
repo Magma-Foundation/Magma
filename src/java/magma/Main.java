@@ -772,7 +772,7 @@ public class Main {
         }
     }
 
-    private record Content(String input) implements StructSegment {
+    private record Content(String input) implements StructSegment, FunctionSegment {
         @Override
         public String generate() {
             return this.input;
@@ -1382,7 +1382,7 @@ public class Main {
                     if (maybeWithBraces.startsWith("{") && maybeWithBraces.endsWith("}")) {
                         var inputContent = maybeWithBraces.substring(1, maybeWithBraces.length() - 1);
 
-                        var parsed = parseStatements(paramsState, inputContent, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+                        var parsed = parseFunctionSegments(paramsState, inputContent, depth);
                         var outputContent = "{" + joinNodes("", parsed.right) + "\n" + "\t".repeat(depth) + "}";
                         return new Some<>(new Tuple<CompileState, StructSegment>(parsed.left.exit(), new Content(header + outputContent)));
                     }
@@ -1394,10 +1394,36 @@ public class Main {
         return new None<>();
     }
 
+    private static Tuple<CompileState, List<FunctionSegment>> parseFunctionSegments(CompileState state, String input, int depth) {
+        return parseStatements(state, input, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+    }
+
     private static Tuple<CompileState, FunctionSegment> parseFunctionSegment(CompileState state, String input, int depth) {
         return Main.<Whitespace, FunctionSegment>typed(() -> parseWhitespace(state, input))
                 .or(() -> typed(() -> parseStatement(input, depth, slice -> parseStatementValue(state, slice))))
+                .or(() -> parseBlock(state, input, depth))
                 .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, FunctionSegment>> parseBlock(CompileState state, String input, int depth) {
+        var stripped = input.strip();
+        if (!stripped.endsWith("}")) {
+            return new None<>();
+        }
+
+        var slice = stripped.substring(0, stripped.length() - "}".length());
+        var contentStart = slice.indexOf("{");
+        if (contentStart < 0) {
+            return new None<>();
+        }
+
+        var beforeContent = slice.substring(0, contentStart).strip();
+        var content = slice.substring(contentStart + "{".length());
+
+        var indent = "\n" + "\t".repeat(depth);
+        var tuple = parseFunctionSegments(state, content, depth);
+        var generated = indent + generatePlaceholder(beforeContent) + "{" + joinNodes("", tuple.right) + indent + "}";
+        return new Some<>(new Tuple<>(tuple.left, new Content(generated)));
     }
 
     private static Option<Tuple<CompileState, StatementValue>> parseStatementValue(CompileState state, String input) {
