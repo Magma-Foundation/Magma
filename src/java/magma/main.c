@@ -49,6 +49,7 @@ public class Main {
 		T get(int index);
 		Iterator<T> iterateReverse();
 		Option<Pair<T, List<T>>> removeLast();
+		boolean contains(T element);
 	}
 	private interface Head<T> {
 		Option<T> next();
@@ -85,31 +86,6 @@ public class Main {
 	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
 	private static class Maps {
-		private record JavaMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> record JavaMap<K, V>(/* java.util.Map<K, V> */ map) implements Map<K, V> {
-			/* public */ JavaMap(){
-				/* this(new HashMap<>()) */;
-			}
-			@Override
-            public Map<K, V> put(K key, V value){
-				/* this.map.put(key, value) */;
-				return this;
-			}
-			@Override
-            public Map<K, V> putAll(Map<K, V> others){
-				return others.iterate(/* ) */.<Map<K, V>>fold(this, /* (kvMap */, /* kvTuple) -> kvMap */.put(/* kvTuple */.left(/*  */), /* kvTuple */.right(/*  */)));
-			}
-			@Override
-            public Iterator<Pair<K, V>> iterate(){
-				return /* new Lists */.JavaList<>(/* new ArrayList<> */(this.map.entrySet(/* ))) */.iterate(/*  */).map(tuple -> new Tuple<>(tuple.getKey(), tuple.getValue()));
-			}
-			@Override
-            public Option<V> get(K key){/* 
-                if (this.map.containsKey(key)) {
-                    return new Some<>(this.map.get(key));
-                } */
-				return /* new None<> */(/*  */);
-			}
-		}
 		@Actual
         public static Map<K, V> of<K, V>(K key, V value){
 			return /* new JavaMap<K, V> */(/* ) */.put(key, value);
@@ -301,6 +277,10 @@ public class Main {
 				/* var copy = new ArrayList<T>(this.elements) */;
 				/* var removed = copy.removeLast() */;
 				return /* new Some<> */(/* new Tuple<>(removed */, new JavaList(/* copy) */));
+			}
+			@Override
+            public boolean contains(T element){
+				return /* elements */.contains(element);
 			}
 			private List<T> setLast(T element){
 				/* var copy = new ArrayList<>(this.elements) */;
@@ -872,6 +852,10 @@ public class Main {
                             .withInfix(infix)
                             .withContent(content)
                             .withDepth(depth);
+
+                    if(prototype.annotations.contains("Actual")) {
+                        return new Some<>(new Tuple<>(state, new Whitespace()));
+                    }
 
                     return parseStructureWithVariants(prototype, afterInfix, state.enter());
                 }

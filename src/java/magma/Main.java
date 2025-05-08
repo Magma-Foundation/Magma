@@ -80,6 +80,8 @@ public class Main {
         Iterator<T> iterateReverse();
 
         Option<Pair<T, List<T>>> removeLast();
+
+        boolean contains(T element);
     }
 
     private interface Head<T> {
@@ -402,6 +404,11 @@ public class Main {
                 var copy = new ArrayList<T>(this.elements);
                 var removed = copy.removeLast();
                 return new Some<>(new Tuple<>(removed, new JavaList<>(copy)));
+            }
+
+            @Override
+            public boolean contains(T element) {
+                return elements.contains(element);
             }
 
             private List<T> setLast(T element) {
@@ -1061,6 +1068,10 @@ public class Main {
                             .withInfix(infix)
                             .withContent(content)
                             .withDepth(depth);
+
+                    if(prototype.annotations.contains("Actual")) {
+                        return new Some<>(new Tuple<>(state, new Whitespace()));
+                    }
 
                     return parseStructureWithVariants(prototype, afterInfix, state.enter());
                 }
