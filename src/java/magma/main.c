@@ -63,7 +63,7 @@ public class Main {
 	}
 	private sealed interface Caller extends Node {
 	}
-	private sealed interface Value extends Caller {
+	private sealed interface Value extends /* Caller, Argument */ {
 	}
 	private interface StatementValue extends Node {
 	}
@@ -82,6 +82,8 @@ public class Main {
 		Map<String, Type> extractFromTemplate(Type template);
 	}
 	private @ interface Actual {
+	}
+	private interface Argument extends Node {
 	}
 	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
@@ -109,15 +111,15 @@ public class Main {
 			return mapper(this.value);
 		}
 		@Override public Option<T> filter(T -> boolean predicate){
-			return predicate(/*  */);
+			return predicate();
 		}
 		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
-			return other(/*  */).map(/* otherValue -> new Tuple<> */(this.value, /* otherValue */));
+			return other().map(/* otherValue -> new Tuple<> */(this.value, /* otherValue */));
 		}
 	}
 	private record None<T> implements Option<T> {
 		@Override public Option<R> map<R>(T -> R mapper){
-			return new None(/*  */);
+			return new None();
 		}
 		@Override public boolean isPresent(){
 			return false;
@@ -126,19 +128,19 @@ public class Main {
 			return other;
 		}
 		@Override public T orElseGet(() -> T other){
-			return other(/*  */);
+			return other();
 		}
 		@Override public Option<T> or(() -> Option<T> other){
-			return other(/*  */);
+			return other();
 		}
 		@Override public Option<R> flatMap<R>(T -> Option<R> mapper){
-			return new None(/*  */);
+			return new None();
 		}
 		@Override public Option<T> filter(T -> boolean predicate){
-			return new None(/*  */);
+			return new None();
 		}
 		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
-			return new None(/*  */);
+			return new None();
 		}
 	}
 	@rivate static class RangeHead implements Head<Integer> { @rivate final int length; private int counter = 0; /* public */ RangeHead(int length){
@@ -158,15 +160,15 @@ public class Main {
 	}
 	private static class EmptyHead<T> implements Head<T> {
 		@Override public Option<T> next(){
-			return /* new None<> */(/*  */);
+			return /* new None<> */();
 		}
 	}
 	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
 		@Override public Iterator<R> map<R>(T -> R mapper){
-			return new HeadedIterator(/* () -> this */.head.next(/*  */).map(mapper));
+			return new HeadedIterator(/* () -> this */.head.next().map(mapper));
 		}
 		@Override public C collect<C>(Collector<T, C> collector){
-			return this.fold(collector.createInitial(/*  */), /* collector::fold */);
+			return this.fold(collector.createInitial(), /* collector::fold */);
 		}
 		@Override public C fold<C>(C initial, (C, T) -> C folder){
 			/* var current = initial */;/* 
@@ -182,19 +184,19 @@ public class Main {
             } */
 		}
 		@Override public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
-			return this.map(mapper).<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<> */(/*  */)), /* Iterator::concat */);
+			return this.map(mapper).<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<> */()), /* Iterator::concat */);
 		}
 		@Override public Iterator<T> concat(Iterator<T> other){
-			return new HeadedIterator(/* () -> this */.head.next(/*  */).or(/* other::next */));
+			return new HeadedIterator(/* () -> this */.head.next().or(/* other::next */));
 		}
 		@Override public Option<T> next(){
-			return this.head.next(/*  */);
+			return this.head.next();
 		}
 		@Override public Iterator<T> filter(T -> boolean predicate){
-			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/*  */)));
+			return this.flatMap(/* t -> new HeadedIterator<> */(predicate()));
 		}
 		@Override public Iterator<Pair<T, R>> zip<R>(Iterator<R> other){
-			return new HeadedIterator(/* () -> this */.head.next(/*  */).and(/* other::next */));
+			return new HeadedIterator(/* () -> this */.head.next().and(/* other::next */));
 		}
 	}
 	private static class Lists {
@@ -208,25 +210,25 @@ public class Main {
 				return new JavaList(/* copy */);
 			}
 			@Override public Iterator<T> iterate(){
-				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/*  */))).map(this.elements::get);
+				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size())).map(this.elements::get);
 			}
 			@Override public boolean isEmpty(){
-				return this.elements.isEmpty(/*  */);
+				return this.elements.isEmpty();
 			}
 			@Override public int size(){
-				return this.elements.size(/*  */);
+				return this.elements.size();
 			}
 			@Override public List<T> subList(int startInclusive, int endExclusive){
 				return new JavaList(/* new ArrayList<>(this */.elements.subList(startInclusive, /* endExclusive)) */);
 			}
 			@Override public T getLast(){
-				return this.elements.getLast(/*  */);
+				return this.elements.getLast();
 			}
 			@Override public T get(int index){
 				return this.elements.get(index);
 			}
 			@Override public Iterator<T> iterateReverse(){
-				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/*  */))).map(/* index -> this */.elements.size() - index - 1).map(this.elements::get);
+				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size())).map(/* index -> this */.elements.size() - index - 1).map(this.elements::get);
 			}
 			@Override public Option<Pair<T, List<T>>> removeLast(){/* 
                 if (this.elements.isEmpty()) {
@@ -251,7 +253,7 @@ public class Main {
 			}
 		}
 		public static List<T> empty<T>(){
-			return /* new JavaList<> */(/*  */);
+			return /* new JavaList<> */();
 		}
 		public static List<T> of<T>(/* T... */ elements){
 			return /* new JavaList<> */(/* new ArrayList<> */(/* Arrays */.asList(elements)));
@@ -311,7 +313,7 @@ public class Main {
     } */
 	private static class ListCollector<T> implements Collector<T, List<T>> {
 		@Override public List<T> createInitial(){
-			return /* Lists */.empty(/*  */);
+			return /* Lists */.empty();
 		}
 		@Override public List<T> fold(List<T> current, T element){
 			return current.add(element);
@@ -381,28 +383,28 @@ public class Main {
 			/* this.frames = frames */;
 		}
 		private CompileState enter(){
-			return /* new CompileState */(this.frames.add(/* new Frame */(/*  */)));
+			return /* new CompileState */(this.frames.add(/* new Frame */()));
 		}
 		private CompileState defineThis(String name){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineName(name)));
 		}
 		private Option<Type> findType(String input){
-			return this.frames.iterateReverse(/*  */).map(/* frame -> frame */.findType(input)).flatMap(/* Iterators::fromOption */).next(/*  */);
+			return this.frames.iterateReverse().map(/* frame -> frame */.findType(input)).flatMap(/* Iterators::fromOption */).next();
 		}
 		public CompileState defineTypeParams(List<String> typeParams){
-			return /* new CompileState */(this.frames.mapLast(/* last -> typeParams */.iterate(/*  */).map(/* TypeParam::new */).fold(/* last */, /* Frame::defineTypeParam */)));
+			return /* new CompileState */(this.frames.mapLast(/* last -> typeParams */.iterate().map(/* TypeParam::new */).fold(/* last */, /* Frame::defineTypeParam */)));
 		}
 		public CompileState exit(){
-			return /* new CompileState */(this.frames.removeLast(/*  */).map(/* Pair::right */).orElse(this.frames));
+			return /* new CompileState */(this.frames.removeLast().map(/* Pair::right */).orElse(this.frames));
 		}
 		public CompileState defineType(Type type){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineType(type)));
 		}
 		public Option</* Definition */> findValue(String name){
-			return this.frames.iterateReverse(/*  */).map(/* frame -> frame */.findValue(name)).flatMap(/* Iterators::fromOption */).next(/*  */);
+			return this.frames.iterateReverse().map(/* frame -> frame */.findValue(name)).flatMap(/* Iterators::fromOption */).next();
 		}
 		public CompileState defineValues(List</* Definition */> names){
-			return names.iterate(/*  */).fold(this, /* CompileState::defineValue */);
+			return names.iterate().fold(this, /* CompileState::defineValue */);
 		}
 		private CompileState defineValue(/* Definition */ definition){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineValue(definition)));
@@ -492,7 +494,7 @@ public class Main {
             return new StructurePrototype(this.type, annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         } */
 	}
-	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment, TypeArgument */ {
+	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment, TypeArgument, Argument */ {
 		@Override public String generate(){
 			return /* "" */;
 		}
@@ -526,11 +528,11 @@ public class Main {
 			return false;
 		}
 		@Override public Map<String, Type> extractFromTemplate(Type template){
-			return /* Maps */.empty(/*  */);
+			return /* Maps */.empty();
 		}
 	}/* 
 
-    private record ObjectType(String name, List<Type> typeParams, List<Definition> definitions) implements Type {
+    private record ObjectType(String name, List<Type> typeArguments, List<Definition> definitions) implements Type {
         @Override
         public boolean hasName(String name) {
             return this.name.equals(name);
@@ -543,12 +545,12 @@ public class Main {
 
         @Override
         public String generate() {
-            var joined = this.typeParams.isEmpty() ? "" : this.joinTypeParams();
+            var joined = this.typeArguments.isEmpty() ? "" : this.joinTypeParams();
             return this.name + joined;
         }
 
         private String joinTypeParams() {
-            return "<" + joinNodes(", ", this.typeParams) + ">";
+            return "<" + joinNodes(", ", this.typeArguments) + ">";
         }
 
         public ObjectType withTypeArgs(List<Type> typeArgs) {
@@ -649,12 +651,12 @@ public class Main {
 	}
 	private record Return(Node value) implements StatementValue {
 		@Override public String generate(){
-			return /* "return " + this */.value.generate(/*  */);
+			return /* "return " + this */.value.generate();
 		}
 	}
 	private record ConstructionHeader(/* ObjectType */ type) implements Caller {
 		@Override public String generate(){
-			return /* "new " + this */.type.generate(/*  */);
+			return /* "new " + this */.type.generate();
 		}
 	}/* 
 
@@ -678,7 +680,7 @@ public class Main {
 			return this.value.equals(name);
 		}
 		@Override public Map<String, Type> extractFromTemplate(Type template){
-			return /* Maps */.empty(/*  */);
+			return /* Maps */.empty();
 		}
 	}/* 
 
@@ -730,7 +732,7 @@ public class Main {
 	}
 	private static String compile(String input){
 		/* CompileState compileState = new CompileState() */;
-		return /* compileStatements */(/* compileState */.enter(/*  */), input, /* Main::compileRootSegment */).right;
+		return /* compileStatements */(/* compileState */.enter(), input, /* Main::compileRootSegment */).right;
 	}
 	private static Tuple<CompileState, String> compileStatements(CompileState state, String input, (CompileState, String) -> Tuple<CompileState, String> mapper){
 		/* var parsed = parseStatements(state, input, mapper) */;
@@ -740,7 +742,7 @@ public class Main {
 		return /* parseAll */(state, input, /* Main::foldStatementValue */, mapper);
 	}
 	private static String join(String delimiter, List<String> elements){
-		return elements.iterate(/*  */).collect(/* new Joiner */(delimiter)).orElse(/* "" */);
+		return elements.iterate().collect(/* new Joiner */(delimiter)).orElse(/* "" */);
 	}
 	private static Tuple<CompileState, List<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){/* 
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
@@ -761,7 +763,7 @@ public class Main {
             var c = input.charAt(i);
             state = folder.apply(state, c);
         } */
-		return /* state */.advance(/*  */).segments;
+		return /* state */.advance().segments;
 	}
 	private static DivideState foldStatementValue(DivideState state, /* char */ c){
 		/* var appended = state.append(c) */;
@@ -773,7 +775,7 @@ public class Main {
             return appended.advance().exit();
         } */
 	/* if */ (){
-		return /* appended */.enter(/*  */);/* 
+		return /* appended */.enter();/* 
         }
         if (c == ' */
 	}/* ') {
@@ -1113,53 +1115,8 @@ public class Main {
             return new Tuple<>(state, BooleanNode.False);
         }
 
-        if (stripped.endsWith(")")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-
-            var divisions = divide(withoutEnd, Main::foldArgsStart);
-
-            if (divisions.size() >= 2) {
-                var joined = join("", divisions.subList(0, divisions.size() - 1));
-                var beforeArgs = joined.substring(0, joined.length() - ")".length());
-                var args = divisions.getLast();
-                if (beforeArgs.startsWith("new ")) {
-                    var type = parseType(state, beforeArgs.substring("new ".length()));
-                    if (type.right instanceof ObjectType objectType) {
-                        var argumentsTuple = parseValues(type.left, args, Main::parseValue);
-
-                        if (objectType.find("new") instanceof Some(var constructorType)) {
-                            if (constructorType.type instanceof Functional expected) {
-                                var argumentsTypes = argumentsTuple.right
-                                        .iterate()
-                                        .map(argument -> resolve(argumentsTuple.left, argument))
-                                        .collect(new ListCollector<>());
-
-                                var actual = new Functional(argumentsTypes, expected.returns);
-                                var extracted = expected.extractFromTemplate(actual);
-
-                                var typeParams = objectType.typeParams
-                                        .iterate()
-                                        .map(Main::retainTypeParam)
-                                        .flatMap(Iterators::fromOption)
-                                        .map(param -> param.name)
-                                        .collect(new ListCollector<>());
-
-                                var newTypeParams = typeParams.iterate()
-                                        .map(value -> find(extracted, value))
-                                        .flatMap(Iterators::fromOption)
-                                        .collect(new ListCollector<>());
-
-                                var caller = new ConstructionHeader(objectType.withTypeArgs(newTypeParams));
-                                return new Tuple<>(argumentsTuple.left, new Invokable(caller, argumentsTuple.right));
-                            }
-                        }
-                    }
-                }
-
-                var type = parseValue(state, beforeArgs);
-                var parsed = parseValues(type.left, args, Main::parseValue);
-                return new Tuple<>(parsed.left, new Invokable(type.right, parsed.right));
-            }
+        if (parseInvokable(state, stripped) instanceof Some(var invokable)) {
+            return new Tuple<>(invokable.left, invokable.right);
         }
 
         var separator = stripped.lastIndexOf(".");
@@ -1188,6 +1145,113 @@ public class Main {
         return new Tuple<>(state, new Placeholder(stripped));
     } *//* 
 
+    private static Option<Tuple<CompileState, Invokable>> parseInvokable(CompileState state, String stripped) {
+        if (!stripped.endsWith(")")) {
+            return new None<>();
+        }
+
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var divisions = divide(withoutEnd, Main::foldArgsStart);
+
+        if (divisions.size() < 2) {
+            return new None<>();
+        }
+
+        var joined = join("", divisions.subList(0, divisions.size() - 1));
+        var beforeArgs = joined.substring(0, joined.length() - ")".length());
+        var args = divisions.getLast();
+        return parseConstruction(state, beforeArgs, args).or(() -> parseInvocation(state, beforeArgs, args));
+    } *//* 
+
+    private static Option<Tuple<CompileState, Invokable>> parseInvocation(CompileState state, String beforeArgs, String args) {
+        var valueTuple = parseValue(state, beforeArgs);
+        var argumentsTuple = parseArguments(valueTuple.left, args);
+        return new Some<>(new Tuple<CompileState, Invokable>(argumentsTuple.left, new Invokable(valueTuple.right, argumentsTuple.right)));
+    } *//* 
+
+    private static Tuple<CompileState, List<Value>> parseArguments(CompileState state, String args) {
+        var argumentsTuple = parseValues(state, args, Main::parseArgument);
+        var argumentsState = argumentsTuple.left;
+        var arguments = retainValues(argumentsTuple.right);
+        return new Tuple<CompileState, List<Value>>(argumentsState, arguments);
+    } *//* 
+
+    private static List<Value> retainValues(List<Argument> arguments) {
+        return arguments.iterate()
+                .map(Main::retainValue)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+    } *//* 
+
+    private static Option<Value> retainValue(Argument argument) {
+        if (argument instanceof Value value) {
+            return new Some<>(value);
+        }
+        return new None<>();
+    } *//* 
+
+    private static Tuple<CompileState, Argument> parseArgument(CompileState state, String input) {
+        return parseWhitespace(state, input)
+                .map(tuple -> new Tuple<CompileState, Argument>(tuple.left, tuple.right))
+                .orElseGet(() -> {
+                    var tuple = parseValue(state, input);
+                    return new Tuple<>(tuple.left, tuple.right);
+                });
+    } *//* 
+
+    private static Option<Tuple<CompileState, Invokable>> parseConstruction(CompileState state, String beforeArgs, String args) {
+        if (!beforeArgs.startsWith("new ")) {
+            return new None<>();
+        }
+
+        var type = parseType(state, beforeArgs.substring("new ".length()));
+        if (!(type.right instanceof ObjectType objectType)) {
+            return new None<>();
+        }
+
+        var argumentsTuple = parseArguments(type.left, args);
+
+        if (!(objectType.find("new") instanceof Some(var constructorType))) {
+            return new None<>();
+        }
+        if (!(constructorType.type instanceof Functional expected)) {
+            return new None<>();
+        }
+
+        var argumentsTypes = resolveArguments(argumentsTuple.left, argumentsTuple.right);
+        var actual = new Functional(argumentsTypes, expected.returns);
+        var extracted = expected.extractFromTemplate(actual);
+
+        var typeParams = extractTypeParameters(objectType);
+        var newTypeParams = createTypeArguments(typeParams, extracted);
+        var caller = new ConstructionHeader(objectType.withTypeArgs(newTypeParams));
+        return new Some<>(new Tuple<>(argumentsTuple.left, new Invokable(caller, argumentsTuple.right)));
+    } *//* 
+
+    private static List<Type> createTypeArguments(
+            List<String> typeParamsOrdering,
+            Map<String, Type> typeArgumentsMap
+    ) {
+        return typeParamsOrdering.iterate()
+                .map(typeArgumentsMap::get)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+    } *//* 
+
+    private static List<String> extractTypeParameters(ObjectType objectType) {
+        return objectType.typeArguments.iterate()
+                .map(Main::retainTypeParam)
+                .flatMap(Iterators::fromOption)
+                .map(param -> param.name)
+                .collect(new ListCollector<>());
+    } *//* 
+
+    private static List<Type> resolveArguments(CompileState state, List<Value> arguments) {
+        return arguments.iterate()
+                .map(argument -> resolve(state, argument))
+                .collect(new ListCollector<>());
+    } *//* 
+
     private static DivideState foldArgsStart(DivideState state, char c) {
         var appended = state.append(c);
         if (c == '(') {
@@ -1201,10 +1265,6 @@ public class Main {
             return appended.exit();
         }
         return appended;
-    } *//* 
-
-    private static Option<Type> find(Map<String, Type> self, String key) {
-        return self.get(key);
     } *//* 
 
     private static Option<TypeParam> retainTypeParam(Type param) {

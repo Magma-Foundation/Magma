@@ -101,7 +101,7 @@ public class Main {
     private sealed interface Caller extends Node {
     }
 
-    private sealed interface Value extends Caller permits BooleanNode, DataAccess, Invokable, Placeholder, Symbol {
+    private sealed interface Value extends Caller, Argument permits BooleanNode, DataAccess, Invokable, Placeholder, Symbol {
     }
 
     private interface StatementValue extends Node {
@@ -130,6 +130,9 @@ public class Main {
     }
 
     private @interface Actual {
+    }
+
+    private interface Argument extends Node {
     }
 
     private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
@@ -726,7 +729,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements StructSegment, Parameter, FunctionSegment, TypeArgument {
+    private static class Whitespace implements StructSegment, Parameter, FunctionSegment, TypeArgument, Argument {
         @Override
         public String generate() {
             return "";
@@ -1436,11 +1439,43 @@ public class Main {
         var joined = join("", divisions.subList(0, divisions.size() - 1));
         var beforeArgs = joined.substring(0, joined.length() - ")".length());
         var args = divisions.getLast();
-        return parseConstruction(state, beforeArgs, args).or(() -> {
-            var type = parseValue(state, beforeArgs);
-            var parsed = parseValues(type.left, args, Main::parseValue);
-            return new Some<>(new Tuple<CompileState, Invokable>(parsed.left, new Invokable(type.right, parsed.right)));
-        });
+        return parseConstruction(state, beforeArgs, args).or(() -> parseInvocation(state, beforeArgs, args));
+    }
+
+    private static Option<Tuple<CompileState, Invokable>> parseInvocation(CompileState state, String beforeArgs, String args) {
+        var valueTuple = parseValue(state, beforeArgs);
+        var argumentsTuple = parseArguments(valueTuple.left, args);
+        return new Some<>(new Tuple<CompileState, Invokable>(argumentsTuple.left, new Invokable(valueTuple.right, argumentsTuple.right)));
+    }
+
+    private static Tuple<CompileState, List<Value>> parseArguments(CompileState state, String args) {
+        var argumentsTuple = parseValues(state, args, Main::parseArgument);
+        var argumentsState = argumentsTuple.left;
+        var arguments = retainValues(argumentsTuple.right);
+        return new Tuple<CompileState, List<Value>>(argumentsState, arguments);
+    }
+
+    private static List<Value> retainValues(List<Argument> arguments) {
+        return arguments.iterate()
+                .map(Main::retainValue)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+    }
+
+    private static Option<Value> retainValue(Argument argument) {
+        if (argument instanceof Value value) {
+            return new Some<>(value);
+        }
+        return new None<>();
+    }
+
+    private static Tuple<CompileState, Argument> parseArgument(CompileState state, String input) {
+        return parseWhitespace(state, input)
+                .map(tuple -> new Tuple<CompileState, Argument>(tuple.left, tuple.right))
+                .orElseGet(() -> {
+                    var tuple = parseValue(state, input);
+                    return new Tuple<>(tuple.left, tuple.right);
+                });
     }
 
     private static Option<Tuple<CompileState, Invokable>> parseConstruction(CompileState state, String beforeArgs, String args) {
@@ -1453,7 +1488,7 @@ public class Main {
             return new None<>();
         }
 
-        var argumentsTuple = parseValues(type.left, args, Main::parseValue);
+        var argumentsTuple = parseArguments(type.left, args);
 
         if (!(objectType.find("new") instanceof Some(var constructorType))) {
             return new None<>();
