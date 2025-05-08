@@ -63,7 +63,7 @@ public class Main {
 	}
 	private sealed interface Caller extends Node {
 	}
-	private sealed interface Value extends /* Caller permits BooleanNode, DataAccess, Invokable, Placeholder, Symbol */ {
+	private sealed interface Value extends Caller {
 	}
 	private interface StatementValue extends Node {
 	}
@@ -474,9 +474,9 @@ public class Main {
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineValue(definition)));
 		}
 	}
-	private /* record */ StructurePrototype(String type, String beforeInfix, String infix, String name, List_<String> typeParams, Option<Type> maybeSuperType, List_</* Definition */> parameters, List_<Type> interfaces, String content, int /* depth */ ){/* 
+	private /* record */ StructurePrototype(String type, String beforeInfix, String infix, String name, List_<String> typeParams, Option<Type> maybeSuperType, List_</* Definition */> parameters, List_<Type> interfaces, List_<String> variants, String content, int /* depth */ ){/* 
         public StructurePrototype(String type1) {
-            this(type1, "", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), "", 0);
+            this(type1, "", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), Lists.empty(), "", 0);
         } *//* 
 
         private String generate() {
@@ -488,42 +488,46 @@ public class Main {
         } *//* 
 
         public StructurePrototype withBeforeInfix(String beforeInfix) {
-            return new StructurePrototype(this.type, beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         } *//* 
 
         public StructurePrototype withInfix(String infix) {
-            return new StructurePrototype(this.type, this.beforeInfix, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         } *//* 
 
         public StructurePrototype withTypeParams(List_<String> typeParams) {
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         } *//* 
 
         public StructurePrototype withParameters(List_<Definition> parameters) {
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.variants, this.content, this.depth);
         } *//* 
 
         public StructurePrototype withInterfaces(List_<Type> interfaces) {
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.variants, this.content, this.depth);
         } *//* 
 
         public StructurePrototype withContent(String content) {
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, content, this.depth);
         } *//* 
 
         public StructurePrototype withDepth(int depth) {
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, depth);
         } *//* 
 
         public StructurePrototype withName(String name) {
             if (name.isEmpty()) {
                 return this;
             }
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         } *//* 
 
         public StructurePrototype withSuperType(Type superType) {
-            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.content, this.depth);
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.variants, this.content, this.depth);
+        } *//* 
+
+        public StructurePrototype withVariants(List_<String> variants) {
+            return new StructurePrototype(this.type, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, variants, this.content, this.depth);
         } */
 	}
 	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment, TypeArgument */ {
@@ -824,12 +828,32 @@ public class Main {
                             .withContent(content)
                             .withDepth(depth);
 
-                    return parseStructureWithMaybeTypeParameters(state.enter(), prototype, afterInfix);
+                    return parseStructureWithVariants(prototype, afterInfix, state.enter());
                 }
             }
         }
 
         return new None<>();
+    } *//* 
+
+    private static Option<Tuple<CompileState, StructSegment>> parseStructureWithVariants(StructurePrototype prototype, String input, CompileState state) {
+        var permitsIndex = input.indexOf(" permits ");
+        if (permitsIndex >= 0) {
+            var before = input.substring(0, permitsIndex);
+            var after = input.substring(" permits ".length()).strip();
+            var variants = divideSimpleValues(after);
+            return parseStructureWithMaybeTypeParameters(state, prototype.withVariants(variants), before);
+        }
+
+        return parseStructureWithMaybeTypeParameters(state, prototype, input);
+    } *//* 
+
+    private static List_<String> divideSimpleValues(String input) {
+        return divide(input, Main::foldValueChar)
+                .iterate()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
     } *//* 
 
     private static Option<Tuple<CompileState, StructSegment>> structWithMaybeImplements(CompileState state, String input, StructurePrototype prototype) {
