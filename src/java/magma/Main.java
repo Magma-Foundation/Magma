@@ -1393,10 +1393,13 @@ public class Main {
 
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            var argsStart = withoutEnd.indexOf("(");
-            if (argsStart >= 0) {
-                var beforeArgs = withoutEnd.substring(0, argsStart).strip();
-                var args = withoutEnd.substring(argsStart + "(".length());
+
+            var divisions = divide(withoutEnd, Main::foldArgsStart);
+
+            if (divisions.size() >= 2) {
+                var joined = join("", divisions.subList(0, divisions.size() - 1));
+                var beforeArgs = joined.substring(0, joined.length() - ")".length());
+                var args = divisions.getLast();
                 if (beforeArgs.startsWith("new ")) {
                     var type = parseType(state, beforeArgs.substring("new ".length()));
                     if (type.right instanceof ObjectType objectType) {
@@ -1430,6 +1433,7 @@ public class Main {
                         }
                     }
                 }
+
                 var type = parseValue(state, beforeArgs);
                 var parsed = parseValues(type.left, args, Main::parseValue);
                 return new Tuple<>(parsed.left, new Invokable(type.right, parsed.right));
@@ -1460,6 +1464,21 @@ public class Main {
         }
 
         return new Tuple<>(state, new Placeholder(stripped));
+    }
+
+    private static DivideState foldArgsStart(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var entered = appended.enter();
+            if (entered.isShallow()) {
+                return entered.advance();
+            }
+            return entered;
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Option<Type> find(Map<String, Type> self, String key) {

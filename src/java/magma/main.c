@@ -109,10 +109,10 @@ public class Main {
 			return mapper(this.value);
 		}
 		@Override public Option<T> filter(T -> boolean predicate){
-			return predicate(this.value) ? this : new None<>();
+			return predicate(/*  */);
 		}
 		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
-			return other(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
+			return other(/*  */).map(/* otherValue -> new Tuple<> */(this.value, /* otherValue */));
 		}
 	}
 	private record None<T> implements Option<T> {
@@ -163,7 +163,7 @@ public class Main {
 	}
 	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
 		@Override public Iterator<R> map<R>(T -> R mapper){
-			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).map(mapper));
+			return new HeadedIterator(/* () -> this */.head.next(/*  */).map(mapper));
 		}
 		@Override public C collect<C>(Collector<T, C> collector){
 			return this.fold(collector.createInitial(/*  */), /* collector::fold */);
@@ -182,19 +182,19 @@ public class Main {
             } */
 		}
 		@Override public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
-			return this.map(/* mapper) */.<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<>( */)), /* Iterator::concat */);
+			return this.map(mapper).<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<> */(/*  */)), /* Iterator::concat */);
 		}
 		@Override public Iterator<T> concat(Iterator<T> other){
-			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).or(other::next));
+			return new HeadedIterator(/* () -> this */.head.next(/*  */).or(/* other::next */));
 		}
 		@Override public Option<T> next(){
 			return this.head.next(/*  */);
 		}
 		@Override public Iterator<T> filter(T -> boolean predicate){
-			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
+			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/*  */)));
 		}
 		@Override public Iterator<Pair<T, R>> zip<R>(Iterator<R> other){
-			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).and(other::next));
+			return new HeadedIterator(/* () -> this */.head.next(/*  */).and(/* other::next */));
 		}
 	}
 	private static class Lists {
@@ -208,7 +208,7 @@ public class Main {
 				return new JavaList(/* copy */);
 			}
 			@Override public Iterator<T> iterate(){
-				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/* ) */)).map(this.elements::get);
+				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/*  */))).map(this.elements::get);
 			}
 			@Override public boolean isEmpty(){
 				return this.elements.isEmpty(/*  */);
@@ -226,7 +226,7 @@ public class Main {
 				return this.elements.get(index);
 			}
 			@Override public Iterator<T> iterateReverse(){
-				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/* )) */).map(index -> this.elements.size() - index - 1).map(this.elements::get);
+				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/*  */))).map(/* index -> this */.elements.size() - index - 1).map(this.elements::get);
 			}
 			@Override public Option<Pair<T, List<T>>> removeLast(){/* 
                 if (this.elements.isEmpty()) {
@@ -387,22 +387,22 @@ public class Main {
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineName(name)));
 		}
 		private Option<Type> findType(String input){
-			return this.frames.iterateReverse(/* ) */.map(/* frame -> frame */.findType(/* input) */).flatMap(Iterators::fromOption).next();
+			return this.frames.iterateReverse(/*  */).map(/* frame -> frame */.findType(input)).flatMap(/* Iterators::fromOption */).next(/*  */);
 		}
 		public CompileState defineTypeParams(List<String> typeParams){
-			return /* new CompileState */(this.frames.mapLast(/* last -> typeParams */.iterate(/* ) */.map(/* TypeParam::new */).fold(last, /* Frame::defineTypeParam */)));
+			return /* new CompileState */(this.frames.mapLast(/* last -> typeParams */.iterate(/*  */).map(/* TypeParam::new */).fold(/* last */, /* Frame::defineTypeParam */)));
 		}
 		public CompileState exit(){
-			return /* new CompileState */(this.frames.removeLast(/* ) */.map(/* Pair::right */).orElse(this.frames));
+			return /* new CompileState */(this.frames.removeLast(/*  */).map(/* Pair::right */).orElse(this.frames));
 		}
 		public CompileState defineType(Type type){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineType(type)));
 		}
 		public Option</* Definition */> findValue(String name){
-			return this.frames.iterateReverse(/* ) */.map(/* frame -> frame */.findValue(/* name) */).flatMap(Iterators::fromOption).next();
+			return this.frames.iterateReverse(/*  */).map(/* frame -> frame */.findValue(name)).flatMap(/* Iterators::fromOption */).next(/*  */);
 		}
 		public CompileState defineValues(List</* Definition */> names){
-			return names.iterate(/* ) */.fold(this, /* CompileState::defineValue */);
+			return names.iterate(/*  */).fold(this, /* CompileState::defineValue */);
 		}
 		private CompileState defineValue(/* Definition */ definition){
 			return /* new CompileState */(this.frames.mapLast(/* last -> last */.defineValue(definition)));
@@ -630,7 +630,7 @@ public class Main {
     } */
 	private static class Iterators {
 		public static Iterator<T> fromOption<T>(Option<T> option){
-			return /* new HeadedIterator<> */(option.<Head<T>>map(/* SingleHead::new) */.orElseGet(EmptyHead::new));
+			return /* new HeadedIterator<> */(option.<Head<T>>map(/* SingleHead::new */).orElseGet(/* EmptyHead::new */));
 		}
 	}
 	private static class SingleHead<T> implements Head<T> {
@@ -740,7 +740,7 @@ public class Main {
 		return /* parseAll */(state, input, /* Main::foldStatementValue */, mapper);
 	}
 	private static String join(String delimiter, List<String> elements){
-		return elements.iterate(/* ) */.collect(/* new Joiner */(delimiter)).orElse("");
+		return elements.iterate(/*  */).collect(/* new Joiner */(delimiter)).orElse(/* "" */);
 	}
 	private static Tuple<CompileState, List<T>> parseAll<T>(CompileState state, String input, (DivideState, /*  Character */) -> DivideState folder, BiFunction /* mapper */ <CompileState, String, Tuple<CompileState, T>>){/* 
         return divide(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
@@ -1115,10 +1115,13 @@ public class Main {
 
         if (stripped.endsWith(")")) {
             var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-            var argsStart = withoutEnd.indexOf("(");
-            if (argsStart >= 0) {
-                var beforeArgs = withoutEnd.substring(0, argsStart).strip();
-                var args = withoutEnd.substring(argsStart + "(".length());
+
+            var divisions = divide(withoutEnd, Main::foldArgsStart);
+
+            if (divisions.size() >= 2) {
+                var joined = join("", divisions.subList(0, divisions.size() - 1));
+                var beforeArgs = joined.substring(0, joined.length() - ")".length());
+                var args = divisions.getLast();
                 if (beforeArgs.startsWith("new ")) {
                     var type = parseType(state, beforeArgs.substring("new ".length()));
                     if (type.right instanceof ObjectType objectType) {
@@ -1152,6 +1155,7 @@ public class Main {
                         }
                     }
                 }
+
                 var type = parseValue(state, beforeArgs);
                 var parsed = parseValues(type.left, args, Main::parseValue);
                 return new Tuple<>(parsed.left, new Invokable(type.right, parsed.right));
@@ -1182,6 +1186,21 @@ public class Main {
         }
 
         return new Tuple<>(state, new Placeholder(stripped));
+    } *//* 
+
+    private static DivideState foldArgsStart(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var entered = appended.enter();
+            if (entered.isShallow()) {
+                return entered.advance();
+            }
+            return entered;
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     } *//* 
 
     private static Option<Type> find(Map<String, Type> self, String key) {
