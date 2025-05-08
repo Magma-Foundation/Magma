@@ -138,6 +138,48 @@ public class Main {
     private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
     }
 
+    private record None<T>() implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> other) {
+            return other.get();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
+
+        @Override
+        public <R> Option<Pair<T, R>> and(Supplier<Option<R>> other) {
+            return new None<>();
+        }
+    }
+
     private static class Maps {
         @Actual
         private record JavaMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
@@ -226,48 +268,6 @@ public class Main {
         @Override
         public <R> Option<Pair<T, R>> and(Supplier<Option<R>> other) {
             return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
-        }
-    }
-
-    private record None<T>() implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        }
-
-        @Override
-        public T orElse(T other) {
-            return other;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> other) {
-            return other.get();
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other.get();
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<>();
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            return new None<>();
-        }
-
-        @Override
-        public <R> Option<Pair<T, R>> and(Supplier<Option<R>> other) {
-            return new None<>();
         }
     }
 

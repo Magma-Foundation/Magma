@@ -87,6 +87,32 @@ public class Main {
 	}
 	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
+	private record None<T> implements Option<T> {
+		@Override public Option<R> map<R>(T -> R mapper){
+			return new None();
+		}
+		@Override public boolean isPresent(){
+			return false;
+		}
+		@Override public T orElse(T other){
+			return other;
+		}
+		@Override public T orElseGet(() -> T other){
+			return other();
+		}
+		@Override public Option<T> or(() -> Option<T> other){
+			return other();
+		}
+		@Override public Option<R> flatMap<R>(T -> Option<R> mapper){
+			return new None();
+		}
+		@Override public Option<T> filter(T -> boolean predicate){
+			return new None();
+		}
+		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
+			return new None();
+		}
+	}
 	private static class Maps {
 		@Actual public static Map<K, V> of<K, V>(K key, V value);
 		@Actual public static Map<K, V> empty<K, V>();
@@ -118,32 +144,6 @@ public class Main {
 		}
 		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
 			return other().map(/* otherValue -> new Tuple<> */(this.value, /* otherValue */));
-		}
-	}
-	private record None<T> implements Option<T> {
-		@Override public Option<R> map<R>(T -> R mapper){
-			return new None();
-		}
-		@Override public boolean isPresent(){
-			return false;
-		}
-		@Override public T orElse(T other){
-			return other;
-		}
-		@Override public T orElseGet(() -> T other){
-			return other();
-		}
-		@Override public Option<T> or(() -> Option<T> other){
-			return other();
-		}
-		@Override public Option<R> flatMap<R>(T -> Option<R> mapper){
-			return new None();
-		}
-		@Override public Option<T> filter(T -> boolean predicate){
-			return new None();
-		}
-		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
-			return new None();
 		}
 	}
 	@rivate static class RangeHead implements Head<Integer> { @rivate final int length; private int counter = 0; /* public */ RangeHead(int length){
