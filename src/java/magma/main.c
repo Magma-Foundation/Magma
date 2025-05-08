@@ -80,10 +80,13 @@ public class Main {
 		boolean hasName(String name);
 		Map<String, Type> extractFromTemplate(Type template);
 	}
+	private @interface Actual {
+	}
 	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
 	private static class Maps {
-		private record JavaMap<K, V>(/* java.util.Map<K, V> */ map) implements Map<K, V> {
+		@Actual
+        private record JavaMap<K, V>(/* java.util.Map<K, V> */ map) implements Map<K, V> {
 			/* public */ JavaMap(){
 				/* this(new HashMap<>()) */;
 			}
@@ -108,10 +111,12 @@ public class Main {
 				return /* new None<> */(/*  */);
 			}
 		}
-		public static Map<K, V> of<K, V>(K key, V value){
+		@Actual
+        public static Map<K, V> of<K, V>(K key, V value){
 			return /* new JavaMap<K, V> */(/* ) */.put(key, value);
 		}
-		public static Map<K, V> empty<K, V>(){
+		@Actual
+        public static Map<K, V> empty<K, V>(){
 			return /* new JavaMap<> */(/*  */);
 		}
 	}

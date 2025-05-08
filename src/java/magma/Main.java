@@ -127,10 +127,14 @@ public class Main {
         Map<String, Type> extractFromTemplate(Type template);
     }
 
+    private @interface Actual {
+    }
+
     private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
     }
 
     private static class Maps {
+        @Actual
         private record JavaMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
             public JavaMap() {
                 this(new HashMap<>());
@@ -164,10 +168,12 @@ public class Main {
             }
         }
 
+        @Actual
         public static <K, V> Map<K, V> of(K key, V value) {
             return new JavaMap<K, V>().put(key, value);
         }
 
+        @Actual
         public static <K, V> Map<K, V> empty() {
             return new JavaMap<>();
         }
