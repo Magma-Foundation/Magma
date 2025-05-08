@@ -86,86 +86,66 @@ public class Main {
 	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
 	private static class Maps {
-		@Actual
-        public static Map<K, V> of<K, V>(K key, V value){
+		@Actual public static Map<K, V> of<K, V>(K key, V value){
 			return /* new JavaMap<K, V> */(/* ) */.put(key, value);
 		}
-		@Actual
-        public static Map<K, V> empty<K, V>(){
+		@Actual public static Map<K, V> empty<K, V>(){
 			return /* new JavaMap<> */(/*  */);
 		}
 	}
 	private record Some<T>(T value) implements Option<T> {
-		@Override
-        public Option<R> map<R>(T -> R mapper){
+		@Override public Option<R> map<R>(T -> R mapper){
 			return new Some<R>(mapper(this.value));
 		}
-		@Override
-        public boolean isPresent(){
+		@Override public boolean isPresent(){
 			return true;
 		}
-		@Override
-        public T orElse(T other){
+		@Override public T orElse(T other){
 			return this.value;
 		}
-		@Override
-        public T orElseGet(() -> T other){
+		@Override public T orElseGet(() -> T other){
 			return this.value;
 		}
-		@Override
-        public Option<T> or(() -> Option<T> other){
+		@Override public Option<T> or(() -> Option<T> other){
 			return this;
 		}
-		@Override
-        public Option<R> flatMap<R>(T -> Option<R> mapper){
+		@Override public Option<R> flatMap<R>(T -> Option<R> mapper){
 			return mapper(this.value);
 		}
-		@Override
-        public Option<T> filter(T -> boolean predicate){
+		@Override public Option<T> filter(T -> boolean predicate){
 			return predicate(this.value) ? this : new None<>();
 		}
-		@Override
-        public Option<Pair<T, R>> and<R>(() -> Option<R> other){
+		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
 			return other(/* ) */.map(/* otherValue -> new Tuple<>(this */.value, otherValue));
 		}
 	}
 	private record None<T> implements Option<T> {
-		@Override
-        public Option<R> map<R>(T -> R mapper){
+		@Override public Option<R> map<R>(T -> R mapper){
 			return new None(/*  */);
 		}
-		@Override
-        public boolean isPresent(){
+		@Override public boolean isPresent(){
 			return false;
 		}
-		@Override
-        public T orElse(T other){
+		@Override public T orElse(T other){
 			return other;
 		}
-		@Override
-        public T orElseGet(() -> T other){
+		@Override public T orElseGet(() -> T other){
 			return other(/*  */);
 		}
-		@Override
-        public Option<T> or(() -> Option<T> other){
+		@Override public Option<T> or(() -> Option<T> other){
 			return other(/*  */);
 		}
-		@Override
-        public Option<R> flatMap<R>(T -> Option<R> mapper){
+		@Override public Option<R> flatMap<R>(T -> Option<R> mapper){
 			return new None(/*  */);
 		}
-		@Override
-        public Option<T> filter(T -> boolean predicate){
+		@Override public Option<T> filter(T -> boolean predicate){
 			return new None(/*  */);
 		}
-		@Override
-        public Option<Pair<T, R>> and<R>(() -> Option<R> other){
+		@Override public Option<Pair<T, R>> and<R>(() -> Option<R> other){
 			return new None(/*  */);
 		}
 	}
-	private static class RangeHead implements Head<Integer> {
-        private final int length;
-        private int counter = 0; /* public */ RangeHead(int length){
+	@rivate static class RangeHead implements Head<Integer> { @rivate final int length; private int counter = 0; /* public */ RangeHead(int length){
 		/* this.length = length */;/* 
         }
 
@@ -181,22 +161,18 @@ public class Main {
      */
 	}
 	private static class EmptyHead<T> implements Head<T> {
-		@Override
-        public Option<T> next(){
+		@Override public Option<T> next(){
 			return /* new None<> */(/*  */);
 		}
 	}
 	private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-		@Override
-        public Iterator<R> map<R>(T -> R mapper){
+		@Override public Iterator<R> map<R>(T -> R mapper){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).map(mapper));
 		}
-		@Override
-        public C collect<C>(Collector<T, C> collector){
+		@Override public C collect<C>(Collector<T, C> collector){
 			return this.fold(collector.createInitial(/*  */), /* collector::fold */);
 		}
-		@Override
-        public C fold<C>(C initial, (C, T) -> C folder){
+		@Override public C fold<C>(C initial, (C, T) -> C folder){
 			/* var current = initial */;/* 
             while (true) {
                 C finalCurrent = current;
@@ -209,24 +185,19 @@ public class Main {
                 }
             } */
 		}
-		@Override
-        public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
+		@Override public Iterator<R> flatMap<R>(T -> Iterator<R> mapper){
 			return this.map(/* mapper) */.<Iterator<R>>fold(new HeadedIterator(/* new EmptyHead<>( */)), /* Iterator::concat */);
 		}
-		@Override
-        public Iterator<T> concat(Iterator<T> other){
+		@Override public Iterator<T> concat(Iterator<T> other){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).or(other::next));
 		}
-		@Override
-        public Option<T> next(){
+		@Override public Option<T> next(){
 			return this.head.next(/*  */);
 		}
-		@Override
-        public Iterator<T> filter(T -> boolean predicate){
+		@Override public Iterator<T> filter(T -> boolean predicate){
 			return this.flatMap(/* t -> new HeadedIterator<> */(predicate(/* t) ? new SingleHead<>(t) : new EmptyHead<>( */)));
 		}
-		@Override
-        public Iterator<Pair<T, R>> zip<R>(Iterator<R> other){
+		@Override public Iterator<Pair<T, R>> zip<R>(Iterator<R> other){
 			return new HeadedIterator(/*  */(/* ) -> this */.head.next(/*  */).and(other::next));
 		}
 	}
@@ -235,42 +206,33 @@ public class Main {
 			/* public */ JavaList(){
 				/* this(new ArrayList<>()) */;
 			}
-			@Override
-            public List<T> add(T element){
+			@Override public List<T> add(T element){
 				/* var copy = new ArrayList<>(this.elements) */;
 				/* copy.add(element) */;
 				return new JavaList(/* copy */);
 			}
-			@Override
-            public Iterator<T> iterate(){
+			@Override public Iterator<T> iterate(){
 				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/* ) */)).map(this.elements::get);
 			}
-			@Override
-            public boolean isEmpty(){
+			@Override public boolean isEmpty(){
 				return this.elements.isEmpty(/*  */);
 			}
-			@Override
-            public int size(){
+			@Override public int size(){
 				return this.elements.size(/*  */);
 			}
-			@Override
-            public List<T> subList(int startInclusive, int endExclusive){
+			@Override public List<T> subList(int startInclusive, int endExclusive){
 				return new JavaList(/* new ArrayList<>(this */.elements.subList(startInclusive, /* endExclusive)) */);
 			}
-			@Override
-            public T getLast(){
+			@Override public T getLast(){
 				return this.elements.getLast(/*  */);
 			}
-			@Override
-            public T get(int index){
+			@Override public T get(int index){
 				return this.elements.get(index);
 			}
-			@Override
-            public Iterator<T> iterateReverse(){
+			@Override public Iterator<T> iterateReverse(){
 				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size(/* )) */).map(index -> this.elements.size() - index - 1).map(this.elements::get);
 			}
-			@Override
-            public Option<Pair<T, List<T>>> removeLast(){/* 
+			@Override public Option<Pair<T, List<T>>> removeLast(){/* 
                 if (this.elements.isEmpty()) {
                     return new None<>();
                 } */
@@ -278,17 +240,15 @@ public class Main {
 				/* var removed = copy.removeLast() */;
 				return /* new Some<> */(/* new Tuple<>(removed */, new JavaList(/* copy) */));
 			}
-			@Override
-            public boolean contains(T element){
-				return /* elements */.contains(element);
+			@Override public boolean contains(T element){
+				return this.elements.contains(element);
 			}
 			private List<T> setLast(T element){
 				/* var copy = new ArrayList<>(this.elements) */;
 				/* copy.set(copy.size() - 1, element) */;
 				return new JavaList(/* copy */);
 			}
-			@Override
-            public List<T> mapLast(T -> T mapper){
+			@Override public List<T> mapLast(T -> T mapper){
 				/* var oldLast = this.getLast() */;
 				/* var newLast = mapper.apply(oldLast) */;
 				return this.setLast(/* newLast */);
@@ -354,26 +314,21 @@ public class Main {
         }
     } */
 	private static class ListCollector<T> implements Collector<T, List<T>> {
-		@Override
-        public List<T> createInitial(){
+		@Override public List<T> createInitial(){
 			return /* Lists */.empty(/*  */);
 		}
-		@Override
-        public List<T> fold(List<T> current, T element){
+		@Override public List<T> fold(List<T> current, T element){
 			return current.add(element);
 		}
 	}
 	private record TypeParam(String name) implements Type {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return this.name;
 		}
-		@Override
-        public boolean hasName(String name){
+		@Override public boolean hasName(String name){
 			return this.name.equals(name);
 		}
-		@Override
-        public Map<String, Type> extractFromTemplate(Type template){
+		@Override public Map<String, Type> extractFromTemplate(Type template){
 			return /* Maps */.of(this.name, template);
 		}
 	}
@@ -542,8 +497,7 @@ public class Main {
         } */
 	}
 	private static class Whitespace implements /* StructSegment, Parameter, FunctionSegment, TypeArgument */ {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return /* "" */;
 		}
 	}/* 
@@ -564,22 +518,18 @@ public class Main {
         }
     } */
 	private record Content(String input) implements StructSegment {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return this.input;
 		}
 	}
 	private record Placeholder(String /* input */ ) implements /* Node, StructSegment, Parameter, Value, FunctionSegment, StatementValue, Type */ {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return /* generatePlaceholder */(this.input);
 		}
-		@Override
-        public boolean hasName(String name){
+		@Override public boolean hasName(String name){
 			return false;
 		}
-		@Override
-        public Map<String, Type> extractFromTemplate(Type template){
+		@Override public Map<String, Type> extractFromTemplate(Type template){
 			return /* Maps */.empty(/*  */);
 		}
 	}/* 
@@ -616,32 +566,70 @@ public class Main {
         }
     } */
 	public record Statement(int depth, String content) implements /* StructSegment, FunctionSegment */ {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return /* createIndent(this */.depth()) + this.content() + ";
 			/* " */;
 		}
 	}/* 
 
     private record Definition(
+            List<String> annotations,
             Option<String> maybeBeforeType,
             Type type,
             String name,
             List<String> typeParams
     ) implements Parameter, StatementValue {
         public Definition(Type type, String name) {
-            this(new None<>(), type, name, Lists.empty());
+            this(Lists.empty(), new None<>(), type, name, Lists.empty());
+        }
+
+        private Definition() {
+            this(Lists.empty(), new None<>(), new Placeholder("?"), "?", Lists.empty());
         }
 
         @Override
         public String generate() {
-            var beforeTypeString = this.maybeBeforeType()
-                    .filter(value -> !value.isEmpty())
+            var beforeTypeString = this.generateBeforeType();
+            var joinedAnnotations = this.generateAnnotations();
+            var typeParamString = this.generateTypeParameters();
+            return joinedAnnotations + beforeTypeString + this.type.generate() + " " + this.name + typeParamString;
+        }
+
+        private String generateBeforeType() {
+            return this.maybeBeforeType.filter(value -> !value.isEmpty())
                     .map(beforeType -> beforeType + " ")
                     .orElse("");
+        }
 
-            var typeParamString = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
-            return beforeTypeString + this.type.generate() + " " + this.name + typeParamString;
+        private String generateAnnotations() {
+            return this.annotations.iterate()
+                    .map(annotation -> "@" + annotation + " ")
+                    .collect(new Joiner(""))
+                    .orElse("");
+        }
+
+        private String generateTypeParameters() {
+            return this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
+        }
+
+        public Definition withName(String name) {
+            return new Definition(this.annotations, this.maybeBeforeType, this.type, name, this.typeParams);
+        }
+
+        public Definition withTypeParams(List<String> typeParams) {
+            return new Definition(this.annotations, this.maybeBeforeType, this.type, this.name, typeParams);
+        }
+
+        public Definition withType(Type type) {
+            return new Definition(this.annotations, this.maybeBeforeType, type, this.name, this.typeParams);
+        }
+
+        public Definition withBeforeType(String beforeType) {
+            return new Definition(this.annotations, new Some<>(beforeType), this.type, this.name, this.typeParams);
+        }
+
+        public Definition withAnnotations(List<String> annotations) {
+            return new Definition(annotations, this.maybeBeforeType, this.type, this.name, this.typeParams);
         }
     } */
 	private static class Iterators {
@@ -655,8 +643,7 @@ public class Main {
 		/* public */ SingleHead(T value){
 			/* this.value = value */;
 		}
-		@Override
-        public Option<T> next(){/* 
+		@Override public Option<T> next(){/* 
             if (this.retrieved) {
                 return new None<>();
             } */
@@ -665,14 +652,12 @@ public class Main {
 		}
 	}
 	private record Return(Node value) implements StatementValue {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return /* "return " + this */.value.generate(/*  */);
 		}
 	}
 	private record ConstructionHeader(/* ObjectType */ type) implements Caller {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return /* "new " + this */.type.generate(/*  */);
 		}
 	}/* 
@@ -685,22 +670,18 @@ public class Main {
         }
     } */
 	private record DataAccess(Value parent, String property) implements Value {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return this.parent.generate() + "." + this.property;
 		}
 	}
 	private record Symbol(String value) implements /* Value, Type */ {
-		@Override
-        public String generate(){
+		@Override public String generate(){
 			return this.value;
 		}
-		@Override
-        public boolean hasName(String name){
+		@Override public boolean hasName(String name){
 			return this.value.equals(name);
 		}
-		@Override
-        public Map<String, Type> extractFromTemplate(Type template){
+		@Override public Map<String, Type> extractFromTemplate(Type template){
 			return /* Maps */.empty(/*  */);
 		}
 	}/* 
@@ -853,7 +834,7 @@ public class Main {
                             .withContent(content)
                             .withDepth(depth);
 
-                    if(prototype.annotations.contains("Actual")) {
+                    if (prototype.annotations.contains("Actual")) {
                         return new Some<>(new Tuple<>(state, new Whitespace()));
                     }
 
@@ -1310,28 +1291,43 @@ public class Main {
             var name = input.substring(nameSeparator + " ".length()).strip();
             if (isSymbol(name)) {
                 var divisions = divide(beforeName, Main::foldTypeDivisions);
+                var withName = new Definition().withName(name);
                 if (divisions.size() >= 2) {
                     var beforeType = join(" ", divisions.subList(0, divisions.size() - 1)).strip();
                     var type = divisions.getLast();
 
-                    if (beforeType.endsWith(">")) {
-                        var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
-                        var typeParamStart = withoutTypeParamEnd.indexOf("<");
-                        if (typeParamStart >= 0) {
-                            var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart).strip();
-                            var typeParams = parseValues(state, withoutTypeParamEnd.substring(typeParamStart + "<".length()), Main::stripToTuple);
-                            return new Some<>(assembleDefinition(new Some<String>(beforeTypeParams), type, name, typeParams.left, typeParams.right));
-                        }
+                    var annotationsSeparator = beforeType.lastIndexOf("\n");
+                    if (annotationsSeparator >= 0) {
+                        var annotations = parseAnnotations(beforeType.substring(0, annotationsSeparator));
+                        var substring = beforeType.substring(annotationsSeparator + "\n".length()).strip();
+                        return attachTypeParameters(state, substring, type, withName.withAnnotations(annotations));
                     }
 
-                    return new Some<>(assembleDefinition(new Some<String>(beforeType), type, name, state, Lists.empty()));
+                    return attachTypeParameters(state, beforeType, type, withName);
                 }
                 else {
-                    return new Some<>(assembleDefinition(new None<String>(), beforeName, name, state, Lists.empty()));
+                    return new Some<>(assembleDefinition(beforeName, state, withName));
                 }
             }
         }
         return new None<>();
+    } *//* 
+
+    private static Some<Tuple<CompileState, Definition>> attachTypeParameters(CompileState state, String beforeType, String type, Definition withName) {
+        if (beforeType.endsWith(">")) {
+            var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
+            var typeParamStart = withoutTypeParamEnd.indexOf("<");
+            if (typeParamStart >= 0) {
+                var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart).strip();
+                var substring = withoutTypeParamEnd.substring(typeParamStart + "<".length());
+                var typeParams = parseValues(state, substring, Main::stripToTuple);
+                return new Some<>(assembleDefinition(type, typeParams.left, withName
+                        .withBeforeType(beforeTypeParams)
+                        .withTypeParams(typeParams.right)));
+            }
+        }
+
+        return new Some<>(assembleDefinition(type, state, withName.withBeforeType(beforeType)));
     } *//* 
 
     private static Tuple<CompileState, String> stripToTuple(CompileState t, String u) {
@@ -1353,9 +1349,9 @@ public class Main {
         return appended;
     } *//* 
 
-    private static Tuple<CompileState, Definition> assembleDefinition(Option<String> maybeBeforeType, String type, String name, CompileState state, List<String> typeParams) {
-        var typeTuple = parseType(state.enter().defineTypeParams(typeParams), type);
-        var definition = new Definition(maybeBeforeType, typeTuple.right, name, typeParams);
+    private static Tuple<CompileState, Definition> assembleDefinition(String type, CompileState state, Definition definition1) {
+        var typeTuple = parseType(state.enter().defineTypeParams(definition1.typeParams), type);
+        var definition = definition1.withType(typeTuple.right);
         return new Tuple<>(typeTuple.left.exit(), definition);
     } *//* 
 

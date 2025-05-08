@@ -815,48 +815,63 @@ public class Main {
     }
 
     private record Definition(
+            List<String> annotations,
             Option<String> maybeBeforeType,
             Type type,
             String name,
             List<String> typeParams
     ) implements Parameter, StatementValue {
         public Definition(Type type, String name) {
-            this(new None<>(), type, name, Lists.empty());
+            this(Lists.empty(), new None<>(), type, name, Lists.empty());
         }
 
         private Definition() {
-            this(new None<>(), new Placeholder("?"), "?", Lists.empty());
+            this(Lists.empty(), new None<>(), new Placeholder("?"), "?", Lists.empty());
         }
 
         @Override
         public String generate() {
-            var beforeTypeString = this.maybeBeforeType()
-                    .filter(value -> !value.isEmpty())
-                    .map(beforeType -> beforeType + " ")
-                    .orElse("");
-
-            var typeParamString = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
-            return beforeTypeString + this.type.generate() + " " + this.name + typeParamString;
+            var beforeTypeString = this.generateBeforeType();
+            var joinedAnnotations = this.generateAnnotations();
+            var typeParamString = this.generateTypeParameters();
+            return joinedAnnotations + beforeTypeString + this.type.generate() + " " + this.name + typeParamString;
         }
 
-        public Definition withMaybeBeforeType(Option<String> maybeBeforeType) {
-            return new Definition(maybeBeforeType, this.type, this.name, this.typeParams);
+        private String generateBeforeType() {
+            return this.maybeBeforeType.filter(value -> !value.isEmpty())
+                    .map(beforeType -> beforeType + " ")
+                    .orElse("");
+        }
+
+        private String generateAnnotations() {
+            return this.annotations.iterate()
+                    .map(annotation -> "@" + annotation + " ")
+                    .collect(new Joiner(""))
+                    .orElse("");
+        }
+
+        private String generateTypeParameters() {
+            return this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
         }
 
         public Definition withName(String name) {
-            return new Definition(this.maybeBeforeType, this.type, name, this.typeParams);
+            return new Definition(this.annotations, this.maybeBeforeType, this.type, name, this.typeParams);
         }
 
         public Definition withTypeParams(List<String> typeParams) {
-            return new Definition(this.maybeBeforeType, this.type, this.name, typeParams);
+            return new Definition(this.annotations, this.maybeBeforeType, this.type, this.name, typeParams);
         }
 
         public Definition withType(Type type) {
-            return new Definition(this.maybeBeforeType, type, this.name, this.typeParams);
+            return new Definition(this.annotations, this.maybeBeforeType, type, this.name, this.typeParams);
         }
 
         public Definition withBeforeType(String beforeType) {
-            return new Definition(new Some<>(beforeType), this.type, this.name, this.typeParams);
+            return new Definition(this.annotations, new Some<>(beforeType), this.type, this.name, this.typeParams);
+        }
+
+        public Definition withAnnotations(List<String> annotations) {
+            return new Definition(annotations, this.maybeBeforeType, this.type, this.name, this.typeParams);
         }
     }
 
@@ -1555,20 +1570,14 @@ public class Main {
                     var beforeType = join(" ", divisions.subList(0, divisions.size() - 1)).strip();
                     var type = divisions.getLast();
 
-                    if (beforeType.endsWith(">")) {
-                        var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
-                        var typeParamStart = withoutTypeParamEnd.indexOf("<");
-                        if (typeParamStart >= 0) {
-                            var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart).strip();
-                            var typeParams = parseValues(state, withoutTypeParamEnd.substring(typeParamStart + "<".length()), Main::stripToTuple);
-                            return new Some<>(assembleDefinition(type, typeParams.left, withName
-                                    .withBeforeType(beforeTypeParams)
-                                    .withTypeParams(typeParams.right)));
-                        }
+                    var annotationsSeparator = beforeType.lastIndexOf("\n");
+                    if (annotationsSeparator >= 0) {
+                        var annotations = parseAnnotations(beforeType.substring(0, annotationsSeparator));
+                        var substring = beforeType.substring(annotationsSeparator + "\n".length()).strip();
+                        return attachTypeParameters(state, substring, type, withName.withAnnotations(annotations));
                     }
 
-                    return new Some<>(assembleDefinition(type, state, withName
-                            .withBeforeType(beforeType)));
+                    return attachTypeParameters(state, beforeType, type, withName);
                 }
                 else {
                     return new Some<>(assembleDefinition(beforeName, state, withName));
@@ -1576,6 +1585,23 @@ public class Main {
             }
         }
         return new None<>();
+    }
+
+    private static Some<Tuple<CompileState, Definition>> attachTypeParameters(CompileState state, String beforeType, String type, Definition withName) {
+        if (beforeType.endsWith(">")) {
+            var withoutTypeParamEnd = beforeType.substring(0, beforeType.length() - ">".length());
+            var typeParamStart = withoutTypeParamEnd.indexOf("<");
+            if (typeParamStart >= 0) {
+                var beforeTypeParams = withoutTypeParamEnd.substring(0, typeParamStart).strip();
+                var substring = withoutTypeParamEnd.substring(typeParamStart + "<".length());
+                var typeParams = parseValues(state, substring, Main::stripToTuple);
+                return new Some<>(assembleDefinition(type, typeParams.left, withName
+                        .withBeforeType(beforeTypeParams)
+                        .withTypeParams(typeParams.right)));
+            }
+        }
+
+        return new Some<>(assembleDefinition(type, state, withName.withBeforeType(beforeType)));
     }
 
     private static Tuple<CompileState, String> stripToTuple(CompileState t, String u) {
