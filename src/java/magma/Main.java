@@ -176,7 +176,24 @@ public class Main {
     }
 
     private static Result<String, CompileError> compileRootSegment(String input) {
-        return compilePrefix(input, "package ", slice -> new Err<>(new CompileError("Invalid package", slice)));
+        return compilePrefix(input.strip(), "package ", withoutPrefix -> {
+            return compileSuffix(withoutPrefix, ";", slice -> {
+                return createError("Invalid package", slice);
+            });
+        });
+    }
+
+    private static Result<String, CompileError> compileSuffix(String input, String suffix, Function<String, Result<String, CompileError>> mapper) {
+        if (input.endsWith(suffix)) {
+            var slice = input.substring(0, input.length() - suffix.length());
+            return mapper.apply(slice);
+        }
+
+        return createError("Suffix '" + suffix + "' not present", input);
+    }
+
+    private static Result<String, CompileError> createError(String message, String context) {
+        return new Err<>(new CompileError(message, context));
     }
 
     private static Result<String, CompileError> compilePrefix(String input, String prefix, Function<String, Result<String, CompileError>> compiler) {
@@ -185,7 +202,7 @@ public class Main {
             return compiler.apply(slice);
         }
 
-        return new Err<>(new CompileError("Prefix '" + prefix + "' not present", input));
+        return createError("Prefix '" + prefix + "' not present", input);
     }
 
 }
