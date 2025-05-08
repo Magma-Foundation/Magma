@@ -299,7 +299,6 @@ public class Main {
     }
 
     private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-
         @Override
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
@@ -315,9 +314,9 @@ public class Main {
             var current = initial;
             while (true) {
                 C finalCurrent = current;
-                var folded = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
-                if (folded.isPresent()) {
-                    current = folded.orElse(null);
+                var maybeFolded = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                if (maybeFolded instanceof Some(var folded)) {
+                    current = folded;
                 }
                 else {
                     return current;
