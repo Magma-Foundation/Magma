@@ -1407,26 +1407,12 @@ public class Main {
 
                         if (objectType.find("new") instanceof Some(var constructorType)) {
                             if (constructorType.type instanceof Functional expected) {
-                                var argumentsTypes = argumentsTuple.right
-                                        .iterate()
-                                        .map(argument -> resolve(argumentsTuple.left, argument))
-                                        .collect(new ListCollector<>());
-
+                                var argumentsTypes = resolveArguments(argumentsTuple.left, argumentsTuple.right);
                                 var actual = new Functional(argumentsTypes, expected.returns);
                                 var extracted = expected.extractFromTemplate(actual);
 
-                                var typeParams = objectType.typeArguments
-                                        .iterate()
-                                        .map(Main::retainTypeParam)
-                                        .flatMap(Iterators::fromOption)
-                                        .map(param -> param.name)
-                                        .collect(new ListCollector<>());
-
-                                var newTypeParams = typeParams.iterate()
-                                        .map(value -> find(extracted, value))
-                                        .flatMap(Iterators::fromOption)
-                                        .collect(new ListCollector<>());
-
+                                var typeParams = extractTypeParameters(objectType);
+                                var newTypeParams = createTypeArguments(typeParams, extracted);
                                 var caller = new ConstructionHeader(objectType.withTypeArgs(newTypeParams));
                                 return new Tuple<>(argumentsTuple.left, new Invokable(caller, argumentsTuple.right));
                             }
@@ -1466,6 +1452,30 @@ public class Main {
         return new Tuple<>(state, new Placeholder(stripped));
     }
 
+    private static List<Type> createTypeArguments(
+            List<String> typeParamsOrdering,
+            Map<String, Type> typeArgumentsMap
+    ) {
+        return typeParamsOrdering.iterate()
+                .map(typeArgumentsMap::get)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+    }
+
+    private static List<String> extractTypeParameters(ObjectType objectType) {
+        return objectType.typeArguments.iterate()
+                .map(Main::retainTypeParam)
+                .flatMap(Iterators::fromOption)
+                .map(param -> param.name)
+                .collect(new ListCollector<>());
+    }
+
+    private static List<Type> resolveArguments(CompileState state, List<Value> arguments) {
+        return arguments.iterate()
+                .map(argument -> resolve(state, argument))
+                .collect(new ListCollector<>());
+    }
+
     private static DivideState foldArgsStart(DivideState state, char c) {
         var appended = state.append(c);
         if (c == '(') {
@@ -1479,10 +1489,6 @@ public class Main {
             return appended.exit();
         }
         return appended;
-    }
-
-    private static Option<Type> find(Map<String, Type> self, String key) {
-        return self.get(key);
     }
 
     private static Option<TypeParam> retainTypeParam(Type param) {
