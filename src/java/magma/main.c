@@ -86,12 +86,8 @@ public class Main {
 	private record Tuple<A, B>(A left, B right) implements Pair<A, B> {
 	}
 	private static class Maps {
-		@Actual public static Map<K, V> of<K, V>(K key, V value){
-			return /* new JavaMap<K, V> */(/* ) */.put(key, value);
-		}
-		@Actual public static Map<K, V> empty<K, V>(){
-			return /* new JavaMap<> */(/*  */);
-		}
+		@Actual public static Map<K, V> of<K, V>(K key, V value);
+		@Actual public static Map<K, V> empty<K, V>();
 	}
 	private record Some<T>(T value) implements Option<T> {
 		@Override public Option<R> map<R>(T -> R mapper){
@@ -1072,7 +1068,7 @@ public class Main {
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
 
                     var header = createIndent(depth) + definition.generate() + "(" + paramsJoined + ")";
-                    if (maybeWithBraces.equals(";")) {
+                    if (maybeWithBraces.equals(";") || definition.annotations.contains("Actual")) {
                         return new Some<>(new Tuple<CompileState, StructSegment>(paramsState, new Content(header + ";")));
                     }
 

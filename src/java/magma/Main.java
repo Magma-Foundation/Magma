@@ -1346,7 +1346,7 @@ public class Main {
                     var paramsJoined = joinNodes(", ", paramsTuple.right);
 
                     var header = createIndent(depth) + definition.generate() + "(" + paramsJoined + ")";
-                    if (maybeWithBraces.equals(";")) {
+                    if (maybeWithBraces.equals(";") || definition.annotations.contains("Actual")) {
                         return new Some<>(new Tuple<CompileState, StructSegment>(paramsState, new Content(header + ";")));
                     }
 
