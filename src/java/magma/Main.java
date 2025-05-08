@@ -775,7 +775,7 @@ public class Main {
         }
     }
 
-    private record ObjectType(String name, List<Type> typeParams, List<Definition> definitions) implements Type {
+    private record ObjectType(String name, List<Type> typeArguments, List<Definition> definitions) implements Type {
         @Override
         public boolean hasName(String name) {
             return this.name.equals(name);
@@ -788,12 +788,12 @@ public class Main {
 
         @Override
         public String generate() {
-            var joined = this.typeParams.isEmpty() ? "" : this.joinTypeParams();
+            var joined = this.typeArguments.isEmpty() ? "" : this.joinTypeParams();
             return this.name + joined;
         }
 
         private String joinTypeParams() {
-            return "<" + joinNodes(", ", this.typeParams) + ">";
+            return "<" + joinNodes(", ", this.typeArguments) + ">";
         }
 
         public ObjectType withTypeArgs(List<Type> typeArgs) {
@@ -1415,7 +1415,7 @@ public class Main {
                                 var actual = new Functional(argumentsTypes, expected.returns);
                                 var extracted = expected.extractFromTemplate(actual);
 
-                                var typeParams = objectType.typeParams
+                                var typeParams = objectType.typeArguments
                                         .iterate()
                                         .map(Main::retainTypeParam)
                                         .flatMap(Iterators::fromOption)
