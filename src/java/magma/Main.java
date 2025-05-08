@@ -1391,39 +1391,8 @@ public class Main {
             return new Tuple<>(state, BooleanNode.False);
         }
 
-        if (stripped.endsWith(")")) {
-            var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
-
-            var divisions = divide(withoutEnd, Main::foldArgsStart);
-
-            if (divisions.size() >= 2) {
-                var joined = join("", divisions.subList(0, divisions.size() - 1));
-                var beforeArgs = joined.substring(0, joined.length() - ")".length());
-                var args = divisions.getLast();
-                if (beforeArgs.startsWith("new ")) {
-                    var type = parseType(state, beforeArgs.substring("new ".length()));
-                    if (type.right instanceof ObjectType objectType) {
-                        var argumentsTuple = parseValues(type.left, args, Main::parseValue);
-
-                        if (objectType.find("new") instanceof Some(var constructorType)) {
-                            if (constructorType.type instanceof Functional expected) {
-                                var argumentsTypes = resolveArguments(argumentsTuple.left, argumentsTuple.right);
-                                var actual = new Functional(argumentsTypes, expected.returns);
-                                var extracted = expected.extractFromTemplate(actual);
-
-                                var typeParams = extractTypeParameters(objectType);
-                                var newTypeParams = createTypeArguments(typeParams, extracted);
-                                var caller = new ConstructionHeader(objectType.withTypeArgs(newTypeParams));
-                                return new Tuple<>(argumentsTuple.left, new Invokable(caller, argumentsTuple.right));
-                            }
-                        }
-                    }
-                }
-
-                var type = parseValue(state, beforeArgs);
-                var parsed = parseValues(type.left, args, Main::parseValue);
-                return new Tuple<>(parsed.left, new Invokable(type.right, parsed.right));
-            }
+        if (parseInvokable(state, stripped) instanceof Some(var invokable)) {
+            return new Tuple<>(invokable.left, invokable.right);
         }
 
         var separator = stripped.lastIndexOf(".");
@@ -1450,6 +1419,57 @@ public class Main {
         }
 
         return new Tuple<>(state, new Placeholder(stripped));
+    }
+
+    private static Option<Tuple<CompileState, Invokable>> parseInvokable(CompileState state, String stripped) {
+        if (!stripped.endsWith(")")) {
+            return new None<>();
+        }
+
+        var withoutEnd = stripped.substring(0, stripped.length() - ")".length());
+        var divisions = divide(withoutEnd, Main::foldArgsStart);
+
+        if (divisions.size() < 2) {
+            return new None<>();
+        }
+
+        var joined = join("", divisions.subList(0, divisions.size() - 1));
+        var beforeArgs = joined.substring(0, joined.length() - ")".length());
+        var args = divisions.getLast();
+        return parseConstruction(state, beforeArgs, args).or(() -> {
+            var type = parseValue(state, beforeArgs);
+            var parsed = parseValues(type.left, args, Main::parseValue);
+            return new Some<>(new Tuple<CompileState, Invokable>(parsed.left, new Invokable(type.right, parsed.right)));
+        });
+    }
+
+    private static Option<Tuple<CompileState, Invokable>> parseConstruction(CompileState state, String beforeArgs, String args) {
+        if (!beforeArgs.startsWith("new ")) {
+            return new None<>();
+        }
+
+        var type = parseType(state, beforeArgs.substring("new ".length()));
+        if (!(type.right instanceof ObjectType objectType)) {
+            return new None<>();
+        }
+
+        var argumentsTuple = parseValues(type.left, args, Main::parseValue);
+
+        if (!(objectType.find("new") instanceof Some(var constructorType))) {
+            return new None<>();
+        }
+        if (!(constructorType.type instanceof Functional expected)) {
+            return new None<>();
+        }
+
+        var argumentsTypes = resolveArguments(argumentsTuple.left, argumentsTuple.right);
+        var actual = new Functional(argumentsTypes, expected.returns);
+        var extracted = expected.extractFromTemplate(actual);
+
+        var typeParams = extractTypeParameters(objectType);
+        var newTypeParams = createTypeArguments(typeParams, extracted);
+        var caller = new ConstructionHeader(objectType.withTypeArgs(newTypeParams));
+        return new Some<>(new Tuple<>(argumentsTuple.left, new Invokable(caller, argumentsTuple.right)));
     }
 
     private static List<Type> createTypeArguments(
