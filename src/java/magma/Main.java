@@ -47,6 +47,11 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) throws CompileException {
+        if(input.startsWith("package ")) {
+            var slice = input.substring("package ".length());
+            throw new CompileException("Invalid package", slice);
+        }
+
         throw new CompileException("Invalid root", input);
     }
 }
