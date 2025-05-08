@@ -1421,9 +1421,23 @@ public class Main {
         var content = slice.substring(contentStart + "{".length());
 
         var indent = "\n" + "\t".repeat(depth);
-        var tuple = parseFunctionSegments(state, content, depth);
-        var generated = indent + generatePlaceholder(beforeContent) + "{" + joinNodes("", tuple.right) + indent + "}";
-        return new Some<>(new Tuple<>(tuple.left, new Content(generated)));
+        var headerTuple = compileBlockHeader(state, beforeContent);
+        var segmentsTuple = parseFunctionSegments(headerTuple.left, content, depth);
+        var generated = indent + headerTuple.right + "{" + joinNodes("", segmentsTuple.right) + indent + "}";
+        return new Some<>(new Tuple<>(segmentsTuple.left, new Content(generated)));
+    }
+
+    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("if")) {
+            var withoutPrefix = stripped.substring("if".length()).strip();
+            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+                var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+                var valueTuple = parseValue(state, condition);
+                return new Tuple<>(valueTuple.left, "if (" + valueTuple.right.generate() + ")");
+            }
+        }
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static Option<Tuple<CompileState, StatementValue>> parseStatementValue(CompileState state, String input) {

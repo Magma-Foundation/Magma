@@ -111,7 +111,7 @@ public class Main {
 			return mapper(this.value);
 		}
 		@Override public Option<T> filter(T -> boolean predicate){
-			/* if (predicate.test(this.value)) */{
+			if (predicate(this.value)){
 				return this;
 			}
 			return /* new None<> */();
@@ -178,7 +178,7 @@ public class Main {
 			/* while (true) */{
 				/* C finalCurrent = current */;
 				/* var folded = this.head.next().map(inner -> folder.apply(finalCurrent, inner)) */;
-				/* if (folded.isPresent()) */{
+				if (/* folded */.isPresent()){
 					/* current = folded.orElse(null) */;
 				}
 				/* else */{
@@ -197,7 +197,7 @@ public class Main {
 		}
 		@Override public Iterator<T> filter(T -> boolean predicate){
 			/* return this.flatMap(element -> */{
-				/* if (predicate.test(element)) */{
+				if (predicate(element)){
 					return new HeadedIterator(/* new SingleHead<> */(element));
 				}
 				return new HeadedIterator(/* new EmptyHead<> */());
@@ -240,7 +240,7 @@ public class Main {
 				return /* new HeadedIterator<> */(/* new RangeHead */(this.elements.size())).map(/* index -> this */.elements.size() - index - 1).map(this.elements::get);
 			}
 			@Override public Option<Pair<T, List<T>>> removeLast(){
-				/* if (this.elements.isEmpty()) */{
+				if (this.elements.isEmpty()){
 					return /* new None<> */();
 				}
 				/* var copy = new ArrayList<T>(this.elements) */;
@@ -417,13 +417,13 @@ public class Main {
 			return /* joinedModifiers + this */.infix + this.name() + typeParamsStrings + paramStrings + extendsString + interfacesString;
 		}
 		/* private String generateTypeParameters() */{
-			/* if (this.typeParams().isEmpty()) */{
+			if (this.typeParams().isEmpty()){
 				return /* "" */;
 			}
 			return /* "<" + join(", ", this */.typeParams) + ">";
 		}
 		/* private String generateParameters() */{
-			/* if (this.parameters.isEmpty()) */{
+			if (this.parameters.isEmpty()){
 				return /* "" */;
 			}
 			return /* "(" + joinNodes(", ", this */.parameters) + ")";
@@ -432,7 +432,7 @@ public class Main {
 			return this.maybeSuperType.map(/* extendsSlice -> " extends " + extendsSlice */.generate());
 		}
 		/* private String generateImplements() */{
-			/* if (this.interfaces.isEmpty()) */{
+			if (this.interfaces.isEmpty()){
 				return /* "" */;
 			}
 			return /* " implements " + joinNodes */(/* " */, /* " */, this.interfaces);
@@ -462,7 +462,7 @@ public class Main {
 			return /* new StructurePrototype */(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, /* depth */);
 		}
 		/* public StructurePrototype withName(String name) */{
-			/* if (name.isEmpty()) */{
+			if (name.isEmpty()){
 				return this;
 			}
 			return /* new StructurePrototype */(this.type, this.annotations, this.modifiers, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
@@ -634,7 +634,7 @@ public class Main {
 			/* this.value = value */;
 		}
 		@Override public Option<T> next(){
-			/* if (this.retrieved) */{
+			if (this.retrieved){
 				return /* new None<> */();
 			}
 			/* this.retrieved = true */;
@@ -1109,9 +1109,23 @@ public class Main {
         var content = slice.substring(contentStart + "{".length());
 
         var indent = "\n" + "\t".repeat(depth);
-        var tuple = parseFunctionSegments(state, content, depth);
-        var generated = indent + generatePlaceholder(beforeContent) + "{" + joinNodes("", tuple.right) + indent + "}";
-        return new Some<>(new Tuple<>(tuple.left, new Content(generated)));
+        var headerTuple = compileBlockHeader(state, beforeContent);
+        var segmentsTuple = parseFunctionSegments(headerTuple.left, content, depth);
+        var generated = indent + headerTuple.right + "{" + joinNodes("", segmentsTuple.right) + indent + "}";
+        return new Some<>(new Tuple<>(segmentsTuple.left, new Content(generated)));
+    } *//* 
+
+    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("if")) {
+            var withoutPrefix = stripped.substring("if".length()).strip();
+            if (withoutPrefix.startsWith("(") && withoutPrefix.endsWith(")")) {
+                var condition = withoutPrefix.substring(1, withoutPrefix.length() - 1);
+                var valueTuple = parseValue(state, condition);
+                return new Tuple<>(valueTuple.left, "if (" + valueTuple.right.generate() + ")");
+            }
+        }
+        return new Tuple<>(state, generatePlaceholder(input));
     } *//* 
 
     private static Option<Tuple<CompileState, StatementValue>> parseStatementValue(CompileState state, String input) {
