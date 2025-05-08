@@ -624,7 +624,7 @@ public class Main {
     private record StructurePrototype(
             String type,
             List<String> annotations,
-            String beforeInfix,
+            List<String> modifiers,
             String infix,
             String name,
             List<String> typeParams,
@@ -636,62 +636,86 @@ public class Main {
             int depth
     ) {
         public StructurePrototype(String type1) {
-            this(type1, Lists.empty(), "", "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), Lists.empty(), "", 0);
+            this(type1, Lists.empty(), Lists.empty(), "", "", Lists.empty(), new None<>(), Lists.empty(), Lists.empty(), Lists.empty(), "", 0);
         }
 
         private String generate() {
-            var typeParamsStrings = this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
-            var paramStrings = this.parameters.isEmpty() ? "" : "(" + joinNodes(", ", this.parameters) + ")";
-            var extendsString = this.maybeSuperType.map(extendsSlice -> " extends " + extendsSlice.generate()).orElse("");
-            var interfacesString = this.interfaces.isEmpty() ? "" : " implements " + joinNodes(", ", this.interfaces);
-            return this.beforeInfix + this.infix + this.name() + typeParamsStrings + paramStrings + extendsString + interfacesString;
+            var typeParamsStrings = this.generateTypeParameters();
+            var paramStrings = this.generateParameters();
+            var extendsString = this.generateSuperType().orElse("");
+            var interfacesString = this.generateImplements();
+            var joinedModifiers = this.generateModifiers();
+            return joinedModifiers + this.infix + this.name() + typeParamsStrings + paramStrings + extendsString + interfacesString;
         }
 
-        public StructurePrototype withBeforeInfix(String beforeInfix) {
-            return new StructurePrototype(this.type, this.annotations, beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
+        private String generateTypeParameters() {
+            return this.typeParams().isEmpty() ? "" : "<" + join(", ", this.typeParams) + ">";
+        }
+
+        private String generateParameters() {
+            return this.parameters.isEmpty() ? "" : "(" + joinNodes(", ", this.parameters) + ")";
+        }
+
+        private Option<String> generateSuperType() {
+            return this.maybeSuperType.map(extendsSlice -> " extends " + extendsSlice.generate());
+        }
+
+        private String generateImplements() {
+            return this.interfaces.isEmpty() ? "" : " implements " + joinNodes(", ", this.interfaces);
+        }
+
+        private String generateModifiers() {
+            return this.modifiers.iterate()
+                    .map(modifier -> modifier + " ")
+                    .collect(new Joiner())
+                    .orElse("");
+        }
+
+        public StructurePrototype withModifiers(List<String> modifiers) {
+            return new StructurePrototype(this.type, this.annotations, modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withInfix(String infix) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withTypeParams(List<String> typeParams) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withParameters(List<Definition> parameters) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withInterfaces(List<Type> interfaces) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withContent(String content) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, content, this.depth);
         }
 
         public StructurePrototype withDepth(int depth) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, depth);
         }
 
         public StructurePrototype withName(String name) {
             if (name.isEmpty()) {
                 return this;
             }
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withSuperType(Type superType) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, new Some<>(superType), this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
 
         public StructurePrototype withVariants(List<String> variants) {
-            return new StructurePrototype(this.type, this.annotations, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, variants, this.content, this.depth);
+            return new StructurePrototype(this.type, this.annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, variants, this.content, this.depth);
         }
 
         public StructurePrototype withAnnotations(List<String> annotations) {
-            return new StructurePrototype(this.type, annotations, this.beforeInfix, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
+            return new StructurePrototype(this.type, annotations, this.modifiers, this.infix, this.name, this.typeParams, this.maybeSuperType, this.parameters, this.interfaces, this.variants, this.content, this.depth);
         }
     }
 
@@ -1016,7 +1040,7 @@ public class Main {
                 var keywordIndex = beforeContent.indexOf(infix);
                 if (keywordIndex >= 0) {
                     var prototype2 = new StructurePrototype(type);
-                    var beforeInfix = beforeContent.substring(0, keywordIndex);
+                    var beforeInfix = beforeContent.substring(0, keywordIndex).strip();
 
                     StructurePrototype withAnnotations;
                     var annotationsSeparator = beforeInfix.lastIndexOf("\n");
@@ -1025,10 +1049,11 @@ public class Main {
                         var afterAnnotations = beforeContent.substring(annotationsSeparator + "\n".length());
 
                         var annotations = parseAnnotations(annotationsString);
-                        withAnnotations = prototype2.withAnnotations(annotations).withBeforeInfix(afterAnnotations);
+                        var prototype = prototype2.withAnnotations(annotations);
+                        withAnnotations = attachModifiers(prototype, afterAnnotations);
                     }
                     else {
-                        withAnnotations = prototype2.withBeforeInfix(beforeInfix);
+                        withAnnotations = attachModifiers(prototype2, beforeInfix);
                     }
 
                     var afterInfix = beforeContent.substring(keywordIndex + infix.length()).strip();
@@ -1045,16 +1070,28 @@ public class Main {
         return new None<>();
     }
 
+    private static StructurePrototype attachModifiers(StructurePrototype prototype, String input) {
+        return prototype.withModifiers(parseModifiers(input));
+    }
+
+    private static List<String> parseModifiers(String input) {
+        return divide(input.strip(), (state, c) -> foldByDelimiter(state, c, ' '))
+                .iterate()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
+    }
+
     private static List<String> parseAnnotations(String annotationsString) {
-        return divide(annotationsString, Main::foldByDelimiter)
+        return divide(annotationsString, (state, c) -> foldByDelimiter(state, c, '\n'))
                 .iterate()
                 .map(String::strip)
                 .map(slice -> slice.substring(1))
                 .collect(new ListCollector<>());
     }
 
-    private static DivideState foldByDelimiter(DivideState state, Character c) {
-        if (c == '\n') {
+    private static DivideState foldByDelimiter(DivideState state, Character c, char delimiter) {
+        if (c == delimiter) {
             return state.advance();
         }
         else {
