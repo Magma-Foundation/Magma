@@ -551,6 +551,9 @@ public class Main {
         if (stripped.equals("String")) {
             return Optional.of(new Tuple<>(state, new Ref(Primitive.Char)));
         }
+        if(stripped.equals("int")) {
+            return Optional.of(new Tuple<>(state, Primitive.Int));
+        }
         return Optional.empty();
     }
 
@@ -614,7 +617,8 @@ public class Main {
     }
 
     private enum Primitive implements Type {
-        Char("char");
+        Char("char"),
+        Int("int");
 
         private final String value;
 

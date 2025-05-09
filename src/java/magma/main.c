@@ -27,7 +27,7 @@
 /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
 	/* private */ char* buffer;
-	/* private */ /* int */ depth;/* private DivideState(List<String> segments, String buffer, int depth) {
+	/* private */ int depth;/* private DivideState(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -375,6 +375,9 @@
         if (stripped.equals("String")) {
             return Optional.of(new Tuple<>(state, new Ref(Primitive.Char)));
         }
+        if(stripped.equals("int")) {
+            return Optional.of(new Tuple<>(state, Primitive.Int));
+        }
         return Optional.empty();
     } */
 	/* private static Optional<Tuple<CompileState, ObjectType>> parseTemplate(CompileState oldState, String input) {
@@ -430,7 +433,8 @@
         return "content-start" + replaced + " content-end";
     } */
 	/* private enum Primitive implements Type {
-        Char("char");
+        Char("char"),
+        Int("int");
 
         private final String value;
 
