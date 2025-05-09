@@ -1,5 +1,28 @@
-/* private static  */struct DivideState {
-	/* private final */ /* List<String> */ segments;
+/* private static */struct Lists {
+	/* private record JVMList<T>(java.util.List<T> internal) implements List<T> {
+
+            public JVMList() {
+                this(new ArrayList<>());
+            }
+
+            @Override
+            public List<T> add(T element) {
+                this.internal.add(element);
+                return this;
+            }
+
+            @Override
+            public Iterator<T> iterate() {
+                return new HeadedIterator<>(new RangeHead(this.internal.size())).map(this.internal::get);
+            }
+        } */
+	/* public static <T> List<T> empty() {
+            return new JVMList<>();
+        } */
+	/*  */
+};
+/* private static */struct DivideState {
+	/* private */ /* List<String> */ segments;
 	/* private */ /* StringBuilder */ buffer;
 	/* private */ /* int */ depth;
 	/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
@@ -8,10 +31,10 @@
             this.depth = depth;
         } */
 	/* public DivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(Lists.empty(), new StringBuilder(), 0);
         } */
 	/* private DivideState advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } */
@@ -35,10 +58,72 @@
         } */
 	/*  */
 };
-/* public  */struct Main {
+/* public */struct Main {
+	/* private interface Iterator<T> {
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <C> C collect(Collector<T, C> collector);
+    } */
+	/* private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    } */
+	/* private interface List<T> {
+        List<T> add(T element);
+
+        Iterator<T> iterate();
+    } */
+	/* private interface Head<T> {
+        Optional<T> next();
+    } */
+	/* private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        private <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            var current = initial;
+            while (true) {
+                R finalCurrent = current;
+                var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
+                if (optional.isPresent()) {
+                    current = optional.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+    } */
+	/* private static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter;
+
+        public RangeHead(int length) {
+            this.length = length;
+            this.counter = 0;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter >= this.length) {
+                return Optional.empty();
+            }
+            var value = this.counter;
+            this.counter++;
+            return Optional.of(value);
+        }
+    } */
 	/* private record CompileState(List<String> structs) {
         public CompileState() {
-            this(new ArrayList<>());
+            this(Lists.empty());
         }
 
         public CompileState addStruct(String struct) {
@@ -47,6 +132,17 @@
         }
     } */
 	/* private record Tuple<A, B>(A left, B right) {
+    } */
+	/* private record Joiner() implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> maybeCurrent, String element) {
+            return Optional.of(maybeCurrent.map(current -> current + element).orElse(element));
+        }
     } */
 	/* public static void main() {
         try {
@@ -67,20 +163,22 @@
     } */
 	/* private static String compile(String input) {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
-        var joinedStructs = String.join("", compiled.left.structs);
+        var joinedStructs = compiled.left.structs
+                .iterate()
+                .collect(new Joiner())
+                .orElse("");
+
         return joinedStructs + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     } */
 	/* private static Tuple<CompileState, String> compileStatements(CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         var segments = divide(input);
-        var output = new StringBuilder();
-        var current = initial;
-        for (var segment : segments) {
-            var mapped = mapper.apply(current, segment);
-            current = mapped.left;
-            output.append(mapped.right);
-        }
+        var tuple = new Tuple<>(initial, new StringBuilder());
+        var folded = segments.iterate().fold(tuple, (tuple0, s) -> {
+            var mapped = mapper.apply(tuple0.left, s);
+            return new Tuple<>(mapped.left, tuple0.right.append(mapped.right));
+        });
 
-        return new Tuple<>(current, output.toString());
+        return new Tuple<>(folded.left, folded.right.toString());
     } */
 	/* private static List<String> divide(String input) {
         var current = new DivideState();
@@ -130,7 +228,7 @@
                     }
 
                     var statementsTuple = compileStatements(state, content1, Main::compileClassSegment);
-                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + statementsTuple.right + "\n};\n";
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + statementsTuple.right + "\n};\n";
                     var added = statementsTuple.left.addStruct(generated);
                     return Optional.of(new Tuple<>(added, ""));
                 });
