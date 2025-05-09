@@ -1,7 +1,10 @@
-package magma;
-
-public class Main {
-    public static void main(String[] args) {
-
+void main() {
+    var source = Paths.get(".", "src", "java", "magma", "main.mgs");
+    var target = source.resolveSibling("main.c");
+    try {
+        var input = Files.readString(source);
+        Files.writeString(target, input);
+    } catch (IOException e) {
+        e.printStackTrace();
     }
 }
