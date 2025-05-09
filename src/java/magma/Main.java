@@ -102,7 +102,7 @@ class Main {
                 .resolve("java")
                 .resolve("magma");
 
-        var source = parent.resolve("main.mgs");
+        var source = parent.resolve("Main.java");
         var target = parent.resolve("main.c");
 
         source.readString()
