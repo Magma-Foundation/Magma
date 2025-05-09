@@ -610,16 +610,25 @@ public class Main {
     private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {
             return compileInfix(beforeName.strip(), " ", Main::findLast, (beforeType, type) -> {
-                return compileInfix(beforeType.strip(), "\n", Main::findLast, (annotationsString, afterAnnotations) -> compileSymbol(rawName.strip(), name -> {
-                    var typeTuple = parseType(state, type);
+                var strippedBeforeType = beforeType.strip();
+                return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
                     var annotations = divide(annotationsString, foldWithDelimiter('\n'))
                             .iterate()
                             .map(slice -> slice.substring(1))
                             .collect(new ListCollector<>());
 
-                    return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name)));
-                }));
+                    return assembleDefinition(state, annotations, afterAnnotations, rawName, type);
+                }).or(() -> {
+                    return assembleDefinition(state, new ArrayList<>(), strippedBeforeType, rawName, type);
+                });
             });
+        });
+    }
+
+    private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, List<String> annotations, String afterAnnotations, String rawName, String type) {
+        return compileSymbol(rawName.strip(), name -> {
+            var typeTuple = parseType(state, type);
+            return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name)));
         });
     }
 
