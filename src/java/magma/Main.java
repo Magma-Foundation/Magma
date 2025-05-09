@@ -51,6 +51,9 @@ public class Main {
         String generate();
     }
 
+    private @interface Actual {
+    }
+
     private static class EmptyHead<T> implements Head<T> {
         @Override
         public Optional<T> next() {
@@ -126,6 +129,7 @@ public class Main {
     }
 
     private static class StandardLibrary {
+        @Actual
         private static <T> T[] allocate(int length) {
             return (T[]) new Object[length];
         }

@@ -1,6 +1,9 @@
 /* private */struct Type {/* String stringify(); *//* String generate(); *//*  */
 };
-/* private static */struct StandardLibrary {/* private static <T> T[] allocate(int length) {
+/* private @ */struct Actual {/*  */
+};
+/* private static */struct StandardLibrary {
+	/*         private static <T> */ /* T[] */ allocate(/* int length */)/*  {
             return (T[]) new Object[length];
         } *//*  */
 };
