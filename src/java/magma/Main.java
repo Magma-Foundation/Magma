@@ -60,6 +60,8 @@ public class Main {
         boolean equalsTo(Type other);
 
         Type strip();
+
+        boolean isParameterized();
     }
 
     private @interface Actual {
@@ -80,7 +82,31 @@ public class Main {
 
         @Override
         public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).<Iterator<R>>fold(new HeadedIterator<R>(new EmptyHead<R>()), Iterator::concat);
+            // capture a reference to the "outer" iterator
+            final Iterator<T> outer = this;
+
+            return new HeadedIterator<>(new Head<R>() {
+                // start with an empty inner
+                private Iterator<R> inner = new HeadedIterator<>(new EmptyHead<>());
+
+                @Override
+                public Optional<R> next() {
+                    Optional<R> nextInner;
+                    // loop until we either return an R or detect that outer is done
+                    while ((nextInner = inner.next()).isEmpty()) {
+                        // inner is exhausted → advance outer
+                        Optional<T> nextOuter = outer.next();
+                        if (nextOuter.isEmpty()) {
+                            // no more T's, so we're done
+                            return Optional.empty();
+                        }
+                        // build a new inner from the next outer element
+                        inner = mapper.apply(nextOuter.get());
+                    }
+                    // we got an R from inner
+                    return nextInner;
+                }
+            });
         }
 
         @Override
@@ -335,6 +361,11 @@ public class Main {
         public Type strip() {
             return new Ref(this.type.strip());
         }
+
+        @Override
+        public boolean isParameterized() {
+            return this.type.isParameterized();
+        }
     }
 
     private record ObjectType(String name, List<Type> arguments) implements Type {
@@ -362,6 +393,11 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return new ObjectType(this.name, newArguments);
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return this.arguments.iterate().anyMatch(Type::isParameterized);
         }
 
         private String joinArguments() {
@@ -392,6 +428,11 @@ public class Main {
         @Override
         public Type strip() {
             return this;
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return false;
         }
     }
 
@@ -488,6 +529,11 @@ public class Main {
         @Override
         public Type strip() {
             return Primitive.Void;
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return true;
         }
     }
 
@@ -643,12 +689,10 @@ public class Main {
             List<Type> typeArguments,
             String content
     ) {
-        return compileSymbol(name.strip(), strippedName -> {
-            var statementsTuple = compileStatements(state, content, Main::compileClassSegment);
-            var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(strippedName, typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
-            var added = statementsTuple.left.addStruct(generated);
-            return Optional.of(added);
-        });
+        var statementsTuple = compileStatements(state.addTypeParameters(typeParams), content, Main::compileClassSegment);
+        var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name.strip(), typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
+        var added = statementsTuple.left.addStruct(generated);
+        return Optional.of(added);
     }
 
     private static <T> Optional<T> compileSymbol(String input, Function<String, Optional<T>> mapper) {
@@ -674,6 +718,7 @@ public class Main {
         return compileOrPlaceholder(state, input, Lists.of(
                 createStructureRule("class "),
                 createStructureRule("interface "),
+                createStructureRule("record "),
                 Main::compileDefinitionStatement,
                 Main::compileMethod
         ));
@@ -831,7 +876,14 @@ public class Main {
                 var arguments = argumentsTuple.right;
 
                 var expansion = new ObjectType(base, arguments);
-                var withExpansion = argumentsState.expand(expansion).orElse(argumentsState);
+                CompileState withExpansion;
+                if (expansion.isParameterized()) {
+                    withExpansion = argumentsState;
+                }
+                else {
+                    withExpansion = argumentsState.expand(expansion).orElse(argumentsState);
+                }
+
                 return Optional.of(new Tuple<>(withExpansion, expansion));
             });
         });
@@ -909,6 +961,11 @@ public class Main {
         @Override
         public Type strip() {
             return this;
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return false;
         }
     }
 }

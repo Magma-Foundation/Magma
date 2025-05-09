@@ -1,12 +1,8 @@
-/* private */struct List_/* T */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//*  */
-};
-/* private */struct Type {/* String stringify(); *//* String generate(); *//* boolean equalsTo(Type other); *//* Type strip(); *//*  */
+/* private */struct Type {/* String stringify(); *//* String generate(); *//* boolean equalsTo(Type other); *//* Type strip(); *//* boolean isParameterized(); *//*  */
 };
 /* private @ */struct Actual {/*  */
 };
 /* private static */struct StandardLibrary {/*  */
-};
-/* private */struct List_T {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//*  */
 };
 /* private static */struct Lists {/*  */
 };
@@ -23,77 +19,31 @@
             this(new ArrayList<String>(), "", 0);
         } *//*  */
 };
-/* private */struct Iterator_R {/* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); *//* boolean allMatch(Predicate<T> predicate); *//*  */
+/* private */struct CompileState(
+            List<String> structs,
+            List<String> functions, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
+            List<ObjectType> expansions, List<String> typeParams) {/* public CompileState() {
+            this(new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
+        } *//*  */
 };
-/* private */struct Iterator_T {/* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); *//* boolean allMatch(Predicate<T> predicate); *//*  */
+/* private */struct Tuple<A, B>(A left, B right) {/*  */
 };
 /* private static */struct Iterators {/*  */
 };
+/* private */struct Ref(Type type) implements Type {/*  */
+};
+/* private */struct ObjectType(String name, List<Type> arguments) implements Type {/*  */
+};
+/* private */struct Placeholder(String value) implements Type {/*  */
+};
+/* private */struct Definition(List<String> annotations, String afterAnnotations, Type type, String name,
+                              List<String> typeParams) {/*  */
+};
+/* private */struct TypeParam(String input) implements Type {/*  */
+};
 /* private */struct List_/* T> */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//*  */
 };
-/* public */struct Main {/* private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-        @Override
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new HeadedIterator<>(() -> this.head.next().map(mapper));
-        }
-
-        @Override
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return this.map(mapper).<Iterator<R>>fold(new HeadedIterator<R>(new EmptyHead<R>()), Iterator::concat);
-        }
-
-        @Override
-        public Iterator<T> concat(Iterator<T> other) {
-            return new HeadedIterator<>(() -> this.head.next().or(other::next));
-        }
-
-        @Override
-        public Optional<T> next() {
-            return this.head.next();
-        }
-
-        @Override
-        public boolean anyMatch(Predicate<T> predicate) {
-            return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
-        }
-
-        @Override
-        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
-            return new HeadedIterator<>(() -> {
-                return this.head.next().flatMap(nextValue -> {
-                    return other.next().map(otherValue -> {
-                        return new Tuple<>(nextValue, otherValue);
-                    });
-                });
-            });
-        }
-
-        @Override
-        public boolean allMatch(Predicate<T> predicate) {
-            return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
-        }
-
-        @Override
-        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
-            var current = initial;
-            while (true) {
-                R finalCurrent = current;
-                var optional = this.head.next().map(next -> folder.apply(finalCurrent, next));
-                if (optional.isPresent()) {
-                    current = optional.get();
-                }
-                else {
-                    return current;
-                }
-            }
-        }
-
-        @Override
-        public <C> C collect(Collector<T, C> collector) {
-            return this.fold(collector.createInitial(), collector::fold);
-        }
-    } *//* private record Tuple<A, B>(A left, B right) {
-    } *//* ' && appended.isShallow()) {
+/* public */struct Main {/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* if (c == '{') {
             return appended.enter();
@@ -161,12 +111,10 @@
             List<Type> typeArguments,
             String content
     ) {
-        return compileSymbol(name.strip(), strippedName -> {
-            var statementsTuple = compileStatements(state, content, Main::compileClassSegment);
-            var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(strippedName, typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
-            var added = statementsTuple.left.addStruct(generated);
-            return Optional.of(added);
-        });
+        var statementsTuple = compileStatements(state.addTypeParameters(typeParams), content, Main::compileClassSegment);
+        var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name.strip(), typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
+        var added = statementsTuple.left.addStruct(generated);
+        return Optional.of(added);
     } */
 	/* private static <T> Optional<T> compileSymbol(String input, Function<String, Optional<T>> mapper) {
         if (!isSymbol(input)) {
@@ -189,6 +137,7 @@
         return compileOrPlaceholder(state, input, Lists.of(
                 createStructureRule("class "),
                 createStructureRule("interface "),
+                createStructureRule("record "),
                 Main::compileDefinitionStatement,
                 Main::compileMethod
         ));
@@ -332,7 +281,14 @@
                 var arguments = argumentsTuple.right;
 
                 var expansion = new ObjectType(base, arguments);
-                var withExpansion = argumentsState.expand(expansion).orElse(argumentsState);
+                CompileState withExpansion;
+                if (expansion.isParameterized()) {
+                    withExpansion = argumentsState;
+                }
+                else {
+                    withExpansion = argumentsState.expand(expansion).orElse(argumentsState);
+                }
+
                 return Optional.of(new Tuple<>(withExpansion, expansion));
             });
         });
@@ -402,6 +358,11 @@
         @Override
         public Type strip() {
             return this;
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return false;
         }
     } */
 	/* } */
