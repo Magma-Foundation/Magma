@@ -5,6 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -67,7 +70,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        var segments = extracted(input, new State());
+        var segments = divide(input);
         var output = new StringBuilder();
         for (var segment : segments) {
             output.append(compileRootSegment(segment));
@@ -76,8 +79,8 @@ public class Main {
         return output + "\nint main(){\n\treturn 0;\n}\n";
     }
 
-    private static List<String> extracted(String input, State state) {
-        var current = state;
+    private static List<String> divide(String input) {
+        var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = fold(current, c);
@@ -106,7 +109,36 @@ public class Main {
             return "";
         }
 
-        return generatePlaceholder(stripped);
+        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+            return compileInfix(afterKeyword, "{", (beforeContent, withEnd) -> {
+                return compileSuffix(withEnd.strip(), "}", content1 -> {
+                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {\n};\n" + generatePlaceholder(content1));
+                });
+            });
+        }).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (input.endsWith(suffix)) {
+            var content = input.substring(0, input.length() - suffix.length());
+            return mapper.apply(content);
+        }
+
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var classIndex = stripped.indexOf(infix);
+        if (classIndex >= 0) {
+            var left = stripped.substring(0, classIndex);
+            var right = stripped.substring(classIndex + infix.length());
+            return mapper.apply(left, right);
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> getString(String left, String right) {
+        return Optional.of(generatePlaceholder(left) + "struct " + generatePlaceholder(right));
     }
 
     private static String generatePlaceholder(String input) {
