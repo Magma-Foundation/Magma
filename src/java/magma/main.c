@@ -21,7 +21,7 @@
         } *//*  */
 };
 /* private static */struct DivideState {
-	/* private */ /* List<String> */ segments;
+	/* private */ /* List */</* String */> segments;
 	/* private */ /* StringBuilder */ buffer;
 	/* private */ /* int */ depth;/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -137,16 +137,19 @@
 
         return joinedStructs + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     } *//* private static Tuple<CompileState, String> compileStatements(CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        var segments = divideStatements(input);
+        return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
+    } *//* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var segments = divide(input, folder);
+
         var tuple = new Tuple<>(initial, new StringBuilder());
-        var folded = segments.iterate().fold(tuple, (tuple0, s) -> {
-            var mapped = mapper.apply(tuple0.left, s);
-            return new Tuple<>(mapped.left, tuple0.right.append(mapped.right));
+        var folded = segments.iterate().fold(tuple, (tuple0, element) -> {
+            var mapped = mapper.apply(tuple0.left, element);
+            return new Tuple<>(mapped.left, merger.apply(tuple0.right, mapped.right));
         });
 
         return new Tuple<>(folded.left, folded.right.toString());
-    } *//* private static List<String> divideStatements(String input) {
-        return divide(input, Main::foldStatementChar);
+    } *//* private static StringBuilder merge(StringBuilder buffer, String element) {
+        return buffer.append(element);
     } *//* private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
@@ -241,11 +244,18 @@
         return true;
     } */
 	/* private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        return compileOr(state, input, Lists.of(
+        return compileOrPlaceholder(state, input, Lists.of(
                 createStructureRule("class "),
                 createStructureRule("interface "),
                 Main::compileDefinitionStatement
-        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input.strip())));
+        ));
+    } */
+	/* private static Tuple<CompileState, String> compileOrPlaceholder(
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
+    ) {
+        return compileOr(state, input, rules).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input.strip())));
     } */
 	/* private static Optional<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> biFunctionList) {
         return biFunctionList.iterate().map(rule -> rule.apply(state, input)).flatMap(Iterators::fromOptional).next();
@@ -255,11 +265,31 @@
             return compileInfix(withoutEnd, " ", Main::findLast, (beforeName, rawName) -> {
                 return compileInfix(beforeName, " ", Main::findLast, (beforeType, type) -> {
                     return compileSymbol(rawName.strip(), name -> {
-                        return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                        var typeTuple = compileType(state, type);
+                        return Optional.of(new Tuple<>(typeTuple.left, "\n\t" + generatePlaceholder(beforeType) + " " + typeTuple.right + " " + name + ";"));
                     });
                 });
             });
         });
+    } */
+	/* private static Tuple<CompileState, String> compileType(CompileState state, String input) {
+        return compileOrPlaceholder(state, input, Lists.of(
+                Main::compileTemplate
+        ));
+    } */
+	/* private static Optional<Tuple<CompileState, String>> compileTemplate(CompileState state, String input) {
+        return compileSuffix(input.strip(), ">", withoutEnd -> {
+            return compileFirst(withoutEnd, "<", (base, argumentsString) -> {
+                var argumentsTuple = compileAll(state, argumentsString, Main::foldValueChar, Main::compileType, Main::mergeValues);
+                return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(base) + "<" + argumentsTuple.right + ">"));
+            });
+        });
+    } */
+	/* private static StringBuilder mergeValues(StringBuilder buffer, String element) {
+        if (buffer.isEmpty()) {
+            return buffer.append(element);
+        }
+        return buffer.append(", ").append(element);
     } */
 	/* private static Optional<Integer> findLast(String input, String infix) {
         var index = input.lastIndexOf(infix);
