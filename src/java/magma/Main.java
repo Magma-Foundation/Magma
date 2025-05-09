@@ -234,6 +234,18 @@ public class Main {
         }
     }
 
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
     public static void main() {
         try {
             var root = Paths.get(".", "src", "java", "magma");
@@ -263,7 +275,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        var segments = divide(input);
+        var segments = divideStatements(input);
         var tuple = new Tuple<>(initial, new StringBuilder());
         var folded = segments.iterate().fold(tuple, (tuple0, s) -> {
             var mapped = mapper.apply(tuple0.left, s);
@@ -273,17 +285,21 @@ public class Main {
         return new Tuple<>(folded.left, folded.right.toString());
     }
 
-    private static List<String> divide(String input) {
+    private static List<String> divideStatements(String input) {
+        return divide(input, Main::foldStatementChar);
+    }
+
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            current = fold(current, c);
+            current = folder.apply(current, c);
         }
 
         return current.advance().segments;
     }
 
-    private static DivideState fold(DivideState state, char c) {
+    private static DivideState foldStatementChar(DivideState state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -306,7 +322,7 @@ public class Main {
             return new Tuple<>(state, "");
         }
 
-        return createStructureRule("class ").apply(state,  input)
+        return createStructureRule("class ").apply(state, input)
                 .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(stripped.strip())));
     }
 
@@ -327,17 +343,30 @@ public class Main {
         return (state, input) -> {
             return compileSuffix(input.strip(), ">", withoutEnd -> {
                 return compileFirst(withoutEnd, "<", (name, typeParameters) -> {
-                    return assembleStructure(state, beforeKeyword, name, content1);
+                    var typeParams = divide(typeParameters, Main::foldValueChar)
+                            .iterate()
+                            .map(String::strip)
+                            .collect(new ListCollector<>());
+
+                    return Optional.of(new Tuple<>(state, ""));
+                    // return assembleStructure(state, beforeKeyword, name, typeParams, content1);
                 });
             });
         };
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content1) {
-        return (state, name) -> assembleStructure(state, beforeKeyword, name, content1);
+    private static DivideState foldValueChar(DivideState state1, Character c) {
+        if (c == ',') {
+            return state1.advance();
+        }
+        return state1.append(c);
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, String beforeStruct, String name, String content) {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content) {
+        return (state, name) -> assembleStructure(state, beforeKeyword, name, Lists.empty(), content);
+    }
+
+    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, String beforeStruct, String name, List<String> typeParams, String content) {
         return compileSymbol(name.strip(), strippedName -> {
             var statementsTuple = compileStatements(state, content, Main::compileClassSegment);
             var generated = generatePlaceholder(beforeStruct.strip()) + "struct " + strippedName + " {" + statementsTuple.right + "\n};\n";
