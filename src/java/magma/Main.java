@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -15,6 +16,14 @@ public class Main {
         <R> R fold(R initial, BiFunction<R, T, R> folder);
 
         <C> C collect(Collector<T, C> collector);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+
+        Iterator<T> concat(Iterator<T> other);
+
+        Optional<T> next();
     }
 
     private interface Collector<T, C> {
@@ -33,9 +42,32 @@ public class Main {
         Optional<T> next();
     }
 
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Optional<T> next() {
+            return Optional.empty();
+        }
+    }
+
     private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-        private <R> Iterator<R> map(Function<T, R> mapper) {
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return this.map(mapper).<Iterator<R>>fold(new HeadedIterator<R>(new EmptyHead<R>()), Iterator::concat);
+        }
+
+        @Override
+        public Iterator<T> concat(Iterator<T> other) {
+            return new HeadedIterator<>(() -> this.head.next().or(other::next));
+        }
+
+        @Override
+        public Optional<T> next() {
+            return this.head.next();
         }
 
         @Override
@@ -100,6 +132,10 @@ public class Main {
 
         public static <T> List<T> empty() {
             return new JVMList<>();
+        }
+
+        public static <T> List<T> of(T... elements) {
+            return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
@@ -171,6 +207,30 @@ public class Main {
         @Override
         public Optional<String> fold(Optional<String> maybeCurrent, String element) {
             return Optional.of(maybeCurrent.map(current -> current + element).orElse(element));
+        }
+    }
+
+    private static class Iterators {
+        public static <T> Iterator<T> fromOptional(Optional<T> optional) {
+            return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved = false;
+
+        public SingleHead(T value) {
+            this.value = value;
+        }
+
+        @Override
+        public Optional<T> next() {
+            if (this.retrieved) {
+                return Optional.empty();
+            }
+            this.retrieved = true;
+            return Optional.of(this.value);
         }
     }
 
@@ -246,30 +306,52 @@ public class Main {
             return new Tuple<>(state, "");
         }
 
-        return compileClass(state, stripped)
+        return createStructureRule("class ").apply(state,  input)
                 .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(stripped.strip())));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileStructure(state, input, "class ");
-    }
-
-    private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String input, String infix) {
-        return compileFirst(input, infix, (beforeKeyword, afterKeyword) -> {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String infix) {
+        return (state, input) -> compileFirst(input, infix, (beforeKeyword, afterKeyword) -> {
             return compileFirst(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
-                    var name = beforeContent.strip();
-                    if (!isSymbol(name)) {
-                        return Optional.empty();
-                    }
-
-                    var statementsTuple = compileStatements(state, content1, Main::compileClassSegment);
-                    var generated = generatePlaceholder(beforeKeyword.strip()) + "struct " + name + " {" + statementsTuple.right + "\n};\n";
-                    var added = statementsTuple.left.addStruct(generated);
-                    return Optional.of(new Tuple<>(added, ""));
+                    return compileOr(state, beforeContent, Lists.of(
+                            createStructureWithTypeParamsRule(beforeKeyword, content1),
+                            createStructureWithoutTypeParamsRule(beforeKeyword, content1)
+                    ));
                 });
             });
         });
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content1) {
+        return (state, input) -> {
+            return compileSuffix(input.strip(), ">", withoutEnd -> {
+                return compileFirst(withoutEnd, "<", (name, typeParameters) -> {
+                    return assembleStructure(state, beforeKeyword, name, content1);
+                });
+            });
+        };
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content1) {
+        return (state, name) -> assembleStructure(state, beforeKeyword, name, content1);
+    }
+
+    private static Optional<Tuple<CompileState, String>> assembleStructure(CompileState state, String beforeStruct, String name, String content) {
+        return compileSymbol(name.strip(), strippedName -> {
+            var statementsTuple = compileStatements(state, content, Main::compileClassSegment);
+            var generated = generatePlaceholder(beforeStruct.strip()) + "struct " + strippedName + " {" + statementsTuple.right + "\n};\n";
+            var added = statementsTuple.left.addStruct(generated);
+            return Optional.of(new Tuple<>(added, ""));
+        });
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileSymbol(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
+        if (!isSymbol(input)) {
+            return Optional.empty();
+        }
+
+        return mapper.apply(input);
     }
 
     private static boolean isSymbol(String input) {
@@ -284,17 +366,24 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
-        return compileClass(state, input)
-                .or(() -> compileStructure(state, input, "interface "))
-                .or(() -> compileDefinitionStatement(state, input))
-                .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(input.strip())));
+        return compileOr(state, input, Lists.of(
+                createStructureRule("class "),
+                createStructureRule("interface "),
+                Main::compileDefinitionStatement
+        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input.strip())));
     }
 
-    private static @NotNull Optional<? extends Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> biFunctionList) {
+        return biFunctionList.iterate().map(rule -> rule.apply(state, input)).flatMap(Iterators::fromOptional).next();
+    }
+
+    private static @NotNull Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return compileInfix(withoutEnd, " ", Main::findLast, (beforeName, name) -> {
+            return compileInfix(withoutEnd, " ", Main::findLast, (beforeName, rawName) -> {
                 return compileInfix(beforeName, " ", Main::findLast, (beforeType, type) -> {
-                    return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                    return compileSymbol(rawName.strip(), name -> {
+                        return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                    });
                 });
             });
         });
