@@ -1,7 +1,7 @@
 /* private static  */struct DivideState {
-	/* private final List<String> segments; */
-	/* private StringBuilder buffer; */
-	/* private int depth; */
+	/* private final */ /* List<String> */ segments;
+	/* private */ /* StringBuilder */ buffer;
+	/* private */ /* int */ depth;
 	/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
@@ -117,19 +117,19 @@
             return new Tuple<>(state, "");
         }
 
-        return compileClassSegment(state, stripped);
+        return compileClass(state, stripped)
+                .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(stripped.strip())));
     } */
 	/* private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileInfix(input, "class ", (beforeKeyword, afterKeyword) -> {
-            return compileInfix(afterKeyword, "{", (beforeContent, withEnd) -> {
+        return compileFirst(input, "class ", (beforeKeyword, afterKeyword) -> {
+            return compileFirst(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
-                    var statementsTuple = compileStatements(state, content1, Main::compileClassSegment);
-
                     var name = beforeContent.strip();
                     if (!isSymbol(name)) {
                         return Optional.empty();
                     }
 
+                    var statementsTuple = compileStatements(state, content1, Main::compileClassSegment);
                     var generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + statementsTuple.right + "\n};\n";
                     var added = statementsTuple.left.addStruct(generated);
                     return Optional.of(new Tuple<>(added, ""));
@@ -149,7 +149,21 @@
     } */
 	/* private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
+                .or(() -> compileDefinitionStatement(state, input))
                 .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(input.strip())));
+    } */
+	/* private static @NotNull Optional<? extends Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
+        return compileSuffix(input.strip(), ";", withoutEnd -> {
+            return compileInfix(withoutEnd, " ", Main::findLast, (beforeName, name) -> {
+                return compileInfix(beforeName, " ", Main::findLast, (beforeType, type) -> {
+                    return Optional.of(new Tuple<>(state, "\n\t" + generatePlaceholder(beforeType) + " " + generatePlaceholder(type) + " " + name + ";"));
+                });
+            });
+        });
+    } */
+	/* private static Optional<Integer> findLast(String input, String infix) {
+        var index = input.lastIndexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     } */
 	/* private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
         if (input.endsWith(suffix)) {
@@ -159,14 +173,19 @@
 
         return Optional.empty();
     } */
-	/* private static <T> Optional<T> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        var classIndex = stripped.indexOf(infix);
-        if (classIndex >= 0) {
-            var left = stripped.substring(0, classIndex);
-            var right = stripped.substring(classIndex + infix.length());
+	/* private static <T> Optional<T> compileFirst(String stripped, String infix, BiFunction<String, String, Optional<T>> mapper) {
+        return compileInfix(stripped, infix, Main::findFirst, mapper);
+    } */
+	/* private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locate, BiFunction<String, String, Optional<T>> mapper) {
+        return locate.apply(input, infix).flatMap(index -> {
+            var left = input.substring(0, index);
+            var right = input.substring(index + infix.length());
             return mapper.apply(left, right);
-        }
-        return Optional.empty();
+        });
+    } */
+	/* private static Optional<Integer> findFirst(String input, String infix) {
+        var index = input.indexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     } */
 	/* private static String generatePlaceholder(String input) {
         var replaced = input
