@@ -251,7 +251,11 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileFirst(input, "class ", (beforeKeyword, afterKeyword) -> {
+        return compileStructure(state, input, "class ");
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileStructure(CompileState state, String input, String infix) {
+        return compileFirst(input, infix, (beforeKeyword, afterKeyword) -> {
             return compileFirst(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
                     var name = beforeContent.strip();
@@ -281,6 +285,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
+                .or(() -> compileStructure(state, input, "interface "))
                 .or(() -> compileDefinitionStatement(state, input))
                 .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(input.strip())));
     }
