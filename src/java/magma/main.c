@@ -26,19 +26,19 @@
 };
 /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
-	/* private */ /* StringBuilder */ buffer;
-	/* private */ /* int */ depth;/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+	/* private */ char* buffer;
+	/* private */ /* int */ depth;/* private DivideState(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } *//* public DivideState() {
-            this(Lists.empty(), new StringBuilder(), 0);
+            this(Lists.empty(), "", 0);
         } *//* private DivideState advance() {
-            this.segments = this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments = this.segments.add(this.buffer);
+            this.buffer = "";
             return this;
         } *//* private DivideState append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         } *//* public boolean isLevel() {
             return this.depth == 0;
@@ -198,7 +198,7 @@
         return joinedStructs + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     } *//* private static Tuple<CompileState, String> compileStatements(CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
-    } *//* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    } *//* private static Tuple<CompileState, String> compileAll(CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger) {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
     } *//* private static <T> Tuple<CompileState, List<T>> parseAll(
@@ -216,10 +216,10 @@
         });
 
         return new Tuple<CompileState, List<T>>(folded.left, tuple.right);
-    } *//* private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return elements.iterate().fold(new StringBuilder(), merger).toString();
-    } *//* private static StringBuilder merge(StringBuilder buffer, String element) {
-        return buffer.append(element);
+    } *//* private static String generateAll(List<String> elements, BiFunction<String, String, String> merger) {
+        return elements.iterate().fold("", merger);
+    } *//* private static String merge(String buffer, String element) {
+        return buffer + element;
     } *//* private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
