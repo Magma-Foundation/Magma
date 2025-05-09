@@ -8,11 +8,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 class Main {
-    private interface Option<T> {
+    private sealed interface Option<T> permits Some, None {
         void ifPresent(Consumer<T> consumer);
     }
 
-    private interface Result<T, X> {
+    private sealed interface Result<T, X> permits Ok, Err {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
@@ -35,7 +35,7 @@ class Main {
         }
     }
 
-    private static class None<T> implements Option<T> {
+    private static final class None<T> implements Option<T> {
         @Override
         public void ifPresent(Consumer<T> consumer) {
         }
