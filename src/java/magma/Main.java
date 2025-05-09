@@ -7,9 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main {
     private interface Iterator<T> {
@@ -184,14 +187,26 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> structs) {
+    private record CompileState(List<String> structs,
+                                Map<String, Supplier<Optional<Tuple<CompileState, String>>>> expandables) {
         public CompileState() {
-            this(Lists.empty());
+            this(Lists.empty(), new HashMap<>());
         }
 
         public CompileState addStruct(String struct) {
-            this.structs.add(struct);
+            return new CompileState(this.structs.add(struct), this.expandables);
+        }
+
+        public CompileState addExpandable(String name, Supplier<Optional<Main.Tuple<Main.CompileState, String>>> expandable) {
+            this.expandables.put(name, expandable);
             return this;
+        }
+
+        public Optional<Supplier<Optional<Main.Tuple<Main.CompileState, String>>>> findExpandable(String name) {
+            if (this.expandables.containsKey(name)) {
+                return Optional.of(this.expandables.get(name));
+            }
+            return Optional.empty();
         }
     }
 
@@ -344,7 +359,7 @@ public class Main {
         });
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content1) {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content) {
         return (state, input) -> {
             return compileSuffix(input.strip(), ">", withoutEnd -> {
                 return compileFirst(withoutEnd, "<", (name, typeParameters) -> {
@@ -353,8 +368,9 @@ public class Main {
                             .map(String::strip)
                             .collect(new ListCollector<>());
 
-                    return Optional.of(new Tuple<>(state, ""));
-                    // return assembleStructure(state, beforeKeyword, name, typeParams, content1);
+                    return Optional.of(new Tuple<>(state.addExpandable(name, () -> {
+                        return assembleStructure(state, beforeKeyword, name, typeParams, content);
+                    }), ""));
                 });
             });
         };
@@ -451,7 +467,11 @@ public class Main {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (base, argumentsString) -> {
                 var argumentsTuple = compileAll(state, argumentsString, Main::foldValueChar, Main::compileType, Main::mergeValues);
-                return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(base) + "<" + argumentsTuple.right + ">"));
+                return state.findExpandable(base).flatMap(expandable -> {
+                    return expandable.get();
+                }).or(() -> {
+                    return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(base) + "<" + argumentsTuple.right + ">"));
+                });
             });
         });
     }
