@@ -8,7 +8,7 @@ public class Main {
     public static void main() {
         try {
             var target = Paths.get(".", "src", "java", "magma", "main.c");
-            Files.writeString(target, "");
+            Files.writeString(target, "int main(){\n\treturn 0;\n}\n");
 
             new ProcessBuilder("clang.exe", target.toAbsolutePath().toString(), "-o", "main.exe")
                     .inheritIO()
