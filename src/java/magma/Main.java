@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -25,6 +26,10 @@ public class Main {
         Optional<T> next();
 
         boolean anyMatch(Predicate<T> predicate);
+
+        <R> Iterator<Tuple<T, R>> zip(Iterator<R> other);
+
+        boolean allMatch(Predicate<T> predicate);
     }
 
     private interface Collector<T, C> {
@@ -38,7 +43,9 @@ public class Main {
 
         Iterator<T> iterate();
 
-        boolean contains(T element);
+        boolean contains(T element, BiFunction<T, T, Boolean> equator);
+
+        boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator);
     }
 
     private interface Head<T> {
@@ -49,6 +56,8 @@ public class Main {
         String stringify();
 
         String generate();
+
+        boolean equalsTo(Type other);
     }
 
     private @interface Actual {
@@ -85,6 +94,22 @@ public class Main {
         @Override
         public boolean anyMatch(Predicate<T> predicate) {
             return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        }
+
+        @Override
+        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
+            return new HeadedIterator<>(() -> {
+                return this.head.next().flatMap(nextValue -> {
+                    return other.next().map(otherValue -> {
+                        return new Tuple<>(nextValue, otherValue);
+                    });
+                });
+            });
+        }
+
+        @Override
+        public boolean allMatch(Predicate<T> predicate) {
+            return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
         }
 
         @Override
@@ -195,7 +220,7 @@ public class Main {
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
-            if (this.expansions.contains(expansion)) {
+            if (this.expansions.contains(expansion, ObjectType::equalsTo)) {
                 return Optional.empty();
             }
 
@@ -290,6 +315,11 @@ public class Main {
         public String generate() {
             return this.type.generate() + "*";
         }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Ref ref && this.type.equalsTo(ref.type);
+        }
     }
 
     private record ObjectType(String name, List<Type> arguments) implements Type {
@@ -303,6 +333,13 @@ public class Main {
             return "struct " + this.name + this.joinArguments();
         }
 
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof ObjectType objectType
+                    && this.name.equals(objectType.name)
+                    && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
+        }
+
         private String joinArguments() {
             return this.arguments.iterate()
                     .map(Type::stringify)
@@ -312,15 +349,20 @@ public class Main {
         }
     }
 
-    private record Placeholder(String input) implements Type {
+    private record Placeholder(String value) implements Type {
         @Override
         public String stringify() {
-            return generatePlaceholder(this.input);
+            return generatePlaceholder(this.value);
         }
 
         @Override
         public String generate() {
-            return generatePlaceholder(this.input);
+            return generatePlaceholder(this.value);
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         }
     }
 
@@ -342,6 +384,16 @@ public class Main {
 
         public ArrayList() {
             this(StandardLibrary.allocate(DEFAULT_SIZE), 0);
+        }
+
+        @Override
+        public String toString() {
+            var joined = this.iterate()
+                    .map(Objects::toString)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "[" + joined + "]";
         }
 
         @Override
@@ -370,8 +422,15 @@ public class Main {
         }
 
         @Override
-        public boolean contains(T element) {
-            return this.iterate().anyMatch(thisElement -> thisElement.equals(element));
+        public boolean contains(T otherElement, BiFunction<T, T, Boolean> equator) {
+            return this.iterate().anyMatch(thisElement -> equator.apply(thisElement, otherElement));
+        }
+
+        @Override
+        public boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator) {
+            return this.iterate().zip(others.iterate()).allMatch(tuple -> {
+                return equator.apply(tuple.left(), tuple.right());
+            });
         }
     }
 
@@ -569,7 +628,7 @@ public class Main {
                 return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
-                    if (definition.annotations.contains("Actual")) {
+                    if (definition.annotations.contains("Actual", String::equals)) {
                         return Optional.of(new Tuple<>(definitionState, ""));
                     }
 
@@ -735,6 +794,11 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return this == other;
         }
     }
 }
