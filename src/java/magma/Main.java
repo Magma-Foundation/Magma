@@ -703,8 +703,20 @@ public class Main {
     private static Tuple<CompileState, Type> parseType(CompileState state, String input) {
         return compileOr(state, input, Lists.of(
                 typed(Main::parsePrimitive),
-                typed(Main::parseTemplate)
+                typed(Main::parseTemplate),
+                typed(Main::parseArray)
         )).orElseGet(() -> new Tuple<>(state, new Placeholder(input.strip())));
+    }
+
+    private static Optional<Tuple<CompileState, Type>> parseArray(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.endsWith("[]")) {
+            var slice = input.substring(0, stripped.length() - "[]".length());
+            var childTuple = parseType(state, slice);
+            return Optional.of(new Tuple<>(childTuple.left, new Ref(childTuple.right)));
+        }
+
+        return Optional.empty();
     }
 
     private static <T extends R, R> BiFunction<CompileState, String, Optional<Tuple<CompileState, R>>> typed(BiFunction<CompileState, String, Optional<Tuple<CompileState, T>>> rule) {
