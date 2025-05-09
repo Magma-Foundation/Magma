@@ -70,13 +70,17 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment) + "\nint main(){\n\treturn 0;\n}\n";
+    }
+
+    private static String compileStatements(String input, Function<String, String> mapper) {
         var segments = divide(input);
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
-        return output + "\nint main(){\n\treturn 0;\n}\n";
+        return output.toString();
     }
 
     private static List<String> divide(String input) {
@@ -109,13 +113,21 @@ public class Main {
             return "";
         }
 
-        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String input) {
+        return compileInfix(input, "class ", (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
-                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {\n};\n" + generatePlaceholder(content1));
+                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {\n};\n" + compileStatements(content1, Main::compileClassSegment));
                 });
             });
-        }).orElseGet(() -> generatePlaceholder(stripped));
+        });
+    }
+
+    private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
@@ -135,10 +147,6 @@ public class Main {
             return mapper.apply(left, right);
         }
         return Optional.empty();
-    }
-
-    private static Optional<String> getString(String left, String right) {
-        return Optional.of(generatePlaceholder(left) + "struct " + generatePlaceholder(right));
     }
 
     private static String generatePlaceholder(String input) {

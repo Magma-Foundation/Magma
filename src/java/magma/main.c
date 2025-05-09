@@ -1,9 +1,10 @@
 /* public  */struct Main {
 };
-/* private static class State {
-        private final List<String> segments;
-        private StringBuilder buffer;
-        private int depth;
+/* private static  */struct State {
+};
+/* private final List<String> segments; *//* 
+        private StringBuilder buffer; *//* 
+        private int depth; *//* 
 
         private State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -60,28 +61,32 @@
     }
 
     private static String compile(String input) {
-        var segments = divide(input);
-        var output = new StringBuilder();
+        return compileStatements(input, Main::compileRootSegment) + "\nint main(){\n\treturn 0;\n}\n"; *//* 
+    }
+
+    private static String compileStatements(String input, Function<String, String> mapper) {
+        var segments = divide(input); *//* 
+        var output = new StringBuilder(); *//* 
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
-        return output + "\nint main(){\n\treturn 0;\n}\n";
+        return output.toString(); *//* 
     }
 
     private static List<String> divide(String input) {
-        var current = new State();
-        for (var i = 0; i < input.length(); i++) {
+        var current = new State(); *//* 
+        for (var i = 0; *//*  i < input.length(); *//*  i++) {
             var c = input.charAt(i);
             current = fold(current, c);
         }
 
-        return current.advance().segments;
+        return current.advance().segments; *//* 
     }
 
     private static State fold(State state, char c) {
-        var appended = state.append(c);
-        if (c == ';' && appended.isLevel()) {
+        var appended = state.append(c); *//* 
+        if (c == '; *//* ' && appended.isLevel()) {
             return appended.advance();
         }
         if (c == '{') {
@@ -90,22 +95,30 @@
         if (c == '}') {
             return appended.exit();
         }
-        return appended;
+        return appended; *//* 
     }
 
     private static String compileRootSegment(String input) {
-        var stripped = input.strip();
+        var stripped = input.strip(); *//* 
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
 
-        return compileInfix(stripped, "class ", (beforeKeyword, afterKeyword) -> {
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped)); *//* 
+    }
+
+    private static Optional<String> compileClass(String input) {
+        return compileInfix(input, "class ", (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
-                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {\n};\n" + generatePlaceholder(content1));
+                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {\n};\n" + compileStatements(content1, Main::compileClassSegment));
                 });
             });
-        }).orElseGet(() -> generatePlaceholder(stripped));
+        }); *//* 
+    }
+
+    private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input)); *//* 
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
@@ -114,31 +127,26 @@
             return mapper.apply(content);
         }
 
-        return Optional.empty();
+        return Optional.empty(); *//* 
     }
 
     private static Optional<String> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var classIndex = stripped.indexOf(infix);
+        var classIndex = stripped.indexOf(infix); *//* 
         if (classIndex >= 0) {
             var left = stripped.substring(0, classIndex);
             var right = stripped.substring(classIndex + infix.length());
             return mapper.apply(left, right);
         }
-        return Optional.empty();
-    }
-
-    private static Optional<String> getString(String left, String right) {
-        return Optional.of(generatePlaceholder(left) + "struct " + generatePlaceholder(right));
+        return Optional.empty(); *//* 
     }
 
     private static String generatePlaceholder(String input) {
         var replaced = input
                 .replace("content-start", "content-start")
-                .replace("content-end", "content-end");
+                .replace("content-end", "content-end"); *//* 
 
-        return "content-start" + replaced + " content-end";
-    }
- */
+        return "content-start" + replaced + " content-end"; *//* 
+     */
 int main(){
 	return 0;
 }
