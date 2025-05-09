@@ -5,12 +5,10 @@
 /* private @ */struct Actual {/*  */
 };
 /* private static */struct StandardLibrary {
-	/*         private static <T> */ /* T */* allocate(/* int length */)/*  {
-            return (T[]) new Object[length];
-        } *//*  */
+	/*         private static <T> */ /* T */* allocate(/* int length */);/*  */
 };
 /* private static */struct Lists {
-	/* public static <T> */ struct List_/* T */ of(/* T... elements */)/*  {
+	/* public static <T> */ struct List_/* T */ of(/* T... elements */);/*  {
             return new ArrayList<>(elements, elements.length);
         } *//*  */
 };
@@ -26,46 +24,46 @@
         } *//* public DivideState() {
             this(new ArrayList<String>(), "", 0);
         } */
-	/* private */ /* DivideState */ advance(/*  */)/*  {
+	/* private */ /* DivideState */ advance(/*  */);/*  {
             this.segments = this.segments.addLast(this.buffer);
             this.buffer = "";
             return this;
         } */
-	/* private */ /* DivideState */ append(/* char c */)/*  {
+	/* private */ /* DivideState */ append(/* char c */);/*  {
             this.buffer = this.buffer + c;
             return this;
         } */
-	/* public */ /* boolean */ isLevel(/*  */)/*  {
+	/* public */ /* boolean */ isLevel(/*  */);/*  {
             return this.depth == 0;
         } */
-	/* public */ /* DivideState */ enter(/*  */)/*  {
+	/* public */ /* DivideState */ enter(/*  */);/*  {
             this.depth++;
             return this;
         } */
-	/* public */ /* DivideState */ exit(/*  */)/*  {
+	/* public */ /* DivideState */ exit(/*  */);/*  {
             this.depth--;
             return this;
         } */
-	/* public */ /* boolean */ isShallow(/*  */)/*  {
+	/* public */ /* boolean */ isShallow(/*  */);/*  {
             return this.depth == 1;
         } *//*  */
 };
 /* private */struct Iterator_/* R */ {
-	/* <R> */ /* R */ fold(/* R initial, BiFunction<R, T, R> folder */)/* ; */
-	/* <C> */ /* C */ collect(/* Collector<T, C> collector */)/* ; */
-	/* <R> */ struct Iterator_/* R */ map(/* Function<T, R> mapper */)/* ; */
-	/* <R> */ struct Iterator_/* R */ flatMap(/* Function<T, Iterator<R>> mapper */)/* ; *//* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); */
-	/* <R> Iterator<Tuple<T, */ /* R>> */ zip(/* Iterator<R> other */)/* ; *//* boolean allMatch(Predicate<T> predicate); *//*  */
+	/* <R> */ /* R */ fold(/* R initial, BiFunction<R, T, R> folder */);
+	/* <C> */ /* C */ collect(/* Collector<T, C> collector */);
+	/* <R> */ struct Iterator_/* R */ map(/* Function<T, R> mapper */);
+	/* <R> */ struct Iterator_/* R */ flatMap(/* Function<T, Iterator<R>> mapper */);/* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); */
+	/* <R> Iterator<Tuple<T, */ /* R>> */ zip(/* Iterator<R> other */);/* boolean allMatch(Predicate<T> predicate); *//*  */
 };
 /* private */struct Iterator_/* T */ {
-	/* <R> */ /* R */ fold(/* R initial, BiFunction<R, T, R> folder */)/* ; */
-	/* <C> */ /* C */ collect(/* Collector<T, C> collector */)/* ; */
-	/* <R> */ struct Iterator_/* R */ map(/* Function<T, R> mapper */)/* ; */
-	/* <R> */ struct Iterator_/* R */ flatMap(/* Function<T, Iterator<R>> mapper */)/* ; *//* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); */
-	/* <R> Iterator<Tuple<T, */ /* R>> */ zip(/* Iterator<R> other */)/* ; *//* boolean allMatch(Predicate<T> predicate); *//*  */
+	/* <R> */ /* R */ fold(/* R initial, BiFunction<R, T, R> folder */);
+	/* <C> */ /* C */ collect(/* Collector<T, C> collector */);
+	/* <R> */ struct Iterator_/* R */ map(/* Function<T, R> mapper */);
+	/* <R> */ struct Iterator_/* R */ flatMap(/* Function<T, Iterator<R>> mapper */);/* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); */
+	/* <R> Iterator<Tuple<T, */ /* R>> */ zip(/* Iterator<R> other */);/* boolean allMatch(Predicate<T> predicate); *//*  */
 };
 /* private static */struct Iterators {
-	/* public static <T> */ struct Iterator_/* T */ fromOptional(/* Optional<T> optional */)/*  {
+	/* public static <T> */ struct Iterator_/* T */ fromOptional(/* Optional<T> optional */);/*  {
             return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         } *//*  */
 };
@@ -136,7 +134,7 @@
 	/* private */ /* record */ CompileState(/* 
             List<String> structs,
             Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
-            List<ObjectType> expansions */)/*  {
+            List<ObjectType> expansions */);/*  {
         public CompileState() {
             this(new ArrayList<String>(), new HashMap<>(), new ArrayList<ObjectType>());
         }
@@ -172,7 +170,7 @@
         }
     } *//* private record Tuple<A, B>(A left, B right) {
     } */
-	/* private */ /* record */ Joiner(/* String delimiter */)/*  implements Collector<String, Optional<String>> {
+	/* private */ /* record */ Joiner(/* String delimiter */);/*  implements Collector<String, Optional<String>> {
         private Joiner() {
             this("");
         }
@@ -187,7 +185,7 @@
             return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
         }
     } */
-	/* private */ /* record */ Ref(/* Type type */)/*  implements Type {
+	/* private */ /* record */ Ref(/* Type type */);/*  implements Type {
         @Override
         public String stringify() {
             return this.type.stringify() + "_ref";
@@ -203,7 +201,7 @@
             return other instanceof Ref ref && this.type.equalsTo(ref.type);
         }
     } */
-	/* private */ /* record */ ObjectType(/* String name, List<Type> arguments */)/*  implements Type {
+	/* private */ /* record */ ObjectType(/* String name, List<Type> arguments */);/*  implements Type {
         @Override
         public String stringify() {
             return this.generate();
@@ -229,7 +227,7 @@
                     .orElse("");
         }
     } */
-	/* private */ /* record */ Placeholder(/* String value */)/*  implements Type {
+	/* private */ /* record */ Placeholder(/* String value */);/*  implements Type {
         @Override
         public String stringify() {
             return generatePlaceholder(this.value);
@@ -245,12 +243,12 @@
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         }
     } */
-	/* private */ /* record */ Definition(/* List<String> annotations, String afterAnnotations, Type type, String name */)/*  {
+	/* private */ /* record */ Definition(/* List<String> annotations, String afterAnnotations, Type type, String name */);/*  {
         private String generate() {
             return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
         }
     } */
-	/* public static */ /* void */ main(/*  */)/*  {
+	/* public static */ /* void */ main(/*  */);/*  {
         try {
             var root = Paths.get(".", "src", "java", "magma");
             var source = root.resolve("main.java");
@@ -267,7 +265,7 @@
             e.printStackTrace();
         }
     } */
-	/* private static */ char* compile(/* String input */)/*  {
+	/* private static */ char* compile(/* String input */);/*  {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var joinedStructs = compiled.left.structs
                 .iterate()
@@ -276,10 +274,10 @@
 
         return joinedStructs + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     } */
-	/* private static Tuple<CompileState, */ /* String> */ compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */)/*  {
+	/* private static Tuple<CompileState, */ /* String> */ compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */
-	/* private static Tuple<CompileState, */ /* String> */ compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */)/*  {
+	/* private static Tuple<CompileState, */ /* String> */ compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
     } */
@@ -288,7 +286,7 @@
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
             BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
-     */)/*  {
+     */);/*  {
         var segments = divide(input, folder);
 
         var tuple = new Tuple<>(initial, (List<T>) new ArrayList<T>());
@@ -299,13 +297,13 @@
 
         return new Tuple<CompileState, List<T>>(folded.left, tuple.right);
     } */
-	/* private static */ char* generateAll(/* List<String> elements, BiFunction<String, String, String> merger */)/*  {
+	/* private static */ char* generateAll(/* List<String> elements, BiFunction<String, String, String> merger */);/*  {
         return elements.iterate().fold("", merger);
     } */
-	/* private static */ char* merge(/* String buffer, String element */)/*  {
+	/* private static */ char* merge(/* String buffer, String element */);/*  {
         return buffer + element;
     } */
-	/* private static */ struct List_char_ref divide(/* String input, BiFunction<DivideState, Character, DivideState> folder */)/*  {
+	/* private static */ struct List_char_ref divide(/* String input, BiFunction<DivideState, Character, DivideState> folder */);/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -314,7 +312,7 @@
 
         return current.advance().segments;
     } */
-	/* private static */ /* DivideState */ foldStatementChar(/* DivideState state, char c */)/*  {
+	/* private static */ /* DivideState */ foldStatementChar(/* DivideState state, char c */);/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -421,15 +419,21 @@
     } */
 	/* private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileFirst(input, "(", (definitionString, withParams) -> {
-            return compileFirst(withParams, ")", (params, content) -> {
+            return compileFirst(withParams, ")", (params, oldContent) -> {
                 return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
-                    if (definition.annotations.contains("Actual", String::equals)) {
-                        return Optional.of(new Tuple<>(definitionState, ""));
+
+                    String newContent;
+                    if (definition.annotations.contains("Actual", String::equals) || oldContent.equals(";")) {
+                        newContent = ";";
+                    }
+                    else {
+                        newContent = ";" + generatePlaceholder(oldContent);
                     }
 
-                    var generated = "\n\t" + definition.generate() + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content);
+                    var generatedHeader = "\n\t" + definition.generate() + "(" + generatePlaceholder(params) + ")";
+                    var generated = generatedHeader + newContent;
                     return Optional.of(new Tuple<>(definitionState, generated));
                 });
             });
@@ -467,6 +471,7 @@
                     var annotations = divide(annotationsString, foldWithDelimiter('\n'))
                             .iterate()
                             .map(slice -> slice.substring(1))
+                            .map(String::strip)
                             .collect(new ListCollector<>());
 
                     return assembleDefinition(state, annotations, afterAnnotations, rawName, type);

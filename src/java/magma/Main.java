@@ -624,15 +624,21 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileFirst(input, "(", (definitionString, withParams) -> {
-            return compileFirst(withParams, ")", (params, content) -> {
+            return compileFirst(withParams, ")", (params, oldContent) -> {
                 return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
-                    if (definition.annotations.contains("Actual", String::equals)) {
-                        return Optional.of(new Tuple<>(definitionState, ""));
+
+                    String newContent;
+                    if (definition.annotations.contains("Actual", String::equals) || oldContent.equals(";")) {
+                        newContent = ";";
+                    }
+                    else {
+                        newContent = ";" + generatePlaceholder(oldContent);
                     }
 
-                    var generated = "\n\t" + definition.generate() + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content);
+                    var generatedHeader = "\n\t" + definition.generate() + "(" + generatePlaceholder(params) + ")";
+                    var generated = generatedHeader + newContent;
                     return Optional.of(new Tuple<>(definitionState, generated));
                 });
             });
@@ -674,6 +680,7 @@ public class Main {
                     var annotations = divide(annotationsString, foldWithDelimiter('\n'))
                             .iterate()
                             .map(slice -> slice.substring(1))
+                            .map(String::strip)
                             .collect(new ListCollector<>());
 
                     return assembleDefinition(state, annotations, afterAnnotations, rawName, type);
