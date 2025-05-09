@@ -174,7 +174,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileClass(state, input)
-                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+                .orElseGet(() -> new Tuple<>(state, "\n\t" + generatePlaceholder(input.strip())));
     }
 
     private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
