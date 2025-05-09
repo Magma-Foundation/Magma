@@ -21,7 +21,7 @@
         } *//*  */
 };
 /* private static */struct DivideState {
-	/* private */ /* List */</* String */> segments;
+	/* private */ /* List */<char*> segments;
 	/* private */ /* StringBuilder */ buffer;
 	/* private */ /* int */ depth;/* private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -274,8 +274,16 @@
     } */
 	/* private static Tuple<CompileState, String> compileType(CompileState state, String input) {
         return compileOrPlaceholder(state, input, Lists.of(
+                Main::compilePrimitive,
                 Main::compileTemplate
         ));
+    } */
+	/* private static Optional<Tuple<CompileState, String>> compilePrimitive(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.equals("String")) {
+            return Optional.of(new Tuple<>(state, "char*"));
+        }
+        return Optional.empty();
     } */
 	/* private static Optional<Tuple<CompileState, String>> compileTemplate(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
