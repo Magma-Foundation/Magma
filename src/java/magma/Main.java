@@ -705,7 +705,7 @@ public class Main {
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
         var appended = state.append(c);
@@ -855,10 +855,18 @@ public class Main {
     }
 
     private static DivideState foldTypeSeparator(DivideState state, Character c) {
-        if (c == ' ') {
+        if (c == ' ' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, List<String> annotations, String afterAnnotations, String rawName, String type) {

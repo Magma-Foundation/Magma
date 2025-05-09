@@ -10,8 +10,7 @@
             return new ArrayList<>(elements, elements.length);
         } */ /* private static */struct Lists {/*  */
 };
- 
-	/* Optional<Tuple<List<T>, */ /* T>> */ removeLast(/*  */); /* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//*  */
+ /* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//*  */
 };
  
 	/* private */ struct DivideState advance(/*  */);/*  {
@@ -66,8 +65,10 @@
 	/* public */ struct CompileState addExpandable(/* String name, Function<List<Type>, Optional<CompileState>> expandable */);/*  {
             this.expandables.put(name, expandable);
             return this;
-        } */ 
-	/* public Optional<Function<List<Type>, */ struct Optional_/* CompileState>> */ findExpandable(/* String name */);/*  {
+        } */ /* private */struct List_struct Type {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//*  */
+};
+ 
+	/* public */ struct Optional_struct Function_struct List_struct Type_struct Optional_struct CompileState findExpandable(/* String name */);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
@@ -214,17 +215,14 @@
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */ 
-	/* private static Tuple<CompileState, */ /* String> */ compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
+	/* private static */ struct Tuple_struct CompileState_char_ref compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */ 
-	/* private static Tuple<CompileState, */ /* String> */ compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
+	/* private static */ struct Tuple_struct CompileState_char_ref compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
     } */ 
-	/* Optional<Tuple<List<T>, */ /* T>> */ removeLast(/*  */); /* private */struct List_/* T> */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//*  */
-};
- 
-	/* private static <T> Tuple<CompileState, */ struct List_/* T> */ parseAll(/* 
+	/* private static */ struct Tuple_struct CompileState_struct List_T parseAll(/* 
             CompileState initial,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
@@ -308,7 +306,7 @@
         };
     } */
 	/* private static DivideState foldValueChar(DivideState state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
         var appended = state.append(c);
@@ -447,10 +445,17 @@
         });
     } */
 	/* private static DivideState foldTypeSeparator(DivideState state, Character c) {
-        if (c == ' ') {
+        if (c == ' ' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     } */
 	/* private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, List<String> annotations, String afterAnnotations, String rawName, String type) {
         return compileSuffix(afterAnnotations.strip(), ">", withoutEnd -> {
@@ -519,7 +524,7 @@
             return Optional.of(new Tuple<>(state, Primitive.Int));
         }
 
-        if(stripped.equals("void")) {
+        if (stripped.equals("void")) {
             return Optional.of(new Tuple<>(state, Primitive.Void));
         }
 
