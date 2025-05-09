@@ -215,10 +215,10 @@ public class Main {
 
     private record CompileState(
             List<String> structs,
-            Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
+            List<String> functions, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
             List<ObjectType> expansions, List<String> typeParams) {
         public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -232,11 +232,11 @@ public class Main {
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.structs, this.expandables, this.expansions.addLast(type), this.typeParams);
+            return new CompileState(this.structs, this.functions, this.expandables, this.expansions.addLast(type), this.typeParams);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.expandables, this.expansions, this.typeParams);
+            return new CompileState(this.structs.addLast(struct), this.functions, this.expandables, this.expansions, this.typeParams);
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
@@ -252,7 +252,11 @@ public class Main {
         }
 
         public CompileState addTypeParameters(List<String> typeParams) {
-            return new CompileState(this.structs, this.expandables, this.expansions, typeParams);
+            return new CompileState(this.structs, this.functions, this.expandables, this.expansions, typeParams);
+        }
+
+        public CompileState addFunction(String function) {
+            return new CompileState(this.structs, this.functions.addLast(function), this.expandables, this.expansions, this.typeParams);
         }
     }
 
@@ -695,7 +699,7 @@ public class Main {
 
                     var generatedHeader = "\n\t" + newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
                     var generated = generatedHeader + newContent;
-                    return Optional.of(new Tuple<>(definitionState, generated));
+                    return Optional.of(new Tuple<>(definitionState.addFunction(generated), ""));
                 });
             });
         });
