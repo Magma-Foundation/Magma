@@ -49,6 +49,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     private record CompileState(List<String> structs) {
@@ -117,6 +121,9 @@ public class Main {
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
+        }
         if (c == '{') {
             return appended.enter();
         }
@@ -141,12 +148,28 @@ public class Main {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
                     var statementsTuple = compileStatements(state, content1, Main::compileClassSegment);
 
-                    var generated = generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {" + statementsTuple.right + "\n};\n";
+                    var name = beforeContent.strip();
+                    if (!isSymbol(name)) {
+                        return Optional.empty();
+                    }
+
+                    var generated = generatePlaceholder(beforeKeyword) + "struct " + name + " {" + statementsTuple.right + "\n};\n";
                     var added = statementsTuple.left.addStruct(generated);
                     return Optional.of(new Tuple<>(added, ""));
                 });
             });
         });
+    }
+
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
