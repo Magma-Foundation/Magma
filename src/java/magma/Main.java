@@ -844,8 +844,13 @@ public class Main {
                 typed(Main::parsePrimitive),
                 typed(Main::parseTemplate),
                 typed(Main::parseArray),
-                typed(Main::parseTypeParam)
+                typed(Main::parseTypeParam),
+                typed(Main::parseStructureType)
         )).orElseGet(() -> new Tuple<>(state, new Placeholder(input.strip())));
+    }
+
+    private static Optional<Tuple<CompileState, Type>> parseStructureType(CompileState state, String input) {
+        return compileSymbol(input, input1 -> Optional.of(new Tuple<>(state, new ObjectType(input1, new ArrayList<>()))));
     }
 
     private static Optional<Tuple<CompileState, Type>> parseTypeParam(CompileState state, String input) {
@@ -877,9 +882,11 @@ public class Main {
         if (stripped.equals("String")) {
             return Optional.of(new Tuple<>(state, new Ref(Primitive.Char)));
         }
-        if (stripped.equals("int")) {
+
+        if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of(new Tuple<>(state, Primitive.Int));
         }
+
         return Optional.empty();
     }
 
