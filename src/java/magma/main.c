@@ -311,7 +311,14 @@
         if (c == ',') {
             return state.advance();
         }
-        return state.append(c);
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     } */
 	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content) {
         return (state, name) -> {
