@@ -1,14 +1,42 @@
 /* private */struct Type {/* String stringify(); *//* String generate(); *//* boolean equalsTo(Type other); *//* Type strip(); *//* boolean isParameterized(); *//*  */
 };
-/* private @ */struct Actual {/*  */
+ /* private @ */struct Actual {/*  */
 };
-/* private static */struct StandardLibrary {/*  */
+ 
+	/* private static */ void* allocate(/* int length */); /* private static */struct StandardLibrary {/*  */
 };
-/* private static */struct Lists {/*  */
+ 
+	/* public static */ struct List_T of(/* T... elements */);/*  {
+            return new ArrayList<>(elements, elements.length);
+        } */ /* private static */struct Lists {/*  */
 };
-/* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//*  */
+ 
+	/* Optional<Tuple<List<T>, */ /* T>> */ removeLast(/*  */); /* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//*  */
 };
-/* private static */struct DivideState {
+ 
+	/* private */ struct DivideState advance(/*  */);/*  {
+            this.segments = this.segments.addLast(this.buffer);
+            this.buffer = "";
+            return this;
+        } */ 
+	/* private */ struct DivideState append(/* char c */);/*  {
+            this.buffer = this.buffer + c;
+            return this;
+        } */ 
+	/* public */ int isLevel(/*  */);/*  {
+            return this.depth == 0;
+        } */ 
+	/* public */ struct DivideState enter(/*  */);/*  {
+            this.depth++;
+            return this;
+        } */ 
+	/* public */ struct DivideState exit(/*  */);/*  {
+            this.depth--;
+            return this;
+        } */ 
+	/* public */ int isShallow(/*  */);/*  {
+            return this.depth == 1;
+        } */ /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
 	/* private */ char* buffer;
 	/* private */ int depth;/* private DivideState(List<String> segments, String buffer, int depth) {
@@ -19,67 +47,7 @@
             this(new ArrayList<String>(), "", 0);
         } *//*  */
 };
-/* private */struct CompileState(
-            List<String> structs,
-            List<String> functions, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
-            List<ObjectType> expansions, List<String> typeParams) {/* public CompileState() {
-            this(new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
-        } *//*  */
-};
-/* private */struct Tuple<A, B>(A left, B right) {/*  */
-};
-/* private static */struct Iterators {/*  */
-};
-/* private */struct Ref(Type type) implements Type {/*  */
-};
-/* private */struct ObjectType(String name, List<Type> arguments) implements Type {/*  */
-};
-/* private */struct Placeholder(String value) implements Type {/*  */
-};
-/* private */struct Definition(List<String> annotations, String afterAnnotations, Type type, String name,
-                              List<String> typeParams) {/*  */
-};
-/* private */struct TypeParam(String input) implements Type {/*  */
-};
-/* private */struct List_/* T> */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//*  */
-};
-/* public */struct Main {/* ' && appended.isShallow()) {
-            return appended.advance().exit();
-        } *//* if (c == '{') {
-            return appended.enter();
-        }
-        if (c == '} *//* ') {
-            return appended.exit();
-        } *//* return appended; *//*  */
-};
-
-	/* private static */ void* allocate(/* int length */);
-	/* public static */ struct List_T of(/* T... elements */);/*  {
-            return new ArrayList<>(elements, elements.length);
-        } */
-	/* private */ struct DivideState advance(/*  */);/*  {
-            this.segments = this.segments.addLast(this.buffer);
-            this.buffer = "";
-            return this;
-        } */
-	/* private */ struct DivideState append(/* char c */);/*  {
-            this.buffer = this.buffer + c;
-            return this;
-        } */
-	/* public */ int isLevel(/*  */);/*  {
-            return this.depth == 0;
-        } */
-	/* public */ struct DivideState enter(/*  */);/*  {
-            this.depth++;
-            return this;
-        } */
-	/* public */ struct DivideState exit(/*  */);/*  {
-            this.depth--;
-            return this;
-        } */
-	/* public */ int isShallow(/*  */);/*  {
-            return this.depth == 1;
-        } */
+ 
 	/* private */ struct Optional_struct CompileState expand(/* ObjectType expansion */);/*  {
             if (this.expansions.contains(expansion, ObjectType::equalsTo)) {
                 return Optional.empty();
@@ -88,111 +56,132 @@
             return this.addExpansion(expansion)
                     .findExpandable(expansion.name)
                     .flatMap(expandable -> expandable.apply(expansion.arguments));
-        } */
+        } */ 
 	/* private */ struct CompileState addExpansion(/* ObjectType type */);/*  {
-            return new CompileState(this.structs, this.functions, this.expandables, this.expansions.addLast(type), this.typeParams);
-        } */
+            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams);
+        } */ 
 	/* public */ struct CompileState addStruct(/* String struct */);/*  {
-            return new CompileState(this.structs.addLast(struct), this.functions, this.expandables, this.expansions, this.typeParams);
-        } */
+            return new CompileState(this.generated.addLast(struct), this.expandables, this.expansions, this.typeParams);
+        } */ 
 	/* public */ struct CompileState addExpandable(/* String name, Function<List<Type>, Optional<CompileState>> expandable */);/*  {
             this.expandables.put(name, expandable);
             return this;
-        } */
+        } */ 
 	/* public Optional<Function<List<Type>, */ struct Optional_/* CompileState>> */ findExpandable(/* String name */);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
             return Optional.empty();
-        } */
+        } */ 
 	/* public */ struct CompileState addTypeParameters(/* List<String> typeParams */);/*  {
-            return new CompileState(this.structs, this.functions, this.expandables, this.expansions, typeParams);
-        } */
+            return new CompileState(this.generated, this.expandables, this.expansions, typeParams);
+        } */ 
 	/* public */ struct CompileState addFunction(/* String function */);/*  {
-            return new CompileState(this.structs, this.functions.addLast(function), this.expandables, this.expansions, this.typeParams);
-        } */
+            return new CompileState(this.generated.addLast(function), this.expandables, this.expansions, this.typeParams);
+        } */ /* private */struct CompileState(
+            List<String> generated, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
+            List<ObjectType> expansions, List<String> typeParams) {/* public CompileState() {
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
+        } *//*  */
+};
+ /* private */struct Tuple<A, B>(A left, B right) {/*  */
+};
+ 
 	/* public static */ struct Iterator_T fromOptional(/* Optional<T> optional */);/*  {
             return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
-        } */
+        } */ /* private static */struct Iterators {/*  */
+};
+ 
 	/* public */ char* stringify(/*  */);/*  {
             return this.type.stringify() + "_ref";
-        } */
+        } */ 
 	/* public */ char* generate(/*  */);/*  {
             return this.type.generate() + "*";
-        } */
+        } */ 
 	/* public */ int equalsTo(/* Type other */);/*  {
             return other instanceof Ref ref && this.type.equalsTo(ref.type);
-        } */
+        } */ 
 	/* public */ struct Type strip(/*  */);/*  {
             return new Ref(this.type.strip());
-        } */
+        } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return this.type.isParameterized();
-        } */
+        } */ /* private */struct Ref(Type type) implements Type {/*  */
+};
+ 
 	/* public */ char* stringify(/*  */);/*  {
             return this.generate();
-        } */
+        } */ 
 	/* public */ char* generate(/*  */);/*  {
             return "struct " + this.name + this.joinArguments();
-        } */
+        } */ 
 	/* public */ int equalsTo(/* Type other */);/*  {
             return other instanceof ObjectType objectType
                     && this.name.equals(objectType.name)
                     && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
-        } */
+        } */ 
 	/* public */ struct Type strip(/*  */);/*  {
             var newArguments = this.arguments.iterate()
                     .map(Type::strip)
                     .collect(new ListCollector<>());
 
             return new ObjectType(this.name, newArguments);
-        } */
+        } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return this.arguments.iterate().anyMatch(Type::isParameterized);
-        } */
+        } */ 
 	/* private */ char* joinArguments(/*  */);/*  {
             return this.arguments.iterate()
                     .map(Type::stringify)
                     .collect(new Joiner("_"))
                     .map(result -> "_" + result)
                     .orElse("");
-        } */
+        } */ /* private */struct ObjectType(String name, List<Type> arguments) implements Type {/*  */
+};
+ 
 	/* public */ char* stringify(/*  */);/*  {
             return generatePlaceholder(this.value);
-        } */
+        } */ 
 	/* public */ char* generate(/*  */);/*  {
             return generatePlaceholder(this.value);
-        } */
+        } */ 
 	/* public */ int equalsTo(/* Type other */);/*  {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
-        } */
+        } */ 
 	/* public */ struct Type strip(/*  */);/*  {
             return this;
-        } */
+        } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return false;
-        } */
+        } */ /* private */struct Placeholder(String value) implements Type {/*  */
+};
+ 
 	/* private */ char* generate(/*  */);/*  {
             return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
-        } */
+        } */ 
 	/* public */ struct Definition mapType(/* Function<Type, Type> mapper */);/*  {
             return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
-        } */
+        } */ /* private */struct Definition(List<String> annotations, String afterAnnotations, Type type, String name,
+                              List<String> typeParams) {/*  */
+};
+ 
 	/* public */ char* stringify(/*  */);/*  {
             return this.input;
-        } */
+        } */ 
 	/* public */ char* generate(/*  */);/*  {
             return "template " + this.input;
-        } */
+        } */ 
 	/* public */ int equalsTo(/* Type other */);/*  {
             return other instanceof TypeParam param && this.input.equals(param.input);
-        } */
+        } */ 
 	/* public */ struct Type strip(/*  */);/*  {
             return Primitive.Void;
-        } */
+        } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return true;
-        } */
+        } */ /* private */struct TypeParam(String input) implements Type {/*  */
+};
+ 
 	/* public static */ struct void main(/*  */);/*  {
         try {
             var root = Paths.get(".", "src", "java", "magma");
@@ -209,28 +198,32 @@
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-    } */
+    } */ 
 	/* private static */ char* compile(/* String input */);/*  {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var compiledState = compiled.left;
 
-        var joinedStructs = join(compiledState.structs);
-        var joinedMethods = join(compiledState.functions);
-
-        return joinedStructs + joinedMethods + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
-    } */
+        var joined = join(compiledState.generated);
+        return joined + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
+    } */ 
 	/* private static */ char* join(/* List<String> items */);/*  {
+        return joinWithDelimiter(items, " ");
+    } */ 
+	/* private static */ char* joinWithDelimiter(/* List<String> items, String delimiter */);/*  {
         return items.iterate()
-                .collect(new Joiner())
+                .collect(new Joiner(delimiter))
                 .orElse("");
-    } */
+    } */ 
 	/* private static Tuple<CompileState, */ /* String> */ compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
-    } */
+    } */ 
 	/* private static Tuple<CompileState, */ /* String> */ compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
-    } */
+    } */ 
+	/* Optional<Tuple<List<T>, */ /* T>> */ removeLast(/*  */); /* private */struct List_/* T> */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//*  */
+};
+ 
 	/* private static <T> Tuple<CompileState, */ struct List_/* T> */ parseAll(/* 
             CompileState initial,
             String input,
@@ -246,13 +239,13 @@
         });
 
         return new Tuple<CompileState, List<T>>(folded.left, tuple.right);
-    } */
+    } */ 
 	/* private static */ char* generateAll(/* List<String> elements, BiFunction<String, String, String> merger */);/*  {
         return elements.iterate().fold("", merger);
-    } */
+    } */ 
 	/* private static */ char* merge(/* String buffer, String element */);/*  {
         return buffer + element;
-    } */
+    } */ 
 	/* private static */ struct List_char_ref divide(/* String input, BiFunction<DivideState, Character, DivideState> folder */);/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
@@ -261,13 +254,22 @@
         }
 
         return current.advance().segments;
-    } */
+    } */ 
 	/* private static */ struct DivideState foldStatementChar(/* DivideState state, char c */);/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
         }
-        if (c == '} */
+        if (c == '} */ /* public */struct Main {/* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        } *//* if (c == '{') {
+            return appended.enter();
+        }
+        if (c == '} *//* ') {
+            return appended.exit();
+        } *//* return appended; *//*  */
+};
+
 	/* private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -408,7 +410,20 @@
     } */
 	/* private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {
-            return compileInfix(beforeName.strip(), " ", Main::findLast, (beforeType, type) -> {
+            return compileInfix(() -> {
+                var divisions = divide(beforeName, Main::foldTypeSeparator);
+
+                if (divisions.size() >= 2) {
+                    var maybeRemoved = divisions.removeLast();
+                    if (maybeRemoved.isPresent()) {
+                        var removed = maybeRemoved.get();
+                        var joined = joinWithDelimiter(removed.left, " ");
+                        return Optional.of(new Tuple<>(joined, removed.right));
+                    }
+                }
+
+                return Optional.empty();
+            }, (beforeType, type) -> {
                 var strippedBeforeType = beforeType.strip();
                 return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
                     var annotations = divide(annotationsString, foldWithDelimiter('\n'))
@@ -423,6 +438,12 @@
                 });
             });
         });
+    } */
+	/* private static DivideState foldTypeSeparator(DivideState state, Character c) {
+        if (c == ' ') {
+            return state.advance();
+        }
+        return state.append(c);
     } */
 	/* private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, List<String> annotations, String afterAnnotations, String rawName, String type) {
         return compileSuffix(afterAnnotations.strip(), ">", withoutEnd -> {
@@ -533,10 +554,18 @@
         return compileInfix(stripped, infix, Main::findFirst, mapper);
     } */
 	/* private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locate, BiFunction<String, String, Optional<T>> mapper) {
-        return locate.apply(input, infix).flatMap(index -> {
+        return compileInfix(() -> split(input, infix, locate), mapper);
+    } */
+	/* private static <T> Optional<T> compileInfix(Supplier<Optional<Tuple<String, String>>> supplier, BiFunction<String, String, Optional<T>> mapper) {
+        return supplier.get().flatMap(tuple -> {
+            return mapper.apply(tuple.left, tuple.right);
+        });
+    } */
+	/* private static Optional<Tuple<String, String>> split(String input, String infix, BiFunction<String, String, Optional<Integer>> locate) {
+        return locate.apply(input, infix).map(index -> {
             var left = input.substring(0, index);
             var right = input.substring(index + infix.length());
-            return mapper.apply(left, right);
+            return new Tuple<>(left, right);
         });
     } */
 	/* private static Optional<Integer> findFirst(String input, String infix) {

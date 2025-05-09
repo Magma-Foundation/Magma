@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class Main {
     private interface Iterator<T> {
@@ -46,6 +47,10 @@ public class Main {
         boolean contains(T element, BiFunction<T, T, Boolean> equator);
 
         boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator);
+
+        int size();
+
+        Optional<Tuple<List<T>, T>> removeLast();
     }
 
     private interface Head<T> {
@@ -219,11 +224,10 @@ public class Main {
     }
 
     private record CompileState(
-            List<String> structs,
-            List<String> functions, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
+            List<String> generated, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
             List<ObjectType> expansions, List<String> typeParams) {
         public CompileState() {
-            this(new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -237,11 +241,11 @@ public class Main {
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.structs, this.functions, this.expandables, this.expansions.addLast(type), this.typeParams);
+            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.functions, this.expandables, this.expansions, this.typeParams);
+            return new CompileState(this.generated.addLast(struct), this.expandables, this.expansions, this.typeParams);
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
@@ -257,11 +261,11 @@ public class Main {
         }
 
         public CompileState addTypeParameters(List<String> typeParams) {
-            return new CompileState(this.structs, this.functions, this.expandables, this.expansions, typeParams);
+            return new CompileState(this.generated, this.expandables, this.expansions, typeParams);
         }
 
         public CompileState addFunction(String function) {
-            return new CompileState(this.structs, this.functions.addLast(function), this.expandables, this.expansions, this.typeParams);
+            return new CompileState(this.generated.addLast(function), this.expandables, this.expansions, this.typeParams);
         }
     }
 
@@ -486,6 +490,22 @@ public class Main {
                 return equator.apply(tuple.left(), tuple.right());
             });
         }
+
+        @Override
+        public int size() {
+            return this.size;
+        }
+
+        @Override
+        public Optional<Tuple<List<T>, T>> removeLast() {
+            if (this.array.length == 0) {
+                return Optional.empty();
+            }
+
+            var last = this.array[size - 1];
+            this.size = this.size - 1;
+            return Optional.of(new Tuple<>(this, last));
+        }
     }
 
     private record TypeParam(String input) implements Type {
@@ -569,15 +589,17 @@ public class Main {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var compiledState = compiled.left;
 
-        var joinedStructs = join(compiledState.structs);
-        var joinedMethods = join(compiledState.functions);
-
-        return joinedStructs + joinedMethods + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
+        var joined = join(compiledState.generated);
+        return joined + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     }
 
     private static String join(List<String> items) {
+        return joinWithDelimiter(items, " ");
+    }
+
+    private static String joinWithDelimiter(List<String> items, String delimiter) {
         return items.iterate()
-                .collect(new Joiner())
+                .collect(new Joiner(delimiter))
                 .orElse("");
     }
 
@@ -795,7 +817,20 @@ public class Main {
 
     private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {
-            return compileInfix(beforeName.strip(), " ", Main::findLast, (beforeType, type) -> {
+            return compileInfix(() -> {
+                var divisions = divide(beforeName, Main::foldTypeSeparator);
+
+                if (divisions.size() >= 2) {
+                    var maybeRemoved = divisions.removeLast();
+                    if (maybeRemoved.isPresent()) {
+                        var removed = maybeRemoved.get();
+                        var joined = joinWithDelimiter(removed.left, " ");
+                        return Optional.of(new Tuple<>(joined, removed.right));
+                    }
+                }
+
+                return Optional.empty();
+            }, (beforeType, type) -> {
                 var strippedBeforeType = beforeType.strip();
                 return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
                     var annotations = divide(annotationsString, foldWithDelimiter('\n'))
@@ -810,6 +845,13 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static DivideState foldTypeSeparator(DivideState state, Character c) {
+        if (c == ' ') {
+            return state.advance();
+        }
+        return state.append(c);
     }
 
     private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, List<String> annotations, String afterAnnotations, String rawName, String type) {
@@ -935,10 +977,20 @@ public class Main {
     }
 
     private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locate, BiFunction<String, String, Optional<T>> mapper) {
-        return locate.apply(input, infix).flatMap(index -> {
+        return compileInfix(() -> split(input, infix, locate), mapper);
+    }
+
+    private static <T> Optional<T> compileInfix(Supplier<Optional<Tuple<String, String>>> supplier, BiFunction<String, String, Optional<T>> mapper) {
+        return supplier.get().flatMap(tuple -> {
+            return mapper.apply(tuple.left, tuple.right);
+        });
+    }
+
+    private static Optional<Tuple<String, String>> split(String input, String infix, BiFunction<String, String, Optional<Integer>> locate) {
+        return locate.apply(input, infix).map(index -> {
             var left = input.substring(0, index);
             var right = input.substring(index + infix.length());
-            return mapper.apply(left, right);
+            return new Tuple<>(left, right);
         });
     }
 
