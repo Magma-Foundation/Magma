@@ -10,28 +10,28 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
-    private static class State {
+    private static class DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public State() {
+        public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
-        private State advance() {
+        private DivideState advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
 
-        private State append(char c) {
+        private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         }
@@ -40,15 +40,29 @@ public class Main {
             return this.depth == 0;
         }
 
-        public State enter() {
+        public DivideState enter() {
             this.depth++;
             return this;
         }
 
-        public State exit() {
+        public DivideState exit() {
             this.depth--;
             return this;
         }
+    }
+
+    private record CompileState(List<String> structs) {
+        public CompileState() {
+            this(new ArrayList<>());
+        }
+
+        public CompileState addStruct(String struct) {
+            this.structs.add(struct);
+            return this;
+        }
+    }
+
+    private record Tuple<A, B>(A left, B right) {
     }
 
     public static void main() {
@@ -70,21 +84,26 @@ public class Main {
     }
 
     private static String compile(String input) {
-        return compileStatements(input, Main::compileRootSegment) + "\nint main(){\n\treturn 0;\n}\n";
+        var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
+        var joinedStructs = String.join("", compiled.left.structs);
+        return joinedStructs + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     }
 
-    private static String compileStatements(String input, Function<String, String> mapper) {
+    private static Tuple<CompileState, String> compileStatements(CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         var segments = divide(input);
         var output = new StringBuilder();
+        var current = initial;
         for (var segment : segments) {
-            output.append(mapper.apply(segment));
+            var mapped = mapper.apply(current, segment);
+            current = mapped.left;
+            output.append(mapped.right);
         }
 
-        return output.toString();
+        return new Tuple<>(current, output.toString());
     }
 
     private static List<String> divide(String input) {
-        var current = new State();
+        var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             current = fold(current, c);
@@ -93,7 +112,7 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static State fold(State state, char c) {
+    private static DivideState fold(DivideState state, char c) {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -107,30 +126,35 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String input) {
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return "";
+            return new Tuple<>(state, "");
         }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+        return compileClassSegment(state, stripped);
     }
 
-    private static Optional<String> compileClass(String input) {
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         return compileInfix(input, "class ", (beforeKeyword, afterKeyword) -> {
             return compileInfix(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
-                    return Optional.of(generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {\n};\n" + compileStatements(content1, Main::compileClassSegment));
+                    var statementsTuple = compileStatements(state, content1, Main::compileClassSegment);
+
+                    var generated = generatePlaceholder(beforeKeyword) + "struct " + beforeContent.strip() + " {" + statementsTuple.right + "\n};\n";
+                    var added = statementsTuple.left.addStruct(generated);
+                    return Optional.of(new Tuple<>(added, ""));
                 });
             });
         });
     }
 
-    private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
+        return compileClass(state, input)
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+    private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
         if (input.endsWith(suffix)) {
             var content = input.substring(0, input.length() - suffix.length());
             return mapper.apply(content);
@@ -139,7 +163,7 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<String> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    private static <T> Optional<T> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<T>> mapper) {
         var classIndex = stripped.indexOf(infix);
         if (classIndex >= 0) {
             var left = stripped.substring(0, classIndex);
