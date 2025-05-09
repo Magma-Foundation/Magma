@@ -1,44 +1,21 @@
 /* private */struct Type {/* String stringify(); *//* String generate(); *//*  */
 };
-/* private @ */struct Actual {/*  */
+/* private static */struct StandardLibrary {/* private static <T> T[] allocate(int length) {
+            return (T[]) new Object[length];
+        } *//*  */
+};
+/* private static */struct Lists {/* public static <T> List<T> of(T... elements) {
+            return new ArrayList<>(elements, elements.length);
+        } *//*  */
 };
 /* private */struct List_/* T */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element); *//*  */
-};
-/* private static */struct Lists {/* @Actual
-        private record JVMList<T>(java.util.List<T> internal) implements List<T> {
-            public JVMList() {
-                this(new ArrayList<>());
-            }
-
-            @Override
-            public List<T> addLast(T element) {
-                this.internal.add(element);
-                return this;
-            }
-
-            @Override
-            public Iterator<T> iterate() {
-                return new HeadedIterator<>(new RangeHead(this.internal.size())).map(this.internal::get);
-            }
-
-            @Override
-            public boolean contains(T element) {
-                return this.internal.contains(element);
-            }
-        } */
-	/*         public static <T> */ struct List_/* T */ empty(/*  */)/*  {
-            return new JVMList<>();
-        } */
-	/*         public static <T> */ struct List_/* T */ of(/* T... elements */)/*  {
-            return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
-        } *//*  */
 };
 /* private static */struct DivideState {/* private List<String> segments; *//* private String buffer; *//* private int depth; *//* private DivideState(List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } *//* public DivideState() {
-            this(Lists.empty(), "", 0);
+            this(new ArrayList<String>(), "", 0);
         } *//* private DivideState advance() {
             this.segments = this.segments.addLast(this.buffer);
             this.buffer = "";
@@ -62,7 +39,9 @@
             return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         } *//*  */
 };
-/* private */struct Iterator_/* T */ {/* <R> R fold(R initial, BiFunction<R, T, R> folder); *//* <C> C collect(Collector<T, C> collector); *//* <R> Iterator<R> map(Function<T, R> mapper); *//* <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper); *//* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//*  */
+/* private */struct Iterator_/* T */ {/* <R> R fold(R initial, BiFunction<R, T, R> folder); *//* <C> C collect(Collector<T, C> collector); *//* <R> Iterator<R> map(Function<T, R> mapper); *//* <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper); *//* Iterator<T> concat(Iterator<T> other); *//* Optional<T> next(); *//* boolean anyMatch(Predicate<T> predicate); *//*  */
+};
+/* private */struct List_/* T */ {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element); *//*  */
 };
 /* public */struct Main {/* private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
         @Override
@@ -83,6 +62,11 @@
         @Override
         public Optional<T> next() {
             return this.head.next();
+        }
+
+        @Override
+        public boolean anyMatch(Predicate<T> predicate) {
+            return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
         }
 
         @Override
@@ -109,7 +93,7 @@
             Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
             List<ObjectType> expansions) {
         public CompileState() {
-            this(Lists.empty(), new HashMap<>(), Lists.empty());
+            this(new ArrayList<String>(), new HashMap<>(), new ArrayList<ObjectType>());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -198,11 +182,6 @@
         private String generate() {
             return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
         }
-
-        @Override
-        public String toString() {
-            throw new RuntimeException();
-        }
     } *//* public static void main() {
         try {
             var root = Paths.get(".", "src", "java", "magma");
@@ -240,7 +219,7 @@
     ) {
         var segments = divide(input, folder);
 
-        var tuple = new Tuple<>(initial, Lists.<T>empty());
+        var tuple = new Tuple<>(initial, (List<T>) new ArrayList<T>());
         var folded = segments.iterate().fold(tuple, (tuple0, element) -> {
             var mapped = mapper.apply(tuple0.left, element);
             return new Tuple<>(mapped.left, tuple0.right.addLast(mapped.right));
@@ -319,7 +298,7 @@
     } */
 	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content) {
         return (state, name) -> {
-            return assembleStructure(state, beforeKeyword, name, Lists.empty(), Lists.empty(), content).map(newState -> {
+            return assembleStructure(state, beforeKeyword, name, new ArrayList<String>(), new ArrayList<Type>(), content).map(newState -> {
                 return new Tuple<>(newState, "");
             });
         };

@@ -1,17 +1,14 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Main {
     private interface Iterator<T> {
@@ -26,6 +23,8 @@ public class Main {
         Iterator<T> concat(Iterator<T> other);
 
         Optional<T> next();
+
+        boolean anyMatch(Predicate<T> predicate);
     }
 
     private interface Collector<T, C> {
@@ -50,9 +49,6 @@ public class Main {
         String stringify();
 
         String generate();
-    }
-
-    private @interface Actual {
     }
 
     private static class EmptyHead<T> implements Head<T> {
@@ -81,6 +77,11 @@ public class Main {
         @Override
         public Optional<T> next() {
             return this.head.next();
+        }
+
+        @Override
+        public boolean anyMatch(Predicate<T> predicate) {
+            return this.fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
         }
 
         @Override
@@ -124,38 +125,15 @@ public class Main {
         }
     }
 
+    private static class StandardLibrary {
+        private static <T> T[] allocate(int length) {
+            return (T[]) new Object[length];
+        }
+    }
+
     private static class Lists {
-        @Actual
-        private record JVMList<T>(java.util.List<T> internal) implements List<T> {
-            public JVMList() {
-                this(new ArrayList<>());
-            }
-
-            @Override
-            public List<T> addLast(T element) {
-                this.internal.add(element);
-                return this;
-            }
-
-            @Override
-            public Iterator<T> iterate() {
-                return new HeadedIterator<>(new RangeHead(this.internal.size())).map(this.internal::get);
-            }
-
-            @Override
-            public boolean contains(T element) {
-                return this.internal.contains(element);
-            }
-        }
-
-        @Actual
-        public static <T> List<T> empty() {
-            return new JVMList<>();
-        }
-
-        @Actual
         public static <T> List<T> of(T... elements) {
-            return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
+            return new ArrayList<>(elements, elements.length);
         }
     }
 
@@ -171,7 +149,7 @@ public class Main {
         }
 
         public DivideState() {
-            this(Lists.empty(), "", 0);
+            this(new ArrayList<String>(), "", 0);
         }
 
         private DivideState advance() {
@@ -209,7 +187,7 @@ public class Main {
             Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
             List<ObjectType> expansions) {
         public CompileState() {
-            this(Lists.empty(), new HashMap<>(), Lists.empty());
+            this(new ArrayList<String>(), new HashMap<>(), new ArrayList<ObjectType>());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -289,7 +267,7 @@ public class Main {
     private static class ListCollector<T> implements Collector<T, List<T>> {
         @Override
         public List<T> createInitial() {
-            return Lists.empty();
+            return new ArrayList<>();
         }
 
         @Override
@@ -348,6 +326,51 @@ public class Main {
         }
     }
 
+    private static final class ArrayList<T> implements List<T> {
+        public static final int DEFAULT_SIZE = 10;
+        private int size;
+        private T[] array;
+
+        private ArrayList(T[] internal, int size) {
+            this.array = internal;
+            this.size = size;
+        }
+
+        public ArrayList() {
+            this(StandardLibrary.allocate(DEFAULT_SIZE), 0);
+        }
+
+        @Override
+        public List<T> addLast(T element) {
+            return this.set(this.size, element);
+        }
+
+        private List<T> set(int index, T element) {
+            while (!(index < this.array.length)) {
+                var copy = StandardLibrary.<T>allocate(this.array.length * 2);
+                System.arraycopy(this.array, 0, copy, 0, this.array.length);
+                this.array = copy;
+            }
+
+            this.array[index] = element;
+            if (index >= this.size) {
+                this.size = index + 1;
+            }
+            return this;
+        }
+
+        @Override
+        public Iterator<T> iterate() {
+            return new HeadedIterator<>(new RangeHead(this.size))
+                    .map(index -> this.array[index]);
+        }
+
+        @Override
+        public boolean contains(T element) {
+            return this.iterate().anyMatch(thisElement -> thisElement.equals(element));
+        }
+    }
+
     public static void main() {
         try {
             var root = Paths.get(".", "src", "java", "magma");
@@ -393,7 +416,7 @@ public class Main {
     ) {
         var segments = divide(input, folder);
 
-        var tuple = new Tuple<>(initial, Lists.<T>empty());
+        var tuple = new Tuple<>(initial, (List<T>) new ArrayList<T>());
         var folded = segments.iterate().fold(tuple, (tuple0, element) -> {
             var mapped = mapper.apply(tuple0.left, element);
             return new Tuple<>(mapped.left, tuple0.right.addLast(mapped.right));
@@ -486,7 +509,7 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content) {
         return (state, name) -> {
-            return assembleStructure(state, beforeKeyword, name, Lists.empty(), Lists.empty(), content).map(newState -> {
+            return assembleStructure(state, beforeKeyword, name, new ArrayList<String>(), new ArrayList<Type>(), content).map(newState -> {
                 return new Tuple<>(newState, "");
             });
         };
