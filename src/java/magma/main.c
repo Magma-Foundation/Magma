@@ -2,7 +2,10 @@
 };
 /* private */struct Type {/* String stringify(); *//* String generate(); *//*  */
 };
-/* private static */struct Lists {/* private record JVMList<T>(java.util.List<T> internal) implements List<T> {
+/* private @ */struct Actual {/*  */
+};
+/* private static */struct Lists {/* @Actual
+        private record JVMList<T>(java.util.List<T> internal) implements List<T> {
             public JVMList() {
                 this(new ArrayList<>());
             }
@@ -22,12 +25,13 @@
             public boolean contains(T element) {
                 return this.internal.contains(element);
             }
-
         } */
-	/* public static <T> */ struct List_/* T */ empty(/*  */)/*  {
+	/* @Actual
+        public static <T> */ struct List_/* T */ empty(/*  */)/*  {
             return new JVMList<>();
         } */
-	/* public static <T> */ struct List_/* T */ of(/* T... elements */)/*  {
+	/* @Actual
+        public static <T> */ struct List_/* T */ of(/* T... elements */)/*  {
             return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         } *//*  */
 };

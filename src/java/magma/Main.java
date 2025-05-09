@@ -121,7 +121,11 @@ public class Main {
         }
     }
 
+    private @interface Actual {
+    }
+
     private static class Lists {
+        @Actual
         private record JVMList<T>(java.util.List<T> internal) implements List<T> {
             public JVMList() {
                 this(new ArrayList<>());
@@ -142,13 +146,14 @@ public class Main {
             public boolean contains(T element) {
                 return this.internal.contains(element);
             }
-
         }
 
+        @Actual
         public static <T> List<T> empty() {
             return new JVMList<>();
         }
 
+        @Actual
         public static <T> List<T> of(T... elements) {
             return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         }
