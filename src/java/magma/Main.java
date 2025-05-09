@@ -85,28 +85,7 @@ public class Main {
             // capture a reference to the "outer" iterator
             final Iterator<T> outer = this;
 
-            return new HeadedIterator<>(new Head<R>() {
-                // start with an empty inner
-                private Iterator<R> inner = new HeadedIterator<>(new EmptyHead<>());
-
-                @Override
-                public Optional<R> next() {
-                    Optional<R> nextInner;
-                    // loop until we either return an R or detect that outer is done
-                    while ((nextInner = inner.next()).isEmpty()) {
-                        // inner is exhausted → advance outer
-                        Optional<T> nextOuter = outer.next();
-                        if (nextOuter.isEmpty()) {
-                            // no more T's, so we're done
-                            return Optional.empty();
-                        }
-                        // build a new inner from the next outer element
-                        inner = mapper.apply(nextOuter.get());
-                    }
-                    // we got an R from inner
-                    return nextInner;
-                }
-            });
+            return new HeadedIterator<>(new FlatMapHead<>(outer, mapper));
         }
 
         @Override
@@ -537,6 +516,37 @@ public class Main {
         }
     }
 
+    private static class FlatMapHead<T, R> implements Head<R> {
+        private final Iterator<T> outer;
+        private final Function<T, Iterator<R>> mapper;
+        // start with an empty inner
+        private Iterator<R> inner;
+
+        public FlatMapHead(Iterator<T> outer, Function<T, Iterator<R>> mapper) {
+            this.outer = outer;
+            this.mapper = mapper;
+            this.inner = new HeadedIterator<>(new EmptyHead<>());
+        }
+
+        @Override
+        public Optional<R> next() {
+            Optional<R> nextInner;
+            // loop until we either return an R or detect that outer is done
+            while ((nextInner = this.inner.next()).isEmpty()) {
+                // inner is exhausted → advance outer
+                Optional<T> nextOuter = this.outer.next();
+                if (nextOuter.isEmpty()) {
+                    // no more T's, so we're done
+                    return Optional.empty();
+                }
+                // build a new inner from the next outer element
+                this.inner = this.mapper.apply(nextOuter.get());
+            }
+            // we got an R from inner
+            return nextInner;
+        }
+    }
+
     public static void main() {
         try {
             var root = Paths.get(".", "src", "java", "magma");
@@ -557,12 +567,18 @@ public class Main {
 
     private static String compile(String input) {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
-        var joinedStructs = compiled.left.structs
-                .iterate()
+        var compiledState = compiled.left;
+
+        var joinedStructs = join(compiledState.structs);
+        var joinedMethods = join(compiledState.functions);
+
+        return joinedStructs + joinedMethods + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
+    }
+
+    private static String join(List<String> items) {
+        return items.iterate()
                 .collect(new Joiner())
                 .orElse("");
-
-        return joinedStructs + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
