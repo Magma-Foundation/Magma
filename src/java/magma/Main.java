@@ -58,6 +58,8 @@ public class Main {
         String generate();
 
         boolean equalsTo(Type other);
+
+        Type strip();
     }
 
     private @interface Actual {
@@ -214,9 +216,9 @@ public class Main {
     private record CompileState(
             List<String> structs,
             Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
-            List<ObjectType> expansions) {
+            List<ObjectType> expansions, List<String> typeParams) {
         public CompileState() {
-            this(new ArrayList<String>(), new HashMap<>(), new ArrayList<ObjectType>());
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -230,11 +232,11 @@ public class Main {
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.structs, this.expandables, this.expansions.addLast(type));
+            return new CompileState(this.structs, this.expandables, this.expansions.addLast(type), this.typeParams);
         }
 
         public CompileState addStruct(String struct) {
-            return new CompileState(this.structs.addLast(struct), this.expandables, this.expansions);
+            return new CompileState(this.structs.addLast(struct), this.expandables, this.expansions, this.typeParams);
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
@@ -247,6 +249,10 @@ public class Main {
                 return Optional.of(this.expandables.get(name));
             }
             return Optional.empty();
+        }
+
+        public CompileState addTypeParameters(List<String> typeParams) {
+            return new CompileState(this.structs, this.expandables, this.expansions, typeParams);
         }
     }
 
@@ -320,6 +326,11 @@ public class Main {
         public boolean equalsTo(Type other) {
             return other instanceof Ref ref && this.type.equalsTo(ref.type);
         }
+
+        @Override
+        public Type strip() {
+            return new Ref(this.type.strip());
+        }
     }
 
     private record ObjectType(String name, List<Type> arguments) implements Type {
@@ -338,6 +349,15 @@ public class Main {
             return other instanceof ObjectType objectType
                     && this.name.equals(objectType.name)
                     && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
+        }
+
+        @Override
+        public Type strip() {
+            var newArguments = this.arguments.iterate()
+                    .map(Type::strip)
+                    .collect(new ListCollector<>());
+
+            return new ObjectType(this.name, newArguments);
         }
 
         private String joinArguments() {
@@ -364,11 +384,21 @@ public class Main {
         public boolean equalsTo(Type other) {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         }
+
+        @Override
+        public Type strip() {
+            return this;
+        }
     }
 
-    private record Definition(List<String> annotations, String afterAnnotations, Type type, String name) {
+    private record Definition(List<String> annotations, String afterAnnotations, Type type, String name,
+                              List<String> typeParams) {
         private String generate() {
             return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
+        }
+
+        public Definition mapType(Function<Type, Type> mapper) {
+            return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
         }
     }
 
@@ -431,6 +461,29 @@ public class Main {
             return this.iterate().zip(others.iterate()).allMatch(tuple -> {
                 return equator.apply(tuple.left(), tuple.right());
             });
+        }
+    }
+
+    private record TypeParam(String input) implements Type {
+
+        @Override
+        public String stringify() {
+            return this.input;
+        }
+
+        @Override
+        public String generate() {
+            return "template " + this.input;
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof TypeParam param && this.input.equals(param.input);
+        }
+
+        @Override
+        public Type strip() {
+            return Primitive.Void;
         }
     }
 
@@ -629,15 +682,18 @@ public class Main {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
 
+                    Definition newDefinition;
                     String newContent;
                     if (definition.annotations.contains("Actual", String::equals) || oldContent.equals(";")) {
+                        newDefinition = definition.mapType(Type::strip);
                         newContent = ";";
                     }
                     else {
                         newContent = ";" + generatePlaceholder(oldContent);
+                        newDefinition = definition;
                     }
 
-                    var generatedHeader = "\n\t" + definition.generate() + "(" + generatePlaceholder(params) + ")";
+                    var generatedHeader = "\n\t" + newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
                     var generated = generatedHeader + newContent;
                     return Optional.of(new Tuple<>(definitionState, generated));
                 });
@@ -683,7 +739,7 @@ public class Main {
                             .map(String::strip)
                             .collect(new ListCollector<>());
 
-                    return assembleDefinition(state, annotations, afterAnnotations, rawName, type);
+                    return assembleDefinition(state, annotations, afterAnnotations.strip(), rawName, type);
                 }).or(() -> {
                     return assembleDefinition(state, new ArrayList<>(), strippedBeforeType, rawName, type);
                 });
@@ -692,9 +748,20 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, List<String> annotations, String afterAnnotations, String rawName, String type) {
+        return compileSuffix(afterAnnotations.strip(), ">", withoutEnd -> {
+            return compileFirst(withoutEnd, "<", (beforeTypeParams, typeParams) -> {
+                var typeParamsTuple = Main.parseValues(state, typeParams, (state1, s1) -> new Tuple<>(state1, s1.strip()));
+                return getCompileStateDefinitionTuple(typeParamsTuple.left, annotations, beforeTypeParams.strip(), typeParamsTuple.right, rawName, type);
+            });
+        }).or(() -> {
+            return getCompileStateDefinitionTuple(state, annotations, afterAnnotations, new ArrayList<>(), rawName, type);
+        });
+    }
+
+    private static Optional<Tuple<CompileState, Definition>> getCompileStateDefinitionTuple(CompileState state, List<String> annotations, String afterAnnotations, List<String> typeParams, String rawName, String type) {
         return compileSymbol(rawName.strip(), name -> {
-            var typeTuple = parseType(state, type);
-            return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name)));
+            var typeTuple = parseType(state.addTypeParameters(typeParams), type);
+            return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name, typeParams)));
         });
     }
 
@@ -711,8 +778,18 @@ public class Main {
         return compileOr(state, input, Lists.of(
                 typed(Main::parsePrimitive),
                 typed(Main::parseTemplate),
-                typed(Main::parseArray)
+                typed(Main::parseArray),
+                typed(Main::parseTypeParam)
         )).orElseGet(() -> new Tuple<>(state, new Placeholder(input.strip())));
+    }
+
+    private static Optional<Tuple<CompileState, Type>> parseTypeParam(CompileState state, String input) {
+        var stripped = input.strip();
+        if (state.typeParams.contains(stripped, String::equals)) {
+            return Optional.of(new Tuple<>(state, new TypeParam(stripped)));
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, Type>> parseArray(CompileState state, String input) {
@@ -744,7 +821,7 @@ public class Main {
     private static Optional<Tuple<CompileState, ObjectType>> parseTemplate(CompileState oldState, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (base, argumentsString) -> {
-                var argumentsTuple = parseAll(oldState, argumentsString, Main::foldValueChar, Main::parseType);
+                var argumentsTuple = parseValues(oldState, argumentsString, Main::parseType);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
@@ -754,6 +831,10 @@ public class Main {
                 return Optional.of(new Tuple<>(withExpansion, expansion));
             });
         });
+    }
+
+    private static <T> Tuple<CompileState, List<T>> parseValues(CompileState oldState, String argumentsString, BiFunction<CompileState, String, Tuple<CompileState, T>> mapper) {
+        return parseAll(oldState, argumentsString, Main::foldValueChar, mapper);
     }
 
     private static Optional<Integer> findLast(String input, String infix) {
@@ -797,7 +878,8 @@ public class Main {
 
     private enum Primitive implements Type {
         Char("char"),
-        Int("int");
+        Int("int"),
+        Void("void");
 
         private final String value;
 
@@ -818,6 +900,11 @@ public class Main {
         @Override
         public boolean equalsTo(Type other) {
             return this == other;
+        }
+
+        @Override
+        public Type strip() {
+            return this;
         }
     }
 }
