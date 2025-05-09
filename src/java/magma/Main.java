@@ -30,21 +30,25 @@ class Main {
     }
 
     private static class Paths {
-        public static Path get(String first, String... more) {
-            return new JVMPath(java.nio.file.Paths.get(first, more));
+        private static Path resolveCurrentWorkingDirectory() {
+            return new JVMPath(java.nio.file.Paths.get("."));
         }
     }
 
     void main() {
-        var parent = Paths.get(".", "src", "java", "magma");
-        var jvmPath = parent.resolve("main.mgs");
-        var jvmPath1 = parent.resolve("main.c");
+        var parent = Paths.resolveCurrentWorkingDirectory()
+                .resolve("src")
+                .resolve("java")
+                .resolve("magma");
+
+        var source = parent.resolve("main.mgs");
+        var target = parent.resolve("main.c");
+
         try {
-            var input = jvmPath.readString();
-            jvmPath1.writeString(input);
+            var input = source.readString();
+            target.writeString(input);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
