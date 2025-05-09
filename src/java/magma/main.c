@@ -182,7 +182,7 @@
         } */ /* private */struct TypeParam(String input) implements Type {/*  */
 };
  
-	/* public static */ struct void main(/*  */);/*  {
+	/* public static */ void main(/*  */);/*  {
         try {
             var root = Paths.get(".", "src", "java", "magma");
             var source = root.resolve("main.java");
@@ -517,6 +517,10 @@
 
         if (stripped.equals("int") || stripped.equals("boolean")) {
             return Optional.of(new Tuple<>(state, Primitive.Int));
+        }
+
+        if(stripped.equals("void")) {
+            return Optional.of(new Tuple<>(state, Primitive.Void));
         }
 
         return Optional.empty();

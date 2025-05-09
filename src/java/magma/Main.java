@@ -936,6 +936,10 @@ public class Main {
             return Optional.of(new Tuple<>(state, Primitive.Int));
         }
 
+        if (stripped.equals("void")) {
+            return Optional.of(new Tuple<>(state, Primitive.Void));
+        }
+
         return Optional.empty();
     }
 
