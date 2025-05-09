@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+struct Path {
+
+}
+
 int main() {
     char* parent = "./src/java/magma";
     char* source =

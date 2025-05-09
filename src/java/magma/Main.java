@@ -1,26 +1,87 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 class Main {
-    private interface Path {
-        void writeString(String input) throws IOException;
+    private interface Option<T> {
+        void ifPresent(Consumer<T> consumer);
+    }
 
-        String readString() throws IOException;
+    private interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    private interface IOError {
+        String display();
+    }
+
+    private interface Path {
+        Option<IOError> writeString(String input);
+
+        Result<String, IOError> readString();
 
         Path resolve(String child);
     }
 
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+    }
+
+    private static class None<T> implements Option<T> {
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+    }
+
+    private record JVMIOError(IOException error) implements IOError {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.error.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+    }
+
     private record JVMPath(java.nio.file.Path path) implements Path {
         @Override
-        public void writeString(String input) throws IOException {
-            Files.writeString(this.path(), input);
+        public Option<IOError> writeString(String input) {
+            try {
+                Files.writeString(this.path(), input);
+                return new None<>();
+            } catch (IOException e) {
+                return new Some<>(new JVMIOError(e));
+            }
         }
 
         @Override
-        public String readString() throws IOException {
-            return Files.readString(this.path());
+        public Result<String, IOError> readString() {
+            try {
+                return new Ok<>(Files.readString(this.path()));
+            } catch (IOException e) {
+                return new Err<>(new JVMIOError(e));
+            }
         }
 
         @Override
@@ -44,11 +105,8 @@ class Main {
         var source = parent.resolve("main.mgs");
         var target = parent.resolve("main.c");
 
-        try {
-            var input = source.readString();
-            target.writeString(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        source.readString()
+                .match(target::writeString, Some::new)
+                .ifPresent(ioError -> System.err.println(ioError.display()));
     }
 }
