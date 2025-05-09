@@ -52,6 +52,9 @@ public class Main {
         String generate();
     }
 
+    private @interface Actual {
+    }
+
     private static class EmptyHead<T> implements Head<T> {
         @Override
         public Optional<T> next() {
@@ -119,9 +122,6 @@ public class Main {
             this.counter++;
             return Optional.of(value);
         }
-    }
-
-    private @interface Actual {
     }
 
     private static class Lists {
@@ -342,6 +342,12 @@ public class Main {
         }
     }
 
+    private record Definition(List<String> annotations, String afterAnnotations, Type type, String name) {
+        private String generate() {
+            return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
+        }
+    }
+
     public static void main() {
         try {
             var root = Paths.get(".", "src", "java", "magma");
@@ -531,11 +537,17 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        return compileFirst(input, "(", (inputDefinition, withParams) -> {
+        return compileFirst(input, "(", (definitionString, withParams) -> {
             return compileFirst(withParams, ")", (params, content) -> {
-                return compileDefinition(state, inputDefinition).flatMap(outputDefinition -> {
-                    var generated = "\n\t" + outputDefinition.right + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content);
-                    return Optional.of(new Tuple<>(outputDefinition.left, generated));
+                return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
+                    var definitionState = definitionTuple.left;
+                    var definition = definitionTuple.right;
+                    if (definition.annotations.contains("Actual")) {
+                        return Optional.of(new Tuple<>(definitionState, ""));
+                    }
+
+                    var generated = "\n\t" + definition.generate() + "(" + generatePlaceholder(params) + ")" + generatePlaceholder(content);
+                    return Optional.of(new Tuple<>(definitionState, generated));
                 });
             });
         });
@@ -560,21 +572,37 @@ public class Main {
                 .next();
     }
 
-    private static @NotNull Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return compileDefinition(state, withoutEnd).map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
+            return parseDefinition(state, withoutEnd)
+                    .map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))
+                    .map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {
             return compileInfix(beforeName.strip(), " ", Main::findLast, (beforeType, type) -> {
-                return compileSymbol(rawName.strip(), name -> {
+                return compileInfix(beforeType.strip(), "\n", Main::findLast, (annotationsString, afterAnnotations) -> compileSymbol(rawName.strip(), name -> {
                     var typeTuple = parseType(state, type);
-                    return Optional.of(new Tuple<>(typeTuple.left, generatePlaceholder(beforeType) + " " + typeTuple.right.generate() + " " + name));
-                });
+                    var annotations = divide(annotationsString, foldWithDelimiter('\n'))
+                            .iterate()
+                            .map(slice -> slice.substring(1))
+                            .collect(new ListCollector<>());
+
+                    return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name)));
+                }));
             });
         });
+    }
+
+    private static BiFunction<DivideState, Character, DivideState> foldWithDelimiter(char delimiter) {
+        return (state, c) -> {
+            if (c == delimiter) {
+                return state.advance();
+            }
+            return state.append(c);
+        };
     }
 
     private static Tuple<CompileState, Type> parseType(CompileState state, String input) {
