@@ -72,6 +72,9 @@ public class Main {
     private @interface Actual {
     }
 
+    private interface Parameter {
+    }
+
     private static class EmptyHead<T> implements Head<T> {
         @Override
         public Optional<T> next() {
@@ -392,7 +395,7 @@ public class Main {
         }
     }
 
-    private record Placeholder(String value) implements Type {
+    private record Placeholder(String value) implements Type, Parameter {
         @Override
         public String stringify() {
             return generatePlaceholder(this.value);
@@ -419,8 +422,13 @@ public class Main {
         }
     }
 
-    private record Definition(List<String> annotations, String afterAnnotations, Type type, String name,
-                              List<String> typeParams) {
+    private record Definition(
+            List<String> annotations,
+            String afterAnnotations,
+            Type type,
+            String name,
+            List<String> typeParams
+    ) implements Parameter {
         private String generate() {
             return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
         }
@@ -679,15 +687,52 @@ public class Main {
             return compileFirst(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
                     return compileOr(state, beforeContent, Lists.of(
-                            createStructureWithTypeParamsRule(beforeKeyword, content1),
-                            createStructureWithoutTypeParamsRule(beforeKeyword, content1)
+                            createStructWithParametersRule(beforeKeyword, content1),
+                            createStructWithoutParametersRule(beforeKeyword, content1)
                     ));
                 });
             });
         });
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content) {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructWithoutParametersRule(String beforeKeyword, String content1) {
+        return (state1, s) -> {
+
+            return createStructureWithMaybeTypeParametersRule(state1, beforeKeyword, s, content1, new ArrayList<>());
+        };
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructWithParametersRule(String beforeKeyword, String content1) {
+        return (state, input) -> {
+            return compileInfix(input, ")", Main::findLast, (withParameters, afterParameters) -> {
+                return compileFirst(withParameters, "(", (beforeParameters, parameters) -> {
+                    var parametersTuple = parseValues(state, parameters, Main::compileParameter);
+                    return createStructureWithMaybeTypeParametersRule(parametersTuple.left, beforeKeyword, beforeParameters, content1, parametersTuple.right);
+                });
+            });
+        };
+    }
+
+    private static Tuple<CompileState, Parameter> compileParameter(CompileState state, String input) {
+        return parseDefinition(state, input)
+                .map(value -> new Tuple<CompileState, Parameter>(value.left, value.right))
+                .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, String>> createStructureWithMaybeTypeParametersRule(
+            CompileState state,
+            String beforeKeyword,
+            String beforeContent,
+            String content1,
+            List<Parameter> parameters
+    ) {
+        return compileOr(state, beforeContent, Lists.of(
+                createStructureWithTypeParamsRule(beforeKeyword, content1, parameters),
+                createStructureWithoutTypeParamsRule(beforeKeyword, content1, parameters)
+        ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content, List<Parameter> parameters) {
         return (state, input) -> {
             return compileSuffix(input.strip(), ">", withoutEnd -> {
                 return compileFirst(withoutEnd, "<", (name, typeParameters) -> {
@@ -697,7 +742,7 @@ public class Main {
                             .collect(new ListCollector<>());
 
                     return Optional.of(new Tuple<>(state.addExpandable(name, (typeArguments) -> {
-                        return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, content);
+                        return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, parameters, content);
                     }), ""));
                 });
             });
@@ -718,9 +763,13 @@ public class Main {
         return appended;
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content) {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(
+            String beforeKeyword,
+            String content,
+            List<Parameter> parameters
+    ) {
         return (state, name) -> {
-            return assembleStructure(state, beforeKeyword, name, new ArrayList<String>(), new ArrayList<Type>(), content).map(newState -> {
+            return assembleStructure(state, beforeKeyword, name, new ArrayList<String>(), new ArrayList<Type>(), parameters, content).map(newState -> {
                 return new Tuple<>(newState, "");
             });
         };
@@ -732,6 +781,7 @@ public class Main {
             String name,
             List<String> typeParams,
             List<Type> typeArguments,
+            List<Parameter> parameters,
             String content
     ) {
         var statementsTuple = compileStatements(state.addTypeParameters(typeParams), content, Main::compileClassSegment);

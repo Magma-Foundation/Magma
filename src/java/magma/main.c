@@ -2,6 +2,8 @@
 };
  /* private @ */struct Actual {/*  */
 };
+ /* private */struct Parameter {/*  */
+};
  
 	/* private static */ void* allocate(/* int length */); /* private static */struct StandardLibrary {/*  */
 };
@@ -79,13 +81,19 @@
         } */ 
 	/* public */ struct CompileState addFunction(/* String function */);/*  {
             return new CompileState(this.generated.addLast(function), this.expandables, this.expansions, this.typeParams);
-        } */ /* private */struct CompileState(
-            List<String> generated, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
-            List<ObjectType> expansions, List<String> typeParams) {/* public CompileState() {
+        } */ /* private */struct CompileState {/* public CompileState() {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
         } *//*  */
 };
- /* private */struct Tuple<A, B>(A left, B right) {/*  */
+ 
+	/* public */ struct Optional_char_ref createInitial(/*  */);/*  {
+            return Optional.empty();
+        } */ 
+	/* public */ struct Optional_char_ref fold(/* Optional<String> maybeCurrent, String element */);/*  {
+            return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
+        } */ /* private */struct Joiner {/* private Joiner() {
+            this("");
+        } *//*  */
 };
  
 	/* public static */ struct Iterator_T fromOptional(/* Optional<T> optional */);/*  {
@@ -107,14 +115,14 @@
         } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return this.type.isParameterized();
-        } */ /* private */struct Ref(Type type) implements Type {/*  */
+        } */ /* private */struct Ref {/*  */
 };
  
 	/* public */ char* stringify(/*  */);/*  {
             return this.name + this.joinArguments();
         } */ 
 	/* public */ char* generate(/*  */);/*  {
-            return "struct " + stringify();
+            return "struct " + this.stringify();
         } */ 
 	/* public */ int equalsTo(/* Type other */);/*  {
             return other instanceof ObjectType objectType
@@ -137,7 +145,7 @@
                     .collect(new Joiner("_"))
                     .map(result -> "_" + result)
                     .orElse("");
-        } */ /* private */struct ObjectType(String name, List<Type> arguments) implements Type {/*  */
+        } */ /* private */struct ObjectType {/*  */
 };
  
 	/* public */ char* stringify(/*  */);/*  {
@@ -154,7 +162,7 @@
         } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return false;
-        } */ /* private */struct Placeholder(String value) implements Type {/*  */
+        } */ /* private */struct Placeholder {/*  */
 };
  
 	/* private */ char* generate(/*  */);/*  {
@@ -162,8 +170,7 @@
         } */ 
 	/* public */ struct Definition mapType(/* Function<Type, Type> mapper */);/*  {
             return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
-        } */ /* private */struct Definition(List<String> annotations, String afterAnnotations, Type type, String name,
-                              List<String> typeParams) {/*  */
+        } */ /* private */struct Definition {/*  */
 };
  
 	/* public */ char* stringify(/*  */);/*  {
@@ -180,7 +187,7 @@
         } */ 
 	/* public */ int isParameterized(/*  */);/*  {
             return true;
-        } */ /* private */struct TypeParam(String input) implements Type {/*  */
+        } */ /* private */struct TypeParam {/*  */
 };
  
 	/* public static */ void main(/*  */);/*  {
@@ -214,7 +221,9 @@
         return items.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
-    } */ 
+    } */ /* private */struct Tuple_CompileState_char_ref {/*  */
+};
+ 
 	/* private static */ struct Tuple_CompileState_char_ref compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */ 
@@ -282,14 +291,41 @@
             return compileFirst(afterKeyword, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", content1 -> {
                     return compileOr(state, beforeContent, Lists.of(
-                            createStructureWithTypeParamsRule(beforeKeyword, content1),
-                            createStructureWithoutTypeParamsRule(beforeKeyword, content1)
+                            createStructWithParametersRule(beforeKeyword, content1),
+                            createStructWithoutParametersRule(beforeKeyword, content1)
                     ));
                 });
             });
         });
     } */
-	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content) {
+	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructWithoutParametersRule(String beforeKeyword, String content1) {
+        return (state1, s) -> {
+
+            return getCompileStateStringTuple(state1, beforeKeyword, s, content1, new ArrayList<>());
+        };
+    } */
+	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructWithParametersRule(String beforeKeyword, String content1) {
+        return (state, input) -> {
+            return compileInfix(input, ")", Main::findLast, (withParameters, afterParameters) -> {
+                return compileFirst(withParameters, "(", (beforeParameters, parameters) -> {
+                    var parametersTuple = parseValues(state, parameters, Main::compileParameter);
+                    return getCompileStateStringTuple(parametersTuple.left, beforeKeyword, beforeParameters, content1, parametersTuple.right);
+                });
+            });
+        };
+    } */
+	/* private static Tuple<CompileState, Parameter> compileParameter(CompileState state, String input) {
+        return parseDefinition(state, input)
+                .map(value -> new Tuple<CompileState, Parameter>(value.left, value.right))
+                .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
+    } */
+	/* private static Optional<Tuple<CompileState, String>> getCompileStateStringTuple(CompileState state, String beforeKeyword, String beforeContent, String content1, List<Parameter> parameters) {
+        return compileOr(state, beforeContent, Lists.of(
+                createStructureWithTypeParamsRule(beforeKeyword, content1, parameters),
+                createStructureWithoutTypeParamsRule(beforeKeyword, content1, parameters)
+        ));
+    } */
+	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithTypeParamsRule(String beforeKeyword, String content, List<Parameter> parameters) {
         return (state, input) -> {
             return compileSuffix(input.strip(), ">", withoutEnd -> {
                 return compileFirst(withoutEnd, "<", (name, typeParameters) -> {
@@ -299,7 +335,7 @@
                             .collect(new ListCollector<>());
 
                     return Optional.of(new Tuple<>(state.addExpandable(name, (typeArguments) -> {
-                        return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, content);
+                        return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, parameters, content);
                     }), ""));
                 });
             });
@@ -318,9 +354,13 @@
         }
         return appended;
     } */
-	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(String beforeKeyword, String content) {
+	/* private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureWithoutTypeParamsRule(
+            String beforeKeyword,
+            String content,
+            List<Parameter> parameters
+    ) {
         return (state, name) -> {
-            return assembleStructure(state, beforeKeyword, name, new ArrayList<String>(), new ArrayList<Type>(), content).map(newState -> {
+            return assembleStructure(state, beforeKeyword, name, new ArrayList<String>(), new ArrayList<Type>(), parameters, content).map(newState -> {
                 return new Tuple<>(newState, "");
             });
         };
@@ -331,6 +371,7 @@
             String name,
             List<String> typeParams,
             List<Type> typeArguments,
+            List<Parameter> parameters,
             String content
     ) {
         var statementsTuple = compileStatements(state.addTypeParameters(typeParams), content, Main::compileClassSegment);
