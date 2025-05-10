@@ -1,8 +1,8 @@
 /* public  */class Main {
 	/* private static  */class State {
-		/* private final List<String> segments */ segments;
-		/* private StringBuilder buffer */ buffer;
-		/* private int depth */ depth;/* 
+		/* private final */ segments : /* List<String> */;
+		/* private */ buffer : /* StringBuilder */;
+		/* private */ depth : /* int */;/* 
 
         public State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -100,8 +100,8 @@
         }
         if (c == '} *//* ') {
             return append.exit();
-        } */
-	/* return append */ append;/* 
+        } *//* 
+        return append; *//* 
      */
 }
 /* private static String compileRootSegment(String input) {
@@ -151,13 +151,14 @@
                 .orElseGet(() -> generatePlaceholder(input));
     } *//* private static Optional<String> compileDefinitionStatement(String input, int depth) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return compileInfix(withoutEnd, " ", Main::findLast, new BiFunction<String, String, Optional<String>>() {
-                @Override
-                public Optional<String> apply(String s, String s2) {
-                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(withoutEnd) + " " + s2 + ";");
-                }
+            return compileLast(withoutEnd, " ", (s, name) -> {
+                return compileLast(s, " ", (beforeType, type) -> {
+                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(beforeType) + " " + name.strip() + " : " + generatePlaceholder(type) + ";");
+                });
             });
         });
+    } *//* private static Optional<String> compileLast(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        return compileInfix(input, infix, Main::findLast, mapper);
     } *//* private static Optional<Integer> findLast(String input, String infix) {
         var index = input.lastIndexOf(infix);
         return index == -1 ? Optional.empty() : Optional.of(index);
