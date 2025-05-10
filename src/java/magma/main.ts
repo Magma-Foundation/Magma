@@ -13,7 +13,12 @@ public class Main {
 
             var input = Files.readString(source);
             Files.writeString(target, generatePlaceholder(input));
-        } catch (IOException e) {
+
+            new ProcessBuilder("cmd", "/d", "npm.exe", "exec", "ts-node", target.toAbsolutePath().toString())
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -22,7 +27,7 @@ public class Main {
         var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end");
-        
+
         return "content-start " + replaced + " content-end";
     }
 }

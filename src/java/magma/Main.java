@@ -13,7 +13,12 @@ public class Main {
 
             var input = Files.readString(source);
             Files.writeString(target, generatePlaceholder(input));
-        } catch (IOException e) {
+
+            new ProcessBuilder("cmd", "/d", "npm.exe", "exec", "ts-node", target.toAbsolutePath().toString())
+                    .inheritIO()
+                    .start()
+                    .waitFor();
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
