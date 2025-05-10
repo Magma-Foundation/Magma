@@ -312,6 +312,10 @@ public class Main {
         public CompileState addMethod(String method) {
             return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods.addLast(method));
         }
+
+        public CompileState addStructure(ObjectType type) {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures.addLast(type), this.methods);
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -912,8 +916,9 @@ public class Main {
                 .addTypeParameters(typeParams)
                 .addTypeArguments(typeArguments), content, Main::compileClassSegment);
 
-        var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name, typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
-        var added = statementsTuple.left.addStruct(generated);
+        var type = new ObjectType(name, typeArguments);
+        var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + statementsTuple.right + "\n};\n";
+        var added = statementsTuple.left.addStruct(generated).addStructure(type);
         return Optional.of(added);
     }
 
