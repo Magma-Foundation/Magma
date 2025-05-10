@@ -98,17 +98,27 @@ void /* {
 String; /* {
     return compileStatements(input, Main::compileRootSegment);
 } */
-/* private static */ compileStatements(input, String, mapper, (Function));
+/* private static */ compileStatements(input, String, mapper, (String) => String);
 String; /* {
     return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
 } */
-/* private static */ compileAll(input, String, folder, (BiFunction), mapper, (Function), merger, (BiFunction));
+/* private static */ compileAll(input, String, folder, (State, Character) => State, mapper, (String) => String, merger, (StringBuilder, String) => StringBuilder);
 String; /* {
+    return generateAll(merger, parseAll(input, folder, mapper));
+} */
+/* private static */ generateAll(merger, (StringBuilder, String) => StringBuilder, elements, (List));
+String; /* {
+    return elements
+            .iterate()
+            .fold(new StringBuilder(), merger)
+            .toString();
+} */
+/* private static */ parseAll(input, String, folder, (State, Character) => State, mapper, (String) => String);
+List; /* {
     return divideAll(input, folder)
             .iterate()
             .map(mapper)
-            .fold(new StringBuilder(), merger)
-            .toString();
+            .collect(new ListCollector<>());
 } */
 /* private static */ mergeStatements(stringBuilder, StringBuilder, str, String);
 StringBuilder; /* {
@@ -118,7 +128,7 @@ StringBuilder; /* {
 List; /* {
     return divideAll(input, Main::foldStatementChar);
 } */
-/* private static */ divideAll(input, String, folder, (BiFunction));
+/* private static */ divideAll(input, String, folder, (State, Character) => State);
 List; /* {
     var current = new State();
     for (var i = 0; i < input.length(); i++) {
@@ -211,7 +221,11 @@ append: return;
         });
     });
 } */ /* private static String compileValues(String params, Function<String, String> mapper) {
-    return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
+    return generateValues(parseValues(params, mapper));
+} */ /* private static String generateValues(List<String> elements) {
+    return generateAll(Main::mergeValues, elements);
+} */ /* private static List<String> parseValues(String params, Function<String, String> mapper) {
+    return parseAll(params, Main::foldValueChar, mapper);
 } */ /* private static String compileParameter(String input) {
     if (input.isBlank()) {
         return "";
@@ -233,10 +247,7 @@ append: return;
         return split(() -> getStringStringTuple(beforeName), (beforeType, type) -> {
             return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                 return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
-                    var typeParams = divideAll(typeParamsString, Main::foldValueChar)
-                            .iterate()
-                            .map(String::strip)
-                            .collect(new ListCollector<>());
+                    var typeParams = parseValues(typeParamsString, String::strip);
 
                     return assembleDefinition(Optional.of(beforeTypeParams), name, typeParams, type);
                 });
@@ -292,10 +303,27 @@ append: return;
     return template(input).orElseGet(() -> generatePlaceholder(stripped));
 } */ /* private static Optional<String> template(String input) {
     return suffix(input.strip(), ">", withoutEnd -> {
-        return first(withoutEnd, "<", (base, arguments) -> {
-            return Optional.of(base + "<" + compileValues(arguments, Main::type) + ">");
+        return first(withoutEnd, "<", (base, argumentsString) -> {
+            var strippedBase = base.strip();
+            var arguments = parseValues(argumentsString, Main::type);
+            
+            if (base.equals("BiFunction")) {
+                return Optional.of(generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+            }
+
+            if (base.equals("Function")) {
+                return Optional.of(generate(Lists.of(arguments.get(0)), arguments.get(1)));
+            }
+
+            return Optional.of(strippedBase + "<" + generateValues(arguments) + ">");
         });
     });
+} */ /* private static String generate(List<String> arguments, String returns) {
+    var joined = arguments.iterate()
+            .collect(new Joiner(", "))
+            .orElse("");
+
+    return "(" + joined + ") => " + returns;
 } */ /* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
     return infix(input, infix, Main::findLast, mapper);
 } */ /* private static Optional<Integer> findLast(String input, String infix) {

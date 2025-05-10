@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -32,6 +33,8 @@ public class Main {
         Iterator<T> iterate();
 
         Optional<Tuple<List<T>, T>> removeLast();
+
+        T get(int index);
     }
 
     private interface Head<T> {
@@ -115,10 +118,19 @@ public class Main {
                 var last = this.elements.getLast();
                 return Optional.of(new Tuple<>(new JVMList<>(slice), last));
             }
+
+            @Override
+            public T get(int index) {
+                return this.elements.get(index);
+            }
         }
 
         public static <T> List<T> empty() {
             return new JVMList<>();
+        }
+
+        public static <T> List<T> of(T... elements) {
+            return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
@@ -251,11 +263,21 @@ public class Main {
             Function<String, String> mapper,
             BiFunction<StringBuilder, String, StringBuilder> merger
     ) {
+        return generateAll(merger, parseAll(input, folder, mapper));
+    }
+
+    private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> elements) {
+        return elements
+                .iterate()
+                .fold(new StringBuilder(), merger)
+                .toString();
+    }
+
+    private static List<String> parseAll(String input, BiFunction<State, Character, State> folder, Function<String, String> mapper) {
         return divideAll(input, folder)
                 .iterate()
                 .map(mapper)
-                .fold(new StringBuilder(), merger)
-                .toString();
+                .collect(new ListCollector<>());
     }
 
     private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
@@ -374,7 +396,15 @@ public class Main {
     }
 
     private static String compileValues(String params, Function<String, String> mapper) {
-        return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
+        return generateValues(parseValues(params, mapper));
+    }
+
+    private static String generateValues(List<String> elements) {
+        return generateAll(Main::mergeValues, elements);
+    }
+
+    private static List<String> parseValues(String params, Function<String, String> mapper) {
+        return parseAll(params, Main::foldValueChar, mapper);
     }
 
     private static String compileParameter(String input) {
@@ -406,10 +436,7 @@ public class Main {
             return split(() -> getStringStringTuple(beforeName), (beforeType, type) -> {
                 return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                     return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
-                        var typeParams = divideAll(typeParamsString, Main::foldValueChar)
-                                .iterate()
-                                .map(String::strip)
-                                .collect(new ListCollector<>());
+                        var typeParams = parseValues(typeParamsString, String::strip);
 
                         return assembleDefinition(Optional.of(beforeTypeParams), name, typeParams, type);
                     });
@@ -477,10 +504,29 @@ public class Main {
 
     private static Optional<String> template(String input) {
         return suffix(input.strip(), ">", withoutEnd -> {
-            return first(withoutEnd, "<", (base, arguments) -> {
-                return Optional.of(base + "<" + compileValues(arguments, Main::type) + ">");
+            return first(withoutEnd, "<", (base, argumentsString) -> {
+                var strippedBase = base.strip();
+                var arguments = parseValues(argumentsString, Main::type);
+
+                if (base.equals("BiFunction")) {
+                    return Optional.of(generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+                }
+
+                if (base.equals("Function")) {
+                    return Optional.of(generate(Lists.of(arguments.get(0)), arguments.get(1)));
+                }
+
+                return Optional.of(strippedBase + "<" + generateValues(arguments) + ">");
             });
         });
+    }
+
+    private static String generate(List<String> arguments, String returns) {
+        var joined = arguments.iterate()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return "(" + joined + ") => " + returns;
     }
 
     private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
