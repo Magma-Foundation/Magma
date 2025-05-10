@@ -1,62 +1,20 @@
 "use strict";
 /* public  */ class Main {
-} /* private interface Iterator<T> {
-        <R> R fold(R initial, BiFunction<R, T, R> folder);
+}
+/* <R> R fold(R initial, BiFunction<R, T, */ folder;
+;
+/* <R> Iterator<R> map(Function<T, */ mapper;
+; /*
+*/
+/* List<T> */ element;
+; /*
 
-        <R> Iterator<R> map(Function<T, R> mapper);
-    } */ /*
+Iterator<T> iterate(); */ /*
+*/
+/*
 
-private interface List<T> {
-    List<T> add(T element);
-
-    Iterator<T> iterate();
-} */ /*
-
-private interface Head<T> {
-    Optional<T> next();
-} */ /*
-
-private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-    @Override
-    public <R> R fold(R initial, BiFunction<R, T, R> folder) {
-        var current = initial;
-        while (true) {
-            R finalCurrent = current;
-            var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
-            if (optional.isPresent()) {
-                current = optional.get();
-            }
-            else {
-                return current;
-            }
-        }
-    }
-
-    @Override
-    public <R> Iterator<R> map(Function<T, R> mapper) {
-        return new HeadedIterator<>(() -> this.head.next().map(mapper));
-    }
-} */ /*
-
-private static class RangeHead implements Head<Integer> {
-    private final int length;
-    private int counter;
-
-    public RangeHead(int length) {
-        this.length = length;
-    }
-
-    @Override
-    public Optional<Integer> next() {
-        if (this.counter < this.length) {
-            var value = this.counter;
-            counter++;
-            return Optional.of(value);
-        }
-
-        return Optional.empty();
-    }
-} */
+private static  */ class RangeHead {
+}
 /*
 
 
@@ -131,20 +89,19 @@ return append; */ /*
 
         return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
     } */ /* private static Optional<String> compileClass(String stripped, int depth) {
-    return compileFirst(stripped, "class ", (left, right) -> {
+    return compileStructure(stripped, depth, "class ");
+} */ /* private static Optional<String> compileStructure(String stripped, int depth, String infix) {
+    return compileFirst(stripped, infix, (left, right) -> {
         return compileFirst(right, "{", (name, withEnd) -> {
             var strippedWithEnd = withEnd.strip();
             return compileSuffix(strippedWithEnd, "}", content1 -> {
                 var strippedName = name.strip();
-                if (!isSymbol(strippedName)) {
-                    return Optional.empty();
-                }
 
                 var beforeIndent = depth == 0 ? "" : "\n\t";
                 var afterIndent = depth == 0 ? "\n" : "";
 
                 var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                return Optional.of(beforeIndent + generatePlaceholder(left) + "class " + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                return Optional.of(beforeIndent + generatePlaceholder(left) + infix + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
             });
         });
     });
@@ -166,6 +123,7 @@ return append; */ /*
     return mapper.apply(slice);
 } */ /* private static String compileClassSegment(String input, int depth) {
     return compileClass(input, depth)
+            .or(() -> compileStructure(input, depth, "interface "))
             .or(() -> compileDefinitionStatement(input, depth))
             .orElseGet(() -> generatePlaceholder(input));
 } */ /* private static Optional<String> compileDefinitionStatement(String input, int depth) {

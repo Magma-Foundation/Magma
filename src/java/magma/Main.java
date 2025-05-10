@@ -205,20 +205,21 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String stripped, int depth) {
-        return compileFirst(stripped, "class ", (left, right) -> {
+        return compileStructure(stripped, depth, "class ");
+    }
+
+    private static Optional<String> compileStructure(String stripped, int depth, String infix) {
+        return compileFirst(stripped, infix, (left, right) -> {
             return compileFirst(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return compileSuffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
-                    if (!isSymbol(strippedName)) {
-                        return Optional.empty();
-                    }
 
                     var beforeIndent = depth == 0 ? "" : "\n\t";
                     var afterIndent = depth == 0 ? "\n" : "";
 
                     var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                    return Optional.of(beforeIndent + generatePlaceholder(left) + "class " + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                    return Optional.of(beforeIndent + generatePlaceholder(left) + infix + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
                 });
             });
         });
@@ -246,6 +247,7 @@ public class Main {
 
     private static String compileClassSegment(String input, int depth) {
         return compileClass(input, depth)
+                .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileDefinitionStatement(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
     }
