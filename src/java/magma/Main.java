@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -130,14 +132,15 @@ public class Main {
                 var strippedWithEnd = withEnd.strip();
                 return compileSuffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
-                    if (isSymbol(strippedName)) {
-                        var beforeIndent = depth == 0 ? "" : "\n\t";
-                        var afterIndent = depth == 0 ? "\n" : "";
-
-                        var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                        return Optional.of(beforeIndent + generatePlaceholder(left) + "class " + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                    if (!isSymbol(strippedName)) {
+                        return Optional.empty();
                     }
-                    return Optional.empty();
+
+                    var beforeIndent = depth == 0 ? "" : "\n\t";
+                    var afterIndent = depth == 0 ? "\n" : "";
+
+                    var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
+                    return Optional.of(beforeIndent + generatePlaceholder(left) + "class " + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
                 });
             });
         });
@@ -155,26 +158,35 @@ public class Main {
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
-        if (input.endsWith(suffix)) {
-            var content = input.substring(0, input.length() - suffix.length());
-            return mapper.apply(content);
+        if (!input.endsWith(suffix)) {
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        var slice = input.substring(0, input.length() - suffix.length());
+        return mapper.apply(slice);
     }
 
     private static String compileClassSegment(String input, int depth) {
-        return compileClass(input, depth).orElseGet(() -> generatePlaceholder(input));
+        return compileClass(input, depth)
+                .or(() -> compileDefinitionStatement(input, depth))
+                .orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileDefinitionStatement(String input, int depth) {
+        return compileSuffix(input.strip(), ";", withoutEnd -> {
+            return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(withoutEnd) + ";");
+        });
     }
 
     private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
         var classIndex = input.indexOf(infix);
-        if (classIndex >= 0) {
-            var left = input.substring(0, classIndex);
-            var right = input.substring(classIndex + infix.length());
-            return mapper.apply(left, right);
+        if (classIndex < 0) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        var left = input.substring(0, classIndex);
+        var right = input.substring(classIndex + infix.length());
+        return mapper.apply(left, right);
     }
 
     private static String getValue(String left, String right) {
