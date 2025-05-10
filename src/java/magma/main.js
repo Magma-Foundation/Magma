@@ -1,7 +1,7 @@
 "use strict";
 /* public  */ class Main {
 }
-/* private */ HeadedIterator(/*  */ head);
+/* private */ HeadedIterator(head);
 record; /* implements Iterator<T> {
     @Override
     public <R> R fold(R initial, BiFunction<R, T, R> folder) {
@@ -41,7 +41,7 @@ private static  */ class Lists {
 
 private static  */ class State {
 }
-/* private */ Joiner(/*  */ delimiter, String);
+/* private */ Joiner(delimiter, String);
 record; /* implements Collector<String, Optional<String>> {
     private Joiner() {
         this("");
@@ -57,7 +57,7 @@ record; /* implements Collector<String, Optional<String>> {
         return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
     }
 } */
-/* private */ Definition(/*  */ maybeBefore, /*  */ type, String, /*  */ name, String, /*  */ typeParams);
+/* private */ Definition(maybeBefore, type, String, name, String, typeParams);
 record; /* {
     private String generate() {
         return this.generateWithParams("");
@@ -69,7 +69,9 @@ record; /* {
                 .map(inner -> "<" + inner + ">")
                 .orElse("");
 
-        var before = this.maybeBefore.map(Main::generatePlaceholder)
+        var before = this.maybeBefore
+                .filter(value -> !value.isEmpty())
+                .map(Main::generatePlaceholder)
                 .map(inner -> inner + " ")
                 .orElse("");
 
@@ -80,12 +82,12 @@ record; /* {
 
 private static  */ class ListCollector {
 }
-(/*  */ current /* List<T> */, /*  */ element) => ; /* List<T> */ /* {
+(current /* List<T> */, element) => ; /* List<T> */ /* {
     return current.add(element);
 } */ /*
 */
-/* private record */ B > ( /*  */left);
-A, /*  */ right;
+/* private record */ B > (left);
+A, right;
 B;
 /* public static */ main();
 void /* {
@@ -105,15 +107,15 @@ void /* {
         throw new RuntimeException(e);
     }
 } */ 
-/* private static */ compile(/*  */ input, String);
+/* private static */ compile(input, String);
 String; /* {
     return compileStatements(input, Main::compileRootSegment);
 } */
-/* private static */ compileStatements(/*  */ input, String, /*  */ mapper);
+/* private static */ compileStatements(input, String, mapper);
 String; /* {
     return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
 } */
-/* private static */ compileAll(/*  */ input, String, /*  */ folder, /*  */ mapper, /*  */ merger);
+/* private static */ compileAll(input, String, folder, mapper, merger);
 String; /* {
     return divideAll(input, folder)
             .iterate()
@@ -121,13 +123,13 @@ String; /* {
             .fold(new StringBuilder(), merger)
             .toString();
 } */
-/* private static */ mergeStatements(/*  */ stringBuilder, StringBuilder, /*  */ str, String);
+/* private static */ mergeStatements(stringBuilder, StringBuilder, str, String);
 StringBuilder; /* {
     return stringBuilder.append(str);
 } */
-/* private static */ divideStatements(/*  */ input, String);
-/* private static */ divideAll(/*  */ input, String, /*  */ folder);
-/* private static */ foldStatementChar(/*  */ state, State, /*  */ c, char);
+/* private static */ divideStatements(input, String);
+/* private static */ divideAll(input, String, folder);
+/* private static */ foldStatementChar(state, State, c, char);
 State; /* {
     var append = state.append(c);
     if (c == ';' && append.isLevel()) {
@@ -144,7 +146,7 @@ if (c == '} */
         */ append.exit();
 return; /* ;
 } */
-/*  */ append: return; /*
+append: return; /*
  */
 /* private static String compileRootSegment(String input) {
         var stripped = input.strip();

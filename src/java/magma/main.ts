@@ -1,28 +1,28 @@
 /* public  */class Main {
 	/* private  */interface Collector<T, C> {
-		/*  */ createInitial() : C;
-		/*  */ fold(/*  */ current : C, /*  */ element : T) : C;/* 
+		createInitial() : C;
+		fold(current : C, element : T) : C;/* 
      */}
 	/* 
 
     private  */interface Iterator<T> {
-		/*  */ fold<R>(/*  */ initial : R, /*  */ folder : /* BiFunction<R, T, R> */) : R;
-		/*  */ map<R>(/*  */ mapper : /* Function<T, R> */) : /* Iterator<R> */;
-		/*  */ collect<R>(/*  */ collector : /* Collector<T, R> */) : R;/* 
+		fold<R>(initial : R, folder : /* BiFunction<R, T, R> */) : R;
+		map<R>(mapper : /* Function<T, R> */) : /* Iterator<R> */;
+		collect<R>(collector : /* Collector<T, R> */) : R;/* 
      */}
 	/* 
 
     private  */interface List<T> {
-		/*  */ add(/*  */ element : T) : /* List<T> */;
-		/*  */ iterate() : /* Iterator<T> */;
-		/*  */ removeLast() : /* Optional<Tuple<List<T>, T>> */;/* 
+		add(element : T) : /* List<T> */;
+		iterate() : /* Iterator<T> */;
+		removeLast() : /* Optional<Tuple<List<T>, T>> */;/* 
      */}
 	/* 
 
     private  */interface Head<T> {
-		/*  */ next() : /* Optional<T> */;/* 
+		next() : /* Optional<T> */;/* 
      */}
-	/* private */ HeadedIterator<T>(/*  */ head : /* Head<T> */) : record/* implements Iterator<T> {
+	/* private */ HeadedIterator<T>(head : /* Head<T> */) : record/* implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
@@ -53,7 +53,7 @@
     private static  */class RangeHead implements Head<Integer> {
 		/* private final */ length : int;
 		/* private */ counter : int;
-		/*  */ RangeHead(/*  */ length : int) : public/* {
+		RangeHead(length : int) : public/* {
             this.length = length;
         } */
 		/* @Override
@@ -71,7 +71,7 @@
 
 
     private static  */class Lists {
-		/* private */ JVMList<T>(/*  */ elements : /* java.util.List<T> */) : record/* implements List<T> {
+		/* private */ JVMList<T>(elements : /* java.util.List<T> */) : record/* implements List<T> {
 
 
             public JVMList() {
@@ -110,12 +110,12 @@
 		/* private */ segments : /* List<String> */;
 		/* private */ buffer : StringBuilder;
 		/* private */ depth : int;
-		/*  */ State(/*  */ segments : /* List<String> */, /*  */ buffer : StringBuilder, /*  */ depth : int) : public/* {
+		State(segments : /* List<String> */, buffer : StringBuilder, depth : int) : public/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
-		/*  */ State() : public/* {
+		State() : public/* {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
 		/* private */ advance() : State/* {
@@ -123,7 +123,7 @@
             this.buffer = new StringBuilder();
             return this;
         } */
-		/* private */ append(/*  */ c : char) : State/* {
+		/* private */ append(c : char) : State/* {
             this.buffer.append(c);
             return this;
         } */
@@ -142,7 +142,7 @@
             return this.depth == 1;
         } *//* 
      */}
-	/* private */ Joiner(/*  */ delimiter : String) : record/* implements Collector<String, Optional<String>> {
+	/* private */ Joiner(delimiter : String) : record/* implements Collector<String, Optional<String>> {
         private Joiner() {
             this("");
         }
@@ -157,7 +157,7 @@
             return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     } */
-	/* private */ Definition(/*  */ maybeBefore : /* Optional<String> */, /*  */ type : String, /*  */ name : String, /*  */ typeParams : /* List<String> */) : record/* {
+	/* private */ Definition(maybeBefore : /* Optional<String> */, type : String, name : String, typeParams : /* List<String> */) : record/* {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -168,7 +168,9 @@
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
 
-            var before = this.maybeBefore.map(Main::generatePlaceholder)
+            var before = this.maybeBefore
+                    .filter(value -> !value.isEmpty())
+                    .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("");
 
@@ -183,11 +185,11 @@
             return Lists.empty();
         } */
 		/* @Override
-        public */ fold(/*  */ current : /* List<T> */, /*  */ element : T) : /* List<T> *//* {
+        public */ fold(current : /* List<T> */, element : T) : /* List<T> *//* {
             return current.add(element);
         } *//* 
      */}
-	/* private record */ B>(/*  */ left : A, /*  */ right : B) : /* Tuple<A, *//* {
+	/* private record */ B>(left : A, right : B) : /* Tuple<A, *//* {
     } */
 	/* public static */ main() : void/* {
         try {
@@ -206,26 +208,26 @@
             throw new RuntimeException(e);
         }
     } */
-	/* private static */ compile(/*  */ input : String) : String/* {
+	/* private static */ compile(input : String) : String/* {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	/* private static */ compileStatements(/*  */ input : String, /*  */ mapper : /* Function<String, String> */) : String/* {
+	/* private static */ compileStatements(input : String, mapper : /* Function<String, String> */) : String/* {
         return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
     } */
-	/* private static */ compileAll(/*  */ input : String, /*  */ folder : /* BiFunction<State, Character, State> */, /*  */ mapper : /* Function<String, String> */, /*  */ merger : /* BiFunction<StringBuilder, String, StringBuilder> */) : String/* {
+	/* private static */ compileAll(input : String, folder : /* BiFunction<State, Character, State> */, mapper : /* Function<String, String> */, merger : /* BiFunction<StringBuilder, String, StringBuilder> */) : String/* {
         return divideAll(input, folder)
                 .iterate()
                 .map(mapper)
                 .fold(new StringBuilder(), merger)
                 .toString();
     } */
-	/* private static */ mergeStatements(/*  */ stringBuilder : StringBuilder, /*  */ str : String) : StringBuilder/* {
+	/* private static */ mergeStatements(stringBuilder : StringBuilder, str : String) : StringBuilder/* {
         return stringBuilder.append(str);
     } */
-	/* private static */ divideStatements(/*  */ input : String) : /* List<String> *//* {
+	/* private static */ divideStatements(input : String) : /* List<String> *//* {
         return divideAll(input, Main::foldStatementChar);
     } */
-	/* private static */ divideAll(/*  */ input : String, /*  */ folder : /* BiFunction<State, Character, State> */) : /* List<String> *//* {
+	/* private static */ divideAll(input : String, folder : /* BiFunction<State, Character, State> */) : /* List<String> *//* {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -234,7 +236,7 @@
 
         return current.advance().segments;
     } */
-	/* private static */ foldStatementChar(/*  */ state : State, /*  */ c : char) : State/* {
+	/* private static */ foldStatementChar(state : State, c : char) : State/* {
         var append = state.append(c);
         if (c == ';' && append.isLevel()) {
             return append.advance();
@@ -251,7 +253,7 @@
 	/* ') {
             */ append.exit() : return/* ;
         } */
-	/*  */ append : return;/* 
+	append : return;/* 
      */
 }
 /* private static String compileRootSegment(String input) {

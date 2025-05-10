@@ -194,7 +194,9 @@ public class Main {
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
 
-            var before = this.maybeBefore.map(Main::generatePlaceholder)
+            var before = this.maybeBefore
+                    .filter(value -> !value.isEmpty())
+                    .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("");
 
