@@ -242,6 +242,10 @@ public class Main {
     }
 
     private record Frame(List<String> typeParameters, List<Type> typeArguments, Optional<String> maybeStructName) {
+        public Frame() {
+            this(new ArrayList<>(), new ArrayList<>(), Optional.empty());
+        }
+
         public Optional<Type> resolveTypeParam(String name) {
             return this.typeParameters.indexOf(name, String::equals).flatMap(index -> {
                 if (index < this.typeArguments.size()) {
@@ -270,7 +274,7 @@ public class Main {
 
     private record Stack(List<Frame> frames) {
         public Stack() {
-            this(new ArrayList<>());
+            this(new ArrayList<Frame>().addLast(new Frame()));
         }
 
         public Stack defineTypeParameters(List<String> typeParameters) {
@@ -281,7 +285,7 @@ public class Main {
             return new Stack(this.frames.mapLast(mapper));
         }
 
-        public Stack defineStruct(String name) {
+        public Stack defineStructPrototype(String name) {
             return this.mapLastFrame(last -> last.defineStruct(name));
         }
 
@@ -318,7 +322,8 @@ public class Main {
             List<ObjectType> expansions,
             List<ObjectType> structures,
             List<String> methods,
-            Stack stack) {
+            Stack stack
+    ) {
         public CompileState() {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
         }
@@ -1008,7 +1013,7 @@ public class Main {
                 .orElse("");
 
         var defined = state.addMethod("// " + name + ": [" + joinedSymbols  + "]\n").mapStack(stack -> stack
-                .defineStruct(name)
+                .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
                 .defineTypeArguments(typeArguments)
         );
@@ -1086,7 +1091,7 @@ public class Main {
         }
         else if (oldContent.equals(";")) {
             newDefinition = definition.mapType(Type::strip).mapName(name -> {
-                return state.stack.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return joinCurrentName(state, name);
             });
 
             newContent = ";";
@@ -1094,7 +1099,7 @@ public class Main {
         else {
             newContent = ";" + generatePlaceholder(oldContent);
             newDefinition = definition.mapName(name -> {
-                return state.stack.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return joinCurrentName(state, name);
             });
         }
 
@@ -1106,6 +1111,13 @@ public class Main {
         var generatedHeader = newDefinition.generate() + "(" + parametersString + ")";
         var generated = generatedHeader + newContent + "\n";
         return Optional.of(new Tuple<>(state.addMethod(generated), ""));
+    }
+
+    private static String joinCurrentName(CompileState state, String name) {
+        return state.stack
+                .findThisName()
+                .map(currentStructName -> currentStructName + "_" + name)
+                .orElse(name);
     }
 
     private static Tuple<CompileState, String> compileOrPlaceholder(

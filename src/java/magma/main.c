@@ -1,44 +1,55 @@
-/* private */struct Type {/* Type strip(); *//*  */
+/* private */struct Type {/*  */
 };
 // Main: []
 // Type: []
-char* stringify(/*  */);
-char* generate(/*  */);
-int equalsTo(/* Type other */);
-int isParameterized(/*  */);
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
 /* private @ */struct Actual {/*  */
 };
 // Actual: [struct Type]
 /* private */struct Parameter {/*  */
 };
 // Parameter: [struct Type, struct Actual]
-char* generate(/*  */);
+char* Parameter_generate(/*  */);
 /* private static */struct StandardLibrary {/*  */
 };
 // StandardLibrary: [struct Type, struct Actual, struct Parameter]
 /* private static */struct Lists {/*  */
 };
 // Lists: [struct Type, struct Actual, struct Parameter, struct StandardLibrary]
-/* private */struct List_char_ref {/* T get(int index); *//* T last(); *//*  */
+/* private */struct Iterator_char_ref {/*  */
 };
 // Main: []
 // Type: []
-char* stringify(/*  */);
-char* generate(/*  */);
-int equalsTo(/* Type other */);
-int isParameterized(/*  */);
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
 // List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
-struct List_/* T */ addLast(/* T element */);
-struct Iterator_/* T */ iterate(/*  */);
-int contains(/* T element */, int (*)(/* T */, /* T */) equator);
-int equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
-int size(/*  */);
-struct Optional_Tuple_List_/* T */_/* T */ removeLast(/*  */);
-int isEmpty(/*  */);
-struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
-struct List_/* T */ addAllLast(struct List_/* T */ others);
-struct Iterator_/* T */ iterateReversed(/*  */);
-struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
+struct List_char_ref List_addLast(char* element);
+// Iterator: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
+struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
+struct Optional_char_ref Iterator_next(/*  */);
+int Iterator_anyMatch(struct Predicate_char_ref predicate);
+int Iterator_allMatch(struct Predicate_char_ref predicate);
+/* private */struct List_char_ref {/*  */
+};
+struct Iterator_char_ref Iterator_iterate(/*  */);
+int Iterator_contains(char* element, int (*)(char*, char*) equator);
+int Iterator_equalsTo(struct List_char_ref others, int (*)(char*, char*) equator);
+int Iterator_size(/*  */);
+struct Optional_Tuple_List_char_ref_char_ref Iterator_removeLast(/*  */);
+int Iterator_isEmpty(/*  */);
+char* Iterator_get(int index);
+struct Optional_int Iterator_indexOf(char* element, int (*)(char*, char*) equator);
+struct List_char_ref Iterator_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref Iterator_iterateReversed(/*  */);
+char* Iterator_last(/*  */);
+struct List_char_ref Iterator_mapLast(char* (*)(char*) mapper);
 /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
 	/* private */ char* buffer;
@@ -63,54 +74,48 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
             return this;
         } *//*  */
 };
-/* public */ int isLevel(/*  */);/*  {
+/* public */ int Iterator_isLevel(/*  */);/*  {
             return this.depth == 0;
         } */
-/* public */ int isShallow(/*  */);/*  {
+/* public */ int Iterator_isShallow(/*  */);/*  {
             return this.depth == 1;
         } */
-/* private */struct List_Type {/* T get(int index); *//* T last(); *//*  */
+/* private */struct List_Type {/*  */
 };
 // Main: []
 // Type: []
-char* stringify(/*  */);
-char* generate(/*  */);
-int equalsTo(/* Type other */);
-int isParameterized(/*  */);
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
 // List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
-struct List_/* T */ addLast(/* T element */);
-struct Iterator_/* T */ iterate(/*  */);
-int contains(/* T element */, int (*)(/* T */, /* T */) equator);
-int equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
-int size(/*  */);
-struct Optional_Tuple_List_/* T */_/* T */ removeLast(/*  */);
-int isEmpty(/*  */);
-struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
-struct List_/* T */ addAllLast(struct List_/* T */ others);
-struct Iterator_/* T */ iterateReversed(/*  */);
-struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
-// List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState]
-struct List_/* T */ addLast(/* T element */);
-struct Iterator_/* T */ iterate(/*  */);
-int contains(/* T element */, int (*)(/* T */, /* T */) equator);
-int equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
-int size(/*  */);
-struct Optional_Tuple_List_/* T */_/* T */ removeLast(/*  */);
-int isEmpty(/*  */);
-struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
-struct List_/* T */ addAllLast(struct List_/* T */ others);
-struct Iterator_/* T */ iterateReversed(/*  */);
-struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
-/* private */struct Frame {/* public Frame defineTypeParameters(List<String> typeParameters) {
-            return new Frame(this.typeParameters.addAllLast(typeParameters), this.typeArguments, this.maybeStructName);
-        } *//* public Frame defineStruct(String name) {
-            return new Frame(this.typeParameters, this.typeArguments, Optional.of(name));
-        } *//* public Frame defineTypeArguments(List<Type> typeArguments) {
-            return new Frame(this.typeParameters, this.typeArguments.addAllLast(typeArguments), this.maybeStructName);
+struct List_char_ref List_addLast(char* element);
+// Iterator: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
+struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
+struct Optional_char_ref Iterator_next(/*  */);
+int Iterator_anyMatch(struct Predicate_char_ref predicate);
+int Iterator_allMatch(struct Predicate_char_ref predicate);
+// List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState]
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*)(char*, char*) equator);
+int List_equalsTo(struct List_char_ref others, int (*)(char*, char*) equator);
+int List_size(/*  */);
+struct Optional_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Optional_int List_indexOf(char* element, int (*)(char*, char*) equator);
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*)(char*) mapper);
+/* private */struct Frame {/* public Frame() {
+            this(new ArrayList<>(), new ArrayList<>(), Optional.empty());
         } *//*  */
 };
-// Frame: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type]
-/* public */ struct Optional_Type resolveTypeParam(char* name);/*  {
+// Frame: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type]
+/* public */ struct Optional_Type Frame_resolveTypeParam(char* name);/*  {
             return this.typeParameters.indexOf(name, String::equals).flatMap(index -> {
                 if (index < this.typeArguments.size()) {
                     return Optional.of(this.typeArguments.get(index));
@@ -118,105 +123,104 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
                 return Optional.empty();
             });
         } */
-/* public */ int isTypeParamDefined(char* value);/*  {
+/* public */ int Frame_isTypeParamDefined(char* value);/*  {
             return this.typeParameters.contains(value, String::equals);
         } */
-/* private */struct List_Frame {/* T get(int index); *//* T last(); *//*  */
+/* public */ struct Frame Frame_defineTypeParameters(struct List_char_ref typeParameters);/*  {
+            return new Frame(this.typeParameters.addAllLast(typeParameters), this.typeArguments, this.maybeStructName);
+        } */
+/* public */ struct Frame Frame_defineStruct(char* name);/*  {
+            return new Frame(this.typeParameters, this.typeArguments, Optional.of(name));
+        } */
+/* public */ struct Frame Frame_defineTypeArguments(struct List_Type typeArguments);/*  {
+            return new Frame(this.typeParameters, this.typeArguments.addAllLast(typeArguments), this.maybeStructName);
+        } */
+/* private */struct List_Frame {/*  */
 };
 // Main: []
 // Type: []
-char* stringify(/*  */);
-char* generate(/*  */);
-int equalsTo(/* Type other */);
-int isParameterized(/*  */);
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
 // List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
-struct List_/* T */ addLast(/* T element */);
-struct Iterator_/* T */ iterate(/*  */);
-int contains(/* T element */, int (*)(/* T */, /* T */) equator);
-int equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
-int size(/*  */);
-struct Optional_Tuple_List_/* T */_/* T */ removeLast(/*  */);
-int isEmpty(/*  */);
-struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
-struct List_/* T */ addAllLast(struct List_/* T */ others);
-struct Iterator_/* T */ iterateReversed(/*  */);
-struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
-// List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState]
-struct List_/* T */ addLast(/* T element */);
-struct Iterator_/* T */ iterate(/*  */);
-int contains(/* T element */, int (*)(/* T */, /* T */) equator);
-int equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
-int size(/*  */);
-struct Optional_Tuple_List_/* T */_/* T */ removeLast(/*  */);
-int isEmpty(/*  */);
-struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
-struct List_/* T */ addAllLast(struct List_/* T */ others);
-struct Iterator_/* T */ iterateReversed(/*  */);
-struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
-// List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame]
-struct List_/* T */ addLast(/* T element */);
-struct Iterator_/* T */ iterate(/*  */);
-int contains(/* T element */, int (*)(/* T */, /* T */) equator);
-int equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
-int size(/*  */);
-struct Optional_Tuple_List_/* T */_/* T */ removeLast(/*  */);
-int isEmpty(/*  */);
-struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
-struct List_/* T */ addAllLast(struct List_/* T */ others);
-struct Iterator_/* T */ iterateReversed(/*  */);
-struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
+struct List_char_ref List_addLast(char* element);
+// Iterator: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
+struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
+struct Optional_char_ref Iterator_next(/*  */);
+int Iterator_anyMatch(struct Predicate_char_ref predicate);
+int Iterator_allMatch(struct Predicate_char_ref predicate);
+// List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState]
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*)(char*, char*) equator);
+int List_equalsTo(struct List_char_ref others, int (*)(char*, char*) equator);
+int List_size(/*  */);
+struct Optional_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Optional_int List_indexOf(char* element, int (*)(char*, char*) equator);
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*)(char*) mapper);
+// List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame]
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*)(char*, char*) equator);
+int List_equalsTo(struct List_char_ref others, int (*)(char*, char*) equator);
+int List_size(/*  */);
+struct Optional_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Optional_int List_indexOf(char* element, int (*)(char*, char*) equator);
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*)(char*) mapper);
 /* private */struct Stack {/* public Stack() {
-            this(new ArrayList<>());
-        } *//* public Stack defineTypeParameters(List<String> typeParameters) {
-            return this.mapLastFrame(last -> last.defineTypeParameters(typeParameters));
-        } *//* private Stack mapLastFrame(Function<Frame, Frame> mapper) {
-            return new Stack(this.frames.mapLast(mapper));
-        } *//* public Stack defineStruct(String name) {
-            return this.mapLastFrame(last -> last.defineStruct(name));
-        } *//* public Stack defineTypeArguments(List<Type> typeArguments) {
-            return this.mapLastFrame(last -> last.defineTypeArguments(typeArguments));
+            this(new ArrayList<Frame>().addLast(new Frame()));
         } *//*  */
 };
-// Stack: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame]
-/* public */ struct Optional_char_ref findThisName(/*  */);/*  {
+// Stack: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame]
+/* public */ struct Stack Stack_defineTypeParameters(struct List_char_ref typeParameters);/*  {
+            return this.mapLastFrame(last -> last.defineTypeParameters(typeParameters));
+        } */
+/* private */ struct Stack Stack_mapLastFrame(struct Frame (*)(struct Frame) mapper);/*  {
+            return new Stack(this.frames.mapLast(mapper));
+        } */
+/* public */ struct Stack Stack_defineStructPrototype(char* name);/*  {
+            return this.mapLastFrame(last -> last.defineStruct(name));
+        } */
+/* public */ struct Stack Stack_defineTypeArguments(struct List_Type typeArguments);/*  {
+            return this.mapLastFrame(last -> last.defineTypeArguments(typeArguments));
+        } */
+/* public */ struct Optional_char_ref Stack_findThisName(/*  */);/*  {
             return this.frames
                     .iterateReversed()
                     .map(Frame::maybeStructName)
                     .flatMap(Iterators::fromOptional)
                     .next();
         } */
-/* public */ struct Optional_Type resolveTypeArgument(char* value);/*  {
+/* public */ struct Optional_Type Stack_resolveTypeArgument(char* value);/*  {
             return this.frames
                     .iterateReversed()
                     .map(frame -> frame.resolveTypeParam(value))
                     .flatMap(Iterators::fromOptional)
                     .next();
         } */
-/* public */ int isTypeParamDefined(char* value);/*  {
+/* public */ int Stack_isTypeParamDefined(char* value);/*  {
             return this.frames
                     .iterateReversed()
                     .anyMatch(frame -> frame.isTypeParamDefined(value));
         } */
 /* private */struct CompileState {/* public CompileState() {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
-        } *//* private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
-        } *//* public CompileState addStruct(String struct) {
-            return new CompileState(this.generated.addLast(struct)
-                    .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
-        } *//* public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
-            this.expandables.put(name, expandable);
-            return this;
-        } *//* private CompileState mapStack(Function<Stack, Stack> mapper) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
-        } *//* public CompileState addMethod(String method) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
-        } *//* public CompileState addStructure(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
         } *//*  */
 };
-// CompileState: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack]
-/* private */ struct Optional_/* CompileState */ expand(/* ObjectType expansion */);/*  {
+// CompileState: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack]
+/* private */ struct Optional_CompileState CompileState_expand(/* ObjectType expansion */);/*  {
             if (expansion.isParameterized()) {
                 return Optional.empty();
             }
@@ -230,78 +234,98 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
                     .findExpandable(expansion.name)
                     .flatMap(expandable -> expandable.apply(expansion.arguments));
         } */
-/* public */ struct Optional_Func_List_Type_Optional_/* CompileState */ findExpandable(char* name);/*  {
+/* private */ struct CompileState CompileState_addExpansion(/* ObjectType type */);/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
+        } */
+/* public */ struct CompileState CompileState_addStruct(char* struct);/*  {
+            return new CompileState(this.generated.addLast(struct)
+                    .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
+        } */
+/* public */ struct CompileState CompileState_addExpandable(char* name, struct Optional_CompileState (*)(struct List_Type) expandable);/*  {
+            this.expandables.put(name, expandable);
+            return this;
+        } */
+/* public */ struct Optional_Func_List_Type_Optional_CompileState CompileState_findExpandable(char* name);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
             return Optional.empty();
         } */
-/* public */ int isTypeDefined(char* base);/*  {
+/* private */ struct CompileState CompileState_mapStack(struct Stack (*)(struct Stack) mapper);/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
+        } */
+/* public */ int CompileState_isTypeDefined(char* base);/*  {
             return this.isCurrentStructName(base) || this.isStructureDefined(base);
         } */
-/* private */ int isStructureDefined(char* base);/*  {
+/* private */ int CompileState_isStructureDefined(char* base);/*  {
             return this.structures.iterate().anyMatch(structure -> structure.name.equals(base));
         } */
-/* private */ int isCurrentStructName(char* base);/*  {
+/* private */ int CompileState_isCurrentStructName(char* base);/*  {
             return this.stack.findThisName().filter(inner -> inner.equals(base)).isPresent();
+        } */
+/* public */ struct CompileState CompileState_addMethod(char* method);/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
+        } */
+/* public */ struct CompileState CompileState_addStructure(/* ObjectType type */);/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
         } */
 /* private */struct Joiner {/* private Joiner() {
             this("");
         } *//*  */
 };
-// Joiner: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState]
-/* public */ struct Optional_char_ref createInitial(/*  */);/*  {
+// Joiner: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState]
+/* public */ struct Optional_char_ref Joiner_createInitial(/*  */);/*  {
             return Optional.empty();
         } */
-/* public */ struct Optional_char_ref fold(struct Optional_char_ref maybeCurrent, char* element);/*  {
+/* public */ struct Optional_char_ref Joiner_fold(struct Optional_char_ref maybeCurrent, char* element);/*  {
             return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
         } */
 /* private static */struct Iterators {/*  */
 };
-// Iterators: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner]
+// Iterators: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner]
 /* private */struct Ref {/*  */
 };
-// Ref: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators]
-/* public */ char* stringify(/*  */);/*  {
+// Ref: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators]
+/* public */ char* Ref_stringify(/*  */);/*  {
             return this.type.stringify() + "_ref";
         } */
-/* public */ char* generate(/*  */);/*  {
+/* public */ char* Ref_generate(/*  */);/*  {
             return this.type.generate() + "*";
         } */
-/* public */ int equalsTo(struct Type other);/*  {
+/* public */ int Ref_equalsTo(struct Type other);/*  {
             return other instanceof Ref ref && this.type.equalsTo(ref.type);
         } */
-/* public */ struct Type strip(/*  */);/*  {
+/* public */ struct Type Ref_strip(/*  */);/*  {
             return new Ref(this.type.strip());
         } */
-/* public */ int isParameterized(/*  */);/*  {
+/* public */ int Ref_isParameterized(/*  */);/*  {
             return this.type.isParameterized();
         } */
 /* private */struct ObjectType {/*  */
 };
-// ObjectType: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref]
-/* public */ char* stringify(/*  */);/*  {
+// ObjectType: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref]
+/* public */ char* ObjectType_stringify(/*  */);/*  {
             return this.name + this.joinArguments();
         } */
-/* public */ char* generate(/*  */);/*  {
+/* public */ char* ObjectType_generate(/*  */);/*  {
             return "struct " + this.stringify();
         } */
-/* public */ int equalsTo(struct Type other);/*  {
+/* public */ int ObjectType_equalsTo(struct Type other);/*  {
             return other instanceof ObjectType objectType
                     && this.name.equals(objectType.name)
                     && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
         } */
-/* public */ struct Type strip(/*  */);/*  {
+/* public */ struct Type ObjectType_strip(/*  */);/*  {
             var newArguments = this.arguments.iterate()
                     .map(Type::strip)
                     .collect(new ListCollector<>());
 
             return new ObjectType(this.name, newArguments);
         } */
-/* public */ int isParameterized(/*  */);/*  {
+/* public */ int ObjectType_isParameterized(/*  */);/*  {
             return this.arguments.iterate().anyMatch(Type::isParameterized);
         } */
-/* private */ char* joinArguments(/*  */);/*  {
+/* private */ char* ObjectType_joinArguments(/*  */);/*  {
             return this.arguments.iterate()
                     .map(Type::stringify)
                     .collect(new Joiner("_"))
@@ -310,57 +334,59 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
         } */
 /* private */struct Placeholder {/*  */
 };
-// Placeholder: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType]
-/* public */ char* stringify(/*  */);/*  {
+// Placeholder: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType]
+/* public */ char* Placeholder_stringify(/*  */);/*  {
             return generatePlaceholder(this.value);
         } */
-/* public */ char* generate(/*  */);/*  {
+/* public */ char* Placeholder_generate(/*  */);/*  {
             return generatePlaceholder(this.value);
         } */
-/* public */ int equalsTo(struct Type other);/*  {
+/* public */ int Placeholder_equalsTo(struct Type other);/*  {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         } */
-/* public */ struct Type strip(/*  */);/*  {
+/* public */ struct Type Placeholder_strip(/*  */);/*  {
             return this;
         } */
-/* public */ int isParameterized(/*  */);/*  {
+/* public */ int Placeholder_isParameterized(/*  */);/*  {
             return true;
         } */
-/* private */struct Definition {/* public Definition mapType(Function<Type, Type> mapper) {
-            return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
-        } *//* public Definition mapName(Function<String, String> mapper) {
-            return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
-        } *//*  */
+/* private */struct Definition {/*  */
 };
-// Definition: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder]
-/* public */ char* generate(/*  */);/*  {
+// Definition: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder]
+/* public */ char* Definition_generate(/*  */);/*  {
             return this.generateAfterAnnotations() + this.type().generate() + " " + this.name();
         } */
-/* private */ char* generateAfterAnnotations(/*  */);/*  {
+/* private */ char* Definition_generateAfterAnnotations(/*  */);/*  {
             return this.afterAnnotations.isEmpty() ? "" : (generatePlaceholder(this.afterAnnotations()) + " ");
+        } */
+/* public */ struct Definition Definition_mapType(struct Type (*)(struct Type) mapper);/*  {
+            return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
+        } */
+/* public */ struct Definition Definition_mapName(char* (*)(char*) mapper);/*  {
+            return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
         } */
 /* private */struct TypeParam {/*  */
 };
-// TypeParam: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition]
-/* public */ char* stringify(/*  */);/*  {
+// TypeParam: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition]
+/* public */ char* TypeParam_stringify(/*  */);/*  {
             return this.input;
         } */
-/* public */ char* generate(/*  */);/*  {
+/* public */ char* TypeParam_generate(/*  */);/*  {
             return "template " + this.input;
         } */
-/* public */ int equalsTo(struct Type other);/*  {
+/* public */ int TypeParam_equalsTo(struct Type other);/*  {
             return other instanceof TypeParam param && this.input.equals(param.input);
         } */
-/* public */ struct Type strip(/*  */);/*  {
+/* public */ struct Type TypeParam_strip(/*  */);/*  {
             return Primitive.Void;
         } */
-/* public */ int isParameterized(/*  */);/*  {
+/* public */ int TypeParam_isParameterized(/*  */);/*  {
             return true;
         } */
 /* private */struct Functional {/*  */
 };
-// Functional: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam]
-/* public */ char* stringify(/*  */);/*  {
+// Functional: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam]
+/* public */ char* Functional_stringify(/*  */);/*  {
             var joinedParameters = this.typeParameters.iterate()
                     .map(Type::stringify)
                     .collect(new Joiner("_"))
@@ -369,7 +395,7 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 
             return "Func_" + joinedParameters + this.returnType.stringify();
         } */
-/* public */ char* generate(/*  */);/*  {
+/* public */ char* Functional_generate(/*  */);/*  {
             var joined = this.typeParameters.iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
@@ -377,29 +403,40 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 
             return this.returnType.generate() + " (*)(" + joined + ")";
         } */
-/* public */ int equalsTo(struct Type other);/*  {
+/* public */ int Functional_equalsTo(struct Type other);/*  {
             return other instanceof Functional functional
                     && this.returnType.equalsTo(functional.returnType)
                     && this.typeParameters.equalsTo(functional.typeParameters, Type::equalsTo);
         } */
-/* public */ struct Type strip(/*  */);/*  {
+/* public */ struct Type Functional_strip(/*  */);/*  {
             return new Functional(this.returnType.strip(), this.typeParameters.iterate()
                     .map(Type::strip)
                     .collect(new ListCollector<>()));
         } */
-/* public */ int isParameterized(/*  */);/*  {
+/* public */ int Functional_isParameterized(/*  */);/*  {
             return this.returnType.isParameterized() || this.typeParameters.iterate().anyMatch(Type::isParameterized);
         } */
 /* private */struct Tuple_CompileState_char_ref {/*  */
 };
-// Joiner: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState]
-/* public */ struct Optional_char_ref createInitial(/*  */);/*  {
+// Joiner: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState]
+/* public */ struct Optional_char_ref Joiner_createInitial(/*  */);/*  {
             return Optional.empty();
         } */
-/* public */ struct Optional_char_ref fold(struct Optional_char_ref maybeCurrent, char* element);/*  {
+/* public */ struct Optional_char_ref Joiner_fold(struct Optional_char_ref maybeCurrent, char* element);/*  {
             return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
         } */
-// Tuple: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam, struct Functional]
+// Tuple: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam, struct Functional]
+/* private */struct Tuple_CompileState_List_char_ref {/*  */
+};
+// Joiner: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState]
+/* public */ struct Optional_char_ref Joiner_createInitial(/*  */);/*  {
+            return Optional.empty();
+        } */
+/* public */ struct Optional_char_ref Joiner_fold(struct Optional_char_ref maybeCurrent, char* element);/*  {
+            return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
+        } */
+// Tuple: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam, struct Functional]
+// Tuple: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam, struct Functional, struct Tuple_CompileState_char_ref]
 /* public */struct Main {/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* if (c == '{') {
@@ -409,20 +446,13 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
             return appended.exit();
         } *//* return appended; *//*  */
 };
-/* private static */ struct Tuple_CompileState_char_ref compileStatements(struct CompileState initial, char* input, struct Tuple_CompileState_char_ref (*)(struct CompileState, char*) mapper);/*  {
-        return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
-    } */
-/* private static */ struct Tuple_CompileState_char_ref compileAll(struct CompileState initial, char* input, struct DivideState (*)(struct DivideState, /* Character */) folder, struct Tuple_CompileState_char_ref (*)(struct CompileState, char*) mapper, char* (*)(char*, char*) merger);/*  {
-        var tuple = parseAll(initial, input, folder, mapper);
-        return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
-    } */
-/* private static */ char* generateAll(struct List_char_ref elements, char* (*)(char*, char*) merger);/*  {
+/* private static */ char* Tuple_generateAll(struct List_char_ref elements, char* (*)(char*, char*) merger);/*  {
         return elements.iterate().fold("", merger);
     } */
-/* private static */ char* merge(char* buffer, char* element);/*  {
+/* private static */ char* Tuple_merge(char* buffer, char* element);/*  {
         return buffer + element;
     } */
-/* private static */ struct List_char_ref divide(char* input, struct DivideState (*)(struct DivideState, /* Character */) folder);/*  {
+/* private static */ struct List_char_ref Tuple_divide(char* input, struct DivideState (*)(struct DivideState, /* Character */) folder);/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -431,7 +461,7 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 
         return current.advance().segments;
     } */
-/* private static */ struct DivideState foldStatementChar(struct DivideState state, /*  char c */);/*  {
+/* private static */ struct DivideState Tuple_foldStatementChar(struct DivideState state, /*  char c */);/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -555,7 +585,7 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
                 .orElse("");
 
         var defined = state.addMethod("// " + name + ": [" + joinedSymbols  + "]\n").mapStack(stack -> stack
-                .defineStruct(name)
+                .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
                 .defineTypeArguments(typeArguments)
         );
@@ -628,7 +658,7 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
         }
         else if (oldContent.equals(";")) {
             newDefinition = definition.mapType(Type::strip).mapName(name -> {
-                return state.stack.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return joinCurrentName(state, name);
             });
 
             newContent = ";";
@@ -636,7 +666,7 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
         else {
             newContent = ";" + generatePlaceholder(oldContent);
             newDefinition = definition.mapName(name -> {
-                return state.stack.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return joinCurrentName(state, name);
             });
         }
 
@@ -648,6 +678,12 @@ struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
         var generatedHeader = newDefinition.generate() + "(" + parametersString + ")";
         var generated = generatedHeader + newContent + "\n";
         return Optional.of(new Tuple<>(state.addMethod(generated), ""));
+    } */
+	/* private static String joinCurrentName(CompileState state, String name) {
+        return state.stack
+                .findThisName()
+                .map(currentStructName -> currentStructName + "_" + name)
+                .orElse(name);
     } */
 	/* private static Tuple<CompileState, String> compileOrPlaceholder(
             CompileState state,
