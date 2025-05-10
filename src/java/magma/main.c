@@ -69,7 +69,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -77,18 +77,18 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* private */struct Iterator_char_ref {/*  */
 };
-struct Option_char_ref Option_char_ref_char_ref_char_ref_next(/*  */);
-int Option_char_ref_char_ref_char_ref_anyMatch(int (*predicate)(char*));
-int Option_char_ref_char_ref_char_ref_allMatch(int (*predicate)(char*));
-struct Iterator_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
+struct Option_char_ref Iterator_char_ref_next(/*  */);
+int Iterator_char_ref_anyMatch(int (*predicate)(char*));
+int Iterator_char_ref_allMatch(int (*predicate)(char*));
+struct Iterator_char_ref Iterator_char_ref_filter(int (*predicate)(char*));
 /* private sealed */struct Option_Tuple_List_char_ref_char_ref {/*  */
 };
 /* Main: [
@@ -118,7 +118,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -126,12 +126,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -141,13 +141,13 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
-/* private sealed */struct Option_Tuple_char_ref_int {/*  */
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+/* private sealed */struct Option_int {/*  */
 };
 /* Main: [
 ] */
@@ -176,7 +176,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -184,12 +184,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -199,12 +199,12 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -215,37 +215,19 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  *
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
-/* private sealed */struct Option_int {/*  */
-};
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* private */struct List_char_ref {/*  */
 };
-struct Option_int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_iterateReversed(/*  */);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_last(/*  */);
-struct List_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_mapLast(char* (*mapper)(char*));
+struct Option_int List_char_ref_indexOf(char* element, int (*equator)(char*, char*));
+struct List_char_ref List_char_ref_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_char_ref_iterateReversed(/*  */);
+char* List_char_ref_last(/*  */);
+struct List_char_ref List_char_ref_mapLast(char* (*mapper)(char*));
 /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
 	/* private */ char* buffer;
@@ -255,139 +237,31 @@ struct List_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_
             this.depth = depth;
         } *//* public DivideState() {
             this(new ArrayList<String>(), "", 0);
-        } *//* private DivideState advance() {
+        } *//*  */
+};
+/* private */ struct DivideState DivideState_advance(/*  */);/*  {
             this.segments = this.segments.addLast(this.buffer);
             this.buffer = "";
             return this;
-        } *//* private DivideState append(char c) {
+        } */
+/* private */ struct DivideState DivideState_append(char c);/*  {
             this.buffer = this.buffer + c;
             return this;
-        } *//* public DivideState enter() {
-            this.depth++;
-            return this;
-        } *//* public DivideState exit() {
-            this.depth--;
-            return this;
-        } *//*  */
-};
-/* public */ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isLevel(/*  */);/*  {
+        } */
+/* public */ int DivideState_isLevel(/*  */);/*  {
             return this.depth == 0;
         } */
-/* public */ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isShallow(/*  */);/*  {
+/* public */ struct DivideState DivideState_enter(/*  */);/*  {
+            this.depth++;
+            return this;
+        } */
+/* public */ struct DivideState DivideState_exit(/*  */);/*  {
+            this.depth--;
+            return this;
+        } */
+/* public */ int DivideState_isShallow(/*  */);/*  {
             return this.depth == 1;
         } */
-/* private */struct List_Type {/*  */
-};
-/* Main: [
-] */
-/* Type: [
-] */
-char* Type_stringify(/*  */);
-char* Type_generate(/*  */);
-int Type_equalsTo(struct Type other);
-struct Type Type_strip(/*  */);
-int Type_isParameterized(/*  */);
-/* default */ char* Type_generateWithName(char* name);/*  {
-            return this.generate() + " " + name;
-        } */
-/* List: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists
-] */
-struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists
-] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
-/* List: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
-	struct Option_int, 
-	struct List_char_ref, 
-	struct DivideState
-] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_mapLast(char* (*mapper)(char*));
 /* private sealed */struct Option_Type {/*  */
 };
 /* Main: [
@@ -417,7 +291,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -425,12 +299,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -440,12 +314,12 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -456,23 +330,12 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  *
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -482,24 +345,25 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_mapLast(char* (*mapper)(char*));
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -509,48 +373,23 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
-	struct DivideState, 
-	struct List_Type
+	struct DivideState
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isEmpty(/*  */);
-/* private */struct Frame {/* public Frame() {
-            this(new ArrayList<>(), new ArrayList<>(), new None<String>());
-        } *//* public Frame defineTypeParameters(List<String> typeParameters) {
-            return new Frame(this.typeParameters.addAllLast(typeParameters), this.typeArguments, this.maybeStructName);
-        } *//* public Frame defineStruct(String name) {
-            return new Frame(this.typeParameters, this.typeArguments, new Some<String>(name));
-        } *//* public Frame defineTypeArguments(List<Type> typeArguments) {
-            return new Frame(this.typeParameters, this.typeArguments.addAllLast(typeArguments), this.maybeStructName);
-        } *//*  */
-	struct List_char_ref typeParameters;
-	struct List_Type typeArguments;
-	struct Option_char_ref maybeStructName;
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* private */struct Iterator_Type {/*  */
 };
-/* public */ struct Option_Type Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_resolveTypeParam(char* name);/*  {
-            return this.typeParameters.indexOf(name, String::equals).flatMap(index -> {
-                if (index < this.typeArguments.size()) {
-                    return new Some<>(this.typeArguments.get(index));
-                }
-                return new None<>();
-            });
-        } */
-/* public */ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isTypeParamDefined(char* value);/*  {
-            return this.typeParameters.contains(value, String::equals);
-        } */
-/* public */ struct Option_/* ObjectType */ Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_createObjectType(/*  */);/*  {
-            return this.maybeStructName.map(name -> {
-                return new ObjectType(name, this.typeArguments);
-            });
-        } */
-/* private */struct List_Frame {/*  */
+struct Option_Type Iterator_Type_next(/*  */);
+int Iterator_Type_anyMatch(int (*predicate)(struct Type));
+int Iterator_Type_allMatch(int (*predicate)(struct Type));
+struct Iterator_Type Iterator_Type_filter(int (*predicate)(struct Type));
+/* private sealed */struct Option_Tuple_List_Type_Type {/*  */
 };
 /* Main: [
 ] */
@@ -579,7 +418,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -587,12 +426,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -602,12 +441,12 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -618,23 +457,12 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  *
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -644,24 +472,25 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_mapLast(char* (*mapper)(char*));
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -671,18 +500,170 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type
+] */
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
+/* private */struct List_Type {/*  */
+};
+struct Option_Tuple_List_Type_Type List_Type_removeLast(/*  */);
+int List_Type_isEmpty(/*  */);
+struct Type List_Type_get(int index);
+struct Option_int List_Type_indexOf(struct Type element, int (*equator)(struct Type, struct Type));
+struct List_Type List_Type_addAllLast(struct List_Type others);
+struct Iterator_Type List_Type_iterateReversed(/*  */);
+struct Type List_Type_last(/*  */);
+struct List_Type List_Type_mapLast(struct Type (*mapper)(struct Type));
+/* private */struct Frame {/* public Frame() {
+            this(new ArrayList<>(), new ArrayList<>(), new None<String>());
+        } *//*  */
+	struct List_char_ref typeParameters;
+	struct List_Type typeArguments;
+	struct Option_char_ref maybeStructName;
+};
+/* Frame: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
 	struct List_Type
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isEmpty(/*  */);
+/* public */ struct Option_Type Frame_resolveTypeParam(char* name);/*  {
+            return this.typeParameters.indexOf(name, String::equals).flatMap(index -> {
+                if (index < this.typeArguments.size()) {
+                    return new Some<>(this.typeArguments.get(index));
+                }
+                return new None<>();
+            });
+        } */
+/* public */ int Frame_isTypeParamDefined(char* value);/*  {
+            return this.typeParameters.contains(value, String::equals);
+        } */
+/* public */ struct Frame Frame_defineTypeParameters(struct List_char_ref typeParameters);/*  {
+            return new Frame(this.typeParameters.addAllLast(typeParameters), this.typeArguments, this.maybeStructName);
+        } */
+/* public */ struct Frame Frame_defineStruct(char* name);/*  {
+            return new Frame(this.typeParameters, this.typeArguments, new Some<String>(name));
+        } */
+/* public */ struct Frame Frame_defineTypeArguments(struct List_Type typeArguments);/*  {
+            return new Frame(this.typeParameters, this.typeArguments.addAllLast(typeArguments), this.maybeStructName);
+        } */
+/* public */ struct Option_/* ObjectType */ Frame_createObjectType(/*  */);/*  {
+            return this.maybeStructName.map(name -> {
+                return new ObjectType(name, this.typeArguments);
+            });
+        } */
+/* private sealed */struct Option_Frame {/*  */
+};
+/* Main: [
+] */
+/* Type: [
+] */
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
+/* default */ char* Type_generateWithName(char* name);/*  {
+            return this.generate() + " " + name;
+        } */
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct List_char_ref List_char_ref_addLast(char* element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref
+] */
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref
+] */
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -692,27 +673,373 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type
+] */
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_mapLast(char* (*mapper)(char*));
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* private */struct Iterator_Frame {/*  */
+};
+struct Option_Frame Iterator_Frame_next(/*  */);
+int Iterator_Frame_anyMatch(int (*predicate)(struct Frame));
+int Iterator_Frame_allMatch(int (*predicate)(struct Frame));
+struct Iterator_Frame Iterator_Frame_filter(int (*predicate)(struct Frame));
+/* private sealed */struct Option_Tuple_List_Frame_Frame {/*  */
+};
+/* Main: [
+] */
+/* Type: [
+] */
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
+/* default */ char* Type_generateWithName(char* name);/*  {
+            return this.generate() + " " + name;
+        } */
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct List_char_ref List_char_ref_addLast(char* element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref
+] */
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref
+] */
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type
+] */
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame
+] */
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_or(struct Option_Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isPresent(/*  */);
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_filter(int (*predicate)(struct Tuple_List_Frame_Frame));
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElse(struct Tuple_List_Frame_Frame other);
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElseGet(struct Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isEmpty(/*  */);
+/* private */struct List_Frame {/*  */
+};
+struct Option_Tuple_List_Frame_Frame List_Frame_removeLast(/*  */);
+int List_Frame_isEmpty(/*  */);
+struct Frame List_Frame_get(int index);
+struct Option_int List_Frame_indexOf(struct Frame element, int (*equator)(struct Frame, struct Frame));
+struct List_Frame List_Frame_addAllLast(struct List_Frame others);
+struct Iterator_Frame List_Frame_iterateReversed(/*  */);
+struct Frame List_Frame_last(/*  */);
+struct List_Frame List_Frame_mapLast(struct Frame (*mapper)(struct Frame));
 /* private */struct Stack {/* public Stack() {
             this(new ArrayList<Frame>().addLast(new Frame()));
         } *//*  */
@@ -727,45 +1054,55 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame
 ] */
-/* public */ struct Stack Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_defineTypeParameters(struct List_char_ref typeParameters);/*  {
+/* public */ struct Stack Stack_defineTypeParameters(struct List_char_ref typeParameters);/*  {
             return this.mapLastFrame(last -> last.defineTypeParameters(typeParameters));
         } */
-/* private */ struct Stack Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_mapLastFrame(struct Frame (*mapper)(struct Frame));/*  {
+/* private */ struct Stack Stack_mapLastFrame(struct Frame (*mapper)(struct Frame));/*  {
             return new Stack(this.frames.mapLast(mapper));
         } */
-/* public */ struct Stack Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_defineStructPrototype(char* name);/*  {
+/* public */ struct Stack Stack_defineStructPrototype(char* name);/*  {
             return this.mapLastFrame(last -> last.defineStruct(name));
         } */
-/* public */ struct Stack Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_defineTypeArguments(struct List_Type typeArguments);/*  {
+/* public */ struct Stack Stack_defineTypeArguments(struct List_Type typeArguments);/*  {
             return this.mapLastFrame(last -> last.defineTypeArguments(typeArguments));
         } */
-/* public */ struct Option_/* ObjectType */ Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_findCurrentObjectType(/*  */);/*  {
+/* public */ struct Option_/* ObjectType */ Stack_findCurrentObjectType(/*  */);/*  {
             return this.frames
                     .iterateReversed()
                     .map(Frame::createObjectType)
                     .flatMap(Iterators::fromOptional)
                     .next();
         } */
-/* public */ struct Option_Type Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_resolveTypeArgument(char* value);/*  {
+/* public */ struct Option_Type Stack_resolveTypeArgument(char* value);/*  {
             return this.frames
                     .iterateReversed()
                     .map(frame -> frame.resolveTypeParam(value))
                     .flatMap(Iterators::fromOptional)
                     .next();
         } */
-/* public */ int Stack_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_isTypeParamDefined(char* value);/*  {
+/* public */ int Stack_isTypeParamDefined(char* value);/*  {
             return this.frames
                     .iterateReversed()
                     .anyMatch(frame -> frame.isTypeParamDefined(value));
+        } */
+/* public */ struct Stack Stack_enter(/*  */);/*  {
+            return new Stack(this.frames.addLast(new Frame()));
+        } */
+/* public */ struct Stack Stack_exit(/*  */);/*  {
+            return new Stack(this.frames.removeLast().map(Tuple::left).orElse(this.frames));
         } */
 /* private */struct ObjectType {/*  */
 	char* name;
@@ -780,45 +1117,49 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack
 ] */
-/* public */ char* ObjectType_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_stringify(/*  */);/*  {
+/* public */ char* ObjectType_stringify(/*  */);/*  {
             return this.name + this.joinArguments();
         } */
-/* public */ char* ObjectType_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_generate(/*  */);/*  {
+/* public */ char* ObjectType_generate(/*  */);/*  {
             return "struct " + this.stringify();
         } */
-/* public */ int ObjectType_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_equalsTo(struct Type other);/*  {
+/* public */ int ObjectType_equalsTo(struct Type other);/*  {
             return other instanceof ObjectType objectType
                     && this.name.equals(objectType.name)
                     && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
         } */
-/* public */ struct Type ObjectType_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_strip(/*  */);/*  {
+/* public */ struct Type ObjectType_strip(/*  */);/*  {
             var newArguments = this.arguments.iterate()
                     .map(Type::strip)
                     .collect(new ListCollector<>());
 
             return new ObjectType(this.name, newArguments);
         } */
-/* public */ int ObjectType_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_isParameterized(/*  */);/*  {
+/* public */ int ObjectType_isParameterized(/*  */);/*  {
             return this.arguments.iterate().anyMatch(Type::isParameterized);
         } */
-/* private */ char* ObjectType_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_joinArguments(/*  */);/*  {
+/* private */ char* ObjectType_joinArguments(/*  */);/*  {
             return this.arguments.iterate()
                     .map(Type::stringify)
                     .collect(new Joiner("_"))
                     .map(result -> "_" + result)
                     .orElse("");
         } */
-/* private */struct List_ObjectType {/*  */
+/* private sealed */struct Option_ObjectType {/*  */
 };
 /* Main: [
 ] */
@@ -847,7 +1188,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -855,12 +1196,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -870,12 +1211,12 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -886,23 +1227,12 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  *
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -912,24 +1242,25 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_mapLast(char* (*mapper)(char*));
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -939,18 +1270,37 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type
+	struct Option_Type, 
+	struct Iterator_Type
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isEmpty(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -960,27 +1310,85 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_mapLast(char* (*mapper)(char*));
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame
+] */
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_or(struct Option_Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isPresent(/*  */);
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_filter(int (*predicate)(struct Tuple_List_Frame_Frame));
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElse(struct Tuple_List_Frame_Frame other);
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElseGet(struct Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -990,30 +1398,435 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_mapLast(char* (*mapper)(char*));
+struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
+int Option_ObjectType_isPresent(/*  */);
+struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
+struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
+struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
+int Option_ObjectType_isEmpty(/*  */);
+/* private */struct Iterator_ObjectType {/*  */
+};
+struct Option_ObjectType Iterator_ObjectType_next(/*  */);
+int Iterator_ObjectType_anyMatch(int (*predicate)(struct ObjectType));
+int Iterator_ObjectType_allMatch(int (*predicate)(struct ObjectType));
+struct Iterator_ObjectType Iterator_ObjectType_filter(int (*predicate)(struct ObjectType));
+/* private sealed */struct Option_Tuple_List_ObjectType_ObjectType {/*  */
+};
+/* Main: [
+] */
+/* Type: [
+] */
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
+/* default */ char* Type_generateWithName(char* name);/*  {
+            return this.generate() + " " + name;
+        } */
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct List_char_ref List_char_ref_addLast(char* element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref
+] */
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref
+] */
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type
+] */
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame
+] */
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_or(struct Option_Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isPresent(/*  */);
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_filter(int (*predicate)(struct Tuple_List_Frame_Frame));
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElse(struct Tuple_List_Frame_Frame other);
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElseGet(struct Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
+int Option_ObjectType_isPresent(/*  */);
+struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
+struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
+struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
+int Option_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType
+] */
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_or(struct Option_Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isPresent(/*  */);
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple_List_ObjectType_ObjectType));
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElse(struct Tuple_List_ObjectType_ObjectType other);
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElseGet(struct Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isEmpty(/*  */);
+/* private */struct List_ObjectType {/*  */
+};
+struct Option_Tuple_List_ObjectType_ObjectType List_ObjectType_removeLast(/*  */);
+int List_ObjectType_isEmpty(/*  */);
+struct ObjectType List_ObjectType_get(int index);
+struct Option_int List_ObjectType_indexOf(struct ObjectType element, int (*equator)(struct ObjectType, struct ObjectType));
+struct List_ObjectType List_ObjectType_addAllLast(struct List_ObjectType others);
+struct Iterator_ObjectType List_ObjectType_iterateReversed(/*  */);
+struct ObjectType List_ObjectType_last(/*  */);
+struct List_ObjectType List_ObjectType_mapLast(struct ObjectType (*mapper)(struct ObjectType));
 /* private sealed */struct Option_CompileState {/*  */
 };
 /* Main: [
@@ -1043,7 +1856,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1051,12 +1864,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1066,12 +1879,12 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1082,23 +1895,12 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  *
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -1108,24 +1910,25 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_mapLast(char* (*mapper)(char*));
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1135,18 +1938,37 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type
+	struct Option_Type, 
+	struct Iterator_Type
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isEmpty(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -1156,27 +1978,85 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_mapLast(char* (*mapper)(char*));
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame
+] */
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_or(struct Option_Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isPresent(/*  */);
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_filter(int (*predicate)(struct Tuple_List_Frame_Frame));
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElse(struct Tuple_List_Frame_Frame other);
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElseGet(struct Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -1186,30 +2066,47 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_mapLast(char* (*mapper)(char*));
+struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1219,39 +2116,506 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
+int Option_ObjectType_isPresent(/*  */);
+struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
+struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
+struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
+int Option_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType
+] */
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_or(struct Option_Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isPresent(/*  */);
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple_List_ObjectType_ObjectType));
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElse(struct Tuple_List_ObjectType_ObjectType other);
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElseGet(struct Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isEmpty(/*  */);
+struct Option_CompileState Option_CompileState_or(struct Option_CompileState (*other)());
+int Option_CompileState_isPresent(/*  */);
+struct Option_CompileState Option_CompileState_filter(int (*predicate)(struct CompileState));
+struct CompileState Option_CompileState_orElse(struct CompileState other);
+struct CompileState Option_CompileState_orElseGet(struct CompileState (*other)());
+int Option_CompileState_isEmpty(/*  */);
+/* private sealed */struct Option_Func_List_Type_Option_CompileState {/*  */
+};
+/* Main: [
+] */
+/* Type: [
+] */
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
+/* default */ char* Type_generateWithName(char* name);/*  {
+            return this.generate() + " " + name;
+        } */
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct List_char_ref List_char_ref_addLast(char* element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref
+] */
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref
+] */
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type
+] */
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame
+] */
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_or(struct Option_Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isPresent(/*  */);
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_filter(int (*predicate)(struct Tuple_List_Frame_Frame));
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElse(struct Tuple_List_Frame_Frame other);
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElseGet(struct Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
+int Option_ObjectType_isPresent(/*  */);
+struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
+struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
+struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
+int Option_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType
+] */
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_or(struct Option_Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isPresent(/*  */);
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple_List_ObjectType_ObjectType));
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElse(struct Tuple_List_ObjectType_ObjectType other);
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElseGet(struct Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
+	struct List_ObjectType
+] */
+struct Option_CompileState Option_CompileState_or(struct Option_CompileState (*other)());
+int Option_CompileState_isPresent(/*  */);
+struct Option_CompileState Option_CompileState_filter(int (*predicate)(struct CompileState));
+struct CompileState Option_CompileState_orElse(struct CompileState other);
+struct CompileState Option_CompileState_orElseGet(struct CompileState (*other)());
+int Option_CompileState_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
+	struct List_ObjectType, 
+	struct Option_CompileState
+] */
+struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_or(struct Option_Func_List_Type_Option_CompileState (*other)());
+int Option_Func_List_Type_Option_CompileState_isPresent(/*  */);
+struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_filter(int (*predicate)(struct Option_CompileState (*)(struct List_Type)));
+struct Option_CompileState (*Option_Func_List_Type_Option_CompileState_orElse)(struct List_Type)(struct Option_CompileState (*other)(struct List_Type));
+struct Option_CompileState (*Option_Func_List_Type_Option_CompileState_orElseGet)(struct List_Type)(struct Option_CompileState (*)(struct List_Type) (*other)());
+int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
 /* private */struct CompileState {/* public CompileState() {
             this(new ArrayList<>(), new ListMap<>(String::equals), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
-        } *//* private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
-        } *//* public CompileState addStruct(String structName) {
-            return new CompileState(this.generated.addLast(structName)
-                    .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
-        } *//* public CompileState addExpandable(String name, Function<List<Type>, Option<CompileState>> expandable) {
-            return new CompileState(this.generated, this.expandables.put(name, expandable), this.expansions, this.structures, this.methods, this.stack);
-        } *//* private CompileState mapStack(Function<Stack, Stack> mapper) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
-        } *//* public CompileState addMethod(String method) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
-        } *//* public CompileState addStructure(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
         } *//*  */
 	struct List_char_ref generated;
 	struct Map_char_ref_Func_List_Type_Option_/* CompileState */ expandables;
@@ -1260,33 +2624,28 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct List_char_ref methods;
 	struct Stack stack;
 };
-/* private */ struct Option_CompileState Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_expand(struct ObjectType expansion);/*  {
-            if (expansion.isParameterized()) {
-                return new None<>();
-            }
-
-            if (this.expansions.contains(expansion, ObjectType::equalsTo)) {
-                return new None<>();
-            }
-
-            System.err.println(expansion.generate());
-            return this.addExpansion(expansion)
-                    .findExpandable(expansion.name)
-                    .flatMap(expandable -> expandable.apply(expansion.arguments));
-        } */
-/* public */ struct Option_Func_List_Type_Option_/* CompileState */ Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_findExpandable(char* name);/*  {
+/* public */ struct Option_Func_List_Type_Option_CompileState CompileState_findExpandable(char* name);/*  {
             return this.expandables.find(name);
         } */
-/* public */ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isTypeDefined(char* base);/*  {
+/* private */ struct CompileState CompileState_mapStack(struct Stack (*mapper)(struct Stack));/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
+        } */
+/* public */ int CompileState_isTypeDefined(char* base);/*  {
             return this.isCurrentStructName(base) || this.isStructureDefined(base);
         } */
-/* private */ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isStructureDefined(char* base);/*  {
+/* private */ int CompileState_isStructureDefined(char* base);/*  {
             return this.structures.iterate().anyMatch(structure -> structure.name.equals(base));
         } */
-/* private */ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isCurrentStructName(char* base);/*  {
+/* private */ int CompileState_isCurrentStructName(char* base);/*  {
             return this.stack.findCurrentObjectType()
                     .filter(inner -> inner.name.equals(base))
                     .isPresent();
+        } */
+/* public */ struct CompileState CompileState_addMethod(char* method);/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
+        } */
+/* public */ struct CompileState CompileState_addStructure(struct ObjectType type);/*  {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
         } */
 /* private */struct Joiner {/*  */
 	char* delimiter;
@@ -1300,24 +2659,32 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState
 ] */
-/* public */ struct Option_char_ref Joiner_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_createInitial(/*  */);/*  {
+/* public */ struct Option_char_ref Joiner_createInitial(/*  */);/*  {
             return new None<>();
         } */
-/* public */ struct Option_char_ref Joiner_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_fold(struct Option_char_ref maybeCurrent, char* element);/*  {
+/* public */ struct Option_char_ref Joiner_fold(struct Option_char_ref maybeCurrent, char* element);/*  {
             return new Some<>(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
         } */
 /* private static */struct Iterators {/*  */
@@ -1331,18 +2698,26 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner
 ] */
@@ -1358,35 +2733,43 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators
 ] */
-/* public */ char* Ref_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_stringify(/*  */);/*  {
+/* public */ char* Ref_stringify(/*  */);/*  {
             return this.type.stringify() + "_ref";
         } */
-/* public */ char* Ref_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_generate(/*  */);/*  {
+/* public */ char* Ref_generate(/*  */);/*  {
             return this.type.generate() + "*";
         } */
-/* public */ int Ref_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_equalsTo(struct Type other);/*  {
+/* public */ int Ref_equalsTo(struct Type other);/*  {
             return other instanceof Ref ref && this.type.equalsTo(ref.type);
         } */
-/* public */ struct Type Ref_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_strip(/*  */);/*  {
+/* public */ struct Type Ref_strip(/*  */);/*  {
             return new Ref(this.type.strip());
         } */
-/* public */ int Ref_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isParameterized(/*  */);/*  {
+/* public */ int Ref_isParameterized(/*  */);/*  {
             return this.type.isParameterized();
         } */
 /* private */struct Placeholder {/*  */
@@ -1401,39 +2784,47 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref
 ] */
-/* public */ char* Placeholder_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_stringify(/*  */);/*  {
+/* public */ char* Placeholder_stringify(/*  */);/*  {
             return generatePlaceholder(this.value);
         } */
-/* public */ char* Placeholder_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_generate(/*  */);/*  {
+/* public */ char* Placeholder_generate(/*  */);/*  {
             return generatePlaceholder(this.value);
         } */
-/* public */ struct Option_/* Definition */ Placeholder_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_toDefinition(/*  */);/*  {
+/* public */ struct Option_/* Definition */ Placeholder_toDefinition(/*  */);/*  {
             return new None<>();
         } */
-/* public */ int Placeholder_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_equalsTo(struct Type other);/*  {
+/* public */ int Placeholder_equalsTo(struct Type other);/*  {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         } */
-/* public */ struct Type Placeholder_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_strip(/*  */);/*  {
+/* public */ struct Type Placeholder_strip(/*  */);/*  {
             return this;
         } */
-/* public */ int Placeholder_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isParameterized(/*  */);/*  {
+/* public */ int Placeholder_isParameterized(/*  */);/*  {
             return true;
         } */
 /* private sealed */struct Option_Definition {/*  */
@@ -1465,7 +2856,7 @@ struct List_char_ref List_char_ref_addLast(char* element);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_ref other);
+struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1473,12 +2864,12 @@ struct Iterator_char_ref Iterator_char_ref_char_ref_concat(struct Iterator_char_
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
+struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
+int Option_char_ref_isPresent(/*  */);
+struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
+char* Option_char_ref_orElse(char* other);
+char* Option_char_ref_orElseGet(char* (*other)());
+int Option_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1488,12 +2879,12 @@ int Option_char_ref_char_ref_char_ref_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_or(struct Option_Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isPresent(/*  */);
+struct Option_Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple_List_char_ref_char_ref));
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElse(struct Tuple_List_char_ref_char_ref other);
+struct Tuple_List_char_ref_char_ref Option_Tuple_List_char_ref_char_ref_orElseGet(struct Tuple_List_char_ref_char_ref (*other)());
+int Option_Tuple_List_char_ref_char_ref_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1504,23 +2895,12 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_isEmpty(/*  *
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_or(struct Option_char_ref (*other)());
-/* Option: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref
-] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_isEmpty(/*  */);
+struct Option_int Option_int_or(struct Option_int (*other)());
+int Option_int_isPresent(/*  */);
+struct Option_int Option_int_filter(int (*predicate)(int));
+int Option_int_orElse(int other);
+int Option_int_orElseGet(int (*other)());
+int Option_int_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -1530,24 +2910,25 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_mapLast(char* (*mapper)(char*));
+struct List_Type List_Type_addLast(struct Type element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1557,18 +2938,37 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct Option_Type Option_Type_or(struct Option_Type (*other)());
+int Option_Type_isPresent(/*  */);
+struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
+struct Type Option_Type_orElse(struct Type other);
+struct Type Option_Type_orElseGet(struct Type (*other)());
+int Option_Type_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type
+	struct Option_Type, 
+	struct Iterator_Type
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_isEmpty(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_or(struct Option_Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isPresent(/*  */);
+struct Option_Tuple_List_Type_Type Option_Tuple_List_Type_Type_filter(int (*predicate)(struct Tuple_List_Type_Type));
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElse(struct Tuple_List_Type_Type other);
+struct Tuple_List_Type_Type Option_Tuple_List_Type_Type_orElseGet(struct Tuple_List_Type_Type (*other)());
+int Option_Tuple_List_Type_Type_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -1578,27 +2978,85 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_mapLast(char* (*mapper)(char*));
+struct List_Frame List_Frame_addLast(struct Frame element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame
+] */
+struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
+int Option_Frame_isPresent(/*  */);
+struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
+struct Frame Option_Frame_orElse(struct Frame other);
+struct Frame Option_Frame_orElseGet(struct Frame (*other)());
+int Option_Frame_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame
+] */
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_or(struct Option_Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isPresent(/*  */);
+struct Option_Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_filter(int (*predicate)(struct Tuple_List_Frame_Frame));
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElse(struct Tuple_List_Frame_Frame other);
+struct Tuple_List_Frame_Frame Option_Tuple_List_Frame_Frame_orElseGet(struct Tuple_List_Frame_Frame (*other)());
+int Option_Tuple_List_Frame_Frame_isEmpty(/*  */);
 /* List: [
 	struct Type, 
 	struct Actual, 
@@ -1608,30 +3066,47 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType
 ] */
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_addLast(char* element);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_iterate(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_contains(char* element, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_size(/*  */);
-struct Option_Tuple_List_char_ref_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_removeLast(/*  */);
-int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_isEmpty(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_get(int index);
-struct Option_int List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_indexOf(char* element, int (*equator)(char*, char*));
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_addAllLast(struct List_char_ref others);
-struct Iterator_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_iterateReversed(/*  */);
-char* List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_last(/*  */);
-struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_mapLast(char* (*mapper)(char*));
+struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1641,24 +3116,93 @@ struct List_char_ref List_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_re
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
+int Option_ObjectType_isPresent(/*  */);
+struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
+struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
+struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
+int Option_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType
+] */
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_or(struct Option_Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isPresent(/*  */);
+struct Option_Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple_List_ObjectType_ObjectType));
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElse(struct Tuple_List_ObjectType_ObjectType other);
+struct Tuple_List_ObjectType_ObjectType Option_Tuple_List_ObjectType_ObjectType_orElseGet(struct Tuple_List_ObjectType_ObjectType (*other)());
+int Option_Tuple_List_ObjectType_ObjectType_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_isEmpty(/*  */);
+struct Option_CompileState Option_CompileState_or(struct Option_CompileState (*other)());
+int Option_CompileState_isPresent(/*  */);
+struct Option_CompileState Option_CompileState_filter(int (*predicate)(struct CompileState));
+struct CompileState Option_CompileState_orElse(struct CompileState other);
+struct CompileState Option_CompileState_orElseGet(struct CompileState (*other)());
+int Option_CompileState_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1668,46 +3212,91 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
+	struct List_ObjectType, 
+	struct Option_CompileState
+] */
+struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_or(struct Option_Func_List_Type_Option_CompileState (*other)());
+int Option_Func_List_Type_Option_CompileState_isPresent(/*  */);
+struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_filter(int (*predicate)(struct Option_CompileState (*)(struct List_Type)));
+struct Option_CompileState (*Option_Func_List_Type_Option_CompileState_orElse)(struct List_Type)(struct Option_CompileState (*other)(struct List_Type));
+struct Option_CompileState (*Option_Func_List_Type_Option_CompileState_orElseGet)(struct List_Type)(struct Option_CompileState (*)(struct List_Type) (*other)());
+int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
+	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
 	struct Placeholder
 ] */
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_or(struct Option_char_ref (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_isPresent(/*  */);
-struct Option_char_ref Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_filter(int (*predicate)(char*));
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_orElse(char* other);
-char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_orElseGet(char* (*other)());
-int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_isEmpty(/*  */);
-/* private */struct Definition {/* public Definition mapType(Function<Type, Type> mapper) {
-            return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
-        } *//* public Definition mapName(Function<String, String> mapper) {
-            return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
-        } *//*  */
+struct Option_Definition Option_Definition_or(struct Option_Definition (*other)());
+int Option_Definition_isPresent(/*  */);
+struct Option_Definition Option_Definition_filter(int (*predicate)(struct Definition));
+struct Definition Option_Definition_orElse(struct Definition other);
+struct Definition Option_Definition_orElseGet(struct Definition (*other)());
+int Option_Definition_isEmpty(/*  */);
+/* private */struct Definition {/*  */
 	struct List_char_ref annotations;
 	char* afterAnnotations;
 	struct Type type;
 	char* name;
 	struct List_char_ref typeParams;
 };
-/* public */ struct Option_Definition Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_toDefinition(/*  */);/*  {
+/* public */ struct Option_Definition Definition_toDefinition(/*  */);/*  {
             return new Some<>(this);
         } */
-/* private */ char* Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_generateAfterAnnotations(/*  */);/*  {
+/* private */ char* Definition_generateAfterAnnotations(/*  */);/*  {
             return this.afterAnnotations.isEmpty() ? "" : (generatePlaceholder(this.afterAnnotations()) + " ");
+        } */
+/* public */ struct Definition Definition_mapType(struct Type (*mapper)(struct Type));/*  {
+            return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
+        } */
+/* public */ struct Definition Definition_mapName(char* (*mapper)(char*));/*  {
+            return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
         } */
 /* private */struct TypeParam {/*  */
 	char* input;
@@ -1721,18 +3310,26 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
@@ -1741,19 +3338,19 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_Definition, 
 	struct Definition
 ] */
-/* public */ char* TypeParam_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_stringify(/*  */);/*  {
+/* public */ char* TypeParam_stringify(/*  */);/*  {
             return this.input;
         } */
-/* public */ char* TypeParam_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_generate(/*  */);/*  {
+/* public */ char* TypeParam_generate(/*  */);/*  {
             return "template " + this.input;
         } */
-/* public */ int TypeParam_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_equalsTo(struct Type other);/*  {
+/* public */ int TypeParam_equalsTo(struct Type other);/*  {
             return other instanceof TypeParam param && this.input.equals(param.input);
         } */
-/* public */ struct Type TypeParam_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_strip(/*  */);/*  {
+/* public */ struct Type TypeParam_strip(/*  */);/*  {
             return Primitive.Void;
         } */
-/* public */ int TypeParam_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_isParameterized(/*  */);/*  {
+/* public */ int TypeParam_isParameterized(/*  */);/*  {
             return true;
         } */
 /* private */struct Functional {/*  */
@@ -1769,18 +3366,26 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
@@ -1790,7 +3395,7 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Definition, 
 	struct TypeParam
 ] */
-/* public */ char* Functional_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_stringify(/*  */);/*  {
+/* public */ char* Functional_stringify(/*  */);/*  {
             var joinedParameters = this.typeParameters.iterate()
                     .map(Type::stringify)
                     .collect(new Joiner("_"))
@@ -1799,23 +3404,23 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 
             return "Func_" + joinedParameters + this.returnType.stringify();
         } */
-/* public */ char* Functional_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_generate(/*  */);/*  {
+/* public */ char* Functional_generate(/*  */);/*  {
             return this.generateWithName("");
         } */
-/* public */ int Functional_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_equalsTo(struct Type other);/*  {
+/* public */ int Functional_equalsTo(struct Type other);/*  {
             return other instanceof Functional functional
                     && this.returnType.equalsTo(functional.returnType)
                     && this.typeParameters.equalsTo(functional.typeParameters, Type::equalsTo);
         } */
-/* public */ struct Type Functional_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_strip(/*  */);/*  {
+/* public */ struct Type Functional_strip(/*  */);/*  {
             return new Functional(this.returnType.strip(), this.typeParameters.iterate()
                     .map(Type::strip)
                     .collect(new ListCollector<>()));
         } */
-/* public */ int Functional_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_isParameterized(/*  */);/*  {
+/* public */ int Functional_isParameterized(/*  */);/*  {
             return this.returnType.isParameterized() || this.typeParameters.iterate().anyMatch(Type::isParameterized);
         } */
-/* public */ char* Functional_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_generateWithName(char* name);/*  {
+/* public */ char* Functional_generateWithName(char* name);/*  {
             var joined = this.typeParameters.iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
@@ -1836,24 +3441,32 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState
 ] */
-/* public */ struct Option_char_ref Joiner_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_createInitial(/*  */);/*  {
+/* public */ struct Option_char_ref Joiner_createInitial(/*  */);/*  {
             return new None<>();
         } */
-/* public */ struct Option_char_ref Joiner_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_fold(struct Option_char_ref maybeCurrent, char* element);/*  {
+/* public */ struct Option_char_ref Joiner_fold(struct Option_char_ref maybeCurrent, char* element);/*  {
             return new Some<>(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
         } */
 /* Tuple: [
@@ -1865,18 +3478,26 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Option_char_ref, 
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
 	struct Option_int, 
 	struct List_char_ref, 
 	struct DivideState, 
-	struct List_Type, 
 	struct Option_Type, 
+	struct Iterator_Type, 
+	struct Option_Tuple_List_Type_Type, 
+	struct List_Type, 
 	struct Frame, 
+	struct Option_Frame, 
+	struct Iterator_Frame, 
+	struct Option_Tuple_List_Frame_Frame, 
 	struct List_Frame, 
 	struct Stack, 
 	struct ObjectType, 
+	struct Option_ObjectType, 
+	struct Iterator_ObjectType, 
+	struct Option_Tuple_List_ObjectType_ObjectType, 
 	struct List_ObjectType, 
 	struct Option_CompileState, 
+	struct Option_Func_List_Type_Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
@@ -1886,100 +3507,6 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	struct Definition, 
 	struct TypeParam, 
 	struct Functional
-] */
-/* private */struct Tuple_CompileState_List_char_ref {/*  */
-};
-/* Joiner: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
-	struct Option_int, 
-	struct List_char_ref, 
-	struct DivideState, 
-	struct List_Type, 
-	struct Option_Type, 
-	struct Frame, 
-	struct List_Frame, 
-	struct Stack, 
-	struct ObjectType, 
-	struct List_ObjectType, 
-	struct Option_CompileState, 
-	struct CompileState
-] */
-/* public */ struct Option_char_ref Joiner_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_createInitial(/*  */);/*  {
-            return new None<>();
-        } */
-/* public */ struct Option_char_ref Joiner_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_fold(struct Option_char_ref maybeCurrent, char* element);/*  {
-            return new Some<>(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
-        } */
-/* Tuple: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
-	struct Option_int, 
-	struct List_char_ref, 
-	struct DivideState, 
-	struct List_Type, 
-	struct Option_Type, 
-	struct Frame, 
-	struct List_Frame, 
-	struct Stack, 
-	struct ObjectType, 
-	struct List_ObjectType, 
-	struct Option_CompileState, 
-	struct CompileState, 
-	struct Joiner, 
-	struct Iterators, 
-	struct Ref, 
-	struct Placeholder, 
-	struct Option_Definition, 
-	struct Definition, 
-	struct TypeParam, 
-	struct Functional
-] */
-/* Tuple: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
-	struct Option_int, 
-	struct List_char_ref, 
-	struct DivideState, 
-	struct List_Type, 
-	struct Option_Type, 
-	struct Frame, 
-	struct List_Frame, 
-	struct Stack, 
-	struct ObjectType, 
-	struct List_ObjectType, 
-	struct Option_CompileState, 
-	struct CompileState, 
-	struct Joiner, 
-	struct Iterators, 
-	struct Ref, 
-	struct Placeholder, 
-	struct Option_Definition, 
-	struct Definition, 
-	struct TypeParam, 
-	struct Functional, 
-	struct Tuple_CompileState_char_ref
 ] */
 /* public */struct Main {/* ' && appended.isShallow()) {
             return appended.advance().exit();
@@ -1990,13 +3517,20 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
             return appended.exit();
         } *//* return appended; *//*  */
 };
-/* private static */ char* Tuple_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_CompileState_char_ref_CompileState_List_char_ref_generateAll(struct List_char_ref elements, char* (*merger)(char*, char*));/*  {
+/* private static */ struct Tuple_CompileState_char_ref Main_compileStatements(struct CompileState initial, char* input, struct Tuple_CompileState_char_ref (*mapper)(struct CompileState, char*));/*  {
+        return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
+    } */
+/* private static */ struct Tuple_CompileState_char_ref Main_compileAll(struct CompileState initial, char* input, struct DivideState (*folder)(struct DivideState, char), struct Tuple_CompileState_char_ref (*mapper)(struct CompileState, char*), char* (*merger)(char*, char*));/*  {
+        var tuple = parseAll(initial, input, folder, mapper);
+        return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
+    } */
+/* private static */ char* Main_generateAll(struct List_char_ref elements, char* (*merger)(char*, char*));/*  {
         return elements.iterate().fold("", merger);
     } */
-/* private static */ char* Tuple_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_CompileState_char_ref_CompileState_List_char_ref_merge(char* buffer, char* element);/*  {
+/* private static */ char* Main_merge(char* buffer, char* element);/*  {
         return buffer + element;
     } */
-/* private static */ struct List_char_ref Tuple_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_CompileState_char_ref_CompileState_List_char_ref_divide(char* input, struct DivideState (*folder)(struct DivideState, char));/*  {
+/* private static */ struct List_char_ref Main_divide(char* input, struct DivideState (*folder)(struct DivideState, char));/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -2005,7 +3539,7 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 
         return current.advance().segments;
     } */
-/* private static */ struct DivideState Tuple_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_char_ref_int_Type_Type_Frame_ObjectType_CompileState_Definition_CompileState_char_ref_CompileState_List_char_ref_foldStatementChar(struct DivideState state, char c);/*  {
+/* private static */ struct DivideState Main_foldStatementChar(struct DivideState state, char c);/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -2130,6 +3664,7 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
                 .orElse("");
 
         var defined = state.addMethod(generatePlaceholder(name + ": [" + joinedSymbols + "\n]") + "\n").mapStack(stack -> stack
+                .enter()
                 .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
                 .defineTypeArguments(typeArguments)
@@ -2148,7 +3683,10 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
                 .addAllLast(definitions);
 
         var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + generateAll(statements, Main::merge) + "\n};\n";
-        var added = statementsTuple.left.addStruct(generated).addStructure(type);
+        var added = statementsTuple.left.mapStack(Stack::exit)
+                .addStruct(generated)
+                .addStructure(type);
+
         return new Some<>(added);
     } */
 	/* private static Tuple<CompileState, List<String>> parseStatements(String content, CompileState defined) {
@@ -2239,7 +3777,7 @@ int Option_char_ref_char_ref_char_ref_Tuple_List_char_ref_char_ref_int_Tuple_cha
 	/* private static String joinCurrentName(CompileState state, String name) {
         return state.stack
                 .findCurrentObjectType()
-                .map(currentStructName -> currentStructName.stringify() + "_" + name)
+                .map(currentStructType -> currentStructType.stringify() + "_" + name)
                 .orElse(name);
     } */
 	/* private static Tuple<CompileState, String> compileOrPlaceholder(

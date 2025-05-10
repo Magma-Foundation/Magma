@@ -485,6 +485,14 @@ public class Main {
                     .iterateReversed()
                     .anyMatch(frame -> frame.isTypeParamDefined(value));
         }
+
+        public Stack enter() {
+            return new Stack(this.frames.addLast(new Frame()));
+        }
+
+        public Stack exit() {
+            return new Stack(this.frames.removeLast().map(Tuple::left).orElse(this.frames));
+        }
     }
 
     private record ObjectType(String name, List<Type> arguments) implements Type {
@@ -1202,6 +1210,7 @@ public class Main {
                 .orElse("");
 
         var defined = state.addMethod(generatePlaceholder(name + ": [" + joinedSymbols + "\n]") + "\n").mapStack(stack -> stack
+                .enter()
                 .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
                 .defineTypeArguments(typeArguments)
@@ -1220,7 +1229,10 @@ public class Main {
                 .addAllLast(definitions);
 
         var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + generateAll(statements, Main::merge) + "\n};\n";
-        var added = statementsTuple.left.addStruct(generated).addStructure(type);
+        var added = statementsTuple.left.mapStack(Stack::exit)
+                .addStruct(generated)
+                .addStructure(type);
+
         return new Some<>(added);
     }
 
