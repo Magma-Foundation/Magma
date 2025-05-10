@@ -3,8 +3,6 @@ package magma;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -12,6 +10,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
+    private interface Map<K, V> {
+        Map<K, V> put(K key, V value);
+
+        Option<V> find(K key);
+    }
+
     private sealed interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
@@ -50,6 +54,8 @@ public class Main {
         <R> Iterator<Tuple<T, R>> zip(Iterator<R> other);
 
         boolean allMatch(Predicate<T> predicate);
+
+        Iterator<T> filter(Predicate<T> predicate);
     }
 
     private interface Collector<T, C> {
@@ -113,6 +119,41 @@ public class Main {
         String generate();
 
         Option<Definition> toDefinition();
+    }
+
+    private record ListMap<K, V>(BiFunction<K, K, Boolean> keyEquator, List<Tuple<K, V>> entries) implements Map<K, V> {
+        private ListMap(BiFunction<K, K, Boolean> keyEquator) {
+            this(keyEquator, new ArrayList<>());
+        }
+
+        @Override
+        public Map<K, V> put(K key, V value) {
+            return new ListMap<>(this.keyEquator, this.findEntriesWithoutKey(key).addLast(new Tuple<>(key, value)));
+        }
+
+        @Override
+        public Option<V> find(K key) {
+            return this.entries.iterate()
+                    .filter(entry -> this.keyEquator.apply(key, entry.left))
+                    .map(Tuple::right)
+                    .next();
+        }
+
+        private List<Tuple<K, V>> findEntriesWithoutKey(K key) {
+            if (!this.containsKey(key)) {
+                return this.entries;
+            }
+
+            return this.entries.iterate()
+                    .filter(entry -> !this.keyEquator.apply(entry.left, key))
+                    .collect(new ListCollector<>());
+        }
+
+        private boolean containsKey(K key) {
+            return this.entries.iterate()
+                    .map(Tuple::left)
+                    .anyMatch(thisKey -> this.keyEquator.apply(thisKey, key));
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -255,6 +296,13 @@ public class Main {
         @Override
         public boolean allMatch(Predicate<T> predicate) {
             return this.fold(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+        }
+
+        @Override
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> new HeadedIterator<>(predicate.test(element)
+                    ? new SingleHead<>(element)
+                    : new EmptyHead<>()));
         }
 
         @Override
@@ -483,7 +531,7 @@ public class Main {
             Stack stack
     ) {
         public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
+            this(new ArrayList<>(), new ListMap<>(String::equals), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
         }
 
         private Option<CompileState> expand(ObjectType expansion) {
@@ -511,15 +559,11 @@ public class Main {
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Option<CompileState>> expandable) {
-            this.expandables.put(name, expandable);
-            return this;
+            return new CompileState(this.generated, this.expandables.put(name, expandable), this.expansions, this.structures, this.methods, this.stack);
         }
 
         public Option<Function<List<Type>, Option<CompileState>>> findExpandable(String name) {
-            if (this.expandables.containsKey(name)) {
-                return new Some<>(this.expandables.get(name));
-            }
-            return new None<>();
+            return this.expandables.find(name);
         }
 
         private CompileState mapStack(Function<Stack, Stack> mapper) {

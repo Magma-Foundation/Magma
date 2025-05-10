@@ -88,6 +88,7 @@ int Option_isEmpty(/*  */);
 struct Option_char_ref Option_next(/*  */);
 int Option_anyMatch(int (*predicate)(char*));
 int Option_allMatch(int (*predicate)(char*));
+struct Iterator_char_ref Option_filter(int (*predicate)(char*));
 /* private sealed */struct Option_Tuple_List_char_ref_char_ref {/*  */
 };
 /* Main: [
@@ -1232,15 +1233,14 @@ char* Option_orElse(char* other);
 char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private */struct CompileState {/* public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
+            this(new ArrayList<>(), new ListMap<>(String::equals), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
         } *//* private CompileState addExpansion(ObjectType type) {
             return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
         } *//* public CompileState addStruct(String structName) {
             return new CompileState(this.generated.addLast(structName)
                     .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
         } *//* public CompileState addExpandable(String name, Function<List<Type>, Option<CompileState>> expandable) {
-            this.expandables.put(name, expandable);
-            return this;
+            return new CompileState(this.generated, this.expandables.put(name, expandable), this.expansions, this.structures, this.methods, this.stack);
         } *//* private CompileState mapStack(Function<Stack, Stack> mapper) {
             return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
         } *//* public CompileState addMethod(String method) {
@@ -1270,10 +1270,7 @@ int Option_isEmpty(/*  */);
                     .flatMap(expandable -> expandable.apply(expansion.arguments));
         } */
 /* public */ struct Option_Func_List_Type_Option_/* CompileState */ Option_findExpandable(char* name);/*  {
-            if (this.expandables.containsKey(name)) {
-                return new Some<>(this.expandables.get(name));
-            }
-            return new None<>();
+            return this.expandables.find(name);
         } */
 /* public */ int Option_isTypeDefined(char* base);/*  {
             return this.isCurrentStructName(base) || this.isStructureDefined(base);
