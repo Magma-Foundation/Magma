@@ -1,4 +1,5 @@
-/* public  */class Main {/* private static  */class State {/* private final List<String> segments; *//* 
+/* public  */class Main {
+	/* private static  */class State {/* private final List<String> segments; *//* 
         private StringBuilder buffer; *//* 
         private int depth; *//* 
 
@@ -100,40 +101,64 @@
             return append.exit();
         } *//* 
         return append; *//* 
-     */}/* private static String compileRootSegment(String input) {
+     */
+}
+/* private static String compileRootSegment(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
 
-        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
-    } *//* private static Optional<String> compileClass(String stripped) {
-        return compileFirst(stripped, " */class ", (left, right) -> {/* return compileFirst(right, "{", (name, withEnd) -> {
+        return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
+    } *//* private static Optional<String> compileClass(String stripped, int depth) {
+        return compileFirst(stripped, "class ", (left, right) -> {
+            return compileFirst(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
-                if (strippedWithEnd.endsWith("}")) {
-                    var content = strippedWithEnd.substring(0, strippedWithEnd.length() - "}".length());
-                    return Optional.of(generatePlaceholder(left) + " */class " + name.strip() + " {/* " + compileStatements(content, Main::compileClassSegment) + "}");
-                 */}/* 
+                return compileSuffix(strippedWithEnd, "}", content1 -> {
+                    var strippedName = name.strip();
+                    if (isSymbol(strippedName)) {
+                        var beforeIndent = depth == 0 ? "" : "\n\t";
+                        var afterIndent = depth == 0 ? "\n" : "";
 
-                return Optional.empty(); *//* 
+                        var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
+                        return Optional.of(beforeIndent + generatePlaceholder(left) + "class " + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                    }
+                    return Optional.empty();
+                });
             });
-         */}/* ); *//* }
+        });
+    } *//* private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
+    } *//* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (input.endsWith(suffix)) {
+            var content = input.substring(0, input.length() - suffix.length());
+            return mapper.apply(content);
+        }
 
-    private static String compileClassSegment(String input) {
-        return compileClass(input).orElseGet(() -> generatePlaceholder(input)); *//* }
-
-    private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var classIndex = input.indexOf(infix); *//* if (classIndex >= 0) {
+        return Optional.empty();
+    } *//* private static String compileClassSegment(String input, int depth) {
+        return compileClass(input, depth).orElseGet(() -> generatePlaceholder(input));
+    } *//* private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
             var left = input.substring(0, classIndex);
             var right = input.substring(classIndex + infix.length());
             return mapper.apply(left, right);
-        } *//* return Optional.empty(); *//* }
-
-    private static String getValue(String left, String right) {
-        return generatePlaceholder(left) + "class " + generatePlaceholder(right); *//* }
-
-    private static String generatePlaceholder(String input) {
+        }
+        return Optional.empty();
+    } *//* private static String getValue(String left, String right) {
+        return generatePlaceholder(left) + "class " + generatePlaceholder(right);
+    } *//* private static String generatePlaceholder(String input) {
         var replaced = input
                 .replace("content-start", "content-start")
-                .replace("content-end", "content-end"); *//* return "content-start " + replaced + " content-end"; *//* }
-} */
+                .replace("content-end", "content-end");
+
+        return "content-start " + replaced + " content-end";
+    } *//* } */
