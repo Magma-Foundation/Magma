@@ -1189,7 +1189,10 @@ public class Main {
             return Optional.of(new Tuple<>(state, new Ref(Primitive.Char)));
         }
 
-        if (stripped.equals("int") || stripped.equals("boolean")) {
+        if (stripped.equals("int")
+                || stripped.equals("Integer")
+                || stripped.equals("boolean")
+                || stripped.equals("Boolean")) {
             return Optional.of(new Tuple<>(state, Primitive.Int));
         }
 

@@ -23,12 +23,12 @@ struct Type Type_strip(/*  */);
 int Type_isParameterized(/*  */);
 struct List_/* T */ List_addLast(/* T element */);
 struct Iterator_/* T */ List_iterate(/*  */);
-int List_contains(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
-int List_equalsTo(struct List_/* T */ others, /* Boolean */ (*)(/* T */, /* T */) equator);
+int List_contains(/* T element */, int (*)(/* T */, /* T */) equator);
+int List_equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_/* T */_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
-struct Optional_/* Integer */ List_indexOf(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
+struct Optional_int List_indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
@@ -69,21 +69,21 @@ struct Type Type_strip(/*  */);
 int Type_isParameterized(/*  */);
 struct List_/* T */ List_addLast(/* T element */);
 struct Iterator_/* T */ List_iterate(/*  */);
-int List_contains(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
-int List_equalsTo(struct List_/* T */ others, /* Boolean */ (*)(/* T */, /* T */) equator);
+int List_contains(/* T element */, int (*)(/* T */, /* T */) equator);
+int List_equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_/* T */_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
-struct Optional_/* Integer */ List_indexOf(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
+struct Optional_int List_indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 struct List_/* T */ List_addLast(/* T element */);
 struct Iterator_/* T */ List_iterate(/*  */);
-int List_contains(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
-int List_equalsTo(struct List_/* T */ others, /* Boolean */ (*)(/* T */, /* T */) equator);
+int List_contains(/* T element */, int (*)(/* T */, /* T */) equator);
+int List_equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_/* T */_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
-struct Optional_/* Integer */ List_indexOf(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
+struct Optional_int List_indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 /* private */struct CompileState {/* public CompileState() {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty(), new ArrayList<>(), new ArrayList<>());
@@ -300,30 +300,30 @@ struct Type Type_strip(/*  */);
 int Type_isParameterized(/*  */);
 struct List_/* T */ List_addLast(/* T element */);
 struct Iterator_/* T */ List_iterate(/*  */);
-int List_contains(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
-int List_equalsTo(struct List_/* T */ others, /* Boolean */ (*)(/* T */, /* T */) equator);
+int List_contains(/* T element */, int (*)(/* T */, /* T */) equator);
+int List_equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_/* T */_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
-struct Optional_/* Integer */ List_indexOf(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
+struct Optional_int List_indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 struct List_/* T */ List_addLast(/* T element */);
 struct Iterator_/* T */ List_iterate(/*  */);
-int List_contains(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
-int List_equalsTo(struct List_/* T */ others, /* Boolean */ (*)(/* T */, /* T */) equator);
+int List_contains(/* T element */, int (*)(/* T */, /* T */) equator);
+int List_equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_/* T */_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
-struct Optional_/* Integer */ List_indexOf(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
+struct Optional_int List_indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 struct List_/* T */ List_addLast(/* T element */);
 struct Iterator_/* T */ List_iterate(/*  */);
-int List_contains(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
-int List_equalsTo(struct List_/* T */ others, /* Boolean */ (*)(/* T */, /* T */) equator);
+int List_contains(/* T element */, int (*)(/* T */, /* T */) equator);
+int List_equalsTo(struct List_/* T */ others, int (*)(/* T */, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_/* T */_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
-struct Optional_/* Integer */ List_indexOf(/* T element */, /* Boolean */ (*)(/* T */, /* T */) equator);
+struct Optional_int List_indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 /* private */struct Tuple_CompileState_List_CompileState {/*  */
 };
@@ -730,7 +730,10 @@ struct List_/* T */ List_addAllLast(struct List_/* T */ others);
             return Optional.of(new Tuple<>(state, new Ref(Primitive.Char)));
         }
 
-        if (stripped.equals("int") || stripped.equals("boolean")) {
+        if (stripped.equals("int")
+                || stripped.equals("Integer")
+                || stripped.equals("boolean")
+                || stripped.equals("Boolean")) {
             return Optional.of(new Tuple<>(state, Primitive.Int));
         }
 
