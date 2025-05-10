@@ -407,7 +407,8 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 
             return "Func_" + joinedParameters + this.returnType.stringify();
         } */
-/* public */ char* Functional_generate(/*  */);/*  {return generateWithName("");
+/* public */ char* Functional_generate(/*  */);/*  {
+            return this.generateWithName("");
         } */
 /* public */ int Functional_equalsTo(struct Type other);/*  {
             return other instanceof Functional functional
@@ -468,7 +469,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* private static */ char* Tuple_merge(char* buffer, char* element);/*  {
         return buffer + element;
     } */
-/* private static */ struct List_char_ref Tuple_divide(char* input, struct DivideState (*folder)(struct DivideState, /* Character */));/*  {
+/* private static */ struct List_char_ref Tuple_divide(char* input, struct DivideState (*folder)(struct DivideState, char));/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -477,7 +478,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 
         return current.advance().segments;
     } */
-/* private static */ struct DivideState Tuple_foldStatementChar(struct DivideState state, /*  char c */);/*  {
+/* private static */ struct DivideState Tuple_foldStatementChar(struct DivideState state, char c);/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -871,6 +872,10 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
                 || stripped.equals("boolean")
                 || stripped.equals("Boolean")) {
             return Optional.of(new Tuple<>(state, Primitive.Int));
+        }
+
+        if (stripped.equals("char") || stripped.equals("Character")) {
+            return Optional.of(new Tuple<>(state, Primitive.Char));
         }
 
         if (stripped.equals("void")) {

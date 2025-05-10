@@ -768,7 +768,8 @@ public class Main {
         }
 
         @Override
-        public String generate() {return generateWithName("");
+        public String generate() {
+            return this.generateWithName("");
         }
 
         @Override
@@ -1315,6 +1316,10 @@ public class Main {
                 || stripped.equals("boolean")
                 || stripped.equals("Boolean")) {
             return Optional.of(new Tuple<>(state, Primitive.Int));
+        }
+
+        if (stripped.equals("char") || stripped.equals("Character")) {
+            return Optional.of(new Tuple<>(state, Primitive.Char));
         }
 
         if (stripped.equals("void")) {
