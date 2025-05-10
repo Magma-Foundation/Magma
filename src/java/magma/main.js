@@ -1,86 +1,321 @@
 "use strict";
-/* private */ class Some {
-}
-(T);
-value;
-implements;
-Option < T > {};
-/* private static */ class None {
-}
-/* private */ class HeadedIterator {
-}
-(Head < T > head);
-implements;
-Iterator < T > {};
-/* private static */ class RangeHead {
-}
-/* private */ class JVMList {
-}
-(java.util.List < T > elements);
-implements;
-List < T > {};
 /* private static */ class Lists {
-}
-/* private */ class CompileState {
-}
-(List < String > structures);
-{
-    CompileState();
-    public; /* {
-            this(Lists.empty());
-        } */
-    /* public */ addStructure(structure, String);
-    CompileState; /* {
-            return new CompileState(this.structures.add(structure));
-        } */
 }
 /* private static */ class DivideState {
 }
-/* private */ class Joiner {
-}
-(String);
-delimiter;
-implements;
-Collector < String, Option < String >> {};
-/* private */ class Definition {
-}
-(Option < String > maybeBefore, String);
-type, String;
-name, List < String > typeParams;
-{
-    /* private */ generate();
-    String; /* {
-            return this.generateWithParams("");
-        } */
-    /* public */ generateWithParams(params, String);
-    String; /* {
-            var joined = this.typeParams.iterate()
-                    .collect(new Joiner())
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
-
-            var before = this.maybeBefore
-                    .filter(value -> !value.isEmpty())
-                    .map(Main::generatePlaceholder)
-                    .map(inner -> inner + " ")
-                    .orElse("");
-
-            return before + this.name + joined + params + " : " + this.type;
-        } */
-}
-/* private static */ class ListCollector {
-}
-/* private */ class Tuple {
-}
-(A);
-left, B;
-right;
-{
-}
 /* public */ class Main {
+    /* private interface Option */ map() {
+        (mapper);
+        (T) => R;
+        Option; /* ;
+
+        boolean isPresent();
+
+        T orElse(T other);
+
+        Option<T> filter(Predicate<T> predicate);
+
+        T orElseGet(Supplier<T> supplier);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+    } */
+        /* private interface Collector<T, C> {
+            */ createInitial();
+        C; /* ;
+
+        C fold(C current, T element);
+    } */
+        /* private interface Iterator */ fold < T > {}(initial, R, folder, (R, T) => R);
+        R; /* ;
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <R> R collect(Collector<T, R> collector);
+    } */
+        /* private interface List<T> {
+            */ add(element, T);
+        List; /* ;
+
+        Iterator<T> iterate();
+
+        Option<Tuple<List<T>, T>> removeLast();
+
+        T get(int index);
+    } */
+        /* private interface Head<T> {
+            */ next();
+        Option; /* ;
+    } */
+        /* private */ Some(value, T);
+        record; /* implements Option<T> {
+            @Override
+            public <R> Option<R> map(Function<T, R> mapper) {
+                return new Some<>(mapper.apply(this.value));
+            }
+    
+            @Override
+            public boolean isPresent() {
+                return true;
+            }
+    
+            @Override
+            public T orElse(T other) {
+                return this.value;
+            }
+    
+            @Override
+            public Option<T> filter(Predicate<T> predicate) {
+                return predicate.test(this.value) ? this : new None<>();
+            }
+    
+            @Override
+            public T orElseGet(Supplier<T> supplier) {
+                return this.value;
+            }
+    
+            @Override
+            public Option<T> or(Supplier<Option<T>> other) {
+                return this;
+            }
+    
+            @Override
+            public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+                return mapper.apply(this.value);
+            }
+        } */
+        /* private static class None */ map < T > implements;
+        Option < T > {};
+        public(mapper, (T) => R);
+        Option; /* {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get();
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+    } */
+        /* private */ HeadedIterator(head, (Head));
+        record; /* implements Iterator<T> {
+            @Override
+            public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+                var current = initial;
+                while (true) {
+                    R finalCurrent = current;
+                    var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                    if (optional.isPresent()) {
+                        current = optional.orElse(null);
+                    }
+                    else {
+                        return current;
+                    }
+                }
+            }
+    
+            @Override
+            public <R> Iterator<R> map(Function<T, R> mapper) {
+                return new HeadedIterator<>(() -> this.head.next().map(mapper));
+            }
+    
+            @Override
+            public <R> R collect(Collector<T, R> collector) {
+                return this.fold(collector.createInitial(), collector::fold);
+            }
+        } */
+        /* private static class RangeHead implements Head<Integer> {
+            private final int length;
+            private int counter;
+    
+            */ RangeHead(length, number);
+        public; /* {
+            this.length = length;
+        }
+
+        @Override
+        public Option<Integer> next() {
+            if (this.counter < this.length) {
+                var value = this.counter;
+                this.counter++;
+                return new Some<>(value);
+            }
+
+            return new None<>();
+        }
+    } */
+        /* private */ CompileState(structures, (List));
+        record; /* {
+            public CompileState() {
+                this(Lists.empty());
+            }
+    
+            public CompileState addStructure(String structure) {
+                return new CompileState(this.structures.add(structure));
+            }
+        } */
+        /* private */ Joiner(delimiter, String);
+        record; /* implements Collector<String, Option<String>> {
+            private Joiner() {
+                this("");
+            }
+    
+            @Override
+            public Option<String> createInitial() {
+                return new None<>();
+            }
+    
+            @Override
+            public Option<String> fold(Option<String> current, String element) {
+                return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
+            }
+        } */
+        /* private */ Definition(maybeBefore, (Option), type, String, name, String, typeParams, (List));
+        record; /* {
+            private String generate() {
+                return this.generateWithParams("");
+            }
+    
+            public String generateWithParams(String params) {
+                var joined = this.typeParams.iterate()
+                        .collect(new Joiner())
+                        .map(inner -> "<" + inner + ">")
+                        .orElse("");
+    
+                var before = this.maybeBefore
+                        .filter(value -> !value.isEmpty())
+                        .map(Main::generatePlaceholder)
+                        .map(inner -> inner + " ")
+                        .orElse("");
+    
+                return before + this.name + joined + params + " : " + this.type;
+            }
+        } */
+        /* private static class ListCollector<T> implements Collector<T, List<T>> {
+            @Override
+            public */ createInitial();
+        List; /* {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
+        }
+    } */
+        /* private record */ B > (left);
+        A, right;
+        B;
+        /* public static */ main();
+        void /* {
+            try {
+                var parent = Paths.get(".", "src", "java", "magma");
+                var source = parent.resolve("Main.java");
+                var target = parent.resolve("main.ts");
+    
+                var input = Files.readString(source);
+                Files.writeString(target, compile(input));
+    
+                new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
+                        .inheritIO()
+                        .start()
+                        .waitFor();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        } */ 
+        /* private static */ compile(input, String);
+        String; /* {
+            var tuple = compileStatements(new CompileState(), input, Main::compileRootSegment);
+            var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("");
+            return joined + tuple.right;
+        } */
+        /* private static */ compileStatements(state, CompileState, input, String, mapper, (CompileState, String) => [CompileState, String]);
+        [CompileState, String]; /* {
+            return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements);
+        } */
+        /* private static */ compileAll(state, CompileState, input, String, folder, (DivideState, Character) => DivideState, mapper, (CompileState, String) => [CompileState, String], merger, (StringBuilder, String) => StringBuilder);
+        [CompileState, String]; /* {
+            var parsed = parseAll(state, input, folder, mapper);
+            var generated = generateAll(merger, parsed.right);
+            return new Tuple<>(parsed.left, generated);
+        } */
+        /* private static */ generateAll(merger, (StringBuilder, String) => StringBuilder, elements, (List));
+        String; /* {
+            return elements
+                    .iterate()
+                    .fold(new StringBuilder(), merger)
+                    .toString();
+        } */
+        /* private static */ parseAll(state, CompileState, input, String, folder, (DivideState, Character) => DivideState, mapper, (CompileState, String) => [CompileState, String]);
+        [CompileState, (List)]; /* {
+            return divideAll(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
+                var state1 = tuple.left;
+                var right = tuple.right;
+    
+                var applied = mapper.apply(state1, element);
+                return new Tuple<>(applied.left, right.add(applied.right));
+            });
+        } */
+        /* private static */ mergeStatements(stringBuilder, StringBuilder, str, String);
+        StringBuilder; /* {
+            return stringBuilder.append(str);
+        } */
+        /* private static */ divideAll(input, String, folder, (DivideState, Character) => DivideState);
+        List; /* {
+            var current = new DivideState();
+            for (var i = 0; i < input.length(); i++) {
+                var c = input.charAt(i);
+                current = folder.apply(current, c);
+            }
+    
+            return current.advance().segments;
+        } */
+        /* private static */ foldStatementChar(state, DivideState, c, char);
+        DivideState; /* {
+            var append = state.append(c);
+            if (c == ';' && append.isLevel()) {
+                return append.advance();
+            }
+            if (c == '} */
+        /* ' */ append.isShallow();
+        /*
+            if  */ /* {
+            return append.enter();
+        }
+        if (c == '} */
+        /* ') {
+                */ append.exit();
+        return; /* ;
+    } */
+        append: return;
+    }
 }
-() => append;
-return;
 /* private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -97,6 +332,10 @@ return;
             var strippedWithEnd = withEnd.strip();
             return suffix(strippedWithEnd, "}", content1 -> {
                 var strippedName = name.strip();
+                if (!isSymbol(strippedName)) {
+                    return new None<>();
+                }
+
                 var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
                 var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + strippedName + " {" + statements.right + "\n}\n";
                 return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));

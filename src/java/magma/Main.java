@@ -443,6 +443,10 @@ public class Main {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
+                    if (!isSymbol(strippedName)) {
+                        return new None<>();
+                    }
+
                     var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
                     var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + strippedName + " {" + statements.right + "\n}\n";
                     return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
