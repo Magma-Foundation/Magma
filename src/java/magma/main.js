@@ -1,6 +1,45 @@
 "use strict";
 /* public */ class Main {
 }
+/* private */ Some(value, T);
+record; /* implements Option<T> {
+    @Override
+    public <R> Option<R> map(Function<T, R> mapper) {
+        return new Some<>(mapper.apply(this.value));
+    }
+
+    @Override
+    public boolean isPresent() {
+        return true;
+    }
+
+    @Override
+    public T orElse(T other) {
+        return this.value;
+    }
+
+    @Override
+    public Option<T> filter(Predicate<T> predicate) {
+        return predicate.test(this.value) ? this : new None<>();
+    }
+
+    @Override
+    public T orElseGet(Supplier<T> supplier) {
+        return this.value;
+    }
+
+    @Override
+    public Option<T> or(Supplier<Option<T>> other) {
+        return this;
+    }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(this.value);
+    }
+} */
+/* private static */ class None {
+}
 /* private */ HeadedIterator(head, (Head));
 record; /* implements Iterator<T> {
     @Override
@@ -10,7 +49,7 @@ record; /* implements Iterator<T> {
             R finalCurrent = current;
             var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
             if (optional.isPresent()) {
-                current = optional.get();
+                current = optional.orElse(null);
             }
             else {
                 return current;
@@ -35,22 +74,22 @@ record; /* implements Iterator<T> {
 /* private static */ class State {
 }
 /* private */ Joiner(delimiter, String);
-record; /* implements Collector<String, Optional<String>> {
+record; /* implements Collector<String, Option<String>> {
     private Joiner() {
         this("");
     }
 
     @Override
-    public Optional<String> createInitial() {
-        return Optional.empty();
+    public Option<String> createInitial() {
+        return new None<>();
     }
 
     @Override
-    public Optional<String> fold(Optional<String> current, String element) {
-        return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
+    public Option<String> fold(Option<String> current, String element) {
+        return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
     }
 } */
-/* private */ Definition(maybeBefore, (Optional), type, String, name, String, typeParams, (List));
+/* private */ Definition(maybeBefore, (Option), type, String, name, String, typeParams, (List));
 record; /* {
     private String generate() {
         return this.generateWithParams("");
@@ -124,10 +163,6 @@ List; /* {
 StringBuilder; /* {
     return stringBuilder.append(str);
 } */
-/* private static */ divideStatements(input, String);
-List; /* {
-    return divideAll(input, Main::foldStatementChar);
-} */
 /* private static */ divideAll(input, String, folder, (State, Character) => State);
 List; /* {
     var current = new State();
@@ -163,9 +198,9 @@ append: return;
         }
 
         return compileClass(stripped, 0).orElseGet(() -> generatePlaceholder(stripped));
-    } */ /* private static Optional<String> compileClass(String stripped, int depth) {
+    } */ /* private static Option<String> compileClass(String stripped, int depth) {
     return compileStructure(stripped, depth, "class ");
-} */ /* private static Optional<String> compileStructure(String stripped, int depth, String infix) {
+} */ /* private static Option<String> compileStructure(String stripped, int depth, String infix) {
     return first(stripped, infix, (beforeInfix, right) -> {
         return first(right, "{", (name, withEnd) -> {
             var strippedWithEnd = withEnd.strip();
@@ -177,7 +212,7 @@ append: return;
                 var afterBlock = depth == 0 ? "\n" : "";
 
                 var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                return Optional.of(beforeIndent + generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements + indent + "}" + afterBlock);
+                return new Some<>(beforeIndent + generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements + indent + "}" + afterBlock);
             });
         });
     });
@@ -190,9 +225,9 @@ append: return;
         return false;
     }
     return true;
-} */ /* private static <T> Optional<T> suffix(String input, String suffix, Function<String, Optional<T>> mapper) {
+} */ /* private static <T> Option<T> suffix(String input, String suffix, Function<String, Option<T>> mapper) {
     if (!input.endsWith(suffix)) {
-        return Optional.empty();
+        return new None<>();
     }
 
     var slice = input.substring(0, input.length() - suffix.length());
@@ -204,18 +239,18 @@ append: return;
             .or(() -> compileMethod(input, depth))
             .or(() -> compileDefinitionStatement(input, depth))
             .orElseGet(() -> generatePlaceholder(input));
-} */ /* private static Optional<String> compileWhitespace(String input) {
+} */ /* private static Option<String> compileWhitespace(String input) {
     if (input.isBlank()) {
-        return Optional.of("");
+        return new Some<>("");
     }
-    return Optional.empty();
-} */ /* private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
+    return new None<>();
+} */ /* private static Option<String> compileMethod(String input, int depth) {
     return first(input, "(", (definition, withParams) -> {
         return first(withParams, ")", (params, rawContent) -> {
             var content = rawContent.strip();
             var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
-            return Optional.of(createIndent(depth) + parseDefinition(definition)
+            return new Some<>(createIndent(depth) + parseDefinition(definition)
                     .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileParameter) + ")"))
                     .orElseGet(() -> generatePlaceholder(definition)) + newContent);
         });
@@ -238,27 +273,27 @@ append: return;
     return cache.append(", ").append(element);
 } */ /* private static String createIndent(int depth) {
     return "\n" + "\t".repeat(depth);
-} */ /* private static Optional<String> compileDefinitionStatement(String input, int depth) {
+} */ /* private static Option<String> compileDefinitionStatement(String input, int depth) {
     return suffix(input.strip(), ";", withoutEnd -> {
         return parseDefinition(withoutEnd).map(result -> createIndent(depth) + result.generate() + ";");
     });
-} */ /* private static Optional<Definition> parseDefinition(String input) {
+} */ /* private static Option<Definition> parseDefinition(String input) {
     return last(input.strip(), " ", (beforeName, name) -> {
         return split(() -> getStringStringTuple(beforeName), (beforeType, type) -> {
             return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                 return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                     var typeParams = parseValues(typeParamsString, String::strip);
 
-                    return assembleDefinition(Optional.of(beforeTypeParams), name, typeParams, type);
+                    return assembleDefinition(new Some<String>(beforeTypeParams), name, typeParams, type);
                 });
             }).or(() -> {
-                return assembleDefinition(Optional.of(beforeType), name, Lists.empty(), type);
+                return assembleDefinition(new Some<String>(beforeType), name, Lists.empty(), type);
             });
         }).or(() -> {
-            return assembleDefinition(Optional.empty(), name, Lists.empty(), beforeName);
+            return assembleDefinition(new None<String>(), name, Lists.empty(), beforeName);
         });
     });
-} */ /* private static Optional<Tuple<String, String>> getStringStringTuple(String beforeName) {
+} */ /* private static Option<Tuple<String, String>> getStringStringTuple(String beforeName) {
     var divisions = divideAll(beforeName, Main::foldTypeSeparator);
     return divisions.removeLast().map(removed -> {
         var left = removed.left.iterate().collect(new Joiner(" ")).orElse("");
@@ -279,8 +314,8 @@ append: return;
         return appended.exit();
     }
     return appended;
-} */ /* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
-    return Optional.of(new Definition(beforeTypeParams, type(type), name.strip(), typeParams));
+} */ /* private static Option<Definition> assembleDefinition(Option<String> beforeTypeParams, String name, List<String> typeParams, String type) {
+    return new Some<>(new Definition(beforeTypeParams, type(type), name.strip(), typeParams));
 } */ /* private static State foldValueChar(State state, char c) {
     if (c == ',' && state.isLevel()) {
         return state.advance();
@@ -305,21 +340,21 @@ append: return;
     }
 
     return template(input).orElseGet(() -> generatePlaceholder(stripped));
-} */ /* private static Optional<String> template(String input) {
+} */ /* private static Option<String> template(String input) {
     return suffix(input.strip(), ">", withoutEnd -> {
         return first(withoutEnd, "<", (base, argumentsString) -> {
             var strippedBase = base.strip();
             var arguments = parseValues(argumentsString, Main::type);
 
             if (base.equals("BiFunction")) {
-                return Optional.of(generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+                return new Some<>(generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
             }
 
             if (base.equals("Function")) {
-                return Optional.of(generate(Lists.of(arguments.get(0)), arguments.get(1)));
+                return new Some<>(generate(Lists.of(arguments.get(0)), arguments.get(1)));
             }
 
-            return Optional.of(strippedBase + "<" + generateValues(arguments) + ">");
+            return new Some<>(strippedBase + "<" + generateValues(arguments) + ">");
         });
     });
 } */ /* private static String generate(List<String> arguments, String returns) {
@@ -328,29 +363,29 @@ append: return;
             .orElse("");
 
     return "(" + joined + ") => " + returns;
-} */ /* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+} */ /* private static <T> Option<T> last(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
     return infix(input, infix, Main::findLast, mapper);
-} */ /* private static Optional<Integer> findLast(String input, String infix) {
+} */ /* private static Option<Integer> findLast(String input, String infix) {
     var index = input.lastIndexOf(infix);
-    return index == -1 ? Optional.empty() : Optional.of(index);
-} */ /* private static <T> Optional<T> first(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+    return index == -1 ? new None<Integer>() : new Some<>(index);
+} */ /* private static <T> Option<T> first(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
     return infix(input, infix, Main::findFirst, mapper);
-} */ /* private static <T> Optional<T> infix(
+} */ /* private static <T> Option<T> infix(
         String input,
         String infix,
-        BiFunction<String, String, Optional<Integer>> locator,
-        BiFunction<String, String, Optional<T>> mapper
+        BiFunction<String, String, Option<Integer>> locator,
+        BiFunction<String, String, Option<T>> mapper
 ) {
     return split(() -> locator.apply(input, infix).map(index -> {
         var left = input.substring(0, index);
         var right = input.substring(index + infix.length());
         return new Tuple<>(left, right);
     }), mapper);
-} */ /* private static <T> Optional<T> split(Supplier<Optional<Tuple<String, String>>> splitter, BiFunction<String, String, Optional<T>> mapper) {
+} */ /* private static <T> Option<T> split(Supplier<Option<Tuple<String, String>>> splitter, BiFunction<String, String, Option<T>> mapper) {
     return splitter.get().flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
-} */ /* private static Optional<Integer> findFirst(String input, String infix) {
+} */ /* private static Option<Integer> findFirst(String input, String infix) {
     var index = input.indexOf(infix);
-    return index == -1 ? Optional.empty() : Optional.of(index);
+    return index == -1 ? new None<Integer>() : new Some<>(index);
 } */ /* private static String generatePlaceholder(String input) {
     var replaced = input
             .replace("content-start", "content-start")
