@@ -19,7 +19,7 @@
 /* private */interface List<T> {
 	add(element : T) : List<T>;
 	iterate() : Iterator<T>;
-	removeLast() : Option<Tuple<List<T>, T>>;
+	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : T;
 }
 /* private */interface Head<T> {
@@ -140,7 +140,7 @@
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             } */
 	/* @Override
-            public */ removeLast() : Option<Tuple<List<T>, T>>/* {
+            public */ removeLast() : Option<[List<T>, T]>/* {
                 if (this.elements.isEmpty()) {
                     return new None<>();
                 }
@@ -273,10 +273,10 @@
         var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("");
         return joined + tuple.right;
     } */
-	/* private static */ compileStatements(state : CompileState, input : String, mapper : (CompileState, String) => Tuple<CompileState, String>) : Tuple<CompileState, String>/* {
+	/* private static */ compileStatements(state : CompileState, input : String, mapper : (CompileState, String) => [CompileState, String]) : [CompileState, String]/* {
         return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements);
     } */
-	/* private static */ compileAll(state : CompileState, input : String, folder : (DivideState, Character) => DivideState, mapper : (CompileState, String) => Tuple<CompileState, String>, merger : (StringBuilder, String) => StringBuilder) : Tuple<CompileState, String>/* {
+	/* private static */ compileAll(state : CompileState, input : String, folder : (DivideState, Character) => DivideState, mapper : (CompileState, String) => [CompileState, String], merger : (StringBuilder, String) => StringBuilder) : [CompileState, String]/* {
         var parsed = parseAll(state, input, folder, mapper);
         var generated = generateAll(merger, parsed.right);
         return new Tuple<>(parsed.left, generated);
@@ -287,7 +287,7 @@
                 .fold(new StringBuilder(), merger)
                 .toString();
     } */
-	/* private static */ parseAll(state : CompileState, input : String, folder : (DivideState, Character) => DivideState, mapper : (CompileState, String) => Tuple<CompileState, String>) : Tuple<CompileState, List<String>>/* {
+	/* private static */ parseAll(state : CompileState, input : String, folder : (DivideState, Character) => DivideState, mapper : (CompileState, String) => [CompileState, String]) : [CompileState, List<String>]/* {
         return divideAll(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
             var state1 = tuple.left;
             var right = tuple.right;
@@ -499,26 +499,23 @@
                 var arguments = argumentsTuple.right;
 
                 if (base.equals("BiFunction")) {
-                    List<String> arguments1 = Lists.of(arguments.get(0), arguments.get(1));
-                    String returns = arguments.get(2);
-                    return new Some<>(new Tuple<>(argumentsState, generate(arguments1, returns)));
+                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
                 }
 
                 if (base.equals("Function")) {
-                    List<String> arguments1 = Lists.of(arguments.get(0));
-                    String returns = arguments.get(1);
-                    return new Some<>(new Tuple<>(argumentsState, generate(arguments1, returns)));
+                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
                 }
 
                 if (base.equals("Predicate")) {
-                    List<String> arguments1 = Lists.of(arguments.get(0));
-                    return new Some<>(new Tuple<>(argumentsState, generate(arguments1, "boolean")));
+                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
                 }
 
                 if (base.equals("Supplier")) {
-                    List<String> arguments1 = Lists.empty();
-                    String returns = arguments.get(0);
-                    return new Some<>(new Tuple<>(argumentsState, generate(arguments1, returns)));
+                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.empty(), arguments.get(0))));
+                }
+
+                if (base.equals("Tuple")) {
+                    return new Some<>(new Tuple<>(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
                 }
 
                 return new Some<>(new Tuple<>(argumentsState, strippedBase + "<" + generateValues(arguments) + ">"));

@@ -240,26 +240,23 @@ return;
             var arguments = argumentsTuple.right;
 
             if (base.equals("BiFunction")) {
-                List<String> arguments1 = Lists.of(arguments.get(0), arguments.get(1));
-                String returns = arguments.get(2);
-                return new Some<>(new Tuple<>(argumentsState, generate(arguments1, returns)));
+                return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
             }
 
             if (base.equals("Function")) {
-                List<String> arguments1 = Lists.of(arguments.get(0));
-                String returns = arguments.get(1);
-                return new Some<>(new Tuple<>(argumentsState, generate(arguments1, returns)));
+                return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
             }
 
             if (base.equals("Predicate")) {
-                List<String> arguments1 = Lists.of(arguments.get(0));
-                return new Some<>(new Tuple<>(argumentsState, generate(arguments1, "boolean")));
+                return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
             }
 
             if (base.equals("Supplier")) {
-                List<String> arguments1 = Lists.empty();
-                String returns = arguments.get(0);
-                return new Some<>(new Tuple<>(argumentsState, generate(arguments1, returns)));
+                return new Some<>(new Tuple<>(argumentsState, generate(Lists.empty(), arguments.get(0))));
+            }
+
+            if (base.equals("Tuple")) {
+                return new Some<>(new Tuple<>(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
             }
 
             return new Some<>(new Tuple<>(argumentsState, strippedBase + "<" + generateValues(arguments) + ">"));
