@@ -76,7 +76,7 @@ private static  */ class ListCollector {
     return current.add(element);
 } */ /*
 */
-/* public static */ main( /*  */);
+/* public static */ main();
 void /* {
     try {
         var parent = Paths.get(".", "src", "java", "magma");
@@ -123,14 +123,14 @@ State; /* {
         return append.advance();
     }
     if (c == '} */
-/* ' */ append.isShallow( /*  */);
+/* ' */ append.isShallow();
 /*
     if  */ /* {
     return append.enter();
 }
 if (c == '} */
 /* ') {
-        */ append.exit( /*  */);
+        */ append.exit();
 return; /* ;
 } */
 append: return; /*
@@ -188,14 +188,17 @@ append: return; /*
             var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
             return Optional.of(createIndent(depth) + parseDefinition(definition)
-                    .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileDefinitionOrStatement) + ")"))
+                    .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileParameter) + ")"))
                     .orElseGet(() -> generatePlaceholder(definition)) + newContent);
         });
     });
 } */ /* private static String compileValues(String params, Function<String, String> mapper) {
     return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
-} */ /* private static String compileDefinitionOrStatement(String s) {
-    return parseDefinition(s).map(Definition::generate).orElseGet(() -> generatePlaceholder(s));
+} */ /* private static String compileParameter(String input) {
+    if (input.isBlank()) {
+        return "";
+    }
+    return parseDefinition(input).map(Definition::generate).orElseGet(() -> generatePlaceholder(input));
 } */ /* private static StringBuilder mergeValues(StringBuilder cache, String element) {
     if (cache.isEmpty()) {
         return cache.append(element);

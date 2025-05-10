@@ -1,6 +1,6 @@
 /* public  */class Main {
 	/* private  */interface Collector<T, C> {
-		createInitial(/*  */) : C;
+		createInitial() : C;
 		fold(current : C, element : T) : C;/* 
      */}
 	/* 
@@ -14,12 +14,12 @@
 
     private  */interface List<T> {
 		add(element : T) : /* List<T> */;
-		iterate(/*  */) : /* Iterator<T> */;/* 
+		iterate() : /* Iterator<T> */;/* 
      */}
 	/* 
 
     private  */interface Head<T> {
-		next(/*  */) : /* Optional<T> */;/* 
+		next() : /* Optional<T> */;/* 
      */}
 	/* private */ HeadedIterator<T>(head : /* Head<T> */) : record/* implements Iterator<T> {
         @Override
@@ -56,7 +56,7 @@
             this.length = length;
         } */
 		/* @Override
-        public */ next(/*  */) : /* Optional<Integer> *//* {
+        public */ next() : /* Optional<Integer> *//* {
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -88,7 +88,7 @@
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
         } */
-		/* public static  */ empty<T>(/*  */) : /* List<T> *//* {
+		/* public static  */ empty<T>() : /* List<T> *//* {
             return new JVMList<>();
         } *//* 
      */}
@@ -103,10 +103,10 @@
             this.buffer = buffer;
             this.depth = depth;
         } */
-		State(/*  */) : public/* {
+		State() : public/* {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
-		/* private */ advance(/*  */) : State/* {
+		/* private */ advance() : State/* {
             this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
@@ -115,18 +115,18 @@
             this.buffer.append(c);
             return this;
         } */
-		/* public */ enter(/*  */) : State/* {
+		/* public */ enter() : State/* {
             this.depth++;
             return this;
         } */
-		/* public */ isLevel(/*  */) : boolean/* {
+		/* public */ isLevel() : boolean/* {
             return this.depth == 0;
         } */
-		/* public */ exit(/*  */) : State/* {
+		/* public */ exit() : State/* {
             this.depth--;
             return this;
         } */
-		/* public */ isShallow(/*  */) : boolean/* {
+		/* public */ isShallow() : boolean/* {
             return this.depth == 1;
         } *//* 
      */}
@@ -134,7 +134,7 @@
 
     private static  */class Joiner implements Collector<String, Optional<String>> {
 		/* @Override
-        public */ createInitial(/*  */) : /* Optional<String> *//* {
+        public */ createInitial() : /* Optional<String> *//* {
             return Optional.empty();
         } */
 		/* @Override
@@ -164,7 +164,7 @@
 
     private static  */class ListCollector<T> implements Collector<T, List<T>> {
 		/* @Override
-        public */ createInitial(/*  */) : /* List<T> *//* {
+        public */ createInitial() : /* List<T> *//* {
             return Lists.empty();
         } */
 		/* @Override
@@ -172,7 +172,7 @@
             return current.add(element);
         } *//* 
      */}
-	/* public static */ main(/*  */) : void/* {
+	/* public static */ main() : void/* {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
             var source = parent.resolve("Main.java");
@@ -223,7 +223,7 @@
             return append.advance();
         }
         if (c == '} */
-	/* ' */ append.isShallow(/*  */) : /* && *//* ) {
+	/* ' */ append.isShallow() : /* && *//* ) {
             return append.advance().exit();
         } */
 	/* 
@@ -232,7 +232,7 @@
         }
         if (c == '} */
 	/* ') {
-            */ append.exit(/*  */) : return/* ;
+            */ append.exit() : return/* ;
         } */
 	append : return;/* 
      */
@@ -290,14 +290,17 @@
                 var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
                 return Optional.of(createIndent(depth) + parseDefinition(definition)
-                        .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileDefinitionOrStatement) + ")"))
+                        .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileParameter) + ")"))
                         .orElseGet(() -> generatePlaceholder(definition)) + newContent);
             });
         });
     } *//* private static String compileValues(String params, Function<String, String> mapper) {
         return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
-    } *//* private static String compileDefinitionOrStatement(String s) {
-        return parseDefinition(s).map(Definition::generate).orElseGet(() -> generatePlaceholder(s));
+    } *//* private static String compileParameter(String input) {
+        if (input.isBlank()) {
+            return "";
+        }
+        return parseDefinition(input).map(Definition::generate).orElseGet(() -> generatePlaceholder(input));
     } *//* private static StringBuilder mergeValues(StringBuilder cache, String element) {
         if (cache.isEmpty()) {
             return cache.append(element);

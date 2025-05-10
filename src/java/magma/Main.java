@@ -335,7 +335,7 @@ public class Main {
                 var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
                 return Optional.of(createIndent(depth) + parseDefinition(definition)
-                        .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileDefinitionOrStatement) + ")"))
+                        .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileParameter) + ")"))
                         .orElseGet(() -> generatePlaceholder(definition)) + newContent);
             });
         });
@@ -345,8 +345,11 @@ public class Main {
         return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
     }
 
-    private static String compileDefinitionOrStatement(String s) {
-        return parseDefinition(s).map(Definition::generate).orElseGet(() -> generatePlaceholder(s));
+    private static String compileParameter(String input) {
+        if (input.isBlank()) {
+            return "";
+        }
+        return parseDefinition(input).map(Definition::generate).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
