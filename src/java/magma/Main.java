@@ -565,7 +565,7 @@ public class Main {
     }
 
     private record CompileState(
-            List<String> generated,
+            List<Tuple2<String, List<String>>> generations,
             Map<String, Function<List<Type>, Option<CompileState>>> expandables,
             List<ObjectType> expansions,
             List<ObjectType> structures,
@@ -585,23 +585,21 @@ public class Main {
                 return new None<>();
             }
 
-            System.err.println(expansion.generateAsTemplate());
             return this.addExpansion(expansion)
                     .findExpandable(expansion.name)
                     .flatMap(expandable -> expandable.apply(expansion.arguments));
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
+            return new CompileState(this.generations, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
         }
 
         public CompileState addStruct(String structName) {
-            return new CompileState(this.generated.addLast(structName)
-                    .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
+            return new CompileState(this.generations.addLast(new Tuple2Impl<>(structName, this.methods)), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Option<CompileState>> expandable) {
-            return new CompileState(this.generated, this.expandables.put(name, expandable), this.expansions, this.structures, this.methods, this.stack);
+            return new CompileState(this.generations, this.expandables.put(name, expandable), this.expansions, this.structures, this.methods, this.stack);
         }
 
         public Option<Function<List<Type>, Option<CompileState>>> findExpandable(String name) {
@@ -609,7 +607,7 @@ public class Main {
         }
 
         private CompileState mapStack(Function<Stack, Stack> mapper) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
+            return new CompileState(this.generations, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
         }
 
         public boolean isTypeDefined(String base) {
@@ -627,11 +625,11 @@ public class Main {
         }
 
         public CompileState addMethod(String method) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
+            return new CompileState(this.generations, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
         }
 
         public CompileState addStructure(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
+            return new CompileState(this.generations, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
         }
     }
 
@@ -639,6 +637,10 @@ public class Main {
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        public Joiner() {
+            this("");
+        }
+
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -1038,7 +1040,12 @@ public class Main {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var compiledState = compiled.left();
 
-        var joined = joinWithDelimiter(compiledState.generated, "");
+        var joined = compiledState.generations
+                .iterate()
+                .map(tuple -> tuple.left() + joinWithDelimiter(tuple.right(), ""))
+                .collect(new Joiner())
+                .orElse("");
+
         return joined + compiled.right() + "\nint main(){\n\treturn 0;\n}\n";
     }
 
