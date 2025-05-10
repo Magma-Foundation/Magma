@@ -1,9 +1,9 @@
 /* private */struct Type {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -17,38 +17,28 @@ int Type_isParameterized(/*  */);
         } */
 /* private @ */struct Actual {/*  */
 };
-/* Actual: [
-	Type
-] */
+/* Actual: [Type] */
+/* Actual: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 /* private */struct Parameter {/*  */
 };
-/* Parameter: [
-	Type, 
-	Actual
-] */
+/* Parameter: [Type, Actual] */
+/* Parameter: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Parameter_generate(/*  */);
 struct Option_/* Definition */ Parameter_toDefinition(/*  */);
 /* private static */struct StandardLibrary {/*  */
 };
-/* StandardLibrary: [
-	Type, 
-	Actual, 
-	Parameter
-] */
+/* StandardLibrary: [Type, Actual, Parameter] */
+/* StandardLibrary: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 /* private static */struct Lists {/*  */
 };
-/* Lists: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary
-] */
+/* Lists: [Type, Actual, Parameter, StandardLibrary] */
+/* Lists: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 /* private sealed */struct Option_char_ref {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -60,29 +50,14 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
@@ -97,10 +72,10 @@ int Iterator_char_ref_allMatch(int (*predicate)(char*));
 struct Iterator_char_ref Iterator_char_ref_filter(int (*predicate)(char*));
 /* private sealed */struct Option_Tuple2_List_char_ref_char_ref {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -112,44 +87,22 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
@@ -158,10 +111,10 @@ struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
 /* private sealed */struct Option_int {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -173,60 +126,30 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
@@ -276,10 +199,10 @@ struct List_char_ref List_char_ref_mapLast(char* (*mapper)(char*));
         } */
 /* private sealed */struct Option_Type {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -291,107 +214,44 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
@@ -406,10 +266,10 @@ int Iterator_Type_allMatch(int (*predicate)(struct Type));
 struct Iterator_Type Iterator_Type_filter(int (*predicate)(struct Type));
 /* private sealed */struct Option_Tuple2_List_Type_Type {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -421,128 +281,52 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
@@ -566,23 +350,8 @@ struct List_Type List_Type_mapLast(struct Type (*mapper)(struct Type));
 	struct List_Type typeArguments;
 	struct Option_char_ref maybeStructName;
 };
-/* Frame: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>
-] */
+/* Frame: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>] */
+/* Frame: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 /* public */ struct Option_Type Frame_resolveTypeParam(char* name);/*  {
             return this.typeParameters.indexOf(name, String::equals).flatMap(index -> {
                 if (index < this.typeArguments.size()) {
@@ -610,10 +379,10 @@ struct List_Type List_Type_mapLast(struct Type (*mapper)(struct Type));
         } */
 /* private sealed */struct Option_Frame {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -625,190 +394,66 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
@@ -823,10 +468,10 @@ int Iterator_Frame_allMatch(int (*predicate)(struct Frame));
 struct Iterator_Frame Iterator_Frame_filter(int (*predicate)(struct Frame));
 /* private sealed */struct Option_Tuple2_List_Frame_Frame {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -838,216 +483,74 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
 struct Frame Option_Frame_orElse(struct Frame other);
 struct Frame Option_Frame_orElseGet(struct Frame (*other)());
 int Option_Frame_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
@@ -1069,28 +572,8 @@ struct List_Frame List_Frame_mapLast(struct Frame (*mapper)(struct Frame));
         } *//*  */
 	struct List_Frame frames;
 };
-/* Stack: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>
-] */
+/* Stack: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>] */
+/* Stack: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 /* public */ struct Stack Stack_defineTypeParameters(struct List_char_ref typeParameters);/*  {
             return this.mapLastFrame(last -> last.defineTypeParameters(typeParameters));
         } */
@@ -1132,29 +615,8 @@ struct List_Frame List_Frame_mapLast(struct Frame (*mapper)(struct Frame));
 	char* name;
 	struct List_Type arguments;
 };
-/* ObjectType: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack
-] */
+/* ObjectType: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack] */
+/* ObjectType: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 /* public */ char* ObjectType_stringify(/*  */);/*  {
             var joined = this.arguments.iterate()
                     .map(Type::stringify)
@@ -1193,10 +655,10 @@ struct List_Frame List_Frame_mapLast(struct Frame (*mapper)(struct Frame));
         } */
 /* private sealed */struct Option_ObjectType {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -1208,296 +670,88 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
 struct Frame Option_Frame_orElse(struct Frame other);
 struct Frame Option_Frame_orElseGet(struct Frame (*other)());
 int Option_Frame_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElse(struct Tuple2_List_Frame_Frame other);
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElseGet(struct Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
 int Option_ObjectType_isPresent(/*  */);
 struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
@@ -1512,10 +766,10 @@ int Iterator_ObjectType_allMatch(int (*predicate)(struct ObjectType));
 struct Iterator_ObjectType Iterator_ObjectType_filter(int (*predicate)(struct ObjectType));
 /* private sealed */struct Option_Tuple2_List_ObjectType_ObjectType {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -1527,328 +781,96 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
 struct Frame Option_Frame_orElse(struct Frame other);
 struct Frame Option_Frame_orElseGet(struct Frame (*other)());
 int Option_Frame_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElse(struct Tuple2_List_Frame_Frame other);
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElseGet(struct Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
 int Option_ObjectType_isPresent(/*  */);
 struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
 struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
 struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
 int Option_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_or(struct Option_Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isPresent(/*  */);
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple2_List_ObjectType_ObjectType));
@@ -1867,10 +889,10 @@ struct ObjectType List_ObjectType_last(/*  */);
 struct List_ObjectType List_ObjectType_mapLast(struct ObjectType (*mapper)(struct ObjectType));
 /* private sealed */struct Option_CompileState {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -1882,362 +904,104 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
 struct Frame Option_Frame_orElse(struct Frame other);
 struct Frame Option_Frame_orElseGet(struct Frame (*other)());
 int Option_Frame_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElse(struct Tuple2_List_Frame_Frame other);
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElseGet(struct Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
 int Option_ObjectType_isPresent(/*  */);
 struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
 struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
 struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
 int Option_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_or(struct Option_Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isPresent(/*  */);
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple2_List_ObjectType_ObjectType));
 struct Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_orElse(struct Tuple2_List_ObjectType_ObjectType other);
 struct Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_orElseGet(struct Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_CompileState Option_CompileState_or(struct Option_CompileState (*other)());
 int Option_CompileState_isPresent(/*  */);
 struct Option_CompileState Option_CompileState_filter(int (*predicate)(struct CompileState));
@@ -2246,10 +1010,10 @@ struct CompileState Option_CompileState_orElseGet(struct CompileState (*other)()
 int Option_CompileState_isEmpty(/*  */);
 /* private sealed */struct Option_Func_List_Type_Option_CompileState {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -2261,397 +1025,112 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
 struct Frame Option_Frame_orElse(struct Frame other);
 struct Frame Option_Frame_orElseGet(struct Frame (*other)());
 int Option_Frame_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElse(struct Tuple2_List_Frame_Frame other);
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElseGet(struct Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
 int Option_ObjectType_isPresent(/*  */);
 struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
 struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
 struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
 int Option_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_or(struct Option_Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isPresent(/*  */);
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple2_List_ObjectType_ObjectType));
 struct Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_orElse(struct Tuple2_List_ObjectType_ObjectType other);
 struct Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_orElseGet(struct Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_CompileState Option_CompileState_or(struct Option_CompileState (*other)());
 int Option_CompileState_isPresent(/*  */);
 struct Option_CompileState Option_CompileState_filter(int (*predicate)(struct CompileState));
 struct CompileState Option_CompileState_orElse(struct CompileState other);
 struct CompileState Option_CompileState_orElseGet(struct CompileState (*other)());
 int Option_CompileState_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_or(struct Option_Func_List_Type_Option_CompileState (*other)());
 int Option_Func_List_Type_Option_CompileState_isPresent(/*  */);
 struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_filter(int (*predicate)(struct Option_CompileState (*)(struct List_Type)));
@@ -2694,37 +1173,8 @@ int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
 /* private */struct Joiner {/*  */
 	char* delimiter;
 };
-/* Joiner: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState
-] */
+/* Joiner: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState] */
+/* Joiner: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl] */
 /* public */ struct Option_char_ref Joiner_createInitial(/*  */);/*  {
             return new None<>();
         } */
@@ -2733,74 +1183,13 @@ int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
         } */
 /* private static */struct Iterators {/*  */
 };
-/* Iterators: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState, 
-	Joiner
-] */
+/* Iterators: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState, Joiner] */
+/* Iterators: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl] */
 /* private */struct Ref {/*  */
 	struct Type type;
 };
-/* Ref: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState, 
-	Joiner, 
-	Iterators
-] */
+/* Ref: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState, Joiner, Iterators] */
+/* Ref: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl, SingleHead, ListCollector] */
 /* public */ char* Ref_stringify(/*  */);/*  {
             return this.type.stringify() + "_ref";
         } */
@@ -2819,40 +1208,8 @@ int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
 /* private */struct Placeholder {/*  */
 	char* value;
 };
-/* Placeholder: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState, 
-	Joiner, 
-	Iterators, 
-	Ref
-] */
+/* Placeholder: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState, Joiner, Iterators, Ref] */
+/* Placeholder: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl, SingleHead, ListCollector] */
 /* public */ char* Placeholder_stringify(/*  */);/*  {
             return generatePlaceholder(this.value);
         } */
@@ -2873,10 +1230,10 @@ int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
         } */
 /* private sealed */struct Option_Definition {/*  */
 };
-/* Main: [
-] */
-/* Type: [
-] */
+/* Main: [] */
+/* Main: [] */
+/* Type: [] */
+/* Type: [Tuple2, Map, Option, Iterator, Collector, List, Head] */
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
 /* default */ char* Type_generateAsTemplate(/*  */);/*  {
@@ -2888,438 +1245,120 @@ int Type_isParameterized(/*  */);
 /* default */ char* Type_generateWithName(char* name);/*  {
             return this.generate() + " " + name;
         } */
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_char_ref List_char_ref_addLast(char* element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_char_ref Iterator_char_ref_concat(struct Iterator_char_ref other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_char_ref Option_char_ref_or(struct Option_char_ref (*other)());
 int Option_char_ref_isPresent(/*  */);
 struct Option_char_ref Option_char_ref_filter(int (*predicate)(char*));
 char* Option_char_ref_orElse(char* other);
 char* Option_char_ref_orElseGet(char* (*other)());
 int Option_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElse(struct Tuple2_List_char_ref_char_ref other);
 struct Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_orElseGet(struct Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_int Option_int_or(struct Option_int (*other)());
 int Option_int_isPresent(/*  */);
 struct Option_int Option_int_filter(int (*predicate)(int));
 int Option_int_orElse(int other);
 int Option_int_orElseGet(int (*other)());
 int Option_int_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Type List_Type_addLast(struct Type element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Type Iterator_Type_concat(struct Iterator_Type other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Type Option_Type_or(struct Option_Type (*other)());
 int Option_Type_isPresent(/*  */);
 struct Option_Type Option_Type_filter(int (*predicate)(struct Type));
 struct Type Option_Type_orElse(struct Type other);
 struct Type Option_Type_orElseGet(struct Type (*other)());
 int Option_Type_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElse(struct Tuple2_List_Type_Type other);
 struct Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_orElseGet(struct Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_Frame List_Frame_addLast(struct Frame element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_Frame Iterator_Frame_concat(struct Iterator_Frame other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Frame Option_Frame_or(struct Option_Frame (*other)());
 int Option_Frame_isPresent(/*  */);
 struct Option_Frame Option_Frame_filter(int (*predicate)(struct Frame));
 struct Frame Option_Frame_orElse(struct Frame other);
 struct Frame Option_Frame_orElseGet(struct Frame (*other)());
 int Option_Frame_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElse(struct Tuple2_List_Frame_Frame other);
 struct Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_orElseGet(struct Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isEmpty(/*  */);
-/* List: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* List: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* List: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct List_ObjectType List_ObjectType_addLast(struct ObjectType element);
-/* Iterator: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Iterator: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Iterator: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Iterator_ObjectType Iterator_ObjectType_concat(struct Iterator_ObjectType other);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_ObjectType Option_ObjectType_or(struct Option_ObjectType (*other)());
 int Option_ObjectType_isPresent(/*  */);
 struct Option_ObjectType Option_ObjectType_filter(int (*predicate)(struct ObjectType));
 struct ObjectType Option_ObjectType_orElse(struct ObjectType other);
 struct ObjectType Option_ObjectType_orElseGet(struct ObjectType (*other)());
 int Option_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_or(struct Option_Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isPresent(/*  */);
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple2_List_ObjectType_ObjectType));
 struct Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_orElse(struct Tuple2_List_ObjectType_ObjectType other);
 struct Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_orElseGet(struct Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_CompileState Option_CompileState_or(struct Option_CompileState (*other)());
 int Option_CompileState_isPresent(/*  */);
 struct Option_CompileState Option_CompileState_filter(int (*predicate)(struct CompileState));
 struct CompileState Option_CompileState_orElse(struct CompileState other);
 struct CompileState Option_CompileState_orElseGet(struct CompileState (*other)());
 int Option_CompileState_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head] */
 struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_or(struct Option_Func_List_Type_Option_CompileState (*other)());
 int Option_Func_List_Type_Option_CompileState_isPresent(/*  */);
 struct Option_Func_List_Type_Option_CompileState Option_Func_List_Type_Option_CompileState_filter(int (*predicate)(struct Option_CompileState (*)(struct List_Type)));
 struct Option_CompileState (*Option_Func_List_Type_Option_CompileState_orElse)(struct List_Type)(struct Option_CompileState (*other)(struct List_Type));
 struct Option_CompileState (*Option_Func_List_Type_Option_CompileState_orElseGet)(struct List_Type)(struct Option_CompileState (*)(struct List_Type) (*other)());
 int Option_Func_List_Type_Option_CompileState_isEmpty(/*  */);
-/* Option: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState, 
-	Joiner, 
-	Iterators, 
-	Ref, 
-	Placeholder
-] */
+/* Option: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState, Joiner, Iterators, Ref, Placeholder] */
+/* Option: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl, SingleHead, ListCollector] */
 struct Option_Definition Option_Definition_or(struct Option_Definition (*other)());
 int Option_Definition_isPresent(/*  */);
 struct Option_Definition Option_Definition_filter(int (*predicate)(struct Definition));
@@ -3348,43 +1387,8 @@ int Option_Definition_isEmpty(/*  */);
 /* private */struct TypeParam {/*  */
 	char* input;
 };
-/* TypeParam: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState, 
-	Joiner, 
-	Iterators, 
-	Ref, 
-	Placeholder, 
-	Option<Definition>, 
-	Definition
-] */
+/* TypeParam: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState, Joiner, Iterators, Ref, Placeholder, Option<Definition>, Definition] */
+/* TypeParam: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl, SingleHead, ListCollector, ArrayList] */
 /* public */ char* TypeParam_stringify(/*  */);/*  {
             return this.input;
         } */
@@ -3404,44 +1408,8 @@ int Option_Definition_isEmpty(/*  */);
 	struct Type returnType;
 	struct List_Type typeParameters;
 };
-/* Functional: [
-	Type, 
-	Actual, 
-	Parameter, 
-	StandardLibrary, 
-	Lists, 
-	Option<char*>, 
-	Iterator<char*>, 
-	Option<Tuple2<List<char*>, char*>>, 
-	Option<int>, 
-	List<char*>, 
-	DivideState, 
-	Option<Type>, 
-	Iterator<Type>, 
-	Option<Tuple2<List<Type>, Type>>, 
-	List<Type>, 
-	Frame, 
-	Option<Frame>, 
-	Iterator<Frame>, 
-	Option<Tuple2<List<Frame>, Frame>>, 
-	List<Frame>, 
-	Stack, 
-	ObjectType, 
-	Option<ObjectType>, 
-	Iterator<ObjectType>, 
-	Option<Tuple2<List<ObjectType>, ObjectType>>, 
-	List<ObjectType>, 
-	Option<CompileState>, 
-	Option<struct Option_CompileState (*)(struct List_Type)>, 
-	CompileState, 
-	Joiner, 
-	Iterators, 
-	Ref, 
-	Placeholder, 
-	Option<Definition>, 
-	Definition, 
-	TypeParam
-] */
+/* Functional: [Type, Actual, Parameter, StandardLibrary, Lists, Option<char*>, Iterator<char*>, Option<Tuple2<List<char*>, char*>>, Option<int>, List<char*>, DivideState, Option<Type>, Iterator<Type>, Option<Tuple2<List<Type>, Type>>, List<Type>, Frame, Option<Frame>, Iterator<Frame>, Option<Tuple2<List<Frame>, Frame>>, List<Frame>, Stack, ObjectType, Option<ObjectType>, Iterator<ObjectType>, Option<Tuple2<List<ObjectType>, ObjectType>>, List<ObjectType>, Option<CompileState>, Option<struct Option_CompileState (*)(struct List_Type)>, CompileState, Joiner, Iterators, Ref, Placeholder, Option<Definition>, Definition, TypeParam] */
+/* Functional: [Tuple2, Map, Option, Iterator, Collector, List, Head, ListMap, Some, None, EmptyHead, HeadedIterator, RangeHead implements Head, Tuple2Impl, SingleHead, ListCollector, ArrayList, FlatMapHead] */
 /* public */ char* Functional_stringify(/*  */);/*  {
             var joinedParameters = this.typeParameters.iterate()
                     .map(Type::stringify)
@@ -3672,14 +1640,20 @@ int Option_Definition_isEmpty(/*  */);
             return new None<>();
         }
 
-        var joinedSymbols = state.structures
-                .iterate()
-                .map(ObjectType::generateAsTemplate)
-                .map(inner -> "\n\t" + inner)
+        var joinedExpandables = state.expandables
+                .iterateKeys()
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var defined = state.addMethod(generatePlaceholder(name + ": [" + joinedSymbols + "\n]") + "\n").mapStack(stack -> stack
+        var joinedSymbols = state.structures
+                .iterate()
+                .map(ObjectType::generateAsTemplate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var defined = state.addMethod(debug(name, joinedSymbols))
+                .addMethod(debug(name, joinedExpandables))
+                .mapStack(stack -> stack
                 .enter()
                 .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
@@ -3704,6 +1678,9 @@ int Option_Definition_isEmpty(/*  */);
                 .addStructure(type);
 
         return new Some<>(added);
+    } */
+	/* private static String debug(String name, String joined) {
+        return generatePlaceholder(name + ": [" + joined + "]") + "\n";
     } */
 	/* private static Tuple2<CompileState, List<String>> parseStatements(String content, CompileState defined) {
         return parseAll(defined, content, Main::foldStatementChar, Main::compileClassSegment);

@@ -20,6 +20,8 @@ public class Main {
         Map<K, V> put(K key, V value);
 
         Option<V> find(K key);
+
+        Iterator<K> iterateKeys();
     }
 
     private sealed interface Option<T> {
@@ -146,8 +148,13 @@ public class Main {
         public Option<V> find(K key) {
             return this.entries.iterate()
                     .filter(entry -> this.keyEquator.apply(key, entry.left()))
-                    .map(kvPair -> kvPair.right())
+                    .map(Tuple2::right)
                     .next();
+        }
+
+        @Override
+        public Iterator<K> iterateKeys() {
+            return this.entries.iterate().map(Tuple2::left);
         }
 
         private List<Tuple2<K, V>> findEntriesWithoutKey(K key) {
@@ -1222,14 +1229,20 @@ public class Main {
             return new None<>();
         }
 
-        var joinedSymbols = state.structures
-                .iterate()
-                .map(ObjectType::generateAsTemplate)
-                .map(inner -> "\n\t" + inner)
+        var joinedExpandables = state.expandables
+                .iterateKeys()
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var defined = state.addMethod(generatePlaceholder(name + ": [" + joinedSymbols + "\n]") + "\n").mapStack(stack -> stack
+        var joinedSymbols = state.structures
+                .iterate()
+                .map(ObjectType::generateAsTemplate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var defined = state.addMethod(debug(name, joinedSymbols))
+                .addMethod(debug(name, joinedExpandables))
+                .mapStack(stack -> stack
                 .enter()
                 .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
@@ -1254,6 +1267,10 @@ public class Main {
                 .addStructure(type);
 
         return new Some<>(added);
+    }
+
+    private static String debug(String name, String joined) {
+        return generatePlaceholder(name + ": [" + joined + "]") + "\n";
     }
 
     private static Tuple2<CompileState, List<String>> parseStatements(String content, CompileState defined) {
