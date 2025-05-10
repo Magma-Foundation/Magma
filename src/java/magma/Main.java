@@ -337,20 +337,8 @@ public class Main {
             return Optional.empty();
         }
 
-        public CompileState addTypeParameters(List<String> typeParams) {
-            return this.mapStack(stack -> stack.defineTypeParameters(typeParams));
-        }
-
         private CompileState mapStack(Function<Stack, Stack> mapper) {
             return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
-        }
-
-        public CompileState withStructureName(String name) {
-            return this.mapStack(stack -> stack.defineStruct(name));
-        }
-
-        public CompileState addTypeArguments(List<Type> typeArguments) {
-            return this.mapStack(stack -> stack.defineTypeArguments(typeArguments));
         }
 
         public boolean isTypeDefined(String base) {
@@ -1012,9 +1000,9 @@ public class Main {
             return Optional.empty();
         }
 
-        var statementsTuple = compileStatements(state.withStructureName(name)
-                .addTypeParameters(typeParams)
-                .addTypeArguments(typeArguments), content, Main::compileClassSegment);
+        CompileState compileState = state.mapStack(stack1 -> stack1.defineStruct(name));
+        CompileState compileState1 = compileState.mapStack(stack -> stack.defineTypeParameters(typeParams));
+        var statementsTuple = compileStatements(compileState1.mapStack(stack1 -> stack1.defineTypeArguments(typeArguments)), content, Main::compileClassSegment);
 
         var type = new ObjectType(name, typeArguments);
         var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + statementsTuple.right + "\n};\n";
@@ -1215,7 +1203,7 @@ public class Main {
             String type
     ) {
         return compileSymbol(rawName.strip(), name -> {
-            CompileState state1 = state.addTypeParameters(typeParams);
+            CompileState state1 = state.mapStack(stack -> stack.defineTypeParameters(typeParams));
             return parseType(state1, type).flatMap(typeTuple -> {
                 return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name, typeParams)));
             });
