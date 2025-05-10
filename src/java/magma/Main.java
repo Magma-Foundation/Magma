@@ -527,7 +527,7 @@ public class Main {
 
         @Override
         public String generate() {
-            return generatePlaceholder(this.generateAsTemplate()) + "struct " + this.stringify();
+            return "struct " + this.stringify();
         }
 
         @Override
@@ -566,7 +566,7 @@ public class Main {
 
     private record CompileState(
             List<Tuple2<String, List<String>>> generations,
-            Map<String, Function<List<Type>, Option<CompileState>>> expandables,
+            Map<String, BiFunction<CompileState, List<Type>, Option<CompileState>>> expandables,
             List<ObjectType> expansions,
             List<ObjectType> structures,
             List<String> methods,
@@ -587,7 +587,7 @@ public class Main {
 
             return this.addExpansion(expansion)
                     .findExpandable(expansion.name)
-                    .flatMap(expandable -> expandable.apply(expansion.arguments));
+                    .flatMap(expandable -> expandable.apply(this, expansion.arguments));
         }
 
         private CompileState addExpansion(ObjectType type) {
@@ -598,11 +598,11 @@ public class Main {
             return new CompileState(this.generations.addLast(new Tuple2Impl<>(structName, this.methods)), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
         }
 
-        public CompileState addExpandable(String name, Function<List<Type>, Option<CompileState>> expandable) {
+        public CompileState addExpandable(String name, BiFunction<CompileState, List<Type>, Option<CompileState>> expandable) {
             return new CompileState(this.generations, this.expandables.put(name, expandable), this.expansions, this.structures, this.methods, this.stack);
         }
 
-        public Option<Function<List<Type>, Option<CompileState>>> findExpandable(String name) {
+        public Option<BiFunction<CompileState, List<Type>, Option<CompileState>>> findExpandable(String name) {
             return this.expandables.find(name);
         }
 
@@ -1188,9 +1188,9 @@ public class Main {
                             .map(String::strip)
                             .collect(new ListCollector<>());
 
-                    return new Some<>(new Tuple2Impl<CompileState, String>(state.addExpandable(name, (typeArguments) -> {
-                        return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, parameters, content);
-                    }), "\n\t// " + name + "<" + joinWithDelimiter(typeParams, ", ") + ">"));
+                    return new Some<>(new Tuple2Impl<CompileState, String>(state.addExpandable(name, (state0, typeArguments) -> {
+                        return assembleStructure(state0, beforeKeyword, name, typeParams, typeArguments, parameters, content);
+                    }), ""));
                 });
             });
         };
@@ -1236,33 +1236,12 @@ public class Main {
             return new None<>();
         }
 
-        var joinedExpansions = state.expansions
-                .iterate()
-                .map(ObjectType::generateAsTemplate)
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        var joinedExpandables = state.expandables
-                .iterateKeys()
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        var joinedSymbols = state.structures
-                .iterate()
-                .map(ObjectType::generateAsTemplate)
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        var defined = state
-                .addMethod(debug("Symbols", joinedSymbols))
-                .addMethod(debug("Expanding", joinedExpandables))
-                .addMethod(debug("Expansions", joinedExpansions))
-                .mapStack(stack -> stack
-                        .enter()
-                        .defineStructPrototype(name)
-                        .defineTypeParameters(typeParams)
-                        .defineTypeArguments(typeArguments)
-                );
+        var defined = state.mapStack(stack -> stack
+                .enter()
+                .defineStructPrototype(name)
+                .defineTypeParameters(typeParams)
+                .defineTypeArguments(typeArguments)
+        );
 
         var statementsTuple = parseStatements(content, defined);
         var type = new ObjectType(name, typeArguments);
@@ -1277,15 +1256,23 @@ public class Main {
                 .addAllLast(definitions);
 
         var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + generateAll(statements, Main::merge) + "\n};\n";
-        var added = statementsTuple.left().mapStack(Stack::exit)
+        var added = statementsTuple.left()
+                .mapStack(Stack::exit)
+                .addMethod(createDebug(typeArguments, name))
                 .addStruct(generated)
                 .addStructure(type);
 
         return new Some<>(added);
     }
 
-    private static String debug(String name, String joined) {
-        return generatePlaceholder(name + ": [" + joined + "]") + "\n";
+    private static String createDebug(List<Type> typeArguments, String name) {
+        var joined = typeArguments.iterate()
+                .map(Type::generateAsTemplate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var asTemplate = name + "<" + joined + ">";
+        return "// " + asTemplate + "\n";
     }
 
     private static Tuple2<CompileState, List<String>> parseStatements(String content, CompileState defined) {
