@@ -1012,9 +1012,12 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.returnType.generate() + " (*" +
-                    name +
-                    ")(" + joined + ")";
+            var withoutReturns = "(*" + name + ")(" + joined + ")";
+            if (this.returnType instanceof Functional functional) {
+                return functional.generateWithName(withoutReturns);
+            }
+
+            return this.returnType.generate() + " " + withoutReturns;
         }
     }
 
@@ -1294,7 +1297,7 @@ public class Main {
 
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c) || (i != 0 && Character.isDigit(i))) {
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;

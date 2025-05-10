@@ -44,12 +44,17 @@ int Iterator_char_ref_anyMatch(int (*predicate)(char*));
 int Iterator_char_ref_allMatch(int (*predicate)(char*));
 struct Iterator_char_ref Iterator_char_ref_filter(int (*predicate)(char*));
 // Iterator<char*>
-/* private sealed */struct Option_Tuple2_List_char_ref_char_ref {/*  */
+/* private */struct Tuple2_List_char_ref_char_ref {/*  */
 };
 struct Iterator_char_ref List_char_ref_iterate(/*  */);
 int List_char_ref_contains(char* element, int (*equator)(char*, char*));
 int List_char_ref_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
 int List_char_ref_size(/*  */);
+struct List_char_ref Tuple2_List_char_ref_char_ref_left(/*  */);
+char* Tuple2_List_char_ref_char_ref_right(/*  */);
+// Tuple2<List<char*>, char*>
+/* private sealed */struct Option_Tuple2_List_char_ref_char_ref {/*  */
+};
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_or(struct Option_Tuple2_List_char_ref_char_ref (*other)());
 int Option_Tuple2_List_char_ref_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_char_ref_char_ref Option_Tuple2_List_char_ref_char_ref_filter(int (*predicate)(struct Tuple2_List_char_ref_char_ref));
@@ -130,12 +135,17 @@ int Iterator_Type_anyMatch(int (*predicate)(struct Type));
 int Iterator_Type_allMatch(int (*predicate)(struct Type));
 struct Iterator_Type Iterator_Type_filter(int (*predicate)(struct Type));
 // Iterator<Type>
-/* private sealed */struct Option_Tuple2_List_Type_Type {/*  */
+/* private */struct Tuple2_List_Type_Type {/*  */
 };
 struct Iterator_Type List_Type_iterate(/*  */);
 int List_Type_contains(struct Type element, int (*equator)(struct Type, struct Type));
 int List_Type_equalsTo(struct List_Type others, int (*equator)(struct Type, struct Type));
 int List_Type_size(/*  */);
+struct List_Type Tuple2_List_Type_Type_left(/*  */);
+struct Type Tuple2_List_Type_Type_right(/*  */);
+// Tuple2<List<Type>, Type>
+/* private sealed */struct Option_Tuple2_List_Type_Type {/*  */
+};
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_or(struct Option_Tuple2_List_Type_Type (*other)());
 int Option_Tuple2_List_Type_Type_isPresent(/*  */);
 struct Option_Tuple2_List_Type_Type Option_Tuple2_List_Type_Type_filter(int (*predicate)(struct Tuple2_List_Type_Type));
@@ -205,12 +215,17 @@ int Iterator_Frame_anyMatch(int (*predicate)(struct Frame));
 int Iterator_Frame_allMatch(int (*predicate)(struct Frame));
 struct Iterator_Frame Iterator_Frame_filter(int (*predicate)(struct Frame));
 // Iterator<Frame>
-/* private sealed */struct Option_Tuple2_List_Frame_Frame {/*  */
+/* private */struct Tuple2_List_Frame_Frame {/*  */
 };
 struct Iterator_Frame List_Frame_iterate(/*  */);
 int List_Frame_contains(struct Frame element, int (*equator)(struct Frame, struct Frame));
 int List_Frame_equalsTo(struct List_Frame others, int (*equator)(struct Frame, struct Frame));
 int List_Frame_size(/*  */);
+struct List_Frame Tuple2_List_Frame_Frame_left(/*  */);
+struct Frame Tuple2_List_Frame_Frame_right(/*  */);
+// Tuple2<List<Frame>, Frame>
+/* private sealed */struct Option_Tuple2_List_Frame_Frame {/*  */
+};
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_or(struct Option_Tuple2_List_Frame_Frame (*other)());
 int Option_Tuple2_List_Frame_Frame_isPresent(/*  */);
 struct Option_Tuple2_List_Frame_Frame Option_Tuple2_List_Frame_Frame_filter(int (*predicate)(struct Tuple2_List_Frame_Frame));
@@ -313,6 +328,11 @@ struct List_Frame List_Frame_mapLast(struct Frame (*mapper)(struct Frame));
             return this.arguments.iterate().anyMatch(Type::isParameterized);
         } */
 // ObjectType<>
+/* private */struct Tuple2_char_ref_List_char_ref {/*  */
+};
+char* Tuple2_char_ref_List_char_ref_left(/*  */);
+struct List_char_ref Tuple2_char_ref_List_char_ref_right(/*  */);
+// Tuple2<char*, List<char*>>
 /* private sealed */struct Option_Tuple2_char_ref_List_char_ref {/*  */
 };
 struct List_Tuple2_char_ref_List_char_ref List_Tuple2_char_ref_List_char_ref_addLast(struct Tuple2_char_ref_List_char_ref element);
@@ -331,12 +351,17 @@ int Iterator_Tuple2_char_ref_List_char_ref_anyMatch(int (*predicate)(struct Tupl
 int Iterator_Tuple2_char_ref_List_char_ref_allMatch(int (*predicate)(struct Tuple2_char_ref_List_char_ref));
 struct Iterator_Tuple2_char_ref_List_char_ref Iterator_Tuple2_char_ref_List_char_ref_filter(int (*predicate)(struct Tuple2_char_ref_List_char_ref));
 // Iterator<Tuple2<char*, List<char*>>>
-/* private sealed */struct Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref {/*  */
+/* private */struct Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref {/*  */
 };
 struct Iterator_Tuple2_char_ref_List_char_ref List_Tuple2_char_ref_List_char_ref_iterate(/*  */);
 int List_Tuple2_char_ref_List_char_ref_contains(struct Tuple2_char_ref_List_char_ref element, int (*equator)(struct Tuple2_char_ref_List_char_ref, struct Tuple2_char_ref_List_char_ref));
 int List_Tuple2_char_ref_List_char_ref_equalsTo(struct List_Tuple2_char_ref_List_char_ref others, int (*equator)(struct Tuple2_char_ref_List_char_ref, struct Tuple2_char_ref_List_char_ref));
 int List_Tuple2_char_ref_List_char_ref_size(/*  */);
+struct List_Tuple2_char_ref_List_char_ref Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref_left(/*  */);
+struct Tuple2_char_ref_List_char_ref Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref_right(/*  */);
+// Tuple2<List<Tuple2<char*, List<char*>>>, Tuple2<char*, List<char*>>>
+/* private sealed */struct Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref {/*  */
+};
 struct Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref_or(struct Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref (*other)());
 int Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref_isPresent(/*  */);
 struct Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref Option_Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref_filter(int (*predicate)(struct Tuple2_List_Tuple2_char_ref_List_char_ref_Tuple2_char_ref_List_char_ref));
@@ -373,12 +398,17 @@ int Iterator_ObjectType_anyMatch(int (*predicate)(struct ObjectType));
 int Iterator_ObjectType_allMatch(int (*predicate)(struct ObjectType));
 struct Iterator_ObjectType Iterator_ObjectType_filter(int (*predicate)(struct ObjectType));
 // Iterator<ObjectType>
-/* private sealed */struct Option_Tuple2_List_ObjectType_ObjectType {/*  */
+/* private */struct Tuple2_List_ObjectType_ObjectType {/*  */
 };
 struct Iterator_ObjectType List_ObjectType_iterate(/*  */);
 int List_ObjectType_contains(struct ObjectType element, int (*equator)(struct ObjectType, struct ObjectType));
 int List_ObjectType_equalsTo(struct List_ObjectType others, int (*equator)(struct ObjectType, struct ObjectType));
 int List_ObjectType_size(/*  */);
+struct List_ObjectType Tuple2_List_ObjectType_ObjectType_left(/*  */);
+struct ObjectType Tuple2_List_ObjectType_ObjectType_right(/*  */);
+// Tuple2<List<ObjectType>, ObjectType>
+/* private sealed */struct Option_Tuple2_List_ObjectType_ObjectType {/*  */
+};
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_or(struct Option_Tuple2_List_ObjectType_ObjectType (*other)());
 int Option_Tuple2_List_ObjectType_ObjectType_isPresent(/*  */);
 struct Option_Tuple2_List_ObjectType_ObjectType Option_Tuple2_List_ObjectType_ObjectType_filter(int (*predicate)(struct Tuple2_List_ObjectType_ObjectType));
@@ -434,7 +464,7 @@ struct Option_Func_CompileState_List_Type_Option_CompileState Option_Func_Compil
 int Option_Func_CompileState_List_Type_Option_CompileState_isPresent(/*  */);
 struct Option_Func_CompileState_List_Type_Option_CompileState Option_Func_CompileState_List_Type_Option_CompileState_filter(int (*predicate)(struct Option_CompileState (*)(struct CompileState, struct List_Type)));
 struct Option_CompileState (*Option_Func_CompileState_List_Type_Option_CompileState_orElse)(struct CompileState, struct List_Type)(struct Option_CompileState (*other)(struct CompileState, struct List_Type));
-struct Option_CompileState (*Option_Func_CompileState_List_Type_Option_CompileState_orElseGet)(struct CompileState, struct List_Type)(struct Option_CompileState (*)(struct CompileState, struct List_Type) (*other)());
+struct Option_CompileState (*Option_Func_CompileState_List_Type_Option_CompileState_orElseGet)(struct CompileState, struct List_Type)(struct Option_CompileState (*(*other)())(struct CompileState, struct List_Type));
 int Option_Func_CompileState_List_Type_Option_CompileState_isEmpty(/*  */);
 // Option<struct Option_CompileState (*)(struct CompileState, struct List_Type)>
 /* private */struct CompileState {/* public CompileState() {
@@ -613,19 +643,15 @@ int Option_Definition_isEmpty(/*  */);
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.returnType.generate() + " (*" +
-                    name +
-                    ")(" + joined + ")";
+            var withoutReturns = "(*" + name + ")(" + joined + ")";
+            if (this.returnType instanceof Functional functional) {
+                return functional.generateWithName(withoutReturns);
+            }
+
+            return this.returnType.generate() + " " + withoutReturns;
         } */
 // Functional<>
-/* public */struct Main {/* ' && appended.isShallow()) {
-            return appended.advance().exit();
-        } *//* if (c == '{') {
-            return appended.enter();
-        }
-        if (c == '} *//* ') {
-            return appended.exit();
-        } *//* return appended; *//*  */
+/* private */struct Tuple2_CompileState_char_ref {/*  */
 };
 /* public static */ void Main_main(/*  */);/*  {
         try {
@@ -661,6 +687,18 @@ int Option_Definition_isEmpty(/*  */);
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
+struct CompileState Tuple2_CompileState_char_ref_left(/*  */);
+char* Tuple2_CompileState_char_ref_right(/*  */);
+// Tuple2<CompileState, char*>
+/* public */struct Main {/* ' && appended.isShallow()) {
+            return appended.advance().exit();
+        } *//* if (c == '{') {
+            return appended.enter();
+        }
+        if (c == '} *//* ') {
+            return appended.exit();
+        } *//* return appended; *//*  */
+};
 /* private static */ struct Tuple2_CompileState_char_ref Main_compileStatements(struct CompileState initial, char* input, struct Tuple2_CompileState_char_ref (*mapper)(struct CompileState, char*));/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */
@@ -855,7 +893,7 @@ int Option_Definition_isEmpty(/*  */);
 
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c) || (i != 0 && Character.isDigit(i))) {
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;
