@@ -351,8 +351,8 @@ public class Main {
             return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
         }
 
-        public CompileState addStruct(String struct) {
-            return new CompileState(this.generated.addLast(struct)
+        public CompileState addStruct(String structName) {
+            return new CompileState(this.generated.addLast(structName)
                     .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
         }
 
