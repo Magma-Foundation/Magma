@@ -17,6 +17,7 @@ int Type_isParameterized(/*  */);
 };
 // Parameter: [struct Type, struct Actual]
 char* Parameter_generate(/*  */);
+struct Optional_/* Definition */ Parameter_toDefinition(/*  */);
 /* private static */struct StandardLibrary {/*  */
 };
 // StandardLibrary: [struct Type, struct Actual, struct Parameter]
@@ -122,6 +123,9 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* private */struct Frame {/* public Frame() {
             this(new ArrayList<>(), new ArrayList<>(), Optional.empty());
         } *//*  */
+	struct List_char_ref typeParameters;
+	struct List_Type typeArguments;
+	struct Optional_char_ref maybeStructName;
 };
 // Frame: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type]
 /* public */ struct Optional_Type Frame_resolveTypeParam(char* name);/*  {
@@ -194,6 +198,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* private */struct Stack {/* public Stack() {
             this(new ArrayList<Frame>().addLast(new Frame()));
         } *//*  */
+	struct List_Frame frames;
 };
 // Stack: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame]
 /* public */ struct Stack Stack_defineTypeParameters(struct List_char_ref typeParameters);/*  {
@@ -230,6 +235,12 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* private */struct CompileState {/* public CompileState() {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
         } *//*  */
+	struct List_char_ref generated;
+	struct Map_char_ref_Func_List_Type_Optional_/* CompileState */ expandables;
+	struct List_/* ObjectType */ expansions;
+	struct List_/* ObjectType */ structures;
+	struct List_char_ref methods;
+	struct Stack stack;
 };
 // CompileState: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack]
 /* private */ struct Optional_CompileState CompileState_expand(/* ObjectType expansion */);/*  {
@@ -284,6 +295,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* private */struct Joiner {/* private Joiner() {
             this("");
         } *//*  */
+	char* delimiter;
 };
 // Joiner: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState]
 /* public */ struct Optional_char_ref Joiner_createInitial(/*  */);/*  {
@@ -296,6 +308,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 };
 // Iterators: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner]
 /* private */struct Ref {/*  */
+	struct Type type;
 };
 // Ref: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators]
 /* public */ char* Ref_stringify(/*  */);/*  {
@@ -314,6 +327,8 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
             return this.type.isParameterized();
         } */
 /* private */struct ObjectType {/*  */
+	char* name;
+	struct List_Type arguments;
 };
 // ObjectType: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref]
 /* public */ char* ObjectType_stringify(/*  */);/*  {
@@ -345,6 +360,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
                     .orElse("");
         } */
 /* private */struct Placeholder {/*  */
+	char* value;
 };
 // Placeholder: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType]
 /* public */ char* Placeholder_stringify(/*  */);/*  {
@@ -352,6 +368,9 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
         } */
 /* public */ char* Placeholder_generate(/*  */);/*  {
             return generatePlaceholder(this.value);
+        } */
+/* public */ struct Optional_/* Definition */ Placeholder_toDefinition(/*  */);/*  {
+            return Optional.empty();
         } */
 /* public */ int Placeholder_equalsTo(struct Type other);/*  {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
@@ -363,10 +382,18 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
             return true;
         } */
 /* private */struct Definition {/*  */
+	struct List_char_ref annotations;
+	char* afterAnnotations;
+	struct Type type;
+	char* name;
+	struct List_char_ref typeParams;
 };
 // Definition: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder]
 /* public */ char* Definition_generate(/*  */);/*  {
             return this.generateAfterAnnotations() + this.type.generateWithName(this.name);
+        } */
+/* public */ struct Optional_Definition Definition_toDefinition(/*  */);/*  {
+            return Optional.of(this);
         } */
 /* private */ char* Definition_generateAfterAnnotations(/*  */);/*  {
             return this.afterAnnotations.isEmpty() ? "" : (generatePlaceholder(this.afterAnnotations()) + " ");
@@ -378,6 +405,7 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
             return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
         } */
 /* private */struct TypeParam {/*  */
+	char* input;
 };
 // TypeParam: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition]
 /* public */ char* TypeParam_stringify(/*  */);/*  {
@@ -396,6 +424,8 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
             return true;
         } */
 /* private */struct Functional {/*  */
+	struct Type returnType;
+	struct List_Type typeParameters;
 };
 // Functional: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState, struct List_Type, struct Frame, struct List_Frame, struct Stack, struct CompileState, struct Joiner, struct Iterators, struct Ref, struct ObjectType, struct Placeholder, struct Definition, struct TypeParam]
 /* public */ char* Functional_stringify(/*  */);/*  {
@@ -607,12 +637,24 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
                 .defineTypeArguments(typeArguments)
         );
 
-        var statementsTuple = compileStatements(defined, content, Main::compileClassSegment);
-
+        var statementsTuple = parseStatements(content, defined);
         var type = new ObjectType(name, typeArguments);
-        var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + statementsTuple.right + "\n};\n";
+
+        var definitions = parameters.iterate()
+                .map(Parameter::toDefinition)
+                .flatMap(Iterators::fromOptional)
+                .map(Main::generateDefinitionStatement)
+                .collect(new ListCollector<>());
+
+        var statements = statementsTuple.right
+                .addAllLast(definitions);
+
+        var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + generateAll(statements, Main::merge) + "\n};\n";
         var added = statementsTuple.left.addStruct(generated).addStructure(type);
         return Optional.of(added);
+    } */
+	/* private static Tuple<CompileState, List<String>> parseStatements(String content, CompileState defined) {
+        return parseAll(defined, content, Main::foldStatementChar, Main::compileClassSegment);
     } */
 	/* private static <T> Optional<T> compileSymbol(String input, Function<String, Optional<T>> mapper) {
         if (!isSymbol(input)) {
@@ -722,9 +764,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	/* private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(state, withoutEnd)
-                    .map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))
-                    .map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
+                    .map(tuple -> new Tuple<>(tuple.left, generateDefinitionStatement(tuple.right)));
         });
+    } */
+	/* private static String generateDefinitionStatement(Definition definition) {
+        return "\n\t" + definition.generate() + ";";
     } */
 	/* private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {

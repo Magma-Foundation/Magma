@@ -92,6 +92,8 @@ public class Main {
 
     private interface Parameter {
         String generate();
+
+        Optional<Definition> toDefinition();
     }
 
     private static class EmptyHead<T> implements Head<T> {
@@ -529,6 +531,11 @@ public class Main {
         }
 
         @Override
+        public Optional<Definition> toDefinition() {
+            return Optional.empty();
+        }
+
+        @Override
         public boolean equalsTo(Type other) {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         }
@@ -554,6 +561,11 @@ public class Main {
         @Override
         public String generate() {
             return this.generateAfterAnnotations() + this.type.generateWithName(this.name);
+        }
+
+        @Override
+        public Optional<Definition> toDefinition() {
+            return Optional.of(this);
         }
 
         private String generateAfterAnnotations() {
@@ -1029,12 +1041,25 @@ public class Main {
                 .defineTypeArguments(typeArguments)
         );
 
-        var statementsTuple = compileStatements(defined, content, Main::compileClassSegment);
-
+        var statementsTuple = parseStatements(content, defined);
         var type = new ObjectType(name, typeArguments);
-        var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + statementsTuple.right + "\n};\n";
+
+        var definitions = parameters.iterate()
+                .map(Parameter::toDefinition)
+                .flatMap(Iterators::fromOptional)
+                .map(Main::generateDefinitionStatement)
+                .collect(new ListCollector<>());
+
+        var statements = statementsTuple.right
+                .addAllLast(definitions);
+
+        var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + generateAll(statements, Main::merge) + "\n};\n";
         var added = statementsTuple.left.addStruct(generated).addStructure(type);
         return Optional.of(added);
+    }
+
+    private static Tuple<CompileState, List<String>> parseStatements(String content, CompileState defined) {
+        return parseAll(defined, content, Main::foldStatementChar, Main::compileClassSegment);
     }
 
     private static <T> Optional<T> compileSymbol(String input, Function<String, Optional<T>> mapper) {
@@ -1153,9 +1178,12 @@ public class Main {
     private static Optional<Tuple<CompileState, String>> compileDefinitionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(state, withoutEnd)
-                    .map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))
-                    .map(tuple -> new Tuple<>(tuple.left, "\n\t" + tuple.right + ";"));
+                    .map(tuple -> new Tuple<>(tuple.left, generateDefinitionStatement(tuple.right)));
         });
+    }
+
+    private static String generateDefinitionStatement(Definition definition) {
+        return "\n\t" + definition.generate() + ";";
     }
 
     private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
