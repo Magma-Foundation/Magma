@@ -1,24 +1,29 @@
 "use strict";
-/* private */ record;
-Some(T, value);
+/* private */ class Some {
+}
+(T);
+value;
 implements;
 Option < T > {};
 /* private static */ class None {
 }
-/* private */ record;
-HeadedIterator(Head < T > head);
+/* private */ class HeadedIterator {
+}
+(Head < T > head);
 implements;
 Iterator < T > {};
 /* private static */ class RangeHead {
 }
-/* private */ record;
-JVMList(java.util.List < T > elements);
+/* private */ class JVMList {
+}
+(java.util.List < T > elements);
 implements;
 List < T > {};
 /* private static */ class Lists {
 }
-/* private */ record;
-CompileState(List < String > structures);
+/* private */ class CompileState {
+}
+(List < String > structures);
 {
     CompileState();
     public; /* {
@@ -31,12 +36,17 @@ CompileState(List < String > structures);
 }
 /* private static */ class DivideState {
 }
-/* private */ record;
-Joiner(String, delimiter);
+/* private */ class Joiner {
+}
+(String);
+delimiter;
 implements;
 Collector < String, Option < String >> {};
-/* private */ record;
-Definition(Option < String > maybeBefore, String, type, String, name, List < String > typeParams);
+/* private */ class Definition {
+}
+(Option < String > maybeBefore, String);
+type, String;
+name, List < String > typeParams;
 {
     /* private */ generate();
     String; /* {
@@ -60,8 +70,11 @@ Definition(Option < String > maybeBefore, String, type, String, name, List < Str
 }
 /* private static */ class ListCollector {
 }
-/* private */ record;
-Tuple(A, left, B, right);
+/* private */ class Tuple {
+}
+(A);
+left, B;
+right;
 {
 }
 /* public */ class Main {
@@ -77,15 +90,15 @@ return;
         return compileClass(stripped, 0, state)
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
     } */ /* private static Option<Tuple<CompileState, String>> compileClass(String stripped, int depth, CompileState state) {
-    return compileStructure(stripped, "class ", state);
-} */ /* private static Option<Tuple<CompileState, String>> compileStructure(String stripped, String infix, CompileState state) {
-    return first(stripped, infix, (beforeInfix, right) -> {
+    return compileStructure(stripped, "class ", "class ", state);
+} */ /* private static Option<Tuple<CompileState, String>> compileStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+    return first(stripped, sourceInfix, (beforeInfix, right) -> {
         return first(right, "{", (name, withEnd) -> {
             var strippedWithEnd = withEnd.strip();
             return suffix(strippedWithEnd, "}", content1 -> {
                 var strippedName = name.strip();
                 var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
-                var generated = generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements.right + "\n}\n";
+                var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + strippedName + " {" + statements.right + "\n}\n";
                 return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
             });
         });
@@ -109,8 +122,8 @@ return;
 } */ /* private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input, int depth) {
     return compileWhitespace(input, state)
             .or(() -> compileClass(input, depth, state))
-            .or(() -> compileStructure(input, "interface ", state))
-            .or(() -> compileStructure(input, "record ", state))
+            .or(() -> compileStructure(input, "interface ", "interface ", state))
+            .or(() -> compileStructure(input, "record ", "class ", state))
             .or(() -> compileMethod(input, depth, state))
             .or(() -> compileDefinitionStatement(input, depth, state))
             .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));

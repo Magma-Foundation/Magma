@@ -25,7 +25,7 @@
 /* private */interface Head<T> {
 	next() : Option<T>;
 }
-/* private */record Some<T>(T value) implements Option<T> {
+/* private */class Some<T>(T value) implements Option<T> {
 	/* @Override
         public  */ map<R>(mapper : (T) => R) : Option<R>/* {
             return new Some<>(mapper.apply(this.value));
@@ -85,7 +85,7 @@
             return new None<>();
         } */
 }
-/* private */record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+/* private */class HeadedIterator<T>(Head<T> head) implements Iterator<T> {
 	/* @Override
         public  */ fold<R>(initial : R, folder : (R, T) => R) : R/* {
             var current = initial;
@@ -126,7 +126,7 @@
             return new None<>();
         } */
 }
-/* private */record JVMList<T>(java.util.List<T> elements) implements List<T> {
+/* private */class JVMList<T>(java.util.List<T> elements) implements List<T> {
 	JVMList() : public/* {
                 this(new ArrayList<>());
             } */
@@ -162,7 +162,7 @@
             return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         } */
 }
-/* private */record CompileState(List<String> structures) {
+/* private */class CompileState(List<String> structures) {
 	CompileState() : public/* {
             this(Lists.empty());
         } */
@@ -206,7 +206,7 @@
             return this.depth == 1;
         } */
 }
-/* private */record Joiner(String delimiter) implements Collector<String, Option<String>> {
+/* private */class Joiner(String delimiter) implements Collector<String, Option<String>> {
 	Joiner() : private/* {
             this("");
         } */
@@ -219,7 +219,7 @@
             return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
         } */
 }
-/* private */record Definition(Option<String> maybeBefore, String type, String name, List<String> typeParams) {
+/* private */class Definition(Option<String> maybeBefore, String type, String name, List<String> typeParams) {
 	/* private */ generate() : String/* {
             return this.generateWithParams("");
         } */
@@ -248,7 +248,7 @@
             return current.add(element);
         } */
 }
-/* private */record Tuple<A, B>(A left, B right) {
+/* private */class Tuple<A, B>(A left, B right) {
 }
 /* public */class Main {
 	/* public static */ main() : void/* {
@@ -336,15 +336,15 @@
         return compileClass(stripped, 0, state)
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
     } *//* private static Option<Tuple<CompileState, String>> compileClass(String stripped, int depth, CompileState state) {
-        return compileStructure(stripped, "class ", state);
-    } *//* private static Option<Tuple<CompileState, String>> compileStructure(String stripped, String infix, CompileState state) {
-        return first(stripped, infix, (beforeInfix, right) -> {
+        return compileStructure(stripped, "class ", "class ", state);
+    } *//* private static Option<Tuple<CompileState, String>> compileStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+        return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
                     var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
-                    var generated = generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements.right + "\n}\n";
+                    var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + strippedName + " {" + statements.right + "\n}\n";
                     return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
                 });
             });
@@ -368,8 +368,8 @@
     } *//* private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input, int depth) {
         return compileWhitespace(input, state)
                 .or(() -> compileClass(input, depth, state))
-                .or(() -> compileStructure(input, "interface ", state))
-                .or(() -> compileStructure(input, "record ", state))
+                .or(() -> compileStructure(input, "interface ", "interface ", state))
+                .or(() -> compileStructure(input, "record ", "class ", state))
                 .or(() -> compileMethod(input, depth, state))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
