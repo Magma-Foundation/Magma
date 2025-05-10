@@ -57,6 +57,8 @@ public class Main {
         T get(int index);
 
         Optional<Integer> indexOf(T element, BiFunction<T, T, Boolean> equator);
+
+        List<T> addAllLast(List<T> others);
     }
 
     private interface Head<T> {
@@ -240,9 +242,11 @@ public class Main {
             List<String> typeParams,
             List<Type> typeArguments,
             Optional<String> maybeCurrentStructName,
-            List<ObjectType> structures) {
+            List<ObjectType> structures,
+            List<String> methods
+    ) {
         public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty(), new ArrayList<>());
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty(), new ArrayList<>(), new ArrayList<>());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -261,11 +265,12 @@ public class Main {
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures);
+            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods);
         }
 
-        public CompileState addGenerative(String struct) {
-            return new CompileState(this.generated.addLast(struct), this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures);
+        public CompileState addStruct(String struct) {
+            return new CompileState(this.generated.addLast(struct)
+                    .addAllLast(this.methods), this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, new ArrayList<>());
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
@@ -281,15 +286,15 @@ public class Main {
         }
 
         public CompileState addTypeParameters(List<String> typeParams) {
-            return new CompileState(this.generated, this.expandables, this.expansions, typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures);
+            return new CompileState(this.generated, this.expandables, this.expansions, typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods);
         }
 
         public CompileState withStructureName(String name) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, Optional.of(name), this.structures);
+            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, Optional.of(name), this.structures, this.methods);
         }
 
         public CompileState addTypeArguments(List<Type> typeArguments) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, typeArguments, this.maybeCurrentStructName, this.structures);
+            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, typeArguments, this.maybeCurrentStructName, this.structures, this.methods);
         }
 
         public boolean isTypeDefined(String base) {
@@ -302,6 +307,10 @@ public class Main {
 
         private boolean isCurrentStructName(String base) {
             return this.maybeCurrentStructName.filter(value -> value.equals(base)).isPresent();
+        }
+
+        public CompileState addMethod(String method) {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods.addLast(method));
         }
     }
 
@@ -577,6 +586,11 @@ public class Main {
                     return Optional.<Integer>empty();
                 }
             }).flatMap(Iterators::fromOptional).next();
+        }
+
+        @Override
+        public List<T> addAllLast(List<T> others) {
+            return others.iterate().fold(this, (BiFunction<List<T>, T, List<T>>) List::addLast);
         }
     }
 
@@ -899,7 +913,7 @@ public class Main {
                 .addTypeArguments(typeArguments), content, Main::compileClassSegment);
 
         var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name, typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
-        var added = statementsTuple.left.addGenerative(generated);
+        var added = statementsTuple.left.addStruct(generated);
         return Optional.of(added);
     }
 
@@ -987,7 +1001,7 @@ public class Main {
 
         var generatedHeader = newDefinition.generate() + "(" + parametersString + ")";
         var generated = generatedHeader + newContent + "\n";
-        return Optional.of(new Tuple<>(state.addGenerative(generated), ""));
+        return Optional.of(new Tuple<>(state.addMethod(generated), ""));
     }
 
     private static Tuple<CompileState, String> compileOrPlaceholder(
