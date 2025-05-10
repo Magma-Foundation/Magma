@@ -77,11 +77,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private */struct Iterator_char_ref {/*  */
 };
@@ -125,11 +125,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -140,11 +140,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private sealed */struct Option_Tuple_char_ref_int {/*  */
 };
@@ -183,11 +183,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -198,11 +198,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -214,7 +214,7 @@ int Option_isEmpty(/*  */);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -225,18 +225,18 @@ struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private sealed */struct Option_int {/*  */
 };
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private */struct List_char_ref {/*  */
 };
@@ -312,11 +312,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -327,11 +327,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -343,7 +343,7 @@ int Option_isEmpty(/*  */);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -354,11 +354,11 @@ struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -424,11 +424,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -439,11 +439,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -455,7 +455,7 @@ int Option_isEmpty(/*  */);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -466,11 +466,11 @@ struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -514,11 +514,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct DivideState, 
 	struct List_Type
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private */struct Frame {/* public Frame() {
             this(new ArrayList<>(), new ArrayList<>(), new None<String>());
@@ -581,11 +581,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -596,11 +596,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -612,7 +612,7 @@ int Option_isEmpty(/*  */);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -623,11 +623,11 @@ struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -671,11 +671,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct DivideState, 
 	struct List_Type
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -798,11 +798,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -813,11 +813,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -829,7 +829,7 @@ int Option_isEmpty(/*  */);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -840,11 +840,11 @@ struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -888,11 +888,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct DivideState, 
 	struct List_Type
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -943,11 +943,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct List_Frame, 
 	struct Stack
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private */struct CompileState {/* public CompileState() {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
@@ -1238,11 +1238,11 @@ struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 	struct StandardLibrary, 
 	struct Lists
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -1253,11 +1253,11 @@ int Option_isEmpty(/*  */);
 	struct Option_char_ref, 
 	struct Iterator_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -1269,7 +1269,7 @@ int Option_isEmpty(/*  */);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1280,11 +1280,11 @@ struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
 	struct Iterator_char_ref, 
 	struct Option_Tuple_List_char_ref_char_ref
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -1328,11 +1328,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct DivideState, 
 	struct List_Type
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* List: [
 	struct Type, 
@@ -1383,11 +1383,11 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct List_Frame, 
 	struct Stack
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* Option: [
 	struct Type, 
@@ -1415,11 +1415,11 @@ int Option_isEmpty(/*  */);
 	struct ObjectType, 
 	struct Placeholder
 ] */
-struct Option_char_ref Option_or(struct Supplier_Option_char_ref other);
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
 struct Option_char_ref Option_filter(int (*predicate)(char*));
 char* Option_orElse(char* other);
-char* Option_orElseGet(struct Supplier_char_ref other);
+char* Option_orElseGet(char* (*other)());
 int Option_isEmpty(/*  */);
 /* private */struct Definition {/* public Definition mapType(Function<Type, Type> mapper) {
             return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
@@ -2155,6 +2155,11 @@ int Option_isEmpty(/*  */);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
+
+                if (base.equals("Supplier")) {
+                    var functional = new Functional(arguments.get(0), new ArrayList<>());
+                    return new Some<>(new Tuple<CompileState, Type>(argumentsState, functional));
+                }
 
                 if (base.equals("Predicate")) {
                     var functional = new Functional(Primitive.Int, Lists.of(arguments.get(0)));

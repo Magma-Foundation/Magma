@@ -1487,6 +1487,11 @@ public class Main {
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
 
+                if (base.equals("Supplier")) {
+                    var functional = new Functional(arguments.get(0), new ArrayList<>());
+                    return new Some<>(new Tuple<CompileState, Type>(argumentsState, functional));
+                }
+
                 if (base.equals("Predicate")) {
                     var functional = new Functional(Primitive.Int, Lists.of(arguments.get(0)));
                     return new Some<>(new Tuple<CompileState, Type>(argumentsState, functional));
