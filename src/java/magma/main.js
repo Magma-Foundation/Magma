@@ -27,11 +27,28 @@ private static  */ class State {
     return this.depth == 1;
 } */ /*
 */
-/* private */ Definition( /* String beforeType, String type, String name */);
+/*
+
+private static  */ class Joiner {
+}
+( /* Optional<String> current, String element */) => ; /* Optional<String> */ /* {
+    return Optional.of(current.map(inner -> inner + element).orElse(element));
+} */ /*
+*/
+/* private */ Definition( /* String beforeType, String type, String name, List<String> typeParams */);
+/*
+
+private static  */ class ListCollector {
+}
+( /* List<T> current, T element */) => ; /* List<T> */ /* {
+    return current.add(element);
+} */ /*
+*/
 /* public static */ main( /*  */);
 /* private static */ compile( /* String input */);
 /* private static */ compileStatements( /* String input, Function<String, String> mapper */);
-/* private static */ divide( /* String input */);
+/* private static */ divideStatements( /* String input */);
+/* private static */ divideAll( /* String input, BiFunction<State, Character, State> folder */);
 /* private static */ fold( /* State state, char c */);
 /* ' */ append.isShallow( /*  */);
 /*
@@ -54,7 +71,7 @@ if (c == '} */
     return first(stripped, infix, (left, right) -> {
         return first(right, "{", (name, withEnd) -> {
             var strippedWithEnd = withEnd.strip();
-            return compileSuffix(strippedWithEnd, "}", content1 -> {
+            return suffix(strippedWithEnd, "}", content1 -> {
                 var strippedName = name.strip();
 
                 var beforeIndent = depth == 0 ? "" : "\n\t";
@@ -74,7 +91,7 @@ if (c == '} */
         return false;
     }
     return true;
-} */ /* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+} */ /* private static <T> Optional<T> suffix(String input, String suffix, Function<String, Optional<T>> mapper) {
     if (!input.endsWith(suffix)) {
         return Optional.empty();
     }
@@ -101,23 +118,41 @@ if (c == '} */
 } */ /* private static String createIndent(int depth) {
     return "\n" + "\t".repeat(depth);
 } */ /* private static Optional<String> compileDefinitionStatement(String input, int depth) {
-    return compileSuffix(input.strip(), ";", withoutEnd -> {
+    return suffix(input.strip(), ";", withoutEnd -> {
         return parseDefinition(withoutEnd).map(result -> createIndent(depth) + result.generate() + ";");
     });
 } */ /* private static Optional<Definition> parseDefinition(String input) {
-    return compileLast(input.strip(), " ", (beforeName, name) -> {
-        return compileLast(beforeName, " ", (beforeType, type) -> {
-            return Optional.of(new Definition(beforeType, compileType(type), name.strip()));
+    return last(input.strip(), " ", (beforeName, name) -> {
+        return last(beforeName, " ", (beforeType, type) -> {
+            return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
+                return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
+                    var typeParams = divideAll(typeParamsString, Main::foldValueChar)
+                            .iterate()
+                            .map(String::strip)
+                            .collect(new ListCollector<>());
+
+                    return assembleDefinition(beforeTypeParams, name, typeParams, type);
+                });
+            }).or(() -> {
+                return assembleDefinition(beforeType, name, Lists.empty(), type);
+            });
         });
     });
+} */ /* private static Optional<Definition> assembleDefinition(String beforeTypeParams, String name, List<String> typeParams, String type) {
+    return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
+} */ /* private static State foldValueChar(State state, char c) {
+    if (c == ',') {
+        return state.advance();
+    }
+    return state.append(c);
 } */ /* private static String compileType(String type) {
     return generatePlaceholder(type);
-} */ /* private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+} */ /* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
     return compileInfix(input, infix, Main::findLast, mapper);
 } */ /* private static Optional<Integer> findLast(String input, String infix) {
     var index = input.lastIndexOf(infix);
     return index == -1 ? Optional.empty() : Optional.of(index);
-} */ /* private static Optional<String> first(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+} */ /* private static <T> Optional<T> first(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
     return compileInfix(input, infix, Main::findFirst, mapper);
 } */ /* private static <T> Optional<T> compileInfix(
         String input,

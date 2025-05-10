@@ -1,7 +1,16 @@
 /* public  */class Main {
-	/* private  */interface Iterator<T> {
-		/* <R> */ fold(/* R initial, BiFunction<R, T, R> folder */) : /* R */;
-		/* <R> */ map(/* Function<T, R> mapper */) : /* Iterator<R> */;/* 
+	/* private  */interface Collector<T, C> {
+		/* C createInitial */;
+		/* 
+
+        C fold */;/* 
+     */}
+	/* 
+
+    private  */interface Iterator<T> {
+		/*  */ fold<R>(/* R initial, BiFunction<R, T, R> folder */) : /* R */;
+		/*  */ map<R>(/* Function<T, R> mapper */) : /* Iterator<R> */;
+		/*  */ collect<R>(/* Collector<T, R> collector */) : /* R */;/* 
      */}
 	/* 
 
@@ -35,6 +44,11 @@
         @Override
         public <R> Iterator<R> map(Function<T, R> mapper) {
             return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <R> R collect(Collector<T, R> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
         }
     } */
 	/* 
@@ -80,7 +94,7 @@
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
         } */
-		/* public static <T> */ empty(/*  */) : /* List<T> *//* {
+		/* public static  */ empty<T>(/*  */) : /* List<T> *//* {
             return new JVMList<>();
         } *//* 
      */}
@@ -126,15 +140,44 @@
             return this.depth == 1;
         } *//* 
      */}
-	/* private */ Definition(/* String beforeType, String type, String name */) : /* record *//* {
+	/* 
+
+    private static  */class Joiner implements Collector<String, Optional<String>> {
+		/* @Override
+        public */ createInitial(/*  */) : /* Optional<String> *//* {
+            return Optional.empty();
+        } */
+		/* @Override
+        public */ fold(/* Optional<String> current, String element */) : /* Optional<String> *//* {
+            return Optional.of(current.map(inner -> inner + element).orElse(element));
+        } *//* 
+     */}
+	/* private */ Definition(/* String beforeType, String type, String name, List<String> typeParams */) : /* record *//* {
         private String generate() {
             return this.generateWithParams("");
         }
 
         public String generateWithParams(String params) {
-            return generatePlaceholder(this.beforeType) + " " + this.name + params + " : " + this.type;
+            var joined = this.typeParams.iterate()
+                    .collect(new Joiner())
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+
+            return generatePlaceholder(this.beforeType) + " " + this.name + joined + params + " : " + this.type;
         }
     } */
+	/* 
+
+    private static  */class ListCollector<T> implements Collector<T, List<T>> {
+		/* @Override
+        public */ createInitial(/*  */) : /* List<T> *//* {
+            return Lists.empty();
+        } */
+		/* @Override
+        public */ fold(/* List<T> current, T element */) : /* List<T> *//* {
+            return current.add(element);
+        } *//* 
+     */}
 	/* public static */ main(/*  */) : /* void *//* {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
@@ -156,17 +199,20 @@
         return compileStatements(input, Main::compileRootSegment);
     } */
 	/* private static */ compileStatements(/* String input, Function<String, String> mapper */) : /* String *//* {
-        return divide(input)
+        return divideStatements(input)
                 .iterate()
                 .map(mapper)
                 .fold(new StringBuilder(), StringBuilder::append)
                 .toString();
     } */
-	/* private static */ divide(/* String input */) : /* List<String> *//* {
+	/* private static */ divideStatements(/* String input */) : /* List<String> *//* {
+        return divideAll(input, Main::fold);
+    } */
+	/* private static */ divideAll(/* String input, BiFunction<State, Character, State> folder */) : /* List<String> *//* {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            current = fold(current, c);
+            current = folder.apply(current, c);
         }
 
         return current.advance().segments;
@@ -204,7 +250,7 @@
         return first(stripped, infix, (left, right) -> {
             return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
-                return compileSuffix(strippedWithEnd, "}", content1 -> {
+                return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
 
                     var beforeIndent = depth == 0 ? "" : "\n\t";
@@ -224,7 +270,7 @@
             return false;
         }
         return true;
-    } *//* private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+    } *//* private static <T> Optional<T> suffix(String input, String suffix, Function<String, Optional<T>> mapper) {
         if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
@@ -251,23 +297,41 @@
     } *//* private static String createIndent(int depth) {
         return "\n" + "\t".repeat(depth);
     } *//* private static Optional<String> compileDefinitionStatement(String input, int depth) {
-        return compileSuffix(input.strip(), ";", withoutEnd -> {
+        return suffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(withoutEnd).map(result -> createIndent(depth) + result.generate() + ";");
         });
     } *//* private static Optional<Definition> parseDefinition(String input) {
-        return compileLast(input.strip(), " ", (beforeName, name) -> {
-            return compileLast(beforeName, " ", (beforeType, type) -> {
-                return Optional.of(new Definition(beforeType, compileType(type), name.strip()));
+        return last(input.strip(), " ", (beforeName, name) -> {
+            return last(beforeName, " ", (beforeType, type) -> {
+                return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
+                    return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
+                        var typeParams = divideAll(typeParamsString, Main::foldValueChar)
+                                .iterate()
+                                .map(String::strip)
+                                .collect(new ListCollector<>());
+
+                        return assembleDefinition(beforeTypeParams, name, typeParams, type);
+                    });
+                }).or(() -> {
+                    return assembleDefinition(beforeType, name, Lists.empty(), type);
+                });
             });
         });
+    } *//* private static Optional<Definition> assembleDefinition(String beforeTypeParams, String name, List<String> typeParams, String type) {
+        return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
+    } *//* private static State foldValueChar(State state, char c) {
+        if (c == ',') {
+            return state.advance();
+        }
+        return state.append(c);
     } *//* private static String compileType(String type) {
         return generatePlaceholder(type);
-    } *//* private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+    } *//* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
         return compileInfix(input, infix, Main::findLast, mapper);
     } *//* private static Optional<Integer> findLast(String input, String infix) {
         var index = input.lastIndexOf(infix);
         return index == -1 ? Optional.empty() : Optional.of(index);
-    } *//* private static Optional<String> first(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    } *//* private static <T> Optional<T> first(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
         return compileInfix(input, infix, Main::findFirst, mapper);
     } *//* private static <T> Optional<T> compileInfix(
             String input,
