@@ -370,8 +370,13 @@ public class Main {
         return state.append(c);
     }
 
-    private static String compileType(String type) {
-        return generatePlaceholder(type);
+    private static String compileType(String input) {
+        var stripped = input.strip();
+        if(isSymbol(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     }
 
     private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {

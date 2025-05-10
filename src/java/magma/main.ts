@@ -1,14 +1,14 @@
 /* public  */class Main {
 	/* private  */interface Collector<T, C> {
-		createInitial(/*  */) : /* C */;
-		fold(/* C current, T element */) : /* C */;/* 
+		createInitial(/*  */) : C;
+		fold(/* C current, T element */) : C;/* 
      */}
 	/* 
 
     private  */interface Iterator<T> {
-		/*  */ fold<R>(/* R initial, BiFunction<R, T, R> folder */) : /* R */;
+		/*  */ fold<R>(/* R initial, BiFunction<R, T, R> folder */) : R;
 		/*  */ map<R>(/* Function<T, R> mapper */) : /* Iterator<R> */;
-		/*  */ collect<R>(/* Collector<T, R> collector */) : /* R */;/* 
+		/*  */ collect<R>(/* Collector<T, R> collector */) : R;/* 
      */}
 	/* 
 
@@ -21,7 +21,7 @@
     private  */interface Head<T> {
 		next(/*  */) : /* Optional<T> */;/* 
      */}
-	/* private */ HeadedIterator<T>(/* Head<T> head */) : /* record *//* implements Iterator<T> {
+	/* private */ HeadedIterator<T>(/* Head<T> head */) : record/* implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
@@ -50,9 +50,9 @@
 	/* 
 
     private static  */class RangeHead implements Head<Integer> {
-		/* private final */ length : /* int */;
-		/* private */ counter : /* int */;
-		RangeHead(/* int length */) : /* public *//* {
+		/* private final */ length : int;
+		/* private */ counter : int;
+		RangeHead(/* int length */) : public/* {
             this.length = length;
         } */
 		/* @Override
@@ -70,7 +70,7 @@
 
 
     private static  */class Lists {
-		/* private */ JVMList<T>(/* java.util.List<T> elements */) : /* record *//* implements List<T> {
+		/* private */ JVMList<T>(/* java.util.List<T> elements */) : record/* implements List<T> {
 
 
             public JVMList() {
@@ -96,37 +96,37 @@
 
     private static  */class State {
 		/* private */ segments : /* List<String> */;
-		/* private */ buffer : /* StringBuilder */;
-		/* private */ depth : /* int */;
-		State(/* List<String> segments, StringBuilder buffer, int depth */) : /* public *//* {
+		/* private */ buffer : StringBuilder;
+		/* private */ depth : int;
+		State(/* List<String> segments, StringBuilder buffer, int depth */) : public/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
-		State(/*  */) : /* public *//* {
+		State(/*  */) : public/* {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
-		/* private */ advance(/*  */) : /* State *//* {
+		/* private */ advance(/*  */) : State/* {
             this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } */
-		/* private */ append(/* char c */) : /* State *//* {
+		/* private */ append(/* char c */) : State/* {
             this.buffer.append(c);
             return this;
         } */
-		/* public */ enter(/*  */) : /* State *//* {
+		/* public */ enter(/*  */) : State/* {
             this.depth++;
             return this;
         } */
-		/* public */ isLevel(/*  */) : /* boolean *//* {
+		/* public */ isLevel(/*  */) : boolean/* {
             return this.depth == 0;
         } */
-		/* public */ exit(/*  */) : /* State *//* {
+		/* public */ exit(/*  */) : State/* {
             this.depth--;
             return this;
         } */
-		/* public */ isShallow(/*  */) : /* boolean *//* {
+		/* public */ isShallow(/*  */) : boolean/* {
             return this.depth == 1;
         } *//* 
      */}
@@ -142,7 +142,7 @@
             return Optional.of(current.map(inner -> inner + element).orElse(element));
         } *//* 
      */}
-	/* private */ Definition(/* Optional<String> maybeBefore, String type, String name, List<String> typeParams */) : /* record *//* {
+	/* private */ Definition(/* Optional<String> maybeBefore, String type, String name, List<String> typeParams */) : record/* {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -172,7 +172,7 @@
             return current.add(element);
         } *//* 
      */}
-	/* public static */ main(/*  */) : /* void *//* {
+	/* public static */ main(/*  */) : void/* {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
             var source = parent.resolve("Main.java");
@@ -189,10 +189,10 @@
             throw new RuntimeException(e);
         }
     } */
-	/* private static */ compile(/* String input */) : /* String *//* {
+	/* private static */ compile(/* String input */) : String/* {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	/* private static */ compileStatements(/* String input, Function<String, String> mapper */) : /* String *//* {
+	/* private static */ compileStatements(/* String input, Function<String, String> mapper */) : String/* {
         return divideStatements(input)
                 .iterate()
                 .map(mapper)
@@ -211,7 +211,7 @@
 
         return current.advance().segments;
     } */
-	/* private static */ fold(/* State state, char c */) : /* State *//* {
+	/* private static */ fold(/* State state, char c */) : State/* {
         var append = state.append(c);
         if (c == ';' && append.isLevel()) {
             return append.advance();
@@ -226,9 +226,9 @@
         }
         if (c == '} */
 	/* ') {
-            */ append.exit(/*  */) : /* return *//* ;
+            */ append.exit(/*  */) : return/* ;
         } */
-	append : /* return */;/* 
+	append : return;/* 
      */
 }
 /* private static String compileRootSegment(String input) {
@@ -320,8 +320,13 @@
             return state.advance();
         }
         return state.append(c);
-    } *//* private static String compileType(String type) {
-        return generatePlaceholder(type);
+    } *//* private static String compileType(String input) {
+        var stripped = input.strip();
+        if(isSymbol(stripped)) {
+            return stripped;
+        }
+
+        return generatePlaceholder(stripped);
     } *//* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
         return compileInfix(input, infix, Main::findLast, mapper);
     } *//* private static Optional<Integer> findLast(String input, String infix) {

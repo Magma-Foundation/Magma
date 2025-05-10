@@ -2,43 +2,45 @@
 /* public  */ class Main {
 }
 /* private */ HeadedIterator( /* Head<T> head */);
+record; /* implements Iterator<T> {
+    @Override
+    public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+        var current = initial;
+        while (true) {
+            R finalCurrent = current;
+            var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+            if (optional.isPresent()) {
+                current = optional.get();
+            }
+            else {
+                return current;
+            }
+        }
+    }
+
+    @Override
+    public <R> Iterator<R> map(Function<T, R> mapper) {
+        return new HeadedIterator<>(() -> this.head.next().map(mapper));
+    }
+
+    @Override
+    public <R> R collect(Collector<T, R> collector) {
+        return this.fold(collector.createInitial(), collector::fold);
+    }
+} */
 /*
 
 private static  */ class RangeHead {
 }
-( /*  */) => ; /* Optional<Integer> */ /* {
-    if (this.counter < this.length) {
-        var value = this.counter;
-        this.counter++;
-        return Optional.of(value);
-    }
-
-    return Optional.empty();
-} */ /*
-*/
 /*
 
 
 private static  */ class Lists {
 }
-( /*  */) => ; /* List<T> */ /* {
-    return new JVMList<>();
-} */ /*
-*/
 /*
 
 private static  */ class State {
 }
-( /*  */) => ;
-( /*  */) => ;
-( /* char c */) => ;
-( /*  */) => ;
-( /*  */) => ;
-( /*  */) => ;
-( /*  */) => ; /* boolean */ /* {
-    return this.depth == 1;
-} */ /*
-*/
 /*
 
 private static  */ class Joiner {
@@ -48,6 +50,24 @@ private static  */ class Joiner {
 } */ /*
 */
 /* private */ Definition( /* Optional<String> maybeBefore, String type, String name, List<String> typeParams */);
+record; /* {
+    private String generate() {
+        return this.generateWithParams("");
+    }
+
+    public String generateWithParams(String params) {
+        var joined = this.typeParams.iterate()
+                .collect(new Joiner())
+                .map(inner -> "<" + inner + ">")
+                .orElse("");
+
+        var before = this.maybeBefore.map(Main::generatePlaceholder)
+                .map(inner -> inner + " ")
+                .orElse("");
+
+        return before + this.name + joined + params + " : " + this.type;
+    }
+} */
 /*
 
 private static  */ class ListCollector {
@@ -57,11 +77,44 @@ private static  */ class ListCollector {
 } */ /*
 */
 /* public static */ main( /*  */);
+void /* {
+    try {
+        var parent = Paths.get(".", "src", "java", "magma");
+        var source = parent.resolve("Main.java");
+        var target = parent.resolve("main.ts");
+
+        var input = Files.readString(source);
+        Files.writeString(target, compile(input));
+
+        new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
+                .inheritIO()
+                .start()
+                .waitFor();
+    } catch (IOException | InterruptedException e) {
+        throw new RuntimeException(e);
+    }
+} */ 
 /* private static */ compile( /* String input */);
+String; /* {
+    return compileStatements(input, Main::compileRootSegment);
+} */
 /* private static */ compileStatements( /* String input, Function<String, String> mapper */);
+String; /* {
+    return divideStatements(input)
+            .iterate()
+            .map(mapper)
+            .fold(new StringBuilder(), StringBuilder::append)
+            .toString();
+} */
 /* private static */ divideStatements( /* String input */);
 /* private static */ divideAll( /* String input, BiFunction<State, Character, State> folder */);
 /* private static */ fold( /* State state, char c */);
+State; /* {
+    var append = state.append(c);
+    if (c == ';' && append.isLevel()) {
+        return append.advance();
+    }
+    if (c == '} */
 /* ' */ append.isShallow( /*  */);
 /*
     if  */ /* {
@@ -70,7 +123,9 @@ private static  */ class ListCollector {
 if (c == '} */
 /* ') {
         */ append.exit( /*  */);
-append: /* return */ ; /*
+return; /* ;
+} */
+append: return; /*
  */
 /* private static String compileRootSegment(String input) {
         var stripped = input.strip();
@@ -161,8 +216,13 @@ append: /* return */ ; /*
         return state.advance();
     }
     return state.append(c);
-} */ /* private static String compileType(String type) {
-    return generatePlaceholder(type);
+} */ /* private static String compileType(String input) {
+    var stripped = input.strip();
+    if(isSymbol(stripped)) {
+        return stripped;
+    }
+
+    return generatePlaceholder(stripped);
 } */ /* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
     return compileInfix(input, infix, Main::findLast, mapper);
 } */ /* private static Optional<Integer> findLast(String input, String infix) {
