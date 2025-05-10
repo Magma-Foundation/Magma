@@ -53,6 +53,8 @@ public class Main {
         Optional<Tuple<List<T>, T>> removeLast();
 
         boolean isEmpty();
+
+        T get(int index);
     }
 
     private interface Head<T> {
@@ -534,6 +536,11 @@ public class Main {
         public boolean isEmpty() {
             return this.size() == 0;
         }
+
+        @Override
+        public T get(int index) {
+            return this.array[index];
+        }
     }
 
     private record TypeParam(String input) implements Type {
@@ -592,6 +599,48 @@ public class Main {
             }
             // we got an R from inner
             return nextInner;
+        }
+    }
+
+    private record Functional(Type returnType, List<Type> typeParameters) implements Type {
+        @Override
+        public String stringify() {
+            var joinedParameters = this.typeParameters.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .map(inner -> inner + "_")
+                    .orElse("");
+
+            return "Func_" + joinedParameters + this.returnType.stringify();
+        }
+
+        @Override
+        public String generate() {
+            var joined = this.typeParameters.iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.returnType.generate() + " (*)(" + joined + ")";
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof Functional functional
+                    && this.returnType.equalsTo(functional.returnType)
+                    && this.typeParameters.equalsTo(functional.typeParameters, Type::equalsTo);
+        }
+
+        @Override
+        public Type strip() {
+            return new Functional(this.returnType.strip(), this.typeParameters.iterate()
+                    .map(Type::strip)
+                    .collect(new ListCollector<>()));
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return this.returnType.isParameterized() || this.typeParameters.iterate().anyMatch(Type::isParameterized);
         }
     }
 
@@ -1082,13 +1131,18 @@ public class Main {
         return Optional.empty();
     }
 
-    private static Optional<Tuple<CompileState, ObjectType>> parseTemplate(CompileState oldState, String input) {
+    private static Optional<Tuple<CompileState, Type>> parseTemplate(CompileState oldState, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
-            return compileFirst(withoutEnd, "<", (base, argumentsString) -> {
+            return Main.compileFirst(withoutEnd, "<", (base, argumentsString) -> {
                 var argumentsTuple = parseValues(oldState, argumentsString, Main::parseTypeOrPlaceholder);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
+
+                if (base.equals("BiFunction")) {
+                    var functional = new Functional(arguments.get(2), Lists.of(arguments.get(0), arguments.get(1)));
+                    return Optional.of(new Tuple<>(argumentsState, functional));
+                }
 
                 var expansion = new ObjectType(base, arguments);
                 CompileState withExpansion;

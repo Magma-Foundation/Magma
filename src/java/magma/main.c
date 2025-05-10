@@ -35,20 +35,22 @@ int Iterator_allMatch(struct Predicate_T predicate);
 /* private */struct Iterator_T {/*  */
 };
 struct Iterator_T Iterator_iterate(/*  */);
-int Iterator_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
-int Iterator_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int Iterator_contains(struct T element, /* Boolean */ (*)(struct T, /* T */) equator);
+int Iterator_equalsTo(struct List_T others, /* Boolean */ (*)(struct T, /* T */) equator);
 int Iterator_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ Iterator_removeLast(/*  */);
 int Iterator_isEmpty(/*  */);
+struct T Iterator_get(int index);
 /* private */struct List_T {/*  */
 };
 struct List_T Iterator_addLast(struct T element);
 struct Iterator_T Iterator_iterate(/*  */);
-int Iterator_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
-int Iterator_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int Iterator_contains(struct T element, /* Boolean */ (*)(struct T, /* T */) equator);
+int Iterator_equalsTo(struct List_T others, /* Boolean */ (*)(struct T, /* T */) equator);
 int Iterator_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ Iterator_removeLast(/*  */);
 int Iterator_isEmpty(/*  */);
+struct T Iterator_get(int index);
 /* private */struct List_char_ref {/*  */
 };
 struct public Iterator_DivideState(/*  */);/*  {
@@ -88,20 +90,22 @@ struct public Iterator_DivideState(/*  */);/*  {
 };
 struct List_T List_addLast(struct T element);
 struct Iterator_T List_iterate(/*  */);
-int List_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
-int List_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int List_contains(struct T element, /* Boolean */ (*)(struct T, /* T */) equator);
+int List_equalsTo(struct List_T others, /* Boolean */ (*)(struct T, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
+struct T List_get(int index);
 /* private */struct List_Type {/*  */
 };
 struct List_T List_addLast(struct T element);
 struct Iterator_T List_iterate(/*  */);
-int List_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
-int List_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int List_contains(struct T element, /* Boolean */ (*)(struct T, /* T */) equator);
+int List_equalsTo(struct List_T others, /* Boolean */ (*)(struct T, /* T */) equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
+struct T List_get(int index);
 /* private */struct List_ObjectType {/*  */
 };
 struct public CompileState_CompileState(/*  */);/*  {
@@ -247,7 +251,39 @@ struct public CompileState_CompileState(/*  */);/*  {
         } */
 /* private */struct TypeParam {/*  */
 };
-/* public static */ void TypeParam_main(/*  */);/*  {
+/* public */ char* Functional_stringify(/*  */);/*  {
+            var joinedParameters = this.typeParameters.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .map(inner -> inner + "_")
+                    .orElse("");
+
+            return "Func_" + joinedParameters + this.returnType.stringify();
+        } */
+/* public */ char* Functional_generate(/*  */);/*  {
+            var joined = this.typeParameters.iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.returnType.generate() + " (*)(" + joined + ")";
+        } */
+/* public */ int Functional_equalsTo(struct Type other);/*  {
+            return other instanceof Functional functional
+                    && this.returnType.equalsTo(functional.returnType)
+                    && this.typeParameters.equalsTo(functional.typeParameters, Type::equalsTo);
+        } */
+/* public */ struct Type Functional_strip(/*  */);/*  {
+            return new Functional(this.returnType.strip(), this.typeParameters.iterate()
+                    .map(Type::strip)
+                    .collect(new ListCollector<>()));
+        } */
+/* public */ int Functional_isParameterized(/*  */);/*  {
+            return this.returnType.isParameterized() || this.typeParameters.iterate().anyMatch(Type::isParameterized);
+        } */
+/* private */struct Functional {/*  */
+};
+/* public static */ void Functional_main(/*  */);/*  {
         try {
             var root = Paths.get(".", "src", "java", "magma");
             var source = root.resolve("main.java");
@@ -264,36 +300,36 @@ struct public CompileState_CompileState(/*  */);/*  {
             e.printStackTrace();
         }
     } */
-/* private static */ char* TypeParam_compile(char* input);/*  {
+/* private static */ char* Functional_compile(char* input);/*  {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var compiledState = compiled.left;
 
         var joined = joinWithDelimiter(compiledState.generated, "");
         return joined + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     } */
-/* private static */ char* TypeParam_joinWithDelimiter(struct List_char_ref items, char* delimiter);/*  {
+/* private static */ char* Functional_joinWithDelimiter(struct List_char_ref items, char* delimiter);/*  {
         return items.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
 /* private */struct Tuple_CompileState_char_ref {/*  */
 };
-/* private static */ struct Tuple_CompileState_char_ref Tuple_compileStatements(struct CompileState initial, char* input, struct BiFunction_CompileState_char_ref_Tuple_CompileState_char_ref mapper);/*  {
+/* private static */ struct Tuple_CompileState_char_ref Tuple_compileStatements(struct CompileState initial, char* input, struct Tuple_CompileState_char_ref (*)(struct CompileState, char*) mapper);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */
-/* private static */ struct Tuple_CompileState_char_ref Tuple_compileAll(struct CompileState initial, char* input, struct BiFunction_DivideState_/* Character */_/* DivideState */ folder, struct BiFunction_CompileState_char_ref_Tuple_CompileState_char_ref mapper, struct BiFunction_char_ref_char_ref_char_ref merger);/*  {
+/* private static */ struct Tuple_CompileState_char_ref Tuple_compileAll(struct CompileState initial, char* input, /* DivideState */ (*)(struct DivideState, /* Character */) folder, struct Tuple_CompileState_char_ref (*)(struct CompileState, char*) mapper, char* (*)(char*, char*) merger);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
     } */
 /* private */struct Tuple_CompileState_/* T */ {/*  */
 };
-/* private static */ char* Tuple_generateAll(struct List_char_ref elements, struct BiFunction_char_ref_char_ref_char_ref merger);/*  {
+/* private static */ char* Tuple_generateAll(struct List_char_ref elements, char* (*)(char*, char*) merger);/*  {
         return elements.iterate().fold("", merger);
     } */
 /* private static */ char* Tuple_merge(char* buffer, char* element);/*  {
         return buffer + element;
     } */
-/* private static */ struct List_char_ref Tuple_divide(char* input, struct BiFunction_DivideState_/* Character */_/* DivideState */ folder);/*  {
+/* private static */ struct List_char_ref Tuple_divide(char* input, /* DivideState */ (*)(struct DivideState, /* Character */) folder);/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -680,13 +716,18 @@ struct public CompileState_CompileState(/*  */);/*  {
 
         return Optional.empty();
     } */
-	/* private static Optional<Tuple<CompileState, ObjectType>> parseTemplate(CompileState oldState, String input) {
+	/* private static Optional<Tuple<CompileState, Type>> parseTemplate(CompileState oldState, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
-            return compileFirst(withoutEnd, "<", (base, argumentsString) -> {
+            return Main.compileFirst(withoutEnd, "<", (base, argumentsString) -> {
                 var argumentsTuple = parseValues(oldState, argumentsString, Main::parseTypeOrPlaceholder);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
+
+                if (base.equals("BiFunction")) {
+                    var functional = new Functional(arguments.get(2), Lists.of(arguments.get(0), arguments.get(1)));
+                    return Optional.of(new Tuple<>(argumentsState, functional));
+                }
 
                 var expansion = new ObjectType(base, arguments);
                 CompileState withExpansion;
