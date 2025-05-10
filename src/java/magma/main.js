@@ -296,6 +296,10 @@ append: return;
     return appended;
 } */ /* private static String type(String input) {
     var stripped = input.strip();
+    if (stripped.equals("int")) {
+        return "number";
+    }
+
     if (isSymbol(stripped)) {
         return stripped;
     }
@@ -306,7 +310,7 @@ append: return;
         return first(withoutEnd, "<", (base, argumentsString) -> {
             var strippedBase = base.strip();
             var arguments = parseValues(argumentsString, Main::type);
-            
+
             if (base.equals("BiFunction")) {
                 return Optional.of(generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
             }

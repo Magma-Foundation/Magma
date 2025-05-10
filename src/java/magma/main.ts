@@ -12,7 +12,7 @@
 		add(element : T) : List<T>;
 		iterate() : Iterator<T>;
 		removeLast() : Optional<Tuple<List<T>, T>>;
-		get(index : int) : T;
+		get(index : number) : T;
 	}
 	/* private */interface Head<T> {
 		next() : Optional<T>;
@@ -44,9 +44,9 @@
         }
     } */
 	/* private static */class RangeHead implements Head<Integer> {
-		/* private final */ length : int;
-		/* private */ counter : int;
-		RangeHead(length : int) : public/* {
+		/* private final */ length : number;
+		/* private */ counter : number;
+		RangeHead(length : number) : public/* {
             this.length = length;
         } */
 		/* @Override
@@ -105,8 +105,8 @@
 	/* private static */class State {
 		/* private */ segments : List<String>;
 		/* private */ buffer : StringBuilder;
-		/* private */ depth : int;
-		State(segments : List<String>, buffer : StringBuilder, depth : int) : public/* {
+		/* private */ depth : number;
+		State(segments : List<String>, buffer : StringBuilder, depth : number) : public/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -397,6 +397,10 @@
         return appended;
     } *//* private static String type(String input) {
         var stripped = input.strip();
+        if (stripped.equals("int")) {
+            return "number";
+        }
+
         if (isSymbol(stripped)) {
             return stripped;
         }
@@ -407,7 +411,7 @@
             return first(withoutEnd, "<", (base, argumentsString) -> {
                 var strippedBase = base.strip();
                 var arguments = parseValues(argumentsString, Main::type);
-                
+
                 if (base.equals("BiFunction")) {
                     return Optional.of(generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
                 }

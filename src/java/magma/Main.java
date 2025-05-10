@@ -495,6 +495,10 @@ public class Main {
 
     private static String type(String input) {
         var stripped = input.strip();
+        if (stripped.equals("int")) {
+            return "number";
+        }
+
         if (isSymbol(stripped)) {
             return stripped;
         }
