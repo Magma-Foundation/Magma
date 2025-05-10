@@ -1,5 +1,5 @@
 "use strict";
-/* public  */ class Main {
+/* public */ class Main {
 }
 /* private */ HeadedIterator(head);
 record; /* implements Iterator<T> {
@@ -28,18 +28,11 @@ record; /* implements Iterator<T> {
         return this.fold(collector.createInitial(), collector::fold);
     }
 } */
-/*
-
-private static  */ class RangeHead {
+/* private static */ class RangeHead {
 }
-/*
-
-
-private static  */ class Lists {
+/* private static */ class Lists {
 }
-/*
-
-private static  */ class State {
+/* private static */ class State {
 }
 /* private */ Joiner(delimiter, String);
 record; /* implements Collector<String, Optional<String>> {
@@ -78,14 +71,11 @@ record; /* {
         return before + this.name + joined + params + " : " + this.type;
     }
 } */
-/*
-
-private static  */ class ListCollector {
+/* private static */ class ListCollector {
 }
 (current /* List<T> */, element) => ; /* List<T> */ /* {
     return current.add(element);
-} */ /*
-*/
+} */
 /* private record */ B > (left);
 A, right;
 B;
@@ -146,8 +136,7 @@ if (c == '} */
         */ append.exit();
 return; /* ;
 } */
-append: return; /*
- */
+append: return;
 /* private static String compileRootSegment(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -158,17 +147,18 @@ append: return; /*
     } */ /* private static Optional<String> compileClass(String stripped, int depth) {
     return compileStructure(stripped, depth, "class ");
 } */ /* private static Optional<String> compileStructure(String stripped, int depth, String infix) {
-    return first(stripped, infix, (left, right) -> {
+    return first(stripped, infix, (beforeInfix, right) -> {
         return first(right, "{", (name, withEnd) -> {
             var strippedWithEnd = withEnd.strip();
             return suffix(strippedWithEnd, "}", content1 -> {
                 var strippedName = name.strip();
 
-                var beforeIndent = depth == 0 ? "" : "\n\t";
-                var afterIndent = depth == 0 ? "\n" : "";
+                var indent = createIndent(depth);
+                var beforeIndent = depth == 0 ? "" : indent;
+                var afterBlock = depth == 0 ? "\n" : "";
 
                 var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                return Optional.of(beforeIndent + generatePlaceholder(left) + infix + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                return Optional.of(beforeIndent + generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements + indent + "}" + afterBlock);
             });
         });
     });
@@ -189,11 +179,17 @@ append: return; /*
     var slice = input.substring(0, input.length() - suffix.length());
     return mapper.apply(slice);
 } */ /* private static String compileClassSegment(String input, int depth) {
-    return compileClass(input, depth)
+    return compileWhitespace(input)
+            .or(() -> compileClass(input, depth))
             .or(() -> compileStructure(input, depth, "interface "))
             .or(() -> compileMethod(input, depth))
             .or(() -> compileDefinitionStatement(input, depth))
             .orElseGet(() -> generatePlaceholder(input));
+} */ /* private static Optional<String> compileWhitespace(String input) {
+    if (input.isBlank()) {
+        return Optional.of("");
+    }
+    return Optional.empty();
 } */ /* private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
     return first(input, "(", (definition, withParams) -> {
         return first(withParams, ")", (params, rawContent) -> {

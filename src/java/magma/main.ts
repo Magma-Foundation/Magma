@@ -1,27 +1,21 @@
-/* public  */class Main {
-	/* private  */interface Collector<T, C> {
+/* public */class Main {
+	/* private */interface Collector<T, C> {
 		createInitial() : C;
-		fold(current : C, element : T) : C;/* 
-     */}
-	/* 
-
-    private  */interface Iterator<T> {
+		fold(current : C, element : T) : C;
+	}
+	/* private */interface Iterator<T> {
 		fold<R>(initial : R, folder : /* BiFunction<R, T, R> */) : R;
 		map<R>(mapper : /* Function<T, R> */) : /* Iterator<R> */;
-		collect<R>(collector : /* Collector<T, R> */) : R;/* 
-     */}
-	/* 
-
-    private  */interface List<T> {
+		collect<R>(collector : /* Collector<T, R> */) : R;
+	}
+	/* private */interface List<T> {
 		add(element : T) : /* List<T> */;
 		iterate() : /* Iterator<T> */;
-		removeLast() : /* Optional<Tuple<List<T>, T>> */;/* 
-     */}
-	/* 
-
-    private  */interface Head<T> {
-		next() : /* Optional<T> */;/* 
-     */}
+		removeLast() : /* Optional<Tuple<List<T>, T>> */;
+	}
+	/* private */interface Head<T> {
+		next() : /* Optional<T> */;
+	}
 	/* private */ HeadedIterator<T>(head : /* Head<T> */) : record/* implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
@@ -48,9 +42,7 @@
             return this.fold(collector.createInitial(), collector::fold);
         }
     } */
-	/* 
-
-    private static  */class RangeHead implements Head<Integer> {
+	/* private static */class RangeHead implements Head<Integer> {
 		/* private final */ length : int;
 		/* private */ counter : int;
 		RangeHead(length : int) : public/* {
@@ -65,12 +57,9 @@
             }
 
             return Optional.empty();
-        } *//* 
-     */}
-	/* 
-
-
-    private static  */class Lists {
+        } */
+	}
+	/* private static */class Lists {
 		/* private */ JVMList<T>(elements : /* java.util.List<T> */) : record/* implements List<T> {
 
 
@@ -102,11 +91,9 @@
         } */
 		/* public static  */ empty<T>() : /* List<T> *//* {
             return new JVMList<>();
-        } *//* 
-     */}
-	/* 
-
-    private static  */class State {
+        } */
+	}
+	/* private static */class State {
 		/* private */ segments : /* List<String> */;
 		/* private */ buffer : StringBuilder;
 		/* private */ depth : int;
@@ -140,8 +127,8 @@
         } */
 		/* public */ isShallow() : boolean/* {
             return this.depth == 1;
-        } *//* 
-     */}
+        } */
+	}
 	/* private */ Joiner(delimiter : String) : record/* implements Collector<String, Optional<String>> {
         private Joiner() {
             this("");
@@ -177,9 +164,7 @@
             return before + this.name + joined + params + " : " + this.type;
         }
     } */
-	/* 
-
-    private static  */class ListCollector<T> implements Collector<T, List<T>> {
+	/* private static */class ListCollector<T> implements Collector<T, List<T>> {
 		/* @Override
         public */ createInitial() : /* List<T> *//* {
             return Lists.empty();
@@ -187,8 +172,8 @@
 		/* @Override
         public */ fold(current : /* List<T> */, element : T) : /* List<T> *//* {
             return current.add(element);
-        } *//* 
-     */}
+        } */
+	}
 	/* private record */ B>(left : A, right : B) : /* Tuple<A, *//* {
     } */
 	/* public static */ main() : void/* {
@@ -253,8 +238,7 @@
 	/* ') {
             */ append.exit() : return/* ;
         } */
-	append : return;/* 
-     */
+	append : return;
 }
 /* private static String compileRootSegment(String input) {
         var stripped = input.strip();
@@ -266,17 +250,18 @@
     } *//* private static Optional<String> compileClass(String stripped, int depth) {
         return compileStructure(stripped, depth, "class ");
     } *//* private static Optional<String> compileStructure(String stripped, int depth, String infix) {
-        return first(stripped, infix, (left, right) -> {
+        return first(stripped, infix, (beforeInfix, right) -> {
             return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
 
-                    var beforeIndent = depth == 0 ? "" : "\n\t";
-                    var afterIndent = depth == 0 ? "\n" : "";
+                    var indent = createIndent(depth);
+                    var beforeIndent = depth == 0 ? "" : indent;
+                    var afterBlock = depth == 0 ? "\n" : "";
 
                     var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                    return Optional.of(beforeIndent + generatePlaceholder(left) + infix + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                    return Optional.of(beforeIndent + generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements + indent + "}" + afterBlock);
                 });
             });
         });
@@ -297,11 +282,17 @@
         var slice = input.substring(0, input.length() - suffix.length());
         return mapper.apply(slice);
     } *//* private static String compileClassSegment(String input, int depth) {
-        return compileClass(input, depth)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input, depth))
                 .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> compileDefinitionStatement(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
+    } *//* private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     } *//* private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
         return first(input, "(", (definition, withParams) -> {
             return first(withParams, ")", (params, rawContent) -> {

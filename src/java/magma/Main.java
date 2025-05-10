@@ -307,17 +307,18 @@ public class Main {
     }
 
     private static Optional<String> compileStructure(String stripped, int depth, String infix) {
-        return first(stripped, infix, (left, right) -> {
+        return first(stripped, infix, (beforeInfix, right) -> {
             return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
 
-                    var beforeIndent = depth == 0 ? "" : "\n\t";
-                    var afterIndent = depth == 0 ? "\n" : "";
+                    var indent = createIndent(depth);
+                    var beforeIndent = depth == 0 ? "" : indent;
+                    var afterBlock = depth == 0 ? "\n" : "";
 
                     var statements = compileStatements(content1, input -> compileClassSegment(input, depth + 1));
-                    return Optional.of(beforeIndent + generatePlaceholder(left) + infix + strippedName + " {" + statements + afterIndent + "}" + afterIndent);
+                    return Optional.of(beforeIndent + generatePlaceholder(beforeInfix.strip()) + infix + strippedName + " {" + statements + indent + "}" + afterBlock);
                 });
             });
         });
@@ -344,11 +345,19 @@ public class Main {
     }
 
     private static String compileClassSegment(String input, int depth) {
-        return compileClass(input, depth)
+        return compileWhitespace(input)
+                .or(() -> compileClass(input, depth))
                 .or(() -> compileStructure(input, depth, "interface "))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> compileDefinitionStatement(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
+    }
+
+    private static Optional<String> compileWhitespace(String input) {
+        if (input.isBlank()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     }
 
     private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
