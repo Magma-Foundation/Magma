@@ -3675,7 +3675,7 @@ int Option_Definition_isEmpty(/*  */);
 
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(i))) {
                 continue;
             }
             return false;
