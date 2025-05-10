@@ -47,7 +47,7 @@
         } *//*  */
 };
  
-	/* private */ struct Optional_struct CompileState expand(/* ObjectType expansion */);/*  {
+	/* private */ struct Optional_CompileState expand(/* ObjectType expansion */);/*  {
             if (this.expansions.contains(expansion, ObjectType::equalsTo)) {
                 return Optional.empty();
             }
@@ -65,10 +65,10 @@
 	/* public */ struct CompileState addExpandable(/* String name, Function<List<Type>, Optional<CompileState>> expandable */);/*  {
             this.expandables.put(name, expandable);
             return this;
-        } */ /* private */struct List_struct Type {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//*  */
+        } */ /* private */struct List_Type {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//*  */
 };
  
-	/* public */ struct Optional_struct Function_struct List_struct Type_struct Optional_struct CompileState findExpandable(/* String name */);/*  {
+	/* public */ struct Optional_Function_List_Type_Optional_CompileState findExpandable(/* String name */);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
@@ -111,10 +111,10 @@
 };
  
 	/* public */ char* stringify(/*  */);/*  {
-            return this.generate();
+            return this.name + this.joinArguments();
         } */ 
 	/* public */ char* generate(/*  */);/*  {
-            return "struct " + this.name + this.joinArguments();
+            return "struct " + stringify();
         } */ 
 	/* public */ int equalsTo(/* Type other */);/*  {
             return other instanceof ObjectType objectType
@@ -215,14 +215,14 @@
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */ 
-	/* private static */ struct Tuple_struct CompileState_char_ref compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
+	/* private static */ struct Tuple_CompileState_char_ref compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */ 
-	/* private static */ struct Tuple_struct CompileState_char_ref compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
+	/* private static */ struct Tuple_CompileState_char_ref compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
     } */ 
-	/* private static */ struct Tuple_struct CompileState_struct List_T parseAll(/* 
+	/* private static */ struct Tuple_CompileState_List_T parseAll(/* 
             CompileState initial,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
@@ -448,6 +448,7 @@
         if (c == ' ' && state.isLevel()) {
             return state.advance();
         }
+
         var appended = state.append(c);
         if (c == '<') {
             return appended.enter();

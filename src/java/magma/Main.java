@@ -354,12 +354,12 @@ public class Main {
     private record ObjectType(String name, List<Type> arguments) implements Type {
         @Override
         public String stringify() {
-            return this.generate();
+            return this.name + this.joinArguments();
         }
 
         @Override
         public String generate() {
-            return "struct " + this.name + this.joinArguments();
+            return "struct " + this.stringify();
         }
 
         @Override
