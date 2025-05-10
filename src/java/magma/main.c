@@ -34,8 +34,8 @@ struct List_char_ref List_addLast(char* element);
 // Iterator: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
 struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 struct Optional_char_ref Iterator_next(/*  */);
-int Iterator_anyMatch(struct Predicate_char_ref predicate);
-int Iterator_allMatch(struct Predicate_char_ref predicate);
+int Iterator_anyMatch(int (*)(char*) predicate);
+int Iterator_allMatch(int (*)(char*) predicate);
 /* private */struct List_char_ref {/*  */
 };
 struct Iterator_char_ref Iterator_iterate(/*  */);
@@ -94,8 +94,8 @@ struct List_char_ref List_addLast(char* element);
 // Iterator: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
 struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 struct Optional_char_ref Iterator_next(/*  */);
-int Iterator_anyMatch(struct Predicate_char_ref predicate);
-int Iterator_allMatch(struct Predicate_char_ref predicate);
+int Iterator_anyMatch(int (*)(char*) predicate);
+int Iterator_allMatch(int (*)(char*) predicate);
 // List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState]
 struct List_char_ref List_addLast(char* element);
 struct Iterator_char_ref List_iterate(/*  */);
@@ -149,8 +149,8 @@ struct List_char_ref List_addLast(char* element);
 // Iterator: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists]
 struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
 struct Optional_char_ref Iterator_next(/*  */);
-int Iterator_anyMatch(struct Predicate_char_ref predicate);
-int Iterator_allMatch(struct Predicate_char_ref predicate);
+int Iterator_anyMatch(int (*)(char*) predicate);
+int Iterator_allMatch(int (*)(char*) predicate);
 // List: [struct Type, struct Actual, struct Parameter, struct StandardLibrary, struct Lists, struct Iterator_char_ref, struct List_char_ref, struct DivideState]
 struct List_char_ref List_addLast(char* element);
 struct Iterator_char_ref List_iterate(/*  */);
@@ -870,6 +870,11 @@ struct List_char_ref List_mapLast(char* (*)(char*) mapper);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
+
+                if (base.equals("Predicate")) {
+                    var functional = new Functional(Primitive.Int, Lists.of(arguments.get(0)));
+                    return Optional.of(new Tuple<>(argumentsState, functional));
+                }
 
                 if (base.equals("Function")) {
                     var functional = new Functional(arguments.get(1), Lists.of(arguments.get(0)));
