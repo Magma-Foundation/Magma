@@ -1001,9 +1001,19 @@ public class Main {
             return Optional.empty();
         }
 
-        CompileState compileState = state.mapStack(stack1 -> stack1.defineStruct(name));
-        CompileState compileState1 = compileState.mapStack(stack -> stack.defineTypeParameters(typeParams));
-        var statementsTuple = compileStatements(compileState1.mapStack(stack1 -> stack1.defineTypeArguments(typeArguments)), content, Main::compileClassSegment);
+        var joinedSymbols = state.structures
+                .iterate()
+                .map(ObjectType::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var defined = state.addMethod("// " + name + ": [" + joinedSymbols  + "]\n").mapStack(stack -> stack
+                .defineStruct(name)
+                .defineTypeParameters(typeParams)
+                .defineTypeArguments(typeArguments)
+        );
+
+        var statementsTuple = compileStatements(defined, content, Main::compileClassSegment);
 
         var type = new ObjectType(name, typeArguments);
         var generated = generatePlaceholder(beforeStruct.strip()) + type.generate() + " {" + statementsTuple.right + "\n};\n";
