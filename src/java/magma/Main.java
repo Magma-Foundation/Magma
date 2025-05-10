@@ -435,7 +435,11 @@ public class Main {
             List<String> typeParams
     ) implements Parameter {
         private String generate() {
-            return generatePlaceholder(this.afterAnnotations()) + " " + this.type().generate() + " " + this.name();
+            return this.generateAfterAnnotations() + this.type().generate() + " " + this.name();
+        }
+
+        private String generateAfterAnnotations() {
+            return this.afterAnnotations.isEmpty() ? "" : (generatePlaceholder(this.afterAnnotations()) + " ");
         }
 
         public Definition mapType(Function<Type, Type> mapper) {
@@ -611,12 +615,8 @@ public class Main {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var compiledState = compiled.left;
 
-        var joined = join(compiledState.generated);
+        var joined = joinWithDelimiter(compiledState.generated, "");
         return joined + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
-    }
-
-    private static String join(List<String> items) {
-        return joinWithDelimiter(items, " ");
     }
 
     private static String joinWithDelimiter(List<String> items, String delimiter) {
@@ -854,8 +854,15 @@ public class Main {
 
                     Definition newDefinition;
                     String newContent;
-                    if (definition.annotations.contains("Actual", String::equals) || oldContent.equals(";")) {
+                    if (definition.annotations.contains("Actual", String::equals)) {
                         newDefinition = definition.mapType(Type::strip);
+                        newContent = ";";
+                    }
+                    else if (oldContent.equals(";")) {
+                        newDefinition = definition.mapType(Type::strip).mapName(name -> {
+                            return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                        });
+
                         newContent = ";";
                     }
                     else {
@@ -865,8 +872,8 @@ public class Main {
                         });
                     }
 
-                    var generatedHeader = "\n\t" + newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
-                    var generated = generatedHeader + newContent;
+                    var generatedHeader = newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
+                    var generated = generatedHeader + newContent + "\n";
                     return Optional.of(new Tuple<>(definitionState.addGenerative(generated), ""));
                 });
             });
