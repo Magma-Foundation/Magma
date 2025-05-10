@@ -3508,7 +3508,24 @@ int Option_Definition_isEmpty(/*  */);
 	struct TypeParam, 
 	struct Functional
 ] */
-/* public */struct Main {/* ' && appended.isShallow()) {
+/* public */struct Main {
+	// Map<K, V>
+	// Option<T>
+	// Iterator<T>
+	// Collector<T, C>
+	// List<T>
+	// Head<T>
+	// ListMap<K, V>
+	// Some<T>
+	// None<T>
+	// EmptyHead<T> implements Head<T>
+	// HeadedIterator<T>
+	// RangeHead implements Head<Integer>
+	// Tuple<A, B>
+	// SingleHead<T> implements Head<T>
+	// ListCollector<T> implements Collector<T, List<T>>
+	// ArrayList<T> implements List<T>
+	// FlatMapHead<T, R> implements Head<R>/* ' && appended.isShallow()) {
             return appended.advance().exit();
         } *//* if (c == '{') {
             return appended.enter();
@@ -3613,7 +3630,7 @@ int Option_Definition_isEmpty(/*  */);
 
                     return new Some<>(new Tuple<CompileState, String>(state.addExpandable(name, (typeArguments) -> {
                         return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, parameters, content);
-                    }), ""));
+                    }), "\n\t// " + name + "<" + joinWithDelimiter(typeParams, ", ") + ">"));
                 });
             });
         };

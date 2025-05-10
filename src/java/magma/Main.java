@@ -1156,7 +1156,7 @@ public class Main {
 
                     return new Some<>(new Tuple<CompileState, String>(state.addExpandable(name, (typeArguments) -> {
                         return assembleStructure(state, beforeKeyword, name, typeParams, typeArguments, parameters, content);
-                    }), ""));
+                    }), "\n\t// " + name + "<" + joinWithDelimiter(typeParams, ", ") + ">"));
                 });
             });
         };
