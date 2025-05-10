@@ -1,7 +1,7 @@
 "use strict";
 /* public  */ class Main {
 }
-/* private */ HeadedIterator(head);
+/* private */ HeadedIterator(/*  */ head);
 record; /* implements Iterator<T> {
     @Override
     public <R> R fold(R initial, BiFunction<R, T, R> folder) {
@@ -41,15 +41,23 @@ private static  */ class Lists {
 
 private static  */ class State {
 }
-/*
+/* private */ Joiner(/*  */ delimiter, String);
+record; /* implements Collector<String, Optional<String>> {
+    private Joiner() {
+        this("");
+    }
 
-private static  */ class Joiner {
-}
-(current /* Optional<String> */, element) => ; /* Optional<String> */ /* {
-    return Optional.of(current.map(inner -> inner + element).orElse(element));
-} */ /*
-*/
-/* private */ Definition(maybeBefore, type, String, name, String, typeParams);
+    @Override
+    public Optional<String> createInitial() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> fold(Optional<String> current, String element) {
+        return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
+    }
+} */
+/* private */ Definition(/*  */ maybeBefore, /*  */ type, String, /*  */ name, String, /*  */ typeParams);
 record; /* {
     private String generate() {
         return this.generateWithParams("");
@@ -72,10 +80,13 @@ record; /* {
 
 private static  */ class ListCollector {
 }
-(current /* List<T> */, element) => ; /* List<T> */ /* {
+(/*  */ current /* List<T> */, /*  */ element) => ; /* List<T> */ /* {
     return current.add(element);
 } */ /*
 */
+/* private record */ B > ( /*  */left);
+A, /*  */ right;
+B;
 /* public static */ main();
 void /* {
     try {
@@ -94,15 +105,15 @@ void /* {
         throw new RuntimeException(e);
     }
 } */ 
-/* private static */ compile(input, String);
+/* private static */ compile(/*  */ input, String);
 String; /* {
     return compileStatements(input, Main::compileRootSegment);
 } */
-/* private static */ compileStatements(input, String, /* Function<String, */ mapper);
+/* private static */ compileStatements(/*  */ input, String, /*  */ mapper);
 String; /* {
     return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
 } */
-/* private static */ compileAll(input, String, /* BiFunction<State, Character, */ folder, /* Function<String, */ mapper, /* BiFunction<StringBuilder, String, */ merger);
+/* private static */ compileAll(/*  */ input, String, /*  */ folder, /*  */ mapper, /*  */ merger);
 String; /* {
     return divideAll(input, folder)
             .iterate()
@@ -110,13 +121,13 @@ String; /* {
             .fold(new StringBuilder(), merger)
             .toString();
 } */
-/* private static */ mergeStatements(stringBuilder, StringBuilder, str, String);
+/* private static */ mergeStatements(/*  */ stringBuilder, StringBuilder, /*  */ str, String);
 StringBuilder; /* {
     return stringBuilder.append(str);
 } */
-/* private static */ divideStatements(input, String);
-/* private static */ divideAll(input, String, /* BiFunction<State, Character, */ folder);
-/* private static */ foldStatementChar(state, State, c, char);
+/* private static */ divideStatements(/*  */ input, String);
+/* private static */ divideAll(/*  */ input, String, /*  */ folder);
+/* private static */ foldStatementChar(/*  */ state, State, /*  */ c, char);
 State; /* {
     var append = state.append(c);
     if (c == ';' && append.isLevel()) {
@@ -133,7 +144,7 @@ if (c == '} */
         */ append.exit();
 return; /* ;
 } */
-append: return; /*
+/*  */ append: return; /*
  */
 /* private static String compileRootSegment(String input) {
         var stripped = input.strip();
@@ -212,7 +223,7 @@ append: return; /*
     });
 } */ /* private static Optional<Definition> parseDefinition(String input) {
     return last(input.strip(), " ", (beforeName, name) -> {
-        return last(beforeName, " ", (beforeType, type) -> {
+        return split(() -> getStringStringTuple(beforeName), (beforeType, type) -> {
             return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                 return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                     var typeParams = divideAll(typeParamsString, Main::foldValueChar)
@@ -229,6 +240,27 @@ append: return; /*
             return assembleDefinition(Optional.empty(), name, Lists.empty(), beforeName);
         });
     });
+} */ /* private static Optional<Tuple<String, String>> getStringStringTuple(String beforeName) {
+    var divisions = divideAll(beforeName, Main::foldTypeSeparator);
+    return divisions.removeLast().map(removed -> {
+        var left = removed.left.iterate().collect(new Joiner(" ")).orElse("");
+        var right = removed.right;
+
+        return new Tuple<>(left, right);
+    });
+} */ /* private static State foldTypeSeparator(State state, Character c) {
+    if (c == ' ' && state.isLevel()) {
+        return state.advance();
+    }
+
+    var appended = state.append(c);
+    if (c == '<') {
+        return appended.enter();
+    }
+    if (c == '>') {
+        return appended.exit();
+    }
+    return appended;
 } */ /* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
     return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
 } */ /* private static State foldValueChar(State state, char c) {
@@ -252,23 +284,25 @@ append: return; /*
 
     return generatePlaceholder(stripped);
 } */ /* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-    return compileInfix(input, infix, Main::findLast, mapper);
+    return infix(input, infix, Main::findLast, mapper);
 } */ /* private static Optional<Integer> findLast(String input, String infix) {
     var index = input.lastIndexOf(infix);
     return index == -1 ? Optional.empty() : Optional.of(index);
 } */ /* private static <T> Optional<T> first(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-    return compileInfix(input, infix, Main::findFirst, mapper);
-} */ /* private static <T> Optional<T> compileInfix(
+    return infix(input, infix, Main::findFirst, mapper);
+} */ /* private static <T> Optional<T> infix(
         String input,
         String infix,
         BiFunction<String, String, Optional<Integer>> locator,
         BiFunction<String, String, Optional<T>> mapper
 ) {
-    return locator.apply(input, infix).flatMap(index -> {
+    return split(() -> locator.apply(input, infix).map(index -> {
         var left = input.substring(0, index);
         var right = input.substring(index + infix.length());
-        return mapper.apply(left, right);
-    });
+        return new Tuple<>(left, right);
+    }), mapper);
+} */ /* private static <T> Optional<T> split(Supplier<Optional<Tuple<String, String>>> splitter, BiFunction<String, String, Optional<T>> mapper) {
+    return splitter.get().flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
 } */ /* private static Optional<Integer> findFirst(String input, String infix) {
     var index = input.indexOf(infix);
     return index == -1 ? Optional.empty() : Optional.of(index);

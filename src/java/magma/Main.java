@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Main {
     private interface Collector<T, C> {
@@ -29,6 +30,8 @@ public class Main {
         List<T> add(T element);
 
         Iterator<T> iterate();
+
+        Optional<Tuple<List<T>, T>> removeLast();
     }
 
     private interface Head<T> {
@@ -101,6 +104,17 @@ public class Main {
             public Iterator<T> iterate() {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
+
+            @Override
+            public Optional<Tuple<List<T>, T>> removeLast() {
+                if (this.elements.isEmpty()) {
+                    return Optional.empty();
+                }
+
+                var slice = this.elements.subList(0, this.elements.size() - 1);
+                var last = this.elements.getLast();
+                return Optional.of(new Tuple<>(new JVMList<>(slice), last));
+            }
         }
 
         public static <T> List<T> empty() {
@@ -153,7 +167,11 @@ public class Main {
         }
     }
 
-    private static class Joiner implements Collector<String, Optional<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+        private Joiner() {
+            this("");
+        }
+
         @Override
         public Optional<String> createInitial() {
             return Optional.empty();
@@ -161,7 +179,7 @@ public class Main {
 
         @Override
         public Optional<String> fold(Optional<String> current, String element) {
-            return Optional.of(current.map(inner -> inner + element).orElse(element));
+            return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
@@ -194,6 +212,9 @@ public class Main {
         public List<T> fold(List<T> current, T element) {
             return current.add(element);
         }
+    }
+
+    private record Tuple<A, B>(A left, B right) {
     }
 
     public static void main() {
@@ -371,7 +392,7 @@ public class Main {
 
     private static Optional<Definition> parseDefinition(String input) {
         return last(input.strip(), " ", (beforeName, name) -> {
-            return last(beforeName, " ", (beforeType, type) -> {
+            return split(() -> getStringStringTuple(beforeName), (beforeType, type) -> {
                 return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                     return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                         var typeParams = divideAll(typeParamsString, Main::foldValueChar)
@@ -388,6 +409,31 @@ public class Main {
                 return assembleDefinition(Optional.empty(), name, Lists.empty(), beforeName);
             });
         });
+    }
+
+    private static Optional<Tuple<String, String>> getStringStringTuple(String beforeName) {
+        var divisions = divideAll(beforeName, Main::foldTypeSeparator);
+        return divisions.removeLast().map(removed -> {
+            var left = removed.left.iterate().collect(new Joiner(" ")).orElse("");
+            var right = removed.right;
+
+            return new Tuple<>(left, right);
+        });
+    }
+
+    private static State foldTypeSeparator(State state, Character c) {
+        if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
@@ -419,7 +465,7 @@ public class Main {
     }
 
     private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        return compileInfix(input, infix, Main::findLast, mapper);
+        return infix(input, infix, Main::findLast, mapper);
     }
 
     private static Optional<Integer> findLast(String input, String infix) {
@@ -428,20 +474,24 @@ public class Main {
     }
 
     private static <T> Optional<T> first(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        return compileInfix(input, infix, Main::findFirst, mapper);
+        return infix(input, infix, Main::findFirst, mapper);
     }
 
-    private static <T> Optional<T> compileInfix(
+    private static <T> Optional<T> infix(
             String input,
             String infix,
             BiFunction<String, String, Optional<Integer>> locator,
             BiFunction<String, String, Optional<T>> mapper
     ) {
-        return locator.apply(input, infix).flatMap(index -> {
+        return split(() -> locator.apply(input, infix).map(index -> {
             var left = input.substring(0, index);
             var right = input.substring(index + infix.length());
-            return mapper.apply(left, right);
-        });
+            return new Tuple<>(left, right);
+        }), mapper);
+    }
+
+    private static <T> Optional<T> split(Supplier<Optional<Tuple<String, String>>> splitter, BiFunction<String, String, Optional<T>> mapper) {
+        return splitter.get().flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
     }
 
     private static Optional<Integer> findFirst(String input, String infix) {
