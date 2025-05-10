@@ -435,6 +435,12 @@ public class Main {
         public Frame defineTypeArguments(List<Type> typeArguments) {
             return new Frame(this.typeParameters, this.typeArguments.addAllLast(typeArguments), this.maybeStructName);
         }
+
+        public Option<ObjectType> createObjectType() {
+            return this.maybeStructName.map(name -> {
+                return new ObjectType(name, this.typeArguments);
+            });
+        }
     }
 
     private record Stack(List<Frame> frames) {
@@ -458,10 +464,10 @@ public class Main {
             return this.mapLastFrame(last -> last.defineTypeArguments(typeArguments));
         }
 
-        public Option<String> findThisName() {
+        public Option<ObjectType> findCurrentObjectType() {
             return this.frames
                     .iterateReversed()
-                    .map(Frame::maybeStructName)
+                    .map(Frame::createObjectType)
                     .flatMap(Iterators::fromOptional)
                     .next();
         }
@@ -579,7 +585,9 @@ public class Main {
         }
 
         private boolean isCurrentStructName(String base) {
-            return this.stack.findThisName().filter(inner -> inner.equals(base)).isPresent();
+            return this.stack.findCurrentObjectType()
+                    .filter(inner -> inner.name.equals(base))
+                    .isPresent();
         }
 
         public CompileState addMethod(String method) {
@@ -596,10 +604,6 @@ public class Main {
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private Joiner() {
-            this("");
-        }
-
         @Override
         public Option<String> createInitial() {
             return new None<>();
@@ -792,9 +796,9 @@ public class Main {
 
         @Override
         public boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator) {
-            return this.iterate().zip(others.iterate()).allMatch(tuple -> {
-                return equator.apply(tuple.left(), tuple.right());
-            });
+            return this.iterate()
+                    .zip(others.iterate())
+                    .allMatch(tuple -> equator.apply(tuple.left(), tuple.right()));
         }
 
         @Override
@@ -920,9 +924,7 @@ public class Main {
                         return new None<>();
                     }
                     // build a new inner from the next outer element
-                    case Some<T>(var value) -> {
-                        this.inner = this.mapper.apply(value);
-                    }
+                    case Some<T>(var value) -> this.inner = this.mapper.apply(value);
                 }
             }
             // we got an R from inner
@@ -1315,8 +1317,8 @@ public class Main {
 
     private static String joinCurrentName(CompileState state, String name) {
         return state.stack
-                .findThisName()
-                .map(currentStructName -> currentStructName + "_" + name)
+                .findCurrentObjectType()
+                .map(currentStructType -> currentStructType.stringify() + "_" + name)
                 .orElse(name);
     }
 
