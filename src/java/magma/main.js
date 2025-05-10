@@ -354,6 +354,14 @@ append: return;
                 return new Some<>(generate(Lists.of(arguments.get(0)), arguments.get(1)));
             }
 
+            if (base.equals("Predicate")) {
+                return new Some<>(generate(Lists.of(arguments.get(0)), "boolean"));
+            }
+
+            if (base.equals("Supplier")) {
+                return new Some<>(generate(Lists.empty(), arguments.get(0)));
+            }
+
             return new Some<>(strippedBase + "<" + generateValues(arguments) + ">");
         });
     });

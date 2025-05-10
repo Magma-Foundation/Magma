@@ -3,9 +3,9 @@
 		map<R>(mapper : (T) => R) : Option<R>;
 		isPresent() : boolean;
 		orElse(other : T) : T;
-		filter(predicate : Predicate<T>) : Option<T>;
-		orElseGet(supplier : Supplier<T>) : T;
-		or(other : Supplier<Option<T>>) : Option<T>;
+		filter(predicate : (T) => boolean) : Option<T>;
+		orElseGet(supplier : () => T) : T;
+		or(other : () => Option<T>) : Option<T>;
 		flatMap<R>(mapper : (T) => Option<R>) : Option<R>;
 	}
 	/* private */interface Collector<T, C> {
@@ -76,15 +76,15 @@
             return other;
         } */
 		/* @Override
-        public */ filter(predicate : Predicate<T>) : Option<T>/* {
+        public */ filter(predicate : (T) => boolean) : Option<T>/* {
             return new None<>();
         } */
 		/* @Override
-        public */ orElseGet(supplier : Supplier<T>) : T/* {
+        public */ orElseGet(supplier : () => T) : T/* {
             return supplier.get();
         } */
 		/* @Override
-        public */ or(other : Supplier<Option<T>>) : Option<T>/* {
+        public */ or(other : () => Option<T>) : Option<T>/* {
             return other.get();
         } */
 		/* @Override
@@ -490,6 +490,14 @@
 
                 if (base.equals("Function")) {
                     return new Some<>(generate(Lists.of(arguments.get(0)), arguments.get(1)));
+                }
+
+                if (base.equals("Predicate")) {
+                    return new Some<>(generate(Lists.of(arguments.get(0)), "boolean"));
+                }
+
+                if (base.equals("Supplier")) {
+                    return new Some<>(generate(Lists.empty(), arguments.get(0)));
                 }
 
                 return new Some<>(strippedBase + "<" + generateValues(arguments) + ">");
