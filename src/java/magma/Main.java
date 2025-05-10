@@ -817,6 +817,10 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
+        if (input.equals("return") || input.equals("private")) {
+            return false;
+        }
+
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isLetter(c)) {
@@ -966,10 +970,19 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, Definition>> getCompileStateDefinitionTuple(CompileState state, List<String> annotations, String afterAnnotations, List<String> typeParams, String rawName, String type) {
+    private static Optional<Tuple<CompileState, Definition>> getCompileStateDefinitionTuple(
+            CompileState state,
+            List<String> annotations,
+            String afterAnnotations,
+            List<String> typeParams,
+            String rawName,
+            String type
+    ) {
         return compileSymbol(rawName.strip(), name -> {
-            var typeTuple = parseType(state.addTypeParameters(typeParams), type);
-            return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name, typeParams)));
+            CompileState state1 = state.addTypeParameters(typeParams);
+            return parseType(state1, type).flatMap(typeTuple -> {
+                return Optional.of(new Tuple<>(typeTuple.left, new Definition(annotations, afterAnnotations, typeTuple.right, name, typeParams)));
+            });
         });
     }
 
@@ -982,14 +995,18 @@ public class Main {
         };
     }
 
-    private static Tuple<CompileState, Type> parseType(CompileState state, String input) {
+    private static Tuple<CompileState, Type> parseTypeOrPlaceholder(CompileState state, String input) {
+        return parseType(state, input).orElseGet(() -> new Tuple<>(state, new Placeholder(input.strip())));
+    }
+
+    private static Optional<Tuple<CompileState, Type>> parseType(CompileState state, String input) {
         return compileOr(state, input, Lists.of(
                 typed(Main::parsePrimitive),
                 typed(Main::parseTemplate),
                 typed(Main::parseArray),
                 typed(Main::parseTypeParam),
                 typed(Main::parseStructureType)
-        )).orElseGet(() -> new Tuple<>(state, new Placeholder(input.strip())));
+        ));
     }
 
     private static Optional<Tuple<CompileState, Type>> parseStructureType(CompileState state, String input) {
@@ -1009,7 +1026,7 @@ public class Main {
         var stripped = input.strip();
         if (stripped.endsWith("[]")) {
             var slice = input.substring(0, stripped.length() - "[]".length());
-            var childTuple = parseType(state, slice);
+            var childTuple = parseTypeOrPlaceholder(state, slice);
             return Optional.of(new Tuple<>(childTuple.left, new Ref(childTuple.right)));
         }
 
@@ -1040,7 +1057,7 @@ public class Main {
     private static Optional<Tuple<CompileState, ObjectType>> parseTemplate(CompileState oldState, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (base, argumentsString) -> {
-                var argumentsTuple = parseValues(oldState, argumentsString, Main::parseType);
+                var argumentsTuple = parseValues(oldState, argumentsString, Main::parseTypeOrPlaceholder);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
