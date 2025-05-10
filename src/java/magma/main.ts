@@ -6,9 +6,9 @@
 	/* 
 
     private  */interface Iterator<T> {
-		/*  */ fold<R>(initial : R, /*  BiFunction<R */, /*  T */, folder : /* R> */) : R;
-		/*  */ map<R>(/* Function<T */, mapper : /* R> */) : /* Iterator<R> */;
-		/*  */ collect<R>(/* Collector<T */, collector : /* R> */) : R;/* 
+		/*  */ fold<R>(initial : R, /* BiFunction<R, T, */ folder : /* R> */) : R;
+		/*  */ map<R>(/* Function<T, */ mapper : /* R> */) : /* Iterator<R> */;
+		/*  */ collect<R>(/* Collector<T, */ collector : /* R> */) : R;/* 
      */}
 	/* 
 
@@ -192,13 +192,10 @@
 	/* private static */ compile(input : String) : String/* {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	/* private static */ compileStatements(input : String, /*  Function<String */, mapper : /* String> */) : String/* {
+	/* private static */ compileStatements(input : String, /* Function<String, */ mapper : /* String> */) : String/* {
         return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
     } */
-	/* private static */ compileAll(input : String, /* 
-            BiFunction<State */, /*  Character */, folder : /* State> */, /* 
-            Function<String */, mapper : /* String> */, /* 
-            BiFunction<StringBuilder */, /*  String */, merger : /* StringBuilder> */) : String/* {
+	/* private static */ compileAll(input : String, /* BiFunction<State, Character, */ folder : /* State> */, /* Function<String, */ mapper : /* String> */, /* BiFunction<StringBuilder, String, */ merger : /* StringBuilder> */) : String/* {
         return divideAll(input, folder)
                 .iterate()
                 .map(mapper)
@@ -211,7 +208,7 @@
 	/* private static */ divideStatements(input : String) : /* List<String> *//* {
         return divideAll(input, Main::foldStatementChar);
     } */
-	/* private static */ divideAll(input : String, /*  BiFunction<State */, /*  Character */, folder : /* State> */) : /* List<String> *//* {
+	/* private static */ divideAll(input : String, /* BiFunction<State, Character, */ folder : /* State> */) : /* List<String> *//* {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -334,10 +331,18 @@
     } *//* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
         return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
     } *//* private static State foldValueChar(State state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     } *//* private static String compileType(String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {

@@ -98,24 +98,24 @@ void /* {
 String; /* {
     return compileStatements(input, Main::compileRootSegment);
 } */
-/* private static */ compileStatements(input, String, mapper);
+/* private static */ compileStatements(input, String, /* Function<String, */ mapper);
 String; /* {
     return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
 } */
-/* private static */ compileAll(input, String, folder, mapper, merger);
+/* private static */ compileAll(input, String, /* BiFunction<State, Character, */ folder, /* Function<String, */ mapper, /* BiFunction<StringBuilder, String, */ merger);
 String; /* {
-return divideAll(input, folder)
-    .iterate()
-    .map(mapper)
-    .fold(new StringBuilder(), merger)
-    .toString();
+    return divideAll(input, folder)
+            .iterate()
+            .map(mapper)
+            .fold(new StringBuilder(), merger)
+            .toString();
 } */
 /* private static */ mergeStatements(stringBuilder, StringBuilder, str, String);
 StringBuilder; /* {
     return stringBuilder.append(str);
 } */
 /* private static */ divideStatements(input, String);
-/* private static */ divideAll(input, String, folder);
+/* private static */ divideAll(input, String, /* BiFunction<State, Character, */ folder);
 /* private static */ foldStatementChar(state, State, c, char);
 State; /* {
     var append = state.append(c);
@@ -229,10 +229,18 @@ append: return; /*
 } */ /* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
     return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
 } */ /* private static State foldValueChar(State state, char c) {
-    if (c == ',') {
+    if (c == ',' && state.isLevel()) {
         return state.advance();
     }
-    return state.append(c);
+
+    var appended = state.append(c);
+    if (c == '<') {
+        return appended.enter();
+    }
+    if (c == '>') {
+        return appended.exit();
+    }
+    return appended;
 } */ /* private static String compileType(String input) {
     var stripped = input.strip();
     if (isSymbol(stripped)) {
