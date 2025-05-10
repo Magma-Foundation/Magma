@@ -4,15 +4,11 @@
 };
  /* private */struct Parameter {/*  */
 };
- 
-	/* private static */ void* allocate(/* int length */); /* private static */struct StandardLibrary {/*  */
+ /* private static */struct StandardLibrary {/*  */
 };
- 
-	/* public static */ struct List_T Lists _of(/* T... elements */);/*  {
-            return new ArrayList<>(elements, elements.length);
-        } */ /* private static */struct Lists {/*  */
+ /* private static */struct Lists {/*  */
 };
- /* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//*  */
+ /* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//* boolean isEmpty(); *//*  */
 };
  
 	/* private */ struct DivideState List_advance(/*  */);/*  {
@@ -67,7 +63,7 @@
 	/* public */ struct CompileState CompileState_addExpandable(/* String name, Function<List<Type>, Optional<CompileState>> expandable */);/*  {
             this.expandables.put(name, expandable);
             return this;
-        } */ /* private */struct List_Type {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//*  */
+        } */ /* private */struct List_Type {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//* boolean isEmpty(); *//*  */
 };
  
 	/* public */ struct Optional_Function_List_Type_Optional_CompileState CompileState_findExpandable(/* String name */);/*  {
@@ -95,10 +91,7 @@
             this("");
         } *//*  */
 };
- 
-	/* public static */ struct Iterator_T Iterators _fromOptional(/* Optional<T> optional */);/*  {
-            return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
-        } */ /* private static */struct Iterators {/*  */
+ /* private static */struct Iterators {/*  */
 };
  
 	/* public */ char* Ref_stringify(/*  */);/*  {
@@ -233,22 +226,6 @@
 	/* private static */ struct Tuple_CompileState_char_ref Tuple_compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
-    } */ 
-	/* private static */ struct Tuple_CompileState_List_T Tuple_parseAll(/* 
-            CompileState initial,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
-     */);/*  {
-        var segments = divide(input, folder);
-
-        var tuple = new Tuple<>(initial, (List<T>) new ArrayList<T>());
-        var folded = segments.iterate().fold(tuple, (tuple0, element) -> {
-            var mapped = mapper.apply(tuple0.left, element);
-            return new Tuple<>(mapped.left, tuple0.right.addLast(mapped.right));
-        });
-
-        return new Tuple<CompileState, List<T>>(folded.left, tuple.right);
     } */ 
 	/* private static */ char* Tuple_generateAll(/* List<String> elements, BiFunction<String, String, String> merger */);/*  {
         return elements.iterate().fold("", merger);
@@ -419,6 +396,10 @@
                 return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
+
+                    if (!definition.typeParams.isEmpty()) {
+                        return Optional.of(new Tuple<>(definitionTuple.left, ""));
+                    }
 
                     Definition newDefinition;
                     String newContent;

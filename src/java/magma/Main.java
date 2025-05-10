@@ -51,6 +51,8 @@ public class Main {
         int size();
 
         Optional<Tuple<List<T>, T>> removeLast();
+
+        boolean isEmpty();
     }
 
     private interface Head<T> {
@@ -521,6 +523,11 @@ public class Main {
             this.size = this.size - 1;
             return Optional.of(new Tuple<>(this, last));
         }
+
+        @Override
+        public boolean isEmpty() {
+            return this.size() == 0;
+        }
     }
 
     private record TypeParam(String input) implements Type {
@@ -831,6 +838,10 @@ public class Main {
                 return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
+
+                    if (!definition.typeParams.isEmpty()) {
+                        return Optional.of(new Tuple<>(definitionTuple.left, ""));
+                    }
 
                     Definition newDefinition;
                     String newContent;
