@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main {
     private static class State {
@@ -48,6 +49,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     public static void main() {
@@ -69,11 +74,15 @@ public class Main {
     }
 
     private static String compile(String input) {
+        return compileStatements(input, Main::compileRootSegment);
+    }
+
+    private static String compileStatements(String input, Function<String, String> mapper) {
         var segments = divide(input);
 
         var output = new StringBuilder();
         for (var segment : segments) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
         return output.toString();
@@ -94,6 +103,9 @@ public class Main {
         if (c == ';' && append.isLevel()) {
             return append.advance();
         }
+        if (c == '}' && append.isShallow()) {
+            return append.advance().exit();
+        }
         if (c == '{') {
             return append.enter();
         }
@@ -109,17 +121,25 @@ public class Main {
             return "";
         }
 
+        return compileClass(stripped).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String stripped) {
         return compileFirst(stripped, "class ", (left, right) -> {
             return compileFirst(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 if (strippedWithEnd.endsWith("}")) {
                     var content = strippedWithEnd.substring(0, strippedWithEnd.length() - "}".length());
-                    return Optional.of(generatePlaceholder(left) + "class " + name.strip() + " {" + generatePlaceholder(content) + "}");
+                    return Optional.of(generatePlaceholder(left) + "class " + name.strip() + " {" + compileStatements(content, Main::compileClassSegment) + "}");
                 }
 
                 return Optional.empty();
             });
-        }).orElseGet(() -> generatePlaceholder(stripped));
+        });
+    }
+
+    private static String compileClassSegment(String input) {
+        return compileClass(input).orElseGet(() -> generatePlaceholder(input));
     }
 
     private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
