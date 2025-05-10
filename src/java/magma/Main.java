@@ -81,6 +81,10 @@ public class Main {
         Type strip();
 
         boolean isParameterized();
+
+        default String generateWithName(String name) {
+            return this.generate() + " " + name;
+        }
     }
 
     private @interface Actual {
@@ -549,7 +553,7 @@ public class Main {
     ) implements Parameter {
         @Override
         public String generate() {
-            return this.generateAfterAnnotations() + this.type().generate() + " " + this.name();
+            return this.generateAfterAnnotations() + this.type.generateWithName(this.name);
         }
 
         private String generateAfterAnnotations() {
@@ -764,13 +768,7 @@ public class Main {
         }
 
         @Override
-        public String generate() {
-            var joined = this.typeParameters.iterate()
-                    .map(Type::generate)
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            return this.returnType.generate() + " (*)(" + joined + ")";
+        public String generate() {return generateWithName("");
         }
 
         @Override
@@ -790,6 +788,18 @@ public class Main {
         @Override
         public boolean isParameterized() {
             return this.returnType.isParameterized() || this.typeParameters.iterate().anyMatch(Type::isParameterized);
+        }
+
+        @Override
+        public String generateWithName(String name) {
+            var joined = this.typeParameters.iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.returnType.generate() + " (*" +
+                    name +
+                    ")(" + joined + ")";
         }
     }
 
@@ -1012,7 +1022,7 @@ public class Main {
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var defined = state.addMethod("// " + name + ": [" + joinedSymbols  + "]\n").mapStack(stack -> stack
+        var defined = state.addMethod("// " + name + ": [" + joinedSymbols + "]\n").mapStack(stack -> stack
                 .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
                 .defineTypeArguments(typeArguments)
