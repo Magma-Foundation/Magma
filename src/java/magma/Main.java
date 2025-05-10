@@ -288,6 +288,28 @@ public class Main {
         public Stack defineTypeArguments(List<Type> typeArguments) {
             return this.mapLastFrame(last -> last.defineTypeArguments(typeArguments));
         }
+
+        public Optional<String> findThisName() {
+            return this.frames
+                    .iterateReversed()
+                    .map(Frame::maybeStructName)
+                    .flatMap(Iterators::fromOptional)
+                    .next();
+        }
+
+        public Optional<Type> resolveTypeArgument(String value) {
+            return this.frames
+                    .iterateReversed()
+                    .map(frame -> frame.resolveTypeParam(value))
+                    .flatMap(Iterators::fromOptional)
+                    .next();
+        }
+
+        public boolean isTypeParamDefined(String value) {
+            return this.frames
+                    .iterateReversed()
+                    .anyMatch(frame -> frame.isTypeParamDefined(value));
+        }
     }
 
     private record CompileState(
@@ -350,7 +372,7 @@ public class Main {
         }
 
         private boolean isCurrentStructName(String base) {
-            return this.findThisName().filter(inner -> inner.equals(base)).isPresent();
+            return this.stack.findThisName().filter(inner -> inner.equals(base)).isPresent();
         }
 
         public CompileState addMethod(String method) {
@@ -361,27 +383,6 @@ public class Main {
             return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
         }
 
-        public Optional<String> findThisName() {
-            return this.stack.frames
-                    .iterateReversed()
-                    .map(Frame::maybeStructName)
-                    .flatMap(Iterators::fromOptional)
-                    .next();
-        }
-
-        public Optional<Type> resolveTypeArgument(String value) {
-            return this.stack.frames
-                    .iterateReversed()
-                    .map(frame -> frame.resolveTypeParam(value))
-                    .flatMap(Iterators::fromOptional)
-                    .next();
-        }
-
-        public boolean isTypeParamDefined(String value) {
-            return this.stack.frames
-                    .iterateReversed()
-                    .anyMatch(frame -> frame.isTypeParamDefined(value));
-        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -1075,7 +1076,7 @@ public class Main {
         }
         else if (oldContent.equals(";")) {
             newDefinition = definition.mapType(Type::strip).mapName(name -> {
-                return state.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return state.stack.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
             });
 
             newContent = ";";
@@ -1083,7 +1084,7 @@ public class Main {
         else {
             newContent = ";" + generatePlaceholder(oldContent);
             newDefinition = definition.mapName(name -> {
-                return state.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return state.stack.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
             });
         }
 
@@ -1247,8 +1248,8 @@ public class Main {
     private static Optional<Tuple<CompileState, Type>> parseTypeParam(CompileState state, String input) {
         var stripped = input.strip();
 
-        if (state.isTypeParamDefined(stripped)) {
-            return Optional.of(state.resolveTypeArgument(stripped).map(tuple -> {
+        if (state.stack.isTypeParamDefined(stripped)) {
+            return Optional.of(state.stack.resolveTypeArgument(stripped).map(tuple -> {
                 return new Tuple<>(state, tuple);
             }).orElseGet(() -> new Tuple<>(state, new TypeParam(stripped))));
         }
