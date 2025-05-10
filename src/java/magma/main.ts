@@ -1,6 +1,90 @@
-/* public  */class Main {
-	/* private static  */class State {
-		/* private final */ segments : /* List<String> */;
+/* public  */class Main {/* private interface Iterator<T> {
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+    } *//* 
+
+    private interface List<T> {
+        List<T> add(T element);
+
+        Iterator<T> iterate();
+    } *//* 
+
+    private interface Head<T> {
+        Optional<T> next();
+    } *//* 
+
+    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            var current = initial;
+            while (true) {
+                R finalCurrent = current;
+                var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                if (optional.isPresent()) {
+                    current = optional.get();
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+    } *//* 
+
+    private static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter < this.length) {
+                var value = this.counter;
+                counter++;
+                return Optional.of(value);
+            }
+
+            return Optional.empty();
+        }
+    } */
+	/* 
+
+
+    private static  */class Lists {/* private record JVMList<T>(java.util.List<T> elements) implements List<T> {
+
+
+            public JVMList() {
+                this(new ArrayList<>());
+            }
+
+            @Override
+            public List<T> add(T element) {
+                this.elements.add(element);
+                return this;
+            }
+
+            @Override
+            public Iterator<T> iterate() {
+                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
+            }
+        } *//* 
+
+        public static <T> List<T> empty() {
+            return new JVMList<>();
+        } *//* 
+     */}
+	/* 
+
+    private static  */class State {
+		/* private */ segments : /* List<String> */;
 		/* private */ buffer : /* StringBuilder */;
 		/* private */ depth : /* int */;/* 
 
@@ -11,11 +95,11 @@
         } *//* 
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+            this(Lists.empty(), new StringBuilder(), 0);
         } *//* 
 
         private State advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         } *//* 
@@ -67,14 +151,11 @@
     } *//* 
 
     private static String compileStatements(String input, Function<String, String> mapper) {
-        var segments = divide(input);
-
-        var output = new StringBuilder();
-        for (var segment : segments) {
-            output.append(mapper.apply(segment));
-        }
-
-        return output.toString();
+        return divide(input)
+                .iterate()
+                .map(mapper)
+                .fold(new StringBuilder(), StringBuilder::append)
+                .toString();
     } *//* 
 
     private static List<String> divide(String input) {
@@ -153,10 +234,12 @@
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             return compileLast(withoutEnd, " ", (s, name) -> {
                 return compileLast(s, " ", (beforeType, type) -> {
-                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(beforeType) + " " + name.strip() + " : " + generatePlaceholder(type) + ";");
+                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(beforeType) + " " + name.strip() + " : " + compileType(type) + ";");
                 });
             });
         });
+    } *//* private static String compileType(String type) {
+        return generatePlaceholder(type);
     } *//* private static Optional<String> compileLast(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
         return compileInfix(input, infix, Main::findLast, mapper);
     } *//* private static Optional<Integer> findLast(String input, String infix) {
