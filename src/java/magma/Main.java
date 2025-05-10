@@ -219,15 +219,28 @@ public class Main {
     }
 
     private static String compileStatements(String input, Function<String, String> mapper) {
-        return divideStatements(input)
+        return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
+    }
+
+    private static String compileAll(
+            String input,
+            BiFunction<State, Character, State> folder,
+            Function<String, String> mapper,
+            BiFunction<StringBuilder, String, StringBuilder> merger
+    ) {
+        return divideAll(input, folder)
                 .iterate()
                 .map(mapper)
-                .fold(new StringBuilder(), StringBuilder::append)
+                .fold(new StringBuilder(), merger)
                 .toString();
     }
 
+    private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
+        return stringBuilder.append(str);
+    }
+
     private static List<String> divideStatements(String input) {
-        return divideAll(input, Main::fold);
+        return divideAll(input, Main::foldStatementChar);
     }
 
     private static List<String> divideAll(String input, BiFunction<State, Character, State> folder) {
@@ -240,7 +253,7 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static State fold(State state, char c) {
+    private static State foldStatementChar(State state, char c) {
         var append = state.append(c);
         if (c == ';' && append.isLevel()) {
             return append.advance();
@@ -322,10 +335,25 @@ public class Main {
                 var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
                 return Optional.of(createIndent(depth) + parseDefinition(definition)
-                        .map(definition1 -> definition1.generateWithParams("(" + generatePlaceholder(params) + ")"))
+                        .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileDefinitionOrStatement) + ")"))
                         .orElseGet(() -> generatePlaceholder(definition)) + newContent);
             });
         });
+    }
+
+    private static String compileValues(String params, Function<String, String> mapper) {
+        return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
+    }
+
+    private static String compileDefinitionOrStatement(String s) {
+        return parseDefinition(s).map(Definition::generate).orElseGet(() -> generatePlaceholder(s));
+    }
+
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
     }
 
     private static String createIndent(int depth) {
@@ -372,7 +400,7 @@ public class Main {
 
     private static String compileType(String input) {
         var stripped = input.strip();
-        if(isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             return stripped;
         }
 

@@ -1,7 +1,7 @@
 "use strict";
 /* public  */ class Main {
 }
-/* private */ HeadedIterator( /* Head<T> head */);
+/* private */ HeadedIterator(head);
 record; /* implements Iterator<T> {
     @Override
     public <R> R fold(R initial, BiFunction<R, T, R> folder) {
@@ -45,11 +45,11 @@ private static  */ class State {
 
 private static  */ class Joiner {
 }
-( /* Optional<String> current, String element */) => ; /* Optional<String> */ /* {
+(current /* Optional<String> */, element) => ; /* Optional<String> */ /* {
     return Optional.of(current.map(inner -> inner + element).orElse(element));
 } */ /*
 */
-/* private */ Definition( /* Optional<String> maybeBefore, String type, String name, List<String> typeParams */);
+/* private */ Definition(maybeBefore, type, String, name, String, typeParams);
 record; /* {
     private String generate() {
         return this.generateWithParams("");
@@ -72,7 +72,7 @@ record; /* {
 
 private static  */ class ListCollector {
 }
-( /* List<T> current, T element */) => ; /* List<T> */ /* {
+(current /* List<T> */, element) => ; /* List<T> */ /* {
     return current.add(element);
 } */ /*
 */
@@ -94,21 +94,29 @@ void /* {
         throw new RuntimeException(e);
     }
 } */ 
-/* private static */ compile( /* String input */);
+/* private static */ compile(input, String);
 String; /* {
     return compileStatements(input, Main::compileRootSegment);
 } */
-/* private static */ compileStatements( /* String input, Function<String, String> mapper */);
+/* private static */ compileStatements(input, String, mapper);
 String; /* {
-    return divideStatements(input)
-            .iterate()
-            .map(mapper)
-            .fold(new StringBuilder(), StringBuilder::append)
-            .toString();
+    return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
 } */
-/* private static */ divideStatements( /* String input */);
-/* private static */ divideAll( /* String input, BiFunction<State, Character, State> folder */);
-/* private static */ fold( /* State state, char c */);
+/* private static */ compileAll(input, String, folder, mapper, merger);
+String; /* {
+return divideAll(input, folder)
+    .iterate()
+    .map(mapper)
+    .fold(new StringBuilder(), merger)
+    .toString();
+} */
+/* private static */ mergeStatements(stringBuilder, StringBuilder, str, String);
+StringBuilder; /* {
+    return stringBuilder.append(str);
+} */
+/* private static */ divideStatements(input, String);
+/* private static */ divideAll(input, String, folder);
+/* private static */ foldStatementChar(state, State, c, char);
 State; /* {
     var append = state.append(c);
     if (c == ';' && append.isLevel()) {
@@ -180,10 +188,19 @@ append: return; /*
             var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
             return Optional.of(createIndent(depth) + parseDefinition(definition)
-                    .map(definition1 -> definition1.generateWithParams("(" + generatePlaceholder(params) + ")"))
+                    .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileDefinitionOrStatement) + ")"))
                     .orElseGet(() -> generatePlaceholder(definition)) + newContent);
         });
     });
+} */ /* private static String compileValues(String params, Function<String, String> mapper) {
+    return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
+} */ /* private static String compileDefinitionOrStatement(String s) {
+    return parseDefinition(s).map(Definition::generate).orElseGet(() -> generatePlaceholder(s));
+} */ /* private static StringBuilder mergeValues(StringBuilder cache, String element) {
+    if (cache.isEmpty()) {
+        return cache.append(element);
+    }
+    return cache.append(", ").append(element);
 } */ /* private static String createIndent(int depth) {
     return "\n" + "\t".repeat(depth);
 } */ /* private static Optional<String> compileDefinitionStatement(String input, int depth) {
@@ -218,7 +235,7 @@ append: return; /*
     return state.append(c);
 } */ /* private static String compileType(String input) {
     var stripped = input.strip();
-    if(isSymbol(stripped)) {
+    if (isSymbol(stripped)) {
         return stripped;
     }
 

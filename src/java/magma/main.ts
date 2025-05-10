@@ -1,19 +1,19 @@
 /* public  */class Main {
 	/* private  */interface Collector<T, C> {
 		createInitial(/*  */) : C;
-		fold(/* C current, T element */) : C;/* 
+		fold(current : C, element : T) : C;/* 
      */}
 	/* 
 
     private  */interface Iterator<T> {
-		/*  */ fold<R>(/* R initial, BiFunction<R, T, R> folder */) : R;
-		/*  */ map<R>(/* Function<T, R> mapper */) : /* Iterator<R> */;
-		/*  */ collect<R>(/* Collector<T, R> collector */) : R;/* 
+		/*  */ fold<R>(initial : R, /*  BiFunction<R */, /*  T */, folder : /* R> */) : R;
+		/*  */ map<R>(/* Function<T */, mapper : /* R> */) : /* Iterator<R> */;
+		/*  */ collect<R>(/* Collector<T */, collector : /* R> */) : R;/* 
      */}
 	/* 
 
     private  */interface List<T> {
-		add(/* T element */) : /* List<T> */;
+		add(element : T) : /* List<T> */;
 		iterate(/*  */) : /* Iterator<T> */;/* 
      */}
 	/* 
@@ -21,7 +21,7 @@
     private  */interface Head<T> {
 		next(/*  */) : /* Optional<T> */;/* 
      */}
-	/* private */ HeadedIterator<T>(/* Head<T> head */) : record/* implements Iterator<T> {
+	/* private */ HeadedIterator<T>(head : /* Head<T> */) : record/* implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
@@ -52,7 +52,7 @@
     private static  */class RangeHead implements Head<Integer> {
 		/* private final */ length : int;
 		/* private */ counter : int;
-		RangeHead(/* int length */) : public/* {
+		RangeHead(length : int) : public/* {
             this.length = length;
         } */
 		/* @Override
@@ -70,7 +70,7 @@
 
 
     private static  */class Lists {
-		/* private */ JVMList<T>(/* java.util.List<T> elements */) : record/* implements List<T> {
+		/* private */ JVMList<T>(elements : /* java.util.List<T> */) : record/* implements List<T> {
 
 
             public JVMList() {
@@ -98,7 +98,7 @@
 		/* private */ segments : /* List<String> */;
 		/* private */ buffer : StringBuilder;
 		/* private */ depth : int;
-		State(/* List<String> segments, StringBuilder buffer, int depth */) : public/* {
+		State(segments : /* List<String> */, buffer : StringBuilder, depth : int) : public/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -111,7 +111,7 @@
             this.buffer = new StringBuilder();
             return this;
         } */
-		/* private */ append(/* char c */) : State/* {
+		/* private */ append(c : char) : State/* {
             this.buffer.append(c);
             return this;
         } */
@@ -138,11 +138,11 @@
             return Optional.empty();
         } */
 		/* @Override
-        public */ fold(/* Optional<String> current, String element */) : /* Optional<String> *//* {
+        public */ fold(current : /* Optional<String> */, element : String) : /* Optional<String> *//* {
             return Optional.of(current.map(inner -> inner + element).orElse(element));
         } *//* 
      */}
-	/* private */ Definition(/* Optional<String> maybeBefore, String type, String name, List<String> typeParams */) : record/* {
+	/* private */ Definition(maybeBefore : /* Optional<String> */, type : String, name : String, typeParams : /* List<String> */) : record/* {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -168,7 +168,7 @@
             return Lists.empty();
         } */
 		/* @Override
-        public */ fold(/* List<T> current, T element */) : /* List<T> *//* {
+        public */ fold(current : /* List<T> */, element : T) : /* List<T> *//* {
             return current.add(element);
         } *//* 
      */}
@@ -189,20 +189,29 @@
             throw new RuntimeException(e);
         }
     } */
-	/* private static */ compile(/* String input */) : String/* {
+	/* private static */ compile(input : String) : String/* {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	/* private static */ compileStatements(/* String input, Function<String, String> mapper */) : String/* {
-        return divideStatements(input)
+	/* private static */ compileStatements(input : String, /*  Function<String */, mapper : /* String> */) : String/* {
+        return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
+    } */
+	/* private static */ compileAll(input : String, /* 
+            BiFunction<State */, /*  Character */, folder : /* State> */, /* 
+            Function<String */, mapper : /* String> */, /* 
+            BiFunction<StringBuilder */, /*  String */, merger : /* StringBuilder> */) : String/* {
+        return divideAll(input, folder)
                 .iterate()
                 .map(mapper)
-                .fold(new StringBuilder(), StringBuilder::append)
+                .fold(new StringBuilder(), merger)
                 .toString();
     } */
-	/* private static */ divideStatements(/* String input */) : /* List<String> *//* {
-        return divideAll(input, Main::fold);
+	/* private static */ mergeStatements(stringBuilder : StringBuilder, str : String) : StringBuilder/* {
+        return stringBuilder.append(str);
     } */
-	/* private static */ divideAll(/* String input, BiFunction<State, Character, State> folder */) : /* List<String> *//* {
+	/* private static */ divideStatements(input : String) : /* List<String> *//* {
+        return divideAll(input, Main::foldStatementChar);
+    } */
+	/* private static */ divideAll(input : String, /*  BiFunction<State */, /*  Character */, folder : /* State> */) : /* List<String> *//* {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -211,7 +220,7 @@
 
         return current.advance().segments;
     } */
-	/* private static */ fold(/* State state, char c */) : State/* {
+	/* private static */ foldStatementChar(state : State, c : char) : State/* {
         var append = state.append(c);
         if (c == ';' && append.isLevel()) {
             return append.advance();
@@ -284,10 +293,19 @@
                 var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
 
                 return Optional.of(createIndent(depth) + parseDefinition(definition)
-                        .map(definition1 -> definition1.generateWithParams("(" + generatePlaceholder(params) + ")"))
+                        .map(definition1 -> definition1.generateWithParams("(" + compileValues(params, Main::compileDefinitionOrStatement) + ")"))
                         .orElseGet(() -> generatePlaceholder(definition)) + newContent);
             });
         });
+    } *//* private static String compileValues(String params, Function<String, String> mapper) {
+        return compileAll(params, Main::foldValueChar, mapper, Main::mergeValues);
+    } *//* private static String compileDefinitionOrStatement(String s) {
+        return parseDefinition(s).map(Definition::generate).orElseGet(() -> generatePlaceholder(s));
+    } *//* private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return cache.append(", ").append(element);
     } *//* private static String createIndent(int depth) {
         return "\n" + "\t".repeat(depth);
     } *//* private static Optional<String> compileDefinitionStatement(String input, int depth) {
@@ -322,7 +340,7 @@
         return state.append(c);
     } *//* private static String compileType(String input) {
         var stripped = input.strip();
-        if(isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             return stripped;
         }
 
