@@ -140,6 +140,16 @@ public class Main {
         }
     }
 
+    private record Definition(String beforeType, String type, String name) {
+        private String generate() {
+            return this.generateWithParams("");
+        }
+
+        public String generateWithParams(String params) {
+            return generatePlaceholder(this.beforeType) + " " + this.name + params + " : " + this.type;
+        }
+    }
+
     public static void main() {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
@@ -257,7 +267,14 @@ public class Main {
 
     private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
         return first(input, "(", (definition, withParams) -> {
-            return Optional.of(createIndent(depth) + compileDefinition(definition).orElseGet(() -> generatePlaceholder(definition)) + "(" + generatePlaceholder(withParams));
+            return first(withParams, ")", (params, rawContent) -> {
+                var content = rawContent.strip();
+                var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
+
+                return Optional.of(createIndent(depth) + parseDefinition(definition)
+                        .map(definition1 -> definition1.generateWithParams("(" + generatePlaceholder(params) + ")"))
+                        .orElseGet(() -> generatePlaceholder(definition)) + newContent);
+            });
         });
     }
 
@@ -267,14 +284,14 @@ public class Main {
 
     private static Optional<String> compileDefinitionStatement(String input, int depth) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return compileDefinition(withoutEnd).map(result -> createIndent(depth) + result + ";");
+            return parseDefinition(withoutEnd).map(result -> createIndent(depth) + result.generate() + ";");
         });
     }
 
-    private static Optional<String> compileDefinition(String input) {
+    private static Optional<Definition> parseDefinition(String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
             return compileLast(beforeName, " ", (beforeType, type) -> {
-                return Optional.of(generatePlaceholder(beforeType) + " " + name.strip() + " : " + compileType(type));
+                return Optional.of(new Definition(beforeType, compileType(type), name.strip()));
             });
         });
     }
@@ -283,7 +300,7 @@ public class Main {
         return generatePlaceholder(type);
     }
 
-    private static Optional<String> compileLast(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
         return compileInfix(input, infix, Main::findLast, mapper);
     }
 
@@ -296,7 +313,12 @@ public class Main {
         return compileInfix(input, infix, Main::findFirst, mapper);
     }
 
-    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locator, BiFunction<String, String, Optional<String>> mapper) {
+    private static <T> Optional<T> compileInfix(
+            String input,
+            String infix,
+            BiFunction<String, String, Optional<Integer>> locator,
+            BiFunction<String, String, Optional<T>> mapper
+    ) {
         return locator.apply(input, infix).flatMap(index -> {
             var left = input.substring(0, index);
             var right = input.substring(index + infix.length());
