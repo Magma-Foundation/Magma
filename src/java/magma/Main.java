@@ -59,6 +59,10 @@ public class Main {
         Optional<Integer> indexOf(T element, BiFunction<T, T, Boolean> equator);
 
         List<T> addAllLast(List<T> others);
+
+        Iterator<T> iterateReversed();
+
+        T last();
     }
 
     private interface Head<T> {
@@ -235,18 +239,36 @@ public class Main {
         }
     }
 
+    private record Frame(List<String> typeParams, List<Type> typeArguments, Optional<String> maybeStructName) {
+        public Optional<Type> resolveTypeParam(String name) {
+            return this.typeParams.indexOf(name, String::equals).flatMap(index -> {
+                if (index < this.typeArguments.size()) {
+                    return Optional.of(this.typeArguments.get(index));
+                }
+                return Optional.empty();
+            });
+        }
+
+        public boolean isTypeParamDefined(String value) {
+            return this.typeParams.contains(value, String::equals);
+        }
+    }
+
+    private record Stack(List<Frame> frames) {
+        public Stack() {
+            this(new ArrayList<>());
+        }
+    }
+
     private record CompileState(
             List<String> generated,
             Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
             List<ObjectType> expansions,
-            List<String> typeParams,
-            List<Type> typeArguments,
-            Optional<String> maybeCurrentStructName,
             List<ObjectType> structures,
-            List<String> methods
-    ) {
+            List<String> methods,
+            Stack stack) {
         public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new Stack());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -265,12 +287,12 @@ public class Main {
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods);
+            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.structures, this.methods, this.stack);
         }
 
         public CompileState addStruct(String struct) {
             return new CompileState(this.generated.addLast(struct)
-                    .addAllLast(this.methods), this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, new ArrayList<>());
+                    .addAllLast(this.methods), this.expandables, this.expansions, this.structures, new ArrayList<>(), this.stack);
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
@@ -286,15 +308,15 @@ public class Main {
         }
 
         public CompileState addTypeParameters(List<String> typeParams) {
-            return new CompileState(this.generated, this.expandables, this.expansions, typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods);
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, this.stack);
         }
 
         public CompileState withStructureName(String name) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, Optional.of(name), this.structures, this.methods);
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, this.stack);
         }
 
         public CompileState addTypeArguments(List<Type> typeArguments) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, typeArguments, this.maybeCurrentStructName, this.structures, this.methods);
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, this.stack);
         }
 
         public boolean isTypeDefined(String base) {
@@ -306,15 +328,37 @@ public class Main {
         }
 
         private boolean isCurrentStructName(String base) {
-            return this.maybeCurrentStructName.filter(value -> value.equals(base)).isPresent();
+            return this.findThisName().filter(inner -> inner.equals(base)).isPresent();
         }
 
         public CompileState addMethod(String method) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, this.methods.addLast(method));
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
         }
 
         public CompileState addStructure(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures.addLast(type), this.methods);
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures.addLast(type), this.methods, this.stack);
+        }
+
+        public Optional<String> findThisName() {
+            return this.stack.frames
+                    .iterateReversed()
+                    .map(Frame::maybeStructName)
+                    .flatMap(Iterators::fromOptional)
+                    .next();
+        }
+
+        public Optional<Type> resolveTypeArgument(String value) {
+            return this.stack.frames
+                    .iterateReversed()
+                    .map(frame -> frame.resolveTypeParam(value))
+                    .flatMap(Iterators::fromOptional)
+                    .next();
+        }
+
+        public boolean isTypeParamDefined(String value) {
+            return this.stack.frames
+                    .iterateReversed()
+                    .anyMatch(frame -> frame.isTypeParamDefined(value));
         }
     }
 
@@ -595,6 +639,18 @@ public class Main {
         @Override
         public List<T> addAllLast(List<T> others) {
             return others.iterate().fold(this, (BiFunction<List<T>, T, List<T>>) List::addLast);
+        }
+
+        @Override
+        public Iterator<T> iterateReversed() {
+            return new HeadedIterator<>(new RangeHead(this.size))
+                    .map(index -> this.size - index - 1)
+                    .map(this::get);
+        }
+
+        @Override
+        public T last() {
+            return this.get(this.size - 1);
         }
     }
 
@@ -987,7 +1043,7 @@ public class Main {
         }
         else if (oldContent.equals(";")) {
             newDefinition = definition.mapType(Type::strip).mapName(name -> {
-                return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return state.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
             });
 
             newContent = ";";
@@ -995,7 +1051,7 @@ public class Main {
         else {
             newContent = ";" + generatePlaceholder(oldContent);
             newDefinition = definition.mapName(name -> {
-                return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                return state.findThisName().map(currentStructName -> currentStructName + "_" + name).orElse(name);
             });
         }
 
@@ -1158,14 +1214,14 @@ public class Main {
 
     private static Optional<Tuple<CompileState, Type>> parseTypeParam(CompileState state, String input) {
         var stripped = input.strip();
-        return state.typeParams.indexOf(stripped, String::equals).flatMap(index -> {
-            if (index < state.typeArguments.size()) {
-                var argument = state.typeArguments.get(index);
-                return Optional.of(new Tuple<>(state, argument));
-            }
 
-            return Optional.of(new Tuple<>(state, new TypeParam(stripped)));
-        });
+        if (state.isTypeParamDefined(stripped)) {
+            return Optional.of(state.resolveTypeArgument(stripped).map(tuple -> {
+                return new Tuple<>(state, tuple);
+            }).orElseGet(() -> new Tuple<>(state, new TypeParam(stripped))));
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, Type>> parseArray(CompileState state, String input) {
