@@ -1,5 +1,7 @@
 package magma;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -209,8 +211,8 @@ public class Main {
     }
 
     private static Optional<String> compileStructure(String stripped, int depth, String infix) {
-        return compileFirst(stripped, infix, (left, right) -> {
-            return compileFirst(right, "{", (name, withEnd) -> {
+        return first(stripped, infix, (left, right) -> {
+            return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return compileSuffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
@@ -248,16 +250,31 @@ public class Main {
     private static String compileClassSegment(String input, int depth) {
         return compileClass(input, depth)
                 .or(() -> compileStructure(input, depth, "interface "))
+                .or(() -> compileMethod(input, depth))
                 .or(() -> compileDefinitionStatement(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
     }
 
+    private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
+        return first(input, "(", (definition, withParams) -> {
+            return Optional.of(createIndent(depth) + compileDefinition(definition).orElseGet(() -> generatePlaceholder(definition)) + "(" + generatePlaceholder(withParams));
+        });
+    }
+
+    private static String createIndent(int depth) {
+        return "\n" + "\t".repeat(depth);
+    }
+
     private static Optional<String> compileDefinitionStatement(String input, int depth) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return compileLast(withoutEnd, " ", (s, name) -> {
-                return compileLast(s, " ", (beforeType, type) -> {
-                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(beforeType) + " " + name.strip() + " : " + compileType(type) + ";");
-                });
+            return compileDefinition(withoutEnd).map(result -> createIndent(depth) + result + ";");
+        });
+    }
+
+    private static Optional<String> compileDefinition(String input) {
+        return compileLast(input.strip(), " ", (beforeName, name) -> {
+            return compileLast(beforeName, " ", (beforeType, type) -> {
+                return Optional.of(generatePlaceholder(beforeType) + " " + name.strip() + " : " + compileType(type));
             });
         });
     }
@@ -275,7 +292,7 @@ public class Main {
         return index == -1 ? Optional.empty() : Optional.of(index);
     }
 
-    private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    private static Optional<String> first(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
         return compileInfix(input, infix, Main::findFirst, mapper);
     }
 

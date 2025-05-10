@@ -1,21 +1,22 @@
 /* public  */class Main {
 	/* private  */interface Iterator<T> {
-		/* <R> R fold(R initial, BiFunction<R, T, */ folder) : /* R> */;
-		/* <R> Iterator<R> map(Function<T, */ mapper) : /* R> */;/* 
+		/* <R> */ fold : /* R */(/* R initial, BiFunction<R, T, R> folder); */
+		/* <R> */ map : /* Iterator<R> */(/* Function<T, R> mapper); *//* 
      */}
 	/* 
 
     private  */interface List<T> {
-		/* List<T> */ element) : /* add(T */;/* 
+		/* List<T> add */(/* T element); */
+		/* 
 
-        Iterator<T> iterate(); *//* 
+        Iterator<T> iterate */(/* ); *//* 
      */}
 	/* 
 
-    private  */interface Head<T> {/* Optional<T> next(); *//* 
-     */}/* 
-
-    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+    private  */interface Head<T> {
+		/* Optional<T> next */(/* ); *//* 
+     */}
+	/* private */ HeadedIterator<T> : /* record */(/* Head<T> head) implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
@@ -40,14 +41,14 @@
 
     private static  */class RangeHead implements Head<Integer> {
 		/* private final */ length : /* int */;
-		/* private */ counter : /* int */;/* 
+		/* private */ counter : /* int */;
+		/* 
 
-        public RangeHead(int length) {
+        public RangeHead */(/* int length) {
             this.length = length;
-        } *//* 
-
-        @Override
-        public Optional<Integer> next() {
+        } */
+		/* @Override
+        public */ next : /* Optional<Integer> */(/* ) {
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -60,7 +61,8 @@
 	/* 
 
 
-    private static  */class Lists {/* private record JVMList<T>(java.util.List<T> elements) implements List<T> {
+    private static  */class Lists {
+		/* private */ JVMList<T> : /* record */(/* java.util.List<T> elements) implements List<T> {
 
 
             public JVMList() {
@@ -77,9 +79,8 @@
             public Iterator<T> iterate() {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
             }
-        } *//* 
-
-        public static <T> List<T> empty() {
+        } */
+		/* public static <T> */ empty : /* List<T> */(/* ) {
             return new JVMList<>();
         } *//* 
      */}
@@ -88,49 +89,44 @@
     private static  */class State {
 		/* private */ segments : /* List<String> */;
 		/* private */ buffer : /* StringBuilder */;
-		/* private */ depth : /* int */;/* 
+		/* private */ depth : /* int */;
+		/* 
 
-        public State(List<String> segments, StringBuilder buffer, int depth) {
+        public State */(/* List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        } *//* 
+        } */
+		/* 
 
-        public State() {
+        public State */(/* ) {
             this(Lists.empty(), new StringBuilder(), 0);
-        } *//* 
-
-        private State advance() {
+        } */
+		/* private */ advance : /* State */(/* ) {
             this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
-        } *//* 
-
-        private State append(char c) {
+        } */
+		/* private */ append : /* State */(/* char c) {
             this.buffer.append(c);
             return this;
-        } *//* 
-
-        public State enter() {
+        } */
+		/* public */ enter : /* State */(/* ) {
             this.depth++;
             return this;
-        } *//* 
-
-        public boolean isLevel() {
+        } */
+		/* public */ isLevel : /* boolean */(/* ) {
             return this.depth == 0;
-        } *//* 
-
-        public State exit() {
+        } */
+		/* public */ exit : /* State */(/* ) {
             this.depth--;
             return this;
-        } *//* 
-
-        public boolean isShallow() {
+        } */
+		/* public */ isShallow : /* boolean */(/* ) {
             return this.depth == 1;
         } *//* 
-     */}/* 
-
-    public static void main() {
+     */}
+	/* public static */ main : /* void */(/* ) {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
             var source = parent.resolve("Main.java");
@@ -146,21 +142,18 @@
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-    } *//* 
-
-    private static String compile(String input) {
+    } */
+	/* private static */ compile : /* String */(/* String input) {
         return compileStatements(input, Main::compileRootSegment);
-    } *//* 
-
-    private static String compileStatements(String input, Function<String, String> mapper) {
+    } */
+	/* private static */ compileStatements : /* String */(/* String input, Function<String, String> mapper) {
         return divide(input)
                 .iterate()
                 .map(mapper)
                 .fold(new StringBuilder(), StringBuilder::append)
                 .toString();
-    } *//* 
-
-    private static List<String> divide(String input) {
+    } */
+	/* private static */ divide : /* List<String> */(/* String input) {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -168,21 +161,23 @@
         }
 
         return current.advance().segments;
-    } *//* 
-
-    private static State fold(State state, char c) {
+    } */
+	/* private static */ fold : /* State */(/* State state, char c) {
         var append = state.append(c);
         if (c == ';' && append.isLevel()) {
             return append.advance();
         }
-        if (c == '} *//* ' && append.isShallow()) {
+        if (c == '} */
+	/* ' */ append.isShallow : /* && */(/* )) {
             return append.advance().exit();
-        } *//* 
-        if (c == '{') {
+        } */
+	/* 
+        if  */(/* c == '{') {
             return append.enter();
         }
-        if (c == '} *//* ') {
-            return append.exit();
+        if (c == '} */
+	/* ') {
+            */ append.exit : /* return */(/* );
         } *//* 
         return append; *//* 
      */
@@ -197,8 +192,8 @@
     } *//* private static Optional<String> compileClass(String stripped, int depth) {
         return compileStructure(stripped, depth, "class ");
     } *//* private static Optional<String> compileStructure(String stripped, int depth, String infix) {
-        return compileFirst(stripped, infix, (left, right) -> {
-            return compileFirst(right, "{", (name, withEnd) -> {
+        return first(stripped, infix, (left, right) -> {
+            return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return compileSuffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
@@ -230,14 +225,23 @@
     } *//* private static String compileClassSegment(String input, int depth) {
         return compileClass(input, depth)
                 .or(() -> compileStructure(input, depth, "interface "))
+                .or(() -> compileMethod(input, depth))
                 .or(() -> compileDefinitionStatement(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));
+    } *//* private static @NotNull Optional<? extends String> compileMethod(String input, int depth) {
+        return first(input, "(", (definition, withParams) -> {
+            return Optional.of(createIndent(depth) + compileDefinition(definition).orElseGet(() -> generatePlaceholder(definition)) + "(" + generatePlaceholder(withParams));
+        });
+    } *//* private static String createIndent(int depth) {
+        return "\n" + "\t".repeat(depth);
     } *//* private static Optional<String> compileDefinitionStatement(String input, int depth) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return compileLast(withoutEnd, " ", (s, name) -> {
-                return compileLast(s, " ", (beforeType, type) -> {
-                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(beforeType) + " " + name.strip() + " : " + compileType(type) + ";");
-                });
+            return compileDefinition(withoutEnd).map(result -> createIndent(depth) + result + ";");
+        });
+    } *//* private static Optional<String> compileDefinition(String input) {
+        return compileLast(input.strip(), " ", (beforeName, name) -> {
+            return compileLast(beforeName, " ", (beforeType, type) -> {
+                return Optional.of(generatePlaceholder(beforeType) + " " + name.strip() + " : " + compileType(type));
             });
         });
     } *//* private static String compileType(String type) {
@@ -247,7 +251,7 @@
     } *//* private static Optional<Integer> findLast(String input, String infix) {
         var index = input.lastIndexOf(infix);
         return index == -1 ? Optional.empty() : Optional.of(index);
-    } *//* private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    } *//* private static Optional<String> first(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
         return compileInfix(input, infix, Main::findFirst, mapper);
     } *//* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locator, BiFunction<String, String, Optional<String>> mapper) {
         return locator.apply(input, infix).flatMap(index -> {
