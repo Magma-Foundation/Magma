@@ -85,11 +85,11 @@ struct List_/* T */ List_addAllLast(struct List_/* T */ others);
             return new CompileState(this.generated.addLast(struct)
                     .addAllLast(this.methods), this.expandables, this.expansions, this.typeParams, this.typeArguments, this.maybeCurrentStructName, this.structures, new ArrayList<>());
         } */
-/* public */ struct CompileState CompileState_addExpandable(char* name, struct Function_List_/* Type */_Optional_CompileState expandable);/*  {
+/* public */ struct CompileState CompileState_addExpandable(char* name, struct Optional_CompileState (*)(struct List_/* Type */) expandable);/*  {
             this.expandables.put(name, expandable);
             return this;
         } */
-/* public */ struct Optional_Function_List_/* Type */_Optional_CompileState CompileState_findExpandable(char* name);/*  {
+/* public */ struct Optional_Func_List_/* Type */_Optional_CompileState CompileState_findExpandable(char* name);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
@@ -200,10 +200,10 @@ struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 /* private */ char* Definition_generateAfterAnnotations(/*  */);/*  {
             return this.afterAnnotations.isEmpty() ? "" : (generatePlaceholder(this.afterAnnotations()) + " ");
         } */
-/* public */ struct Definition Definition_mapType(struct Function_/* Type */_/* Type */ mapper);/*  {
+/* public */ struct Definition Definition_mapType(/* Type */ (*)(/* Type */) mapper);/*  {
             return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
         } */
-/* public */ struct Definition Definition_mapName(struct Function_char_ref_char_ref mapper);/*  {
+/* public */ struct Definition Definition_mapName(char* (*)(char*) mapper);/*  {
             return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
         } */
 /* private */struct TypeParam {/* @Override
@@ -703,6 +703,11 @@ struct List_/* T */ List_addAllLast(struct List_/* T */ others);
 
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
+
+                if (base.equals("Function")) {
+                    var functional = new Functional(arguments.get(1), Lists.of(arguments.get(0)));
+                    return Optional.of(new Tuple<>(argumentsState, functional));
+                }
 
                 if (base.equals("BiFunction")) {
                     var functional = new Functional(arguments.get(2), Lists.of(arguments.get(0), arguments.get(1)));

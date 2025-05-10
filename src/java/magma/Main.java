@@ -1203,6 +1203,11 @@ public class Main {
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
 
+                if (base.equals("Function")) {
+                    var functional = new Functional(arguments.get(1), Lists.of(arguments.get(0)));
+                    return Optional.of(new Tuple<>(argumentsState, functional));
+                }
+
                 if (base.equals("BiFunction")) {
                     var functional = new Functional(arguments.get(2), Lists.of(arguments.get(0), arguments.get(1)));
                     return Optional.of(new Tuple<>(argumentsState, functional));
