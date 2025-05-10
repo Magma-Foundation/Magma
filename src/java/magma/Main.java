@@ -107,6 +107,10 @@ public class Main {
 
         String generate();
 
+        default String generateAsTemplate() {
+            return this.generate();
+        }
+
         boolean equalsTo(Type other);
 
         Type strip();
@@ -127,7 +131,8 @@ public class Main {
         Option<Definition> toDefinition();
     }
 
-    private record ListMap<K, V>(BiFunction<K, K, Boolean> keyEquator, List<Tuple2<K, V>> entries) implements Map<K, V> {
+    private record ListMap<K, V>(BiFunction<K, K, Boolean> keyEquator,
+                                 List<Tuple2<K, V>> entries) implements Map<K, V> {
         private ListMap(BiFunction<K, K, Boolean> keyEquator) {
             this(keyEquator, new ArrayList<>());
         }
@@ -504,12 +509,29 @@ public class Main {
     private record ObjectType(String name, List<Type> arguments) implements Type {
         @Override
         public String stringify() {
-            return this.name + this.joinArguments();
+            var joined = this.arguments.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .map(result -> "_" + result)
+                    .orElse("");
+
+            return this.name + joined;
         }
 
         @Override
         public String generate() {
             return "struct " + this.stringify();
+        }
+
+        @Override
+        public String generateAsTemplate() {
+            var joined = this.arguments.iterate()
+                    .map(Type::generateAsTemplate)
+                    .collect(new Joiner(", "))
+                    .map(result -> "<" + result + ">")
+                    .orElse("");
+
+            return this.name + joined;
         }
 
         @Override
@@ -533,13 +555,6 @@ public class Main {
             return this.arguments.iterate().anyMatch(Type::isParameterized);
         }
 
-        private String joinArguments() {
-            return this.arguments.iterate()
-                    .map(Type::stringify)
-                    .collect(new Joiner("_"))
-                    .map(result -> "_" + result)
-                    .orElse("");
-        }
     }
 
     private record CompileState(
@@ -1209,7 +1224,7 @@ public class Main {
 
         var joinedSymbols = state.structures
                 .iterate()
-                .map(ObjectType::generate)
+                .map(ObjectType::generateAsTemplate)
                 .map(inner -> "\n\t" + inner)
                 .collect(new Joiner(", "))
                 .orElse("");
