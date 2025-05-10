@@ -1,7 +1,7 @@
 "use strict";
 /* public */ class Main {
 }
-/* private */ HeadedIterator(head);
+/* private */ HeadedIterator(head, (Head));
 record; /* implements Iterator<T> {
     @Override
     public <R> R fold(R initial, BiFunction<R, T, R> folder) {
@@ -50,7 +50,7 @@ record; /* implements Collector<String, Optional<String>> {
         return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
     }
 } */
-/* private */ Definition(maybeBefore, type, String, name, String, typeParams);
+/* private */ Definition(maybeBefore, (Optional), type, String, name, String, typeParams, (List));
 record; /* {
     private String generate() {
         return this.generateWithParams("");
@@ -73,9 +73,6 @@ record; /* {
 } */
 /* private static */ class ListCollector {
 }
-(current /* List<T> */, element) => ; /* List<T> */ /* {
-    return current.add(element);
-} */
 /* private record */ B > (left);
 A, right;
 B;
@@ -101,11 +98,11 @@ void /* {
 String; /* {
     return compileStatements(input, Main::compileRootSegment);
 } */
-/* private static */ compileStatements(input, String, mapper);
+/* private static */ compileStatements(input, String, mapper, (Function));
 String; /* {
     return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
 } */
-/* private static */ compileAll(input, String, folder, mapper, merger);
+/* private static */ compileAll(input, String, folder, (BiFunction), mapper, (Function), merger, (BiFunction));
 String; /* {
     return divideAll(input, folder)
             .iterate()
@@ -118,7 +115,19 @@ StringBuilder; /* {
     return stringBuilder.append(str);
 } */
 /* private static */ divideStatements(input, String);
-/* private static */ divideAll(input, String, folder);
+List; /* {
+    return divideAll(input, Main::foldStatementChar);
+} */
+/* private static */ divideAll(input, String, folder, (BiFunction));
+List; /* {
+    var current = new State();
+    for (var i = 0; i < input.length(); i++) {
+        var c = input.charAt(i);
+        current = folder.apply(current, c);
+    }
+
+    return current.advance().segments;
+} */
 /* private static */ foldStatementChar(state, State, c, char);
 State; /* {
     var append = state.append(c);
@@ -260,7 +269,7 @@ append: return;
     }
     return appended;
 } */ /* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
-    return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
+    return Optional.of(new Definition(beforeTypeParams, type(type), name.strip(), typeParams));
 } */ /* private static State foldValueChar(State state, char c) {
     if (c == ',' && state.isLevel()) {
         return state.advance();
@@ -274,13 +283,19 @@ append: return;
         return appended.exit();
     }
     return appended;
-} */ /* private static String compileType(String input) {
+} */ /* private static String type(String input) {
     var stripped = input.strip();
     if (isSymbol(stripped)) {
         return stripped;
     }
 
-    return generatePlaceholder(stripped);
+    return template(input).orElseGet(() -> generatePlaceholder(stripped));
+} */ /* private static Optional<String> template(String input) {
+    return suffix(input.strip(), ">", withoutEnd -> {
+        return first(withoutEnd, "<", (base, arguments) -> {
+            return Optional.of(base + "<" + compileValues(arguments, Main::type) + ">");
+        });
+    });
 } */ /* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
     return infix(input, infix, Main::findLast, mapper);
 } */ /* private static Optional<Integer> findLast(String input, String infix) {

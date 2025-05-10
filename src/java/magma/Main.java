@@ -448,7 +448,7 @@ public class Main {
     }
 
     private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
-        return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
+        return Optional.of(new Definition(beforeTypeParams, type(type), name.strip(), typeParams));
     }
 
     private static State foldValueChar(State state, char c) {
@@ -466,13 +466,21 @@ public class Main {
         return appended;
     }
 
-    private static String compileType(String input) {
+    private static String type(String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
             return stripped;
         }
 
-        return generatePlaceholder(stripped);
+        return template(input).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> template(String input) {
+        return suffix(input.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (base, arguments) -> {
+                return Optional.of(base + "<" + compileValues(arguments, Main::type) + ">");
+            });
+        });
     }
 
     private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {

@@ -4,19 +4,19 @@
 		fold(current : C, element : T) : C;
 	}
 	/* private */interface Iterator<T> {
-		fold<R>(initial : R, folder : /* BiFunction<R, T, R> */) : R;
-		map<R>(mapper : /* Function<T, R> */) : /* Iterator<R> */;
-		collect<R>(collector : /* Collector<T, R> */) : R;
+		fold<R>(initial : R, folder : BiFunction<R, T, R>) : R;
+		map<R>(mapper : Function<T, R>) : Iterator<R>;
+		collect<R>(collector : Collector<T, R>) : R;
 	}
 	/* private */interface List<T> {
-		add(element : T) : /* List<T> */;
-		iterate() : /* Iterator<T> */;
-		removeLast() : /* Optional<Tuple<List<T>, T>> */;
+		add(element : T) : List<T>;
+		iterate() : Iterator<T>;
+		removeLast() : Optional<Tuple<List<T>, T>>;
 	}
 	/* private */interface Head<T> {
-		next() : /* Optional<T> */;
+		next() : Optional<T>;
 	}
-	/* private */ HeadedIterator<T>(head : /* Head<T> */) : record/* implements Iterator<T> {
+	/* private */ HeadedIterator<T>(head : Head<T>) : record/* implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
@@ -49,7 +49,7 @@
             this.length = length;
         } */
 		/* @Override
-        public */ next() : /* Optional<Integer> *//* {
+        public */ next() : Optional<Integer>/* {
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
@@ -60,7 +60,7 @@
         } */
 	}
 	/* private static */class Lists {
-		/* private */ JVMList<T>(elements : /* java.util.List<T> */) : record/* implements List<T> {
+		/* private */ JVMList<T>(elements : java.util.List<T>) : record/* implements List<T> {
 
 
             public JVMList() {
@@ -89,15 +89,15 @@
                 return Optional.of(new Tuple<>(new JVMList<>(slice), last));
             }
         } */
-		/* public static  */ empty<T>() : /* List<T> *//* {
+		/* public static  */ empty<T>() : List<T>/* {
             return new JVMList<>();
         } */
 	}
 	/* private static */class State {
-		/* private */ segments : /* List<String> */;
+		/* private */ segments : List<String>;
 		/* private */ buffer : StringBuilder;
 		/* private */ depth : int;
-		State(segments : /* List<String> */, buffer : StringBuilder, depth : int) : public/* {
+		State(segments : List<String>, buffer : StringBuilder, depth : int) : public/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -144,7 +144,7 @@
             return Optional.of(current.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     } */
-	/* private */ Definition(maybeBefore : /* Optional<String> */, type : String, name : String, typeParams : /* List<String> */) : record/* {
+	/* private */ Definition(maybeBefore : Optional<String>, type : String, name : String, typeParams : List<String>) : record/* {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -166,11 +166,11 @@
     } */
 	/* private static */class ListCollector<T> implements Collector<T, List<T>> {
 		/* @Override
-        public */ createInitial() : /* List<T> *//* {
+        public */ createInitial() : List<T>/* {
             return Lists.empty();
         } */
 		/* @Override
-        public */ fold(current : /* List<T> */, element : T) : /* List<T> *//* {
+        public */ fold(current : List<T>, element : T) : List<T>/* {
             return current.add(element);
         } */
 	}
@@ -196,10 +196,10 @@
 	/* private static */ compile(input : String) : String/* {
         return compileStatements(input, Main::compileRootSegment);
     } */
-	/* private static */ compileStatements(input : String, mapper : /* Function<String, String> */) : String/* {
+	/* private static */ compileStatements(input : String, mapper : Function<String, String>) : String/* {
         return compileAll(input, Main::foldStatementChar, mapper, Main::mergeStatements);
     } */
-	/* private static */ compileAll(input : String, folder : /* BiFunction<State, Character, State> */, mapper : /* Function<String, String> */, merger : /* BiFunction<StringBuilder, String, StringBuilder> */) : String/* {
+	/* private static */ compileAll(input : String, folder : BiFunction<State, Character, State>, mapper : Function<String, String>, merger : BiFunction<StringBuilder, String, StringBuilder>) : String/* {
         return divideAll(input, folder)
                 .iterate()
                 .map(mapper)
@@ -209,10 +209,10 @@
 	/* private static */ mergeStatements(stringBuilder : StringBuilder, str : String) : StringBuilder/* {
         return stringBuilder.append(str);
     } */
-	/* private static */ divideStatements(input : String) : /* List<String> *//* {
+	/* private static */ divideStatements(input : String) : List<String>/* {
         return divideAll(input, Main::foldStatementChar);
     } */
-	/* private static */ divideAll(input : String, folder : /* BiFunction<State, Character, State> */) : /* List<String> *//* {
+	/* private static */ divideAll(input : String, folder : BiFunction<State, Character, State>) : List<String>/* {
         var current = new State();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -363,7 +363,7 @@
         }
         return appended;
     } *//* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
-        return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
+        return Optional.of(new Definition(beforeTypeParams, type(type), name.strip(), typeParams));
     } *//* private static State foldValueChar(State state, char c) {
         if (c == ',' && state.isLevel()) {
             return state.advance();
@@ -377,13 +377,19 @@
             return appended.exit();
         }
         return appended;
-    } *//* private static String compileType(String input) {
+    } *//* private static String type(String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
             return stripped;
         }
 
-        return generatePlaceholder(stripped);
+        return template(input).orElseGet(() -> generatePlaceholder(stripped));
+    } *//* private static Optional<String> template(String input) {
+        return suffix(input.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (base, arguments) -> {
+                return Optional.of(base + "<" + compileValues(arguments, Main::type) + ">");
+            });
+        });
     } *//* private static <T> Optional<T> last(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
         return infix(input, infix, Main::findLast, mapper);
     } *//* private static Optional<Integer> findLast(String input, String infix) {
