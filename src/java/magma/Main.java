@@ -1032,10 +1032,11 @@ public class Main {
         var joinedSymbols = state.structures
                 .iterate()
                 .map(ObjectType::generate)
+                .map(inner -> "\n\t" + inner)
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var defined = state.addMethod("// " + name + ": [" + joinedSymbols + "]\n").mapStack(stack -> stack
+        var defined = state.addMethod(generatePlaceholder(name + ": [" + joinedSymbols + "\n]") + "\n").mapStack(stack -> stack
                 .defineStructPrototype(name)
                 .defineTypeParameters(typeParams)
                 .defineTypeArguments(typeArguments)
