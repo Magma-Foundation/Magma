@@ -761,6 +761,253 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
                     .iterateReversed()
                     .anyMatch(frame -> frame.isTypeParamDefined(value));
         } */
+/* private */struct ObjectType {/*  */
+	char* name;
+	struct List_Type arguments;
+};
+/* ObjectType: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct List_Type, 
+	struct Option_Type, 
+	struct Frame, 
+	struct List_Frame, 
+	struct Stack
+] */
+/* public */ char* ObjectType_stringify(/*  */);/*  {
+            return this.name + this.joinArguments();
+        } */
+/* public */ char* ObjectType_generate(/*  */);/*  {
+            return "struct " + this.stringify();
+        } */
+/* public */ int ObjectType_equalsTo(struct Type other);/*  {
+            return other instanceof ObjectType objectType
+                    && this.name.equals(objectType.name)
+                    && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
+        } */
+/* public */ struct Type ObjectType_strip(/*  */);/*  {
+            var newArguments = this.arguments.iterate()
+                    .map(Type::strip)
+                    .collect(new ListCollector<>());
+
+            return new ObjectType(this.name, newArguments);
+        } */
+/* public */ int ObjectType_isParameterized(/*  */);/*  {
+            return this.arguments.iterate().anyMatch(Type::isParameterized);
+        } */
+/* private */ char* ObjectType_joinArguments(/*  */);/*  {
+            return this.arguments.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .map(result -> "_" + result)
+                    .orElse("");
+        } */
+/* private */struct List_ObjectType {/*  */
+};
+/* Main: [
+] */
+/* Type: [
+] */
+char* Type_stringify(/*  */);
+char* Type_generate(/*  */);
+int Type_equalsTo(struct Type other);
+struct Type Type_strip(/*  */);
+int Type_isParameterized(/*  */);
+/* default */ char* Type_generateWithName(char* name);/*  {
+            return this.generate() + " " + name;
+        } */
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct List_char_ref List_addLast(char* element);
+/* Iterator: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Iterator_char_ref Iterator_concat(struct Iterator_char_ref other);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists
+] */
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
+int Option_isPresent(/*  */);
+struct Option_char_ref Option_filter(int (*predicate)(char*));
+char* Option_orElse(char* other);
+char* Option_orElseGet(char* (*other)());
+int Option_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref
+] */
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
+int Option_isPresent(/*  */);
+struct Option_char_ref Option_filter(int (*predicate)(char*));
+char* Option_orElse(char* other);
+char* Option_orElseGet(char* (*other)());
+int Option_isEmpty(/*  */);
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref
+] */
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref
+] */
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
+int Option_isPresent(/*  */);
+struct Option_char_ref Option_filter(int (*predicate)(char*));
+char* Option_orElse(char* other);
+char* Option_orElseGet(char* (*other)());
+int Option_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState
+] */
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*equator)(char*, char*));
+int List_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
+int List_size(/*  */);
+struct Option_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Option_int List_indexOf(char* element, int (*equator)(char*, char*));
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*mapper)(char*));
+/* Option: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct List_Type
+] */
+struct Option_char_ref Option_or(struct Option_char_ref (*other)());
+int Option_isPresent(/*  */);
+struct Option_char_ref Option_filter(int (*predicate)(char*));
+char* Option_orElse(char* other);
+char* Option_orElseGet(char* (*other)());
+int Option_isEmpty(/*  */);
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct List_Type, 
+	struct Option_Type, 
+	struct Frame
+] */
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*equator)(char*, char*));
+int List_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
+int List_size(/*  */);
+struct Option_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Option_int List_indexOf(char* element, int (*equator)(char*, char*));
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*mapper)(char*));
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct List_Type, 
+	struct Option_Type, 
+	struct Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*equator)(char*, char*));
+int List_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
+int List_size(/*  */);
+struct Option_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Option_int List_indexOf(char* element, int (*equator)(char*, char*));
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* private sealed */struct Option_CompileState {/*  */
 };
 /* Main: [
@@ -924,6 +1171,39 @@ struct List_char_ref List_addAllLast(struct List_char_ref others);
 struct Iterator_char_ref List_iterateReversed(/*  */);
 char* List_last(/*  */);
 struct List_char_ref List_mapLast(char* (*mapper)(char*));
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct List_Type, 
+	struct Option_Type, 
+	struct Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*equator)(char*, char*));
+int List_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
+int List_size(/*  */);
+struct Option_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Option_int List_indexOf(char* element, int (*equator)(char*, char*));
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -941,7 +1221,9 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct Option_Type, 
 	struct Frame, 
 	struct List_Frame, 
-	struct Stack
+	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType
 ] */
 struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
@@ -968,12 +1250,12 @@ int Option_isEmpty(/*  */);
         } *//*  */
 	struct List_char_ref generated;
 	struct Map_char_ref_Func_List_Type_Option_/* CompileState */ expandables;
-	struct List_/* ObjectType */ expansions;
-	struct List_/* ObjectType */ structures;
+	struct List_ObjectType expansions;
+	struct List_ObjectType structures;
 	struct List_char_ref methods;
 	struct Stack stack;
 };
-/* private */ struct Option_CompileState Option_expand(/* ObjectType expansion */);/*  {
+/* private */ struct Option_CompileState Option_expand(struct ObjectType expansion);/*  {
             if (expansion.isParameterized()) {
                 return new None<>();
             }
@@ -1025,6 +1307,8 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState
 ] */
@@ -1054,6 +1338,8 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner
@@ -1079,6 +1365,8 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
@@ -1098,62 +1386,6 @@ int Option_isEmpty(/*  */);
         } */
 /* public */ int Ref_isParameterized(/*  */);/*  {
             return this.type.isParameterized();
-        } */
-/* private */struct ObjectType {/*  */
-	char* name;
-	struct List_Type arguments;
-};
-/* ObjectType: [
-	struct Type, 
-	struct Actual, 
-	struct Parameter, 
-	struct StandardLibrary, 
-	struct Lists, 
-	struct Option_char_ref, 
-	struct Iterator_char_ref, 
-	struct Option_Tuple_List_char_ref_char_ref, 
-	struct Option_Tuple_char_ref_int, 
-	struct Option_int, 
-	struct List_char_ref, 
-	struct DivideState, 
-	struct List_Type, 
-	struct Option_Type, 
-	struct Frame, 
-	struct List_Frame, 
-	struct Stack, 
-	struct Option_CompileState, 
-	struct CompileState, 
-	struct Joiner, 
-	struct Iterators, 
-	struct Ref
-] */
-/* public */ char* ObjectType_stringify(/*  */);/*  {
-            return this.name + this.joinArguments();
-        } */
-/* public */ char* ObjectType_generate(/*  */);/*  {
-            return "struct " + this.stringify();
-        } */
-/* public */ int ObjectType_equalsTo(struct Type other);/*  {
-            return other instanceof ObjectType objectType
-                    && this.name.equals(objectType.name)
-                    && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
-        } */
-/* public */ struct Type ObjectType_strip(/*  */);/*  {
-            var newArguments = this.arguments.iterate()
-                    .map(Type::strip)
-                    .collect(new ListCollector<>());
-
-            return new ObjectType(this.name, newArguments);
-        } */
-/* public */ int ObjectType_isParameterized(/*  */);/*  {
-            return this.arguments.iterate().anyMatch(Type::isParameterized);
-        } */
-/* private */ char* ObjectType_joinArguments(/*  */);/*  {
-            return this.arguments.iterate()
-                    .map(Type::stringify)
-                    .collect(new Joiner("_"))
-                    .map(result -> "_" + result)
-                    .orElse("");
         } */
 /* private */struct Placeholder {/*  */
 	char* value;
@@ -1176,12 +1408,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
-	struct Ref, 
-	struct ObjectType
+	struct Ref
 ] */
 /* public */ char* Placeholder_stringify(/*  */);/*  {
             return generatePlaceholder(this.value);
@@ -1364,6 +1597,39 @@ struct List_char_ref List_addAllLast(struct List_char_ref others);
 struct Iterator_char_ref List_iterateReversed(/*  */);
 char* List_last(/*  */);
 struct List_char_ref List_mapLast(char* (*mapper)(char*));
+/* List: [
+	struct Type, 
+	struct Actual, 
+	struct Parameter, 
+	struct StandardLibrary, 
+	struct Lists, 
+	struct Option_char_ref, 
+	struct Iterator_char_ref, 
+	struct Option_Tuple_List_char_ref_char_ref, 
+	struct Option_Tuple_char_ref_int, 
+	struct Option_int, 
+	struct List_char_ref, 
+	struct DivideState, 
+	struct List_Type, 
+	struct Option_Type, 
+	struct Frame, 
+	struct List_Frame, 
+	struct Stack, 
+	struct ObjectType
+] */
+struct List_char_ref List_addLast(char* element);
+struct Iterator_char_ref List_iterate(/*  */);
+int List_contains(char* element, int (*equator)(char*, char*));
+int List_equalsTo(struct List_char_ref others, int (*equator)(char*, char*));
+int List_size(/*  */);
+struct Option_Tuple_List_char_ref_char_ref List_removeLast(/*  */);
+int List_isEmpty(/*  */);
+char* List_get(int index);
+struct Option_int List_indexOf(char* element, int (*equator)(char*, char*));
+struct List_char_ref List_addAllLast(struct List_char_ref others);
+struct Iterator_char_ref List_iterateReversed(/*  */);
+char* List_last(/*  */);
+struct List_char_ref List_mapLast(char* (*mapper)(char*));
 /* Option: [
 	struct Type, 
 	struct Actual, 
@@ -1381,7 +1647,9 @@ struct List_char_ref List_mapLast(char* (*mapper)(char*));
 	struct Option_Type, 
 	struct Frame, 
 	struct List_Frame, 
-	struct Stack
+	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType
 ] */
 struct Option_char_ref Option_or(struct Option_char_ref (*other)());
 int Option_isPresent(/*  */);
@@ -1407,12 +1675,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
-	struct ObjectType, 
 	struct Placeholder
 ] */
 struct Option_char_ref Option_or(struct Option_char_ref (*other)());
@@ -1459,12 +1728,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
-	struct ObjectType, 
 	struct Placeholder, 
 	struct Option_Definition, 
 	struct Definition
@@ -1506,12 +1776,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
-	struct ObjectType, 
 	struct Placeholder, 
 	struct Option_Definition, 
 	struct Definition, 
@@ -1572,6 +1843,8 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState
 ] */
@@ -1599,12 +1872,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
-	struct ObjectType, 
 	struct Placeholder, 
 	struct Option_Definition, 
 	struct Definition, 
@@ -1631,6 +1905,8 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState
 ] */
@@ -1658,12 +1934,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
-	struct ObjectType, 
 	struct Placeholder, 
 	struct Option_Definition, 
 	struct Definition, 
@@ -1688,12 +1965,13 @@ int Option_isEmpty(/*  */);
 	struct Frame, 
 	struct List_Frame, 
 	struct Stack, 
+	struct ObjectType, 
+	struct List_ObjectType, 
 	struct Option_CompileState, 
 	struct CompileState, 
 	struct Joiner, 
 	struct Iterators, 
 	struct Ref, 
-	struct ObjectType, 
 	struct Placeholder, 
 	struct Option_Definition, 
 	struct Definition, 

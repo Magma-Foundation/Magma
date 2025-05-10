@@ -433,6 +433,47 @@ public class Main {
         }
     }
 
+    private record ObjectType(String name, List<Type> arguments) implements Type {
+        @Override
+        public String stringify() {
+            return this.name + this.joinArguments();
+        }
+
+        @Override
+        public String generate() {
+            return "struct " + this.stringify();
+        }
+
+        @Override
+        public boolean equalsTo(Type other) {
+            return other instanceof ObjectType objectType
+                    && this.name.equals(objectType.name)
+                    && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
+        }
+
+        @Override
+        public Type strip() {
+            var newArguments = this.arguments.iterate()
+                    .map(Type::strip)
+                    .collect(new ListCollector<>());
+
+            return new ObjectType(this.name, newArguments);
+        }
+
+        @Override
+        public boolean isParameterized() {
+            return this.arguments.iterate().anyMatch(Type::isParameterized);
+        }
+
+        private String joinArguments() {
+            return this.arguments.iterate()
+                    .map(Type::stringify)
+                    .collect(new Joiner("_"))
+                    .map(result -> "_" + result)
+                    .orElse("");
+        }
+    }
+
     private record CompileState(
             List<String> generated,
             Map<String, Function<List<Type>, Option<CompileState>>> expandables,
@@ -586,47 +627,6 @@ public class Main {
         @Override
         public boolean isParameterized() {
             return this.type.isParameterized();
-        }
-    }
-
-    private record ObjectType(String name, List<Type> arguments) implements Type {
-        @Override
-        public String stringify() {
-            return this.name + this.joinArguments();
-        }
-
-        @Override
-        public String generate() {
-            return "struct " + this.stringify();
-        }
-
-        @Override
-        public boolean equalsTo(Type other) {
-            return other instanceof ObjectType objectType
-                    && this.name.equals(objectType.name)
-                    && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
-        }
-
-        @Override
-        public Type strip() {
-            var newArguments = this.arguments.iterate()
-                    .map(Type::strip)
-                    .collect(new ListCollector<>());
-
-            return new ObjectType(this.name, newArguments);
-        }
-
-        @Override
-        public boolean isParameterized() {
-            return this.arguments.iterate().anyMatch(Type::isParameterized);
-        }
-
-        private String joinArguments() {
-            return this.arguments.iterate()
-                    .map(Type::stringify)
-                    .collect(new Joiner("_"))
-                    .map(result -> "_" + result)
-                    .orElse("");
         }
     }
 
