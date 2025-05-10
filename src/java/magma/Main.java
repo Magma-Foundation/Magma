@@ -75,6 +75,7 @@ public class Main {
     }
 
     private interface Parameter {
+        String generate();
     }
 
     private static class EmptyHead<T> implements Head<T> {
@@ -434,7 +435,8 @@ public class Main {
             String name,
             List<String> typeParams
     ) implements Parameter {
-        private String generate() {
+        @Override
+        public String generate() {
             return this.generateAfterAnnotations() + this.type().generate() + " " + this.name();
         }
 
@@ -719,11 +721,15 @@ public class Main {
         return (state, input) -> {
             return compileInfix(input, ")", Main::findLast, (withParameters, afterParameters) -> {
                 return compileFirst(withParameters, "(", (beforeParameters, parameters) -> {
-                    var parametersTuple = parseValues(state, parameters, Main::compileParameter);
+                    var parametersTuple = parseParameters(state, parameters);
                     return createStructureWithMaybeTypeParametersRule(parametersTuple.left, beforeKeyword, beforeParameters, content1, parametersTuple.right);
                 });
             });
         };
+    }
+
+    private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String parameters) {
+        return parseValues(state, parameters, Main::compileParameter);
     }
 
     private static Tuple<CompileState, Parameter> compileParameter(CompileState state, String input) {
@@ -848,36 +854,51 @@ public class Main {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
 
-                    if (!definition.typeParams.isEmpty()) {
-                        return Optional.of(new Tuple<>(definitionTuple.left, ""));
-                    }
-
-                    Definition newDefinition;
-                    String newContent;
-                    if (definition.annotations.contains("Actual", String::equals)) {
-                        newDefinition = definition.mapType(Type::strip);
-                        newContent = ";";
-                    }
-                    else if (oldContent.equals(";")) {
-                        newDefinition = definition.mapType(Type::strip).mapName(name -> {
-                            return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
-                        });
-
-                        newContent = ";";
-                    }
-                    else {
-                        newContent = ";" + generatePlaceholder(oldContent);
-                        newDefinition = definition.mapName(name -> {
-                            return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
-                        });
-                    }
-
-                    var generatedHeader = newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
-                    var generated = generatedHeader + newContent + "\n";
-                    return Optional.of(new Tuple<>(definitionState.addGenerative(generated), ""));
+                    var parametersTuple = parseParameters(definitionState, params);
+                    return assembleMethod(parametersTuple.left, definition, parametersTuple.right, oldContent);
                 });
             });
         });
+    }
+
+    private static Optional<Tuple<CompileState, String>> assembleMethod(
+            CompileState state,
+            Definition definition,
+            List<Parameter> parameters,
+            String oldContent
+    ) {
+        if (!definition.typeParams.isEmpty()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+
+        Definition newDefinition;
+        String newContent;
+        if (definition.annotations.contains("Actual", String::equals)) {
+            newDefinition = definition.mapType(Type::strip);
+            newContent = ";";
+        }
+        else if (oldContent.equals(";")) {
+            newDefinition = definition.mapType(Type::strip).mapName(name -> {
+                return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+            });
+
+            newContent = ";";
+        }
+        else {
+            newContent = ";" + generatePlaceholder(oldContent);
+            newDefinition = definition.mapName(name -> {
+                return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+            });
+        }
+
+        var parametersString = parameters.iterate()
+                .map(Parameter::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var generatedHeader = newDefinition.generate() + "(" + parametersString + ")";
+        var generated = generatedHeader + newContent + "\n";
+        return Optional.of(new Tuple<>(state.addGenerative(generated), ""));
     }
 
     private static Tuple<CompileState, String> compileOrPlaceholder(

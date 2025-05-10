@@ -1,12 +1,13 @@
 char* Type_stringify(/*  */);
 char* Type_generate(/*  */);
-int Type_equalsTo(/* Type other */);
+int Type_equalsTo(struct Type other);
 struct Type Type_strip(/*  */);
 int Type_isParameterized(/*  */);
 /* private */struct Type {/*  */
 };
 /* private @ */struct Actual {/*  */
 };
+char* Parameter_generate(/*  */);
 /* private */struct Parameter {/*  */
 };
 struct Optional_T Head_next(/*  */);
@@ -16,25 +17,35 @@ struct Optional_T Head_next(/*  */);
 };
 /* private static */struct Lists {/*  */
 };
-struct List_T List_addLast(/* T element */);
-struct Iterator_T Iterator_concat(/* Iterator<T> other */);
+struct List_T List_addLast(struct T element);
+struct C Collector_createInitial(/*  */);
+struct C Collector_fold(struct C current, struct T element);
+/* private */struct Collector_T_/* C */ {/*  */
+};
+struct Iterator_T Iterator_concat(struct Iterator_T other);
 struct Optional_T Iterator_next(/*  */);
-int Iterator_anyMatch(/* Predicate<T> predicate */);
-int Iterator_allMatch(/* Predicate<T> predicate */);
+int Iterator_anyMatch(struct Predicate_T predicate);
+int Iterator_allMatch(struct Predicate_T predicate);
+/* private */struct Iterator_R {/*  */
+};
+struct Iterator_T Iterator_concat(struct Iterator_T other);
+struct Optional_T Iterator_next(/*  */);
+int Iterator_anyMatch(struct Predicate_T predicate);
+int Iterator_allMatch(struct Predicate_T predicate);
 /* private */struct Iterator_T {/*  */
 };
-struct Iterator_T List_iterate(/*  */);
-int Iterator_contains(/* T element, BiFunction<T, T, Boolean> equator */);
-int Iterator_equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */);
+struct Iterator_T Iterator_iterate(/*  */);
+int Iterator_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int Iterator_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
 int Iterator_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ Iterator_removeLast(/*  */);
 int Iterator_isEmpty(/*  */);
 /* private */struct List_T {/*  */
 };
-struct List_T List_addLast(/* T element */);
+struct List_T Iterator_addLast(struct T element);
 struct Iterator_T Iterator_iterate(/*  */);
-int Iterator_contains(/* T element, BiFunction<T, T, Boolean> equator */);
-int Iterator_equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */);
+int Iterator_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int Iterator_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
 int Iterator_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ Iterator_removeLast(/*  */);
 int Iterator_isEmpty(/*  */);
@@ -48,7 +59,7 @@ struct public Iterator_DivideState(/*  */);/*  {
             this.buffer = "";
             return this;
         } */
-/* private */ struct DivideState Iterator_append(/* char c */);/*  {
+/* private */ struct DivideState Iterator_append(struct char c);/*  {
             this.buffer = this.buffer + c;
             return this;
         } */
@@ -75,19 +86,19 @@ struct public Iterator_DivideState(/*  */);/*  {
             this.depth = depth;
         } *//*  */
 };
-struct List_T List_addLast(/* T element */);
+struct List_T List_addLast(struct T element);
 struct Iterator_T List_iterate(/*  */);
-int List_contains(/* T element, BiFunction<T, T, Boolean> equator */);
-int List_equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */);
+int List_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int List_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
 /* private */struct List_Type {/*  */
 };
-struct List_T List_addLast(/* T element */);
+struct List_T List_addLast(struct T element);
 struct Iterator_T List_iterate(/*  */);
-int List_contains(/* T element, BiFunction<T, T, Boolean> equator */);
-int List_equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */);
+int List_contains(struct T element, struct BiFunction_T_/* T */_/* Boolean */ equator);
+int List_equalsTo(struct List_T others, struct BiFunction_T_/* T */_/* Boolean */ equator);
 int List_size(/*  */);
 struct Optional_Tuple_List_T_/* T */ List_removeLast(/*  */);
 int List_isEmpty(/*  */);
@@ -96,7 +107,7 @@ int List_isEmpty(/*  */);
 struct public CompileState_CompileState(/*  */);/*  {
             this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
         } */
-/* private */ struct Optional_CompileState CompileState_expand(/* ObjectType expansion */);/*  {
+/* private */ struct Optional_CompileState CompileState_expand(struct ObjectType expansion);/*  {
             if (this.expansions.contains(expansion, ObjectType::equalsTo)) {
                 return Optional.empty();
             }
@@ -105,26 +116,26 @@ struct public CompileState_CompileState(/*  */);/*  {
                     .findExpandable(expansion.name)
                     .flatMap(expandable -> expandable.apply(expansion.arguments));
         } */
-/* private */ struct CompileState CompileState_addExpansion(/* ObjectType type */);/*  {
+/* private */ struct CompileState CompileState_addExpansion(struct ObjectType type);/*  {
             return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams, this.maybeCurrentStructName);
         } */
-/* public */ struct CompileState CompileState_addGenerative(/* String struct */);/*  {
+/* public */ struct CompileState CompileState_addGenerative(char* struct);/*  {
             return new CompileState(this.generated.addLast(struct), this.expandables, this.expansions, this.typeParams, this.maybeCurrentStructName);
         } */
-/* public */ struct CompileState CompileState_addExpandable(/* String name, Function<List<Type>, Optional<CompileState>> expandable */);/*  {
+/* public */ struct CompileState CompileState_addExpandable(char* name, struct Function_List_Type_Optional_CompileState expandable);/*  {
             this.expandables.put(name, expandable);
             return this;
         } */
-/* public */ struct Optional_Function_List_Type_Optional_CompileState CompileState_findExpandable(/* String name */);/*  {
+/* public */ struct Optional_Function_List_Type_Optional_CompileState CompileState_findExpandable(char* name);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
             return Optional.empty();
         } */
-/* public */ struct CompileState CompileState_addTypeParameters(/* List<String> typeParams */);/*  {
+/* public */ struct CompileState CompileState_addTypeParameters(struct List_char_ref typeParams);/*  {
             return new CompileState(this.generated, this.expandables, this.expansions, typeParams, this.maybeCurrentStructName);
         } */
-/* public */ struct CompileState CompileState_withStructureName(/* String name */);/*  {
+/* public */ struct CompileState CompileState_withStructureName(char* name);/*  {
             return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, Optional.of(name));
         } */
 /* private */struct CompileState {/*  */
@@ -132,7 +143,7 @@ struct public CompileState_CompileState(/*  */);/*  {
 /* public */ struct Optional_char_ref Joiner_createInitial(/*  */);/*  {
             return Optional.empty();
         } */
-/* public */ struct Optional_char_ref Joiner_fold(/* Optional<String> maybeCurrent, String element */);/*  {
+/* public */ struct Optional_char_ref Joiner_fold(struct Optional_char_ref maybeCurrent, char* element);/*  {
             return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
         } */
 /* private */struct Joiner {/* private Joiner() {
@@ -147,7 +158,7 @@ struct public CompileState_CompileState(/*  */);/*  {
 /* public */ char* Ref_generate(/*  */);/*  {
             return this.type.generate() + "*";
         } */
-/* public */ int Ref_equalsTo(/* Type other */);/*  {
+/* public */ int Ref_equalsTo(struct Type other);/*  {
             return other instanceof Ref ref && this.type.equalsTo(ref.type);
         } */
 /* public */ struct Type Ref_strip(/*  */);/*  {
@@ -164,7 +175,7 @@ struct public CompileState_CompileState(/*  */);/*  {
 /* public */ char* ObjectType_generate(/*  */);/*  {
             return "struct " + this.stringify();
         } */
-/* public */ int ObjectType_equalsTo(/* Type other */);/*  {
+/* public */ int ObjectType_equalsTo(struct Type other);/*  {
             return other instanceof ObjectType objectType
                     && this.name.equals(objectType.name)
                     && this.arguments.equalsTo(objectType.arguments, Type::equalsTo);
@@ -194,7 +205,7 @@ struct public CompileState_CompileState(/*  */);/*  {
 /* public */ char* Placeholder_generate(/*  */);/*  {
             return generatePlaceholder(this.value);
         } */
-/* public */ int Placeholder_equalsTo(/* Type other */);/*  {
+/* public */ int Placeholder_equalsTo(struct Type other);/*  {
             return other instanceof Placeholder placeholder && this.value.equals(placeholder.value);
         } */
 /* public */ struct Type Placeholder_strip(/*  */);/*  {
@@ -205,16 +216,16 @@ struct public CompileState_CompileState(/*  */);/*  {
         } */
 /* private */struct Placeholder {/*  */
 };
-/* private */ char* Definition_generate(/*  */);/*  {
+/* public */ char* Definition_generate(/*  */);/*  {
             return this.generateAfterAnnotations() + this.type().generate() + " " + this.name();
         } */
 /* private */ char* Definition_generateAfterAnnotations(/*  */);/*  {
             return this.afterAnnotations.isEmpty() ? "" : (generatePlaceholder(this.afterAnnotations()) + " ");
         } */
-/* public */ struct Definition Definition_mapType(/* Function<Type, Type> mapper */);/*  {
+/* public */ struct Definition Definition_mapType(struct Function_Type_/* Type */ mapper);/*  {
             return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
         } */
-/* public */ struct Definition Definition_mapName(/* Function<String, String> mapper */);/*  {
+/* public */ struct Definition Definition_mapName(struct Function_char_ref_char_ref mapper);/*  {
             return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
         } */
 /* private */struct Definition {/*  */
@@ -225,7 +236,7 @@ struct public CompileState_CompileState(/*  */);/*  {
 /* public */ char* TypeParam_generate(/*  */);/*  {
             return "template " + this.input;
         } */
-/* public */ int TypeParam_equalsTo(/* Type other */);/*  {
+/* public */ int TypeParam_equalsTo(struct Type other);/*  {
             return other instanceof TypeParam param && this.input.equals(param.input);
         } */
 /* public */ struct Type TypeParam_strip(/*  */);/*  {
@@ -253,34 +264,36 @@ struct public CompileState_CompileState(/*  */);/*  {
             e.printStackTrace();
         }
     } */
-/* private static */ char* TypeParam_compile(/* String input */);/*  {
+/* private static */ char* TypeParam_compile(char* input);/*  {
         var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         var compiledState = compiled.left;
 
         var joined = joinWithDelimiter(compiledState.generated, "");
         return joined + compiled.right + "\nint main(){\n\treturn 0;\n}\n";
     } */
-/* private static */ char* TypeParam_joinWithDelimiter(/* List<String> items, String delimiter */);/*  {
+/* private static */ char* TypeParam_joinWithDelimiter(struct List_char_ref items, char* delimiter);/*  {
         return items.iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
     } */
 /* private */struct Tuple_CompileState_char_ref {/*  */
 };
-/* private static */ struct Tuple_CompileState_char_ref TypeParam_compileStatements(/* CompileState initial, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper */);/*  {
+/* private static */ struct Tuple_CompileState_char_ref Tuple_compileStatements(struct CompileState initial, char* input, struct BiFunction_CompileState_char_ref_Tuple_CompileState_char_ref mapper);/*  {
         return compileAll(initial, input, Main::foldStatementChar, mapper, Main::merge);
     } */
-/* private static */ struct Tuple_CompileState_char_ref Tuple_compileAll(/* CompileState initial, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger */);/*  {
+/* private static */ struct Tuple_CompileState_char_ref Tuple_compileAll(struct CompileState initial, char* input, struct BiFunction_DivideState_/* Character */_/* DivideState */ folder, struct BiFunction_CompileState_char_ref_Tuple_CompileState_char_ref mapper, struct BiFunction_char_ref_char_ref_char_ref merger);/*  {
         var tuple = parseAll(initial, input, folder, mapper);
         return new Tuple<>(tuple.left, generateAll(tuple.right, merger));
     } */
-/* private static */ char* Tuple_generateAll(/* List<String> elements, BiFunction<String, String, String> merger */);/*  {
+/* private */struct Tuple_CompileState_/* T */ {/*  */
+};
+/* private static */ char* Tuple_generateAll(struct List_char_ref elements, struct BiFunction_char_ref_char_ref_char_ref merger);/*  {
         return elements.iterate().fold("", merger);
     } */
-/* private static */ char* Tuple_merge(/* String buffer, String element */);/*  {
+/* private static */ char* Tuple_merge(char* buffer, char* element);/*  {
         return buffer + element;
     } */
-/* private static */ struct List_char_ref Tuple_divide(/* String input, BiFunction<DivideState, Character, DivideState> folder */);/*  {
+/* private static */ struct List_char_ref Tuple_divide(char* input, struct BiFunction_DivideState_/* Character */_/* DivideState */ folder);/*  {
         var current = new DivideState();
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -289,7 +302,7 @@ struct public CompileState_CompileState(/*  */);/*  {
 
         return current.advance().segments;
     } */
-/* private static */ struct DivideState Tuple_foldStatementChar(/* DivideState state, char c */);/*  {
+/* private static */ struct DivideState Tuple_foldStatementChar(struct DivideState state, struct char c);/*  {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
@@ -335,11 +348,14 @@ struct public CompileState_CompileState(/*  */);/*  {
         return (state, input) -> {
             return compileInfix(input, ")", Main::findLast, (withParameters, afterParameters) -> {
                 return compileFirst(withParameters, "(", (beforeParameters, parameters) -> {
-                    var parametersTuple = parseValues(state, parameters, Main::compileParameter);
+                    var parametersTuple = parseParameters(state, parameters);
                     return createStructureWithMaybeTypeParametersRule(parametersTuple.left, beforeKeyword, beforeParameters, content1, parametersTuple.right);
                 });
             });
         };
+    } */
+	/* private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String parameters) {
+        return parseValues(state, parameters, Main::compileParameter);
     } */
 	/* private static Tuple<CompileState, Parameter> compileParameter(CompileState state, String input) {
         return parseDefinition(state, input)
@@ -454,36 +470,50 @@ struct public CompileState_CompileState(/*  */);/*  {
                     var definitionState = definitionTuple.left;
                     var definition = definitionTuple.right;
 
-                    if (!definition.typeParams.isEmpty()) {
-                        return Optional.of(new Tuple<>(definitionTuple.left, ""));
-                    }
-
-                    Definition newDefinition;
-                    String newContent;
-                    if (definition.annotations.contains("Actual", String::equals)) {
-                        newDefinition = definition.mapType(Type::strip);
-                        newContent = ";";
-                    }
-                    else if (oldContent.equals(";")) {
-                        newDefinition = definition.mapType(Type::strip).mapName(name -> {
-                            return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
-                        });
-
-                        newContent = ";";
-                    }
-                    else {
-                        newContent = ";" + generatePlaceholder(oldContent);
-                        newDefinition = definition.mapName(name -> {
-                            return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
-                        });
-                    }
-
-                    var generatedHeader = newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
-                    var generated = generatedHeader + newContent + "\n";
-                    return Optional.of(new Tuple<>(definitionState.addGenerative(generated), ""));
+                    var parametersTuple = parseParameters(definitionState, params);
+                    return assembleMethod(parametersTuple.left, definition, parametersTuple.right, oldContent);
                 });
             });
         });
+    } */
+	/* private static Optional<Tuple<CompileState, String>> assembleMethod(
+            CompileState state,
+            Definition definition,
+            List<Parameter> parameters,
+            String oldContent
+    ) {
+        if (!definition.typeParams.isEmpty()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+
+        Definition newDefinition;
+        String newContent;
+        if (definition.annotations.contains("Actual", String::equals)) {
+            newDefinition = definition.mapType(Type::strip);
+            newContent = ";";
+        }
+        else if (oldContent.equals(";")) {
+            newDefinition = definition.mapType(Type::strip).mapName(name -> {
+                return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+            });
+
+            newContent = ";";
+        }
+        else {
+            newContent = ";" + generatePlaceholder(oldContent);
+            newDefinition = definition.mapName(name -> {
+                return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+            });
+        }
+
+        var parametersString = parameters.iterate()
+                .map(Parameter::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var generatedHeader = newDefinition.generate() + "(" + parametersString + ")";
+        var generated = generatedHeader + newContent + "\n";
+        return Optional.of(new Tuple<>(state.addGenerative(generated), ""));
     } */
 	/* private static Tuple<CompileState, String> compileOrPlaceholder(
             CompileState state,
