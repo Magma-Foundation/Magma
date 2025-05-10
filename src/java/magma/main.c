@@ -404,14 +404,19 @@
 	/* private static Optional<CompileState> assembleStructure(
             CompileState state,
             String beforeStruct,
-            String name,
+            String rawName,
             List<String> typeParams,
             List<Type> typeArguments,
             List<Parameter> parameters,
             String content
     ) {
+        var name = rawName.strip();
+        if (!isSymbol(name)) {
+            return Optional.empty();
+        }
+
         var statementsTuple = compileStatements(state.withStructureName(name).addTypeParameters(typeParams), content, Main::compileClassSegment);
-        var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name.strip(), typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
+        var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name, typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
         var added = statementsTuple.left.addGenerative(generated);
         return Optional.of(added);
     } */
