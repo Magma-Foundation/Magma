@@ -527,7 +527,7 @@ public class Main {
 
         @Override
         public String generate() {
-            return "struct " + this.stringify();
+            return generatePlaceholder(this.generateAsTemplate()) + "struct " + this.stringify();
         }
 
         @Override
@@ -585,7 +585,7 @@ public class Main {
                 return new None<>();
             }
 
-            System.err.println(expansion.generate());
+            System.err.println(expansion.generateAsTemplate());
             return this.addExpansion(expansion)
                     .findExpandable(expansion.name)
                     .flatMap(expandable -> expandable.apply(expansion.arguments));
@@ -1229,6 +1229,12 @@ public class Main {
             return new None<>();
         }
 
+        var joinedExpansions = state.expansions
+                .iterate()
+                .map(ObjectType::generateAsTemplate)
+                .collect(new Joiner(", "))
+                .orElse("");
+
         var joinedExpandables = state.expandables
                 .iterateKeys()
                 .collect(new Joiner(", "))
@@ -1240,14 +1246,16 @@ public class Main {
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var defined = state.addMethod(debug(name, joinedSymbols))
-                .addMethod(debug(name, joinedExpandables))
+        var defined = state
+                .addMethod(debug("Symbols", joinedSymbols))
+                .addMethod(debug("Expanding", joinedExpandables))
+                .addMethod(debug("Expansions", joinedExpansions))
                 .mapStack(stack -> stack
-                .enter()
-                .defineStructPrototype(name)
-                .defineTypeParameters(typeParams)
-                .defineTypeArguments(typeArguments)
-        );
+                        .enter()
+                        .defineStructPrototype(name)
+                        .defineTypeParameters(typeParams)
+                        .defineTypeArguments(typeArguments)
+                );
 
         var statementsTuple = parseStatements(content, defined);
         var type = new ObjectType(name, typeArguments);
