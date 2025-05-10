@@ -1,5 +1,4 @@
-/* public  */class /* Main {
-    private static class State {
+/* public  */class Main {/* private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
@@ -99,14 +98,31 @@
             return "";
         }
 
-        var classIndex = stripped.indexOf("class ".toString());
-        if(classIndex >= 0) {
-            var left = stripped.substring(0, classIndex);
-            var right = stripped.substring(classIndex + "class ".length());
-            return generatePlaceholder(left) + "class " + generatePlaceholder(right);
-        }
+        return compileFirst(stripped, "class ", (left, right) -> {
+            return compileFirst(right, "{", (name, withEnd) -> {
+                var strippedWithEnd = withEnd.strip();
+                if (strippedWithEnd.endsWith("}")) {
+                    var content = strippedWithEnd.substring(0, strippedWithEnd.length() - "}".length());
+                    return Optional.of(generatePlaceholder(left) + "class " + name.strip() + " {" + generatePlaceholder(content) + "}");
+                }
 
-        return generatePlaceholder(stripped);
+                return Optional.empty();
+            });
+        }).orElseGet(() -> generatePlaceholder(stripped));
+    }
+
+    private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var classIndex = input.indexOf(infix);
+        if (classIndex >= 0) {
+            var left = input.substring(0, classIndex);
+            var right = input.substring(classIndex + infix.length());
+            return mapper.apply(left, right);
+        }
+        return Optional.empty();
+    }
+
+    private static String getValue(String left, String right) {
+        return generatePlaceholder(left) + "class " + generatePlaceholder(right);
     }
 
     private static String generatePlaceholder(String input) {
@@ -116,4 +132,4 @@
 
         return "content-start " + replaced + " content-end";
     }
-} */
+ */}
