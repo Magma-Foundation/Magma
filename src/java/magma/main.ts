@@ -1,9 +1,7 @@
 /* public  */class Main {
 	/* private  */interface Collector<T, C> {
-		/* C createInitial */;
-		/* 
-
-        C fold */;/* 
+		createInitial(/*  */) : /* C */;
+		fold(/* C current, T element */) : /* C */;/* 
      */}
 	/* 
 
@@ -15,15 +13,13 @@
 	/* 
 
     private  */interface List<T> {
-		/* List<T> add */;
-		/* 
-
-        Iterator<T> iterate */;/* 
+		add(/* T element */) : /* List<T> */;
+		iterate(/*  */) : /* Iterator<T> */;/* 
      */}
 	/* 
 
     private  */interface Head<T> {
-		/* Optional<T> next */;/* 
+		next(/*  */) : /* Optional<T> */;/* 
      */}
 	/* private */ HeadedIterator<T>(/* Head<T> head */) : /* record *//* implements Iterator<T> {
         @Override
@@ -56,9 +52,7 @@
     private static  */class RangeHead implements Head<Integer> {
 		/* private final */ length : /* int */;
 		/* private */ counter : /* int */;
-		/* 
-
-        public RangeHead *//* {
+		RangeHead(/* int length */) : /* public *//* {
             this.length = length;
         } */
 		/* @Override
@@ -104,16 +98,12 @@
 		/* private */ segments : /* List<String> */;
 		/* private */ buffer : /* StringBuilder */;
 		/* private */ depth : /* int */;
-		/* 
-
-        public State *//* {
+		State(/* List<String> segments, StringBuilder buffer, int depth */) : /* public *//* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         } */
-		/* 
-
-        public State *//* {
+		State(/*  */) : /* public *//* {
             this(Lists.empty(), new StringBuilder(), 0);
         } */
 		/* private */ advance(/*  */) : /* State *//* {
@@ -152,7 +142,7 @@
             return Optional.of(current.map(inner -> inner + element).orElse(element));
         } *//* 
      */}
-	/* private */ Definition(/* String beforeType, String type, String name, List<String> typeParams */) : /* record *//* {
+	/* private */ Definition(/* Optional<String> maybeBefore, String type, String name, List<String> typeParams */) : /* record *//* {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -163,7 +153,11 @@
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
 
-            return generatePlaceholder(this.beforeType) + " " + this.name + joined + params + " : " + this.type;
+            var before = this.maybeBefore.map(Main::generatePlaceholder)
+                    .map(inner -> inner + " ")
+                    .orElse("");
+
+            return before + this.name + joined + params + " : " + this.type;
         }
     } */
 	/* 
@@ -233,8 +227,8 @@
         if (c == '} */
 	/* ') {
             */ append.exit(/*  */) : /* return *//* ;
-        } *//* 
-        return append; *//* 
+        } */
+	append : /* return */;/* 
      */
 }
 /* private static String compileRootSegment(String input) {
@@ -310,14 +304,16 @@
                                 .map(String::strip)
                                 .collect(new ListCollector<>());
 
-                        return assembleDefinition(beforeTypeParams, name, typeParams, type);
+                        return assembleDefinition(Optional.of(beforeTypeParams), name, typeParams, type);
                     });
                 }).or(() -> {
-                    return assembleDefinition(beforeType, name, Lists.empty(), type);
+                    return assembleDefinition(Optional.of(beforeType), name, Lists.empty(), type);
                 });
+            }).or(() -> {
+                return assembleDefinition(Optional.empty(), name, Lists.empty(), beforeName);
             });
         });
-    } *//* private static Optional<Definition> assembleDefinition(String beforeTypeParams, String name, List<String> typeParams, String type) {
+    } *//* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
         return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
     } *//* private static State foldValueChar(State state, char c) {
         if (c == ',') {

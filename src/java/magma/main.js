@@ -6,6 +6,16 @@
 
 private static  */ class RangeHead {
 }
+( /*  */) => ; /* Optional<Integer> */ /* {
+    if (this.counter < this.length) {
+        var value = this.counter;
+        this.counter++;
+        return Optional.of(value);
+    }
+
+    return Optional.empty();
+} */ /*
+*/
 /*
 
 
@@ -19,6 +29,8 @@ private static  */ class Lists {
 
 private static  */ class State {
 }
+( /*  */) => ;
+( /*  */) => ;
 ( /* char c */) => ;
 ( /*  */) => ;
 ( /*  */) => ;
@@ -35,7 +47,7 @@ private static  */ class Joiner {
     return Optional.of(current.map(inner -> inner + element).orElse(element));
 } */ /*
 */
-/* private */ Definition( /* String beforeType, String type, String name, List<String> typeParams */);
+/* private */ Definition( /* Optional<String> maybeBefore, String type, String name, List<String> typeParams */);
 /*
 
 private static  */ class ListCollector {
@@ -58,6 +70,8 @@ private static  */ class ListCollector {
 if (c == '} */
 /* ') {
         */ append.exit( /*  */);
+append: /* return */ ; /*
+ */
 /* private static String compileRootSegment(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -131,14 +145,16 @@ if (c == '} */
                             .map(String::strip)
                             .collect(new ListCollector<>());
 
-                    return assembleDefinition(beforeTypeParams, name, typeParams, type);
+                    return assembleDefinition(Optional.of(beforeTypeParams), name, typeParams, type);
                 });
             }).or(() -> {
-                return assembleDefinition(beforeType, name, Lists.empty(), type);
+                return assembleDefinition(Optional.of(beforeType), name, Lists.empty(), type);
             });
+        }).or(() -> {
+            return assembleDefinition(Optional.empty(), name, Lists.empty(), beforeName);
         });
     });
-} */ /* private static Optional<Definition> assembleDefinition(String beforeTypeParams, String name, List<String> typeParams, String type) {
+} */ /* private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
     return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
 } */ /* private static State foldValueChar(State state, char c) {
     if (c == ',') {

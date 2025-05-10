@@ -165,7 +165,7 @@ public class Main {
         }
     }
 
-    private record Definition(String beforeType, String type, String name, List<String> typeParams) {
+    private record Definition(Optional<String> maybeBefore, String type, String name, List<String> typeParams) {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -176,7 +176,11 @@ public class Main {
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
 
-            return generatePlaceholder(this.beforeType) + " " + this.name + joined + params + " : " + this.type;
+            var before = this.maybeBefore.map(Main::generatePlaceholder)
+                    .map(inner -> inner + " ")
+                    .orElse("");
+
+            return before + this.name + joined + params + " : " + this.type;
         }
     }
 
@@ -344,16 +348,18 @@ public class Main {
                                 .map(String::strip)
                                 .collect(new ListCollector<>());
 
-                        return assembleDefinition(beforeTypeParams, name, typeParams, type);
+                        return assembleDefinition(Optional.of(beforeTypeParams), name, typeParams, type);
                     });
                 }).or(() -> {
-                    return assembleDefinition(beforeType, name, Lists.empty(), type);
+                    return assembleDefinition(Optional.of(beforeType), name, Lists.empty(), type);
                 });
+            }).or(() -> {
+                return assembleDefinition(Optional.empty(), name, Lists.empty(), beforeName);
             });
         });
     }
 
-    private static Optional<Definition> assembleDefinition(String beforeTypeParams, String name, List<String> typeParams, String type) {
+    private static Optional<Definition> assembleDefinition(Optional<String> beforeTypeParams, String name, List<String> typeParams, String type) {
         return Optional.of(new Definition(beforeTypeParams, compileType(type), name.strip(), typeParams));
     }
 
