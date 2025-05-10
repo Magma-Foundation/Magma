@@ -10,14 +10,16 @@ public class Main {
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
+        private int depth;
 
-        public State(List<String> segments, StringBuilder buffer) {
+        public State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
+            this.depth = depth;
         }
 
         public State() {
-            this(new ArrayList<>(), new StringBuilder());
+            this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
         private State advance() {
@@ -28,6 +30,20 @@ public class Main {
 
         private State append(char c) {
             this.buffer.append(c);
+            return this;
+        }
+
+        public State enter() {
+            this.depth++;
+            return this;
+        }
+
+        public boolean isLevel() {
+            return this.depth == 0;
+        }
+
+        public State exit() {
+            this.depth--;
             return this;
         }
     }
@@ -73,12 +89,16 @@ public class Main {
 
     private static State fold(State state, char c) {
         var append = state.append(c);
-        if (c == ';') {
+        if (c == ';' && append.isLevel()) {
             return append.advance();
         }
-        else {
-            return append;
+        if (c == '{') {
+            return append.enter();
         }
+        if (c == '}') {
+            return append.exit();
+        }
+        return append;
     }
 
     private static String compileRootSegment(String input) {
