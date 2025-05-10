@@ -29,6 +29,7 @@ int isEmpty(/*  */);
 struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ addAllLast(struct List_/* T */ others);
 struct Iterator_/* T */ iterateReversed(/*  */);
+struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
 	/* private */ char* buffer;
@@ -75,6 +76,7 @@ int isEmpty(/*  */);
 struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ addAllLast(struct List_/* T */ others);
 struct Iterator_/* T */ iterateReversed(/*  */);
+struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 struct List_/* T */ addLast(/* T element */);
 struct Iterator_/* T */ iterate(/*  */);
 int contains(/* T element */, int (*)(/* T */, /* T */) equator);
@@ -85,10 +87,17 @@ int isEmpty(/*  */);
 struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ addAllLast(struct List_/* T */ others);
 struct Iterator_/* T */ iterateReversed(/*  */);
-/* private */struct Frame {/*  */
+struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
+/* private */struct Frame {/* public Frame defineTypeParameters(List<String> typeParameters) {
+            return new Frame(this.typeParameters.addAllLast(typeParameters), this.typeArguments, this.maybeStructName);
+        } *//* public Frame defineStruct(String name) {
+            return new Frame(this.typeParameters, this.typeArguments, Optional.of(name));
+        } *//* public Frame defineTypeArguments(List<Type> typeArguments) {
+            return new Frame(this.typeParameters, this.typeArguments.addAllLast(typeArguments), this.maybeStructName);
+        } *//*  */
 };
 /* public */ struct Optional_Type resolveTypeParam(char* name);/*  {
-            return this.typeParams.indexOf(name, String::equals).flatMap(index -> {
+            return this.typeParameters.indexOf(name, String::equals).flatMap(index -> {
                 if (index < this.typeArguments.size()) {
                     return Optional.of(this.typeArguments.get(index));
                 }
@@ -96,7 +105,7 @@ struct Iterator_/* T */ iterateReversed(/*  */);
             });
         } */
 /* public */ int isTypeParamDefined(char* value);/*  {
-            return this.typeParams.contains(value, String::equals);
+            return this.typeParameters.contains(value, String::equals);
         } */
 /* private */struct List_Frame {/* T get(int index); *//* T last(); *//*  */
 };
@@ -114,6 +123,7 @@ int isEmpty(/*  */);
 struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ addAllLast(struct List_/* T */ others);
 struct Iterator_/* T */ iterateReversed(/*  */);
+struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 struct List_/* T */ addLast(/* T element */);
 struct Iterator_/* T */ iterate(/*  */);
 int contains(/* T element */, int (*)(/* T */, /* T */) equator);
@@ -124,6 +134,7 @@ int isEmpty(/*  */);
 struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ addAllLast(struct List_/* T */ others);
 struct Iterator_/* T */ iterateReversed(/*  */);
+struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 struct List_/* T */ addLast(/* T element */);
 struct Iterator_/* T */ iterate(/*  */);
 int contains(/* T element */, int (*)(/* T */, /* T */) equator);
@@ -134,8 +145,17 @@ int isEmpty(/*  */);
 struct Optional_int indexOf(/* T element */, int (*)(/* T */, /* T */) equator);
 struct List_/* T */ addAllLast(struct List_/* T */ others);
 struct Iterator_/* T */ iterateReversed(/*  */);
+struct List_/* T */ mapLast(/* T */ (*)(/* T */) mapper);
 /* private */struct Stack {/* public Stack() {
             this(new ArrayList<>());
+        } *//* public Stack defineTypeParameters(List<String> typeParameters) {
+            return this.mapLastFrame(last -> last.defineTypeParameters(typeParameters));
+        } *//* private Stack mapLastFrame(Function<Frame, Frame> mapper) {
+            return new Stack(this.frames.mapLast(mapper));
+        } *//* public Stack defineStruct(String name) {
+            return this.mapLastFrame(last -> last.defineStruct(name));
+        } *//* public Stack defineTypeArguments(List<Type> typeArguments) {
+            return this.mapLastFrame(last -> last.defineTypeArguments(typeArguments));
         } *//*  */
 };
 /* private */struct CompileState {/* public CompileState() {
@@ -149,11 +169,13 @@ struct Iterator_/* T */ iterateReversed(/*  */);
             this.expandables.put(name, expandable);
             return this;
         } *//* public CompileState addTypeParameters(List<String> typeParams) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, this.stack);
+            return this.mapStack(stack -> stack.defineTypeParameters(typeParams));
+        } *//* private CompileState mapStack(Function<Stack, Stack> mapper) {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, mapper.apply(this.stack));
         } *//* public CompileState withStructureName(String name) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, this.stack);
+            return this.mapStack(stack -> stack.defineStruct(name));
         } *//* public CompileState addTypeArguments(List<Type> typeArguments) {
-            return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods, this.stack);
+            return this.mapStack(stack -> stack.defineTypeArguments(typeArguments));
         } *//* public CompileState addMethod(String method) {
             return new CompileState(this.generated, this.expandables, this.expansions, this.structures, this.methods.addLast(method), this.stack);
         } *//* public CompileState addStructure(ObjectType type) {
