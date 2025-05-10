@@ -227,10 +227,13 @@ public class Main {
     }
 
     private record CompileState(
-            List<String> generated, Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
-            List<ObjectType> expansions, List<String> typeParams) {
+            List<String> generated,
+            Map<String, Function<List<Type>, Optional<CompileState>>> expandables,
+            List<ObjectType> expansions,
+            List<String> typeParams,
+            Optional<String> maybeCurrentStructName) {
         public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
         }
 
         private Optional<CompileState> expand(ObjectType expansion) {
@@ -244,11 +247,11 @@ public class Main {
         }
 
         private CompileState addExpansion(ObjectType type) {
-            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams);
+            return new CompileState(this.generated, this.expandables, this.expansions.addLast(type), this.typeParams, this.maybeCurrentStructName);
         }
 
-        public CompileState addStruct(String struct) {
-            return new CompileState(this.generated.addLast(struct), this.expandables, this.expansions, this.typeParams);
+        public CompileState addGenerative(String struct) {
+            return new CompileState(this.generated.addLast(struct), this.expandables, this.expansions, this.typeParams, this.maybeCurrentStructName);
         }
 
         public CompileState addExpandable(String name, Function<List<Type>, Optional<CompileState>> expandable) {
@@ -264,11 +267,11 @@ public class Main {
         }
 
         public CompileState addTypeParameters(List<String> typeParams) {
-            return new CompileState(this.generated, this.expandables, this.expansions, typeParams);
+            return new CompileState(this.generated, this.expandables, this.expansions, typeParams, this.maybeCurrentStructName);
         }
 
-        public CompileState addFunction(String function) {
-            return new CompileState(this.generated.addLast(function), this.expandables, this.expansions, this.typeParams);
+        public CompileState withStructureName(String name) {
+            return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, Optional.of(name));
         }
     }
 
@@ -435,6 +438,10 @@ public class Main {
 
         public Definition mapType(Function<Type, Type> mapper) {
             return new Definition(this.annotations, this.afterAnnotations, mapper.apply(this.type), this.name, this.typeParams);
+        }
+
+        public Definition mapName(Function<String, String> mapper) {
+            return new Definition(this.annotations, this.afterAnnotations, this.type, mapper.apply(this.name), this.typeParams);
         }
     }
 
@@ -697,7 +704,6 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructWithoutParametersRule(String beforeKeyword, String content1) {
         return (state1, s) -> {
-
             return createStructureWithMaybeTypeParametersRule(state1, beforeKeyword, s, content1, new ArrayList<>());
         };
     }
@@ -784,9 +790,9 @@ public class Main {
             List<Parameter> parameters,
             String content
     ) {
-        var statementsTuple = compileStatements(state.addTypeParameters(typeParams), content, Main::compileClassSegment);
+        var statementsTuple = compileStatements(state.withStructureName(name).addTypeParameters(typeParams), content, Main::compileClassSegment);
         var generated = generatePlaceholder(beforeStruct.strip()) + new ObjectType(name.strip(), typeArguments).generate() + " {" + statementsTuple.right + "\n};\n";
-        var added = statementsTuple.left.addStruct(generated);
+        var added = statementsTuple.left.addGenerative(generated);
         return Optional.of(added);
     }
 
@@ -834,12 +840,14 @@ public class Main {
                     }
                     else {
                         newContent = ";" + generatePlaceholder(oldContent);
-                        newDefinition = definition;
+                        newDefinition = definition.mapName(name -> {
+                            return state.maybeCurrentStructName.map(currentStructName -> currentStructName + "_" + name).orElse(name);
+                        });
                     }
 
                     var generatedHeader = "\n\t" + newDefinition.generate() + "(" + generatePlaceholder(params) + ")";
                     var generated = generatedHeader + newContent;
-                    return Optional.of(new Tuple<>(definitionState.addFunction(generated), ""));
+                    return Optional.of(new Tuple<>(definitionState.addGenerative(generated), ""));
                 });
             });
         });
