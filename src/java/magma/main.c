@@ -1,50 +1,103 @@
-/* private */struct Type {/* String stringify(); *//* String generate(); *//* boolean equalsTo(Type other); *//* Type strip(); *//* boolean isParameterized(); *//*  */
+
+	/*  */ char* stringify(/*  */); 
+	/*  */ char* generate(/*  */); 
+	/*  */ int equalsTo(/* Type other */); 
+	/*  */ struct Type strip(/*  */); 
+	/*  */ int isParameterized(/*  */); /* private */struct Type {/*  */
 };
  /* private @ */struct Actual {/*  */
 };
  /* private */struct Parameter {/*  */
 };
+ 
+	/*  */ struct Optional_T next(/*  */); /* private */struct Head_T {/*  */
+};
  /* private static */struct StandardLibrary {/*  */
 };
  /* private static */struct Lists {/*  */
 };
- /* private */struct List_char_ref {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//* boolean isEmpty(); *//*  */
+ 
+	/*  */ struct List_T addLast(/* T element */); 
+	/*  */ struct Iterator_T concat(/* Iterator<T> other */); 
+	/*  */ struct Optional_T next(/*  */); 
+	/*  */ int anyMatch(/* Predicate<T> predicate */); 
+	/*  */ int allMatch(/* Predicate<T> predicate */); /* private */struct Iterator_T {/*  */
 };
  
-	/* private */ struct DivideState List_advance(/*  */);/*  {
+	/*  */ struct Iterator_T iterate(/*  */); 
+	/*  */ int contains(/* T element, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int size(/*  */); 
+	/*  */ struct Optional_Tuple_List_T_/* T */ removeLast(/*  */); 
+	/*  */ int isEmpty(/*  */); /* private */struct List_T {/*  */
+};
+ 
+	/*  */ struct List_T addLast(/* T element */); 
+	/*  */ struct Iterator_T iterate(/*  */); 
+	/*  */ int contains(/* T element, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int size(/*  */); 
+	/*  */ struct Optional_Tuple_List_T_/* T */ removeLast(/*  */); 
+	/*  */ int isEmpty(/*  */); /* private */struct List_char_ref {/*  */
+};
+ 
+	/*  */ struct private Iterator_DivideState(/* List<String> segments, String buffer, int depth */);/*  {
+            this.segments = segments;
+            this.buffer = buffer;
+            this.depth = depth;
+        } */ 
+	/*  */ struct public Iterator_DivideState(/*  */);/*  {
+            this(new ArrayList<String>(), "", 0);
+        } */ 
+	/* private */ struct DivideState Iterator_advance(/*  */);/*  {
             this.segments = this.segments.addLast(this.buffer);
             this.buffer = "";
             return this;
         } */ 
-	/* private */ struct DivideState List_append(/* char c */);/*  {
+	/* private */ struct DivideState Iterator_append(/* char c */);/*  {
             this.buffer = this.buffer + c;
             return this;
         } */ 
-	/* public */ int List_isLevel(/*  */);/*  {
+	/* public */ int Iterator_isLevel(/*  */);/*  {
             return this.depth == 0;
         } */ 
-	/* public */ struct DivideState List_enter(/*  */);/*  {
+	/* public */ struct DivideState Iterator_enter(/*  */);/*  {
             this.depth++;
             return this;
         } */ 
-	/* public */ struct DivideState List_exit(/*  */);/*  {
+	/* public */ struct DivideState Iterator_exit(/*  */);/*  {
             this.depth--;
             return this;
         } */ 
-	/* public */ int List_isShallow(/*  */);/*  {
+	/* public */ int Iterator_isShallow(/*  */);/*  {
             return this.depth == 1;
         } */ /* private static */struct DivideState {
 	/* private */ struct List_char_ref segments;
 	/* private */ char* buffer;
-	/* private */ int depth;/* private DivideState(List<String> segments, String buffer, int depth) {
-            this.segments = segments;
-            this.buffer = buffer;
-            this.depth = depth;
-        } *//* public DivideState() {
-            this(new ArrayList<String>(), "", 0);
-        } *//*  */
+	/* private */ int depth;/*  */
 };
  
+	/*  */ struct List_T addLast(/* T element */); 
+	/*  */ struct Iterator_T iterate(/*  */); 
+	/*  */ int contains(/* T element, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int size(/*  */); 
+	/*  */ struct Optional_Tuple_List_T_/* T */ removeLast(/*  */); 
+	/*  */ int isEmpty(/*  */); /* private */struct List_Type {/*  */
+};
+ 
+	/*  */ struct List_T addLast(/* T element */); 
+	/*  */ struct Iterator_T iterate(/*  */); 
+	/*  */ int contains(/* T element, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int equalsTo(/* List<T> others, BiFunction<T, T, Boolean> equator */); 
+	/*  */ int size(/*  */); 
+	/*  */ struct Optional_Tuple_List_T_/* T */ removeLast(/*  */); 
+	/*  */ int isEmpty(/*  */); /* private */struct List_ObjectType {/*  */
+};
+ 
+	/*  */ struct public CompileState_CompileState(/*  */);/*  {
+            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
+        } */ 
 	/* private */ struct Optional_CompileState CompileState_expand(/* ObjectType expansion */);/*  {
             if (this.expansions.contains(expansion, ObjectType::equalsTo)) {
                 return Optional.empty();
@@ -63,33 +116,30 @@
 	/* public */ struct CompileState CompileState_addExpandable(/* String name, Function<List<Type>, Optional<CompileState>> expandable */);/*  {
             this.expandables.put(name, expandable);
             return this;
-        } */ /* private */struct List_Type {/* List<T> addLast(T element); *//* Iterator<T> iterate(); *//* boolean contains(T element, BiFunction<T, T, Boolean> equator); *//* boolean equalsTo(List<T> others, BiFunction<T, T, Boolean> equator); *//* int size(); *//* Optional<Tuple<List<T>, T>> removeLast(); *//* boolean isEmpty(); *//*  */
-};
- 
+        } */ 
 	/* public */ struct Optional_Function_List_Type_Optional_CompileState CompileState_findExpandable(/* String name */);/*  {
             if (this.expandables.containsKey(name)) {
                 return Optional.of(this.expandables.get(name));
             }
             return Optional.empty();
         } */ 
-	/* public */ struct CompileState List_addTypeParameters(/* List<String> typeParams */);/*  {
+	/* public */ struct CompileState CompileState_addTypeParameters(/* List<String> typeParams */);/*  {
             return new CompileState(this.generated, this.expandables, this.expansions, typeParams, this.maybeCurrentStructName);
         } */ 
-	/* public */ struct CompileState List_withStructureName(/* String name */);/*  {
+	/* public */ struct CompileState CompileState_withStructureName(/* String name */);/*  {
             return new CompileState(this.generated, this.expandables, this.expansions, this.typeParams, Optional.of(name));
-        } */ /* private */struct CompileState {/* public CompileState() {
-            this(new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), Optional.empty());
-        } *//*  */
+        } */ /* private */struct CompileState {/*  */
 };
  
+	/*  */ struct private Joiner_Joiner(/*  */);/*  {
+            this("");
+        } */ 
 	/* public */ struct Optional_char_ref Joiner_createInitial(/*  */);/*  {
             return Optional.empty();
         } */ 
 	/* public */ struct Optional_char_ref Joiner_fold(/* Optional<String> maybeCurrent, String element */);/*  {
             return Optional.of(maybeCurrent.map(current -> current + this.delimiter + element).orElse(element));
-        } */ /* private */struct Joiner {/* private Joiner() {
-            this("");
-        } *//*  */
+        } */ /* private */struct Joiner {/*  */
 };
  /* private static */struct Iterators {/*  */
 };
@@ -254,7 +304,8 @@
         }
         if (c == '} *//* ') {
             return appended.exit();
-        } *//* return appended; *//*  */
+        } */
+	/*  */ struct return appended;/*  */
 };
 
 	/* private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
@@ -447,33 +498,44 @@
     } */
 	/* private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {
-            return compileInfix(() -> {
-                var divisions = divide(beforeName, Main::foldTypeSeparator);
+            return compileOr(state, beforeName, Lists.of(
+                    (state1, s) -> compileInfix(() -> {
+                        var divisions = divide(beforeName, Main::foldTypeSeparator);
 
-                if (divisions.size() >= 2) {
-                    var maybeRemoved = divisions.removeLast();
-                    if (maybeRemoved.isPresent()) {
-                        var removed = maybeRemoved.get();
-                        var joined = joinWithDelimiter(removed.left, " ");
-                        return Optional.of(new Tuple<>(joined, removed.right));
-                    }
-                }
+                        if (divisions.size() >= 2) {
+                            var maybeRemoved = divisions.removeLast();
+                            if (maybeRemoved.isPresent()) {
+                                var removed = maybeRemoved.get();
+                                var joined = joinWithDelimiter(removed.left, " ");
+                                return Optional.of(new Tuple<>(joined, removed.right));
+                            }
+                        }
 
-                return Optional.empty();
-            }, (beforeType, type) -> {
-                var strippedBeforeType = beforeType.strip();
-                return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
-                    var annotations = divide(annotationsString, foldWithDelimiter('\n'))
-                            .iterate()
-                            .map(slice -> slice.substring(1))
-                            .map(String::strip)
-                            .collect(new ListCollector<>());
+                        return Optional.empty();
+                    }, (beforeType, type) -> {
+                        return getCompileStateDefinitionTuple(state1, rawName, beforeType, type);
+                    }),
+                    (state2, s) -> getCompileStateDefinitionTuple(state2, rawName, "", s)
+            ));
+        });
+    } */
+	/* private static Optional<Tuple<CompileState, Definition>> getCompileStateDefinitionTuple(
+            CompileState state,
+            String rawName,
+            String beforeType,
+            String type
+    ) {
+        var strippedBeforeType = beforeType.strip();
+        return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
+            var annotations = divide(annotationsString, foldWithDelimiter('\n'))
+                    .iterate()
+                    .map(slice -> slice.substring(1))
+                    .map(String::strip)
+                    .collect(new ListCollector<>());
 
-                    return assembleDefinition(state, annotations, afterAnnotations.strip(), rawName, type);
-                }).or(() -> {
-                    return assembleDefinition(state, new ArrayList<>(), strippedBeforeType, rawName, type);
-                });
-            });
+            return assembleDefinition(state, annotations, afterAnnotations.strip(), rawName, type);
+        }).or(() -> {
+            return assembleDefinition(state, new ArrayList<>(), strippedBeforeType, rawName, type);
         });
     } */
 	/* private static DivideState foldTypeSeparator(DivideState state, Character c) {

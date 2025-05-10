@@ -893,33 +893,45 @@ public class Main {
 
     private static Optional<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return compileInfix(input.strip(), " ", Main::findLast, (beforeName, rawName) -> {
-            return compileInfix(() -> {
-                var divisions = divide(beforeName, Main::foldTypeSeparator);
+            return compileOr(state, beforeName, Lists.of(
+                    (state1, s) -> compileInfix(() -> {
+                        var divisions = divide(beforeName, Main::foldTypeSeparator);
 
-                if (divisions.size() >= 2) {
-                    var maybeRemoved = divisions.removeLast();
-                    if (maybeRemoved.isPresent()) {
-                        var removed = maybeRemoved.get();
-                        var joined = joinWithDelimiter(removed.left, " ");
-                        return Optional.of(new Tuple<>(joined, removed.right));
-                    }
-                }
+                        if (divisions.size() >= 2) {
+                            var maybeRemoved = divisions.removeLast();
+                            if (maybeRemoved.isPresent()) {
+                                var removed = maybeRemoved.get();
+                                var joined = joinWithDelimiter(removed.left, " ");
+                                return Optional.of(new Tuple<>(joined, removed.right));
+                            }
+                        }
 
-                return Optional.empty();
-            }, (beforeType, type) -> {
-                var strippedBeforeType = beforeType.strip();
-                return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
-                    var annotations = divide(annotationsString, foldWithDelimiter('\n'))
-                            .iterate()
-                            .map(slice -> slice.substring(1))
-                            .map(String::strip)
-                            .collect(new ListCollector<>());
+                        return Optional.empty();
+                    }, (beforeType, type) -> {
+                        return getCompileStateDefinitionTuple(state1, rawName, beforeType, type);
+                    }),
+                    (state2, s) -> getCompileStateDefinitionTuple(state2, rawName, "", s)
+            ));
+        });
+    }
 
-                    return assembleDefinition(state, annotations, afterAnnotations.strip(), rawName, type);
-                }).or(() -> {
-                    return assembleDefinition(state, new ArrayList<>(), strippedBeforeType, rawName, type);
-                });
-            });
+    private static Optional<Tuple<CompileState, Definition>> getCompileStateDefinitionTuple(
+            CompileState state,
+            String rawName,
+            String beforeType,
+            String type
+    ) {
+        var strippedBeforeType = beforeType.strip();
+        return compileInfix(strippedBeforeType, "\n", Main::findLast, (annotationsString, afterAnnotations) -> {
+            var annotations = divide(annotationsString, foldWithDelimiter('\n'))
+                    .iterate()
+                    .map(slice -> slice.substring(1))
+                    .map(String::strip)
+                    .collect(new ListCollector<>());
+
+            return assembleDefinition(state, annotations, afterAnnotations.strip(), rawName, type);
+        }).or(() -> {
+            return assembleDefinition(state, new ArrayList<>(), strippedBeforeType, rawName, type);
         });
     }
 
