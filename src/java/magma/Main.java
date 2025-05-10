@@ -1,7 +1,5 @@
 package magma;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -174,23 +172,35 @@ public class Main {
 
     private static Optional<String> compileDefinitionStatement(String input, int depth) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(withoutEnd) + ";");
+            return compileInfix(withoutEnd, " ", Main::findLast, new BiFunction<String, String, Optional<String>>() {
+                @Override
+                public Optional<String> apply(String s, String s2) {
+                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(withoutEnd) + " " + s2 + ";");
+                }
+            });
         });
     }
 
-    private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex < 0) {
-            return Optional.empty();
-        }
-
-        var left = input.substring(0, classIndex);
-        var right = input.substring(classIndex + infix.length());
-        return mapper.apply(left, right);
+    private static Optional<Integer> findLast(String input, String infix) {
+        var index = input.lastIndexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     }
 
-    private static String getValue(String left, String right) {
-        return generatePlaceholder(left) + "class " + generatePlaceholder(right);
+    private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        return compileInfix(input, infix, Main::findFirst, mapper);
+    }
+
+    private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locator, BiFunction<String, String, Optional<String>> mapper) {
+        return locator.apply(input, infix).flatMap(index -> {
+            var left = input.substring(0, index);
+            var right = input.substring(index + infix.length());
+            return mapper.apply(left, right);
+        });
+    }
+
+    private static Optional<Integer> findFirst(String input, String infix) {
+        var index = input.indexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     }
 
     private static String generatePlaceholder(String input) {

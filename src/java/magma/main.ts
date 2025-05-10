@@ -1,8 +1,8 @@
 /* public  */class Main {
 	/* private static  */class State {
-		/* private final List<String> segments */;
-		/* private StringBuilder buffer */;
-		/* private int depth */;/* 
+		/* private final List<String> segments */ segments;
+		/* private StringBuilder buffer */ buffer;
+		/* private int depth */ depth;/* 
 
         public State(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
@@ -101,7 +101,7 @@
         if (c == '} *//* ') {
             return append.exit();
         } */
-	/* return append */;/* 
+	/* return append */ append;/* 
      */
 }
 /* private static String compileRootSegment(String input) {
@@ -151,19 +151,27 @@
                 .orElseGet(() -> generatePlaceholder(input));
     } *//* private static Optional<String> compileDefinitionStatement(String input, int depth) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(withoutEnd) + ";");
+            return compileInfix(withoutEnd, " ", Main::findLast, new BiFunction<String, String, Optional<String>>() {
+                @Override
+                public Optional<String> apply(String s, String s2) {
+                    return Optional.of("\n" + "\t".repeat(depth) + generatePlaceholder(withoutEnd) + " " + s2 + ";");
+                }
+            });
         });
+    } *//* private static Optional<Integer> findLast(String input, String infix) {
+        var index = input.lastIndexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     } *//* private static Optional<String> compileFirst(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var classIndex = input.indexOf(infix);
-        if (classIndex < 0) {
-            return Optional.empty();
-        }
-
-        var left = input.substring(0, classIndex);
-        var right = input.substring(classIndex + infix.length());
-        return mapper.apply(left, right);
-    } *//* private static String getValue(String left, String right) {
-        return generatePlaceholder(left) + "class " + generatePlaceholder(right);
+        return compileInfix(input, infix, Main::findFirst, mapper);
+    } *//* private static Optional<String> compileInfix(String input, String infix, BiFunction<String, String, Optional<Integer>> locator, BiFunction<String, String, Optional<String>> mapper) {
+        return locator.apply(input, infix).flatMap(index -> {
+            var left = input.substring(0, index);
+            var right = input.substring(index + infix.length());
+            return mapper.apply(left, right);
+        });
+    } *//* private static Optional<Integer> findFirst(String input, String infix) {
+        var index = input.indexOf(infix);
+        return index == -1 ? Optional.empty() : Optional.of(index);
     } *//* private static String generatePlaceholder(String input) {
         var replaced = input
                 .replace("content-start", "content-start")
