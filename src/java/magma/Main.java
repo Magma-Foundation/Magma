@@ -57,7 +57,7 @@ public class Main {
             var input = Files.readString(source);
             Files.writeString(target, compile(input));
 
-            new ProcessBuilder("cmd", "/c", "npm", "exec", "ts-node", target.toAbsolutePath().toString())
+            new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
                     .inheritIO()
                     .start()
                     .waitFor();
@@ -105,6 +105,13 @@ public class Main {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
+        }
+
+        var classIndex = stripped.indexOf("class ".toString());
+        if(classIndex >= 0) {
+            var left = stripped.substring(0, classIndex);
+            var right = stripped.substring(classIndex + "class ".length());
+            return generatePlaceholder(left) + "class " + generatePlaceholder(right);
         }
 
         return generatePlaceholder(stripped);

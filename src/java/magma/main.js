@@ -1,4 +1,6 @@
-/* public  */class /* Main {
+"use strict";
+/* public  */ class {
+} /* Main {
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
