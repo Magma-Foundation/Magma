@@ -454,6 +454,7 @@ public class Main {
         return compileWhitespace(input)
                 .or(() -> compileClass(input, depth))
                 .or(() -> compileStructure(input, depth, "interface "))
+                .or(() -> compileStructure(input, depth, "record "))
                 .or(() -> compileMethod(input, depth))
                 .or(() -> compileDefinitionStatement(input, depth))
                 .orElseGet(() -> generatePlaceholder(input));

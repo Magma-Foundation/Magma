@@ -1,101 +1,46 @@
 "use strict";
 /* public */ class Main {
 }
-/* private */ Some(value, T);
-record; /* implements Option<T> {
-    @Override
-    public <R> Option<R> map(Function<T, R> mapper) {
-        return new Some<>(mapper.apply(this.value));
-    }
-
-    @Override
-    public boolean isPresent() {
-        return true;
-    }
-
-    @Override
-    public T orElse(T other) {
-        return this.value;
-    }
-
-    @Override
-    public Option<T> filter(Predicate<T> predicate) {
-        return predicate.test(this.value) ? this : new None<>();
-    }
-
-    @Override
-    public T orElseGet(Supplier<T> supplier) {
-        return this.value;
-    }
-
-    @Override
-    public Option<T> or(Supplier<Option<T>> other) {
-        return this;
-    }
-
-    @Override
-    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-        return mapper.apply(this.value);
-    }
-} */
+/* private */ record;
+Some(T, value);
+implements;
+Option < T > {};
 /* private static */ class None {
 }
-/* private */ HeadedIterator(head, (Head));
-record; /* implements Iterator<T> {
-    @Override
-    public <R> R fold(R initial, BiFunction<R, T, R> folder) {
-        var current = initial;
-        while (true) {
-            R finalCurrent = current;
-            var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
-            if (optional.isPresent()) {
-                current = optional.orElse(null);
-            }
-            else {
-                return current;
-            }
-        }
-    }
-
-    @Override
-    public <R> Iterator<R> map(Function<T, R> mapper) {
-        return new HeadedIterator<>(() -> this.head.next().map(mapper));
-    }
-
-    @Override
-    public <R> R collect(Collector<T, R> collector) {
-        return this.fold(collector.createInitial(), collector::fold);
-    }
-} */
+/* private */ record;
+HeadedIterator(Head < T > head);
+implements;
+Iterator < T > {};
 /* private static */ class RangeHead {
 }
 /* private static */ class Lists {
 }
+ > elements;
+implements;
+List < T > {};
+/* public static  */ empty();
+List; /* {
+    return new JVMList<>();
+} */
+/* public static  */ of(elements);
+List; /* {
+    return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
+} */
 /* private static */ class State {
 }
-/* private */ Joiner(delimiter, String);
-record; /* implements Collector<String, Option<String>> {
-    private Joiner() {
-        this("");
-    }
-
-    @Override
-    public Option<String> createInitial() {
-        return new None<>();
-    }
-
-    @Override
-    public Option<String> fold(Option<String> current, String element) {
-        return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
-    }
-} */
-/* private */ Definition(maybeBefore, (Option), type, String, name, String, typeParams, (List));
-record; /* {
-    private String generate() {
+/* private */ record;
+Joiner(String, delimiter);
+implements;
+Collector < String, Option < String >> {};
+/* private */ record;
+Definition(Option < String > maybeBefore, String, type, String, name, List < String > typeParams);
+{
+    /* private */ generate();
+    String; /* {
         return this.generateWithParams("");
-    }
-
-    public String generateWithParams(String params) {
+    } */
+    /* public */ generateWithParams(params, String);
+    String; /* {
         var joined = this.typeParams.iterate()
                 .collect(new Joiner())
                 .map(inner -> "<" + inner + ">")
@@ -108,13 +53,14 @@ record; /* {
                 .orElse("");
 
         return before + this.name + joined + params + " : " + this.type;
-    }
-} */
+    } */
+}
 /* private static */ class ListCollector {
 }
-/* private record */ B > (left);
-A, right;
-B;
+/* private */ record;
+Tuple(A, left, B, right);
+{
+}
 /* public static */ main();
 void /* {
     try {
@@ -236,6 +182,7 @@ append: return;
     return compileWhitespace(input)
             .or(() -> compileClass(input, depth))
             .or(() -> compileStructure(input, depth, "interface "))
+            .or(() -> compileStructure(input, depth, "record "))
             .or(() -> compileMethod(input, depth))
             .or(() -> compileDefinitionStatement(input, depth))
             .orElseGet(() -> generatePlaceholder(input));
