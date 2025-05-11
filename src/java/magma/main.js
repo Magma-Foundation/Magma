@@ -128,7 +128,7 @@
         /* if (this.elements.isEmpty())  */ {
             return new None();
         }
-        let slice = this.elements.subList(0);
+        let slice = this.elements.subList(0, this.elements.size() - 1);
         let last = this.elements.getLast();
         return new Some(new [(List), T](new JVMList(slice), last));
     }
@@ -424,7 +424,7 @@
         /* if (!input.endsWith(suffix))  */ {
             return new None();
         }
-        let slice = input.substring(0, length());
+        let slice = input.substring(0, input.length() - suffix.length());
         return mapper.apply(slice);
     }
     /* private static */ compileClassSegment(state, input, depth) {
@@ -451,7 +451,7 @@
                     return new Some(new Tuple(definitionTuple.left, s));
                 }
                 /* if (content.startsWith("{") && content.endsWith("}"))  */ {
-                    let substring = content.substring(1);
+                    let substring = content.substring(1, content.length() - 1);
                     let statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
                     let generated = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
                     return new Some(new Tuple(statementsTuple.left, generated));
@@ -513,7 +513,7 @@
         });
     }
     /* private static */ value(state, input, depth) {
-        return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth)).or(() => digits(state, input)).or(() => not(state, input, depth)).or(() => methodReference(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
+        return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth, "+")).or(() => operation(state, input, depth, "-")).or(() => digits(state, input)).or(() => not(state, input, depth)).or(() => methodReference(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
     }
     /* private static */ methodReference(state, input, depth) {
         return last(input, "::", (s, s2) => {
@@ -537,7 +537,7 @@
                 return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString, depth);
             }
             /* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */ {
-                let parameterNames = divideAll(strippedBeforeArrow.substring(1), Main.foldValueChar);
+                let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar);
                 return assembleLambda(state, parameterNames, valueString, depth);
             }
             return new None();
@@ -548,7 +548,7 @@
         let strippedValueString = valueString.strip();
         /* String s */ ;
         /* if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}"))  */ {
-            let /* value  */ = compileFunctionSegments(state, strippedValueString.substring(1), depth);
+            let /* value  */ = compileFunctionSegments(state, strippedValueString.substring(1, strippedValueString.length() - 1), depth);
             let /* s  */ = "{" + value.right + createIndent(depth) + "}";
         }
         /* else  */ {
@@ -636,11 +636,11 @@
         }
         return new None();
     }
-    /* private static */ operation(state, value, depth) {
-        return first(value, "+", (s, s2) => {
+    /* private static */ operation(state, value, depth, infix) {
+        return first(value, infix, (s, s2) => {
             let leftTuple = value(state, s, depth);
             let rightTuple = value(leftTuple.left, s2, depth);
-            return new Some(new Tuple(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+            return new Some(new Tuple(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
         });
     }
     /* private static */ compileValues(state, params, mapper) {

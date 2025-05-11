@@ -159,7 +159,7 @@
 		/* if (this.elements.isEmpty())  */{
 			return new None<>();
 		}
-		let slice : var = this.elements.subList(0, /*  this.elements.size() - 1 */);
+		let slice : var = this.elements.subList(0, this.elements.size() - 1);
 		let last : var = this.elements.getLast();
 		return new Some<>(new [List<T>, T](new JVMList<>(slice), last));
 	}
@@ -460,7 +460,7 @@
 		/* if (!input.endsWith(suffix))  */{
 			return new None<>();
 		}
-		let slice : var = input.substring(0, /* input.length() - suffix */.length());
+		let slice : var = input.substring(0, input.length() - suffix.length());
 		return mapper.apply(slice);
 	}
 	/* private static */ compileClassSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
@@ -487,7 +487,7 @@
 					return new Some<>(new Tuple<>(definitionTuple.left, s));
 				}
 				/* if (content.startsWith("{") && content.endsWith("}"))  */{
-					let substring : var = content.substring(1, /*  content.length() - 1 */);
+					let substring : var = content.substring(1, content.length() - 1);
 					let statementsTuple : var = compileFunctionSegments(definitionTuple.left, substring, depth);
 					let generated : var = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
 					return new Some<>(new Tuple<>(statementsTuple.left, generated));
@@ -549,7 +549,7 @@
 		});
 	}
 	/* private static */ value(state : CompileState, input : string, depth : number) : [CompileState, string] {
-		return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth)).or(() => digits(state, input)).or(() => not(state, input, depth)).or(() => methodReference(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
+		return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth, "+")).or(() => operation(state, input, depth, "-")).or(() => digits(state, input)).or(() => not(state, input, depth)).or(() => methodReference(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
 	}
 	/* private static */ methodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
 		return last(input, "::", (s,  s2) => {
@@ -573,7 +573,7 @@
 				return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString, depth);
 			}
 			/* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */{
-				let parameterNames : var = divideAll(strippedBeforeArrow.substring(1, /*  strippedBeforeArrow.length() - 1 */), Main.foldValueChar);
+				let parameterNames : var = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar);
 				return assembleLambda(state, parameterNames, valueString, depth);
 			}
 			return new None<>();
@@ -584,7 +584,7 @@
 		let strippedValueString : var = valueString.strip();
 		/* String s */;
 		/* if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}"))  */{
-			let /* value  */ = compileFunctionSegments(state, strippedValueString.substring(1, /*  strippedValueString.length() - 1 */), depth);
+			let /* value  */ = compileFunctionSegments(state, strippedValueString.substring(1, strippedValueString.length() - 1), depth);
 			let /* s  */ = "{" + value.right + createIndent(depth) + "}";
 		}
 		/* else  */{
@@ -672,11 +672,11 @@
 		}
 		return new None<>();
 	}
-	/* private static */ operation(state : CompileState, value : string, depth : number) : Option<[CompileState, string]> {
-		return first(value, "+", (s,  s2) => {
+	/* private static */ operation(state : CompileState, value : string, depth : number, infix : string) : Option<[CompileState, string]> {
+		return first(value, infix, (s,  s2) => {
 			let leftTuple : var = value(state, s, depth);
 			let rightTuple : var = value(leftTuple.left, s2, depth);
-			return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+			return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
 		});
 	}
 	/* private static */ compileValues(state : CompileState, params : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {

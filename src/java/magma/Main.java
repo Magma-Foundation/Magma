@@ -728,7 +728,8 @@ public class Main {
                 .or(() -> dataAccess(state, input, depth))
                 .or(() -> symbolValue(state, input))
                 .or(() -> invocation(state, input, depth))
-                .or(() -> operation(state, input, depth))
+                .or(() -> operation(state, input, depth, "+"))
+                .or(() -> operation(state, input, depth, "-"))
                 .or(() -> digits(state, input))
                 .or(() -> not(state, input, depth))
                 .or(() -> methodReference(state, input, depth))
@@ -875,11 +876,11 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> operation(CompileState state, String value, int depth) {
-        return first(value, "+", (s, s2) -> {
+    private static Option<Tuple<CompileState, String>> operation(CompileState state, String value, int depth, String infix) {
+        return first(value, infix, (s, s2) -> {
             var leftTuple = value(state, s, depth);
             var rightTuple = value(leftTuple.left, s2, depth);
-            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " " + infix + " "  + rightTuple.right));
         });
     }
 
