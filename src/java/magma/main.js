@@ -239,7 +239,7 @@ Collector < String, Option < String >> {
         public */ ,
     /* @Override
         public */ fold(current, element) {
-        return /* new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)) */;
+        return /* new Some<>(current.map(inner -> inner  */ + + /*  element).orElse(element)) */;
     }
 };
 /* private */ class Definition {
@@ -265,7 +265,7 @@ name, List < String > typeParams;
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("") */ ;
-        return /* before + this.name + joined + params + " : " + this.type */;
+        return /* before  */ + + + + + /*  this.type */;
     }
 }
 /* private static */ class ListCollector {
@@ -291,7 +291,7 @@ right;
     /* private static */ compile(input) {
         /* var tuple = compileStatements(new CompileState(), input, Main::compileRootSegment) */ ;
         /* var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("") */ ;
-        return /* joined + tuple.right */;
+        return /* joined  */ + /*  tuple.right */;
     }
     /* private static */ compileStatements(state, input, mapper) {
         return /* compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;
@@ -411,7 +411,7 @@ right;
         return /* new Tuple<>(state, generatePlaceholder(stripped)) */;
     }
     /* private static */ compileValue(state, value) {
-        return /* new Tuple<CompileState, String>(state, generatePlaceholder(value)) */;
+        /* ) */ ;
     }
     /* private static */ compileValues(state, params, mapper) {
         /* var parsed = parseValues(state, params, mapper) */ ;
@@ -433,7 +433,7 @@ right;
         return /* cache.append(", ").append(element) */;
     }
     /* private static */ createIndent(depth) {
-        return /* "\n" + "\t".repeat(depth) */;
+        return /* "\n"  */ + /*  "\t".repeat(depth) */;
     }
     /* private static */ compileDefinitionStatement(input, depth, state) {
         /* ) */ ;
@@ -488,7 +488,7 @@ right;
         /* var joined = arguments.iterate()
                 .collect(new Joiner(", "))
                 .orElse("") */ ;
-        return /* "(" + joined + ") => " + returns */;
+        return /* "("  */ + + + /*  returns */;
     }
     /* private static  */ last(input, infix, mapper) {
         return /* infix(input, infix, Main::findLast, mapper) */;
@@ -514,7 +514,7 @@ right;
         /* var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end") */ ;
-        return /* "content-start " + replaced + " content-end" */;
+        return /* "content-start "  */ + + /*  " content-end" */;
     }
 }
 /*  */ 

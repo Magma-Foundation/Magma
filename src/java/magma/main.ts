@@ -240,7 +240,7 @@
 	}
 	/* @Override
         public */ fold(current : Option<string>, element : string) : Option<string> {
-		return /* new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element)) */;
+		return /* new Some<>(current.map(inner -> inner  */ + /*  this.delimiter  */ + /*  element).orElse(element)) */;
 	}
 }
 /* private */class Definition(Option<String> maybeBefore, String type, String name, List<String> typeParams) {
@@ -257,7 +257,7 @@
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("") */;
-		return /* before + this.name + joined + params + " : " + this.type */;
+		return /* before  */ + /*  this.name  */ + /*  joined  */ + /*  params  */ + /*  " : "  */ + /*  this.type */;
 	}
 }
 /* private static */class ListCollector<T> implements Collector<T, List<T>> {
@@ -292,7 +292,7 @@
 	/* private static */ compile(input : string) : string {
 		/* var tuple = compileStatements(new CompileState(), input, Main::compileRootSegment) */;
 		/* var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("") */;
-		return /* joined + tuple.right */;
+		return /* joined  */ + /*  tuple.right */;
 	}
 	/* private static */ compileStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
 		return /* compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;
@@ -481,8 +481,14 @@
         } */
 		return /* new Tuple<>(state, generatePlaceholder(stripped)) */;
 	}
-	/* private static */ compileValue(state : CompileState, value : string) : [CompileState, string] {
-		return /* new Tuple<CompileState, String>(state, generatePlaceholder(value)) */;
+	/* private static */ compileValue(state : CompileState, value : string) : [CompileState, string] {/* return first(value, "+", (s, s2) -> {
+            var leftTuple = compileValue(state, s);
+            var rightTuple = compileValue(leftTuple.left, s2);
+            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+        } *//* ).orElseGet(() -> {
+            return new Tuple<CompileState, String>(state, generatePlaceholder(value));
+        } */
+		/* ) */;
 	}
 	/* private static */ compileValues(state : CompileState, params : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
 		/* var parsed = parseValues(state, params, mapper) */;
@@ -508,7 +514,7 @@
 		return /* cache.append(", ").append(element) */;
 	}
 	/* private static */ createIndent(depth : number) : string {
-		return /* "\n" + "\t".repeat(depth) */;
+		return /* "\n"  */ + /*  "\t".repeat(depth) */;
 	}
 	/* private static */ compileDefinitionStatement(input : string, depth : number, state : CompileState) : Option<[CompileState, string]> {/* return suffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(state, withoutEnd).map(result -> {
@@ -614,7 +620,7 @@
 		/* var joined = arguments.iterate()
                 .collect(new Joiner(", "))
                 .orElse("") */;
-		return /* "(" + joined + ") => " + returns */;
+		return /* "("  */ + /*  joined  */ + /*  ") => "  */ + /*  returns */;
 	}
 	/* private static  */ last<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return /* infix(input, infix, Main::findLast, mapper) */;
@@ -644,7 +650,7 @@
 		/* var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end") */;
-		return /* "content-start " + replaced + " content-end" */;
+		return /* "content-start "  */ + /*  replaced  */ + /*  " content-end" */;
 	}
 }
 /*  */

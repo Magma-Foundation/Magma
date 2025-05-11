@@ -627,7 +627,13 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String value) {
-        return new Tuple<CompileState, String>(state, generatePlaceholder(value));
+        return first(value, "+", (s, s2) -> {
+            var leftTuple = compileValue(state, s);
+            var rightTuple = compileValue(leftTuple.left, s2);
+            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+        }).orElseGet(() -> {
+            return new Tuple<CompileState, String>(state, generatePlaceholder(value));
+        });
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
