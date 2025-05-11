@@ -63,6 +63,8 @@ public class Main {
         boolean isEmpty();
 
         List<T> addFirst(T element);
+
+        Iterator<Tuple<Integer, T>> iterateWithIndices();
     }
 
     private interface Head<T> {
@@ -268,7 +270,7 @@ public class Main {
 
             @Override
             public Iterator<T> iterate() {
-                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
+                return this.iterateWithIndices().map(Tuple::right);
             }
 
             @Override
@@ -307,6 +309,11 @@ public class Main {
             public List<T> addFirst(T element) {
                 this.elements.addFirst(element);
                 return this;
+            }
+
+            @Override
+            public Iterator<Tuple<Integer, T>> iterateWithIndices() {
+                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(index -> new Tuple<>(index, this.elements.get(index)));
             }
         }
 
@@ -1193,19 +1200,19 @@ public class Main {
                         .collect(new ListCollector<>());
 
                 if (base.equals("BiFunction")) {
-                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
+                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
                 }
 
                 if (base.equals("Function")) {
-                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
+                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1))));
                 }
 
                 if (base.equals("Predicate")) {
-                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
+                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), "boolean")));
                 }
 
                 if (base.equals("Supplier")) {
-                    return new Some<>(new Tuple<>(argumentsState, generate(Lists.empty(), arguments.get(0))));
+                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.empty(), arguments.get(0))));
                 }
 
                 if (base.equals("Tuple") && arguments.size() >= 2) {
@@ -1224,8 +1231,9 @@ public class Main {
         });
     }
 
-    private static String generate(List<String> arguments, String returns) {
-        var joined = arguments.iterate()
+    private static String generateFunctionalType(List<String> arguments, String returns) {
+        var joined = arguments.iterateWithIndices()
+                .map(pair -> "arg" + pair.left + " : " + pair.right)
                 .collect(new Joiner(", "))
                 .orElse("");
 

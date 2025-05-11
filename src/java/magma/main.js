@@ -161,7 +161,7 @@
     }
     /* @Override
             public */ iterate() {
-        return new HeadedIterator(new RangeHead(this.elements.size())).map(this.elements.get);
+        return this.iterateWithIndices().map(Tuple.right);
     }
     /* @Override
             public */ removeLast() {
@@ -193,6 +193,10 @@
             public */ addFirst(element) {
         /* this.elements.addFirst(element) */ ;
         return this;
+    }
+    /* @Override
+            public */ iterateWithIndices() {
+        return new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple(index, this.elements.get(index)));
     }
 }
 /* private static */ class Lists /*  */ {
@@ -897,16 +901,16 @@
                 let argumentsState = argumentsTuple.left;
                 let arguments = argumentsTuple.right.iterate().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
                 /* if (base.equals("BiFunction"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
+                    return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
                 }
                 /* if (base.equals("Function"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
+                    return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1))));
                 }
                 /* if (base.equals("Predicate"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
+                    return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), "boolean")));
                 }
                 /* if (base.equals("Supplier"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.empty(), arguments.get(0))));
+                    return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.empty(), arguments.get(0))));
                 }
                 /* if (base.equals("Tuple") && arguments.size() >= 2)  */ {
                     return new Some(new Tuple(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
@@ -922,8 +926,8 @@
             });
         });
     }
-    /* private static */ generate(arguments, returns) {
-        let joined = arguments.iterate().collect(new Joiner(", ")).orElse("");
+    /* private static */ generateFunctionalType(arguments, returns) {
+        let joined = arguments.iterateWithIndices().map((pair) => "arg" + pair.left + " : " + pair.right).collect(new Joiner(", ")).orElse("");
         return "(" + joined + ") => " + returns;
     }
     /* private static  */ last(input, infix, mapper) {

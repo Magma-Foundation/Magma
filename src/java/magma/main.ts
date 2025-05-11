@@ -1,11 +1,11 @@
 /* private */interface Option<T>/*   */ {
-	map<R>(mapper : (T) => R) : Option<R>;
+	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
-	filter(predicate : (T) => boolean) : Option<T>;
+	filter(predicate : (arg0 : T) => boolean) : Option<T>;
 	orElseGet(supplier : () => T) : T;
 	or(other : () => Option<T>) : Option<T>;
-	flatMap<R>(mapper : (T) => Option<R>) : Option<R>;
+	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
 	isEmpty() : boolean;
 }
 /* private */interface Collector<T, C>/*   */ {
@@ -13,10 +13,10 @@
 	fold(current : C, element : T) : C;
 }
 /* private */interface Iterator<T>/*   */ {
-	fold<R>(initial : R, folder : (R, T) => R) : R;
-	map<R>(mapper : (T) => R) : Iterator<R>;
+	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R;
+	map<R>(mapper : (arg0 : T) => R) : Iterator<R>;
 	collect<R>(collector : Collector<T, R>) : R;
-	filter(predicate : (T) => boolean) : Iterator<T>;
+	filter(predicate : (arg0 : T) => boolean) : Iterator<T>;
 	next() : Option<T>;
 }
 /* private */interface List<T>/*   */ {
@@ -28,6 +28,7 @@
 	addAll(other : List<T>) : List<T>;
 	isEmpty() : boolean;
 	addFirst(element : T) : List<T>;
+	iterateWithIndices() : Iterator<[number, T]>;
 }
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
@@ -37,7 +38,7 @@
 	}
 
 	/* @Override
-        public  */ map<R>(mapper : (T) => R) : Option<R> {
+        public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new Some(mapper.apply(this.value));
 	}
 	/* @Override
@@ -49,7 +50,7 @@
 		return this.value;
 	}
 	/* @Override
-        public */ filter(predicate : (T) => boolean) : Option<T> {
+        public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
 		/* if (predicate.test(this.value))  */{
 			return this;
 		}
@@ -64,7 +65,7 @@
 		return this;
 	}
 	/* @Override
-        public  */ flatMap<R>(mapper : (T) => Option<R>) : Option<R> {
+        public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
 		return mapper.apply(this.value);
 	}
 	/* @Override
@@ -74,7 +75,7 @@
 }
 /* private static */class None<T>/*  */ {
 	/* @Override
-        public  */ map<R>(mapper : (T) => R) : Option<R> {
+        public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
 	}
 	/* @Override
@@ -86,7 +87,7 @@
 		return other;
 	}
 	/* @Override
-        public */ filter(predicate : (T) => boolean) : Option<T> {
+        public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
 		return new None();
 	}
 	/* @Override
@@ -98,7 +99,7 @@
 		return other.get();
 	}
 	/* @Override
-        public  */ flatMap<R>(mapper : (T) => Option<R>) : Option<R> {
+        public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
 		return new None();
 	}
 	/* @Override
@@ -133,7 +134,7 @@
 	}
 
 	/* @Override
-        public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
+        public  */ fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		let current = initial;
 		/* while (true) {{
                 R finalCurrent = current;
@@ -146,7 +147,7 @@
 		}
 	}
 	/* @Override
-        public  */ map<R>(mapper : (T) => R) : Iterator<R> {
+        public  */ map<R>(mapper : (arg0 : T) => R) : Iterator<R> {
 		return new HeadedIterator(() => this.head.next().map(mapper));
 	}
 	/* @Override
@@ -154,7 +155,7 @@
 		return this.fold(collector.createInitial(), collector.fold);
 	}
 	/* @Override
-        public */ filter(predicate : (T) => boolean) : Iterator<T> {
+        public */ filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
 		return this.flatMap((element) => {
 			/* if (predicate.test(element))  */{
 				return new HeadedIterator(new SingleHead(element));
@@ -166,7 +167,7 @@
         public */ next() : Option<T> {
 		return this.head.next();
 	}
-	/* private  */ flatMap<R>(f : (T) => Iterator<R>) : Iterator<R> {
+	/* private  */ flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
 		return new HeadedIterator(new FlatMapHead(this.head, f));
 	}
 }
@@ -201,7 +202,7 @@
 	}
 	/* @Override
             public */ iterate() : Iterator<T> {
-		return new HeadedIterator(new RangeHead(this.elements.size())).map(this.elements.get);
+		return this.iterateWithIndices().map(Tuple.right);
 	}
 	/* @Override
             public */ removeLast() : Option<[List<T>, T]> {
@@ -233,6 +234,10 @@
             public */ addFirst(element : T) : List<T> {
 		/* this.elements.addFirst(element) */;
 		return this;
+	}
+	/* @Override
+            public */ iterateWithIndices() : Iterator<[number, T]> {
+		return new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple(index, this.elements.get(index)));
 	}
 }
 /* private static */class Lists/*  */ {
@@ -328,10 +333,10 @@
 /* private */class Tuple<A, B>/* (A left, B right)  */ {
 }
 /* private static */class FlatMapHead<T, R>/*  */ {
-	/* private final */ mapper : (T) => Iterator<R>;
+	/* private final */ mapper : (arg0 : T) => Iterator<R>;
 	/* private final */ head : Head<T>;
 	/* private */ current : Option<Iterator<R>>;
-	FlatMapHead(head : Head<T>, mapper : (T) => Iterator<R>) : public {
+	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Iterator<R>) : public {
 		let /* this.mapper  */ = mapper;
 		let /* this.current  */ = new None();
 		let /* this.head  */ = head;
@@ -412,25 +417,25 @@
 		let joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("");
 		return joined + tuple.right;
 	}
-	/* private static */ compileStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
+	/* private static */ compileStatements(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
 		let parsed = parseStatements(state, input, mapper);
 		return new Tuple(parsed.left, generateStatements(parsed.right));
 	}
 	/* private static */ generateStatements(statements : List<string>) : string {
 		return generateAll(Main.mergeStatements, statements);
 	}
-	/* private static */ parseStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, List<string>] {
+	/* private static */ parseStatements(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, List<string>] {
 		return parseAll(state, input, Main.foldStatementChar, mapper);
 	}
-	/* private static */ compileAll(state : CompileState, input : string, folder : (DivideState, Character) => DivideState, mapper : (CompileState, string) => [CompileState, string], merger : (StringBuilder, string) => StringBuilder) : [CompileState, string] {
+	/* private static */ compileAll(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string], merger : (arg0 : StringBuilder, arg1 : string) => StringBuilder) : [CompileState, string] {
 		let parsed = parseAll(state, input, folder, mapper);
 		let generated = generateAll(merger, parsed.right);
 		return new Tuple(parsed.left, generated);
 	}
-	/* private static */ generateAll(merger : (StringBuilder, string) => StringBuilder, elements : List<string>) : string {
+	/* private static */ generateAll(merger : (arg0 : StringBuilder, arg1 : string) => StringBuilder, elements : List<string>) : string {
 		return elements.iterate().fold(new StringBuilder(), merger).toString();
 	}
-	/* private static */ parseAll(state : CompileState, input : string, folder : (DivideState, Character) => DivideState, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, List<string>] {
+	/* private static */ parseAll(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, List<string>] {
 		return divideAll(input, folder).iterate().fold(new Tuple(state, Lists.empty()), (tuple,  element) => {
 			let state1 = tuple.left;
 			let right = tuple.right;
@@ -441,7 +446,7 @@
 	/* private static */ mergeStatements(stringBuilder : StringBuilder, str : string) : StringBuilder {
 		return stringBuilder.append(str);
 	}
-	/* private static */ divideAll(input : string, folder : (DivideState, Character) => DivideState) : List<string> {
+	/* private static */ divideAll(input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState) : List<string> {
 		let current = new DivideState(input);
 		/* while (true) {{
             var maybePopped = current.pop().map(tuple -> {{
@@ -585,7 +590,7 @@
 		}
 		return true;
 	}
-	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (string) => Option<T>) : Option<T> {
+	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
 		/* if (!input.endsWith(suffix))  */{
 			return new None();
 		}
@@ -816,7 +821,7 @@
 			return new Some(new Tuple(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
 		});
 	}
-	/* private static */ compileValues(state : CompileState, params : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
+	/* private static */ compileValues(state : CompileState, params : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
 		let parsed = parseValues(state, params, mapper);
 		let generated = generateValues(parsed.right);
 		return new Tuple(parsed.left, generated);
@@ -824,7 +829,7 @@
 	/* private static */ generateValues(elements : List<string>) : string {
 		return generateAll(Main.mergeValues, elements);
 	}
-	/* private static */ parseValues(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, List<string>] {
+	/* private static */ parseValues(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, List<string>] {
 		return parseAll(state, input, Main.foldValueChar, mapper);
 	}
 	/* private static */ compileParameter(state : CompileState, input : string) : [CompileState, string] {
@@ -869,7 +874,7 @@
 			});
 		});
 	}
-	/* private static */ toLast(input : string, separator : string, folder : (DivideState, Character) => DivideState) : Option<[string, string]> {
+	/* private static */ toLast(input : string, separator : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState) : Option<[string, string]> {
 		let divisions = divideAll(input, folder);
 		return divisions.removeLast().map((removed) => {
 			let left = removed.left.iterate().collect(new Joiner(separator)).orElse("");
@@ -946,16 +951,16 @@
 				let argumentsState = argumentsTuple.left;
 				let arguments = argumentsTuple.right.iterate().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
 				/* if (base.equals("BiFunction"))  */{
-					return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
+					return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
 				}
 				/* if (base.equals("Function"))  */{
-					return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
+					return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1))));
 				}
 				/* if (base.equals("Predicate"))  */{
-					return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
+					return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), "boolean")));
 				}
 				/* if (base.equals("Supplier"))  */{
-					return new Some(new Tuple(argumentsState, generate(Lists.empty(), arguments.get(0))));
+					return new Some(new Tuple(argumentsState, generateFunctionalType(Lists.empty(), arguments.get(0))));
 				}
 				/* if (base.equals("Tuple") && arguments.size() >= 2)  */{
 					return new Some(new Tuple(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
@@ -971,11 +976,11 @@
 			});
 		});
 	}
-	/* private static */ generate(arguments : List<string>, returns : string) : string {
-		let joined = arguments.iterate().collect(new Joiner(", ")).orElse("");
+	/* private static */ generateFunctionalType(arguments : List<string>, returns : string) : string {
+		let joined = arguments.iterateWithIndices().map((pair) => "arg" + pair.left + " : " + pair.right).collect(new Joiner(", ")).orElse("");
 		return "(" + joined + ") => " + returns;
 	}
-	/* private static  */ last<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
+	/* private static  */ last<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return infix(input, infix, Main.findLast, mapper);
 	}
 	/* private static */ findLast(input : string, infix : string) : Option<number> {
@@ -985,17 +990,17 @@
 		}
 		return new Some(index);
 	}
-	/* private static  */ first<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
+	/* private static  */ first<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return infix(input, infix, Main.findFirst, mapper);
 	}
-	/* private static  */ infix<T>(input : string, infix : string, locator : (string, string) => Option<number>, mapper : (string, string) => Option<T>) : Option<T> {
+	/* private static  */ infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return split(() => locator.apply(input, infix).map((index) => {
 			let left = input.substring(0, index);
 			let right = input.substring(index + infix.length());
 			return new Tuple(left, right);
 		}), mapper);
 	}
-	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (string, string) => Option<T>) : Option<T> {
+	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
