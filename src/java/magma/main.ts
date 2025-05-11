@@ -1,181 +1,44 @@
-/* private */interface Option<T> {
-	map<R>(mapper : (T) => R) : Option<R>;
-	isPresent() : boolean;
-	orElse(other : T) : T;
-	filter(predicate : (T) => boolean) : Option<T>;
-	orElseGet(supplier : () => T) : T;
-	or(other : () => Option<T>) : Option<T>;
-	flatMap<R>(mapper : (T) => Option<R>) : Option<R>;
-	isEmpty() : boolean;
-}
-/* private */interface Collector<T, C> {
-	createInitial() : C;
-	fold(current : C, element : T) : C;
-}
-/* private */interface Iterator<T> {
-	fold<R>(initial : R, folder : (R, T) => R) : R;
-	map<R>(mapper : (T) => R) : Iterator<R>;
-	collect<R>(collector : Collector<T, R>) : R;
-}
-/* private */interface List<T> {
-	add(element : T) : List<T>;
-	iterate() : Iterator<T>;
-	removeLast() : Option<[List<T>, T]>;
-	get(index : number) : T;
-}
-/* private */interface Head<T> {
-	next() : Option<T>;
-}
-/* private */class Some<T>(T value) implements Option<T> {
-	/* @Override
-        public  */ map<R>(mapper : (T) => R) : Option<R> {
-		return /* new Some<>(mapper.apply(this.value)) */;
-	}
-	/* @Override
-        public */ isPresent() : boolean {
-		return true;
-	}
-	/* @Override
-        public */ orElse(other : T) : T {
-		return /* this.value */;
-	}
-	/* @Override
-        public */ filter(predicate : (T) => boolean) : Option<T> {
-		return /* predicate.test(this.value) ? this : new None<>() */;
-	}
-	/* @Override
-        public */ orElseGet(supplier : () => T) : T {
-		return /* this.value */;
-	}
-	/* @Override
-        public */ or(other : () => Option<T>) : Option<T> {
-		return this;
-	}
-	/* @Override
-        public  */ flatMap<R>(mapper : (T) => Option<R>) : Option<R> {
-		return /* mapper.apply(this.value) */;
-	}
-	/* @Override
-        public */ isEmpty() : boolean {
-		return false;
-	}
-}
-/* private static */class None<T> implements Option<T> {
-	/* @Override
-        public  */ map<R>(mapper : (T) => R) : Option<R> {
-		return /* new None<>() */;
-	}
-	/* @Override
-        public */ isPresent() : boolean {
-		return false;
-	}
-	/* @Override
-        public */ orElse(other : T) : T {
-		return other;
-	}
-	/* @Override
-        public */ filter(predicate : (T) => boolean) : Option<T> {
-		return /* new None<>() */;
-	}
-	/* @Override
-        public */ orElseGet(supplier : () => T) : T {
-		return /* supplier.get() */;
-	}
-	/* @Override
-        public */ or(other : () => Option<T>) : Option<T> {
-		return /* other.get() */;
-	}
-	/* @Override
-        public  */ flatMap<R>(mapper : (T) => Option<R>) : Option<R> {
-		return /* new None<>() */;
-	}
-	/* @Override
-        public */ isEmpty() : boolean {
-		return true;
-	}
-}
-/* private */class HeadedIterator<T>(Head<T> head) implements Iterator<T> {
-	/* @Override
-        public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
-		/* var current = initial */;/* while (true) {
-                R finalCurrent = current;
-                var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
-                if (optional.isPresent()) {
-                    current = optional.orElse(null);
-                }
-                else {
-                    return current;
-                }
-            } */
-	}
-	/* @Override
-        public  */ map<R>(mapper : (T) => R) : Iterator<R> {
-		return /* new HeadedIterator<>(() -> this.head.next().map(mapper)) */;
-	}
-	/* @Override
-        public  */ collect<R>(collector : Collector<T, R>) : R {
-		return /* this.fold(collector.createInitial(), collector::fold) */;
-	}
-}
-/* private static */class RangeHead implements Head<Integer> {
-	/* private final */ length : number;
-	/* private */ counter : number;
-	RangeHead(length : number) : public {
-		/* this.length = length */;
-	}
-	/* @Override
-        public */ next() : Option<Integer> {/* if (this.counter < this.length) {
-                var value = this.counter;
-                this.counter++;
-                return new Some<>(value);
-            } */
-		return /* new None<>() */;
-	}
-}
-/* private static final */class JVMList<T> implements List<T> {
-	/* private final */ elements : java.util.List<T>;
-	JVMList(elements : java.util.List<T>) : private {
+/* private static */class Lists {
+	/* private static final class JVMList<T> implements List<T> {
+            private final java.util.List<T> elements;
+
+            */ JVMList(elements : java.util.List<T>) : private {
 		/* this.elements = elements */;
-	}
-	JVMList() : public {
-		/* this(new ArrayList<>()) */;
-	}
-	/* @Override
-            public */ add(element : T) : List<T> {
-		/* this.elements.add(element) */;
+		/* }
+
+            public JVMList() {
+                this(new ArrayList<>()) */;
+		/* }
+
+            @Override
+            public List<T> add(T element) {
+                this.elements.add(element) */;
 		return this;
-	}
-	/* @Override
-            public */ iterate() : Iterator<T> {
-		return /* new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get) */;
-	}
-	/* @Override
-            public */ removeLast() : Option<[List<T>, T]> {/* if (this.elements.isEmpty()) {
+		/* }
+
+            @Override
+            public Iterator<T> iterate() {
+                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get) */;/* }
+
+            @Override
+            public Option<Tuple<List<T>, T>> removeLast() {
+                if (this.elements.isEmpty()) {
                     return new None<>();
                 } */
 		/* var slice = this.elements.subList(0, this.elements.size() - 1) */;
 		/* var last = this.elements.getLast() */;
 		return /* new Some<>(new Tuple<List<T>, T>(new JVMList<>(slice), last)) */;
+		/* }
+
+            @Override
+            public T get(int index) {
+                return this.elements.get(index) */;/* } */
 	}
-	/* @Override
-            public */ get(index : number) : T {
-		return /* this.elements.get(index) */;
-	}
-}
-/* private static */class Lists {
 	/* public static  */ empty<T>() : List<T> {
 		return /* new JVMList<>() */;
 	}
 	/* public static  */ of<T>(elements : /* T... */) : List<T> {
 		return /* new JVMList<>(new ArrayList<>(Arrays.asList(elements))) */;
-	}
-}
-/* private */class CompileState(List<String> structures) {
-	CompileState() : public {
-		/* this(Lists.empty()) */;
-	}
-	/* public */ addStructure(structure : string) : CompileState {
-		return /* new CompileState(this.structures.add(structure)) */;
 	}
 }
 /* private static */class DivideState {
@@ -230,49 +93,227 @@
 		return /* this.popAndAppendToTuple().map(Tuple::right) */;
 	}
 }
-/* private */class Joiner(String delimiter) implements Collector<String, Option<String>> {
-	Joiner() : private {
-		/* this("") */;
-	}
-	/* @Override
-        public */ createInitial() : Option<string> {
+/* public */class Main {/* private interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        boolean isPresent();
+
+        T orElse(T other);
+
+        Option<T> filter(Predicate<T> predicate);
+
+        T orElseGet(Supplier<T> supplier);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        boolean isEmpty();
+    } *//* 
+
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    } *//* 
+
+    private interface Iterator<T> {
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <R> R collect(Collector<T, R> collector);
+    } *//* 
+
+    private interface List<T> {
+        List<T> add(T element);
+
+        Iterator<T> iterate();
+
+        Option<Tuple<List<T>, T>> removeLast();
+
+        T get(int index);
+    } *//* 
+
+    private interface Head<T> {
+        Option<T> next();
+    } *//* 
+
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return this.value;
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+    } */
+	/* private static class None */ map<T> implements Option<T> {
+        @Override
+        public <R>(mapper : (T) => R) : Option<R> {
 		return /* new None<>() */;
+		/* }
+
+        @Override
+        public boolean isPresent() {
+            return false */;
+		/* }
+
+        @Override
+        public T orElse(T other) {
+            return other */;
+		/* }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>() */;
+		/* }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get() */;
+		/* }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get() */;
+		/* }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>() */;
+		/* }
+
+        @Override
+        public boolean isEmpty() {
+            return true */;/* } */
+	}/* 
+
+    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            var current = initial;
+            while (true) {
+                R finalCurrent = current;
+                var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                if (optional.isPresent()) {
+                    current = optional.orElse(null);
+                }
+                else {
+                    return current;
+                }
+            }
+        }
+
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        }
+
+        @Override
+        public <R> R collect(Collector<T, R> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+    } */
+	/* private static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter;
+
+        */ RangeHead(length : number) : public {
+		/* this.length = length */;/* }
+
+        @Override
+        public Option<Integer> next() {
+            if (this.counter < this.length) {
+                var value = this.counter;
+                this.counter++;
+                return new Some<>(value);
+            } */
+		return /* new None<>() */;/* } */
 	}
-	/* @Override
-        public */ fold(current : Option<string>, element : string) : Option<string> {
-		return /* new Some<>(current.map(inner -> inner  */ + /*  this.delimiter  */ + /*  element).orElse(element)) */;
-	}
-}
-/* private */class Definition(Option<String> maybeBefore, String type, String name, List<String> typeParams) {
-	/* private */ generate() : string {
-		return /* this.generateWithParams("") */;
-	}
-	/* public */ generateWithParams(params : string) : string {
-		/* var joined = this.typeParams.iterate()
+	/* private */ CompileState(structures : List<string>) : record {/* public CompileState() {
+            this(Lists.empty());
+        } *//* public CompileState addStructure(String structure) {
+            return new CompileState(this.structures.add(structure));
+        } */
+	}/* 
+
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
+        private Joiner() {
+            this("");
+        }
+
+        @Override
+        public Option<String> createInitial() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<String> fold(Option<String> current, String element) {
+            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
+        }
+    } */
+	/* private */ Definition(maybeBefore : Option<string>, type : string, name : string, typeParams : List<string>) : record {/* private String generate() {
+            return this.generateWithParams("");
+        } *//* public String generateWithParams(String params) {
+            var joined = this.typeParams.iterate()
                     .collect(new Joiner())
                     .map(inner -> "<" + inner + ">")
-                    .orElse("") */;
-		/* var before = this.maybeBefore
+                    .orElse("");
+
+            var before = this.maybeBefore
                     .filter(value -> !value.isEmpty())
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
-                    .orElse("") */;
-		return before + /*  this.name  */ + joined + params + " : " + /*  this.type */;
+                    .orElse("");
+
+            return before + this.name + joined + params + " : " + this.type;
+        } */
 	}
-}
-/* private static */class ListCollector<T> implements Collector<T, List<T>> {
-	/* @Override
+	/* private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
         public */ createInitial() : List<T> {
 		return /* Lists.empty() */;
+		/* }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element) */;/* } */
 	}
-	/* @Override
-        public */ fold(current : List<T>, element : T) : List<T> {
-		return /* current.add(element) */;
+	/* private record */ B>(left : A, right : B) : /* Tuple<A, */ {
 	}
-}
-/* private */class Tuple<A, B>(A left, B right) {
-}
-/* public */class Main {
 	/* public static */ main() : void {/* try {
             var parent = Paths.get(".", "src", "java", "magma");
             var source = parent.resolve("Main.java");
@@ -388,14 +429,18 @@
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped))) */;
 	}
 	/* private static */ compileClass(stripped : string, depth : number, state : CompileState) : Option<[CompileState, string]> {
-		return /* compileStructure(stripped, "class ", "class ", state) */;
+		return /* structure(stripped, "class ", "class ", state) */;
 	}
-	/* private static */ compileStructure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, string]> {
+	/* private static */ structure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, string]> {
 		return /* first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
+                    if (!isSymbol(strippedName)) {
+                        return new None<>();
+                    }
+
                     var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
                     var generated = generatePlaceholder(beforeInfix.strip())  */ + targetInfix + strippedName + " {" + /*  statements.right  */ + /*  "\n}\n";
                     return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
@@ -421,8 +466,8 @@
 	/* private static */ compileClassSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		return /* compileWhitespace(input, state)
                 .or(() -> compileClass(input, depth, state))
-                .or(() -> compileStructure(input, "interface ", "interface ", state))
-                .or(() -> compileStructure(input, "record ", "class ", state))
+                .or(() -> structure(input, "interface ", "interface ", state))
+                .or(() -> structure(input, "record ", "class ", state))
                 .or(() -> method(state, input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input))) */;

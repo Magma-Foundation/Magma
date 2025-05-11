@@ -518,21 +518,34 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileClass(String stripped, int depth, CompileState state) {
-        return compileStructure(stripped, "class ", "class ", state);
+        return structure(stripped, "class ", "class ", state);
     }
 
-    private static Option<Tuple<CompileState, String>> compileStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+    private static Option<Tuple<CompileState, String>> structure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (name, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
-                    var strippedName = name.strip();
-                    var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
-                    var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + strippedName + " {" + statements.right + "\n}\n";
-                    return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
+                    return assemble(state, targetInfix, beforeInfix, name, content1);
                 });
             });
         });
+    }
+
+    private static Option<Tuple<CompileState, String>> assemble(
+            CompileState state, String targetInfix,
+            String beforeInfix,
+            String rawName,
+            String content
+    ) {
+        var name = rawName.strip();
+        if (!isSymbol(name)) {
+            return new None<>();
+        }
+
+        var statements = compileStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1));
+        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + " {" + statements.right + "\n}\n";
+        return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
     }
 
     private static boolean isSymbol(String input) {
@@ -558,8 +571,8 @@ public class Main {
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input, int depth) {
         return compileWhitespace(input, state)
                 .or(() -> compileClass(input, depth, state))
-                .or(() -> compileStructure(input, "interface ", "interface ", state))
-                .or(() -> compileStructure(input, "record ", "class ", state))
+                .or(() -> structure(input, "interface ", "interface ", state))
+                .or(() -> structure(input, "record ", "class ", state))
                 .or(() -> method(state, input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
