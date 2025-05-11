@@ -652,7 +652,13 @@ public class Main {
             return new Tuple<>(tuple.left, "return " + tuple.right);
         }
 
-        return new Tuple<>(state, generatePlaceholder(stripped));
+        return first(stripped, "=", (s, s2) -> {
+            var definitionTuple = compileDefinition(state, s);
+            var valueTuple = value(definitionTuple.left, s2);
+            return new Some<>(new Tuple<>(valueTuple.left, "let " + definitionTuple.right + " = " + valueTuple.right));
+        }).orElseGet(() -> {
+            return new Tuple<>(state, generatePlaceholder(stripped));
+        });
     }
 
     private static Tuple<CompileState, String> value(CompileState state, String input) {
@@ -716,6 +722,10 @@ public class Main {
             return new Tuple<>(state, "");
         }
 
+        return compileDefinition(state, input);
+    }
+
+    private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
         return parseDefinition(state, input)
                 .map((Tuple<CompileState, Definition> tuple) -> new Tuple<>(tuple.left, tuple.right.generate()))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));

@@ -97,7 +97,7 @@
 /* private */class HeadedIterator<T>/* (Head<T> head) implements Iterator<T>  */ {
 	/* @Override
         public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
-		/* var current = initial */;/* while (true) {
+		let current : var = initial;/* while (true) {
                 R finalCurrent = current;
                 var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
                 if (optional.isPresent()) {
@@ -120,7 +120,7 @@
 /* private static final */class JVMList<T>/*  implements List<T>  */ {
 	/* private final */ elements : java.util.List<T>;
 	JVMList(elements : java.util.List<T>) : private {
-		/* this.elements = elements */;
+		let /* this.elements  */ = elements;
 	}
 	JVMList() : public {
 		/* this(new ArrayList<>()) */;
@@ -138,8 +138,8 @@
             public */ removeLast() : Option<[List<T>, T]> {/* if (this.elements.isEmpty()) {
                     return new None<>();
                 } */
-		/* var slice = this.elements.subList(0, this.elements.size() - 1) */;
-		/* var last = this.elements.getLast() */;
+		let slice : var = /* this.elements.subList(0, this.elements */.size() - 1);
+		let last : var = /* this.elements */.getLast();
 		return /* new Some<>(new Tuple<List<T>, T>(new JVMList<>(slice), last)) */;
 	}
 	/* @Override
@@ -162,18 +162,18 @@
 	/* private */ segments : List<string>;
 	/* private */ buffer : StringBuilder;
 	DivideState(input : string, index : number, segments : List<string>, buffer : StringBuilder, depth : number) : public {
-		/* this.segments = segments */;
-		/* this.buffer = buffer */;
-		/* this.depth = depth */;
-		/* this.input = input */;
-		/* this.index = index */;
+		let /* this.segments  */ = segments;
+		let /* this.buffer  */ = buffer;
+		let /* this.depth  */ = depth;
+		let /* this.input  */ = input;
+		let /* this.index  */ = index;
 	}
 	DivideState(input : string) : public {
 		/* this(input, 0, Lists.empty(), new StringBuilder(), 0) */;
 	}
 	/* private */ advance() : DivideState {
-		/* this.segments = this.segments.add(this.buffer.toString()) */;
-		/* this.buffer = new StringBuilder() */;
+		let /* this.segments  */ = /* this.segments.add(this.buffer */.toString());
+		let /* this.buffer  */ = /*  new StringBuilder() */;
 		return this;
 	}
 	/* private */ append(c : char) : DivideState {
@@ -225,7 +225,7 @@
         private int counter;
 
         */ RangeHead(length : number) : public {
-		/* this.length = length */;/* }
+		let /* this.length  */ = length;/* }
 
         @Override
         public Option<Integer> next() {
@@ -292,16 +292,16 @@
         } */
 	}
 	/* private static */ compile(input : string) : string {
-		/* var tuple = compileStatements(new CompileState(), input, Main::compileRootSegment) */;
-		/* var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("") */;
+		let tuple : var = /*  compileStatements(new CompileState(), input, Main::compileRootSegment) */;
+		let joined : var = /* tuple.left.structures */.iterate().collect(new Joiner()).orElse("");
 		return joined + /*  tuple.right */;
 	}
 	/* private static */ compileStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
 		return /* compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;
 	}
 	/* private static */ compileAll(state : CompileState, input : string, folder : (DivideState, Character) => DivideState, mapper : (CompileState, string) => [CompileState, string], merger : (StringBuilder, string) => StringBuilder) : [CompileState, string] {
-		/* var parsed = parseAll(state, input, folder, mapper) */;
-		/* var generated = generateAll(merger, parsed.right) */;
+		let parsed : var = /*  parseAll(state, input, folder, mapper) */;
+		let generated : var = /* generateAll(merger, parsed */.right);
 		return /* new Tuple<>(parsed */.left, generated);
 	}
 	/* private static */ generateAll(merger : (StringBuilder, string) => StringBuilder, elements : List<string>) : string {
@@ -320,7 +320,7 @@
 		return stringBuilder.append(str);
 	}
 	/* private static */ divideAll(input : string, folder : (DivideState, Character) => DivideState) : List<string> {
-		/* var current = new DivideState(input) */;/* while (true) {
+		let current : var = /*  new DivideState(input) */;/* while (true) {
             var maybePopped = current.pop().map(tuple -> {
                 return foldSingleQuotes(tuple)
                         .or(() -> foldDoubleQuotes(tuple))
@@ -368,7 +368,7 @@
 		return /* new None<>() */;
 	}
 	/* private static */ foldStatementChar(state : DivideState, c : char) : DivideState {
-		/* var append = state.append(c) */;/* if (c == ';' && append.isLevel()) {
+		let append : var = state.append(c);/* if (c == ';' && append.isLevel()) {
             return append.advance();
         } *//* if (c == '}' && append.isShallow()) {
             return append.advance().exit();
@@ -380,7 +380,7 @@
 		return append;
 	}
 	/* private static */ compileRootSegment(state : CompileState, input : string) : [CompileState, string] {
-		/* var stripped = input.strip() */;/* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+		let stripped : var = input.strip();/* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Tuple<>(state, "");
         } */
 		return /* compileClass(stripped, 0, state)
@@ -413,12 +413,12 @@
         });
 	}
 	/* private static */ assemble(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, afterTypeParams : string) : Option<[CompileState, string]> {
-		/* var name = rawName.strip() */;/* if (!isSymbol(name)) {
+		let name : var = rawName.strip();/* if (!isSymbol(name)) {
             return new None<>();
         } */
-		/* var joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + ">").orElse("") */;
-		/* var statements = compileStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1)) */;
-		/* var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n" */;
+		let joinedTypeParams : var = typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + /* ">") */.orElse("");
+		let statements : var = /*  compileStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1)) */;
+		let generated : var = /* generatePlaceholder(beforeInfix */.strip()) + targetInfix + name + joinedTypeParams + /*  generatePlaceholder(afterTypeParams)  */ + " {" + /*  statements.right  */ + "\n}\n";
 		return /* new Some<>(new Tuple<>(statements.left */.addStructure(generated), ""));
 	}
 	/* private static */ isSymbol(input : string) : boolean {/* for (var i = 0; i < input.length(); i++) {
@@ -433,7 +433,7 @@
 	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (string) => Option<T>) : Option<T> {/* if (!input.endsWith(suffix)) {
             return new None<>();
         } */
-		/* var slice = input.substring(0, input.length() - suffix.length()) */;
+		let slice : var = input.substring(0, input.length() - suffix.length());
 		return mapper.apply(slice);
 	}
 	/* private static */ compileClassSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
@@ -473,7 +473,7 @@
         });
 	}
 	/* private static */ compileFunctionalSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
-		/* var stripped = input.strip() */;/* if (stripped.isEmpty()) {
+		let stripped : var = input.strip();/* if (stripped.isEmpty()) {
             return new Tuple<>(state, "");
         } */
 		return /* suffix(stripped, ";", s -> {
@@ -484,12 +484,18 @@
         });
 	}
 	/* private static */ statementValue(state : CompileState, input : string) : [CompileState, string] {
-		/* var stripped = input.strip() */;/* if (stripped.startsWith("return ")) {
+		let stripped : var = input.strip();/* if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
             var tuple = value(state, value);
             return new Tuple<>(tuple.left, "return " + tuple.right);
         } */
-		return /* new Tuple<>(state, generatePlaceholder(stripped)) */;
+		return /* first(stripped, "=", (s, s2) -> {
+            var definitionTuple = compileDefinition(state, s);
+            var valueTuple = value(definitionTuple */.left, s2);
+            return new Some<>(new Tuple<>(valueTuple.left, "let " + /*  definitionTuple.right  */ + " = " + valueTuple.right));
+        }).orElseGet(() -> {
+            return new Tuple<>(state, generatePlaceholder(stripped));
+        });
 	}
 	/* private static */ value(state : CompileState, input : string) : [CompileState, string] {
 		return /* operation(state, input)
@@ -505,13 +511,13 @@
         }) */;
 	}
 	/* private static */ stringValue(state : CompileState, input : string) : Option<[CompileState, string]> {
-		/* var stripped = input.strip() */;/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+		let stripped : var = input.strip();/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
             return new Some<>(new Tuple<>(state, stripped));
         } */
 		return /* new None<>() */;
 	}
 	/* private static */ symbolValue(state : CompileState, value : string) : Option<[CompileState, string]> {
-		/* var stripped = value.strip() */;/* if (isSymbol(stripped)) {
+		let stripped : var = value.strip();/* if (isSymbol(stripped)) {
             return new Some<>(new Tuple<>(state, stripped));
         } */
 		return /* new None<>() */;
@@ -524,8 +530,8 @@
         });
 	}
 	/* private static */ compileValues(state : CompileState, params : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
-		/* var parsed = parseValues(state, params, mapper) */;
-		/* var generated = generateValues(parsed.right) */;
+		let parsed : var = /*  parseValues(state, params, mapper) */;
+		let generated : var = /* generateValues(parsed */.right);
 		return /* new Tuple<>(parsed */.left, generated);
 	}
 	/* private static */ generateValues(elements : List<string>) : string {
@@ -537,6 +543,9 @@
 	/* private static */ compileParameter(state : CompileState, input : string) : [CompileState, string] {/* if (input.isBlank()) {
             return new Tuple<>(state, "");
         } */
+		return /* compileDefinition(state, input) */;
+	}
+	/* private static */ compileDefinition(state : CompileState, input : string) : [CompileState, string] {
 		return /* parseDefinition(state, input)
                 .map((Tuple<CompileState, Definition> tuple) -> new Tuple<>(tuple.left, tuple.right */.generate())).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
 	}
@@ -573,7 +582,7 @@
         });
 	}
 	/* private static */ getStringStringTuple(beforeName : string) : Option<[string, string]> {
-		/* var divisions = divideAll(beforeName, Main::foldTypeSeparator) */;
+		let divisions : var = /*  divideAll(beforeName, Main::foldTypeSeparator) */;
 		return /* divisions.removeLast().map(removed -> {
             var left = removed.left */.iterate().collect(new Joiner(" ")).orElse("");
             var right = removed.right;
@@ -584,7 +593,7 @@
 	/* private static */ foldTypeSeparator(state : DivideState, c : Character) : DivideState {/* if (c == ' ' && state.isLevel()) {
             return state.advance();
         } */
-		/* var appended = state.append(c) */;/* if (c == '<') {
+		let appended : var = state.append(c);/* if (c == '<') {
             return appended.enter();
         } *//* if (c == '>') {
             return appended.exit();
@@ -592,14 +601,14 @@
 		return appended;
 	}
 	/* private static */ assembleDefinition(state : CompileState, beforeTypeParams : Option<string>, name : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
-		/* var type1 = type(state, type) */;
-		/* var node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams) */;
+		let type1 : var = /*  type(state, type) */;
+		let node : var = /* new Definition(beforeTypeParams, type1 */.right, name.strip(), typeParams);
 		return /* new Some<>(new Tuple<>(type1 */.left, node));
 	}
 	/* private static */ foldValueChar(state : DivideState, c : char) : DivideState {/* if (c == ',' && state.isLevel()) {
             return state.advance();
         } */
-		/* var appended = state.append(c) */;/* if (c == '<') {
+		let appended : var = state.append(c);/* if (c == '<') {
             return appended.enter();
         } *//* if (c == '>') {
             return appended.exit();
@@ -607,7 +616,7 @@
 		return appended;
 	}
 	/* private static */ type(state : CompileState, input : string) : [CompileState, string] {
-		/* var stripped = input.strip() */;/* if (stripped.equals("int")) {
+		let stripped : var = input.strip();/* if (stripped.equals("int")) {
             return new Tuple<>(state, "number");
         } *//* if (stripped.equals("String")) {
             return new Tuple<>(state, "string");
@@ -656,16 +665,14 @@
         }) */;
 	}
 	/* private static */ generate(arguments : List<string>, returns : string) : string {
-		/* var joined = arguments.iterate()
-                .collect(new Joiner(", "))
-                .orElse("") */;
+		let joined : var = arguments.iterate().collect(new Joiner(", ")).orElse("");
 		return "(" + joined + ") => " + returns;
 	}
 	/* private static  */ last<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return /* infix(input, infix, Main::findLast, mapper) */;
 	}
 	/* private static */ findLast(input : string, infix : string) : Option<Integer> {
-		/* var index = input.lastIndexOf(infix) */;
+		let index : var = input.lastIndexOf(infix);
 		return /* index == -1 ? new None<Integer>() : new Some<>(index) */;
 	}
 	/* private static  */ first<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
@@ -682,13 +689,11 @@
 		return splitter.get().flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<Integer> {
-		/* var index = input.indexOf(infix) */;
+		let index : var = input.indexOf(infix);
 		return /* index == -1 ? new None<Integer>() : new Some<>(index) */;
 	}
 	/* private static */ generatePlaceholder(input : string) : string {
-		/* var replaced = input
-                .replace("content-start", "content-start")
-                .replace("content-end", "content-end") */;
+		let replaced : var = input.replace("/*", "content-start").replace("*/", "content-end");
 		return "/* " + replaced + " */";
 	}
 }
