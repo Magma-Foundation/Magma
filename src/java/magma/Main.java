@@ -41,6 +41,10 @@ public class Main {
         <R> Iterator<R> map(Function<T, R> mapper);
 
         <R> R collect(Collector<T, R> collector);
+
+        Iterator<T> filter(Predicate<T> predicate);
+
+        Option<T> next();
     }
 
     private interface List<T> {
@@ -152,6 +156,32 @@ public class Main {
         }
     }
 
+    private static class SingleHead<T> implements Head<T> {
+        private final T value;
+        private boolean retrieved;
+
+        public SingleHead(T value) {
+            this.value = value;
+            this.retrieved = false;
+        }
+
+        @Override
+        public Option<T> next() {
+            if (this.retrieved) {
+                return new None<>();
+            }
+            this.retrieved = true;
+            return new Some<>(this.value);
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Option<T> next() {
+            return new None<>();
+        }
+    }
+
     private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
@@ -176,6 +206,25 @@ public class Main {
         @Override
         public <R> R collect(Collector<T, R> collector) {
             return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> {
+                if (predicate.test(element)) {
+                    return new HeadedIterator<>(new SingleHead<>(element));
+                }
+                return new HeadedIterator<>(new EmptyHead<>());
+            });
+        }
+
+        @Override
+        public Option<T> next() {
+            return this.head.next();
+        }
+
+        private <R> Iterator<R> flatMap(Function<T, Iterator<R>> f) {
+            return new HeadedIterator<>(new FlatMapHead<>(this.head, f));
         }
     }
 
@@ -405,6 +454,42 @@ public class Main {
     }
 
     private record Tuple<A, B>(A left, B right) {
+    }
+
+    private static class FlatMapHead<T, R> implements Head<R> {
+        private final Function<T, Iterator<R>> mapper;
+        private final Head<T> head;
+        private Option<Iterator<R>> current;
+
+        public FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
+            this.mapper = mapper;
+            this.current = new None<>();
+            this.head = head;
+        }
+
+        @Override
+        public Option<R> next() {
+            while (true) {
+                if (this.current.isPresent()) {
+                    Iterator<R> inner = this.current.orElse(null);
+                    Option<R> maybe = inner.next();
+                    if (maybe.isPresent()) {
+                        return maybe;
+                    }
+                    else {
+                        this.current = new None<>();
+                    }
+                }
+
+                Option<T> outer = this.head.next();
+                if (outer.isPresent()) {
+                    this.current = outer.map(this.mapper);
+                }
+                else {
+                    return new None<>();
+                }
+            }
+        }
     }
 
     public static void main() {
@@ -1101,7 +1186,11 @@ public class Main {
                 var strippedBase = base.strip();
                 var argumentsTuple = parseValues(state, argumentsString, Main::typeOrPlaceholder);
                 var argumentsState = argumentsTuple.left;
-                var arguments = argumentsTuple.right;
+                var arguments = argumentsTuple.right
+                        .iterate()
+                        .map(String::strip)
+                        .filter(value -> !value.isEmpty())
+                        .collect(new ListCollector<>());
 
                 if (base.equals("BiFunction")) {
                     return new Some<>(new Tuple<>(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));

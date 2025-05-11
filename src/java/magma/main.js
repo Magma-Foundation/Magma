@@ -72,6 +72,26 @@
         return true;
     }
 }
+/* private static */ class SingleHead {
+    SingleHead(value) {
+        let /* this.value  */ = value;
+        let /* this.retrieved  */ = false;
+    }
+    /* @Override
+        public */ next() {
+        /* if (this.retrieved)  */ {
+            return new None();
+        }
+        let /* this.retrieved  */ = true;
+        return new Some(this.value);
+    }
+}
+/* private static */ class EmptyHead {
+    /* @Override
+        public */ next() {
+        return new None();
+    }
+}
 /* private */ class HeadedIterator {
     constructor(head) {
     }
@@ -95,6 +115,22 @@
     /* @Override
         public  */ collect(collector) {
         return this.fold(collector.createInitial(), collector.fold);
+    }
+    /* @Override
+        public */ filter(predicate) {
+        return this.flatMap((element) => {
+            /* if (predicate.test(element))  */ {
+                return new HeadedIterator(new SingleHead(element));
+            }
+            return new HeadedIterator(new EmptyHead());
+        });
+    }
+    /* @Override
+        public */ next() {
+        return this.head.next();
+    }
+    /* private  */ flatMap(f) {
+        return new HeadedIterator(new FlatMapHead(this.head, f));
     }
 }
 /* private static */ class RangeHead /*  */ {
@@ -244,6 +280,35 @@
     }
 }
 /* private */ class Tuple {
+}
+/* private static */ class FlatMapHead {
+    FlatMapHead(head, mapper) {
+        let /* this.mapper  */ = mapper;
+        let /* this.current  */ = new None();
+        let /* this.head  */ = head;
+    }
+    /* @Override
+        public */ next() {
+        /* while (true) {{
+                if (this.current.isPresent()) {{
+                    Iterator<R> inner = this.current.orElse(null);
+                    Option<R> maybe = inner.next();
+                    if (maybe.isPresent()) {{
+                        return maybe;
+                    }
+                    else {{
+                        this.current = new None<>();
+                    }
+                }
+
+                Option<T> outer = this.head.next();
+                if (outer.isPresent()) {{
+                    this.current = outer.map(this.mapper);
+                }
+                else  */ {
+            return new None(); /* } */
+        }
+    }
 }
 /* public */ class Main /*  */ {
     /* private */ CompileState(structures) {
@@ -830,7 +895,7 @@
                 let strippedBase = base.strip();
                 let argumentsTuple = parseValues(state, argumentsString, Main.typeOrPlaceholder);
                 let argumentsState = argumentsTuple.left;
-                let arguments = argumentsTuple.right;
+                let arguments = argumentsTuple.right.iterate().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
                 /* if (base.equals("BiFunction"))  */ {
                     return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
                 }
