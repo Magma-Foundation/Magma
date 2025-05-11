@@ -1599,8 +1599,14 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> beforeTypeParams, String name, List<String> typeParams, String type) {
-        return parseType(state, type).map(type1 -> {
+    private static Option<Tuple<CompileState, Definition>> assembleDefinition(
+            CompileState state,
+            Option<String> beforeTypeParams,
+            String name,
+            List<String> typeParams,
+            String type
+    ) {
+        return parseType(state.withTypeParams(typeParams), type).map(type1 -> {
             var node = new Definition(beforeTypeParams, name.strip(), type1.right, typeParams);
             return new Tuple<>(type1.left, node);
         });
