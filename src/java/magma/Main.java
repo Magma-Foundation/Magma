@@ -339,13 +339,17 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> structures) {
+    private record CompileState(List<String> structures, List<Definition> definitions) {
         public CompileState() {
-            this(Lists.empty());
+            this(Lists.empty(), Lists.empty());
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure));
+            return new CompileState(this.structures.addLast(structure), this.definitions);
+        }
+
+        public CompileState withDefinitions(List<Definition> definitions) {
+            return new CompileState(this.structures, definitions);
         }
     }
 
@@ -832,7 +836,7 @@ public class Main {
             parsed1 = parsed.right;
         }
         else {
-            var joined = joinParameters(params);
+            var joined = joinValues(retainDefinitions(params));
             var constructorIndent = createIndent(1);
             parsed1 = parsed.right.addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
         }
@@ -895,19 +899,20 @@ public class Main {
 
                     var parametersTuple = parseParameters(definitionState, parametersString);
                     var parameters = parametersTuple.right;
-                    var joinedParameters = joinParameters(parameters);
+
+                    var definitions = retainDefinitions(parameters);
+                    var joinedParameters = joinValues(definitions);
 
                     var content = rawContent.strip();
                     var indent = createIndent(depth);
                     var generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
                     if (content.equals(";")) {
-                        var s = indent + generatedHeader + ";";
-                        return new Some<>(new Tuple<>(parametersTuple.left, s));
+                        return new Some<>(new Tuple<>(parametersTuple.left, indent + generatedHeader + ";"));
                     }
 
                     if (content.startsWith("{") && content.endsWith("}")) {
                         var substring = content.substring(1, content.length() - 1);
-                        var statementsTuple = compileFunctionSegments(parametersTuple.left, substring, depth);
+                        var statementsTuple = compileFunctionSegments(parametersTuple.left.withDefinitions(definitions), substring, depth);
                         var generated = indent + generatedHeader + " {" + statementsTuple.right + indent + "}";
                         return new Some<>(new Tuple<>(statementsTuple.left, generated));
                     }
@@ -919,13 +924,18 @@ public class Main {
         });
     }
 
-    private static String joinParameters(List<Parameter> right) {
-        return right.iterate()
-                .map(Main::retainDefinition)
-                .flatMap(Iterators::fromOption)
+    private static String joinValues(List<Definition> retainParameters) {
+        return retainParameters.iterate()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
+    }
+
+    private static List<Definition> retainDefinitions(List<Parameter> right) {
+        return right.iterate()
+                .map(Main::retainDefinition)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
     }
 
     private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
