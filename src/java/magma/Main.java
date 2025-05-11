@@ -523,10 +523,23 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> structure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
-            return first(right, "{", (name, withEnd) -> {
+            return first(right, "{", (beforeContent, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
-                    return assemble(state, targetInfix, beforeInfix, name, content1);
+                    return first(beforeContent, "<", new BiFunction<String, String, Option<Tuple<CompileState, String>>>() {
+                        @Override
+                        public Option<Tuple<CompileState, String>> apply(String name, String withTypeParams) {
+                            return first(withTypeParams, ">", new BiFunction<String, String, Option<Tuple<CompileState, String>>>() {
+                                @Override
+                                public Option<Tuple<CompileState, String>> apply(String typeParamsString, String afterTypeParams) {
+                                    var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                                    return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
+                                }
+                            });
+                        }
+                    }).or(() -> {
+                        return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
+                    });
                 });
             });
         });
@@ -536,15 +549,18 @@ public class Main {
             CompileState state, String targetInfix,
             String beforeInfix,
             String rawName,
-            String content
+            String content,
+            List<String> typeParams,
+            String afterTypeParams
     ) {
         var name = rawName.strip();
         if (!isSymbol(name)) {
             return new None<>();
         }
 
+        var joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + ">").orElse("");
         var statements = compileStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1));
-        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + " {" + statements.right + "\n}\n";
+        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n";
         return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
     }
 
