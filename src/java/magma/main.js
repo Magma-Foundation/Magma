@@ -274,6 +274,31 @@
         return new Some(current.map((inner) => inner + this.delimiter + element).orElse(element));
     }
 }
+/* private */ class Definition /*  */ {
+    constructor(maybeBefore, type, name, typeParams) {
+    }
+    /* private */ generate() {
+        return this.generateWithParams("");
+    }
+    /* public */ generateWithParams(params) {
+        let joined = this.joinTypeParams();
+        let before = this.joinBefore();
+        let typeString = this.generateType();
+        return before + this.name + joined + params + typeString;
+    }
+    /* private */ generateType() {
+        /* if (this.type.equals(Primitive.Var))  */ {
+            return "";
+        }
+        return " : " + this.type.generate();
+    }
+    /* private */ joinBefore() {
+        return this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
+    }
+    /* private */ joinTypeParams() {
+        return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
+    }
+}
 /* private static */ class ListCollector {
     /* @Override
         public */ createInitial() {
@@ -366,6 +391,10 @@
         return this.base + joinedArguments;
     }
 }
+/* private */ class Placeholder /*  */ {
+    constructor(input) {
+    }
+}
 /* public */ class Main /*  */ {
     /* private */ CompileState(structures) {
         /* public CompileState()  */ {
@@ -373,30 +402,6 @@
         }
         /* public CompileState addStructure(String structure)  */ {
             return new CompileState(this.structures.addLast(structure));
-        }
-    }
-    /* private */ Definition(maybeBefore, type, name, typeParams) {
-        /* private String generate()  */ {
-            return this.generateWithParams("");
-        }
-        /* public String generateWithParams(String params)  */ {
-            let joined = this.joinTypeParams();
-            let before = this.joinBefore();
-            let typeString = this.generateType();
-            return before + this.name + joined + params + typeString;
-        }
-        /* private String generateType() {{
-            if (this.type.equals(Primitive.Var))  */ {
-            return "";
-            /* }
-
-            return " : " + this.type.generate() */ ;
-        }
-        /* private String joinBefore()  */ {
-            return this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
-        }
-        /* private String joinTypeParams()  */ {
-            return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
         }
     }
     /* public static */ main() {
@@ -578,13 +583,19 @@
             let /* parsed1  */ = parsed.right;
         }
         /* else  */ {
-            let joined = params.iterate().collect(new Joiner(", ")).orElse("");
+            let joined = joinParameters(params);
             let constructorIndent = createIndent(1);
             let /* parsed1  */ = parsed.right.addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
         }
         let parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
         let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
         return new Some(new Tuple(parsed.left.addStructure(generated), ""));
+    }
+    /* private static */ retainDefinition(parameter) {
+        /* if (parameter instanceof Definition definition)  */ {
+            return new Some(definition);
+        }
+        return new None();
     }
     /* private static */ isSymbol(input) {
         /* for (var i = 0; i < input.length(); i++) {{
@@ -604,7 +615,7 @@
         return mapper.apply(slice);
     }
     /* private static */ compileClassSegment(state, input, depth) {
-        return compileWhitespace(input, state).or(() => compileClass(input, depth, state)).or(() => structure(input, "interface ", "interface ", state)).or(() => structure(input, "record ", "class ", state)).or(() => method(state, input, depth)).or(() => compileDefinitionStatement(input, depth, state)).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
+        return compileWhitespace(input, state).or(() => compileClass(input, depth, state)).or(() => structure(input, "interface ", "interface ", state)).or(() => structure(input, "record ", "class ", state)).or(() => compileMethod(state, input, depth)).or(() => compileDefinitionStatement(input, depth, state)).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
     }
     /* private static */ compileWhitespace(input, state) {
         /* if (input.isBlank())  */ {
@@ -612,13 +623,15 @@
         }
         return new None();
     }
-    /* private static */ method(state, input, depth) {
+    /* private static */ compileMethod(state, input, depth) {
         return first(input, "(", (definition, withParams) => {
-            return first(withParams, ")", (params, rawContent) => {
+            return first(withParams, ")", (parametersString, rawContent) => {
                 let definitionTuple = parseDefinition(state, definition).map((definition1) => {
-                    let paramsTuple = compileParameters(state, params);
-                    let generated = definition1.right.generateWithParams("(" + paramsTuple.right + ")");
-                    return new Tuple(paramsTuple.left, generated);
+                    let parametersTuple = parseParameters(state, parametersString);
+                    let parameters = parametersTuple.right;
+                    let joinedParameters = joinParameters(parameters);
+                    let generated = definition1.right.generateWithParams("(" + joinedParameters + ")");
+                    return new Tuple(parametersTuple.left, generated);
                 }).orElseGet(() => new Tuple(state, generatePlaceholder(definition)));
                 let content = rawContent.strip();
                 let indent = createIndent(depth);
@@ -636,10 +649,8 @@
             });
         });
     }
-    /* private static */ compileParameters(state, params) {
-        let parsed = parseParameters(state, params);
-        let generated = generateValues(parsed.right);
-        return new Tuple(parsed.left, generated);
+    /* private static */ joinParameters(right) {
+        return right.iterate().map(Main.retainDefinition).flatMap(Iterators.fromOption).map(Definition.generate).collect(new Joiner(", ")).orElse("");
     }
     /* private static */ parseParameters(state, params) {
         return parseValuesOrEmpty(state, params, (state1, s) => new Some(compileParameter(state1, s)));
@@ -843,9 +854,9 @@
     }
     /* private static */ compileParameter(state, input) {
         /* if (input.isBlank())  */ {
-            return new Tuple(state, "");
+            return new Tuple(state, new Whitespace());
         }
-        return compileDefinition(state, input);
+        return parseDefinition(state, input).map((tuple) => new [CompileState, Parameter](tuple.left, tuple.right)).orElseGet(() => new Tuple(state, new Placeholder(input)));
     }
     /* private static */ compileDefinition(state, input) {
         return parseDefinition(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
@@ -931,9 +942,6 @@
             return appended.exit();
         }
         return appended;
-    }
-    /* private static */ typeOrPlaceholder(state, input) {
-        return compileType(state, input).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
     }
     /* private static */ compileType(state, input) {
         return parseType(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate()));

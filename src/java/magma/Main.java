@@ -80,6 +80,9 @@ public class Main {
     private interface Argument {
     }
 
+    private interface Parameter {
+    }
+
     private record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -437,7 +440,7 @@ public class Main {
             Type type,
             String name,
             List<String> typeParams
-    ) {
+    ) implements Parameter {
         private String generate() {
             return this.generateWithParams("");
         }
@@ -544,7 +547,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Argument {
+    private static class Whitespace implements Argument, Parameter {
     }
 
     private static class Iterators {
@@ -588,6 +591,9 @@ public class Main {
 
             return this.base + joinedArguments;
         }
+    }
+
+    private record Placeholder(String input) implements Parameter {
     }
 
     public static void main() {
@@ -788,7 +794,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> params) {
+    private static Option<Tuple<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple<CompileState, String>> compileStateStringTupleBiFunction = (state1, s) -> new Tuple<>(state1, s.strip());
@@ -807,7 +813,7 @@ public class Main {
             String content,
             List<String> typeParams,
             String afterTypeParams,
-            List<String> params
+            List<Parameter> params
     ) {
         var name = rawName.strip();
         if (!isSymbol(name)) {
@@ -826,8 +832,7 @@ public class Main {
             parsed1 = parsed.right;
         }
         else {
-            var joined = params.iterate().collect(new Joiner(", ")).orElse("");
-
+            var joined = joinParameters(params);
             var constructorIndent = createIndent(1);
             parsed1 = parsed.right.addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
         }
@@ -835,6 +840,13 @@ public class Main {
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
         return new Some<>(new Tuple<>(parsed.left.addStructure(generated), ""));
+    }
+
+    private static Option<Definition> retainDefinition(Parameter parameter) {
+        if (parameter instanceof Definition definition) {
+            return new Some<>(definition);
+        }
+        return new None<>();
     }
 
     private static boolean isSymbol(String input) {
@@ -862,7 +874,7 @@ public class Main {
                 .or(() -> compileClass(input, depth, state))
                 .or(() -> structure(input, "interface ", "interface ", state))
                 .or(() -> structure(input, "record ", "class ", state))
-                .or(() -> method(state, input, depth))
+                .or(() -> compileMethod(state, input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
@@ -874,14 +886,17 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> method(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input, int depth) {
         return first(input, "(", (definition, withParams) -> {
-            return first(withParams, ")", (params, rawContent) -> {
+            return first(withParams, ")", (parametersString, rawContent) -> {
                 var definitionTuple = parseDefinition(state, definition)
                         .map(definition1 -> {
-                            var paramsTuple = compileParameters(state, params);
-                            var generated = definition1.right.generateWithParams("(" + paramsTuple.right + ")");
-                            return new Tuple<>(paramsTuple.left, generated);
+                            var parametersTuple = parseParameters(state, parametersString);
+                            var parameters = parametersTuple.right;
+                            var joinedParameters = joinParameters(parameters);
+
+                            var generated = definition1.right.generateWithParams("(" + joinedParameters + ")");
+                            return new Tuple<>(parametersTuple.left, generated);
                         })
                         .orElseGet(() -> new Tuple<>(state, generatePlaceholder(definition)));
 
@@ -904,13 +919,16 @@ public class Main {
         });
     }
 
-    private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {
-        var parsed = parseParameters(state, params);
-        var generated = generateValues(parsed.right);
-        return new Tuple<>(parsed.left, generated);
+    private static String joinParameters(List<Parameter> right) {
+        return right.iterate()
+                .map(Main::retainDefinition)
+                .flatMap(Iterators::fromOption)
+                .map(Definition::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
     }
 
-    private static Tuple<CompileState, List<String>> parseParameters(CompileState state, String params) {
+    private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
         return parseValuesOrEmpty(state, params, (state1, s) -> new Some<>(compileParameter(state1, s)));
     }
 
@@ -1157,12 +1175,14 @@ public class Main {
         return getCompileStateListTuple(state, input, Main::foldValueChar, mapper);
     }
 
-    private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
+    private static Tuple<CompileState, Parameter> compileParameter(CompileState state, String input) {
         if (input.isBlank()) {
-            return new Tuple<>(state, "");
+            return new Tuple<>(state, new Whitespace());
         }
 
-        return compileDefinition(state, input);
+        return parseDefinition(state, input)
+                .map(tuple -> new Tuple<CompileState, Parameter>(tuple.left, tuple.right))
+                .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
     }
 
     private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
