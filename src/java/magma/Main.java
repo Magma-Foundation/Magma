@@ -97,6 +97,10 @@ public class Main {
         String generate();
     }
 
+    private interface FindableType extends Type {
+        Option<Type> find(String name);
+    }
+
     private record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -358,12 +362,13 @@ public class Main {
         }
     }
 
-    private record ObjectType(String name, List<Definition> definitions) implements Type {
+    private record ObjectType(String name, List<Definition> definitions) implements FindableType {
         @Override
         public String generate() {
             return this.name;
         }
 
+        @Override
         public Option<Type> find(String name) {
             return this.definitions.iterate()
                     .filter(definition -> definition.name.equals(name))
@@ -400,6 +405,10 @@ public class Main {
 
         public CompileState addType(ObjectType type) {
             return new CompileState(this.structures, this.definitions, this.types.addLast(type));
+        }
+
+        public CompileState withDefinition(Definition definition) {
+            return new CompileState(this.structures, this.definitions.addLast(definition), this.types);
         }
     }
 
@@ -491,10 +500,14 @@ public class Main {
 
     private record Definition(
             Option<String> maybeBefore,
-            Type type,
             String name,
+            Type type,
             List<String> typeParams
     ) implements Parameter {
+        public Definition(String name, Type type) {
+            this(new None<>(), name, type, Lists.empty());
+        }
+
         private String generate() {
             return this.generateWithParams("");
         }
@@ -629,7 +642,7 @@ public class Main {
         }
     }
 
-    private record Template(Type base, List<Type> arguments) implements Type {
+    private record Template(FindableType base, List<Type> arguments) implements FindableType {
         @Override
         public String generate() {
             var joinedArguments = this.arguments.iterate()
@@ -640,9 +653,14 @@ public class Main {
 
             return this.base.generate() + joinedArguments;
         }
+
+        @Override
+        public Option<Type> find(String name) {
+            return this.base.find(name);
+        }
     }
 
-    private record Placeholder(String input) implements Parameter, Value, Type {
+    private record Placeholder(String input) implements Parameter, Value, FindableType {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -651,6 +669,11 @@ public class Main {
         @Override
         public Type type() {
             return Primitive.Unknown;
+        }
+
+        @Override
+        public Option<Type> find(String name) {
+            return new None<>();
         }
     }
 
@@ -734,7 +757,7 @@ public class Main {
         }
     }
 
-    private record Invokable(Caller caller, List<Value> arguments, Type returnsType) implements Value {
+    private record Invokable(Caller caller, List<Value> arguments, Type type) implements Value {
         @Override
         public String generate() {
             var joined = this.arguments.iterate()
@@ -742,12 +765,7 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.caller.generate() + "(" + joined + ")" + generatePlaceholder(": " + this.returnsType.generate());
-        }
-
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
+            return this.caller.generate() + "(" + joined + ")" + generatePlaceholder(": " + this.type.generate());
         }
     }
 
@@ -1069,23 +1087,29 @@ public class Main {
                     var definition = definitionTuple.right;
 
                     var parametersTuple = parseParameters(definitionState, parametersString);
-                    var parameters = parametersTuple.right;
+                    var rawParameters = parametersTuple.right;
 
-                    var definitions = retainDefinitions(parameters);
-                    var joinedParameters = joinValues(definitions);
+                    var parameters = retainDefinitions(rawParameters);
+                    var joinedParameters = joinValues(parameters);
 
                     var content = rawContent.strip();
                     var indent = createIndent(depth);
+
+                    var paramTypes = parameters.iterate()
+                            .map(Definition::type)
+                            .collect(new ListCollector<>());
+
+                    var toDefine = new Definition(definition.name, new FunctionType(paramTypes, definition.type));
                     var generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
                     if (content.equals(";")) {
-                        return new Some<>(new Tuple<>(parametersTuple.left, indent + generatedHeader + ";"));
+                        return new Some<>(new Tuple<>(parametersTuple.left.withDefinition(toDefine), indent + generatedHeader + ";"));
                     }
 
                     if (content.startsWith("{") && content.endsWith("}")) {
                         var substring = content.substring(1, content.length() - 1);
-                        var statementsTuple = compileFunctionSegments(parametersTuple.left.withDefinitions(definitions), substring, depth);
+                        var statementsTuple = compileFunctionSegments(parametersTuple.left.withDefinitions(parameters), substring, depth);
                         var generated = indent + generatedHeader + " {" + statementsTuple.right + indent + "}";
-                        return new Some<>(new Tuple<>(statementsTuple.left, generated));
+                        return new Some<>(new Tuple<>(statementsTuple.left.withDefinition(toDefine), generated));
                     }
 
                     return new None<>();
@@ -1385,7 +1409,7 @@ public class Main {
             var tuple = parseValue(state, parentString, depth);
             var parent = tuple.right;
 
-            var parentType = resolveType(parent, state);
+            var parentType = parent.type();
             if (parentType instanceof TupleType) {
                 if (property.equals("left")) {
                     return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
@@ -1397,7 +1421,7 @@ public class Main {
             }
 
             Type type = Primitive.Unknown;
-            if (parentType instanceof ObjectType objectType) {
+            if (parentType instanceof FindableType objectType) {
                 if (objectType.find(property) instanceof Some(var memberType)) {
                     type = memberType;
                 }
@@ -1539,7 +1563,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> beforeTypeParams, String name, List<String> typeParams, String type) {
         return parseType(state, type).map(type1 -> {
-            var node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams);
+            var node = new Definition(beforeTypeParams, name.strip(), type1.right, typeParams);
             return new Tuple<>(type1.left, node);
         });
     }
