@@ -498,10 +498,10 @@ public class Main {
         if (c == '}' && append.isShallow()) {
             return append.advance().exit();
         }
-        if (c == '{') {
+        if (c == '{' || c == '(') {
             return append.enter();
         }
-        if (c == '}') {
+        if (c == '}' || c == ')') {
             return append.exit();
         }
         return append;
