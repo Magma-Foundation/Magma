@@ -677,20 +677,32 @@ public class Main {
             var tuple = statementValue(state, s, depth);
             return new Some<>(new Tuple<>(tuple.left, createIndent(depth) + tuple.right + ";"));
         }).or(() -> {
-            return compileBlock(state, depth, stripped);
+            return block(state, depth, stripped);
         }).orElseGet(() -> {
             return new Tuple<>(state, generatePlaceholder(stripped));
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileBlock(CompileState state, int depth, String stripped) {
+    private static Option<Tuple<CompileState, String>> block(CompileState state, int depth, String stripped) {
         return suffix(stripped, "}", withoutEnd -> {
-            return first(withoutEnd, "{", (beforeContent, content) -> {
-                var compiled = compileFunctionSegments(state, content, depth);
-                var indent = createIndent(depth);
-                return new Some<>(new Tuple<>(compiled.left, indent + generatePlaceholder(beforeContent) + "{" + compiled.right + indent + "}"));
+            return split(() -> {
+                return toLast(withoutEnd, "{", Main::foldBlockStart);
+            }, (beforeContent, content) -> {
+                return suffix(beforeContent, "{", s -> {
+                    var compiled = compileFunctionSegments(state, content, depth);
+                    var indent = createIndent(depth);
+                    return new Some<>(new Tuple<>(compiled.left, indent + generatePlaceholder(s) + "{" + compiled.right + indent + "}"));
+                });
             });
         });
+    }
+
+    private static DivideState foldBlockStart(DivideState state, Character c) {
+        var appended = state.append(c);
+        if (c == '{') {
+            return appended.advance();
+        }
+        return appended;
     }
 
     private static Tuple<CompileState, String> statementValue(CompileState state, String input, int depth) {

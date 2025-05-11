@@ -102,15 +102,14 @@
 	/* @Override
         public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
 		let current : var = initial;
-		/* while (true)  */{
-			let finalCurrent : R = current;
-			let optional : var = this.head.next().map((inner) => folder.apply(finalCurrent, inner));
-			/* if (optional.isPresent())  */{
-				let /* current  */ = optional.orElse(null);
-			}
-			/* else  */{
-				return current;
-			}
+		/* while (true) {{
+                R finalCurrent = current;
+                var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                if (optional.isPresent()) {{
+                    current = optional.orElse(null);
+                }
+                else  */{
+			return current;/* } */
 		}
 	}
 	/* @Override
@@ -326,37 +325,42 @@
 	}
 	/* private static */ divideAll(input : string, folder : (DivideState, Character) => DivideState) : List<string> {
 		let current : var = new DivideState(input);
-		/* while (true)  */{
-			let maybePopped : var = current.pop().map((tuple) => {
-				return foldSingleQuotes(tuple).or(() => foldDoubleQuotes(tuple)).orElseGet(() => folder.apply(tuple.right, tuple.left));
-			});
-			/* if (maybePopped.isPresent())  */{
-				let /* current  */ = maybePopped.orElse(current);
-			}
-			/* else  */{
-				/* break */;
-			}
+		/* while (true) {{
+            var maybePopped = current.pop().map(tuple -> {{
+                return foldSingleQuotes(tuple)
+                        .or(() -> foldDoubleQuotes(tuple))
+                        .orElseGet(() -> folder.apply(tuple.right, tuple.left));
+            });
+
+            if (maybePopped.isPresent()) {{
+                current = maybePopped.orElse(current);
+            }
+            else  */{
+			/* break */;/* } */
 		}
 		return current.advance().segments;
 	}
 	/* private static */ foldDoubleQuotes(tuple : [Character, DivideState]) : Option<DivideState> {
-		/* if (tuple.left == '\"')  */{
-			let current : var = tuple.right.append(tuple.left);
-			/* while (true)  */{
-				let maybePopped : var = current.popAndAppendToTuple();
-				/* if (maybePopped.isEmpty())  */{
-					/* break */;
-				}
-				let popped : var = maybePopped.orElse(null);
-				let /* current  */ = popped.right;
-				/* if (popped.left == '\\')  */{
-					let /* current  */ = current.popAndAppendToOption().orElse(current);
-				}
-				/* if (popped.left == '\"')  */{
-					/* break */;
-				}
-			}
-			return new Some<>(current);
+		/* if (tuple.left == '\"') {{
+            var current = tuple.right.append(tuple.left);
+            while (true) {{
+                var maybePopped = current.popAndAppendToTuple();
+                if (maybePopped.isEmpty()) {{
+                    break;
+                }
+
+                var popped = maybePopped.orElse(null);
+                current = popped.right;
+
+                if (popped.left == '\\') {{
+                    current = current.popAndAppendToOption().orElse(current);
+                }
+                if (popped.left == '\"')  */{
+			/* break */;
+			/* }
+            }
+
+            return new Some<>(current) */;
 		}
 		return new None<>();
 	}
@@ -381,9 +385,8 @@
 		/* if (c == '}' && append.isShallow())  */{
 			return append.advance().exit();
 		}
-		/* if (c == ' */{
-			let c : /* ' || */ = /* = '(') {
-            return append.enter() */;
+		/* if (c == '{' || c == '(')  */{
+			return append.enter();
 		}
 		/* if (c == '}' || c == ')')  */{
 			return append.exit();
@@ -444,12 +447,12 @@
 		return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
 	}
 	/* private static */ isSymbol(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++)  */{
-			let c : var = input.charAt(i);
-			/* if (Character.isLetter(c) || (i != 0 && Character.isDigit(c)))  */{
-				/* continue */;
-			}
-			return false;
+		/* for (var i = 0; i < input.length(); i++) {{
+            var c = input.charAt(i);
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c)))  */{
+			/* continue */;
+			/* }
+            return false */;
 		}
 		return true;
 	}
@@ -483,12 +486,11 @@
 					let s : var = indent + definitionTuple.right + ";";
 					return new Some<>(new Tuple<>(definitionTuple.left, s));
 				}
-				/* if (content.startsWith(" */{
-					let substring : /* ") && content.endsWith("}")) {
-                    var */ = /* content.substring(1, content.length() - 1);
-                    var statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
-                    var generated = indent  */ + definitionTuple.right + " {" + statementsTuple.right + indent + /*  "}";
-                    return new Some<> */(new Tuple<>(statementsTuple.left, generated));
+				/* if (content.startsWith("{") && content.endsWith("}"))  */{
+					let substring : var = content.substring(1, /*  content.length() - 1 */);
+					let statementsTuple : var = compileFunctionSegments(definitionTuple.left, substring, depth);
+					let generated : var = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
+					return new Some<>(new Tuple<>(statementsTuple.left, generated));
 				}
 				return new None<>();
 			});
@@ -506,19 +508,30 @@
 			let tuple : var = statementValue(state, s, depth);
 			return new Some<>(new Tuple<>(tuple.left, createIndent(depth) + tuple.right + ";"));
 		}).or(() => {
-			return compileBlock(state, depth, stripped);
+			return block(state, depth, stripped);
 		}).orElseGet(() => {
 			return new Tuple<>(state, generatePlaceholder(stripped));
 		});
 	}
-	/* private static */ compileBlock(state : CompileState, depth : number, stripped : string) : Option<[CompileState, string]> {
+	/* private static */ block(state : CompileState, depth : number, stripped : string) : Option<[CompileState, string]> {
 		return suffix(stripped, "}", (withoutEnd) => {
-			return first(withoutEnd, "{", (beforeContent,  content) => {
-				let compiled : var = compileFunctionSegments(state, content, depth);
-				let indent : var = createIndent(depth);
-				return new Some<>(new Tuple<>(compiled.left, indent + generatePlaceholder(beforeContent) + "{" + compiled.right + indent + "}"));
+			return split(() => {
+				return toLast(withoutEnd, "{", Main.foldBlockStart);
+			}, (beforeContent,  content) => {
+				return suffix(beforeContent, "{", (s) => {
+					let compiled : var = compileFunctionSegments(state, content, depth);
+					let indent : var = createIndent(depth);
+					return new Some<>(new Tuple<>(compiled.left, indent + generatePlaceholder(s) + "{" + compiled.right + indent + "}"));
+				});
 			});
 		});
+	}
+	/* private static */ foldBlockStart(state : DivideState, c : Character) : DivideState {
+		let appended : var = state.append(c);
+		/* if (c == '{')  */{
+			return appended.advance();
+		}
+		return appended;
 	}
 	/* private static */ statementValue(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		let stripped : var = input.strip();
@@ -570,10 +583,9 @@
 		/* Tuple<CompileState, String> value */;
 		let strippedValueString : var = valueString.strip();
 		/* String s */;
-		/* if (strippedValueString.startsWith(" */{
-			let value : /* ") && strippedValueString.endsWith("}")) {
-            */ = /*  compileFunctionSegments(state, strippedValueString.substring(1, strippedValueString.length() - 1), depth);
-            s = "{"  */ + value.right + createIndent(depth) + "}";
+		/* if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}"))  */{
+			let /* value  */ = compileFunctionSegments(state, strippedValueString.substring(1, /*  strippedValueString.length() - 1 */), depth);
+			let /* s  */ = "{" + value.right + createIndent(depth) + "}";
 		}
 		/* else  */{
 			let /* value  */ = value(state, strippedValueString, depth);
@@ -590,12 +602,12 @@
 		return new None<>();
 	}
 	/* private static */ isNumber(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++)  */{
-			let c : var = input.charAt(i);
-			/* if (Character.isDigit(c))  */{
-				/* continue */;
-			}
-			return false;
+		/* for (var i = 0; i < input.length(); i++) {{
+            var c = input.charAt(i);
+            if (Character.isDigit(c))  */{
+			/* continue */;
+			/* }
+            return false */;
 		}
 		return true;
 	}
@@ -612,25 +624,25 @@
 		});
 	}
 	/* private static */ invocationHeader(state : CompileState, depth : number, callerString1 : string) : [CompileState, string] {
-		/* if (callerString1.startsWith("new "))  */{
-			let input1 : string = callerString1.substring("new ".length());
-			let map : var = type(state, input1).map((type) => {
-				return new Tuple<>(type.left, "new " + type.right);
-			});
-			/* if (map.isPresent())  */{
-				return map.orElse(null);
-			}
+		/* if (callerString1.startsWith("new ")) {{
+            String input1 = callerString1.substring("new ".length());
+            var map = type(state, input1).map(type -> {{
+                return new Tuple<>(type.left, "new " + type.right);
+            });
+
+            if (map.isPresent())  */{
+			return map.orElse(null);/* } */
 		}
 		return value(state, callerString1, depth);
 	}
 	/* private static */ foldInvocationStart(state : DivideState, c : char) : DivideState {
 		let appended : var = state.append(c);
-		/* if (c == '(')  */{
-			let enter : var = appended.enter();
-			/* if (enter.isShallow())  */{
-				return enter.advance();
-			}
-			return enter;
+		/* if (c == '(') {{
+            var enter = appended.enter();
+            if (enter.isShallow())  */{
+			return enter.advance();
+			/* }
+            return enter */;
 		}
 		/* if (c == ')')  */{
 			return appended.exit();
@@ -751,18 +763,16 @@
 			return state.advance();
 		}
 		let appended : var = state.append(c);
-		/* if (c == '-')  */{
-			let peeked : var = appended.peek();
-			/* if (peeked == '>')  */{
-				return appended.popAndAppendToOption().orElse(appended);
-			}
-			/* else  */{
-				return appended;
-			}
+		/* if (c == '-') {{
+            var peeked = appended.peek();
+            if (peeked == '>') {{
+                return appended.popAndAppendToOption().orElse(appended);
+            }
+            else  */{
+			return appended;/* } */
 		}
-		/* if (c == '<' || c == '(' || c == ' */{
-			/* ') {
-            return appended.enter() */;
+		/* if (c == '<' || c == '(' || c == '{')  */{
+			return appended.enter();
 		}
 		/* if (c == '>' || c == ')' || c == '}')  */{
 			return appended.exit();
