@@ -358,10 +358,17 @@ public class Main {
         }
     }
 
-    private record ObjectType(String name) implements Type {
+    private record ObjectType(String name, List<Definition> definitions) implements Type {
         @Override
         public String generate() {
             return this.name;
+        }
+
+        public Option<Type> find(String name) {
+            return this.definitions.iterate()
+                    .filter(definition -> definition.name.equals(name))
+                    .map(Definition::type)
+                    .next();
         }
     }
 
@@ -581,13 +588,7 @@ public class Main {
         }
     }
 
-    private static class ArrayType implements Type {
-        private final Type right;
-
-        public ArrayType(Type right) {
-            this.right = right;
-        }
-
+    private record ArrayType(Type right) implements Type {
         @Override
         public String generate() {
             return this.right.generate() + "[]";
@@ -665,10 +666,10 @@ public class Main {
         }
     }
 
-    private record DataAccess(Value parent, String property) implements Value {
+    private record DataAccess(Value parent, String property, Type type) implements Value {
         @Override
         public String generate() {
-            return this.parent.generate() + "." + this.property;
+            return this.parent.generate() + "." + this.property + generatePlaceholder(": " + this.type.generate());
         }
 
         @Override
@@ -765,7 +766,7 @@ public class Main {
     private record SymbolValue(String stripped, Type type) implements Value {
         @Override
         public String generate() {
-            return this.stripped + generatePlaceholder(" : " + this.type.generate());
+            return this.stripped + generatePlaceholder(": " + this.type.generate());
         }
     }
 
@@ -1013,7 +1014,7 @@ public class Main {
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
 
-        return new Some<>(new Tuple<>(parsed.left.addStructure(generated).addType(new ObjectType(name)), ""));
+        return new Some<>(new Tuple<>(parsed.left.addStructure(generated).addType(new ObjectType(name, parsed.left.definitions)), ""));
     }
 
     private static Option<Definition> retainDefinition(Parameter parameter) {
@@ -1205,7 +1206,7 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseMethodReference(CompileState state, String input, int depth) {
         return last(input, "::", (s, s2) -> {
             var tuple = parseValue(state, s, depth);
-            return new Some<>(new Tuple<>(tuple.left, new DataAccess(tuple.right, s2)));
+            return new Some<>(new Tuple<>(tuple.left, new DataAccess(tuple.right, s2, Primitive.Unknown)));
         });
     }
 
@@ -1384,8 +1385,8 @@ public class Main {
             var tuple = parseValue(state, parentString, depth);
             var parent = tuple.right;
 
-            var type = resolveType(parent, state);
-            if (type instanceof TupleType) {
+            var parentType = resolveType(parent, state);
+            if (parentType instanceof TupleType) {
                 if (property.equals("left")) {
                     return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
                 }
@@ -1395,7 +1396,14 @@ public class Main {
                 }
             }
 
-            return new Some<>(new Tuple<>(tuple.left, new DataAccess(parent, property)));
+            Type type = Primitive.Unknown;
+            if (parentType instanceof ObjectType objectType) {
+                if (objectType.find(property) instanceof Some(var memberType)) {
+                    type = memberType;
+                }
+            }
+
+            return new Some<>(new Tuple<>(tuple.left, new DataAccess(parent, property, type)));
         });
     }
 
