@@ -666,14 +666,36 @@ public class Main {
                 .or(() -> symbolValue(state, input))
                 .or(() -> stringValue(state, input))
                 .or(() -> dataAccess(state, input))
+                .or(() -> lambda(state, input))
                 .or(() -> invocation(state, input))
                 .or(() -> digits(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
     }
 
+    private static Option<Tuple<CompileState, String>> lambda(CompileState state, String input) {
+        return first(input, "->", (beforeArrow, valueString) -> {
+            var strippedBeforeArrow = beforeArrow.strip();
+            if (isSymbol(strippedBeforeArrow)) {
+                return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString);
+            }
+
+            if (strippedBeforeArrow.equals("()")) {
+                return assembleLambda(state, Lists.empty(), valueString);
+            }
+
+            return new None<>();
+        });
+    }
+
+    private static Some<Tuple<CompileState, String>> assembleLambda(CompileState state, List<String> paramNames, String valueString) {
+        var value = value(state, valueString);
+        var joined = paramNames.iterate().collect(new Joiner(", ")).orElse("");
+        return new Some<>(new Tuple<>(value.left, "(" + joined + ")" + " => " + value.right));
+    }
+
     private static Option<Tuple<CompileState, String>> digits(CompileState state, String input) {
         var stripped = input.strip();
-        if(isNumber(stripped)) {
+        if (isNumber(stripped)) {
             return new Some<>(new Tuple<>(state, stripped));
         }
         return new None<>();
@@ -682,7 +704,9 @@ public class Main {
     private static boolean isNumber(String input) {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if(Character.isDigit(c)) continue;
+            if (Character.isDigit(c)) {
+                continue;
+            }
             return false;
         }
         return true;
