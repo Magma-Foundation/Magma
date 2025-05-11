@@ -18,13 +18,14 @@
 	collect<R>(collector : Collector<T, R>) : R;
 }
 /* private */interface List<T>/*   */ {
-	add(element : T) : List<T>;
+	addLast(element : T) : List<T>;
 	iterate() : Iterator<T>;
 	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : T;
 	size() : number;
 	addAll(other : List<T>) : List<T>;
 	isEmpty() : boolean;
+	addFirst(element : T) : List<T>;
 }
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
@@ -154,7 +155,7 @@
 		/* this(new ArrayList<>()) */;
 	}
 	/* @Override
-            public */ add(element : T) : List<T> {
+            public */ addLast(element : T) : List<T> {
 		/* this.elements.add(element) */;
 		return this;
 	}
@@ -182,11 +183,16 @@
 	/* @Override
             public */ addAll(other : List<T>) : List<T> {
 		let initial : List<T> = this;
-		return other.iterate().fold(initial, List.add);
+		return other.iterate().fold(initial, List.addLast);
 	}
 	/* @Override
             public */ isEmpty() : boolean {
-		return elements.isEmpty();
+		return this.elements.isEmpty();
+	}
+	/* @Override
+            public */ addFirst(element : T) : List<T> {
+		/* this.elements.addFirst(element) */;
+		return this;
 	}
 }
 /* private static */class Lists/*  */ {
@@ -214,7 +220,7 @@
 		/* this(input, 0, Lists.empty(), new StringBuilder(), 0) */;
 	}
 	/* private */ advance() : DivideState {
-		let /* this.segments  */ = this.segments.add(this.buffer.toString());
+		let /* this.segments  */ = this.segments.addLast(this.buffer.toString());
 		let /* this.buffer  */ = new StringBuilder();
 		return this;
 	}
@@ -276,7 +282,7 @@
 	}
 	/* @Override
         public */ fold(current : List<T>, element : T) : List<T> {
-		return current.add(element);
+		return current.addLast(element);
 	}
 }
 /* private */class Tuple<A, B>/* (A left, B right)  */ {
@@ -287,7 +293,7 @@
 			/* this(Lists.empty()) */;
 		}
 		/* public CompileState addStructure(String structure)  */{
-			return new CompileState(this.structures.add(structure));
+			return new CompileState(this.structures.addLast(structure));
 		}
 	}
 	/* private */ Definition(maybeBefore : Option<string>, type : string, name : string, typeParams : List<string>) : record {
@@ -357,7 +363,7 @@
 			let state1 = tuple.left;
 			let right = tuple.right;
 			let applied = mapper.apply(state1, element);
-			return new Tuple<>(applied.left, right.add(applied.right));
+			return new Tuple<>(applied.left, right.addLast(applied.right));
 		});
 	}
 	/* private static */ mergeStatements(stringBuilder : StringBuilder, str : string) : StringBuilder {
@@ -491,7 +497,7 @@
 		/* else  */{
 			let joined = params.iterate().collect(new Joiner(", ")).orElse("");
 			let constructorIndent = createIndent(1);
-			let /* parsed1  */ = /* Lists.<String>empty */().add(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n").addAll(parsed.right);
+			let /* parsed1  */ = parsed.right.addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
 		}
 		let parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
 		let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";

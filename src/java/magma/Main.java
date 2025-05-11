@@ -44,7 +44,7 @@ public class Main {
     }
 
     private interface List<T> {
-        List<T> add(T element);
+        List<T> addLast(T element);
 
         Iterator<T> iterate();
 
@@ -57,6 +57,8 @@ public class Main {
         List<T> addAll(List<T> other);
 
         boolean isEmpty();
+
+        List<T> addFirst(T element);
     }
 
     private interface Head<T> {
@@ -210,7 +212,7 @@ public class Main {
             }
 
             @Override
-            public List<T> add(T element) {
+            public List<T> addLast(T element) {
                 this.elements.add(element);
                 return this;
             }
@@ -244,12 +246,18 @@ public class Main {
             @Override
             public List<T> addAll(List<T> other) {
                 List<T> initial = this;
-                return other.iterate().fold(initial, List::add);
+                return other.iterate().fold(initial, List::addLast);
             }
 
             @Override
             public boolean isEmpty() {
-                return elements.isEmpty();
+                return this.elements.isEmpty();
+            }
+
+            @Override
+            public List<T> addFirst(T element) {
+                this.elements.addFirst(element);
+                return this;
             }
         }
 
@@ -269,7 +277,7 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.add(structure));
+            return new CompileState(this.structures.addLast(structure));
         }
     }
 
@@ -293,7 +301,7 @@ public class Main {
         }
 
         private DivideState advance() {
-            this.segments = this.segments.add(this.buffer.toString());
+            this.segments = this.segments.addLast(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -392,7 +400,7 @@ public class Main {
 
         @Override
         public List<T> fold(List<T> current, T element) {
-            return current.add(element);
+            return current.addLast(element);
         }
     }
 
@@ -466,7 +474,7 @@ public class Main {
             var right = tuple.right;
 
             var applied = mapper.apply(state1, element);
-            return new Tuple<>(applied.left, right.add(applied.right));
+            return new Tuple<>(applied.left, right.addLast(applied.right));
         });
     }
 
@@ -631,9 +639,7 @@ public class Main {
             var joined = params.iterate().collect(new Joiner(", ")).orElse("");
 
             var constructorIndent = createIndent(1);
-            parsed1 = Lists.<String>empty()
-                    .add(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n")
-                    .addAll(parsed.right);
+            parsed1 = parsed.right.addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
         }
 
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
