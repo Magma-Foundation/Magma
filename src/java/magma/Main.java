@@ -555,7 +555,7 @@ public class Main {
         }
     }
 
-    private record Symbol(String input) implements Type {
+    private record SymbolType(String input) implements Type {
         @Override
         public String generate() {
             return this.input;
@@ -625,7 +625,7 @@ public class Main {
     private record Placeholder(String input) implements Parameter, Value {
         @Override
         public String generate() {
-            return this.input;
+            return generatePlaceholder(this.input);
         }
     }
 
@@ -640,13 +640,6 @@ public class Main {
         @Override
         public String generate() {
             return this.parent.generate() + "." + this.property;
-        }
-    }
-
-    private record SymbolValue(String value) implements Value {
-        @Override
-        public String generate() {
-            return this.value;
         }
     }
 
@@ -707,6 +700,21 @@ public class Main {
         @Override
         public String generate() {
             return this.parent.generate() + "[" + this.child.generate() + "]";
+        }
+    }
+
+    private static final class SymbolValue implements Value {
+        private final String stripped;
+        private final Type type;
+
+        public SymbolValue(String stripped, Type type) {
+            this.stripped = stripped;
+            this.type = type;
+        }
+
+        @Override
+        public String generate() {
+            return this.stripped + generatePlaceholder(" : " + this.type.generate());
         }
     }
 
@@ -1205,8 +1213,9 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseDigits(CompileState state, String input) {
         var stripped = input.strip();
         if (isNumber(stripped)) {
-            return new Some<>(new Tuple<CompileState, Value>(state, new SymbolValue(stripped)));
+            return new Some<>(new Tuple<CompileState, Value>(state, new SymbolValue(stripped, Primitive.Int)));
         }
+
         return new None<>();
     }
 
@@ -1262,7 +1271,7 @@ public class Main {
             case Operation operation -> Primitive.Var;
             case Placeholder placeholder -> Primitive.Var;
             case StringValue stringValue -> Primitive.Var;
-            case SymbolValue symbolValue -> state.resolve(symbolValue.value).orElse(Primitive.Var);
+            case SymbolValue symbolValue -> symbolValue.type;
             case IndexValue indexValue -> Primitive.Var;
         };
     }
@@ -1312,11 +1321,11 @@ public class Main {
             var type = resolveType(parent, state);
             if (type instanceof TupleType) {
                 if (property.equals("left")) {
-                    return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0"))));
+                    return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
                 }
 
                 if (property.equals("right")) {
-                    return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("1"))));
+                    return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
                 }
             }
 
@@ -1335,7 +1344,10 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseSymbolValue(CompileState state, String value) {
         var stripped = value.strip();
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, new SymbolValue(stripped)));
+            if (state.resolve(stripped) instanceof Some(var type)) {
+                return new Some<>(new Tuple<>(state, new SymbolValue(stripped, type)));
+            }
+            return new Some<>(new Tuple<>(state, new Placeholder(stripped)));
         }
         return new None<>();
     }
@@ -1502,7 +1514,7 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, new Symbol(stripped)));
+            return new Some<>(new Tuple<>(state, new SymbolType(stripped)));
         }
 
         return template(state, input)
