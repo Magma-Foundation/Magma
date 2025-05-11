@@ -699,6 +699,13 @@ public class Main {
         }
     }
 
+    private record IndexValue(Value parent, Value child) implements Value {
+        @Override
+        public String generate() {
+            return this.parent.generate() + "[" + this.child.generate() + "]";
+        }
+    }
+
     public static void main() {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
@@ -1086,10 +1093,10 @@ public class Main {
         if (c == '{' && state.isLevel()) {
             return appended.advance();
         }
-        if(c == '{') {
+        if (c == '{') {
             return appended.enter();
         }
-        if(c == '}') {
+        if (c == '}') {
             return appended.exit();
         }
         return appended;
@@ -1247,6 +1254,7 @@ public class Main {
             case Placeholder placeholder -> Primitive.Var;
             case StringValue stringValue -> Primitive.Var;
             case SymbolValue symbolValue -> state.resolve(symbolValue.value).orElse(Primitive.Var);
+            case IndexValue indexValue -> Primitive.Var;
         };
     }
 
@@ -1283,13 +1291,26 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Value>> parseDataAccess(CompileState state, String input, int depth) {
-        return last(input.strip(), ".", (parentString, property) -> {
+        return last(input.strip(), ".", (parentString, rawProperty) -> {
+            var property = rawProperty.strip();
             if (!isSymbol(property)) {
                 return new None<>();
             }
 
             var tuple = parseValue(state, parentString, depth);
             var parent = tuple.right;
+
+            var type = resolveType(parent, state);
+            if (type instanceof TupleType) {
+                if (property.equals("left")) {
+                    return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0"))));
+                }
+
+                if (property.equals("right")) {
+                    return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("1"))));
+                }
+            }
+
             return new Some<>(new Tuple<>(tuple.left, new DataAccess(parent, property)));
         });
     }

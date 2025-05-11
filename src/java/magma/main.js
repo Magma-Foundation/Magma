@@ -479,6 +479,14 @@
         return this.caller.generate() + "(" + joined + ")";
     }
 }
+/* private */ class IndexValue /*  */ {
+    constructor(parent, child) {
+    }
+    /* @Override
+        public */ generate() {
+        return this.parent.generate() + "[" + this.child.generate() + "]";
+    }
+}
 /* public */ class Main /*  */ {
     /* private */ CompileState(structures, definitions) {
         /* public CompileState()  */ {
@@ -563,7 +571,7 @@
     }
     /* private static */ foldDoubleQuotes(tuple) {
         /* if (tuple.left == '\"')  */ {
-            let current = tuple.right.append(tuple.left);
+            let current = tuple[1].append(tuple[0]);
             /* while (true)  */ {
                 let maybePopped = current.popAndAppendToTuple();
                 /* if (maybePopped.isEmpty())  */ {
@@ -586,14 +594,14 @@
         /* if (tuple.left != '\'')  */ {
             return new None();
         }
-        let appended = tuple.right.append(tuple.left);
+        let appended = tuple[1].append(tuple[0]);
         return appended.popAndAppendToTuple().map(Main.foldEscaped).flatMap(DivideState.popAndAppendToOption);
     }
     /* private static */ foldEscaped(escaped) {
         /* if (escaped.left == '\\')  */ {
-            return escaped.right.popAndAppendToOption().orElse(escaped.right);
+            return escaped[1].popAndAppendToOption().orElse(escaped[1]);
         }
-        return escaped.right;
+        return escaped[1];
     }
     /* private static */ foldStatementChar(state, c) {
         let append = state.append(c);
@@ -784,10 +792,10 @@
         /* if (c == '{' && state.isLevel())  */ {
             return appended.advance();
         }
-        /* if(c == '{')  */ {
+        /* if (c == '{')  */ {
             return appended.enter();
         }
-        /* if(c == '}')  */ {
+        /* if (c == '}')  */ {
             return appended.exit();
         }
         return appended;
@@ -910,6 +918,7 @@
             /* case Placeholder placeholder -> Primitive.Var */ ;
             /* case StringValue stringValue -> Primitive.Var */ ;
             /* case SymbolValue symbolValue -> state.resolve(symbolValue.value).orElse(Primitive.Var) */ ;
+            /* case IndexValue indexValue -> Primitive.Var */ ;
         }
         /*  */ ;
     }
@@ -942,12 +951,22 @@
         return appended;
     }
     /* private static */ parseDataAccess(state, input, depth) {
-        return last(input.strip(), ".", (parentString, property) => {
+        return last(input.strip(), ".", (parentString, rawProperty) => {
+            let property = rawProperty.strip();
             /* if (!isSymbol(property))  */ {
                 return new None();
             }
             let tuple = parseValue(state, parentString, depth);
             let parent = tuple.right;
+            let type = resolveType(parent, state);
+            /* if (type instanceof TupleType)  */ {
+                /* if (property.equals("left"))  */ {
+                    return new Some(new Tuple(state, new IndexValue(parent, new SymbolValue("0"))));
+                }
+                /* if (property.equals("right"))  */ {
+                    return new Some(new Tuple(state, new IndexValue(parent, new SymbolValue("1"))));
+                }
+            }
             return new Some(new Tuple(tuple.left, new DataAccess(parent, property)));
         });
     }
