@@ -287,7 +287,13 @@
         return elements.iterate().fold(/* new StringBuilder */ (), merger).toString();
     }
     /* private static */ parseAll(state, input, folder, mapper) {
-        return divideAll(input, folder).iterate().fold(/* new Tuple<> */ (state, Lists.empty()));
+        return divideAll(input, folder).iterate().fold(/* new Tuple<> */ (state, Lists.empty()), (tuple, element) =>  /*  {
+            var state1 = tuple.left;
+            var right = tuple.right;
+
+            var applied = mapper.apply(state1, element);
+            return new Tuple<>(applied.left, right.add(applied.right));
+        } */);
     }
     /* private static */ mergeStatements(stringBuilder, str) {
         return stringBuilder.append(str);
@@ -371,7 +377,27 @@
         return structure(stripped, "class ", "class ", state);
     }
     /* private static */ structure(stripped, sourceInfix, targetInfix, state) {
-        return first(stripped, sourceInfix);
+        return first(stripped, sourceInfix, (beforeInfix, right) =>  /*  {
+            return first(right, "{", (beforeContent, withEnd) -> {
+                var strippedWithEnd = withEnd.strip();
+                return suffix(strippedWithEnd, "}", content1 -> {
+                    return first(beforeContent, "<", new BiFunction<String, String, Option<Tuple<CompileState, String>>>() {
+                        @Override
+                        public Option<Tuple<CompileState, String>> apply(String name, String withTypeParams) {
+                            return first(withTypeParams, ">", new BiFunction<String, String, Option<Tuple<CompileState, String>>>() {
+                                @Override
+                                public Option<Tuple<CompileState, String>> apply(String typeParamsString, String afterTypeParams) {
+                                    var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                                    return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
+                                }
+                            });
+                        }
+                    }).or(() -> {
+                        return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
+                    });
+                });
+            });
+        } */);
     }
     /* private static */ assemble(state, targetInfix, beforeInfix, rawName, content, typeParams, afterTypeParams) {
         let name = rawName.strip();
@@ -379,7 +405,7 @@
             return /* new None<> */ ();
         }
         let joinedTypeParams = /*  typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<"  */ +inner +  /*  ">").orElse("") */;
-        let statements = compileStatements(state, content, /* (state0, input) -> compileClassSegment */ ( /* state0 */, input, 1));
+        let statements = compileStatements(state, content, (state0, input) => compileClassSegment(input, 1));
         let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n";
         return /* new Some<> */ ( /* new Tuple<> */(statements.left.addStructure(generated), ""));
     }
@@ -488,7 +514,19 @@ return new Tuple<>(state, generatePlaceholder(stripped));
         return lambda(state, input).or(() => stringValue(state, input)).or(() => dataAccess(state, input)).or(() => symbolValue(state, input)).or(() => operation(state, input)).or(() => invocation(state, input)).or(() => digits(state, input)).orElseGet(() => /* new Tuple<CompileState, String> */ (state, generatePlaceholder(input)));
     }
     /* private static */ lambda(state, input) {
-        return first(input, "->");
+        return first(input, "->", (beforeArrow, valueString) =>  /*  {
+            var strippedBeforeArrow = beforeArrow.strip();
+            if (isSymbol(strippedBeforeArrow)) {
+                return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString);
+            }
+
+            if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
+                var parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main::foldValueChar);
+                return assembleLambda(state, parameterNames, valueString);
+            }
+
+            return new None<>();
+        } */);
     }
     /* private static */ assembleLambda(state, paramNames, valueString) {
         let value = value(state, valueString);
@@ -589,7 +627,7 @@ return new Tuple<>(state, generatePlaceholder(stripped));
         return compileDefinition(state, input);
     }
     /* private static */ compileDefinition(state, input) {
-        return parseDefinition(state, input).map(/* (Tuple<CompileState, Definition> tuple) -> new Tuple<> */ (tuple.left, tuple.right.generate())).orElseGet(() => /* new Tuple<> */ (state, generatePlaceholder(input)));
+        return parseDefinition(state, input).map((Tuple < CompileState, Definition > tuple), /* new Tuple<> */ (tuple.left, tuple.right.generate())).orElseGet(() => /* new Tuple<> */ (state, generatePlaceholder(input)));
     }
     /* private static */ mergeValues(cache, element) {
         /* if (cache.isEmpty())  */ {
@@ -611,7 +649,20 @@ return new Tuple<>(state, generatePlaceholder(stripped));
     } */);
     }
     /* private static */ parseDefinition(state, input) {
-        return last(input.strip(), " ");
+        return last(input.strip(), " ", (beforeName, name) =>  /*  {
+            return split(() -> toLast(beforeName, " ", Main::foldTypeSeparator), (beforeType, type) -> {
+                return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
+                    return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
+                        var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                        return assembleDefinition(typeParams.left, new Some<String>(beforeTypeParams), name, typeParams.right, type);
+                    });
+                }).or(() -> {
+                    return assembleDefinition(state, new Some<String>(beforeType), name, Lists.empty(), type);
+                });
+            }).or(() -> {
+                return assembleDefinition(state, new None<String>(), name, Lists.empty(), beforeName);
+            });
+        } */);
     }
     /* private static */ toLast(input, separator, folder) {
         let divisions = divideAll(input, folder);

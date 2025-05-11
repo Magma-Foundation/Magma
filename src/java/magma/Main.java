@@ -705,8 +705,9 @@ public class Main {
                 return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString);
             }
 
-            if (strippedBeforeArrow.equals("()")) {
-                return assembleLambda(state, Lists.empty(), valueString);
+            if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
+                var parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main::foldValueChar);
+                return assembleLambda(state, parameterNames, valueString);
             }
 
             return new None<>();

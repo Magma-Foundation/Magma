@@ -320,7 +320,7 @@
 		return elements.iterate().fold(/* new StringBuilder */(), merger).toString();
 	}
 	/* private static */ parseAll(state : CompileState, input : string, folder : (DivideState, Character) => DivideState, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, List<string>] {
-		return divideAll(input, folder).iterate().fold(/* new Tuple<> */(state, Lists.empty()), /*  (tuple, element) -> {
+		return divideAll(input, folder).iterate().fold(/* new Tuple<> */(state, Lists.empty()), (tuple,  element) => /*  {
             var state1 = tuple.left;
             var right = tuple.right;
 
@@ -410,7 +410,7 @@
 		return structure(stripped, "class ", "class ", state);
 	}
 	/* private static */ structure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, string]> {
-		return first(stripped, sourceInfix, /*  (beforeInfix, right) -> {
+		return first(stripped, sourceInfix, (beforeInfix,  right) => /*  {
             return first(right, "{", (beforeContent, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
@@ -438,7 +438,7 @@
 			return /* new None<> */();
 		}
 		let joinedTypeParams : var = /*  typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<"  */ + inner + /*  ">").orElse("") */;
-		let statements : var = compileStatements(state, content, /* (state0, input) -> compileClassSegment */(/* state0 */, input, 1));
+		let statements : var = compileStatements(state, content, (state0,  input) => compileClassSegment(/* state0 */, input, 1));
 		let generated : var = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n";
 		return /* new Some<> */(/* new Tuple<> */(statements.left.addStructure(generated), ""));
 	}
@@ -539,14 +539,15 @@
 		return lambda(state, input).or(() => stringValue(state, input)).or(() => dataAccess(state, input)).or(() => symbolValue(state, input)).or(() => operation(state, input)).or(() => invocation(state, input)).or(() => digits(state, input)).orElseGet(() => /* new Tuple<CompileState, String> */(state, generatePlaceholder(input)));
 	}
 	/* private static */ lambda(state : CompileState, input : string) : Option<[CompileState, string]> {
-		return first(input, "->", /*  (beforeArrow, valueString) -> {
+		return first(input, "->", (beforeArrow,  valueString) => /*  {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
                 return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString);
             }
 
-            if (strippedBeforeArrow.equals("()")) {
-                return assembleLambda(state, Lists.empty(), valueString);
+            if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
+                var parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main::foldValueChar);
+                return assembleLambda(state, parameterNames, valueString);
             }
 
             return new None<>();
@@ -648,7 +649,7 @@
 		return compileDefinition(state, input);
 	}
 	/* private static */ compileDefinition(state : CompileState, input : string) : [CompileState, string] {
-		return parseDefinition(state, input).map(/* (Tuple<CompileState, Definition> tuple) -> new Tuple<> */(tuple.left, tuple.right.generate())).orElseGet(() => /* new Tuple<> */(state, generatePlaceholder(input)));
+		return parseDefinition(state, input).map((Tuple<CompileState, Definition> tuple) => /* new Tuple<> */(tuple.left, tuple.right.generate())).orElseGet(() => /* new Tuple<> */(state, generatePlaceholder(input)));
 	}
 	/* private static */ mergeValues(cache : StringBuilder, element : string) : StringBuilder {
 		/* if (cache.isEmpty())  */{
@@ -668,7 +669,7 @@
         } */);
 	}
 	/* private static */ parseDefinition(state : CompileState, input : string) : Option<[CompileState, Definition]> {
-		return last(input.strip(), " ", /*  (beforeName, name) -> {
+		return last(input.strip(), " ", (beforeName,  name) => /*  {
             return split(() -> toLast(beforeName, " ", Main::foldTypeSeparator), (beforeType, type) -> {
                 return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                     return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
