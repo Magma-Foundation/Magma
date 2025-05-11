@@ -672,13 +672,30 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> invocation(CompileState state, String input) {
         return suffix(input.strip(), ")", withoutEnd -> {
-            return first(withoutEnd, "(", (callerString, argumentsString) -> {
-                var callerTuple = value(state, callerString);
-                var argumentsTuple = compileValues(callerTuple.left, argumentsString, Main::value);
+            return split(() -> toLast(withoutEnd, "", Main::foldInvocationStart), (callerWithEnd, argumentsString) -> {
+                return suffix(callerWithEnd, "(", callerString -> {
+                    var callerTuple = value(state, callerString);
+                    var argumentsTuple = compileValues(callerTuple.left, argumentsString, Main::value);
 
-                return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
+                    return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
+                });
             });
         });
+    }
+
+    private static DivideState foldInvocationStart(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var enter = appended.enter();
+            if (enter.isShallow()) {
+                return enter.advance();
+            }
+            return enter;
+        }
+        if (c == ')') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
@@ -765,7 +782,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return last(input.strip(), " ", (beforeName, name) -> {
-            return split(() -> getStringStringTuple(beforeName), (beforeType, type) -> {
+            return split(() -> toLast(beforeName, " ", Main::foldTypeSeparator), (beforeType, type) -> {
                 return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                     return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                         var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
@@ -780,10 +797,10 @@ public class Main {
         });
     }
 
-    private static Option<Tuple<String, String>> getStringStringTuple(String beforeName) {
-        var divisions = divideAll(beforeName, Main::foldTypeSeparator);
+    private static Option<Tuple<String, String>> toLast(String input, String separator, BiFunction<DivideState, Character, DivideState> folder) {
+        var divisions = divideAll(input, folder);
         return divisions.removeLast().map(removed -> {
-            var left = removed.left.iterate().collect(new Joiner(" ")).orElse("");
+            var left = removed.left.iterate().collect(new Joiner(separator)).orElse("");
             var right = removed.right;
 
             return new Tuple<>(left, right);
