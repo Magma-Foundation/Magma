@@ -1455,13 +1455,9 @@ public class Main {
                     var callerString1 = callerString.strip();
 
                     var callerTuple = invocationHeader(state, depth, callerString1);
-                    var parsed = parseValues(callerTuple.left, argumentsString, (state3, s) -> new Some<>(parseValue(state3, s, depth)))
-                            .orElseGet(() -> new Tuple<>(callerTuple.left, Lists.empty()));
 
                     var oldCaller = callerTuple.right;
-                    var arguments = parsed.right;
-
-                    var newCaller = modifyCaller(parsed.left, oldCaller);
+                    var newCaller = modifyCaller(callerTuple.left, oldCaller);
 
                     Type var = Primitive.Unknown;
                     switch (newCaller) {
@@ -1476,6 +1472,10 @@ public class Main {
                         }
                     }
 
+                    var parsed = parseValues(callerTuple.left, argumentsString, (state3, s) -> new Some<>(parseValue(state3, s, depth)))
+                            .orElseGet(() -> new Tuple<>(callerTuple.left, Lists.empty()));
+
+                    var arguments = parsed.right;
                     var invokable = new Invokable(newCaller, arguments, var);
                     return new Some<>(new Tuple<>(parsed.left, invokable));
                 });
