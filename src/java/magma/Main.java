@@ -522,7 +522,7 @@ public class Main {
                 .or(() -> compileClass(input, depth, state))
                 .or(() -> compileStructure(input, "interface ", "interface ", state))
                 .or(() -> compileStructure(input, "record ", "class ", state))
-                .or(() -> compileMethod(input, depth, state))
+                .or(() -> method(state, input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
@@ -534,13 +534,10 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> compileMethod(String input, int depth, CompileState state) {
+    private static Option<Tuple<CompileState, String>> method(CompileState state, String input, int depth) {
         return first(input, "(", (definition, withParams) -> {
             return first(withParams, ")", (params, rawContent) -> {
-                var content = rawContent.strip();
-                var newContent = content.equals(";") ? ";" : generatePlaceholder(content);
-
-                var tuple = parseDefinition(state, definition)
+                var definitionTuple = parseDefinition(state, definition)
                         .map(definition1 -> {
                             var paramsTuple = compileValues(state, params, Main::compileParameter);
                             var generated = definition1.right.generateWithParams("(" + paramsTuple.right + ")");
@@ -548,10 +545,25 @@ public class Main {
                         })
                         .orElseGet(() -> new Tuple<>(state, generatePlaceholder(definition)));
 
-                var s = createIndent(depth) + tuple.right + newContent;
-                return new Some<>(new Tuple<>(tuple.left, s));
+                var content = rawContent.strip();
+                if (content.equals(";")) {
+                    var s = createIndent(depth) + definitionTuple.right + ";";
+                    return new Some<>(new Tuple<>(definitionTuple.left, s));
+                }
+
+                var statementsTuple = compileStatements(definitionTuple.left, content, Main::compileFunctionalSegment);
+                var generated = createIndent(depth) + definitionTuple.right + "{" + statementsTuple.right + "}";
+                return new Some<>(new Tuple<>(statementsTuple.left, generated));
             });
         });
+    }
+
+    private static Tuple<CompileState, String> compileFunctionalSegment(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Tuple<>(state, "");
+        }
+
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
