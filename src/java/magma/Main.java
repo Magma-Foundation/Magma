@@ -887,34 +887,34 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input, int depth) {
-        return first(input, "(", (definition, withParams) -> {
+        return first(input, "(", (definitionString, withParams) -> {
             return first(withParams, ")", (parametersString, rawContent) -> {
-                var definitionTuple = parseDefinition(state, definition)
-                        .map(definition1 -> {
-                            var parametersTuple = parseParameters(state, parametersString);
-                            var parameters = parametersTuple.right;
-                            var joinedParameters = joinParameters(parameters);
+                return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
+                    var definitionState = definitionTuple.left;
+                    var definition = definitionTuple.right;
 
-                            var generated = definition1.right.generateWithParams("(" + joinedParameters + ")");
-                            return new Tuple<>(parametersTuple.left, generated);
-                        })
-                        .orElseGet(() -> new Tuple<>(state, generatePlaceholder(definition)));
+                    var parametersTuple = parseParameters(definitionState, parametersString);
+                    var parameters = parametersTuple.right;
+                    var joinedParameters = joinParameters(parameters);
 
-                var content = rawContent.strip();
-                var indent = createIndent(depth);
-                if (content.equals(";")) {
-                    var s = indent + definitionTuple.right + ";";
-                    return new Some<>(new Tuple<>(definitionTuple.left, s));
-                }
+                    var content = rawContent.strip();
+                    var indent = createIndent(depth);
+                    var generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
+                    if (content.equals(";")) {
+                        var s = indent + generatedHeader + ";";
+                        return new Some<>(new Tuple<>(parametersTuple.left, s));
+                    }
 
-                if (content.startsWith("{") && content.endsWith("}")) {
-                    var substring = content.substring(1, content.length() - 1);
-                    var statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
-                    var generated = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
-                    return new Some<>(new Tuple<>(statementsTuple.left, generated));
-                }
+                    if (content.startsWith("{") && content.endsWith("}")) {
+                        var substring = content.substring(1, content.length() - 1);
+                        var statementsTuple = compileFunctionSegments(parametersTuple.left, substring, depth);
+                        var generated = indent + generatedHeader + " {" + statementsTuple.right + indent + "}";
+                        return new Some<>(new Tuple<>(statementsTuple.left, generated));
+                    }
 
-                return new None<>();
+                    return new None<>();
+                });
+
             });
         });
     }

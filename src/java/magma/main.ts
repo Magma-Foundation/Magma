@@ -690,28 +690,29 @@
 		return new None();
 	}
 	/* private static */ compileMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
-		return first(input, "(", (definition,  withParams) => {
+		return first(input, "(", (definitionString,  withParams) => {
 			return first(withParams, ")", (parametersString,  rawContent) => {
-				let definitionTuple = parseDefinition(state, definition).map((definition1) => {
-					let parametersTuple = parseParameters(state, parametersString);
+				return parseDefinition(state, definitionString).flatMap((definitionTuple) => {
+					let definitionState = definitionTuple.left;
+					let definition = definitionTuple.right;
+					let parametersTuple = parseParameters(definitionState, parametersString);
 					let parameters = parametersTuple.right;
 					let joinedParameters = joinParameters(parameters);
-					let generated = definition1.right.generateWithParams("(" + joinedParameters + ")");
-					return new Tuple(parametersTuple.left, generated);
-				}).orElseGet(() => new Tuple(state, generatePlaceholder(definition)));
-				let content = rawContent.strip();
-				let indent = createIndent(depth);
-				/* if (content.equals(";"))  */{
-					let s = indent + definitionTuple.right + ";";
-					return new Some(new Tuple(definitionTuple.left, s));
-				}
-				/* if (content.startsWith("{") && content.endsWith("}"))  */{
-					let substring = content.substring(1, content.length() - 1);
-					let statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
-					let generated = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
-					return new Some(new Tuple(statementsTuple.left, generated));
-				}
-				return new None();
+					let content = rawContent.strip();
+					let indent = createIndent(depth);
+					let generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
+					/* if (content.equals(";"))  */{
+						let s = indent + generatedHeader + ";";
+						return new Some(new Tuple(parametersTuple.left, s));
+					}
+					/* if (content.startsWith("{") && content.endsWith("}"))  */{
+						let substring = content.substring(1, content.length() - 1);
+						let statementsTuple = compileFunctionSegments(parametersTuple.left, substring, depth);
+						let generated = indent + generatedHeader + " {" + statementsTuple.right + indent + "}";
+						return new Some(new Tuple(statementsTuple.left, generated));
+					}
+					return new None();
+				});
 			});
 		});
 	}
