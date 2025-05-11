@@ -23,11 +23,16 @@
 	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : T;
 	size() : number;
+	addAll(other : List<T>) : List<T>;
+	isEmpty() : boolean;
 }
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
 }
 /* private */class Some<T>/*  */ {
+	constructor (value : T) {
+	}
+
 	/* @Override
         public  */ map<R>(mapper : (T) => R) : Option<R> {
 		return new Some<>(mapper.apply(this.value));
@@ -99,6 +104,9 @@
 	}
 }
 /* private */class HeadedIterator<T>/*  */ {
+	constructor (head : Head<T>) {
+	}
+
 	/* @Override
         public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
 		let current = initial;
@@ -171,6 +179,15 @@
             public */ size() : number {
 		return this.elements.size();
 	}
+	/* @Override
+            public */ addAll(other : List<T>) : List<T> {
+		let initial : List<T> = this;
+		return other.iterate().fold(initial, List.add);
+	}
+	/* @Override
+            public */ isEmpty() : boolean {
+		return elements.isEmpty();
+	}
 }
 /* private static */class Lists/*  */ {
 	/* public static  */ empty<T>() : List<T> {
@@ -237,6 +254,9 @@
 	}
 }
 /* private */class Joiner/*  */ {
+	constructor (delimiter : string) {
+	}
+
 	Joiner() : private {
 		/* this("") */;
 	}
@@ -315,7 +335,14 @@
 		return joined + tuple.right;
 	}
 	/* private static */ compileStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
-		return compileAll(state, input, Main.foldStatementChar, mapper, Main.mergeStatements);
+		let parsed = parseStatements(state, input, mapper);
+		return new Tuple<>(parsed.left, generateStatements(parsed.right));
+	}
+	/* private static */ generateStatements(statements : List<string>) : string {
+		return generateAll(Main.mergeStatements, statements);
+	}
+	/* private static */ parseStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, List<string>] {
+		return parseAll(state, input, Main.foldStatementChar, mapper);
 	}
 	/* private static */ compileAll(state : CompileState, input : string, folder : (DivideState, Character) => DivideState, mapper : (CompileState, string) => [CompileState, string], merger : (StringBuilder, string) => StringBuilder) : [CompileState, string] {
 		let parsed = parseAll(state, input, folder, mapper);
@@ -422,42 +449,53 @@
 				let strippedWithEnd = withEnd.strip();
 				return suffix(strippedWithEnd, "}", (content1) => {
 					return first(beforeContent, " implements ", (s,  s2) => {
-						return getOr(targetInfix, state, beforeInfix, s, content1);
+						return structureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
 					}).or(() => {
-						return getOr(targetInfix, state, beforeInfix, beforeContent, content1);
+						return structureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
 					});
 				});
 			});
 		});
 	}
-	/* private static */ getOr(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, string]> {
+	/* private static */ structureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, string]> {
 		return suffix(beforeContent, ")", (s) => {
 			return first(s, "(", (s1,  s2) => {
-				return getOred(targetInfix, state, beforeInfix, s1, content1);
+				let parsed = parseParameters(state, s2);
+				return getOred(targetInfix, parsed.left, beforeInfix, s1, content1, parsed.right);
 			});
 		}).or(() => {
-			return getOred(targetInfix, state, beforeInfix, beforeContent, content1);
+			return getOred(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
 		});
 	}
-	/* private static */ getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, string]> {
+	/* private static */ getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<string>) : Option<[CompileState, string]> {
 		return first(beforeContent, "<", (name,  withTypeParams) => {
 			return first(withTypeParams, ">", (typeParamsString,  afterTypeParams) => {
 				let typeParams = parseValues(state, typeParamsString, (state1,  s) => new Tuple<>(state1, s.strip()));
-				return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
+				return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
 			});
 		}).or(() => {
-			return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
+			return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
 		});
 	}
-	/* private static */ assemble(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, afterTypeParams : string) : Option<[CompileState, string]> {
+	/* private static */ assemble(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, afterTypeParams : string, params : List<string>) : Option<[CompileState, string]> {
 		let name = rawName.strip();
 		/* if (!isSymbol(name))  */{
 			return new None<>();
 		}
 		let joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-		let statements = compileStatements(state, content, (state0,  input) => compileClassSegment(state0, input, 1));
-		let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n";
-		return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
+		let parsed = parseStatements(state, content, (state0,  input) => compileClassSegment(state0, input, 1));
+		/* List<String> parsed1 */;
+		/* if (params.isEmpty())  */{
+			let /* parsed1  */ = parsed.right;
+		}
+		/* else  */{
+			let joined = params.iterate().collect(new Joiner(", ")).orElse("");
+			let constructorIndent = createIndent(1);
+			let /* parsed1  */ = /* Lists.<String>empty */().add(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n").addAll(parsed.right);
+		}
+		let parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
+		let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
+		return new Some<>(new Tuple<>(parsed.left.addStructure(generated), ""));
 	}
 	/* private static */ isSymbol(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++) {{
@@ -489,7 +527,7 @@
 		return first(input, "(", (definition,  withParams) => {
 			return first(withParams, ")", (params,  rawContent) => {
 				let definitionTuple = parseDefinition(state, definition).map((definition1) => {
-					let paramsTuple = compileValues(state, params, Main.compileParameter);
+					let paramsTuple = compileParameters(state, params);
 					let generated = definition1.right.generateWithParams("(" + paramsTuple.right + ")");
 					return new Tuple<>(paramsTuple.left, generated);
 				}).orElseGet(() => new Tuple<>(state, generatePlaceholder(definition)));
@@ -508,6 +546,14 @@
 				return new None<>();
 			});
 		});
+	}
+	/* private static */ compileParameters(state : CompileState, params : string) : [CompileState, string] {
+		let parsed = parseParameters(state, params);
+		let generated = generateValues(parsed.right);
+		return new Tuple<>(parsed.left, generated);
+	}
+	/* private static */ parseParameters(state : CompileState, params : string) : [CompileState, List<string>] {
+		return parseValues(state, params, Main.compileParameter);
 	}
 	/* private static */ compileFunctionSegments(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		return compileStatements(state, input, (state1,  input1) => compileFunctionSegment(state1, input1, depth + 1));

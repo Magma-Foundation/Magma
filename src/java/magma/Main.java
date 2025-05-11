@@ -53,6 +53,10 @@ public class Main {
         T get(int index);
 
         int size();
+
+        List<T> addAll(List<T> other);
+
+        boolean isEmpty();
     }
 
     private interface Head<T> {
@@ -236,6 +240,17 @@ public class Main {
             public int size() {
                 return this.elements.size();
             }
+
+            @Override
+            public List<T> addAll(List<T> other) {
+                List<T> initial = this;
+                return other.iterate().fold(initial, List::add);
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return elements.isEmpty();
+            }
         }
 
         public static <T> List<T> empty() {
@@ -409,7 +424,16 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        return compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements);
+        var parsed = parseStatements(state, input, mapper);
+        return new Tuple<>(parsed.left, generateStatements(parsed.right));
+    }
+
+    private static String generateStatements(List<String> statements) {
+        return generateAll(Main::mergeStatements, statements);
+    }
+
+    private static Tuple<CompileState, List<String>> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
     private static Tuple<CompileState, String> compileAll(
@@ -551,33 +575,34 @@ public class Main {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     return first(beforeContent, " implements ", (s, s2) -> {
-                        return getOr(targetInfix, state, beforeInfix, s, content1);
+                        return structureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
                     }).or(() -> {
-                        return getOr(targetInfix, state, beforeInfix, beforeContent, content1);
+                        return structureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
                     });
                 });
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple<CompileState, String>> structureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return suffix(beforeContent, ")", s -> {
             return first(s, "(", (s1, s2) -> {
-                return getOred(targetInfix, state, beforeInfix, s1, content1);
+                var parsed = parseParameters(state, s2);
+                return getOred(targetInfix, parsed.left, beforeInfix, s1, content1, parsed.right);
             });
         }).or(() -> {
-            return getOred(targetInfix, state, beforeInfix, beforeContent, content1);
+            return getOred(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
         });
     }
 
-    private static Option<Tuple<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> params) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
-                return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
+                return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
             });
         }).or(() -> {
-            return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
+            return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
         });
     }
 
@@ -587,7 +612,8 @@ public class Main {
             String rawName,
             String content,
             List<String> typeParams,
-            String afterTypeParams
+            String afterTypeParams,
+            List<String> params
     ) {
         var name = rawName.strip();
         if (!isSymbol(name)) {
@@ -595,9 +621,24 @@ public class Main {
         }
 
         var joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + ">").orElse("");
-        var statements = compileStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1));
-        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n";
-        return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
+        var parsed = parseStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1));
+
+        List<String> parsed1;
+        if (params.isEmpty()) {
+            parsed1 = parsed.right;
+        }
+        else {
+            var joined = params.iterate().collect(new Joiner(", ")).orElse("");
+
+            var constructorIndent = createIndent(1);
+            parsed1 = Lists.<String>empty()
+                    .add(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n")
+                    .addAll(parsed.right);
+        }
+
+        var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
+        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
+        return new Some<>(new Tuple<>(parsed.left.addStructure(generated), ""));
     }
 
     private static boolean isSymbol(String input) {
@@ -642,7 +683,7 @@ public class Main {
             return first(withParams, ")", (params, rawContent) -> {
                 var definitionTuple = parseDefinition(state, definition)
                         .map(definition1 -> {
-                            var paramsTuple = compileValues(state, params, Main::compileParameter);
+                            var paramsTuple = compileParameters(state, params);
                             var generated = definition1.right.generateWithParams("(" + paramsTuple.right + ")");
                             return new Tuple<>(paramsTuple.left, generated);
                         })
@@ -665,6 +706,16 @@ public class Main {
                 return new None<>();
             });
         });
+    }
+
+    private static Tuple<CompileState, String> compileParameters(CompileState state, String params) {
+        var parsed = parseParameters(state, params);
+        var generated = generateValues(parsed.right);
+        return new Tuple<>(parsed.left, generated);
+    }
+
+    private static Tuple<CompileState, List<String>> parseParameters(CompileState state, String params) {
+        return parseValues(state, params, Main::compileParameter);
     }
 
     private static Tuple<CompileState, String> compileFunctionSegments(CompileState state, String input, int depth) {
