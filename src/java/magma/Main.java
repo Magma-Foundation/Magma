@@ -67,6 +67,8 @@ public class Main {
         Iterator<Tuple<Integer, T>> iterateWithIndices();
 
         Option<Tuple<T, List<T>>> removeFirst();
+
+        List<T> addAllLast(List<T> others);
     }
 
     private interface Head<T> {
@@ -351,6 +353,12 @@ public class Main {
                 var slice = this.elements.subList(1, this.elements.size());
                 return new Some<>(new Tuple<T, List<T>>(first, new JVMList<>(slice)));
             }
+
+            @Override
+            public List<T> addAllLast(List<T> others) {
+                List<T> initial = this;
+                return others.iterate().fold(initial, List::addLast);
+            }
         }
 
         public static <T> List<T> empty() {
@@ -377,10 +385,18 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> structures, List<Definition> definitions, List<ObjectType> types,
-                                Option<String> maybeStructName) {
+    private record TypeParam(String value) implements Type {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+    }
+
+    private record CompileState(List<String> structures, List<Definition> definitions, List<ObjectType> objectTypes,
+                                Option<String> maybeStructName, List<String> typeParams) {
+
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>());
+            this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty());
         }
 
         private Option<Type> resolveValue(String name) {
@@ -391,33 +407,46 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.types, this.maybeStructName);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.maybeStructName, this.typeParams);
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, definitions, this.types, this.maybeStructName);
+            return new CompileState(this.structures, definitions, this.objectTypes, this.maybeStructName, this.typeParams);
         }
 
-        public Option<ObjectType> resolveType(String name) {
+        public Option<Type> resolveType(String name) {
             if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent()) {
                 return new Some<>(new ObjectType(name, this.definitions));
             }
 
-            return this.types.iterate()
-                    .filter(type -> type.name.equals(name))
+            var maybeTypeParam = this.typeParams.iterate()
+                    .filter(param -> param.equals(name))
                     .next();
+
+            if (maybeTypeParam instanceof Some(var value)) {
+                return new Some<>(new TypeParam(value));
+            }
+
+            return this.objectTypes.iterate()
+                    .filter(type -> type.name.equals(name))
+                    .next()
+                    .map(type -> type);
         }
 
         public CompileState addType(ObjectType type) {
-            return new CompileState(this.structures, this.definitions, this.types.addLast(type), this.maybeStructName);
+            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.maybeStructName, this.typeParams);
         }
 
         public CompileState withDefinition(Definition definition) {
-            return new CompileState(this.structures, this.definitions.addLast(definition), this.types, this.maybeStructName);
+            return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.maybeStructName, this.typeParams);
         }
 
         public CompileState withStructName(String name) {
-            return new CompileState(this.structures, this.definitions, this.types, new Some<>(name));
+            return new CompileState(this.structures, this.definitions, this.objectTypes, new Some<>(name), this.typeParams);
+        }
+
+        public CompileState withTypeParams(List<String> typeParams) {
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.maybeStructName, this.typeParams.addAllLast(typeParams));
         }
     }
 
@@ -1000,14 +1029,14 @@ public class Main {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple<CompileState, String>> compileStateStringTupleBiFunction = (state1, s) -> new Tuple<>(state1, s.strip());
                 var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(compileStateStringTupleBiFunction.apply(state1, s)));
-                return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
+                return assembleStructure(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
             });
         }).or(() -> {
-            return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
+            return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
         });
     }
 
-    private static Option<Tuple<CompileState, String>> assemble(
+    private static Option<Tuple<CompileState, String>> assembleStructure(
             CompileState state, String targetInfix,
             String beforeInfix,
             String rawName,
@@ -1026,7 +1055,7 @@ public class Main {
                 .map(inner -> "<" + inner + ">")
                 .orElse("");
 
-        var parsed = parseStatements(state.withStructName(name), content, (state0, input) -> compileClassSegment(state0, input, 1));
+        var parsed = parseStatements(state.withStructName(name).withTypeParams(typeParams), content, (state0, input) -> compileClassSegment(state0, input, 1));
 
         List<String> parsed1;
         if (params.isEmpty()) {
@@ -1621,7 +1650,12 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, new SymbolType(stripped)));
+            if (state.resolveType(stripped) instanceof Some(var resolved)) {
+                return new Some<>(new Tuple<>(state, resolved));
+            }
+            else {
+                return new Some<>(new Tuple<>(state, new Placeholder(stripped)));
+            }
         }
 
         return parseTemplate(state, input)
@@ -1676,12 +1710,11 @@ public class Main {
             return new Tuple<>(state, new TupleType(children));
         }
 
-        if (state.resolveType(base) instanceof Some(var baseType)) {
-            return new Tuple<>(state, new Template(baseType, children));
+        if (state.resolveType(base) instanceof Some(var baseType) && baseType instanceof FindableType findableType) {
+            return new Tuple<>(state, new Template(findableType, children));
         }
-        else {
-            return new Tuple<>(state, new Template(new Placeholder(base), children));
-        }
+
+        return new Tuple<>(state, new Template(new Placeholder(base), children));
     }
 
     private static Option<Type> retainType(Argument argument) {
