@@ -50,7 +50,7 @@
 
 	/* @Override
         public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
-		return new Some(mapper.apply(this.value));
+		return new Some(mapper(this.value));
 	}
 	/* @Override
         public */ isPresent() : boolean {
@@ -77,7 +77,7 @@
 	}
 	/* @Override
         public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
-		return mapper.apply(this.value);
+		return mapper(this.value);
 	}
 	/* @Override
         public */ isEmpty() : boolean {
@@ -103,11 +103,11 @@
 	}
 	/* @Override
         public */ orElseGet(supplier : () => T) : T {
-		return supplier.get();
+		return supplier();
 	}
 	/* @Override
         public */ or(other : () => Option<T>) : Option<T> {
-		return other.get();
+		return other();
 	}
 	/* @Override
         public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
@@ -477,47 +477,37 @@
 		return this.stripped;
 	}
 }
-/* private static */class DataAccess/*  */ {
-	/* private final */ parent : Value;
-	/* private final */ property : string;
-	DataAccess(parent : Value, property : string) : public {
-		let /* this.parent  */ = parent;
-		let /* this.property  */ = property;
+/* private */class DataAccess/*  */ {
+	constructor (parent : Value, property : string) {
 	}
+
 	/* @Override
         public */ generate() : string {
 		return this.parent.generate() + "." + this.property;
 	}
 }
-/* private static */class SymbolValue/*  */ {
-	/* private final */ stripped : string;
-	SymbolValue(stripped : string) : public {
-		let /* this.stripped  */ = stripped;
+/* private */class SymbolValue/*  */ {
+	constructor (value : string) {
 	}
+
 	/* @Override
         public */ generate() : string {
-		return this.stripped;
+		return this.value;
 	}
 }
-/* private static */class ConstructionCaller/*  */ {
-	/* private final */ right : Type;
-	ConstructionCaller(right : Type) : public {
-		let /* this.right  */ = right;
+/* private */class ConstructionCaller/*  */ {
+	constructor (right : Type) {
 	}
+
 	/* @Override
         public */ generate() : string {
 		return "new " + this.right.generate();
 	}
 }
-/* private static */class Operation/*  */ {
-	/* private final */ left : Value;
-	/* private final */ infix : string;
-	/* private final */ right : Value;
-	Operation(left : Value, infix : string, right : Value) : public {
-		let /* this.left  */ = left;
-		let /* this.infix  */ = infix;
-		let /* this.right  */ = right;
+/* private */class Operation/*  */ {
+	constructor (left : Value, infix : string, right : Value) {
 	}
+
 	/* @Override
         public */ generate() : string {
 		return this.left.generate() + " " + this.infix + " " + this.right.generate();
@@ -570,12 +560,15 @@
         String generate();
     } *//* 
 
-    private interface Value extends LambdaValue, Caller {
+    private sealed interface Value extends LambdaValue, Caller {
         String generate();
     } */
 	/* private */ CompileState(structures : List<string>, definitions : List<Definition>) : record {
 		/* public CompileState()  */{
 			/* this(Lists.empty(), Lists.empty()) */;
+		}
+		/* private Option<Type> resolve(String name)  */{
+			return this.definitions.iterate().filter((definition) => definition.name.equals(name)).next().map(Definition.type);
 		}
 		/* public CompileState addStructure(String structure)  */{
 			return new CompileState(this.structures.addLast(structure), this.definitions);
@@ -619,7 +612,7 @@
 		return elements.iterate().fold(new StringBuilder(), merger).toString();
 	}
 	/* private static  */ parseAll<T>(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, T]) : [CompileState, List<T>] {
-		return getCompileStateListTuple(state, input, folder, (state1,  s) => new Some(mapper.apply(state1, s))).orElseGet(() => new Tuple(state, Lists.empty()));
+		return getCompileStateListTuple(state, input, folder, (state1,  s) => new Some(mapper(state1, s))).orElseGet(() => new Tuple(state, Lists.empty()));
 	}
 	/* private static  */ getCompileStateListTuple<T>(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) : Option<[CompileState, List<T>]> {
 		let initial : Option<[CompileState, List<T>]> = new Some(new Tuple(state, Lists.empty()));
@@ -627,7 +620,7 @@
 			return tuple.flatMap((inner) => {
 				let state1 = inner.left;
 				let right = inner.right;
-				return mapper.apply(state1, element).map((applied) => {
+				return mapper(state1, element).map((applied) => {
 					return new Tuple(applied.left, right.addLast(applied.right));
 				});
 			});
@@ -792,7 +785,7 @@
 			return new None();
 		}
 		let slice = input.substring(0, input.length() - suffix.length());
-		return mapper.apply(slice);
+		return mapper(slice);
 	}
 	/* private static */ compileClassSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		return compileWhitespace(input, state).or(() => compileClass(input, depth, state)).or(() => structure(input, "interface ", "interface ", state)).or(() => structure(input, "record ", "class ", state)).or(() => compileMethod(state, input, depth)).or(() => compileDefinitionStatement(input, depth, state)).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
@@ -966,12 +959,35 @@
 					let callerString1 = callerString.strip();
 					let callerTuple = invocationHeader(state, depth, callerString1);
 					let parsed = parseValues(callerTuple.left, argumentsString, (state3,  s) => new Some(parseValue(state3, s, depth))).orElseGet(() => new Tuple(callerTuple.left, Lists.empty()));
-					let caller = callerTuple.right;
+					let oldCaller = callerTuple.right;
 					let arguments = parsed.right;
-					return new Some(new Tuple(parsed.left, new Invokable(caller, arguments)));
+					let newCaller = modifyCaller(parsed.left, oldCaller);
+					let invokable = new Invokable(newCaller, arguments);
+					return new Some(new Tuple(parsed.left, invokable));
 				});
 			});
 		});
+	}
+	/* private static */ modifyCaller(state : CompileState, oldCaller : Caller) : Caller {
+		/* if (oldCaller instanceof DataAccess access) {{
+            var type = resolveType(access.parent, state);
+            if (type instanceof FunctionType)  */{
+			return access.parent;/* } */
+		}
+		return oldCaller;
+	}
+	/* private static */ resolveType(value : Value, state : CompileState) : Type {
+		/* return switch (value)  */{
+			/* case DataAccess dataAccess -> Primitive.Var */;
+			/* case Invokable invokable -> Primitive.Var */;
+			/* case Lambda lambda -> Primitive.Var */;
+			/* case Not not -> Primitive.Var */;
+			/* case Operation operation -> Primitive.Var */;
+			/* case Placeholder placeholder -> Primitive.Var */;
+			/* case StringValue stringValue -> Primitive.Var */;
+			/* case SymbolValue symbolValue -> state.resolve(symbolValue.value).orElse(Primitive.Var) */;
+		}
+		/*  */;
 	}
 	/* private static */ invocationHeader(state : CompileState, depth : number, callerString1 : string) : [CompileState, Caller] {
 		/* if (callerString1.startsWith("new ")) {{
@@ -1035,7 +1051,7 @@
 		});
 	}
 	/* private static */ compileValues(state : CompileState, params : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
-		let parsed = parseValuesOrEmpty(state, params, (state1,  s) => new Some(mapper.apply(state1, s)));
+		let parsed = parseValuesOrEmpty(state, params, (state1,  s) => new Some(mapper(state1, s)));
 		let generated = generateValues(parsed.right);
 		return new Tuple(parsed.left, generated);
 	}
@@ -1224,14 +1240,14 @@
 		return infix(input, infix, Main.findFirst, mapper);
 	}
 	/* private static  */ infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return split(() => locator.apply(input, infix).map((index) => {
+		return split(() => locator(input, infix).map((index) => {
 			let left = input.substring(0, index);
 			let right = input.substring(index + infix.length());
 			return new Tuple(left, right);
 		}), mapper);
 	}
 	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
+		return splitter().flatMap((tuple) => mapper(tuple.left, tuple.right));
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
 		let index = input.indexOf(infix);

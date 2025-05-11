@@ -4,7 +4,7 @@
     }
     /* @Override
         public  */ map(mapper) {
-        return new Some(mapper.apply(this.value));
+        return new Some(mapper(this.value));
     }
     /* @Override
         public */ isPresent() {
@@ -31,7 +31,7 @@
     }
     /* @Override
         public  */ flatMap(mapper) {
-        return mapper.apply(this.value);
+        return mapper(this.value);
     }
     /* @Override
         public */ isEmpty() {
@@ -57,11 +57,11 @@
     }
     /* @Override
         public */ orElseGet(supplier) {
-        return supplier.get();
+        return supplier();
     }
     /* @Override
         public */ or(other) {
-        return other.get();
+        return other();
     }
     /* @Override
         public  */ flatMap(mapper) {
@@ -408,39 +408,32 @@
         return this.stripped;
     }
 }
-/* private static */ class DataAccess /*  */ {
-    DataAccess(parent, property) {
-        let /* this.parent  */ = parent;
-        let /* this.property  */ = property;
+/* private */ class DataAccess /*  */ {
+    constructor(parent, property) {
     }
     /* @Override
         public */ generate() {
         return this.parent.generate() + "." + this.property;
     }
 }
-/* private static */ class SymbolValue /*  */ {
-    SymbolValue(stripped) {
-        let /* this.stripped  */ = stripped;
+/* private */ class SymbolValue /*  */ {
+    constructor(value) {
     }
     /* @Override
         public */ generate() {
-        return this.stripped;
+        return this.value;
     }
 }
-/* private static */ class ConstructionCaller /*  */ {
-    ConstructionCaller(right) {
-        let /* this.right  */ = right;
+/* private */ class ConstructionCaller /*  */ {
+    constructor(right) {
     }
     /* @Override
         public */ generate() {
         return "new " + this.right.generate();
     }
 }
-/* private static */ class Operation /*  */ {
-    Operation(left, infix, right) {
-        let /* this.left  */ = left;
-        let /* this.infix  */ = infix;
-        let /* this.right  */ = right;
+/* private */ class Operation /*  */ {
+    constructor(left, infix, right) {
     }
     /* @Override
         public */ generate() {
@@ -488,6 +481,9 @@
         /* public CompileState()  */ {
             /* this(Lists.empty(), Lists.empty()) */ ;
         }
+        /* private Option<Type> resolve(String name)  */ {
+            return this.definitions.iterate().filter((definition) => definition.name.equals(name)).next().map(Definition.type);
+        }
         /* public CompileState addStructure(String structure)  */ {
             return new CompileState(this.structures.addLast(structure), this.definitions);
         }
@@ -530,7 +526,7 @@
         return elements.iterate().fold(new StringBuilder(), merger).toString();
     }
     /* private static  */ parseAll(state, input, folder, mapper) {
-        return getCompileStateListTuple(state, input, folder, (state1, s) => new Some(mapper.apply(state1, s))).orElseGet(() => new Tuple(state, Lists.empty()));
+        return getCompileStateListTuple(state, input, folder, (state1, s) => new Some(mapper(state1, s))).orElseGet(() => new Tuple(state, Lists.empty()));
     }
     /* private static  */ getCompileStateListTuple(state, input, folder, mapper) {
         let initial = new Some(new Tuple(state, Lists.empty()));
@@ -538,7 +534,7 @@
             return tuple.flatMap((inner) => {
                 let state1 = inner.left;
                 let right = inner.right;
-                return mapper.apply(state1, element).map((applied) => {
+                return mapper(state1, element).map((applied) => {
                     return new Tuple(applied.left, right.addLast(applied.right));
                 });
             });
@@ -703,7 +699,7 @@
             return new None();
         }
         let slice = input.substring(0, input.length() - suffix.length());
-        return mapper.apply(slice);
+        return mapper(slice);
     }
     /* private static */ compileClassSegment(state, input, depth) {
         return compileWhitespace(input, state).or(() => compileClass(input, depth, state)).or(() => structure(input, "interface ", "interface ", state)).or(() => structure(input, "record ", "class ", state)).or(() => compileMethod(state, input, depth)).or(() => compileDefinitionStatement(input, depth, state)).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
@@ -877,12 +873,35 @@
                     let callerString1 = callerString.strip();
                     let callerTuple = invocationHeader(state, depth, callerString1);
                     let parsed = parseValues(callerTuple.left, argumentsString, (state3, s) => new Some(parseValue(state3, s, depth))).orElseGet(() => new Tuple(callerTuple.left, Lists.empty()));
-                    let caller = callerTuple.right;
+                    let oldCaller = callerTuple.right;
                     let arguments = parsed.right;
-                    return new Some(new Tuple(parsed.left, new Invokable(caller, arguments)));
+                    let newCaller = modifyCaller(parsed.left, oldCaller);
+                    let invokable = new Invokable(newCaller, arguments);
+                    return new Some(new Tuple(parsed.left, invokable));
                 });
             });
         });
+    }
+    /* private static */ modifyCaller(state, oldCaller) {
+        /* if (oldCaller instanceof DataAccess access) {{
+            var type = resolveType(access.parent, state);
+            if (type instanceof FunctionType)  */ {
+            return access.parent; /* } */
+        }
+        return oldCaller;
+    }
+    /* private static */ resolveType(value, state) {
+        /* return switch (value)  */ {
+            /* case DataAccess dataAccess -> Primitive.Var */ ;
+            /* case Invokable invokable -> Primitive.Var */ ;
+            /* case Lambda lambda -> Primitive.Var */ ;
+            /* case Not not -> Primitive.Var */ ;
+            /* case Operation operation -> Primitive.Var */ ;
+            /* case Placeholder placeholder -> Primitive.Var */ ;
+            /* case StringValue stringValue -> Primitive.Var */ ;
+            /* case SymbolValue symbolValue -> state.resolve(symbolValue.value).orElse(Primitive.Var) */ ;
+        }
+        /*  */ ;
     }
     /* private static */ invocationHeader(state, depth, callerString1) {
         /* if (callerString1.startsWith("new ")) {{
@@ -946,7 +965,7 @@
         });
     }
     /* private static */ compileValues(state, params, mapper) {
-        let parsed = parseValuesOrEmpty(state, params, (state1, s) => new Some(mapper.apply(state1, s)));
+        let parsed = parseValuesOrEmpty(state, params, (state1, s) => new Some(mapper(state1, s)));
         let generated = generateValues(parsed.right);
         return new Tuple(parsed.left, generated);
     }
@@ -1135,14 +1154,14 @@
         return infix(input, infix, Main.findFirst, mapper);
     }
     /* private static  */ infix(input, infix, locator, mapper) {
-        return split(() => locator.apply(input, infix).map((index) => {
+        return split(() => locator(input, infix).map((index) => {
             let left = input.substring(0, index);
             let right = input.substring(index + infix.length());
             return new Tuple(left, right);
         }), mapper);
     }
     /* private static  */ split(splitter, mapper) {
-        return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
+        return splitter().flatMap((tuple) => mapper(tuple.left, tuple.right));
     }
     /* private static */ findFirst(input, infix) {
         let index = input.indexOf(infix);

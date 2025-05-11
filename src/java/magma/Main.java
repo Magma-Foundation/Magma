@@ -83,7 +83,7 @@ public class Main {
     private interface Parameter {
     }
 
-    private interface Value extends LambdaValue, Caller {
+    private sealed interface Value extends LambdaValue, Caller {
         String generate();
     }
 
@@ -356,6 +356,13 @@ public class Main {
             this(Lists.empty(), Lists.empty());
         }
 
+        private Option<Type> resolve(String name) {
+            return this.definitions.iterate()
+                    .filter(definition -> definition.name.equals(name))
+                    .next()
+                    .map(Definition::type);
+        }
+
         public CompileState addStructure(String structure) {
             return new CompileState(this.structures.addLast(structure), this.definitions);
         }
@@ -624,57 +631,28 @@ public class Main {
         }
     }
 
-    private static class DataAccess implements Value {
-        private final Value parent;
-        private final String property;
-
-        public DataAccess(Value parent, String property) {
-            this.parent = parent;
-            this.property = property;
-        }
-
+    private record DataAccess(Value parent, String property) implements Value {
         @Override
         public String generate() {
             return this.parent.generate() + "." + this.property;
         }
     }
 
-    private static class SymbolValue implements Value {
-        private final String stripped;
-
-        public SymbolValue(String stripped) {
-            this.stripped = stripped;
-        }
-
+    private record SymbolValue(String value) implements Value {
         @Override
         public String generate() {
-            return this.stripped;
+            return this.value;
         }
     }
 
-    private static class ConstructionCaller implements Caller {
-        private final Type right;
-
-        public ConstructionCaller(Type right) {
-            this.right = right;
-        }
-
+    private record ConstructionCaller(Type right) implements Caller {
         @Override
         public String generate() {
             return "new " + this.right.generate();
         }
     }
 
-    private static class Operation implements Value {
-        private final Value left;
-        private final String infix;
-        private final Value right;
-
-        public Operation(Value left, String infix, Value right) {
-            this.left = left;
-            this.infix = infix;
-            this.right = right;
-        }
+    private record Operation(Value left, String infix, Value right) implements Value {
 
         @Override
         public String generate() {
@@ -1228,12 +1206,39 @@ public class Main {
                     var parsed = parseValues(callerTuple.left, argumentsString, (state3, s) -> new Some<>(parseValue(state3, s, depth)))
                             .orElseGet(() -> new Tuple<>(callerTuple.left, Lists.empty()));
 
-                    var caller = callerTuple.right;
+                    var oldCaller = callerTuple.right;
                     var arguments = parsed.right;
-                    return new Some<>(new Tuple<>(parsed.left, new Invokable(caller, arguments)));
+
+                    var newCaller = modifyCaller(parsed.left, oldCaller);
+                    var invokable = new Invokable(newCaller, arguments);
+                    return new Some<>(new Tuple<>(parsed.left, invokable));
                 });
             });
         });
+    }
+
+    private static Caller modifyCaller(CompileState state, Caller oldCaller) {
+        if (oldCaller instanceof DataAccess access) {
+            var type = resolveType(access.parent, state);
+            if (type instanceof FunctionType) {
+                return access.parent;
+            }
+        }
+
+        return oldCaller;
+    }
+
+    private static Type resolveType(Value value, CompileState state) {
+        return switch (value) {
+            case DataAccess dataAccess -> Primitive.Var;
+            case Invokable invokable -> Primitive.Var;
+            case Lambda lambda -> Primitive.Var;
+            case Not not -> Primitive.Var;
+            case Operation operation -> Primitive.Var;
+            case Placeholder placeholder -> Primitive.Var;
+            case StringValue stringValue -> Primitive.Var;
+            case SymbolValue symbolValue -> state.resolve(symbolValue.value).orElse(Primitive.Var);
+        };
     }
 
     private static Tuple<CompileState, Caller> invocationHeader(CompileState state, int depth, String callerString1) {
