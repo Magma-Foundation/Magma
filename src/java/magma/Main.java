@@ -666,7 +666,19 @@ public class Main {
                 .or(() -> symbolValue(state, input))
                 .or(() -> stringValue(state, input))
                 .or(() -> dataAccess(state, input))
+                .or(() -> invocation(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> invocation(CompileState state, String input) {
+        return suffix(input.strip(), ")", withoutEnd -> {
+            return first(withoutEnd, "(", (callerString, argumentsString) -> {
+                var callerTuple = value(state, callerString);
+                var argumentsTuple = compileValues(callerTuple.left, argumentsString, Main::value);
+
+                return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.left + "(" + argumentsTuple.right + ")"));
+            });
+        });
     }
 
     private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
