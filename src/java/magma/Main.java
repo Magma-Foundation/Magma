@@ -312,6 +312,10 @@ public class Main {
         public Option<DivideState> popAndAppendToOption() {
             return this.popAndAppendToTuple().map(Tuple::right);
         }
+
+        public char peek() {
+            return this.input.charAt(this.index);
+        }
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
@@ -662,11 +666,11 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> value(CompileState state, String input) {
-        return operation(state, input)
-                .or(() -> symbolValue(state, input))
+        return lambda(state, input)
                 .or(() -> stringValue(state, input))
                 .or(() -> dataAccess(state, input))
-                .or(() -> lambda(state, input))
+                .or(() -> symbolValue(state, input))
+                .or(() -> operation(state, input))
                 .or(() -> invocation(state, input))
                 .or(() -> digits(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
@@ -876,10 +880,20 @@ public class Main {
         }
 
         var appended = state.append(c);
-        if (c == '<') {
+        if (c == '-') {
+            var peeked = appended.peek();
+            if (peeked == '>') {
+                return appended.popAndAppendToOption().orElse(appended);
+            }
+            else {
+                return appended;
+            }
+        }
+
+        if (c == '<' || c == '(' || c == '{') {
             return appended.enter();
         }
-        if (c == '>') {
+        if (c == '>' || c == ')' || c == '}') {
             return appended.exit();
         }
         return appended;

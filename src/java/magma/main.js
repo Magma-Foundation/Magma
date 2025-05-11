@@ -110,7 +110,7 @@
             public */ removeLast() {
         let slice = this.elements.subList(0);
         let last = this.elements.getLast();
-        return /* new Some<> */ ( /* new Tuple<List<T>, T> */( /* new JVMList<>(slice */),  /*  last) */);
+        return /* new Some<> */ ( /* new Tuple<List<T>, T> */( /* new JVMList<> */(slice), last));
     }
     /* @Override
             public */ get(index) {
@@ -167,6 +167,9 @@
     }
     /* public */ popAndAppendToOption() {
         return this.popAndAppendToTuple().map( /* Tuple::right */);
+    }
+    /* public */ peek() {
+        return this.input.charAt(this.index);
     }
 }
 /* private static */ class ListCollector {
@@ -237,7 +240,7 @@
         return elements.iterate().fold(/* new StringBuilder */ (), merger).toString();
     }
     /* private static */ parseAll(state, input, folder, mapper) {
-        return divideAll(input, folder).iterate().fold(Lists.empty( /* ) */));
+        return divideAll(input, folder).iterate().fold(/* new Tuple<> */ (state, Lists.empty()));
     }
     /* private static */ mergeStatements(stringBuilder, str) {
         return stringBuilder.append(str);
@@ -294,9 +297,9 @@
             return new None<>();
         } */
         let joinedTypeParams = /*  typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<"  */ +inner +  /*  ">").orElse("") */;
-        let statements = compileStatements(state, content);
+        let statements = compileStatements(state, content, /* (state0, input) -> compileClassSegment */ ( /* state0 */, input, 1));
         let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + statements.right + "\n}\n";
-        return /* new Some<> */ ( /* new Tuple<> */( /* statements.left.addStructure(generated */),  /*  "") */);
+        return /* new Some<> */ ( /* new Tuple<> */(statements.left.addStructure(generated), ""));
     }
     /* private static */ isSymbol(input) {
         return true;
@@ -371,7 +374,7 @@ var s = indent  */
     }) */;
     }
     /* private static */ value(state, input) {
-        return operation(state, input).or(() => symbolValue(state, input)).or(() => stringValue(state, input)).or(() => dataAccess(state, input)).or(() => lambda(state, input)).or(() => invocation(state, input)).or(() => digits(state, input)).orElseGet(() =>  /*  new Tuple<CompileState */, /* String> */ (state, generatePlaceholder(input)));
+        return lambda(state, input).or(() => stringValue(state, input)).or(() => dataAccess(state, input)).or(() => symbolValue(state, input)).or(() => operation(state, input)).or(() => invocation(state, input)).or(() => digits(state, input)).orElseGet(() => /* new Tuple<CompileState, String> */ (state, generatePlaceholder(input)));
     }
     /* private static */ lambda(state, input) {
         return first(input, "->");
@@ -501,12 +504,20 @@ var s = indent  */
     /* private static */ assembleDefinition(state, beforeTypeParams, name, typeParams, type) {
         let type1 = type(state, type);
         let node = /* new Definition */ (beforeTypeParams, /* type1 */ .right, name.strip(), typeParams);
-        return /* new Some<> */ ( /* new Tuple<>(type1 */.left,  /*  node) */);
+        return /* new Some<> */ ( /* new Tuple<> */( /* type1 */.left, node));
     }
     /* private static */ foldValueChar(state, c) {
-        let appended = state.append(c); /* if (c == '<') {
+        let appended = state.append(c); /* if (c == '-') {
+            var peeked = appended.peek();
+            if (peeked == '>') {
+                return appended.popAndAppendToOption().orElse(appended);
+            }
+            else {
+                return appended;
+            }
+        } */ /* if (c == '<' || c == '(' || c == '{') {
             return appended.enter();
-        } */ /* if (c == '>') {
+        } */ /* if (c == '>' || c == ')' || c == '}') {
             return appended.exit();
         } */
         return appended;
@@ -582,7 +593,9 @@ var s = indent  */
         return; /* split(() -> locator.apply(input, infix).map(index -> {
             var left = input.substring(0, index);
             var right = input.substring(index  */
-        +infix.length(mapper);
+        +infix.length( /* ));
+        return new Tuple<>(left, right);
+    }), mapper */);
     }
     /* private static  */ split(splitter, mapper) {
         return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
