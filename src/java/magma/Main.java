@@ -358,12 +358,19 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> structures, List<Definition> definitions) {
+    private record ObjectType(String name) implements Type {
+        @Override
+        public String generate() {
+            return this.name;
+        }
+    }
+
+    private record CompileState(List<String> structures, List<Definition> definitions, List<ObjectType> types) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.empty());
         }
 
-        private Option<Type> resolve(String name) {
+        private Option<Type> resolveValue(String name) {
             return this.definitions.iterate()
                     .filter(definition -> definition.name.equals(name))
                     .next()
@@ -371,11 +378,17 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.types);
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, definitions);
+            return new CompileState(this.structures, definitions, this.types);
+        }
+
+        public Option<ObjectType> resolveType(String name) {
+            return this.types.iterate()
+                    .filter(type -> type.name.equals(name))
+                    .next();
         }
     }
 
@@ -611,7 +624,7 @@ public class Main {
         }
     }
 
-    private record Template(String base, List<Type> arguments) implements Type {
+    private record Template(Type base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
             var joinedArguments = this.arguments.iterate()
@@ -620,11 +633,11 @@ public class Main {
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
 
-            return this.base + joinedArguments;
+            return this.base.generate() + joinedArguments;
         }
     }
 
-    private record Placeholder(String input) implements Parameter, Value {
+    private record Placeholder(String input) implements Parameter, Value, Type {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -1392,7 +1405,7 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseSymbolValue(CompileState state, String value) {
         var stripped = value.strip();
         if (isSymbol(stripped)) {
-            if (state.resolve(stripped) instanceof Some(var type)) {
+            if (state.resolveValue(stripped) instanceof Some(var type)) {
                 return new Some<>(new Tuple<>(state, new SymbolValue(stripped, type)));
             }
             return new Some<>(new Tuple<>(state, new Placeholder(stripped)));
@@ -1565,7 +1578,7 @@ public class Main {
             return new Some<>(new Tuple<>(state, new SymbolType(stripped)));
         }
 
-        return template(state, input)
+        return parseTemplate(state, input)
                 .or(() -> varArgs(state, input));
     }
 
@@ -1579,18 +1592,18 @@ public class Main {
         });
     }
 
-    private static Option<Tuple<CompileState, Type>> template(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> parseTemplate(CompileState state, String input) {
         return suffix(input.strip(), ">", withoutEnd -> {
             return first(withoutEnd, "<", (base, argumentsString) -> {
                 var strippedBase = base.strip();
                 return parseValues(state, argumentsString, Main::argument).map(argumentsTuple -> {
-                    return assembleTemplate(base, strippedBase, argumentsTuple.left, argumentsTuple.right);
+                    return assembleTemplate(strippedBase, argumentsTuple.left, argumentsTuple.right);
                 });
             });
         });
     }
 
-    private static Tuple<CompileState, Type> assembleTemplate(String base, String strippedBase, CompileState state, List<Argument> arguments) {
+    private static Tuple<CompileState, Type> assembleTemplate(String base, CompileState state, List<Argument> arguments) {
         var children = arguments
                 .iterate()
                 .map(Main::retainType)
@@ -1617,7 +1630,12 @@ public class Main {
             return new Tuple<>(state, new TupleType(children));
         }
 
-        return new Tuple<>(state, new Template(strippedBase, children));
+        if (state.resolveType(base) instanceof Some(var baseType)) {
+            return new Tuple<>(state, new Template(baseType, children));
+        }
+        else {
+            return new Tuple<>(state, new Template(new Placeholder(base), children));
+        }
     }
 
     private static Option<Type> retainType(Argument argument) {
