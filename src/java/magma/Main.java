@@ -797,10 +797,10 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input, int depth) {
         return last(input.strip(), ".", (parent, property) -> {
-            var value = value(state, parent, depth);
             if (!isSymbol(property)) {
                 return new None<>();
             }
+            var value = value(state, parent, depth);
             return new Some<>(new Tuple<>(value.left, value.right + "." + property));
         });
     }
