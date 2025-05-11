@@ -85,13 +85,15 @@ public class Main {
 
     private sealed interface Value extends LambdaValue, Caller {
         String generate();
+
+        Type type();
     }
 
     private interface LambdaValue {
         String generate();
     }
 
-    private interface Caller {
+    private sealed interface Caller {
         String generate();
     }
 
@@ -481,7 +483,7 @@ public class Main {
         }
 
         private String generateType() {
-            if (this.type.equals(Primitive.Var)) {
+            if (this.type.equals(Primitive.Unknown)) {
                 return "";
             }
 
@@ -627,12 +629,22 @@ public class Main {
         public String generate() {
             return generatePlaceholder(this.input);
         }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
+        }
     }
 
     private record StringValue(String stripped) implements Value {
         @Override
         public String generate() {
             return this.stripped;
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
         }
     }
 
@@ -641,12 +653,17 @@ public class Main {
         public String generate() {
             return this.parent.generate() + "." + this.property;
         }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
+        }
     }
 
-    private record ConstructionCaller(Type right) implements Caller {
+    private record ConstructionCaller(Type type) implements Caller {
         @Override
         public String generate() {
-            return "new " + this.right.generate();
+            return "new " + this.type.generate();
         }
     }
 
@@ -656,12 +673,22 @@ public class Main {
         public String generate() {
             return this.left.generate() + " " + this.infix + " " + this.right.generate();
         }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
+        }
     }
 
     private record Not(Value value) implements Value {
         @Override
         public String generate() {
             return "!" + this.value.generate();
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
         }
     }
 
@@ -682,9 +709,14 @@ public class Main {
 
             return "(" + joined + ") => " + this.body.generate();
         }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
+        }
     }
 
-    private record Invokable(Caller caller, List<Value> arguments) implements Value {
+    private record Invokable(Caller caller, List<Value> arguments, Type returnsType) implements Value {
         @Override
         public String generate() {
             var joined = this.arguments.iterate()
@@ -692,7 +724,12 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.caller.generate() + "(" + joined + ")";
+            return this.caller.generate() + "(" + joined + ")" + generatePlaceholder(": " + this.returnsType.generate());
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
         }
     }
 
@@ -700,6 +737,11 @@ public class Main {
         @Override
         public String generate() {
             return this.parent.generate() + "[" + this.child.generate() + "]";
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
         }
     }
 
@@ -715,6 +757,11 @@ public class Main {
         @Override
         public String generate() {
             return this.stripped + generatePlaceholder(" : " + this.type.generate());
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Unknown;
         }
     }
 
@@ -1244,7 +1291,17 @@ public class Main {
                     var arguments = parsed.right;
 
                     var newCaller = modifyCaller(parsed.left, oldCaller);
-                    var invokable = new Invokable(newCaller, arguments);
+                    Type var;
+                    switch (newCaller) {
+                        case ConstructionCaller constructionCaller -> {
+                            var = constructionCaller.type;
+                        }
+                        case Value value -> {
+                            var = value.type();
+                        }
+                    }
+
+                    var invokable = new Invokable(newCaller, arguments, var);
                     return new Some<>(new Tuple<>(parsed.left, invokable));
                 });
             });
@@ -1264,15 +1321,15 @@ public class Main {
 
     private static Type resolveType(Value value, CompileState state) {
         return switch (value) {
-            case DataAccess dataAccess -> Primitive.Var;
-            case Invokable invokable -> Primitive.Var;
-            case Lambda lambda -> Primitive.Var;
-            case Not not -> Primitive.Var;
-            case Operation operation -> Primitive.Var;
-            case Placeholder placeholder -> Primitive.Var;
-            case StringValue stringValue -> Primitive.Var;
+            case DataAccess dataAccess -> Primitive.Unknown;
+            case Invokable invokable -> Primitive.Unknown;
+            case Lambda lambda -> Primitive.Unknown;
+            case Not not -> Primitive.Unknown;
+            case Operation operation -> Primitive.Unknown;
+            case Placeholder placeholder -> Primitive.Unknown;
+            case StringValue stringValue -> Primitive.Unknown;
             case SymbolValue symbolValue -> symbolValue.type;
-            case IndexValue indexValue -> Primitive.Var;
+            case IndexValue indexValue -> Primitive.Unknown;
         };
     }
 
@@ -1324,7 +1381,7 @@ public class Main {
                     return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
                 }
 
-                if (property.equals("right")) {
+                if (property.equals("type")) {
                     return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
                 }
             }
@@ -1509,8 +1566,8 @@ public class Main {
             return new Some<>(new Tuple<>(state, Primitive.String));
         }
 
-        if (stripped.equals("var")) {
-            return new Some<>(new Tuple<>(state, Primitive.Var));
+        if (stripped.equals("type")) {
+            return new Some<>(new Tuple<>(state, Primitive.Unknown));
         }
 
         if (isSymbol(stripped)) {
@@ -1641,7 +1698,7 @@ public class Main {
         Int("number"),
         String("string"),
         Boolean("boolean"),
-        Var("var");
+        Unknown("unknown");
 
         private final String value;
 
