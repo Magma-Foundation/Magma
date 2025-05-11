@@ -703,8 +703,8 @@ public class Main {
                 .or(() -> stringValue(state, input))
                 .or(() -> dataAccess(state, input, depth))
                 .or(() -> symbolValue(state, input))
-                .or(() -> operation(state, input, depth))
                 .or(() -> invocation(state, input, depth))
+                .or(() -> operation(state, input, depth))
                 .or(() -> digits(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
     }
