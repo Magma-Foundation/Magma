@@ -608,10 +608,26 @@ public class Main {
         }
 
         return suffix(stripped, ";", s -> {
-            return new Some<>(new Tuple<>(state, createIndent(depth) + generatePlaceholder(s) + ";"));
+            var tuple = statementValue(state, s);
+            return new Some<>(new Tuple<>(tuple.left, createIndent(depth) + tuple.right + ";"));
         }).orElseGet(() -> {
             return new Tuple<>(state, generatePlaceholder(stripped));
         });
+    }
+
+    private static Tuple<CompileState, String> statementValue(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("return ")) {
+            var value = stripped.substring("return ".length());
+            var tuple = compileValue(state, value);
+            return new Tuple<>(tuple.left, "return " + tuple.right);
+        }
+
+        return new Tuple<>(state, generatePlaceholder(stripped));
+    }
+
+    private static Tuple<CompileState, String> compileValue(CompileState state, String value) {
+        return new Tuple<CompileState, String>(state, generatePlaceholder(value));
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
