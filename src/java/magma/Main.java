@@ -25,6 +25,8 @@ public class Main {
         Option<T> or(Supplier<Option<T>> other);
 
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        boolean isEmpty();
     }
 
     private interface Collector<T, C> {
@@ -90,6 +92,11 @@ public class Main {
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return mapper.apply(this.value);
         }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     }
 
     private static class None<T> implements Option<T> {
@@ -126,6 +133,11 @@ public class Main {
         @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
         }
     }
 
@@ -176,10 +188,13 @@ public class Main {
         }
     }
 
-
     private static class Lists {
-        private record JVMList<T>(java.util.List<T> elements) implements List<T> {
+        private static final class JVMList<T> implements List<T> {
+            private final java.util.List<T> elements;
 
+            private JVMList(java.util.List<T> elements) {
+                this.elements = elements;
+            }
 
             public JVMList() {
                 this(new ArrayList<>());
@@ -421,7 +436,8 @@ public class Main {
         var current = new DivideState(input);
         while (true) {
             var maybePopped = current.pop().map(tuple -> {
-                return divideSingleQuotes(tuple)
+                return foldSingleQuotes(tuple)
+                        .or(() -> foldDoubleQuotes(tuple))
                         .orElseGet(() -> folder.apply(tuple.right, tuple.left));
             });
 
@@ -436,7 +452,33 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static Option<DivideState> divideSingleQuotes(Tuple<Character, DivideState> tuple) {
+    private static Option<DivideState> foldDoubleQuotes(Tuple<Character, DivideState> tuple) {
+        if (tuple.left == '\"') {
+            var current = tuple.right.append(tuple.left);
+            while (true) {
+                var maybePopped = current.popAndAppendToTuple();
+                if (maybePopped.isEmpty()) {
+                    break;
+                }
+
+                var popped = maybePopped.orElse(null);
+                current = popped.right;
+
+                if (popped.left == '\\') {
+                    current = current.popAndAppendToOption().orElse(current);
+                }
+                if (popped.left == '\"') {
+                    break;
+                }
+            }
+
+            return new Some<>(current);
+        }
+
+        return new None<>();
+    }
+
+    private static Option<DivideState> foldSingleQuotes(Tuple<Character, DivideState> tuple) {
         if (tuple.left == '\'') {
             var appended = tuple.right.append(tuple.left);
             return appended.popAndAppendToTuple()

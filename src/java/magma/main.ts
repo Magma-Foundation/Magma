@@ -1,23 +1,19 @@
 /* private static */class Lists {
-	/* private */ JVMList<T>(elements : java.util.List<T>) : record{/* implements List<T> {
+	/* private static final class JVMList<T> implements List<T> {
+            private final java.util.List<T> elements;
 
-
-            public JVMList() {
+            */ JVMList(elements : java.util.List<T>) : private{/* {
+                this.elements = elements;
+            } *//* public JVMList() {
                 this(new ArrayList<>());
-            }
-
-            @Override
+            } *//* @Override
             public List<T> add(T element) {
                 this.elements.add(element);
                 return this;
-            }
-
-            @Override
+            } *//* @Override
             public Iterator<T> iterate() {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(this.elements::get);
-            }
-
-            @Override
+            } *//* @Override
             public Option<Tuple<List<T>, T>> removeLast() {
                 if (this.elements.isEmpty()) {
                     return new None<>();
@@ -26,13 +22,10 @@
                 var slice = this.elements.subList(0, this.elements.size() - 1);
                 var last = this.elements.getLast();
                 return new Some<>(new Tuple<List<T>, T>(new JVMList<>(slice), last));
-            }
-
-            @Override
+            } *//* @Override
             public T get(int index) {
                 return this.elements.get(index);
-            }
-        } */}
+            } *//* } */}
 	/* public static  */ empty<T>() : List<T>{/* {
             return new JVMList<>();
         } */}
@@ -103,7 +96,8 @@
 	/* Option<T> filter(Predicate<T> predicate) */;
 	/* T orElseGet(Supplier<T> supplier) */;
 	/* Option<T> or(Supplier<Option<T>> other) */;
-	/* <R> Option<R> flatMap(Function<T, Option<R>> mapper) */;/* } */}
+	/* <R> Option<R> flatMap(Function<T, Option<R>> mapper) */;
+	/* boolean isEmpty() */;/* } */}
 	/* private interface Collector<T, C> {
         */ createInitial() : C{
 	/*  */;
@@ -157,6 +151,11 @@
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return mapper.apply(this.value);
         }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     } */}
 	/* private static class None */ map<T> implements Option<T> {
         @Override
@@ -180,6 +179,9 @@
         } *//* @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
+        } *//* @Override
+        public boolean isEmpty() {
+            return true;
         } *//* } */}
 	/* private */ HeadedIterator<T>(head : Head<T>) : record{/* implements Iterator<T> {
         @Override
@@ -329,7 +331,8 @@
         var current = new DivideState(input);
         while (true) {
             var maybePopped = current.pop().map(tuple -> {
-                return divideSingleQuotes(tuple)
+                return foldSingleQuotes(tuple)
+                        .or(() -> foldDoubleQuotes(tuple))
                         .orElseGet(() -> folder.apply(tuple.right, tuple.left));
             });
 
@@ -343,7 +346,32 @@
 
         return current.advance().segments;
     } */}
-	/* private static */ divideSingleQuotes(tuple : [Character, DivideState]) : Option<DivideState>{/* {
+	/* private static */ foldDoubleQuotes(tuple : [Character, DivideState]) : Option<DivideState>{/* {
+        if (tuple.left == '\"') {
+            var current = tuple.right.append(tuple.left);
+            while (true) {
+                var maybePopped = current.popAndAppendToTuple();
+                if (maybePopped.isEmpty()) {
+                    break;
+                }
+
+                var popped = maybePopped.orElse(null);
+                current = popped.right;
+
+                if (popped.left == '\\') {
+                    current = current.popAndAppendToOption().orElse(current);
+                }
+                if (popped.left == '\"') {
+                    break;
+                }
+            }
+
+            return new Some<>(current);
+        }
+
+        return new None<>();
+    } */}
+	/* private static */ foldSingleQuotes(tuple : [Character, DivideState]) : Option<DivideState>{/* {
         if (tuple.left == '\'') {
             var appended = tuple.right.append(tuple.left);
             return appended.popAndAppendToTuple()

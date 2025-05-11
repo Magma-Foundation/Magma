@@ -1,6 +1,9 @@
 "use strict";
 /* private static */ class Lists {
-    /* private */ JVMList(elements) {
+    /* private static final class JVMList<T> implements List<T> {
+            private final java.util.List<T> elements;
+
+            */ JVMList(elements) {
     }
     /* public static  */ empty() {
     }
@@ -40,7 +43,8 @@
             /* Option<T> filter(Predicate<T> predicate) */ ;
             /* T orElseGet(Supplier<T> supplier) */ ;
             /* Option<T> or(Supplier<Option<T>> other) */ ;
-            /* <R> Option<R> flatMap(Function<T, Option<R>> mapper) */ ; /* } */
+            /* <R> Option<R> flatMap(Function<T, Option<R>> mapper) */ ;
+            /* boolean isEmpty() */ ; /* } */
         };
         /* private interface Collector<T, C> {
             */ createInitial();
@@ -99,6 +103,11 @@
             public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
                 return mapper.apply(this.value);
             }
+    
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
         } */
         }
         /* private static class None */ map < T > implements;
@@ -124,6 +133,9 @@
         } */ /* @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
+        } */ /* @Override
+        public boolean isEmpty() {
+            return true;
         } */ /* } */};
         /* private */ HeadedIterator(head, (Head));
         record;
@@ -313,7 +325,8 @@
             var current = new DivideState(input);
             while (true) {
                 var maybePopped = current.pop().map(tuple -> {
-                    return divideSingleQuotes(tuple)
+                    return foldSingleQuotes(tuple)
+                            .or(() -> foldDoubleQuotes(tuple))
                             .orElseGet(() -> folder.apply(tuple.right, tuple.left));
                 });
     
@@ -327,7 +340,33 @@
     
             return current.advance().segments;
         } */};
-        /* private static */ divideSingleQuotes(tuple, [Character, DivideState]);
+        /* private static */ foldDoubleQuotes(tuple, [Character, DivideState]);
+        Option < DivideState > { /* {
+            if (tuple.left == '\"') {
+                var current = tuple.right.append(tuple.left);
+                while (true) {
+                    var maybePopped = current.popAndAppendToTuple();
+                    if (maybePopped.isEmpty()) {
+                        break;
+                    }
+    
+                    var popped = maybePopped.orElse(null);
+                    current = popped.right;
+    
+                    if (popped.left == '\\') {
+                        current = current.popAndAppendToOption().orElse(current);
+                    }
+                    if (popped.left == '\"') {
+                        break;
+                    }
+                }
+    
+                return new Some<>(current);
+            }
+    
+            return new None<>();
+        } */};
+        /* private static */ foldSingleQuotes(tuple, [Character, DivideState]);
         Option < DivideState > { /* {
             if (tuple.left == '\'') {
                 var appended = tuple.right.append(tuple.left);
