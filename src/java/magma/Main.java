@@ -1754,7 +1754,7 @@ public class Main {
             return new Some<>(new Tuple<>(state, Primitive.String));
         }
 
-        if (stripped.equals("type")) {
+        if (stripped.equals("var")) {
             return new Some<>(new Tuple<>(state, Primitive.Unknown));
         }
 

@@ -688,7 +688,7 @@ Option < [/* CompileState */ , (List)] > {
 }
 /* private static */ divideAll(input, string, folder, (arg0, arg1 /* Character */) => DivideState);
 List < string > {
-    let, current: /* var */  = new DivideState(input /* : string */) /* : DivideState */
+    let, current = new DivideState(input /* : string */) /* : DivideState */
 };
 /* while (true)  */ {
     let maybePopped = /* current */ .pop /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((tuple) => {
@@ -815,7 +815,7 @@ or /* : unknown */(() => {
 }) /* : unknown */;
 /* private static */ assembleStructure(state, targetInfix, string, beforeInfix, string, rawName, string, content, string, typeParams, (List), afterTypeParams, string, params, (List));
 Option < [/* CompileState */ , string] > {
-    let, name: /* var */  = rawName /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, name = rawName /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (!isSymbol(name))  */ {
     return new None( /*  */) /* : None */;
@@ -1014,7 +1014,7 @@ Option < [/* CompileState */ , /* Value */] > {
 ;
 /* private static */ parseNot(state, input, string, depth, number);
 Option < [/* CompileState */ , /* Value */] > {
-    let, stripped: /* var */  = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (stripped.startsWith("!"))  */ {
     let slice = /* stripped */ .substring /* : unknown */(1 /* : number */) /* : unknown */;
@@ -1041,7 +1041,7 @@ Option < [/* CompileState */ , /* Value */] > {
 ;
 /* private static */ assembleLambda(state, paramNames, (List), valueString, string, depth, number);
 Some < [/* CompileState */ , /* Value */] > {
-    let, strippedValueString: /* var */  = valueString /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, strippedValueString = valueString /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}"))  */ {
     let value1 = /* compileStatements */ (state /* : content-start CompileState content-end */, /* strippedValueString */ .substring /* : unknown */(1 /* : number */, length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */, (state1, input1) => /* compileFunctionSegment */ ( /* state1 */,  /* input1 */, depth /* : number */ + 1 /* : number */) /* : unknown */) /* : unknown */;
@@ -1056,7 +1056,7 @@ let right = /* value */ .right /* : unknown */;
 return new Some(new Tuple(left /* : unknown */, new Lambda(paramNames /* : List<string> */) /* : Lambda */) /* : Tuple */) /* : Some */;
 /* private static */ parseDigits(state, input, string);
 Option < [/* CompileState */ , /* Value */] > {
-    let, stripped: /* var */  = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (isNumber(stripped))  */ {
     return new Some(new [/* CompileState */ , /* Value */](state /* : content-start CompileState content-end */, new SymbolValue(Int /* : unknown */) /* : SymbolValue */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : Some */;
@@ -1194,7 +1194,7 @@ Option < [/* CompileState */ , /* Value */] > {
 ;
 /* private static */ parseString(state, input, string);
 Option < [/* CompileState */ , /* Value */] > {
-    let, stripped: /* var */  = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (stripped.startsWith("\"") && stripped.endsWith("\""))  */ {
     return new Some(new Tuple(state /* : content-start CompileState content-end */, new StringValue( /* stripped */) /* : StringValue */) /* : Tuple */) /* : Some */;
@@ -1202,7 +1202,7 @@ Option < [/* CompileState */ , /* Value */] > {
 return new None( /*  */) /* : None */;
 /* private static */ parseSymbolValue(state, value, string);
 Option < [/* CompileState */ , /* Value */] > {
-    let, stripped: /* var */  = value /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, stripped = value /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (isSymbol(stripped))  */ {
     /* if (state.resolveValue(stripped) instanceof Some(var type))  */ {
@@ -1302,7 +1302,7 @@ Option < [/* CompileState */ , Definition] > {
 ;
 /* private static */ toLast(input, string, separator, string, folder, (arg0, arg1 /* Character */) => DivideState);
 Option < [string, string] > {
-    let, divisions: /* var */  = /* divideAll */ (input /* : string */, folder /* : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState */) /* : unknown */,
+    let, divisions = (input /* : string */, folder /* : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState */) /* : unknown */,
     return /* divisions */: /* divisions */ .removeLast /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((removed) => {
         let left = /* removed */ .left /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner(separator /* : string */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         let right = /* removed */ .right /* : unknown */;
@@ -1362,7 +1362,7 @@ Option < [/* CompileState */ , string] > {
 };
 /* private static */ parseType(state, input, string);
 Option < [/* CompileState */ , /* Type */] > {
-    let, stripped: /* var */  = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (stripped.equals("int") || stripped.equals("Integer"))  */ {
     return new Some(new Tuple(state /* : content-start CompileState content-end */, Int /* : unknown */) /* : Tuple */) /* : Some */;
@@ -1370,7 +1370,7 @@ Option < [/* CompileState */ , /* Type */] > {
 /* if (stripped.equals("String"))  */ {
     return new Some(new Tuple(state /* : content-start CompileState content-end */, String /* : unknown */) /* : Tuple */) /* : Some */;
 }
-/* if (stripped.equals("type"))  */ {
+/* if (stripped.equals("var"))  */ {
     return new Some(new Tuple(state /* : content-start CompileState content-end */, Unknown /* : unknown */) /* : Tuple */) /* : Some */;
 }
 /* if (isSymbol(stripped))  */ {
@@ -1453,7 +1453,7 @@ Option < T > {
 };
 /* private static */ findLast(input, string, infix, string);
 Option < number > {
-    let, index: /* var */  = input /* : string */.lastIndexOf /* : unknown */(infix /* : string */) /* : unknown */
+    let, index = input /* : string */.lastIndexOf /* : unknown */(infix /* : string */) /* : unknown */
 };
 /* if (index == -1)  */ {
     return new None( /*  */) /* : None<number> */;
@@ -1479,7 +1479,7 @@ Option < T > {
 };
 /* private static */ findFirst(input, string, infix, string);
 Option < number > {
-    let, index: /* var */  = input /* : string */.indexOf /* : unknown */(infix /* : string */) /* : unknown */
+    let, index = input /* : string */.indexOf /* : unknown */(infix /* : string */) /* : unknown */
 };
 /* if (index == -1)  */ {
     return new None( /*  */) /* : None<number> */;
