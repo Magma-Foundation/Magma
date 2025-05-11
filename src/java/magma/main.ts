@@ -33,7 +33,7 @@
 	}
 	/* @Override
         public */ isPresent() : boolean {
-		return /* true */;
+		return true;
 	}
 	/* @Override
         public */ orElse(other : T) : T {
@@ -49,7 +49,7 @@
 	}
 	/* @Override
         public */ or(other : () => Option<T>) : Option<T> {
-		return /* this */;
+		return this;
 	}
 	/* @Override
         public  */ flatMap<R>(mapper : (T) => Option<R>) : Option<R> {
@@ -57,7 +57,7 @@
 	}
 	/* @Override
         public */ isEmpty() : boolean {
-		return /* false */;
+		return false;
 	}
 }
 /* private static */class None<T> implements Option<T> {
@@ -67,11 +67,11 @@
 	}
 	/* @Override
         public */ isPresent() : boolean {
-		return /* false */;
+		return false;
 	}
 	/* @Override
         public */ orElse(other : T) : T {
-		return /* other */;
+		return other;
 	}
 	/* @Override
         public */ filter(predicate : (T) => boolean) : Option<T> {
@@ -91,7 +91,7 @@
 	}
 	/* @Override
         public */ isEmpty() : boolean {
-		return /* true */;
+		return true;
 	}
 }
 /* private */class HeadedIterator<T>(Head<T> head) implements Iterator<T> {
@@ -143,7 +143,7 @@
 	/* @Override
             public */ add(element : T) : List<T> {
 		/* this.elements.add(element) */;
-		return /* this */;
+		return this;
 	}
 	/* @Override
             public */ iterate() : Iterator<T> {
@@ -197,22 +197,22 @@
 	/* private */ advance() : DivideState {
 		/* this.segments = this.segments.add(this.buffer.toString()) */;
 		/* this.buffer = new StringBuilder() */;
-		return /* this */;
+		return this;
 	}
 	/* private */ append(c : char) : DivideState {
 		/* this.buffer.append(c) */;
-		return /* this */;
+		return this;
 	}
 	/* public */ enter() : DivideState {
 		/* this.depth++ */;
-		return /* this */;
+		return this;
 	}
 	/* public */ isLevel() : boolean {
 		return /* this.depth == 0 */;
 	}
 	/* public */ exit() : DivideState {
 		/* this.depth-- */;
-		return /* this */;
+		return this;
 	}
 	/* public */ isShallow() : boolean {
 		return /* this.depth == 1 */;
@@ -257,7 +257,7 @@
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("") */;
-		return /* before  */ + /*  this.name  */ + /*  joined  */ + /*  params  */ + /*  " : "  */ + /*  this.type */;
+		return before + /*  this.name  */ + joined + params + /*  " : "  */ + /*  this.type */;
 	}
 }
 /* private static */class ListCollector<T> implements Collector<T, List<T>> {
@@ -292,7 +292,7 @@
 	/* private static */ compile(input : string) : string {
 		/* var tuple = compileStatements(new CompileState(), input, Main::compileRootSegment) */;
 		/* var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("") */;
-		return /* joined  */ + /*  tuple.right */;
+		return joined + /*  tuple.right */;
 	}
 	/* private static */ compileStatements(state : CompileState, input : string, mapper : (CompileState, string) => [CompileState, string]) : [CompileState, string] {
 		return /* compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;
@@ -378,7 +378,7 @@
         } *//* if (c == '}') {
             return append.exit();
         } */
-		return /* append */;
+		return append;
 	}
 	/* private static */ compileRootSegment(state : CompileState, input : string) : [CompileState, string] {
 		/* var stripped = input.strip() */;/* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -412,7 +412,7 @@
             }
             return false;
         } */
-		return /* true */;
+		return true;
 	}
 	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (string) => Option<T>) : Option<T> {/* if (!input.endsWith(suffix)) {
             return new None<>();
@@ -476,17 +476,26 @@
 	/* private static */ statementValue(state : CompileState, input : string) : [CompileState, string] {
 		/* var stripped = input.strip() */;/* if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
-            var tuple = compileValue(state, value);
+            var tuple = value(state, value);
             return new Tuple<>(tuple.left, "return " + tuple.right);
         } */
 		return /* new Tuple<>(state, generatePlaceholder(stripped)) */;
 	}
-	/* private static */ compileValue(state : CompileState, value : string) : [CompileState, string] {/* return first(value, "+", (s, s2) -> {
-            var leftTuple = compileValue(state, s);
-            var rightTuple = compileValue(leftTuple.left, s2);
+	/* private static */ value(state : CompileState, input : string) : [CompileState, string] {
+		return /* operation(state, input)
+                .or(() -> symbolValue(state, input))
+                .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input))) */;
+	}
+	/* private static */ symbolValue(state : CompileState, value : string) : Option<[CompileState, string]> {
+		/* var stripped = value.strip() */;/* if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } */
+		return /* new None<>() */;
+	}
+	/* private static */ operation(state : CompileState, value : string) : Option<[CompileState, string]> {/* return first(value, "+", (s, s2) -> {
+            var leftTuple = value(state, s);
+            var rightTuple = value(leftTuple.left, s2);
             return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
-        } *//* ).orElseGet(() -> {
-            return new Tuple<CompileState, String>(state, generatePlaceholder(value));
         } */
 		/* ) */;
 	}
@@ -557,7 +566,7 @@
         } *//* if (c == '>') {
             return appended.exit();
         } */
-		return /* appended */;
+		return appended;
 	}
 	/* private static */ assembleDefinition(state : CompileState, beforeTypeParams : Option<string>, name : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
 		/* var type1 = type(state, type) */;
@@ -572,7 +581,7 @@
         } *//* if (c == '>') {
             return appended.exit();
         } */
-		return /* appended */;
+		return appended;
 	}
 	/* private static */ type(state : CompileState, input : string) : [CompileState, string] {
 		/* var stripped = input.strip() */;/* if (stripped.equals("int")) {
@@ -620,7 +629,7 @@
 		/* var joined = arguments.iterate()
                 .collect(new Joiner(", "))
                 .orElse("") */;
-		return /* "("  */ + /*  joined  */ + /*  ") => "  */ + /*  returns */;
+		return /* "("  */ + joined + /*  ") => "  */ + returns;
 	}
 	/* private static  */ last<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return /* infix(input, infix, Main::findLast, mapper) */;
@@ -650,7 +659,7 @@
 		/* var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end") */;
-		return /* "content-start "  */ + /*  replaced  */ + /*  " content-end" */;
+		return /* "content-start "  */ + replaced + /*  " content-end" */;
 	}
 }
 /*  */

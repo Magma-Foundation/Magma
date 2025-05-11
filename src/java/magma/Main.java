@@ -619,20 +619,32 @@ public class Main {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
-            var tuple = compileValue(state, value);
+            var tuple = value(state, value);
             return new Tuple<>(tuple.left, "return " + tuple.right);
         }
 
         return new Tuple<>(state, generatePlaceholder(stripped));
     }
 
-    private static Tuple<CompileState, String> compileValue(CompileState state, String value) {
+    private static Tuple<CompileState, String> value(CompileState state, String input) {
+        return operation(state, input)
+                .or(() -> symbolValue(state, input))
+                .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> symbolValue(CompileState state, String value) {
+        var stripped = value.strip();
+        if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, stripped));
+        }
+        return new None<>();
+    }
+
+    private static Option<Tuple<CompileState, String>> operation(CompileState state, String value) {
         return first(value, "+", (s, s2) -> {
-            var leftTuple = compileValue(state, s);
-            var rightTuple = compileValue(leftTuple.left, s2);
+            var leftTuple = value(state, s);
+            var rightTuple = value(leftTuple.left, s2);
             return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
-        }).orElseGet(() -> {
-            return new Tuple<CompileState, String>(state, generatePlaceholder(value));
         });
     }
 

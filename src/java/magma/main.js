@@ -13,7 +13,7 @@ Option < T > {
         public */ ,
     /* @Override
         public */ isPresent() {
-        return /* true */;
+        return true;
     }
     /* @Override
         public */ ,
@@ -37,7 +37,7 @@ Option < T > {
         public */ ,
     /* @Override
         public */ or(other) {
-        return /* this */;
+        return this;
     }
     /* @Override
         public  */ ,
@@ -49,7 +49,7 @@ Option < T > {
         public */ ,
     /* @Override
         public */ isEmpty() {
-        return /* false */;
+        return false;
     }
 };
 /* private static */ class None {
@@ -59,11 +59,11 @@ Option < T > {
     }
     /* @Override
         public */ isPresent() {
-        return /* false */;
+        return false;
     }
     /* @Override
         public */ orElse(other) {
-        return /* other */;
+        return other;
     }
     /* @Override
         public */ filter(predicate) {
@@ -83,7 +83,7 @@ Option < T > {
     }
     /* @Override
         public */ isEmpty() {
-        return /* true */;
+        return true;
     }
 }
 /* private */ class HeadedIterator {
@@ -136,7 +136,7 @@ Iterator < T > {
     /* @Override
             public */ add(element) {
         /* this.elements.add(element) */ ;
-        return /* this */;
+        return this;
     }
     /* @Override
             public */ iterate() {
@@ -190,22 +190,22 @@ Iterator < T > {
     /* private */ advance() {
         /* this.segments = this.segments.add(this.buffer.toString()) */ ;
         /* this.buffer = new StringBuilder() */ ;
-        return /* this */;
+        return this;
     }
     /* private */ append(c) {
         /* this.buffer.append(c) */ ;
-        return /* this */;
+        return this;
     }
     /* public */ enter() {
         /* this.depth++ */ ;
-        return /* this */;
+        return this;
     }
     /* public */ isLevel() {
         return /* this.depth == 0 */;
     }
     /* public */ exit() {
         /* this.depth-- */ ;
-        return /* this */;
+        return this;
     }
     /* public */ isShallow() {
         return /* this.depth == 1 */;
@@ -265,7 +265,7 @@ name, List < String > typeParams;
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("") */ ;
-        return /* before  */ + + + + + /*  this.type */;
+        return before + /*  this.name  */ +joined + params + /*  " : "  */ + /*  this.type */;
     }
 }
 /* private static */ class ListCollector {
@@ -291,7 +291,7 @@ right;
     /* private static */ compile(input) {
         /* var tuple = compileStatements(new CompileState(), input, Main::compileRootSegment) */ ;
         /* var joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("") */ ;
-        return /* joined  */ + /*  tuple.right */;
+        return joined +  /*  tuple.right */;
     }
     /* private static */ compileStatements(state, input, mapper) {
         return /* compileAll(state, input, Main::foldStatementChar, mapper, Main::mergeStatements) */;
@@ -346,7 +346,7 @@ right;
         } */ /* if (c == '}') {
             return append.exit();
         } */
-        return /* append */;
+        return append;
     }
     /* private static */ compileRootSegment(state, input) {
         /* var stripped = input.strip() */ ; /* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
@@ -370,7 +370,7 @@ right;
             }
             return false;
         } */
-        return /* true */;
+        return true;
     }
     /* private static  */ suffix(input, suffix, mapper) {
         /* var slice = input.substring(0, input.length() - suffix.length()) */ ;
@@ -405,12 +405,23 @@ right;
     /* private static */ statementValue(state, input) {
         /* var stripped = input.strip() */ ; /* if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
-            var tuple = compileValue(state, value);
+            var tuple = value(state, value);
             return new Tuple<>(tuple.left, "return " + tuple.right);
         } */
         return /* new Tuple<>(state, generatePlaceholder(stripped)) */;
     }
-    /* private static */ compileValue(state, value) {
+    /* private static */ value(state, input) {
+        return /* operation(state, input)
+                .or(() -> symbolValue(state, input))
+                .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input))) */;
+    }
+    /* private static */ symbolValue(state, value) {
+        /* var stripped = value.strip() */ ; /* if (isSymbol(stripped)) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } */
+        return /* new None<>() */;
+    }
+    /* private static */ operation(state, value) {
         /* ) */ ;
     }
     /* private static */ compileValues(state, params, mapper) {
@@ -456,7 +467,7 @@ right;
         } */ /* if (c == '>') {
             return appended.exit();
         } */
-        return /* appended */;
+        return appended;
     }
     /* private static */ assembleDefinition(state, beforeTypeParams, name, typeParams, type) {
         /* var type1 = type(state, type) */ ;
@@ -469,7 +480,7 @@ right;
         } */ /* if (c == '>') {
             return appended.exit();
         } */
-        return /* appended */;
+        return appended;
     }
     /* private static */ type(state, input) {
         /* var stripped = input.strip() */ ; /* if (stripped.equals("int")) {
@@ -488,7 +499,7 @@ right;
         /* var joined = arguments.iterate()
                 .collect(new Joiner(", "))
                 .orElse("") */ ;
-        return /* "("  */ + + + /*  returns */;
+        return /* "("  */ +joined + /*  ") => "  */ +returns;
     }
     /* private static  */ last(input, infix, mapper) {
         return /* infix(input, infix, Main::findLast, mapper) */;
@@ -514,7 +525,7 @@ right;
         /* var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end") */ ;
-        return /* "content-start "  */ + + /*  " content-end" */;
+        return /* "content-start "  */ +replaced +  /*  " content-end" */;
     }
 }
 /*  */ 
