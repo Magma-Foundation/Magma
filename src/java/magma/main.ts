@@ -1,11 +1,11 @@
 /* private */interface Option<T>/*   */ {
-	map<R>(mapper : (arg0 : T) => R) : /* Option */<R>;
+	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
-	filter(predicate : (arg0 : T) => boolean) : /* Option */<T>;
+	filter(predicate : (arg0 : T) => boolean) : Option<T>;
 	orElseGet(supplier : () => T) : T;
-	or(other : () => /* Option */<T>) : /* Option */<T>;
-	flatMap<R>(mapper : (arg0 : T) => /* Option */<R>) : /* Option */<R>;
+	or(other : () => Option<T>) : Option<T>;
+	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
 	isEmpty() : boolean;
 }
 /* private */interface Collector<T, C>/*   */ {
@@ -14,22 +14,22 @@
 }
 /* private */interface Iterator<T>/*   */ {
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R;
-	map<R>(mapper : (arg0 : T) => R) : /* Iterator */<R>;
+	map<R>(mapper : (arg0 : T) => R) : Iterator<R>;
 	collect<R>(collector : Collector<T, R>) : R;
-	filter(predicate : (arg0 : T) => boolean) : /* Iterator */<T>;
+	filter(predicate : (arg0 : T) => boolean) : Iterator<T>;
 	next() : Option<T>;
-	flatMap<R>(f : (arg0 : T) => /* Iterator */<R>) : /* Iterator */<R>;
+	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R>;
 }
 /* private */interface List<T>/*   */ {
-	addLast(element : T) : /* List */<T>;
+	addLast(element : T) : List<T>;
 	iterate() : Iterator<T>;
-	removeLast() : Option<[/* List */<T>, T]>;
+	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : T;
 	size() : number;
 	isEmpty() : boolean;
-	addFirst(element : T) : /* List */<T>;
+	addFirst(element : T) : List<T>;
 	iterateWithIndices() : Iterator<[number, T]>;
-	removeFirst() : Option<[T, /* List */<T>]>;
+	removeFirst() : Option<[T, List<T>]>;
 }
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
@@ -50,7 +50,7 @@
 
 	/* @Override
         public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
-		return new /* Some */(mapper/* : (arg0 : T) => R */(/* this */.value/* : unknown */)/* : R */)/* : content-start Some content-end */;
+		return new Some(mapper/* : (arg0 : T) => R */(/* this */.value/* : unknown */)/* : R */)/* : Some */;
 	}
 	/* @Override
         public */ isPresent() : boolean {
@@ -87,7 +87,7 @@
 /* private static */class None<T>/*  */ {
 	/* @Override
         public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
-		return new /* None */(/*  */)/* : content-start None content-end */;
+		return new None(/*  */)/* : None */;
 	}
 	/* @Override
         public */ isPresent() : boolean {
@@ -99,7 +99,7 @@
 	}
 	/* @Override
         public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
-		return new /* None */(/*  */)/* : content-start None content-end */;
+		return new None(/*  */)/* : None */;
 	}
 	/* @Override
         public */ orElseGet(supplier : () => T) : T {
@@ -111,7 +111,7 @@
 	}
 	/* @Override
         public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
-		return new /* None */(/*  */)/* : content-start None content-end */;
+		return new None(/*  */)/* : None */;
 	}
 	/* @Override
         public */ isEmpty() : boolean {
@@ -160,7 +160,7 @@
 	}
 	/* @Override
         public  */ map<R>(mapper : (arg0 : T) => R) : Iterator<R> {
-		return new /* HeadedIterator */(() => /* this */.head/* : unknown */.next/* : unknown */(/*  */)/* : unknown */.map/* : unknown */(mapper/* : (arg0 : T) => R */)/* : unknown */)/* : content-start HeadedIterator content-end */;
+		return new HeadedIterator(() => /* this */.head/* : unknown */.next/* : unknown */(/*  */)/* : unknown */.map/* : unknown */(mapper/* : (arg0 : T) => R */)/* : unknown */)/* : HeadedIterator */;
 	}
 	/* @Override
         public  */ collect<R>(collector : Collector<T, R>) : R {
@@ -170,9 +170,9 @@
         public */ filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
 		return /* this */.flatMap/* : unknown */((element : unknown) => {
 			/* if (predicate.test(element))  */{
-				return new /* HeadedIterator */(new SingleHead(/* element */)/* : SingleHead */)/* : content-start HeadedIterator content-end */;
+				return new HeadedIterator(new SingleHead(/* element */)/* : SingleHead */)/* : HeadedIterator */;
 			}
-			return new /* HeadedIterator */(new EmptyHead(/*  */)/* : EmptyHead */)/* : content-start HeadedIterator content-end */;
+			return new HeadedIterator(new EmptyHead(/*  */)/* : EmptyHead */)/* : HeadedIterator */;
 		})/* : unknown */;
 	}
 	/* @Override
@@ -181,7 +181,7 @@
 	}
 	/* @Override
         public  */ flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
-		return new /* HeadedIterator */(new /* FlatMapHead */(/* this */.head/* : unknown */, f/* : (arg0 : T) => Iterator<R> */)/* : content-start FlatMapHead content-end */)/* : content-start HeadedIterator content-end */;
+		return new HeadedIterator(new /* FlatMapHead */(/* this */.head/* : unknown */, f/* : (arg0 : T) => Iterator<R> */)/* : content-start FlatMapHead content-end */)/* : HeadedIterator */;
 	}
 }
 /* private static */class RangeHead/*  */ {
@@ -224,7 +224,7 @@
 		}
 		let slice : var = /* this */.elements/* : unknown */.subList/* : unknown */(0/* : number */, /* this */.elements/* : unknown */.size/* : unknown */(/*  */)/* : unknown */ - 1/* : number */)/* : unknown */;
 		let last : var = /* this */.elements/* : unknown */.getLast/* : unknown */(/*  */)/* : unknown */;
-		return new Some(new [List<T>, T](new /* JVMList */(/* slice */)/* : content-start JVMList content-end */, /* last */)/* : [List<T>, T] */)/* : Some */;
+		return new Some(new [List<T>, T](new JVMList(/* slice */)/* : JVMList */, /* last */)/* : [List<T>, T] */)/* : Some */;
 	}
 	/* @Override
             public */ get(index : number) : T {
@@ -254,7 +254,7 @@
 		}
 		let first : var = /* this */.elements/* : unknown */.getFirst/* : unknown */(/*  */)/* : unknown */;
 		let slice : var = /* this */.elements/* : unknown */.subList/* : unknown */(1/* : number */, /* this */.elements/* : unknown */.size/* : unknown */(/*  */)/* : unknown */)/* : unknown */;
-		return new Some(new [T, List<T>](/* first */, new /* JVMList */(/* slice */)/* : content-start JVMList content-end */)/* : [T, List<T>] */)/* : Some */;
+		return new Some(new [T, List<T>](/* first */, new JVMList(/* slice */)/* : JVMList */)/* : [T, List<T>] */)/* : Some */;
 	}
 }
 /* private static */class Lists/*  */ {
@@ -347,7 +347,7 @@
 	}
 	/* @Override
         public */ fold(current : Option<string>, element : string) : Option<string> {
-		return new Some(current/* : Option<string> */.map/* : (arg0 : (arg0 : T) => R) => content-start Option content-end<R> */((inner : unknown) => /* inner */ + /* this */.delimiter/* : unknown */ + element/* : string */)/* : unknown */.orElse/* : unknown */(element/* : string */)/* : unknown */)/* : Some */;
+		return new Some(current/* : Option<string> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */((inner : unknown) => /* inner */ + /* this */.delimiter/* : unknown */ + element/* : string */)/* : unknown */.orElse/* : unknown */(element/* : string */)/* : unknown */)/* : Some */;
 	}
 }
 /* private */class Definition/*  */ {
@@ -386,7 +386,7 @@
 	}
 	/* @Override
         public */ fold(current : List<T>, element : T) : List<T> {
-		return current/* : List<T> */.addLast/* : (arg0 : T) => content-start List content-end<T> */(element/* : T */)/* : unknown */;
+		return current/* : List<T> */.addLast/* : (arg0 : T) => List<T> */(element/* : T */)/* : unknown */;
 	}
 }
 /* private */class Tuple<A, B>/* (A left, B right)  */ {
@@ -445,7 +445,7 @@
 }
 /* private static */class Iterators/*  */ {
 	/* public static  */ fromOption<T>(option : Option<T>) : Iterator<T> {
-		let single : Option<Head<T>> = option/* : Option<T> */.map/* : (arg0 : (arg0 : T) => R) => content-start Option content-end<R> */(/* SingleHead */.new/* : unknown */)/* : unknown */;
+		let single : Option<Head<T>> = option/* : Option<T> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(/* SingleHead */.new/* : unknown */)/* : unknown */;
 		return new HeadedIterator(/* single */.orElseGet/* : unknown */(/* EmptyHead */.new/* : unknown */)/* : unknown */)/* : HeadedIterator */;
 	}
 }
@@ -631,27 +631,33 @@
     private interface FindableType extends Type {
         Option<Type> find(String name);
     } */
-	/* private */ CompileState(structures : List<string>, definitions : List<Definition>, types : List<ObjectType>) : record {
+	/* private */ CompileState(structures : List<string>, definitions : List<Definition>, types : List<ObjectType>, maybeStructName : Option<string>) : record {
 		/* public CompileState()  */{
-			/* this(Lists.empty(), Lists.empty(), Lists.empty()) */;
+			/* this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>()) */;
 		}
 		/* private Option<Type> resolveValue(String name)  */{
 			return /* this */.definitions/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.filter/* : unknown */((definition : unknown) => /* definition */.name/* : unknown */.equals/* : unknown */(/* name */)/* : unknown */)/* : unknown */.next/* : unknown */(/*  */)/* : unknown */.map/* : unknown */(/* Definition */.type/* : unknown */)/* : unknown */;
 		}
 		/* public CompileState addStructure(String structure)  */{
-			return new CompileState(/* this */.structures/* : unknown */.addLast/* : unknown */(/* structure */)/* : unknown */, /* this */.definitions/* : unknown */, /* this */.types/* : unknown */)/* : CompileState */;
+			return new CompileState(/* this */.structures/* : unknown */.addLast/* : unknown */(/* structure */)/* : unknown */, /* this */.definitions/* : unknown */, /* this */.types/* : unknown */, /* this */.maybeStructName/* : unknown */)/* : CompileState */;
 		}
 		/* public CompileState withDefinitions(List<Definition> definitions)  */{
-			return new CompileState(/* this */.structures/* : unknown */, definitions/* : List<Definition> */, /* this */.types/* : unknown */)/* : CompileState */;
+			return new CompileState(/* this */.structures/* : unknown */, definitions/* : List<Definition> */, /* this */.types/* : unknown */, /* this */.maybeStructName/* : unknown */)/* : CompileState */;
 		}
 		/* public Option<ObjectType> resolveType(String name)  */{
+			/* if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent())  */{
+				return new Some(new ObjectType(/* name */, /* this */.definitions/* : unknown */)/* : ObjectType */)/* : Some */;
+			}
 			return /* this */.types/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.filter/* : unknown */((type : unknown) => /* type */.name/* : unknown */.equals/* : unknown */(/* name */)/* : unknown */)/* : unknown */.next/* : unknown */(/*  */)/* : unknown */;
 		}
 		/* public CompileState addType(ObjectType type)  */{
-			return new CompileState(/* this */.structures/* : unknown */, /* this */.definitions/* : unknown */, /* this */.types/* : unknown */.addLast/* : unknown */(/* type */)/* : unknown */)/* : CompileState */;
+			return new CompileState(/* this */.structures/* : unknown */, /* this */.definitions/* : unknown */, /* this */.types/* : unknown */.addLast/* : unknown */(/* type */)/* : unknown */, /* this */.maybeStructName/* : unknown */)/* : CompileState */;
 		}
 		/* public CompileState withDefinition(Definition definition)  */{
-			return new CompileState(/* this */.structures/* : unknown */, /* this */.definitions/* : unknown */.addLast/* : unknown */(/* definition */)/* : unknown */, /* this */.types/* : unknown */)/* : CompileState */;
+			return new CompileState(/* this */.structures/* : unknown */, /* this */.definitions/* : unknown */.addLast/* : unknown */(/* definition */)/* : unknown */, /* this */.types/* : unknown */, /* this */.maybeStructName/* : unknown */)/* : CompileState */;
+		}
+		/* public CompileState withStructName(String name)  */{
+			return new CompileState(/* this */.structures/* : unknown */, /* this */.definitions/* : unknown */, /* this */.types/* : unknown */, new Some(/* name */)/* : Some */)/* : CompileState */;
 		}
 	}
 	/* public static */ main() : void {
@@ -697,7 +703,7 @@
 			return /* tuple */.flatMap/* : unknown */((inner : unknown) => {
 				let state1 : var = /* inner */.left/* : unknown */;
 				let right : var = /* inner */.right/* : unknown */;
-				return mapper/* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]> */(/* state1 */, /* element */)/* : Option<[CompileState, T]> */.map/* : (arg0 : (arg0 : T) => R) => content-start Option content-end<R> */((applied : unknown) => {
+				return mapper/* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]> */(/* state1 */, /* element */)/* : Option<[CompileState, T]> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */((applied : unknown) => {
 					return new Tuple(/* applied */.left/* : unknown */, /* right */.addLast/* : unknown */(/* applied */.right/* : unknown */)/* : unknown */)/* : Tuple */;
 				})/* : unknown */;
 			})/* : unknown */;
@@ -822,7 +828,7 @@
 			return new None(/*  */)/* : None */;
 		}
 		let joinedTypeParams : var = typeParams/* : List<string> */.iterate/* : () => Iterator<T> */(/*  */)/* : unknown */.collect/* : unknown */(new Joiner(", ")/* : Joiner */)/* : unknown */.map/* : unknown */((inner : unknown) => "<" + inner + ">")/* : unknown */.orElse/* : unknown */("")/* : unknown */;
-		let parsed : var = /* parseStatements */(state/* : CompileState */, content/* : string */, (state0 : unknown, input : unknown) => /* compileClassSegment */(/* state0 */, /* input */, 1/* : number */)/* : unknown */)/* : unknown */;
+		let parsed : var = /* parseStatements */(state/* : CompileState */.withStructName/* : unknown */(/* name */)/* : unknown */, content/* : string */, (state0 : unknown, input : unknown) => /* compileClassSegment */(/* state0 */, /* input */, 1/* : number */)/* : unknown */)/* : unknown */;
 		/* List<String> parsed1 */;
 		/* if (params.isEmpty())  */{
 			let /* parsed1  */ = /* parsed */.right/* : unknown */;
@@ -1364,14 +1370,14 @@
 		return infix/* : string */(input/* : string */, infix/* : string */, /* Main */.findFirst/* : unknown */, mapper/* : (arg0 : string, arg1 : string) => Option<T> */)/* : unknown */;
 	}
 	/* private static  */ infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return /* split */(() => locator/* : (arg0 : string, arg1 : string) => Option<number> */(input/* : string */, infix/* : string */)/* : Option<number> */.map/* : (arg0 : (arg0 : T) => R) => content-start Option content-end<R> */((index : unknown) => {
+		return /* split */(() => locator/* : (arg0 : string, arg1 : string) => Option<number> */(input/* : string */, infix/* : string */)/* : Option<number> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */((index : unknown) => {
 			let left : var = input/* : string */.substring/* : unknown */(0/* : number */, /* index */)/* : unknown */;
 			let right : var = input/* : string */.substring/* : unknown */(/* index */ + infix/* : string */.length/* : unknown */(/*  */)/* : unknown */)/* : unknown */;
 			return new Tuple(/* left */, /* right */)/* : Tuple */;
 		})/* : unknown */, mapper/* : (arg0 : string, arg1 : string) => Option<T> */)/* : unknown */;
 	}
 	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return splitter/* : () => Option<[string, string]> */(/*  */)/* : Option<[string, string]> */.flatMap/* : (arg0 : (arg0 : T) => content-start Option content-end<R>) => content-start Option content-end<R> */((tuple : unknown) => mapper/* : (arg0 : string, arg1 : string) => Option<T> */(/* tuple */.left/* : unknown */, /* tuple */.right/* : unknown */)/* : Option<T> */)/* : unknown */;
+		return splitter/* : () => Option<[string, string]> */(/*  */)/* : Option<[string, string]> */.flatMap/* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */((tuple : unknown) => mapper/* : (arg0 : string, arg1 : string) => Option<T> */(/* tuple */.left/* : unknown */, /* tuple */.right/* : unknown */)/* : Option<T> */)/* : unknown */;
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
 		let index : var = input/* : string */.indexOf/* : unknown */(infix/* : string */)/* : unknown */;

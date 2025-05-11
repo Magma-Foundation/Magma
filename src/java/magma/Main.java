@@ -377,9 +377,10 @@ public class Main {
         }
     }
 
-    private record CompileState(List<String> structures, List<Definition> definitions, List<ObjectType> types) {
+    private record CompileState(List<String> structures, List<Definition> definitions, List<ObjectType> types,
+                                Option<String> maybeStructName) {
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty());
+            this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>());
         }
 
         private Option<Type> resolveValue(String name) {
@@ -390,25 +391,33 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.types);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.types, this.maybeStructName);
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, definitions, this.types);
+            return new CompileState(this.structures, definitions, this.types, this.maybeStructName);
         }
 
         public Option<ObjectType> resolveType(String name) {
+            if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent()) {
+                return new Some<>(new ObjectType(name, this.definitions));
+            }
+
             return this.types.iterate()
                     .filter(type -> type.name.equals(name))
                     .next();
         }
 
         public CompileState addType(ObjectType type) {
-            return new CompileState(this.structures, this.definitions, this.types.addLast(type));
+            return new CompileState(this.structures, this.definitions, this.types.addLast(type), this.maybeStructName);
         }
 
         public CompileState withDefinition(Definition definition) {
-            return new CompileState(this.structures, this.definitions.addLast(definition), this.types);
+            return new CompileState(this.structures, this.definitions.addLast(definition), this.types, this.maybeStructName);
+        }
+
+        public CompileState withStructName(String name) {
+            return new CompileState(this.structures, this.definitions, this.types, new Some<>(name));
         }
     }
 
@@ -1017,7 +1026,7 @@ public class Main {
                 .map(inner -> "<" + inner + ">")
                 .orElse("");
 
-        var parsed = parseStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1));
+        var parsed = parseStatements(state.withStructName(name), content, (state0, input) -> compileClassSegment(state0, input, 1));
 
         List<String> parsed1;
         if (params.isEmpty()) {
