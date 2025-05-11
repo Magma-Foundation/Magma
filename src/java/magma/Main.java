@@ -51,6 +51,8 @@ public class Main {
         Option<Tuple<List<T>, T>> removeLast();
 
         T get(int index);
+
+        int size();
     }
 
     private interface Head<T> {
@@ -228,6 +230,11 @@ public class Main {
             @Override
             public T get(int index) {
                 return this.elements.get(index);
+            }
+
+            @Override
+            public int size() {
+                return this.elements.size();
             }
         }
 
@@ -754,7 +761,17 @@ public class Main {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(() -> toLast(withoutEnd, "", Main::foldInvocationStart), (callerWithEnd, argumentsString) -> {
                 return suffix(callerWithEnd, "(", callerString -> {
-                    var callerTuple = value(state, callerString, depth);
+                    var callerString1 = callerString.strip();
+
+                    Tuple<CompileState, String> callerTuple;
+                    if (callerString1.startsWith("new ")) {
+                        var type = type(state, callerString1.substring("new ".length()));
+                        callerTuple = new Tuple<>(type.left, "new " + type.right);
+                    }
+                    else {
+                        callerTuple = value(state, callerString1, depth);
+                    }
+
                     var argumentsTuple = compileValues(callerTuple.left, argumentsString, (state1, input1) -> value(state1, input1, depth));
 
                     return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
@@ -983,7 +1000,7 @@ public class Main {
                     return new Some<>(new Tuple<>(argumentsState, generate(Lists.empty(), arguments.get(0))));
                 }
 
-                if (base.equals("Tuple")) {
+                if (base.equals("Tuple") && arguments.size() >= 2) {
                     return new Some<>(new Tuple<>(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
                 }
 
