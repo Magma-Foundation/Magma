@@ -295,7 +295,7 @@ public class Main {
         }
 
         public Option<DivideState> popAndAppendToOption() {
-            return popAndAppendToTuple().map(Tuple::right);
+            return this.popAndAppendToTuple().map(Tuple::right);
         }
     }
 
@@ -665,6 +665,10 @@ public class Main {
         var stripped = input.strip();
         if (stripped.equals("int")) {
             return new Tuple<>(state, "number");
+        }
+
+        if (stripped.equals("String")) {
+            return new Tuple<>(state, "string");
         }
 
         if (isSymbol(stripped)) {
