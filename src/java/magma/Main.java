@@ -541,11 +541,11 @@ public class Main {
         @Override
         public String generate() {
             var joined = this.arguments().iterateWithIndices()
-                    .map(pair -> "arg" + pair.left + " : " + pair.right)
+                    .map(pair -> "arg" + pair.left + " : " + pair.right.generate())
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return "(" + joined + ") => " + this.returns();
+            return "(" + joined + ") => " + this.returns.generate();
         }
     }
 

@@ -1,11 +1,11 @@
 /* private */interface Option<T>/*   */ {
-	map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Option<R>;
+	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
-	filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Option<T>;
-	orElseGet(supplier : () => Symbol[input=T]) : T;
-	or(other : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@ea30797]) : Option<T>;
-	flatMap<R>(mapper : (arg0 : Symbol[input=T]) => Template[base=Option, arguments=magma.Main$Lists$JVMList@7e774085]) : Option<R>;
+	filter(predicate : (arg0 : T) => boolean) : Option<T>;
+	orElseGet(supplier : () => T) : T;
+	or(other : () => Option<T>) : Option<T>;
+	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
 	isEmpty() : boolean;
 }
 /* private */interface Collector<T, C>/*   */ {
@@ -13,12 +13,12 @@
 	fold(current : C, element : T) : C;
 }
 /* private */interface Iterator<T>/*   */ {
-	fold<R>(initial : R, folder : (arg0 : Symbol[input=R], arg1 : Symbol[input=T]) => Symbol[input=R]) : R;
-	map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Iterator<R>;
+	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R;
+	map<R>(mapper : (arg0 : T) => R) : Iterator<R>;
 	collect<R>(collector : Collector<T, R>) : R;
-	filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Iterator<T>;
+	filter(predicate : (arg0 : T) => boolean) : Iterator<T>;
 	next() : Option<T>;
-	flatMap<R>(f : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@1ee0005]) : Iterator<R>;
+	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R>;
 }
 /* private */interface List<T>/*   */ {
 	addLast(element : T) : List<T>;
@@ -41,7 +41,7 @@
 	}
 
 	/* @Override
-        public  */ map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Option<R> {
+        public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new Some(mapper.apply(this.value));
 	}
 	/* @Override
@@ -53,22 +53,22 @@
 		return this.value;
 	}
 	/* @Override
-        public */ filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Option<T> {
+        public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
 		/* if (predicate.test(this.value))  */{
 			return this;
 		}
 		return new None();
 	}
 	/* @Override
-        public */ orElseGet(supplier : () => Symbol[input=T]) : T {
+        public */ orElseGet(supplier : () => T) : T {
 		return this.value;
 	}
 	/* @Override
-        public */ or(other : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@782830e]) : Option<T> {
+        public */ or(other : () => Option<T>) : Option<T> {
 		return this;
 	}
 	/* @Override
-        public  */ flatMap<R>(mapper : (arg0 : Symbol[input=T]) => Template[base=Option, arguments=magma.Main$Lists$JVMList@470e2030]) : Option<R> {
+        public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
 		return mapper.apply(this.value);
 	}
 	/* @Override
@@ -78,7 +78,7 @@
 }
 /* private static */class None<T>/*  */ {
 	/* @Override
-        public  */ map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Option<R> {
+        public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
 	}
 	/* @Override
@@ -90,19 +90,19 @@
 		return other;
 	}
 	/* @Override
-        public */ filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Option<T> {
+        public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
 		return new None();
 	}
 	/* @Override
-        public */ orElseGet(supplier : () => Symbol[input=T]) : T {
+        public */ orElseGet(supplier : () => T) : T {
 		return supplier.get();
 	}
 	/* @Override
-        public */ or(other : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@3fb4f649]) : Option<T> {
+        public */ or(other : () => Option<T>) : Option<T> {
 		return other.get();
 	}
 	/* @Override
-        public  */ flatMap<R>(mapper : (arg0 : Symbol[input=T]) => Template[base=Option, arguments=magma.Main$Lists$JVMList@33833882]) : Option<R> {
+        public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
 		return new None();
 	}
 	/* @Override
@@ -137,7 +137,7 @@
 	}
 
 	/* @Override
-        public  */ fold<R>(initial : R, folder : (arg0 : Symbol[input=R], arg1 : Symbol[input=T]) => Symbol[input=R]) : R {
+        public  */ fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		let current = initial;
 		/* while (true) {{
                 R finalCurrent = current;
@@ -150,7 +150,7 @@
 		}
 	}
 	/* @Override
-        public  */ map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Iterator<R> {
+        public  */ map<R>(mapper : (arg0 : T) => R) : Iterator<R> {
 		return new HeadedIterator(() => this.head.next().map(mapper));
 	}
 	/* @Override
@@ -158,7 +158,7 @@
 		return this.fold(collector.createInitial(), collector.fold);
 	}
 	/* @Override
-        public */ filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Iterator<T> {
+        public */ filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
 		return this.flatMap((element) => {
 			/* if (predicate.test(element))  */{
 				return new HeadedIterator(new SingleHead(element));
@@ -171,7 +171,7 @@
 		return this.head.next();
 	}
 	/* @Override
-        public  */ flatMap<R>(f : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@4d591d15]) : Iterator<R> {
+        public  */ flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
 		return new HeadedIterator(new FlatMapHead(this.head, f));
 	}
 }
@@ -337,10 +337,10 @@
 /* private */class Tuple<A, B>/* (A left, B right)  */ {
 }
 /* private static */class FlatMapHead<T, R>/*  */ {
-	/* private final */ mapper : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@5ccd43c2];
+	/* private final */ mapper : (arg0 : T) => Iterator<R>;
 	/* private final */ head : Head<T>;
 	/* private */ current : Option<Iterator<R>>;
-	FlatMapHead(head : Head<T>, mapper : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@4aa8f0b4]) : public {
+	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Iterator<R>) : public {
 		let /* this.mapper  */ = mapper;
 		let /* this.current  */ = new None();
 		let /* this.head  */ = head;
@@ -400,8 +400,8 @@
 
 	/* @Override
         public */ generate() : string {
-		let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left + " : " + pair.right).collect(new Joiner(", ")).orElse("");
-		return "(" + joined + ") => " + this.returns();
+		let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left + " : " + pair.right.generate()).collect(new Joiner(", ")).orElse("");
+		return "(" + joined + ") => " + this.returns.generate();
 	}
 }
 /* private */class TupleType/*  */ {
@@ -481,23 +481,23 @@
 		let joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("");
 		return joined + tuple.right;
 	}
-	/* private static */ compileStatements(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@7960847b]) : [CompileState, string] {
+	/* private static */ compileStatements(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
 		let parsed = parseStatements(state, input, mapper);
 		return new Tuple(parsed.left, generateStatements(parsed.right));
 	}
 	/* private static */ generateStatements(statements : List<string>) : string {
 		return generateAll(Main.mergeStatements, statements);
 	}
-	/* private static */ parseStatements(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@6a6824be]) : [CompileState, List<string>] {
+	/* private static */ parseStatements(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, List<string>] {
 		return parseAll(state, input, Main.foldStatementChar, mapper);
 	}
-	/* private static */ generateAll(merger : (arg0 : Symbol[input=StringBuilder], arg1 : String) => Symbol[input=StringBuilder], elements : List<string>) : string {
+	/* private static */ generateAll(merger : (arg0 : StringBuilder, arg1 : string) => StringBuilder, elements : List<string>) : string {
 		return elements.iterate().fold(new StringBuilder(), merger).toString();
 	}
-	/* private static  */ parseAll<T>(state : CompileState, input : string, folder : (arg0 : Symbol[input=DivideState], arg1 : Symbol[input=Character]) => Symbol[input=DivideState], mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@5c8da962]) : [CompileState, List<T>] {
+	/* private static  */ parseAll<T>(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, T]) : [CompileState, List<T>] {
 		return getCompileStateListTuple(state, input, folder, (state1,  s) => new Some(mapper.apply(state1, s))).orElseGet(() => new Tuple(state, Lists.empty()));
 	}
-	/* private static  */ getCompileStateListTuple<T>(state : CompileState, input : string, folder : (arg0 : Symbol[input=DivideState], arg1 : Symbol[input=Character]) => Symbol[input=DivideState], mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@512ddf17]) : Option<[CompileState, List<T>]> {
+	/* private static  */ getCompileStateListTuple<T>(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) : Option<[CompileState, List<T>]> {
 		let initial : Option<[CompileState, List<T>]> = new Some(new Tuple(state, Lists.empty()));
 		return divideAll(input, folder).iterate().fold(initial, (tuple,  element) => {
 			return tuple.flatMap((inner) => {
@@ -512,7 +512,7 @@
 	/* private static */ mergeStatements(stringBuilder : StringBuilder, str : string) : StringBuilder {
 		return stringBuilder.append(str);
 	}
-	/* private static */ divideAll(input : string, folder : (arg0 : Symbol[input=DivideState], arg1 : Symbol[input=Character]) => Symbol[input=DivideState]) : List<string> {
+	/* private static */ divideAll(input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState) : List<string> {
 		let current = new DivideState(input);
 		/* while (true) {{
             var maybePopped = current.pop().map(tuple -> {{
@@ -619,7 +619,7 @@
 	/* private static */ getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<string>) : Option<[CompileState, string]> {
 		return first(beforeContent, "<", (name,  withTypeParams) => {
 			return first(withTypeParams, ">", (typeParamsString,  afterTypeParams) => {
-				let /* final */ compileStateStringTupleBiFunction : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@2c13da15] = (state1,  s) => new Tuple(state1, s.strip());
+				let /* final */ compileStateStringTupleBiFunction : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1,  s) => new Tuple(state1, s.strip());
 				let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1,  s) => new Some(compileStateStringTupleBiFunction.apply(state1, s)));
 				return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
 			});
@@ -657,7 +657,7 @@
 		}
 		return true;
 	}
-	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (arg0 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@77556fd]) : Option<T> {
+	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
 		/* if (!input.endsWith(suffix))  */{
 			return new None();
 		}
@@ -888,7 +888,7 @@
 			return new Some(new Tuple(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
 		});
 	}
-	/* private static */ compileValues(state : CompileState, params : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@368239c8]) : [CompileState, string] {
+	/* private static */ compileValues(state : CompileState, params : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
 		let parsed = parseValuesOrEmpty(state, params, (state1,  s) => new Some(mapper.apply(state1, s)));
 		let generated = generateValues(parsed.right);
 		return new Tuple(parsed.left, generated);
@@ -896,10 +896,10 @@
 	/* private static */ generateValues(elements : List<string>) : string {
 		return generateAll(Main.mergeValues, elements);
 	}
-	/* private static  */ parseValuesOrEmpty<T>(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@9e89d68]) : [CompileState, List<T>] {
+	/* private static  */ parseValuesOrEmpty<T>(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) : [CompileState, List<T>] {
 		return parseValues(state, input, mapper).orElseGet(() => new Tuple(state, Lists.empty()));
 	}
-	/* private static  */ parseValues<T>(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@3b192d32]) : Option<[CompileState, List<T>]> {
+	/* private static  */ parseValues<T>(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) : Option<[CompileState, List<T>]> {
 		return getCompileStateListTuple(state, input, Main.foldValueChar, mapper);
 	}
 	/* private static */ compileParameter(state : CompileState, input : string) : [CompileState, string] {
@@ -933,7 +933,7 @@
 			return split(() => toLast(beforeName, " ", Main.foldTypeSeparator), (beforeType,  type) => {
 				return suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
 					return first(withoutTypeParamStart, "<", (beforeTypeParams,  typeParamsString) => {
-						let /* final */ compileStateStringTupleBiFunction : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@16f65612] = (state1,  s) => new Tuple(state1, s.strip());
+						let /* final */ compileStateStringTupleBiFunction : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1,  s) => new Tuple(state1, s.strip());
 						let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1,  s) => new Some(compileStateStringTupleBiFunction.apply(state1, s)));
 						return assembleDefinition(typeParams.left, new Some<string>(beforeTypeParams), name, typeParams.right, type);
 					});
@@ -945,7 +945,7 @@
 			});
 		});
 	}
-	/* private static */ toLast(input : string, separator : string, folder : (arg0 : Symbol[input=DivideState], arg1 : Symbol[input=Character]) => Symbol[input=DivideState]) : Option<[string, string]> {
+	/* private static */ toLast(input : string, separator : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState) : Option<[string, string]> {
 		let divisions = divideAll(input, folder);
 		return divisions.removeLast().map((removed) => {
 			let left = removed.left.iterate().collect(new Joiner(separator)).orElse("");
@@ -1063,7 +1063,7 @@
 		}
 		return type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right));
 	}
-	/* private static  */ last<T>(input : string, infix : string, mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@311d617d]) : Option<T> {
+	/* private static  */ last<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return infix(input, infix, Main.findLast, mapper);
 	}
 	/* private static */ findLast(input : string, infix : string) : Option<number> {
@@ -1073,17 +1073,17 @@
 		}
 		return new Some(index);
 	}
-	/* private static  */ first<T>(input : string, infix : string, mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@7c53a9eb]) : Option<T> {
+	/* private static  */ first<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return infix(input, infix, Main.findFirst, mapper);
 	}
-	/* private static  */ infix<T>(input : string, infix : string, locator : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@ed17bee], mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@2a33fae0]) : Option<T> {
+	/* private static  */ infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return split(() => locator.apply(input, infix).map((index) => {
 			let left = input.substring(0, index);
 			let right = input.substring(index + infix.length());
 			return new Tuple(left, right);
 		}), mapper);
 	}
-	/* private static  */ split<T>(splitter : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@707f7052], mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@11028347]) : Option<T> {
+	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
