@@ -546,16 +546,24 @@ public class Main {
             return first(right, "{", (beforeContent, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
-                    return first(beforeContent, "<", (name, withTypeParams) -> {
-                        return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
-                            var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
-                            return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
-                        });
+                    return first(beforeContent, " implements ", (s, s2) -> {
+                        return getOr(targetInfix, state, beforeInfix, s, content1);
                     }).or(() -> {
-                        return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
+                        return getOr(targetInfix, state, beforeInfix, beforeContent, content1);
                     });
                 });
             });
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+        return first(beforeContent, "<", (name, withTypeParams) -> {
+            return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
+                var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
+            });
+        }).or(() -> {
+            return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
         });
     }
 
@@ -772,7 +780,7 @@ public class Main {
                 return new Tuple<>(type.left, "new " + type.right);
             });
 
-            if(map.isPresent()) {
+            if (map.isPresent()) {
                 return map.orElse(null);
             }
         }

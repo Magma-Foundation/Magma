@@ -98,6 +98,20 @@
         return this.fold(collector.createInitial());
     }
 }
+/* private static */ class RangeHead /*  */ {
+    RangeHead(length) {
+        let /* this.length  */ = length;
+    }
+    /* @Override
+        public */ next() {
+        /* if (this.counter < this.length)  */ {
+            let value = this.counter;
+            /* this.counter++ */ ;
+            return new Some(value);
+        }
+        return new None();
+    }
+}
 /* private static final */ class JVMList {
     JVMList(elements) {
         let /* this.elements  */ = elements;
@@ -206,22 +220,6 @@
 /* private */ class Tuple {
 }
 /* public */ class Main /*  */ {
-    /* private static class RangeHead implements Head<Integer> {
-        private final int length;
-        private int counter;
-
-        */ RangeHead(length) {
-        let /* this.length  */ = length;
-        /* }
-
-        @Override
-        public Option<Integer> next()  */ {
-            let /* if (this.counter */ value = /* this.counter;
-            this */ 
-                .counter + +(value);
-        }
-        return new None(); /* } */
-    }
     /* private */ CompileState(structures) {
         /* public CompileState()  */ {
             /* this(Lists.empty()) */ ;
@@ -393,6 +391,18 @@
                 let strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}");
             });
+        });
+    }
+    /* private static */ getOr(targetInfix, state, beforeInfix, beforeContent, content1) {
+        return first(beforeContent, "<", (name, withTypeParams) => {
+            return first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
+                let typeParams = parseValues(state, typeParamsString, (state1, s) => {
+                    new Tuple(s.strip());
+                });
+                return assemble(typeParams.left, targetInfix, beforeInfix, name, typeParams.right, afterTypeParams);
+            });
+        }).or(() => {
+            return assemble(state, targetInfix, beforeInfix, beforeContent, Lists.empty(), "");
         });
     }
     /* private static */ assemble(state, targetInfix, beforeInfix, rawName, content, typeParams, afterTypeParams) {
@@ -599,7 +609,7 @@
             let map = type(state).map((type) => {
                 return new Tuple(type.left, "new " + type.right);
             });
-            /* if(map.isPresent())  */ {
+            /* if (map.isPresent())  */ {
                 return map.orElse(null);
             }
         }

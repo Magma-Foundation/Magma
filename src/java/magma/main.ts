@@ -27,7 +27,7 @@
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
 }
-/* private */class Some<T>/* (T value) implements Option<T>  */ {
+/* private */class Some<T>/* (T value) */ {
 	/* @Override
         public  */ map<R>(mapper : (T) => R) : Option<R> {
 		return new Some<>(mapper.apply(this.value));
@@ -64,7 +64,7 @@
 		return false;
 	}
 }
-/* private static */class None<T>/*  implements Option<T>  */ {
+/* private static */class None<T>/*  */ {
 	/* @Override
         public  */ map<R>(mapper : (T) => R) : Option<R> {
 		return new None<>();
@@ -98,7 +98,7 @@
 		return true;
 	}
 }
-/* private */class HeadedIterator<T>/* (Head<T> head) implements Iterator<T>  */ {
+/* private */class HeadedIterator<T>/* (Head<T> head) */ {
 	/* @Override
         public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
 		let current : var = initial;
@@ -124,7 +124,23 @@
 		return this.fold(collector.createInitial(), /*  collector::fold */);
 	}
 }
-/* private static final */class JVMList<T>/*  implements List<T>  */ {
+/* private static */class RangeHead/*  */ {
+	/* private final */ length : number;
+	/* private */ counter : number;
+	RangeHead(length : number) : public {
+		let /* this.length  */ = length;
+	}
+	/* @Override
+        public */ next() : Option<Integer> {
+		/* if (this.counter < this.length)  */{
+			let value : var = this.counter;
+			/* this.counter++ */;
+			return new Some<>(value);
+		}
+		return new None<>();
+	}
+}
+/* private static final */class JVMList<T>/*  */ {
 	/* private final */ elements : java.util.List<T>;
 	JVMList(elements : java.util.List<T>) : private {
 		let /* this.elements  */ = elements;
@@ -224,7 +240,7 @@
 		return this.input.charAt(this.index);
 	}
 }
-/* private static */class ListCollector<T>/*  implements Collector<T, List<T>>  */ {
+/* private static */class ListCollector<T>/*  */ {
 	/* @Override
         public */ createInitial() : List<T> {
 		return Lists.empty();
@@ -237,23 +253,6 @@
 /* private */class Tuple<A, B>/* (A left, B right)  */ {
 }
 /* public */class Main/*  */ {
-	/* private static class RangeHead implements Head<Integer> {
-        private final int length;
-        private int counter;
-
-        */ RangeHead(length : number) : public {
-		let /* this.length  */ = length;
-		/* }
-
-        @Override
-        public Option<Integer> next()  */{
-			let /* if (this.counter */ value : /* < this.length) {
-                var */ = /* this.counter;
-                this */.counter +  + /* ;
-                return new Some<> */(value);
-		}
-		return new None<>();/* } */
-	}
 	/* private */ CompileState(structures : List<string>) : record {
 		/* public CompileState()  */{
 			/* this(Lists.empty()) */;
@@ -418,16 +417,24 @@
 			return first(right, "{", (beforeContent,  withEnd) => {
 				let strippedWithEnd : var = withEnd.strip();
 				return suffix(strippedWithEnd, "}", /*  content1 -> {
-                    return first(beforeContent, "<", (name, withTypeParams) -> {
-                        return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
-                            var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
-                            return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
-                        });
+                    return first(beforeContent, " implements ", (s, s2) -> {
+                        return getOr(targetInfix, state, beforeInfix, s, content1);
                     }).or(() -> {
-                        return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
+                        return getOr(targetInfix, state, beforeInfix, beforeContent, content1);
                     });
                 } */);
 			});
+		});
+	}
+	/* private static */ getOr(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, string]> {
+		return first(beforeContent, "<", (name,  withTypeParams) => {
+			return first(withTypeParams, ">", (typeParamsString,  afterTypeParams) => {
+				let typeParams : var = parseValues(state, typeParamsString, (state1,  s) => {new Tuple<>(/* state1 */, s.strip())
+				});
+				return assemble(typeParams.left, targetInfix, beforeInfix, name, /*  content1 */, typeParams.right, afterTypeParams);
+			});
+		}).or(() => {
+			return assemble(state, targetInfix, beforeInfix, beforeContent, /*  content1 */, Lists.empty(), "");
 		});
 	}
 	/* private static */ assemble(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, afterTypeParams : string) : Option<[CompileState, string]> {
@@ -615,7 +622,7 @@
 			let map : var = type(state, /*  input1 */).map((type) => {
 				return new Tuple<>(type.left, "new " + type.right);
 			});
-			/* if(map.isPresent())  */{
+			/* if (map.isPresent())  */{
 				return map.orElse(null);
 			}
 		}
