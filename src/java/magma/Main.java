@@ -1266,10 +1266,6 @@ public class Main {
         return appended;
     }
 
-    private static Tuple<CompileState, String> typeOrPlaceholder(CompileState state, String input) {
-        return compileType(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
-    }
-
     private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
         return parseType(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
