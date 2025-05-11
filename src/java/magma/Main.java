@@ -682,7 +682,11 @@ public class Main {
     private record Lambda(List<String> parameterNames, LambdaValue body) implements Value {
         @Override
         public String generate() {
-            var joined = this.parameterNames.iterate().collect(new Joiner(", ")).orElse("");
+            var joined = this.parameterNames.iterate()
+                    .map(inner -> inner + " : unknown")
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
             return "(" + joined + ") => " + this.body.generate();
         }
     }
@@ -1125,7 +1129,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, Value> parseValue(CompileState state, String input, int depth) {
-        return lambda(state, input, depth)
+        return parseLambda(state, input, depth)
                 .or(() -> parseString(state, input))
                 .or(() -> parseDataAccess(state, input, depth))
                 .or(() -> parseSymbolValue(state, input))
@@ -1157,7 +1161,7 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, Value>> lambda(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, Value>> parseLambda(CompileState state, String input, int depth) {
         return first(input, "->", (beforeArrow, valueString) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
@@ -1165,7 +1169,12 @@ public class Main {
             }
 
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
-                var parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main::foldValueChar);
+                var parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main::foldValueChar)
+                        .iterate()
+                        .map(String::strip)
+                        .filter(value -> !value.isEmpty())
+                        .collect(new ListCollector<>());
+
                 return assembleLambda(state, parameterNames, valueString, depth);
             }
 

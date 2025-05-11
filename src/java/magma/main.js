@@ -466,7 +466,7 @@
     }
     /* @Override
         public */ generate() {
-        let joined = this.parameterNames.iterate().collect(new Joiner(", ")).orElse("");
+        let joined = this.parameterNames.iterate().map((inner) => inner + " : unknown").collect(new Joiner(", ")).orElse("");
         return "(" + joined + ") => " + this.body.generate();
     }
 }
@@ -820,7 +820,7 @@
         return new Tuple(tuple.left, tuple.right.generate());
     }
     /* private static */ parseValue(state, input, depth) {
-        return lambda(state, input, depth).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvocation(state, input, depth)).or(() => parseOperation(state, input, depth, "+")).or(() => parseOperation(state, input, depth, "-")).or(() => parseDigits(state, input)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).orElseGet(() => new [CompileState, Value](state, new Placeholder(input)));
+        return parseLambda(state, input, depth).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvocation(state, input, depth)).or(() => parseOperation(state, input, depth, "+")).or(() => parseOperation(state, input, depth, "-")).or(() => parseDigits(state, input)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).orElseGet(() => new [CompileState, Value](state, new Placeholder(input)));
     }
     /* private static */ parseMethodReference(state, input, depth) {
         return last(input, "::", (s, s2) => {
@@ -838,14 +838,14 @@
         }
         return new None();
     }
-    /* private static */ lambda(state, input, depth) {
+    /* private static */ parseLambda(state, input, depth) {
         return first(input, "->", (beforeArrow, valueString) => {
             let strippedBeforeArrow = beforeArrow.strip();
             /* if (isSymbol(strippedBeforeArrow))  */ {
                 return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString, depth);
             }
             /* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */ {
-                let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar);
+                let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
                 return assembleLambda(state, parameterNames, valueString, depth);
             }
             return new None();
