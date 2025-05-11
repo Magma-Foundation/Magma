@@ -7,6 +7,7 @@
 	or(other : () => Option<T>) : Option<T>;
 	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
 	isEmpty() : /* boolean */;
+	and<R>(other : () => Option<R>) : Option<[T, R]>;
 }
 /* private */interface Collector<T, C>/*   */ {
 	createInitial() : C;
@@ -19,6 +20,7 @@
 	filter(predicate : (arg0 : T) => boolean) : Iterator<T>;
 	next() : Option<T>;
 	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R>;
+	zip<R>(other : Iterator<R>) : Iterator<[T, R]>;
 }
 /* private */interface List<T>/*   */ {
 	addLast(element : T) : List<T>;
@@ -84,6 +86,10 @@
         public */ isEmpty() : /* boolean */ {
 		return /* false */;
 	}
+	/* @Override
+        public  */ and<R>(other : () => Option<R>) : Option<[T, R]> {
+		return other/* : () => Option<R> */(/*  */)/* : Option<R> */.map/* : (arg0 : (arg0 : R) => R) => Option<R> */((otherValue : unknown) => new /* Tuple */(/* this */.value/* : unknown */, /* otherValue */)/* : content-start Tuple content-end */)/* : unknown */;
+	}
 }
 /* private static */class None<T>/*  */ {
 	/* @Override
@@ -117,6 +123,10 @@
 	/* @Override
         public */ isEmpty() : /* boolean */ {
 		return /* true */;
+	}
+	/* @Override
+        public  */ and<R>(other : () => Option<R>) : Option<[T, R]> {
+		return new None(/*  */)/* : None */;
 	}
 }
 /* private static */class SingleHead<T>/*  */ {
@@ -183,6 +193,10 @@
 	/* @Override
         public  */ flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
 		return new HeadedIterator(new /* FlatMapHead */(/* this */.head/* : unknown */, f/* : (arg0 : T) => Iterator<R> */)/* : content-start FlatMapHead content-end */)/* : HeadedIterator */;
+	}
+	/* @Override
+        public  */ zip<R>(other : Iterator<R>) : Iterator<[T, R]> {
+		return new HeadedIterator(() => /* HeadedIterator */.this/* : unknown */.head/* : unknown */.next/* : unknown */(/*  */)/* : unknown */.and/* : unknown */(other/* : Iterator<R> */.next/* : unknown */)/* : unknown */)/* : HeadedIterator */;
 	}
 }
 /* private static */class RangeHead/*  */ {
@@ -272,12 +286,16 @@
 	}
 }
 /* private */class ObjectType/*  */ {
-	constructor (name : string, definitions : List</* Definition */>) {
+	constructor (name : string, typeParams : List<string>, definitions : List</* Definition */>) {
 	}
 
 	/* @Override
         public */ generate() : string {
 		return /* this */.name/* : unknown */;
+	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		return new ObjectType(/* this */.name/* : unknown */, /* this */.typeParams/* : unknown */, /* this */.definitions/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.map/* : unknown */((definition : unknown) => /* definition */.mapType/* : unknown */((type : unknown) => /* type */.replace/* : unknown */(mapping/* : content-start Map content-end<string, content-start Type content-end> */)/* : unknown */)/* : unknown */)/* : unknown */.collect/* : unknown */(new /* ListCollector */(/*  */)/* : content-start ListCollector content-end */)/* : unknown */)/* : ObjectType */;
 	}
 	/* @Override
         public */ find(name : string) : Option</* Type */> {
@@ -291,6 +309,13 @@
 	/* @Override
         public */ generate() : string {
 		return /* this */.value/* : unknown */;
+	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		/* if (mapping.containsKey(this.value))  */{
+			return mapping/* : content-start Map content-end<string, content-start Type content-end> */.get/* : unknown */(/* this */.value/* : unknown */)/* : unknown */;
+		}
+		return /* this */;
 	}
 }
 /* private static */class DivideState/*  */ {
@@ -362,7 +387,7 @@
 	}
 	/* @Override
         public */ fold(current : Option<string>, element : string) : Option<string> {
-		return new Some(current/* : Option<string> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */((inner : unknown) => /* inner */ + /* this */.delimiter/* : unknown */ + element/* : string */)/* : unknown */.orElse/* : unknown */(element/* : string */)/* : unknown */)/* : Some */;
+		return new Some(current/* : Option<string> */.map/* : (arg0 : (arg0 : string) => R) => Option<R> */((inner : unknown) => /* inner */ + /* this */.delimiter/* : unknown */ + element/* : string */)/* : unknown */.orElse/* : unknown */(element/* : string */)/* : unknown */)/* : Some */;
 	}
 }
 /* private */class Definition/*  */ {
@@ -392,6 +417,9 @@
 	}
 	/* private */ joinTypeParams() : string {
 		return /* this */.typeParams/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.collect/* : unknown */(new Joiner(/*  */)/* : Joiner */)/* : unknown */.map/* : unknown */((inner : unknown) => "<" + inner + ">")/* : unknown */.orElse/* : unknown */("")/* : unknown */;
+	}
+	/* public */ mapType(mapper : (arg0 : /* Type */) => /* Type */) : Definition {
+		return new Definition(/* this */.maybeBefore/* : unknown */, /* this */.name/* : unknown */, mapper/* : (arg0 : content-start Type content-end) => content-start Type content-end */(/* this */.type/* : unknown */)/* : content-start Type content-end */, /* this */.typeParams/* : unknown */)/* : Definition */;
 	}
 }
 /* private static */class ListCollector<T>/*  */ {
@@ -446,6 +474,10 @@
         public */ generate() : string {
 		return /* this */.input/* : unknown */;
 	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		return /* this */;
+	}
 }
 /* private */class ArrayType/*  */ {
 	constructor (right : /* Type */) {
@@ -454,6 +486,10 @@
 	/* @Override
         public */ generate() : string {
 		return /* this */.right/* : unknown */.generate/* : unknown */(/*  */)/* : unknown */ + "[]";
+	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		return /* this */;
 	}
 }
 /* private static */class Whitespace/*  */ {
@@ -473,6 +509,10 @@
 		let joined : /* var */ = /* this */.arguments/* : unknown */(/*  */)/* : unknown */.iterateWithIndices/* : unknown */(/*  */)/* : unknown */.map/* : unknown */((pair : unknown) => "arg" + /* pair */.left/* : unknown */ + " : " + /* pair */.right/* : unknown */.generate/* : unknown */(/*  */)/* : unknown */)/* : unknown */.collect/* : unknown */(new Joiner(", ")/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 		return "(" + /* joined */ + ") => " + /* this */.returns/* : unknown */.generate/* : unknown */(/*  */)/* : unknown */;
 	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		return new FunctionType(/* this */.arguments/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.map/* : unknown */((type : unknown) => /* type */.replace/* : unknown */(mapping/* : content-start Map content-end<string, content-start Type content-end> */)/* : unknown */)/* : unknown */.collect/* : unknown */(new ListCollector(/*  */)/* : ListCollector */)/* : unknown */, /* this */.returns/* : unknown */)/* : FunctionType */;
+	}
 }
 /* private */class TupleType/*  */ {
 	constructor (arguments : List</* Type */>) {
@@ -482,6 +522,10 @@
         public */ generate() : string {
 		let joinedArguments : /* var */ = /* this */.arguments/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.map/* : unknown */(/* Type */.generate/* : unknown */)/* : unknown */.collect/* : unknown */(new Joiner(", ")/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 		return "[" + joinedArguments + "]";
+	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		return /* this */;
 	}
 }
 /* private */class Template/*  */ {
@@ -494,8 +538,15 @@
 		return /* this */.base/* : unknown */.generate/* : unknown */(/*  */)/* : unknown */ + /* joinedArguments */;
 	}
 	/* @Override
+        public */ typeParams() : List<string> {
+		return /* this */.base/* : unknown */.typeParams/* : unknown */(/*  */)/* : unknown */;
+	}
+	/* @Override
         public */ find(name : string) : Option</* Type */> {
-		return /* this */.base/* : unknown */.find/* : unknown */(name/* : string */)/* : unknown */;
+		return /* this */.base/* : unknown */.find/* : unknown */(name/* : string */)/* : unknown */.map/* : unknown */((found : unknown) => {
+			let mapping : /* var */ = /* this */.base/* : unknown */.typeParams/* : unknown */(/*  */)/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.zip/* : unknown */(/* this */.arguments/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */)/* : unknown */.collect/* : unknown */(new /* MapCollector */(/*  */)/* : content-start MapCollector content-end */)/* : unknown */;
+			return /* found */.replace/* : unknown */(/* mapping */)/* : unknown */;
+		})/* : unknown */;
 	}
 }
 /* private */class Placeholder/*  */ {
@@ -509,6 +560,10 @@
 	/* @Override
         public */ type() : /* Type */ {
 		return /* Primitive */.Unknown/* : unknown */;
+	}
+	/* @Override
+        public */ typeParams() : List<string> {
+		return /* Lists */.empty/* : unknown */(/*  */)/* : unknown */;
 	}
 	/* @Override
         public */ find(name : string) : Option</* Type */> {
@@ -631,10 +686,26 @@
 		return /* this */.stripped/* : unknown */ + /* generatePlaceholder */(": " + /* this */.type/* : unknown */.generate/* : unknown */(/*  */)/* : unknown */)/* : unknown */;
 	}
 }
+/* private */class MapCollector<K, V>/*  */ {
+	constructor () {
+	}
+
+	/* @Override
+        public */ createInitial() : /* Map */<K, V> {
+		return new /* HashMap */(/*  */)/* : content-start HashMap content-end */;
+	}
+	/* @Override
+        public */ fold(current : /* Map */<K, V>, element : [K, V]) : /* Map */<K, V> {
+		/* current.put(element.left, element.right) */;
+		return current/* : content-start Map content-end<K, V> */;
+	}
+}
 /* public */class Main/*  */ {/* 
 
     private interface Type extends Argument {
         String generate();
+
+        Type replace(Map<String, Type> mapping);
     } *//* 
 
     private sealed interface Value extends LambdaValue, Caller {
@@ -644,7 +715,14 @@
     } *//* 
 
     private interface FindableType extends Type {
+        List<String> typeParams();
+
         Option<Type> find(String name);
+
+        @Override
+        default Type replace(Map<String, Type> mapping) {
+            return this;
+        }
     } */
 	/* private */ CompileState(structures : List<string>, definitions : List</* Definition */>, objectTypes : List<ObjectType>, maybeStructName : Option<string>, typeParams : List<string>) : /* record */ {
 		/* public CompileState()  */{
@@ -661,7 +739,7 @@
 		}
 		/* public Option<Type> resolveType(String name)  */{
 			/* if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent())  */{
-				return new Some(new ObjectType(/* name */, /* this */.definitions/* : unknown */)/* : ObjectType */)/* : Some */;
+				return new Some(new ObjectType(/* name */, /* this */.typeParams/* : unknown */, /* this */.definitions/* : unknown */)/* : ObjectType */)/* : Some */;
 			}
 			let maybeTypeParam : /* var */ = /* this */.typeParams/* : unknown */.iterate/* : unknown */(/*  */)/* : unknown */.filter/* : unknown */((param : unknown) => /* param */.equals/* : unknown */(/* name */)/* : unknown */)/* : unknown */.next/* : unknown */(/*  */)/* : unknown */;
 			/* if (maybeTypeParam instanceof Some(var value))  */{
@@ -725,7 +803,7 @@
 			return /* tuple */.flatMap/* : unknown */((inner : unknown) => {
 				let state1 : /* var */ = /* inner */.left/* : unknown */;
 				let right : /* var */ = /* inner */.right/* : unknown */;
-				return mapper/* : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, T]> */(/* state1 */, /* element */)/* : Option<[content-start CompileState content-end, T]> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */((applied : unknown) => {
+				return mapper/* : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, T]> */(/* state1 */, /* element */)/* : Option<[content-start CompileState content-end, T]> */.map/* : (arg0 : (arg0 : [content-start CompileState content-end, T]) => R) => Option<R> */((applied : unknown) => {
 					return new Tuple(/* applied */.left/* : unknown */, /* right */.addLast/* : unknown */(/* applied */.right/* : unknown */)/* : unknown */)/* : Tuple */;
 				})/* : unknown */;
 			})/* : unknown */;
@@ -862,7 +940,7 @@
 		}
 		let parsed2 : /* var */ = /* parsed1 */.iterate/* : unknown */(/*  */)/* : unknown */.collect/* : unknown */(new Joiner(/*  */)/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 		let generated : /* var */ = /* generatePlaceholder */(beforeInfix/* : string */.strip/* : unknown */(/*  */)/* : unknown */)/* : unknown */ + targetInfix/* : string */ + /* name */ + /* joinedTypeParams */ + /* generatePlaceholder */(afterTypeParams/* : string */)/* : unknown */ + " {" + parsed2 + "\n}\n";
-		return new Some(new Tuple(/* parsed */.left/* : unknown */.addStructure/* : unknown */(/* generated */)/* : unknown */.addType/* : unknown */(new ObjectType(/* name */, /* parsed */.left/* : unknown */.definitions/* : unknown */)/* : ObjectType */)/* : unknown */, "")/* : Tuple */)/* : Some */;
+		return new Some(new Tuple(/* parsed */.left/* : unknown */.addStructure/* : unknown */(/* generated */)/* : unknown */.addType/* : unknown */(new ObjectType(/* name */, typeParams/* : List<string> */, /* parsed */.left/* : unknown */.definitions/* : unknown */)/* : ObjectType */)/* : unknown */, "")/* : Tuple */)/* : Some */;
 	}
 	/* private static */ retainDefinition(parameter : Parameter) : Option<Definition> {
 		/* if (parameter instanceof Definition definition)  */{
@@ -1395,14 +1473,14 @@
 		return infix/* : string */(input/* : string */, infix/* : string */, /* Main */.findFirst/* : unknown */, mapper/* : (arg0 : string, arg1 : string) => Option<T> */)/* : unknown */;
 	}
 	/* private static  */ infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return /* split */(() => locator/* : (arg0 : string, arg1 : string) => Option<number> */(input/* : string */, infix/* : string */)/* : Option<number> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */((index : unknown) => {
+		return /* split */(() => locator/* : (arg0 : string, arg1 : string) => Option<number> */(input/* : string */, infix/* : string */)/* : Option<number> */.map/* : (arg0 : (arg0 : number) => R) => Option<R> */((index : unknown) => {
 			let left : /* var */ = input/* : string */.substring/* : unknown */(0/* : number */, /* index */)/* : unknown */;
 			let right : /* var */ = input/* : string */.substring/* : unknown */(/* index */ + infix/* : string */.length/* : unknown */(/*  */)/* : unknown */)/* : unknown */;
 			return new Tuple(/* left */, /* right */)/* : Tuple */;
 		})/* : unknown */, mapper/* : (arg0 : string, arg1 : string) => Option<T> */)/* : unknown */;
 	}
 	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return splitter/* : () => Option<[string, string]> */(/*  */)/* : Option<[string, string]> */.flatMap/* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */((tuple : unknown) => mapper/* : (arg0 : string, arg1 : string) => Option<T> */(/* tuple */.left/* : unknown */, /* tuple */.right/* : unknown */)/* : Option<T> */)/* : unknown */;
+		return splitter/* : () => Option<[string, string]> */(/*  */)/* : Option<[string, string]> */.flatMap/* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((tuple : unknown) => mapper/* : (arg0 : string, arg1 : string) => Option<T> */(/* tuple */.left/* : unknown */, /* tuple */.right/* : unknown */)/* : Option<T> */)/* : unknown */;
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
 		let index : /* var */ = input/* : string */.indexOf/* : unknown */(infix/* : string */)/* : unknown */;
@@ -1431,6 +1509,11 @@
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
         }
     } */
 }

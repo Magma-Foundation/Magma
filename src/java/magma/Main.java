@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -27,6 +29,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         boolean isEmpty();
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
     private interface Collector<T, C> {
@@ -47,6 +51,8 @@ public class Main {
         Option<T> next();
 
         <R> Iterator<R> flatMap(Function<T, Iterator<R>> f);
+
+        <R> Iterator<Tuple<T, R>> zip(Iterator<R> other);
     }
 
     private interface List<T> {
@@ -77,6 +83,8 @@ public class Main {
 
     private interface Type extends Argument {
         String generate();
+
+        Type replace(Map<String, Type> mapping);
     }
 
     private interface Argument {
@@ -100,7 +108,14 @@ public class Main {
     }
 
     private interface FindableType extends Type {
+        List<String> typeParams();
+
         Option<Type> find(String name);
+
+        @Override
+        default Type replace(Map<String, Type> mapping) {
+            return this;
+        }
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -146,6 +161,11 @@ public class Main {
         public boolean isEmpty() {
             return false;
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
+        }
     }
 
     private static class None<T> implements Option<T> {
@@ -187,6 +207,11 @@ public class Main {
         @Override
         public boolean isEmpty() {
             return true;
+        }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return new None<>();
         }
     }
 
@@ -260,6 +285,11 @@ public class Main {
         @Override
         public <R> Iterator<R> flatMap(Function<T, Iterator<R>> f) {
             return new HeadedIterator<>(new FlatMapHead<>(this.head, f));
+        }
+
+        @Override
+        public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
+            return new HeadedIterator<>(() -> HeadedIterator.this.head.next().and(other::next));
         }
     }
 
@@ -370,10 +400,21 @@ public class Main {
         }
     }
 
-    private record ObjectType(String name, List<Definition> definitions) implements FindableType {
+    private record ObjectType(
+            String name,
+            List<String> typeParams,
+            List<Definition> definitions
+    ) implements FindableType {
         @Override
         public String generate() {
             return this.name;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return new ObjectType(this.name, this.typeParams, this.definitions.iterate()
+                    .map(definition -> definition.mapType(type -> type.replace(mapping)))
+                    .collect(new ListCollector<>()));
         }
 
         @Override
@@ -389,6 +430,15 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            if (mapping.containsKey(this.value)) {
+                return mapping.get(this.value);
+            }
+
+            return this;
         }
     }
 
@@ -416,7 +466,7 @@ public class Main {
 
         public Option<Type> resolveType(String name) {
             if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent()) {
-                return new Some<>(new ObjectType(name, this.definitions));
+                return new Some<>(new ObjectType(name, this.typeParams, this.definitions));
             }
 
             var maybeTypeParam = this.typeParams.iterate()
@@ -579,6 +629,10 @@ public class Main {
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
         }
+
+        public Definition mapType(Function<Type, Type> mapper) {
+            return new Definition(this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
+        }
     }
 
     private static class ListCollector<T> implements Collector<T, List<T>> {
@@ -637,12 +691,22 @@ public class Main {
         public String generate() {
             return this.input;
         }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
+        }
     }
 
     private record ArrayType(Type right) implements Type {
         @Override
         public String generate() {
             return this.right.generate() + "[]";
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
         }
     }
 
@@ -666,6 +730,11 @@ public class Main {
 
             return "(" + joined + ") => " + this.returns.generate();
         }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return new FunctionType(this.arguments.iterate().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns);
+        }
     }
 
     private record TupleType(List<Type> arguments) implements Type {
@@ -677,6 +746,11 @@ public class Main {
                     .orElse("");
 
             return "[" + joinedArguments + "]";
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
         }
     }
 
@@ -693,8 +767,19 @@ public class Main {
         }
 
         @Override
+        public List<String> typeParams() {
+            return this.base.typeParams();
+        }
+
+        @Override
         public Option<Type> find(String name) {
-            return this.base.find(name);
+            return this.base.find(name).map(found -> {
+                var mapping = this.base.typeParams().iterate()
+                        .zip(this.arguments.iterate())
+                        .collect(new MapCollector<>());
+
+                return found.replace(mapping);
+            });
         }
     }
 
@@ -707,6 +792,11 @@ public class Main {
         @Override
         public Type type() {
             return Primitive.Unknown;
+        }
+
+        @Override
+        public List<String> typeParams() {
+            return Lists.empty();
         }
 
         @Override
@@ -823,6 +913,19 @@ public class Main {
         @Override
         public String generate() {
             return this.stripped + generatePlaceholder(": " + this.type.generate());
+        }
+    }
+
+    private record MapCollector<K, V>() implements Collector<Tuple<K, V>, Map<K, V>> {
+        @Override
+        public Map<K, V> createInitial() {
+            return new HashMap<>();
+        }
+
+        @Override
+        public Map<K, V> fold(Map<K, V> current, Tuple<K, V> element) {
+            current.put(element.left, element.right);
+            return current;
         }
     }
 
@@ -1070,7 +1173,7 @@ public class Main {
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
 
-        return new Some<>(new Tuple<>(parsed.left.addStructure(generated).addType(new ObjectType(name, parsed.left.definitions)), ""));
+        return new Some<>(new Tuple<>(parsed.left.addStructure(generated).addType(new ObjectType(name, typeParams, parsed.left.definitions)), ""));
     }
 
     private static Option<Definition> retainDefinition(Parameter parameter) {
@@ -1803,6 +1906,11 @@ public class Main {
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
         }
     }
 }
