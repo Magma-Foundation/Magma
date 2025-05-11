@@ -108,7 +108,7 @@
     }
     /* @Override
             public */ removeLast() {
-        let slice = this.elements.subList( /* 0 */);
+        let slice = this.elements.subList(0);
         let last = this.elements.getLast();
         return /* new Some<> */ ( /* new Tuple<List<T>, T> */( /* new JVMList<>(slice */),  /*  last) */);
     }
@@ -281,7 +281,7 @@
         let stripped = input.strip(); /* if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Tuple<>(state, "");
         } */
-        return compileClass(stripped, state).orElseGet(/* () -> new Tuple<> */ (state, generatePlaceholder(stripped)));
+        return compileClass(stripped, 0, state).orElseGet(/* () -> new Tuple<> */ (state, generatePlaceholder(stripped)));
     }
     /* private static */ compileClass(stripped, depth, state) {
         return structure(stripped, "class ", "class ", state);
@@ -302,7 +302,7 @@
         return true;
     }
     /* private static  */ suffix(input, suffix, mapper) {
-        let slice = input.substring(length());
+        let slice = input.substring(0, length());
         return mapper.apply(slice);
     }
     /* private static */ compileClassSegment(state, input, depth) {
@@ -369,7 +369,16 @@ var s = indent  */
     }) */;
     }
     /* private static */ value(state, input) {
-        return operation(state, input).or(/* () -> symbolValue */ (state, input)).or(/* () -> stringValue */ (state, input)).or(/* () -> dataAccess */ (state, input)).or(/* () -> invocation */ (state, input)).orElseGet(/* String> */ (state, generatePlaceholder(input)));
+        return operation(state, input).or(/* () -> symbolValue */ (state, input)).or(/* () -> stringValue */ (state, input)).or(/* () -> dataAccess */ (state, input)).or(/* () -> invocation */ (state, input)).or(/* () -> digits */ (state, input)).orElseGet(/* String> */ (state, generatePlaceholder(input)));
+    }
+    /* private static */ digits(state, input) {
+        let stripped = input.strip(); /* if(isNumber(stripped)) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } */
+        return /* new None<> */ ();
+    }
+    /* private static */ isNumber(input) {
+        return true;
     }
     /* private static */ invocation(state, input) {
         return; /* suffix(input.strip(), ")", withoutEnd -> {
@@ -534,7 +543,7 @@ var s = indent  */
 
                 if (base.equals("Tuple")) {
                     return new Some<>(new Tuple<>(argumentsState, "["  */
-        +arguments.get( /* 0 */) + ", " + arguments.get( /* 1 */) + /*  "]"));
+        +arguments.get(0) + ", " + arguments.get(1) + /*  "]"));
     }
 
     return new Some<>(new Tuple<>(argumentsState, strippedBase  */
