@@ -527,10 +527,6 @@ public class Main {
                 var strippedWithEnd = withEnd.strip();
                 return suffix(strippedWithEnd, "}", content1 -> {
                     var strippedName = name.strip();
-                    if (!isSymbol(strippedName)) {
-                        return new None<>();
-                    }
-
                     var statements = compileStatements(state, content1, (state0, input) -> compileClassSegment(state0, input, 1));
                     var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + strippedName + " {" + statements.right + "\n}\n";
                     return new Some<>(new Tuple<>(statements.left.addStructure(generated), ""));
@@ -588,26 +584,31 @@ public class Main {
                         .orElseGet(() -> new Tuple<>(state, generatePlaceholder(definition)));
 
                 var content = rawContent.strip();
+                var indent = createIndent(depth);
                 if (content.equals(";")) {
-                    var s = createIndent(depth) + definitionTuple.right + ";";
+                    var s = indent + definitionTuple.right + ";";
                     return new Some<>(new Tuple<>(definitionTuple.left, s));
                 }
 
-                var statementsTuple = compileStatements(definitionTuple.left, content, Main::compileFunctionalSegment);
-                var generated = createIndent(depth) + definitionTuple.right + "{" + statementsTuple.right + "}";
-                return new Some<>(new Tuple<>(statementsTuple.left, generated));
+                if (content.startsWith("{") && content.endsWith("}")) {
+                    var statementsTuple = compileStatements(definitionTuple.left, content.substring(1, content.length() - 1), (state1, input1) -> compileFunctionalSegment(state1, input1, depth + 1));
+                    var generated = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
+                    return new Some<>(new Tuple<>(statementsTuple.left, generated));
+                }
+
+                return new None<>();
             });
         });
     }
 
-    private static Tuple<CompileState, String> compileFunctionalSegment(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileFunctionalSegment(CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return new Tuple<>(state, "");
         }
 
         return suffix(stripped, ";", s -> {
-            return new Some<>(new Tuple<>(state, "\n\t" + generatePlaceholder(s) + ";"));
+            return new Some<>(new Tuple<>(state, createIndent(depth) + generatePlaceholder(s) + ";"));
         }).orElseGet(() -> {
             return new Tuple<>(state, generatePlaceholder(stripped));
         });
