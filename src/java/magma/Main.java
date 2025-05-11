@@ -559,11 +559,16 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileFunctionalSegment(CompileState state, String input) {
-        if (input.isBlank()) {
+        var stripped = input.strip();
+        if (stripped.isEmpty()) {
             return new Tuple<>(state, "");
         }
 
-        return new Tuple<>(state, generatePlaceholder(input));
+        return suffix(stripped, ";", s -> {
+            return new Some<>(new Tuple<>(state, "\n\t" + generatePlaceholder(s) + ";"));
+        }).orElseGet(() -> {
+            return new Tuple<>(state, generatePlaceholder(stripped));
+        });
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {

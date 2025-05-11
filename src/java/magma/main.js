@@ -34,38 +34,34 @@
 /* public */ class Main {
     /* private interface Option */ map() {
         (mapper) => {
+            /*  */ ;
+            /* boolean isPresent() */ ;
+            /* T orElse(T other) */ ;
+            /* Option<T> filter(Predicate<T> predicate) */ ;
+            /* T orElseGet(Supplier<T> supplier) */ ;
+            /* Option<T> or(Supplier<Option<T>> other) */ ;
+            /* <R> Option<R> flatMap(Function<T, Option<R>> mapper) */ ; /* } */
         };
         /* private interface Collector<T, C> {
             */ createInitial();
         C;
-        { /* ; */ /*
-
-        C fold(C current, T element); */ /*
-    } */
+        {
+            /*  */ ;
+            /* C fold(C current, T element) */ ; /* } */
         }
         /* private interface Iterator */ fold < T > {}(initial, R, folder, (R, T) => R);
         R;
-        { /* ; */ /*
-
-        <R> Iterator<R> map(Function<T, R> mapper); */ /*
-
-        <R> R collect(Collector<T, R> collector); */ /*
-    } */
+        {
+            /*  */ ;
+            /* <R> Iterator<R> map(Function<T, R> mapper) */ ;
+            /* <R> R collect(Collector<T, R> collector) */ ; /* } */
         }
         /* private interface List<T> {
             */ add(element, T);
-        List < T > { /* ; */ /*
-
-        Iterator<T> iterate(); */ /*
-
-        Option<Tuple<List<T>, T>> removeLast(); */ /*
-
-        T get(int index); */ /*
-    } */};
+        List < T > {};
         /* private interface Head<T> {
             */ next();
-        Option < T > { /* ; */ /*
-    } */};
+        Option < T > {};
         /* private */ Some(value, T);
         record;
         { /* implements Option<T> {
@@ -110,38 +106,25 @@
         public(mapper, (T) => R);
         Option < R > { /* {
             return new None<>();
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public boolean isPresent() {
             return false;
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public T orElse(T other) {
             return other;
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public Option<T> filter(Predicate<T> predicate) {
             return new None<>();
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public T orElseGet(Supplier<T> supplier) {
             return supplier.get();
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public Option<T> or(Supplier<Option<T>> other) {
             return other.get();
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
             return new None<>();
-        } */ /*
-    } */};
+        } */ /* } */};
         /* private */ HeadedIterator(head, (Head));
         record;
         { /* implements Iterator<T> {
@@ -179,9 +162,7 @@
         public;
         { /* {
             this.length = length;
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public Option<Integer> next() {
             if (this.counter < this.length) {
                 var value = this.counter;
@@ -190,8 +171,7 @@
             }
 
             return new None<>();
-        } */ /*
-    } */
+        } */ /* } */
         }
         /* private */ CompileState(structures, (List));
         record;
@@ -251,13 +231,10 @@
             public */ createInitial();
         List < T > { /* {
             return Lists.empty();
-        } */ /*
-
-        @Override
+        } */ /* @Override
         public List<T> fold(List<T> current, T element) {
             return current.add(element);
-        } */ /*
-    } */};
+        } */ /* } */};
         /* private record */ B > (left);
         A, right;
         B;
@@ -483,11 +460,16 @@
         /* private static */ compileFunctionalSegment(state, CompileState, input, string);
         [CompileState, string];
         { /* {
-            if (input.isBlank()) {
+            var stripped = input.strip();
+            if (stripped.isEmpty()) {
                 return new Tuple<>(state, "");
             }
     
-            return new Tuple<>(state, generatePlaceholder(input));
+            return suffix(stripped, ";", s -> {
+                return new Some<>(new Tuple<>(state, "\n\t" + generatePlaceholder(s) + ";"));
+            }).orElseGet(() -> {
+                return new Tuple<>(state, generatePlaceholder(stripped));
+            });
         } */
         }
         /* private static */ compileValues(state, CompileState, params, string, mapper, (CompileState, string) => [CompileState, string]);
