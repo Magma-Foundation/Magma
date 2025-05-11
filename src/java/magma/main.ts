@@ -27,7 +27,7 @@
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
 }
-/* private */class Some<T>/* (T value) */ {
+/* private */class Some<T>/*  */ {
 	/* @Override
         public  */ map<R>(mapper : (T) => R) : Option<R> {
 		return new Some<>(mapper.apply(this.value));
@@ -98,7 +98,7 @@
 		return true;
 	}
 }
-/* private */class HeadedIterator<T>/* (Head<T> head) */ {
+/* private */class HeadedIterator<T>/*  */ {
 	/* @Override
         public  */ fold<R>(initial : R, folder : (R, T) => R) : R {
 		let current : var = initial;
@@ -240,6 +240,20 @@
 		return this.input.charAt(this.index);
 	}
 }
+/* private */class Joiner/*  */ {
+	Joiner() : private {
+		/* this("") */;
+	}
+	/* @Override
+        public */ createInitial() : Option<string> {
+		return new None<>();
+	}
+	/* @Override
+        public */ fold(current : Option<string>, element : string) : Option<string> {
+		return new Some<>(current.map((inner) => {inner + this.delimiter + element
+		}).orElse(element));
+	}
+}
 /* private static */class ListCollector<T>/*  */ {
 	/* @Override
         public */ createInitial() : List<T> {
@@ -260,23 +274,7 @@
 		/* public CompileState addStructure(String structure)  */{
 			return new CompileState(this.structures.add(structure));
 		}
-	}/* 
-
-    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private Joiner() {
-            this("");
-        }
-
-        @Override
-        public Option<String> createInitial() {
-            return new None<>();
-        }
-
-        @Override
-        public Option<String> fold(Option<String> current, String element) {
-            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
-        }
-    } */
+	}
 	/* private */ Definition(maybeBefore : Option<string>, type : string, name : string, typeParams : List<string>) : record {
 		/* private String generate()  */{
 			return this.generateWithParams("");
@@ -427,6 +425,15 @@
 		});
 	}
 	/* private static */ getOr(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, string]> {
+		return suffix(beforeContent, ")", (s) => {
+			return first(s, "(", (s1,  s2) => {
+				return getOred(targetInfix, state, beforeInfix, /*  s1 */, /*  content1 */);
+			});
+		}).or(() => {
+			return getOred(targetInfix, state, beforeInfix, beforeContent, /*  content1 */);
+		});
+	}
+	/* private static */ getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, string]> {
 		return first(beforeContent, "<", (name,  withTypeParams) => {
 			return first(withTypeParams, ">", (typeParamsString,  afterTypeParams) => {
 				let typeParams : var = parseValues(state, typeParamsString, (state1,  s) => {new Tuple<>(/* state1 */, s.strip())

@@ -207,6 +207,21 @@
         return this.input.charAt(this.index);
     }
 }
+/* private */ class Joiner /*  */ {
+    Joiner() {
+        /* this("") */ ;
+    }
+    /* @Override
+        public */ createInitial() {
+        return new None();
+    }
+    /* @Override
+        public */ fold(current, element) {
+        return new Some(current.map((inner) => {
+            inner + this.delimiter + element;
+        }).orElse(element));
+    }
+}
 /* private static */ class ListCollector {
     /* @Override
         public */ createInitial() {
@@ -227,23 +242,7 @@
         /* public CompileState addStructure(String structure)  */ {
             return new CompileState(this.structures.add(structure));
         }
-    } /*
-
-    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private Joiner() {
-            this("");
-        }
-
-        @Override
-        public Option<String> createInitial() {
-            return new None<>();
-        }
-
-        @Override
-        public Option<String> fold(Option<String> current, String element) {
-            return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
-        }
-    } */
+    }
     /* private */ Definition(maybeBefore, type, name, typeParams) {
         /* private String generate()  */ {
             return this.generateWithParams("");
@@ -394,6 +393,15 @@
         });
     }
     /* private static */ getOr(targetInfix, state, beforeInfix, beforeContent, content1) {
+        return suffix(beforeContent, ")", (s) => {
+            return first(s, "(", (s1, s2) => {
+                return getOred(targetInfix, state, beforeInfix);
+            });
+        }).or(() => {
+            return getOred(targetInfix, state, beforeInfix, beforeContent);
+        });
+    }
+    /* private static */ getOred(targetInfix, state, beforeInfix, beforeContent, content1) {
         return first(beforeContent, "<", (name, withTypeParams) => {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
                 let typeParams = parseValues(state, typeParamsString, (state1, s) => {

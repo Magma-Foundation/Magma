@@ -557,6 +557,16 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+      return suffix(beforeContent, ")", s -> {
+          return first(s, "(", (s1, s2) -> {
+              return getOred(targetInfix, state, beforeInfix, s1, content1);
+          });
+      }).or(() -> {
+          return getOred(targetInfix, state, beforeInfix, beforeContent, content1);
+      });
+    }
+
+    private static Option<Tuple<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
