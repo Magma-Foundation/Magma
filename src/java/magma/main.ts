@@ -257,7 +257,7 @@
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("") */;
-		return before + /*  this.name  */ + joined + params + /*  " : "  */ + /*  this.type */;
+		return before + /*  this.name  */ + joined + params + " : " + /*  this.type */;
 	}
 }
 /* private static */class ListCollector<T> implements Collector<T, List<T>> {
@@ -484,7 +484,14 @@
 	/* private static */ value(state : CompileState, input : string) : [CompileState, string] {
 		return /* operation(state, input)
                 .or(() -> symbolValue(state, input))
+                .or(() -> stringValue(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input))) */;
+	}
+	/* private static */ stringValue(state : CompileState, input : string) : Option<[CompileState, string]> {
+		/* var stripped = input.strip() */;/* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } */
+		return /* new None<>() */;
 	}
 	/* private static */ symbolValue(state : CompileState, value : string) : Option<[CompileState, string]> {
 		/* var stripped = value.strip() */;/* if (isSymbol(stripped)) {
@@ -523,7 +530,7 @@
 		return /* cache.append(", ").append(element) */;
 	}
 	/* private static */ createIndent(depth : number) : string {
-		return /* "\n"  */ + /*  "\t".repeat(depth) */;
+		return "\n" + /*  "\t".repeat(depth) */;
 	}
 	/* private static */ compileDefinitionStatement(input : string, depth : number, state : CompileState) : Option<[CompileState, string]> {/* return suffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(state, withoutEnd).map(result -> {
@@ -629,7 +636,7 @@
 		/* var joined = arguments.iterate()
                 .collect(new Joiner(", "))
                 .orElse("") */;
-		return /* "("  */ + joined + /*  ") => "  */ + returns;
+		return "(" + joined + ") => " + returns;
 	}
 	/* private static  */ last<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return /* infix(input, infix, Main::findLast, mapper) */;
@@ -659,7 +666,7 @@
 		/* var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end") */;
-		return /* "content-start "  */ + replaced + /*  " content-end" */;
+		return "/* " + replaced + " */";
 	}
 }
 /*  */

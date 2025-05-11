@@ -265,7 +265,7 @@ name, List < String > typeParams;
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("") */ ;
-        return before + /*  this.name  */ +joined + params + /*  " : "  */ + /*  this.type */;
+        return before + /*  this.name  */ +joined + params + " : " +  /*  this.type */;
     }
 }
 /* private static */ class ListCollector {
@@ -413,7 +413,14 @@ right;
     /* private static */ value(state, input) {
         return /* operation(state, input)
                 .or(() -> symbolValue(state, input))
+                .or(() -> stringValue(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input))) */;
+    }
+    /* private static */ stringValue(state, input) {
+        /* var stripped = input.strip() */ ; /* if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, stripped));
+        } */
+        return /* new None<>() */;
     }
     /* private static */ symbolValue(state, value) {
         /* var stripped = value.strip() */ ; /* if (isSymbol(stripped)) {
@@ -444,7 +451,7 @@ right;
         return /* cache.append(", ").append(element) */;
     }
     /* private static */ createIndent(depth) {
-        return /* "\n"  */ + /*  "\t".repeat(depth) */;
+        return "\n" +  /*  "\t".repeat(depth) */;
     }
     /* private static */ compileDefinitionStatement(input, depth, state) {
         /* ) */ ;
@@ -499,7 +506,7 @@ right;
         /* var joined = arguments.iterate()
                 .collect(new Joiner(", "))
                 .orElse("") */ ;
-        return /* "("  */ +joined + /*  ") => "  */ +returns;
+        return "(" + joined + ") => " + returns;
     }
     /* private static  */ last(input, infix, mapper) {
         return /* infix(input, infix, Main::findLast, mapper) */;
@@ -525,7 +532,7 @@ right;
         /* var replaced = input
                 .replace("content-start", "content-start")
                 .replace("content-end", "content-end") */ ;
-        return /* "content-start "  */ +replaced +  /*  " content-end" */;
+        return "/* " + replaced + " */";
     }
 }
 /*  */ 

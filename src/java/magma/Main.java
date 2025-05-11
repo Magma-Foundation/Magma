@@ -629,7 +629,16 @@ public class Main {
     private static Tuple<CompileState, String> value(CompileState state, String input) {
         return operation(state, input)
                 .or(() -> symbolValue(state, input))
+                .or(() -> stringValue(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> stringValue(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return new Some<>(new Tuple<>(state, stripped));
+        }
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> symbolValue(CompileState state, String value) {
