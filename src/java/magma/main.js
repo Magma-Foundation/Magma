@@ -14,7 +14,7 @@
     }
     /* @Override
         public */ filter(predicate) {
-        return /* predicate.test(this.value) ? this : new None<> */ ();
+        return /* new None<> */ ();
     }
     /* @Override
         public */ orElseGet(supplier) {
@@ -266,7 +266,11 @@
         return /* new None<> */ ();
     }
     /* private static */ foldSingleQuotes(tuple) {
-        return /* new None<> */ ();
+        let appended = tuple.right.append(tuple.left);
+        return appended.popAndAppendToTuple().map( /* Main::foldEscaped */).flatMap( /* DivideState::popAndAppendToOption */);
+    }
+    /* private static */ foldEscaped(escaped) {
+        return escaped.right;
     }
     /* private static */ foldStatementChar(state, c) {
         let append = state.append(c); /* if (c == ';' && append.isLevel()) {
@@ -583,8 +587,10 @@ var s = indent  */
         return infix(input, infix, mapper);
     }
     /* private static */ findLast(input, infix) {
-        let index = input.lastIndexOf(infix);
-        return /* index == -1 ? new None<Integer>() : new Some<> */ (index);
+        let index = input.lastIndexOf(infix); /* if (index == -1) {
+            return new None<Integer>();
+        } */
+        return /* new Some<> */ (index);
     }
     /* private static  */ first(input, infix, mapper) {
         return infix(input, infix, mapper);
@@ -601,8 +607,10 @@ var s = indent  */
         return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
     }
     /* private static */ findFirst(input, infix) {
-        let index = input.indexOf(infix);
-        return /* index == -1 ? new None<Integer>() : new Some<> */ (index);
+        let index = input.indexOf(infix); /* if (index == -1) {
+            return new None<Integer>();
+        } */
+        return /* new Some<> */ (index);
     }
     /* private static */ generatePlaceholder(input) {
         let replaced = input.replace("/*", "content-start").replace("*/", "content-end");

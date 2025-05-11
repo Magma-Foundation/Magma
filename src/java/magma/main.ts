@@ -40,8 +40,10 @@
 		return this.value;
 	}
 	/* @Override
-        public */ filter(predicate : (T) => boolean) : Option<T> {
-		return /* predicate.test(this.value) ? this : new None<> */();
+        public */ filter(predicate : (T) => boolean) : Option<T> {/* if (predicate.test(this.value)) {
+                return this;
+            } */
+		return /* new None<> */();
 	}
 	/* @Override
         public */ orElseGet(supplier : () => T) : T {
@@ -362,13 +364,16 @@
         } */
 		return /* new None<> */();
 	}
-	/* private static */ foldSingleQuotes(tuple : [Character, DivideState]) : Option<DivideState> {/* if (tuple.left == '\'') {
-            var appended = tuple.right.append(tuple.left);
-            return appended.popAndAppendToTuple()
-                    .map(escaped -> escaped.left == '\\' ? escaped.right.popAndAppendToOption().orElse(escaped.right) : escaped.right)
-                    .flatMap(DivideState::popAndAppendToOption);
+	/* private static */ foldSingleQuotes(tuple : [Character, DivideState]) : Option<DivideState> {/* if (tuple.left != '\'') {
+            return new None<>();
         } */
-		return /* new None<> */();
+		let appended : var = tuple.right.append(tuple.left);
+		return appended.popAndAppendToTuple().map(/* Main::foldEscaped */).flatMap(/* DivideState::popAndAppendToOption */);
+	}
+	/* private static */ foldEscaped(escaped : [Character, DivideState]) : DivideState {/* if (escaped.left == '\\') {
+            return escaped.right.popAndAppendToOption().orElse(escaped.right);
+        } */
+		return escaped.right;
 	}
 	/* private static */ foldStatementChar(state : DivideState, c : char) : DivideState {
 		let append : var = state.append(c);/* if (c == ';' && append.isLevel()) {
@@ -737,8 +742,10 @@
 		return infix(input, infix, /*  Main::findLast */, mapper);
 	}
 	/* private static */ findLast(input : string, infix : string) : Option<Integer> {
-		let index : var = input.lastIndexOf(infix);
-		return /* index == -1 ? new None<Integer>() : new Some<> */(index);
+		let index : var = input.lastIndexOf(infix);/* if (index == -1) {
+            return new None<Integer>();
+        } */
+		return /* new Some<> */(index);
 	}
 	/* private static  */ first<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return infix(input, infix, /*  Main::findFirst */, mapper);
@@ -754,8 +761,10 @@
 		return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<Integer> {
-		let index : var = input.indexOf(infix);
-		return /* index == -1 ? new None<Integer>() : new Some<> */(index);
+		let index : var = input.indexOf(infix);/* if (index == -1) {
+            return new None<Integer>();
+        } */
+		return /* new Some<> */(index);
 	}
 	/* private static */ generatePlaceholder(input : string) : string {
 		let replaced : var = input.replace("/*", "content-start").replace("*/", "content-end");

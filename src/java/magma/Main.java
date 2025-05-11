@@ -75,7 +75,10 @@ public class Main {
 
         @Override
         public Option<T> filter(Predicate<T> predicate) {
-            return predicate.test(this.value) ? this : new None<>();
+            if (predicate.test(this.value)) {
+                return this;
+            }
+            return new None<>();
         }
 
         @Override
@@ -483,15 +486,21 @@ public class Main {
     }
 
     private static Option<DivideState> foldSingleQuotes(Tuple<Character, DivideState> tuple) {
-        if (tuple.left == '\'') {
-            var appended = tuple.right.append(tuple.left);
-            return appended.popAndAppendToTuple()
-                    .map(escaped -> escaped.left == '\\' ? escaped.right.popAndAppendToOption().orElse(escaped.right) : escaped.right)
-                    .flatMap(DivideState::popAndAppendToOption);
+        if (tuple.left != '\'') {
+            return new None<>();
         }
+        var appended = tuple.right.append(tuple.left);
+        return appended.popAndAppendToTuple()
+                .map(Main::foldEscaped)
+                .flatMap(DivideState::popAndAppendToOption);
 
-        return new None<>();
+    }
 
+    private static DivideState foldEscaped(Tuple<Character, DivideState> escaped) {
+        if (escaped.left == '\\') {
+            return escaped.right.popAndAppendToOption().orElse(escaped.right);
+        }
+        return escaped.right;
     }
 
     private static DivideState foldStatementChar(DivideState state, char c) {
@@ -972,7 +981,10 @@ public class Main {
 
     private static Option<Integer> findLast(String input, String infix) {
         var index = input.lastIndexOf(infix);
-        return index == -1 ? new None<Integer>() : new Some<>(index);
+        if (index == -1) {
+            return new None<Integer>();
+        }
+        return new Some<>(index);
     }
 
     private static <T> Option<T> first(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
@@ -998,7 +1010,10 @@ public class Main {
 
     private static Option<Integer> findFirst(String input, String infix) {
         var index = input.indexOf(infix);
-        return index == -1 ? new None<Integer>() : new Some<>(index);
+        if (index == -1) {
+            return new None<Integer>();
+        }
+        return new Some<>(index);
     }
 
     private static String generatePlaceholder(String input) {
