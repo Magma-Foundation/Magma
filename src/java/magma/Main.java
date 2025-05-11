@@ -659,7 +659,18 @@ public class Main {
         return operation(state, input)
                 .or(() -> symbolValue(state, input))
                 .or(() -> stringValue(state, input))
+                .or(() -> dataAccess(state, input))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
+        return last(input.strip(), ".", (parent, property) -> {
+            var value = value(state, parent);
+            if (isSymbol(property)) {
+                return new None<>();
+            }
+            return new Some<>(new Tuple<>(value.left, value.right + "." + property));
+        });
     }
 
     private static Option<Tuple<CompileState, String>> stringValue(CompileState state, String input) {
