@@ -745,23 +745,10 @@ public class Main {
         }
     }
 
-    private static final class SymbolValue implements Value {
-        private final String stripped;
-        private final Type type;
-
-        public SymbolValue(String stripped, Type type) {
-            this.stripped = stripped;
-            this.type = type;
-        }
-
+    private record SymbolValue(String stripped, Type type) implements Value {
         @Override
         public String generate() {
             return this.stripped + generatePlaceholder(" : " + this.type.generate());
-        }
-
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
         }
     }
 
@@ -1291,13 +1278,17 @@ public class Main {
                     var arguments = parsed.right;
 
                     var newCaller = modifyCaller(parsed.left, oldCaller);
-                    Type var;
+
+                    Type var = Primitive.Unknown;
                     switch (newCaller) {
                         case ConstructionCaller constructionCaller -> {
                             var = constructionCaller.type;
                         }
                         case Value value -> {
-                            var = value.type();
+                            var type = value.type();
+                            if (type instanceof FunctionType functionType) {
+                                var = functionType.returns;
+                            }
                         }
                     }
 
