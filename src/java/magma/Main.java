@@ -599,7 +599,7 @@ public class Main {
     private static boolean isSymbol(String input) {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (Character.isLetter(c)) {
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
                 continue;
             }
             return false;
