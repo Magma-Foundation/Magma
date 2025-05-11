@@ -633,7 +633,8 @@ public class Main {
                 }
 
                 if (content.startsWith("{") && content.endsWith("}")) {
-                    var statementsTuple = compileStatements(definitionTuple.left, content.substring(1, content.length() - 1), (state1, input1) -> compileFunctionalSegment(state1, input1, depth + 1));
+                    var substring = content.substring(1, content.length() - 1);
+                    var statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
                     var generated = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
                     return new Some<>(new Tuple<>(statementsTuple.left, generated));
                 }
@@ -643,7 +644,11 @@ public class Main {
         });
     }
 
-    private static Tuple<CompileState, String> compileFunctionalSegment(CompileState state, String input, int depth) {
+    private static Tuple<CompileState, String> compileFunctionSegments(CompileState state, String input, int depth) {
+        return compileStatements(state, input, (state1, input1) -> compileFunctionSegment(state1, input1, depth + 1));
+    }
+
+    private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (stripped.isEmpty()) {
             return new Tuple<>(state, "");
@@ -652,6 +657,14 @@ public class Main {
         return suffix(stripped, ";", s -> {
             var tuple = statementValue(state, s);
             return new Some<>(new Tuple<>(tuple.left, createIndent(depth) + tuple.right + ";"));
+        }).or(() -> {
+            return suffix(stripped, "}", withoutEnd -> {
+                return first(withoutEnd, "{", (beforeContent, content) -> {
+                    var compiled = compileFunctionSegments(state, content, depth);
+                    var indent = createIndent(depth);
+                    return new Some<>(new Tuple<>(compiled.left, indent + generatePlaceholder(beforeContent) + "{" + compiled.right + indent + "}"));
+                });
+            });
         }).orElseGet(() -> {
             return new Tuple<>(state, generatePlaceholder(stripped));
         });
