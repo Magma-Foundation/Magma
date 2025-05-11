@@ -1157,7 +1157,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> type(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.equals("int")) {
+        if (stripped.equals("int") || stripped.equals("Integer")) {
             return new Some<>(new Tuple<>(state, "number"));
         }
 

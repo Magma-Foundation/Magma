@@ -177,7 +177,7 @@
 		let /* this.length  */ = length;
 	}
 	/* @Override
-        public */ next() : Option<Integer> {
+        public */ next() : Option<number> {
 		/* if (this.counter < this.length)  */{
 			let value = this.counter;
 			/* this.counter++ */;
@@ -921,7 +921,7 @@
 	}
 	/* private static */ type(state : CompileState, input : string) : Option<[CompileState, string]> {
 		let stripped = input.strip();
-		/* if (stripped.equals("int"))  */{
+		/* if (stripped.equals("int") || stripped.equals("Integer"))  */{
 			return new Some(new Tuple(state, "number"));
 		}
 		/* if (stripped.equals("String"))  */{
@@ -978,17 +978,17 @@
 	/* private static  */ last<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return infix(input, infix, Main.findLast, mapper);
 	}
-	/* private static */ findLast(input : string, infix : string) : Option<Integer> {
+	/* private static */ findLast(input : string, infix : string) : Option<number> {
 		let index = input.lastIndexOf(infix);
 		/* if (index == -1)  */{
-			return new None<Integer>();
+			return new None<number>();
 		}
 		return new Some(index);
 	}
 	/* private static  */ first<T>(input : string, infix : string, mapper : (string, string) => Option<T>) : Option<T> {
 		return infix(input, infix, Main.findFirst, mapper);
 	}
-	/* private static  */ infix<T>(input : string, infix : string, locator : (string, string) => Option<Integer>, mapper : (string, string) => Option<T>) : Option<T> {
+	/* private static  */ infix<T>(input : string, infix : string, locator : (string, string) => Option<number>, mapper : (string, string) => Option<T>) : Option<T> {
 		return split(() => locator.apply(input, infix).map((index) => {
 			let left = input.substring(0, index);
 			let right = input.substring(index + infix.length());
@@ -998,10 +998,10 @@
 	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (string, string) => Option<T>) : Option<T> {
 		return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
 	}
-	/* private static */ findFirst(input : string, infix : string) : Option<Integer> {
+	/* private static */ findFirst(input : string, infix : string) : Option<number> {
 		let index = input.indexOf(infix);
 		/* if (index == -1)  */{
-			return new None<Integer>();
+			return new None<number>();
 		}
 		return new Some(index);
 	}

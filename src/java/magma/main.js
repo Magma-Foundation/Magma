@@ -872,7 +872,7 @@
     }
     /* private static */ type(state, input) {
         let stripped = input.strip();
-        /* if (stripped.equals("int"))  */ {
+        /* if (stripped.equals("int") || stripped.equals("Integer"))  */ {
             return new Some(new Tuple(state, "number"));
         }
         /* if (stripped.equals("String"))  */ {
