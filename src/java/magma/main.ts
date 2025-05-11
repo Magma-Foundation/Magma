@@ -418,17 +418,11 @@
 			return first(right, "{", (beforeContent,  withEnd) => {
 				let strippedWithEnd : var = withEnd.strip();
 				return suffix(strippedWithEnd, "}", /*  content1 -> {
-                    return first(beforeContent, "<", new BiFunction<String, String, Option<Tuple<CompileState, String>>>() {
-                        @Override
-                        public Option<Tuple<CompileState, String>> apply(String name, String withTypeParams) {
-                            return first(withTypeParams, ">", new BiFunction<String, String, Option<Tuple<CompileState, String>>>() {
-                                @Override
-                                public Option<Tuple<CompileState, String>> apply(String typeParamsString, String afterTypeParams) {
-                                    var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
-                                    return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
-                                }
-                            });
-                        }
+                    return first(beforeContent, "<", (name, withTypeParams) -> {
+                        return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
+                            var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                            return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams);
+                        });
                     }).or(() -> {
                         return assemble(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "");
                     });
