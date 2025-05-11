@@ -390,6 +390,10 @@ public class Main {
                     .filter(type -> type.name.equals(name))
                     .next();
         }
+
+        public CompileState addType(ObjectType type) {
+            return new CompileState(this.structures, this.definitions, this.types.addLast(type));
+        }
     }
 
     private static class DivideState {
@@ -934,10 +938,10 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileClass(String stripped, int depth, CompileState state) {
-        return structure(stripped, "class ", "class ", state);
+        return compileStructure(stripped, "class ", "class ", state);
     }
 
-    private static Option<Tuple<CompileState, String>> structure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+    private static Option<Tuple<CompileState, String>> compileStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (beforeContent, withEnd) -> {
                 var strippedWithEnd = withEnd.strip();
@@ -1008,7 +1012,8 @@ public class Main {
 
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
-        return new Some<>(new Tuple<>(parsed.left.addStructure(generated), ""));
+
+        return new Some<>(new Tuple<>(parsed.left.addStructure(generated).addType(new ObjectType(name)), ""));
     }
 
     private static Option<Definition> retainDefinition(Parameter parameter) {
@@ -1041,8 +1046,8 @@ public class Main {
     private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input, int depth) {
         return compileWhitespace(input, state)
                 .or(() -> compileClass(input, depth, state))
-                .or(() -> structure(input, "interface ", "interface ", state))
-                .or(() -> structure(input, "record ", "class ", state))
+                .or(() -> compileStructure(input, "interface ", "interface ", state))
+                .or(() -> compileStructure(input, "record ", "class ", state))
                 .or(() -> compileMethod(state, input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
