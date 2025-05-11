@@ -45,6 +45,8 @@ public class Main {
         Iterator<T> filter(Predicate<T> predicate);
 
         Option<T> next();
+
+        <R> Iterator<R> flatMap(Function<T, Iterator<R>> f);
     }
 
     private interface List<T> {
@@ -69,6 +71,13 @@ public class Main {
 
     private interface Head<T> {
         Option<T> next();
+    }
+
+    private interface Type extends Argument {
+        String generate();
+    }
+
+    private interface Argument {
     }
 
     private record Some<T>(T value) implements Option<T> {
@@ -225,7 +234,8 @@ public class Main {
             return this.head.next();
         }
 
-        private <R> Iterator<R> flatMap(Function<T, Iterator<R>> f) {
+        @Override
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> f) {
             return new HeadedIterator<>(new FlatMapHead<>(this.head, f));
         }
     }
@@ -325,7 +335,6 @@ public class Main {
             return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
-
 
     private record CompileState(List<String> structures) {
         public CompileState() {
@@ -499,6 +508,72 @@ public class Main {
         }
     }
 
+    private record Symbol(String input) implements Type {
+        @Override
+        public String generate() {
+            return this.input;
+        }
+    }
+
+    private static class ArrayType implements Type {
+        private final Type right;
+
+        public ArrayType(Type right) {
+            this.right = right;
+        }
+
+        @Override
+        public String generate() {
+            return this.right.generate() + "[]";
+        }
+    }
+
+    private static class Whitespace implements Argument {
+    }
+
+    private static class Iterators {
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            return new HeadedIterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        }
+    }
+
+    private record FunctionType(List<Type> arguments, Type returns) implements Type {
+        @Override
+        public String generate() {
+            var joined = this.arguments().iterateWithIndices()
+                    .map(pair -> "arg" + pair.left + " : " + pair.right)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "(" + joined + ") => " + this.returns();
+        }
+    }
+
+    private record TupleType(List<Type> arguments) implements Type {
+        @Override
+        public String generate() {
+            var joinedArguments = this.arguments.iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "[" + joinedArguments + "]";
+        }
+    }
+
+    private record Template(String base, List<Type> arguments) implements Type {
+        @Override
+        public String generate() {
+            var joinedArguments = this.arguments.iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+
+            return this.base + joinedArguments;
+        }
+    }
+
     public static void main() {
         try {
             var parent = Paths.get(".", "src", "java", "magma");
@@ -536,18 +611,6 @@ public class Main {
         return parseAll(state, input, Main::foldStatementChar, mapper);
     }
 
-    private static Tuple<CompileState, String> compileAll(
-            CompileState state,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Tuple<CompileState, String>> mapper,
-            BiFunction<StringBuilder, String, StringBuilder> merger
-    ) {
-        var parsed = parseAll(state, input, folder, mapper);
-        var generated = generateAll(merger, parsed.right);
-        return new Tuple<>(parsed.left, generated);
-    }
-
     private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> elements) {
         return elements
                 .iterate()
@@ -555,18 +618,32 @@ public class Main {
                 .toString();
     }
 
-    private static Tuple<CompileState, List<String>> parseAll(
+    private static <T> Tuple<CompileState, List<T>> parseAll(
             CompileState state,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Tuple<CompileState, String>> mapper
+            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
     ) {
-        return divideAll(input, folder).iterate().fold(new Tuple<>(state, Lists.empty()), (tuple, element) -> {
-            var state1 = tuple.left;
-            var right = tuple.right;
+        return getCompileStateListTuple(state, input, folder, (state1, s) -> new Some<>(mapper.apply(state1, s)))
+                .orElseGet(() -> new Tuple<>(state, Lists.empty()));
+    }
 
-            var applied = mapper.apply(state1, element);
-            return new Tuple<>(applied.left, right.addLast(applied.right));
+    private static <T> Option<Tuple<CompileState, List<T>>> getCompileStateListTuple(
+            CompileState state,
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
+    ) {
+        Option<Tuple<CompileState, List<T>>> initial = new Some<>(new Tuple<>(state, Lists.empty()));
+        return divideAll(input, folder).iterate().fold(initial, (tuple, element) -> {
+            return tuple.flatMap(inner -> {
+                var state1 = inner.left;
+                var right = inner.right;
+
+                return mapper.apply(state1, element).map(applied -> {
+                    return new Tuple<>(applied.left, right.addLast(applied.right));
+                });
+            });
         });
     }
 
@@ -698,7 +775,8 @@ public class Main {
     private static Option<Tuple<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> params) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
-                var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                final BiFunction<CompileState, String, Tuple<CompileState, String>> compileStateStringTupleBiFunction = (state1, s) -> new Tuple<>(state1, s.strip());
+                var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(compileStateStringTupleBiFunction.apply(state1, s)));
                 return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
             });
         }).or(() -> {
@@ -813,7 +891,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, List<String>> parseParameters(CompileState state, String params) {
-        return parseValues(state, params, Main::compileParameter);
+        return parseValuesOrEmpty(state, params, (state1, s) -> new Some<>(compileParameter(state1, s)));
     }
 
     private static Tuple<CompileState, String> compileFunctionSegments(CompileState state, String input, int depth) {
@@ -976,7 +1054,7 @@ public class Main {
     private static Tuple<CompileState, String> invocationHeader(CompileState state, int depth, String callerString1) {
         if (callerString1.startsWith("new ")) {
             String input1 = callerString1.substring("new ".length());
-            var map = type(state, input1).map(type -> {
+            var map = compileType(state, input1).map(type -> {
                 return new Tuple<>(type.left, "new " + type.right);
             });
 
@@ -1038,7 +1116,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        var parsed = parseValues(state, params, mapper);
+        var parsed = parseValuesOrEmpty(state, params, (state1, s) -> new Some<>(mapper.apply(state1, s)));
         var generated = generateValues(parsed.right);
         return new Tuple<>(parsed.left, generated);
     }
@@ -1047,8 +1125,16 @@ public class Main {
         return generateAll(Main::mergeValues, elements);
     }
 
-    private static Tuple<CompileState, List<String>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        return parseAll(state, input, Main::foldValueChar, mapper);
+    private static <T> Tuple<CompileState, List<T>> parseValuesOrEmpty(
+            CompileState state,
+            String input,
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
+    ) {
+        return parseValues(state, input, mapper).orElseGet(() -> new Tuple<>(state, Lists.empty()));
+    }
+
+    private static <T> Option<Tuple<CompileState, List<T>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper) {
+        return getCompileStateListTuple(state, input, Main::foldValueChar, mapper);
     }
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
@@ -1090,7 +1176,8 @@ public class Main {
             return split(() -> toLast(beforeName, " ", Main::foldTypeSeparator), (beforeType, type) -> {
                 return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
                     return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
-                        var typeParams = parseValues(state, typeParamsString, (state1, s) -> new Tuple<>(state1, s.strip()));
+                        final BiFunction<CompileState, String, Tuple<CompileState, String>> compileStateStringTupleBiFunction = (state1, s) -> new Tuple<>(state1, s.strip());
+                        var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(compileStateStringTupleBiFunction.apply(state1, s)));
                         return assembleDefinition(typeParams.left, new Some<String>(beforeTypeParams), name, typeParams.right, type);
                     });
                 }).or(() -> {
@@ -1159,85 +1246,94 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> typeOrPlaceholder(CompileState state, String input) {
-        return type(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileType(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Option<Tuple<CompileState, String>> type(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
+        return type(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+    }
+
+    private static Option<Tuple<CompileState, Type>> type(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.equals("int") || stripped.equals("Integer")) {
-            return new Some<>(new Tuple<>(state, "number"));
+            return new Some<>(new Tuple<>(state, Primitive.Int));
         }
 
         if (stripped.equals("String")) {
-            return new Some<>(new Tuple<>(state, "string"));
+            return new Some<>(new Tuple<>(state, Primitive.String));
         }
 
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<>(state, new Symbol(stripped)));
         }
 
         return template(state, input)
                 .or(() -> varArgs(state, input));
     }
 
-    private static Option<Tuple<CompileState, String>> varArgs(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> varArgs(CompileState state, String input) {
         return suffix(input, "...", s -> {
-            var inner = typeOrPlaceholder(state, s);
-            return new Some<>(new Tuple<>(inner.left, inner.right + "[]"));
-        });
-    }
-
-    private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {
-        return suffix(input.strip(), ">", withoutEnd -> {
-            return first(withoutEnd, "<", (base, argumentsString) -> {
-                var strippedBase = base.strip();
-                var argumentsTuple = parseValues(state, argumentsString, Main::typeOrPlaceholder);
-                var argumentsState = argumentsTuple.left;
-                var arguments = argumentsTuple.right
-                        .iterate()
-                        .map(String::strip)
-                        .filter(value -> !value.isEmpty())
-                        .collect(new ListCollector<>());
-
-                if (base.equals("BiFunction")) {
-                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
-                }
-
-                if (base.equals("Function")) {
-                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), arguments.get(1))));
-                }
-
-                if (base.equals("Predicate")) {
-                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.of(arguments.get(0)), "boolean")));
-                }
-
-                if (base.equals("Supplier")) {
-                    return new Some<>(new Tuple<>(argumentsState, generateFunctionalType(Lists.empty(), arguments.get(0))));
-                }
-
-                if (base.equals("Tuple") && arguments.size() >= 2) {
-                    return new Some<>(new Tuple<>(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
-                }
-
-                String s;
-                if (arguments.isEmpty()) {
-                    s = "";
-                }
-                else {
-                    s = "<" + generateValues(arguments) + ">";
-                }
-                return new Some<>(new Tuple<>(argumentsState, strippedBase + s));
+            return type(state, s).map(inner -> {
+                var newState = inner.left;
+                var child = inner.right;
+                return new Tuple<>(newState, new ArrayType(child));
             });
         });
     }
 
-    private static String generateFunctionalType(List<String> arguments, String returns) {
-        var joined = arguments.iterateWithIndices()
-                .map(pair -> "arg" + pair.left + " : " + pair.right)
-                .collect(new Joiner(", "))
-                .orElse("");
+    private static Option<Tuple<CompileState, Type>> template(CompileState state, String input) {
+        return suffix(input.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (base, argumentsString) -> {
+                var strippedBase = base.strip();
+                return parseValues(state, argumentsString, Main::argument).map(argumentsTuple -> {
+                    return getCompileStateTuple(base, argumentsTuple, strippedBase);
+                });
+            });
+        });
+    }
 
-        return "(" + joined + ") => " + returns;
+    private static Tuple<CompileState, Type> getCompileStateTuple(String base, Tuple<CompileState, List<Argument>> argumentsTuple, String strippedBase) {
+        var argumentsState = argumentsTuple.left;
+        var arguments = argumentsTuple.right
+                .iterate()
+                .map(Main::retainType)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+
+        if (base.equals("BiFunction")) {
+            return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+        }
+
+        if (base.equals("Function")) {
+            return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+        }
+
+        if (base.equals("Predicate")) {
+            return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0)), Primitive.Boolean));
+        }
+
+        if (base.equals("Supplier")) {
+            return new Tuple<>(argumentsState, new FunctionType(Lists.empty(), arguments.get(0)));
+        }
+
+        if (base.equals("Tuple") && arguments.size() >= 2) {
+            return new Tuple<>(argumentsState, new TupleType(arguments));
+        }
+
+        return new Tuple<>(argumentsState, new Template(strippedBase, arguments));
+    }
+
+    private static Option<Type> retainType(Argument argument) {
+        if (argument instanceof Type type) {
+            return new Some<>(type);
+        }
+        else {
+            return new None<Type>();
+        }
+    }
+
+    private static Option<Tuple<CompileState, Argument>> argument(CompileState state, String input) {
+        return type(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right));
     }
 
     private static <T> Option<T> last(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
@@ -1287,5 +1383,22 @@ public class Main {
                 .replace("*/", "content-end");
 
         return "/* " + replaced + " */";
+    }
+
+    private enum Primitive implements Type {
+        Int("number"),
+        String("string"),
+        Boolean("boolean");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
     }
 }
