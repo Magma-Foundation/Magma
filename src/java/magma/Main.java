@@ -676,7 +676,7 @@ public class Main {
                 var callerTuple = value(state, callerString);
                 var argumentsTuple = compileValues(callerTuple.left, argumentsString, Main::value);
 
-                return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.left + "(" + argumentsTuple.right + ")"));
+                return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
             });
         });
     }
