@@ -83,6 +83,18 @@ public class Main {
     private interface Parameter {
     }
 
+    private interface Value extends LambdaValue, Caller {
+        String generate();
+    }
+
+    private interface LambdaValue {
+        String generate();
+    }
+
+    private interface Caller {
+        String generate();
+    }
+
     private record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -556,7 +568,8 @@ public class Main {
 
     private static class Iterators {
         public static <T> Iterator<T> fromOption(Option<T> option) {
-            return new HeadedIterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+            Option<Head<T>> single = option.map(SingleHead::new);
+            return new HeadedIterator<>(single.orElseGet(EmptyHead::new));
         }
     }
 
@@ -597,7 +610,118 @@ public class Main {
         }
     }
 
-    private record Placeholder(String input) implements Parameter {
+    private record Placeholder(String input) implements Parameter, Value {
+        @Override
+        public String generate() {
+            return this.input;
+        }
+    }
+
+    private record StringValue(String stripped) implements Value {
+        @Override
+        public String generate() {
+            return this.stripped;
+        }
+    }
+
+    private static class DataAccess implements Value {
+        private final Value parent;
+        private final String property;
+
+        public DataAccess(Value parent, String property) {
+            this.parent = parent;
+            this.property = property;
+        }
+
+        @Override
+        public String generate() {
+            return this.parent.generate() + "." + this.property;
+        }
+    }
+
+    private static class SymbolValue implements Value {
+        private final String stripped;
+
+        public SymbolValue(String stripped) {
+            this.stripped = stripped;
+        }
+
+        @Override
+        public String generate() {
+            return this.stripped;
+        }
+    }
+
+    private static class ConstructionCaller implements Caller {
+        private final Type right;
+
+        public ConstructionCaller(Type right) {
+            this.right = right;
+        }
+
+        @Override
+        public String generate() {
+            return "new " + this.right.generate();
+        }
+    }
+
+    private static class Operation implements Value {
+        private final Value left;
+        private final String infix;
+        private final Value right;
+
+        public Operation(Value left, String infix, Value right) {
+            this.left = left;
+            this.infix = infix;
+            this.right = right;
+        }
+
+        @Override
+        public String generate() {
+            return this.left.generate() + " " + this.infix + " " + this.right.generate();
+        }
+    }
+
+    private record Not(Value value) implements Value {
+        @Override
+        public String generate() {
+            return "!" + this.value.generate();
+        }
+    }
+
+    private static class BlockLambdaValue implements LambdaValue {
+        private final String right;
+        private final int depth;
+
+        public BlockLambdaValue(String right, int depth) {
+            this.right = right;
+            this.depth = depth;
+        }
+
+        @Override
+        public String generate() {
+            return "{" + this.right + createIndent(this.depth) + "}";
+        }
+    }
+
+    private record Lambda(List<String> parameterNames, LambdaValue body) implements Value {
+        @Override
+        public String generate() {
+            var joined = this.parameterNames.iterate().collect(new Joiner(", ")).orElse("");
+            return "(" + joined + ") => " + this.body.generate();
+        }
+    }
+
+    private record Invokable(Caller caller, List<Value> arguments) implements Value {
+        @Override
+        public String generate() {
+            var joined = this.arguments.iterate()
+                    .map(Value::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return this.caller.generate() + "(" + joined + ")";
+        }
     }
 
     public static void main() {
@@ -988,52 +1112,58 @@ public class Main {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
-            var tuple = value(state, value, depth);
+            var tuple = compileValue(state, value, depth);
             return new Tuple<>(tuple.left, "return " + tuple.right);
         }
 
         return first(stripped, "=", (s, s2) -> {
             var definitionTuple = compileDefinition(state, s);
-            var valueTuple = value(definitionTuple.left, s2, depth);
+            var valueTuple = compileValue(definitionTuple.left, s2, depth);
             return new Some<>(new Tuple<>(valueTuple.left, "let " + definitionTuple.right + " = " + valueTuple.right));
         }).orElseGet(() -> {
             return new Tuple<>(state, generatePlaceholder(stripped));
         });
     }
 
-    private static Tuple<CompileState, String> value(CompileState state, String input, int depth) {
-        return lambda(state, input, depth)
-                .or(() -> stringValue(state, input))
-                .or(() -> dataAccess(state, input, depth))
-                .or(() -> symbolValue(state, input))
-                .or(() -> invocation(state, input, depth))
-                .or(() -> operation(state, input, depth, "+"))
-                .or(() -> operation(state, input, depth, "-"))
-                .or(() -> digits(state, input))
-                .or(() -> not(state, input, depth))
-                .or(() -> methodReference(state, input, depth))
-                .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    private static Tuple<CompileState, String> compileValue(CompileState state, String input, int depth) {
+        var tuple = parseValue(state, input, depth);
+        return new Tuple<>(tuple.left, tuple.right.generate());
     }
 
-    private static Option<Tuple<CompileState, String>> methodReference(CompileState state, String input, int depth) {
+    private static Tuple<CompileState, Value> parseValue(CompileState state, String input, int depth) {
+        return lambda(state, input, depth)
+                .or(() -> parseString(state, input))
+                .or(() -> parseDataAccess(state, input, depth))
+                .or(() -> parseSymbolValue(state, input))
+                .or(() -> parseInvocation(state, input, depth))
+                .or(() -> parseOperation(state, input, depth, "+"))
+                .or(() -> parseOperation(state, input, depth, "-"))
+                .or(() -> parseDigits(state, input))
+                .or(() -> parseNot(state, input, depth))
+                .or(() -> parseMethodReference(state, input, depth))
+                .orElseGet(() -> new Tuple<CompileState, Value>(state, new Placeholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, Value>> parseMethodReference(CompileState state, String input, int depth) {
         return last(input, "::", (s, s2) -> {
-            var value = value(state, s, depth);
-            return new Some<>(new Tuple<>(value.left, value.right + "." + s2));
+            var tuple = parseValue(state, s, depth);
+            return new Some<>(new Tuple<>(tuple.left, new DataAccess(tuple.right, s2)));
         });
     }
 
-    private static Option<Tuple<CompileState, String>> not(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, Value>> parseNot(CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (stripped.startsWith("!")) {
             var slice = stripped.substring(1);
-            var value = value(state, slice, depth);
-            return new Some<>(new Tuple<>(value.left, "!" + value.right));
+            var tuple = parseValue(state, slice, depth);
+            var value = tuple.right;
+            return new Some<>(new Tuple<>(tuple.left, new Not(value)));
         }
 
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> lambda(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, Value>> lambda(CompileState state, String input, int depth) {
         return first(input, "->", (beforeArrow, valueString) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
@@ -1049,27 +1179,30 @@ public class Main {
         });
     }
 
-    private static Some<Tuple<CompileState, String>> assembleLambda(CompileState state, List<String> paramNames, String valueString, int depth) {
-        Tuple<CompileState, String> value;
+    private static Some<Tuple<CompileState, Value>> assembleLambda(CompileState state, List<String> paramNames, String valueString, int depth) {
         var strippedValueString = valueString.strip();
-        String s;
+
+        Tuple<CompileState, LambdaValue> value;
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
-            value = compileFunctionSegments(state, strippedValueString.substring(1, strippedValueString.length() - 1), depth);
-            s = "{" + value.right + createIndent(depth) + "}";
+            var value1 = compileStatements(state, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) ->
+                    compileFunctionSegment(state1, input1, depth + 1));
+
+            var right = value1.right;
+            value = new Tuple<>(value1.left, new BlockLambdaValue(right, depth));
         }
         else {
-            value = value(state, strippedValueString, depth);
-            s = value.right;
+            var value1 = parseValue(state, strippedValueString, depth);
+            value = new Tuple<>(value1.left, value1.right);
         }
 
-        var joined = paramNames.iterate().collect(new Joiner(", ")).orElse("");
-        return new Some<>(new Tuple<>(value.left, "(" + joined + ") => " + s));
+        var right = value.right;
+        return new Some<>(new Tuple<>(value.left, new Lambda(paramNames, right)));
     }
 
-    private static Option<Tuple<CompileState, String>> digits(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Value>> parseDigits(CompileState state, String input) {
         var stripped = input.strip();
         if (isNumber(stripped)) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<CompileState, Value>(state, new SymbolValue(stripped)));
         }
         return new None<>();
     }
@@ -1085,25 +1218,30 @@ public class Main {
         return true;
     }
 
-    private static Option<Tuple<CompileState, String>> invocation(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, Value>> parseInvocation(CompileState state, String input, int depth) {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(() -> toLast(withoutEnd, "", Main::foldInvocationStart), (callerWithEnd, argumentsString) -> {
                 return suffix(callerWithEnd, "(", callerString -> {
                     var callerString1 = callerString.strip();
 
                     var callerTuple = invocationHeader(state, depth, callerString1);
-                    var argumentsTuple = compileValues(callerTuple.left, argumentsString, (state1, input1) -> value(state1, input1, depth));
-                    return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
+                    var parsed = parseValues(callerTuple.left, argumentsString, (state3, s) -> new Some<>(parseValue(state3, s, depth)))
+                            .orElseGet(() -> new Tuple<>(callerTuple.left, Lists.empty()));
+
+                    var caller = callerTuple.right;
+                    var arguments = parsed.right;
+                    return new Some<>(new Tuple<>(parsed.left, new Invokable(caller, arguments)));
                 });
             });
         });
     }
 
-    private static Tuple<CompileState, String> invocationHeader(CompileState state, int depth, String callerString1) {
+    private static Tuple<CompileState, Caller> invocationHeader(CompileState state, int depth, String callerString1) {
         if (callerString1.startsWith("new ")) {
             String input1 = callerString1.substring("new ".length());
-            var map = compileType(state, input1).map(type -> {
-                return new Tuple<>(type.left, "new " + type.right);
+            var map = parseType(state, input1).map(type -> {
+                var right = type.right;
+                return new Tuple<CompileState, Caller>(type.left, new ConstructionCaller(right));
             });
 
             if (map.isPresent()) {
@@ -1111,7 +1249,8 @@ public class Main {
             }
         }
 
-        return value(state, callerString1, depth);
+        var tuple = parseValue(state, callerString1, depth);
+        return new Tuple<>(tuple.left, tuple.right);
     }
 
     private static DivideState foldInvocationStart(DivideState state, char c) {
@@ -1129,37 +1268,41 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input, int depth) {
-        return last(input.strip(), ".", (parent, property) -> {
+    private static Option<Tuple<CompileState, Value>> parseDataAccess(CompileState state, String input, int depth) {
+        return last(input.strip(), ".", (parentString, property) -> {
             if (!isSymbol(property)) {
                 return new None<>();
             }
-            var value = value(state, parent, depth);
-            return new Some<>(new Tuple<>(value.left, value.right + "." + property));
+
+            var tuple = parseValue(state, parentString, depth);
+            var parent = tuple.right;
+            return new Some<>(new Tuple<>(tuple.left, new DataAccess(parent, property)));
         });
     }
 
-    private static Option<Tuple<CompileState, String>> stringValue(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Value>> parseString(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<>(state, new StringValue(stripped)));
         }
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> symbolValue(CompileState state, String value) {
+    private static Option<Tuple<CompileState, Value>> parseSymbolValue(CompileState state, String value) {
         var stripped = value.strip();
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<>(state, new SymbolValue(stripped)));
         }
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> operation(CompileState state, String value, int depth, String infix) {
+    private static Option<Tuple<CompileState, Value>> parseOperation(CompileState state, String value, int depth, String infix) {
         return first(value, infix, (s, s2) -> {
-            var leftTuple = value(state, s, depth);
-            var rightTuple = value(leftTuple.left, s2, depth);
-            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
+            var tuple = parseValue(state, s, depth);
+            var tuple1 = parseValue(tuple.left, s2, depth);
+            var left = tuple.right;
+            var right = tuple1.right;
+            return new Some<>(new Tuple<>(tuple1.left, new Operation(left, infix, right)));
         });
     }
 
