@@ -48,7 +48,6 @@ or(other, () => Template[base = Option, arguments = magma.Main$Lists$JVMList], )
 Option;
 flatMap(mapper, (arg0 = T) => );
 Template[base = Option, arguments = magma.Main$Lists$JVMList];
-f8f9dd6;
 Option;
 isEmpty();
 boolean;
@@ -66,7 +65,7 @@ next();
 Option;
 flatMap(f, (arg0 = T) => );
 Template[base = Iterator, arguments = magma.Main$Lists$JVMList];
-a1cd57;
+e0005;
 Iterator;
 /* private */ class Some {
     constructor(value) {
@@ -1248,32 +1247,31 @@ Option < [CompileState, Type] > {
         return first(withoutEnd, "<", (base, argumentsString) => {
             let strippedBase = base.strip();
             return parseValues(state, argumentsString, Main.argument).map((argumentsTuple) => {
-                return getCompileStateTuple(base, argumentsTuple, strippedBase);
+                return assembleTemplate(base, strippedBase, argumentsTuple.left, argumentsTuple.right);
             });
         });
     })
 };
-/* private static */ getCompileStateTuple(base, string, argumentsTuple, [CompileState, (List)], strippedBase, string);
+/* private static */ assembleTemplate(base, string, strippedBase, string, state, CompileState, arguments, (List));
 [CompileState, Type];
 {
-    let argumentsState = argumentsTuple.left;
-    let arguments = argumentsTuple.right.iterate().map(Main.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
+    let children = arguments.iterate().map(Main.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
     /* if (base.equals("BiFunction"))  */ {
-        return new Tuple(argumentsState, new FunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+        return new Tuple(state, new FunctionType(Lists.of(children.get(0), children.get(1)), children.get(2)));
     }
     /* if (base.equals("Function"))  */ {
-        return new Tuple(argumentsState, new FunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+        return new Tuple(state, new FunctionType(Lists.of(children.get(0)), children.get(1)));
     }
     /* if (base.equals("Predicate"))  */ {
-        return new Tuple(argumentsState, new FunctionType(Lists.of(arguments.get(0)), Primitive.Boolean));
+        return new Tuple(state, new FunctionType(Lists.of(children.get(0)), Primitive.Boolean));
     }
     /* if (base.equals("Supplier"))  */ {
-        return new Tuple(argumentsState, new FunctionType(Lists.empty(), arguments.get(0)));
+        return new Tuple(state, new FunctionType(Lists.empty(), children.get(0)));
     }
-    /* if (base.equals("Tuple") && arguments.size() >= 2)  */ {
-        return new Tuple(argumentsState, new TupleType(arguments));
+    /* if (base.equals("Tuple") && children.size() >= 2)  */ {
+        return new Tuple(state, new TupleType(children));
     }
-    return new Tuple(argumentsState, new Template(strippedBase, arguments));
+    return new Tuple(state, new Template(strippedBase, children));
 }
 /* private static */ retainType(argument, Argument);
 Option < Type > {
@@ -1286,8 +1284,11 @@ Option < Type > {
 }
 /* private static */ argument(state, CompileState, input, string);
 Option < [CompileState, Argument] > {
-    return: type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right))
-};
+/* if (input.isBlank())  */ };
+/* if (input.isBlank())  */ {
+    return new Some(new Tuple(state, new Whitespace()));
+}
+return type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right));
 /* private static  */ last(input, string, infix, string, mapper, (arg0, arg1) => Template[base = Option, arguments = magma.Main$Lists$JVMList], (), d617d);
 Option < T > {
     return: infix(input, infix, Main.findLast, mapper)

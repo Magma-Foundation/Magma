@@ -4,8 +4,8 @@
 	orElse(other : T) : T;
 	filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Option<T>;
 	orElseGet(supplier : () => Symbol[input=T]) : T;
-	or(other : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@7e774085]) : Option<T>;
-	flatMap<R>(mapper : (arg0 : Symbol[input=T]) => Template[base=Option, arguments=magma.Main$Lists$JVMList@3f8f9dd6]) : Option<R>;
+	or(other : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@ea30797]) : Option<T>;
+	flatMap<R>(mapper : (arg0 : Symbol[input=T]) => Template[base=Option, arguments=magma.Main$Lists$JVMList@7e774085]) : Option<R>;
 	isEmpty() : boolean;
 }
 /* private */interface Collector<T, C>/*   */ {
@@ -18,7 +18,7 @@
 	collect<R>(collector : Collector<T, R>) : R;
 	filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Iterator<T>;
 	next() : Option<T>;
-	flatMap<R>(f : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@75a1cd57]) : Iterator<R>;
+	flatMap<R>(f : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@1ee0005]) : Iterator<R>;
 }
 /* private */interface List<T>/*   */ {
 	addLast(element : T) : List<T>;
@@ -42,7 +42,7 @@
 
 	/* @Override
         public  */ map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Option<R> {
-		return new Some<>(mapper.apply(this.value));
+		return new Some(mapper.apply(this.value));
 	}
 	/* @Override
         public */ isPresent() : boolean {
@@ -57,7 +57,7 @@
 		/* if (predicate.test(this.value))  */{
 			return this;
 		}
-		return new None<>();
+		return new None();
 	}
 	/* @Override
         public */ orElseGet(supplier : () => Symbol[input=T]) : T {
@@ -79,7 +79,7 @@
 /* private static */class None<T>/*  */ {
 	/* @Override
         public  */ map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Option<R> {
-		return new None<>();
+		return new None();
 	}
 	/* @Override
         public */ isPresent() : boolean {
@@ -91,7 +91,7 @@
 	}
 	/* @Override
         public */ filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Option<T> {
-		return new None<>();
+		return new None();
 	}
 	/* @Override
         public */ orElseGet(supplier : () => Symbol[input=T]) : T {
@@ -103,7 +103,7 @@
 	}
 	/* @Override
         public  */ flatMap<R>(mapper : (arg0 : Symbol[input=T]) => Template[base=Option, arguments=magma.Main$Lists$JVMList@33833882]) : Option<R> {
-		return new None<>();
+		return new None();
 	}
 	/* @Override
         public */ isEmpty() : boolean {
@@ -120,16 +120,16 @@
 	/* @Override
         public */ next() : Option<T> {
 		/* if (this.retrieved)  */{
-			return new None<>();
+			return new None();
 		}
 		let /* this.retrieved  */ = true;
-		return new Some<>(this.value);
+		return new Some(this.value);
 	}
 }
 /* private static */class EmptyHead<T>/*  */ {
 	/* @Override
         public */ next() : Option<T> {
-		return new None<>();
+		return new None();
 	}
 }
 /* private */class HeadedIterator<T>/*  */ {
@@ -151,7 +151,7 @@
 	}
 	/* @Override
         public  */ map<R>(mapper : (arg0 : Symbol[input=T]) => Symbol[input=R]) : Iterator<R> {
-		return new HeadedIterator<>(() => this.head.next().map(mapper));
+		return new HeadedIterator(() => this.head.next().map(mapper));
 	}
 	/* @Override
         public  */ collect<R>(collector : Collector<T, R>) : R {
@@ -161,9 +161,9 @@
         public */ filter(predicate : (arg0 : Symbol[input=T]) => Boolean) : Iterator<T> {
 		return this.flatMap((element) => {
 			/* if (predicate.test(element))  */{
-				return new HeadedIterator<>(new SingleHead<>(element));
+				return new HeadedIterator(new SingleHead(element));
 			}
-			return new HeadedIterator<>(new EmptyHead<>());
+			return new HeadedIterator(new EmptyHead());
 		});
 	}
 	/* @Override
@@ -172,7 +172,7 @@
 	}
 	/* @Override
         public  */ flatMap<R>(f : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@4d591d15]) : Iterator<R> {
-		return new HeadedIterator<>(new FlatMapHead<>(this.head, f));
+		return new HeadedIterator(new FlatMapHead(this.head, f));
 	}
 }
 /* private static */class RangeHead/*  */ {
@@ -186,9 +186,9 @@
 		/* if (this.counter < this.length)  */{
 			let value = this.counter;
 			/* this.counter++ */;
-			return new Some<>(value);
+			return new Some(value);
 		}
-		return new None<>();
+		return new None();
 	}
 }
 /* private static final */class JVMList<T>/*  */ {
@@ -211,11 +211,11 @@
 	/* @Override
             public */ removeLast() : Option<[List<T>, T]> {
 		/* if (this.elements.isEmpty())  */{
-			return new None<>();
+			return new None();
 		}
 		let slice = this.elements.subList(0, this.elements.size() - 1);
 		let last = this.elements.getLast();
-		return new Some<>(new [List<T>, T](new JVMList<>(slice), last));
+		return new Some(new [List<T>, T](new JVMList(slice), last));
 	}
 	/* @Override
             public */ get(index : number) : T {
@@ -241,15 +241,15 @@
 	}
 	/* @Override
             public */ iterateWithIndices() : Iterator<[number, T]> {
-		return new HeadedIterator<>(new RangeHead(this.elements.size())).map((index) => new Tuple<>(index, this.elements.get(index)));
+		return new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple(index, this.elements.get(index)));
 	}
 }
 /* private static */class Lists/*  */ {
 	/* public static  */ empty<T>() : List<T> {
-		return new JVMList<>();
+		return new JVMList();
 	}
 	/* public static  */ of<T>(elements : T[]) : List<T> {
-		return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
+		return new JVMList(new ArrayList(Arrays.asList(elements)));
 	}
 }
 /* private static */class DivideState/*  */ {
@@ -294,12 +294,12 @@
 	/* public */ pop() : Option<[Character, DivideState]> {
 		/* if (this.index < this.input.length())  */{
 			let c = this.input.charAt(this.index);
-			return new Some<>(new Tuple<>(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
+			return new Some(new Tuple(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
 		}
-		return new None<>();
+		return new None();
 	}
 	/* public */ popAndAppendToTuple() : Option<[Character, DivideState]> {
-		return this.pop().map((tuple) => new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
+		return this.pop().map((tuple) => new Tuple(tuple.left, tuple.right.append(tuple.left)));
 	}
 	/* public */ popAndAppendToOption() : Option<DivideState> {
 		return this.popAndAppendToTuple().map(Tuple.right);
@@ -317,11 +317,11 @@
 	}
 	/* @Override
         public */ createInitial() : Option<string> {
-		return new None<>();
+		return new None();
 	}
 	/* @Override
         public */ fold(current : Option<string>, element : string) : Option<string> {
-		return new Some<>(current.map((inner) => inner + this.delimiter + element).orElse(element));
+		return new Some(current.map((inner) => inner + this.delimiter + element).orElse(element));
 	}
 }
 /* private static */class ListCollector<T>/*  */ {
@@ -342,7 +342,7 @@
 	/* private */ current : Option<Iterator<R>>;
 	FlatMapHead(head : Head<T>, mapper : (arg0 : Symbol[input=T]) => Template[base=Iterator, arguments=magma.Main$Lists$JVMList@4aa8f0b4]) : public {
 		let /* this.mapper  */ = mapper;
-		let /* this.current  */ = new None<>();
+		let /* this.current  */ = new None();
 		let /* this.head  */ = head;
 	}
 	/* @Override
@@ -364,7 +364,7 @@
                     this.current = outer.map(this.mapper);
                 }
                 else  */{
-			return new None<>();/* } */
+			return new None();/* } */
 		}
 	}
 }
@@ -391,7 +391,7 @@
 }
 /* private static */class Iterators/*  */ {
 	/* public static  */ fromOption<T>(option : Option<T>) : Iterator<T> {
-		return new HeadedIterator<>(/* option.<Head<T>>map */(SingleHead.new).orElseGet(EmptyHead.new));
+		return new HeadedIterator(/* option.<Head<T>>map */(SingleHead.new).orElseGet(EmptyHead.new));
 	}
 }
 /* private */class FunctionType/*  */ {
@@ -483,7 +483,7 @@
 	}
 	/* private static */ compileStatements(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@7960847b]) : [CompileState, string] {
 		let parsed = parseStatements(state, input, mapper);
-		return new Tuple<>(parsed.left, generateStatements(parsed.right));
+		return new Tuple(parsed.left, generateStatements(parsed.right));
 	}
 	/* private static */ generateStatements(statements : List<string>) : string {
 		return generateAll(Main.mergeStatements, statements);
@@ -495,16 +495,16 @@
 		return elements.iterate().fold(new StringBuilder(), merger).toString();
 	}
 	/* private static  */ parseAll<T>(state : CompileState, input : string, folder : (arg0 : Symbol[input=DivideState], arg1 : Symbol[input=Character]) => Symbol[input=DivideState], mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@5c8da962]) : [CompileState, List<T>] {
-		return getCompileStateListTuple(state, input, folder, (state1,  s) => new Some<>(mapper.apply(state1, s))).orElseGet(() => new Tuple<>(state, Lists.empty()));
+		return getCompileStateListTuple(state, input, folder, (state1,  s) => new Some(mapper.apply(state1, s))).orElseGet(() => new Tuple(state, Lists.empty()));
 	}
 	/* private static  */ getCompileStateListTuple<T>(state : CompileState, input : string, folder : (arg0 : Symbol[input=DivideState], arg1 : Symbol[input=Character]) => Symbol[input=DivideState], mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@512ddf17]) : Option<[CompileState, List<T>]> {
-		let initial : Option<[CompileState, List<T>]> = new Some<>(new Tuple<>(state, Lists.empty()));
+		let initial : Option<[CompileState, List<T>]> = new Some(new Tuple(state, Lists.empty()));
 		return divideAll(input, folder).iterate().fold(initial, (tuple,  element) => {
 			return tuple.flatMap((inner) => {
 				let state1 = inner.left;
 				let right = inner.right;
 				return mapper.apply(state1, element).map((applied) => {
-					return new Tuple<>(applied.left, right.addLast(applied.right));
+					return new Tuple(applied.left, right.addLast(applied.right));
 				});
 			});
 		});
@@ -551,11 +551,11 @@
 
             return new Some<>(current) */;
 		}
-		return new None<>();
+		return new None();
 	}
 	/* private static */ foldSingleQuotes(tuple : [Character, DivideState]) : Option<DivideState> {
 		/* if (tuple.left != '\'')  */{
-			return new None<>();
+			return new None();
 		}
 		let appended = tuple.right.append(tuple.left);
 		return appended.popAndAppendToTuple().map(Main.foldEscaped).flatMap(DivideState.popAndAppendToOption);
@@ -585,9 +585,9 @@
 	/* private static */ compileRootSegment(state : CompileState, input : string) : [CompileState, string] {
 		let stripped = input.strip();
 		/* if (stripped.startsWith("package ") || stripped.startsWith("import "))  */{
-			return new Tuple<>(state, "");
+			return new Tuple(state, "");
 		}
-		return compileClass(stripped, 0, state).orElseGet(() => new Tuple<>(state, generatePlaceholder(stripped)));
+		return compileClass(stripped, 0, state).orElseGet(() => new Tuple(state, generatePlaceholder(stripped)));
 	}
 	/* private static */ compileClass(stripped : string, depth : number, state : CompileState) : Option<[CompileState, string]> {
 		return structure(stripped, "class ", "class ", state);
@@ -619,8 +619,8 @@
 	/* private static */ getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<string>) : Option<[CompileState, string]> {
 		return first(beforeContent, "<", (name,  withTypeParams) => {
 			return first(withTypeParams, ">", (typeParamsString,  afterTypeParams) => {
-				let /* final */ compileStateStringTupleBiFunction : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@2c13da15] = (state1,  s) => new Tuple<>(state1, s.strip());
-				let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1,  s) => new Some<>(compileStateStringTupleBiFunction.apply(state1, s)));
+				let /* final */ compileStateStringTupleBiFunction : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@2c13da15] = (state1,  s) => new Tuple(state1, s.strip());
+				let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1,  s) => new Some(compileStateStringTupleBiFunction.apply(state1, s)));
 				return assemble(typeParams.left, targetInfix, beforeInfix, name, content1, typeParams.right, afterTypeParams, params);
 			});
 		}).or(() => {
@@ -630,7 +630,7 @@
 	/* private static */ assemble(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, afterTypeParams : string, params : List<string>) : Option<[CompileState, string]> {
 		let name = rawName.strip();
 		/* if (!isSymbol(name))  */{
-			return new None<>();
+			return new None();
 		}
 		let joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 		let parsed = parseStatements(state, content, (state0,  input) => compileClassSegment(state0, input, 1));
@@ -645,7 +645,7 @@
 		}
 		let parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
 		let generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
-		return new Some<>(new Tuple<>(parsed.left.addStructure(generated), ""));
+		return new Some(new Tuple(parsed.left.addStructure(generated), ""));
 	}
 	/* private static */ isSymbol(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++) {{
@@ -659,19 +659,19 @@
 	}
 	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (arg0 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@77556fd]) : Option<T> {
 		/* if (!input.endsWith(suffix))  */{
-			return new None<>();
+			return new None();
 		}
 		let slice = input.substring(0, input.length() - suffix.length());
 		return mapper.apply(slice);
 	}
 	/* private static */ compileClassSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
-		return compileWhitespace(input, state).or(() => compileClass(input, depth, state)).or(() => structure(input, "interface ", "interface ", state)).or(() => structure(input, "record ", "class ", state)).or(() => method(state, input, depth)).or(() => compileDefinitionStatement(input, depth, state)).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
+		return compileWhitespace(input, state).or(() => compileClass(input, depth, state)).or(() => structure(input, "interface ", "interface ", state)).or(() => structure(input, "record ", "class ", state)).or(() => method(state, input, depth)).or(() => compileDefinitionStatement(input, depth, state)).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
 	}
 	/* private static */ compileWhitespace(input : string, state : CompileState) : Option<[CompileState, string]> {
 		/* if (input.isBlank())  */{
-			return new Some<>(new Tuple<>(state, ""));
+			return new Some(new Tuple(state, ""));
 		}
-		return new None<>();
+		return new None();
 	}
 	/* private static */ method(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
 		return first(input, "(", (definition,  withParams) => {
@@ -679,31 +679,31 @@
 				let definitionTuple = parseDefinition(state, definition).map((definition1) => {
 					let paramsTuple = compileParameters(state, params);
 					let generated = definition1.right.generateWithParams("(" + paramsTuple.right + ")");
-					return new Tuple<>(paramsTuple.left, generated);
-				}).orElseGet(() => new Tuple<>(state, generatePlaceholder(definition)));
+					return new Tuple(paramsTuple.left, generated);
+				}).orElseGet(() => new Tuple(state, generatePlaceholder(definition)));
 				let content = rawContent.strip();
 				let indent = createIndent(depth);
 				/* if (content.equals(";"))  */{
 					let s = indent + definitionTuple.right + ";";
-					return new Some<>(new Tuple<>(definitionTuple.left, s));
+					return new Some(new Tuple(definitionTuple.left, s));
 				}
 				/* if (content.startsWith("{") && content.endsWith("}"))  */{
 					let substring = content.substring(1, content.length() - 1);
 					let statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
 					let generated = indent + definitionTuple.right + " {" + statementsTuple.right + indent + "}";
-					return new Some<>(new Tuple<>(statementsTuple.left, generated));
+					return new Some(new Tuple(statementsTuple.left, generated));
 				}
-				return new None<>();
+				return new None();
 			});
 		});
 	}
 	/* private static */ compileParameters(state : CompileState, params : string) : [CompileState, string] {
 		let parsed = parseParameters(state, params);
 		let generated = generateValues(parsed.right);
-		return new Tuple<>(parsed.left, generated);
+		return new Tuple(parsed.left, generated);
 	}
 	/* private static */ parseParameters(state : CompileState, params : string) : [CompileState, List<string>] {
-		return parseValuesOrEmpty(state, params, (state1,  s) => new Some<>(compileParameter(state1, s)));
+		return parseValuesOrEmpty(state, params, (state1,  s) => new Some(compileParameter(state1, s)));
 	}
 	/* private static */ compileFunctionSegments(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		return compileStatements(state, input, (state1,  input1) => compileFunctionSegment(state1, input1, depth + 1));
@@ -711,15 +711,15 @@
 	/* private static */ compileFunctionSegment(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		let stripped = input.strip();
 		/* if (stripped.isEmpty())  */{
-			return new Tuple<>(state, "");
+			return new Tuple(state, "");
 		}
 		return suffix(stripped, ";", (s) => {
 			let tuple = statementValue(state, s, depth);
-			return new Some<>(new Tuple<>(tuple.left, createIndent(depth) + tuple.right + ";"));
+			return new Some(new Tuple(tuple.left, createIndent(depth) + tuple.right + ";"));
 		}).or(() => {
 			return block(state, depth, stripped);
 		}).orElseGet(() => {
-			return new Tuple<>(state, generatePlaceholder(stripped));
+			return new Tuple(state, generatePlaceholder(stripped));
 		});
 	}
 	/* private static */ block(state : CompileState, depth : number, stripped : string) : Option<[CompileState, string]> {
@@ -730,7 +730,7 @@
 				return suffix(beforeContent, "{", (s) => {
 					let compiled = compileFunctionSegments(state, content, depth);
 					let indent = createIndent(depth);
-					return new Some<>(new Tuple<>(compiled.left, indent + generatePlaceholder(s) + "{" + compiled.right + indent + "}"));
+					return new Some(new Tuple(compiled.left, indent + generatePlaceholder(s) + "{" + compiled.right + indent + "}"));
 				});
 			});
 		});
@@ -747,14 +747,14 @@
 		/* if (stripped.startsWith("return "))  */{
 			let value = stripped.substring("return ".length());
 			let tuple = value(state, value, depth);
-			return new Tuple<>(tuple.left, "return " + tuple.right);
+			return new Tuple(tuple.left, "return " + tuple.right);
 		}
 		return first(stripped, "=", (s,  s2) => {
 			let definitionTuple = compileDefinition(state, s);
 			let valueTuple = value(definitionTuple.left, s2, depth);
-			return new Some<>(new Tuple<>(valueTuple.left, "let " + definitionTuple.right + " = " + valueTuple.right));
+			return new Some(new Tuple(valueTuple.left, "let " + definitionTuple.right + " = " + valueTuple.right));
 		}).orElseGet(() => {
-			return new Tuple<>(state, generatePlaceholder(stripped));
+			return new Tuple(state, generatePlaceholder(stripped));
 		});
 	}
 	/* private static */ value(state : CompileState, input : string, depth : number) : [CompileState, string] {
@@ -763,7 +763,7 @@
 	/* private static */ methodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
 		return last(input, "::", (s,  s2) => {
 			let value = value(state, s, depth);
-			return new Some<>(new Tuple<>(value.left, value.right + "." + s2));
+			return new Some(new Tuple(value.left, value.right + "." + s2));
 		});
 	}
 	/* private static */ not(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
@@ -771,9 +771,9 @@
 		/* if (stripped.startsWith("!"))  */{
 			let slice = stripped.substring(1);
 			let value = value(state, slice, depth);
-			return new Some<>(new Tuple<>(value.left, "!" + value.right));
+			return new Some(new Tuple(value.left, "!" + value.right));
 		}
-		return new None<>();
+		return new None();
 	}
 	/* private static */ lambda(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
 		return first(input, "->", (beforeArrow,  valueString) => {
@@ -785,7 +785,7 @@
 				let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar);
 				return assembleLambda(state, parameterNames, valueString, depth);
 			}
-			return new None<>();
+			return new None();
 		});
 	}
 	/* private static */ assembleLambda(state : CompileState, paramNames : List<string>, valueString : string, depth : number) : Some<[CompileState, string]> {
@@ -801,14 +801,14 @@
 			let /* s  */ = value.right;
 		}
 		let joined = paramNames.iterate().collect(new Joiner(", ")).orElse("");
-		return new Some<>(new Tuple<>(value.left, "(" + joined + ") => " + s));
+		return new Some(new Tuple(value.left, "(" + joined + ") => " + s));
 	}
 	/* private static */ digits(state : CompileState, input : string) : Option<[CompileState, string]> {
 		let stripped = input.strip();
 		/* if (isNumber(stripped))  */{
-			return new Some<>(new Tuple<>(state, stripped));
+			return new Some(new Tuple(state, stripped));
 		}
-		return new None<>();
+		return new None();
 	}
 	/* private static */ isNumber(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++) {{
@@ -827,7 +827,7 @@
 					let callerString1 = callerString.strip();
 					let callerTuple = invocationHeader(state, depth, callerString1);
 					let argumentsTuple = compileValues(callerTuple.left, argumentsString, (state1,  input1) => value(state1, input1, depth));
-					return new Some<>(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
+					return new Some(new Tuple(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
 				});
 			});
 		});
@@ -861,55 +861,55 @@
 	/* private static */ dataAccess(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
 		return last(input.strip(), ".", (parent,  property) => {
 			/* if (!isSymbol(property))  */{
-				return new None<>();
+				return new None();
 			}
 			let value = value(state, parent, depth);
-			return new Some<>(new Tuple<>(value.left, value.right + "." + property));
+			return new Some(new Tuple(value.left, value.right + "." + property));
 		});
 	}
 	/* private static */ stringValue(state : CompileState, input : string) : Option<[CompileState, string]> {
 		let stripped = input.strip();
 		/* if (stripped.startsWith("\"") && stripped.endsWith("\""))  */{
-			return new Some<>(new Tuple<>(state, stripped));
+			return new Some(new Tuple(state, stripped));
 		}
-		return new None<>();
+		return new None();
 	}
 	/* private static */ symbolValue(state : CompileState, value : string) : Option<[CompileState, string]> {
 		let stripped = value.strip();
 		/* if (isSymbol(stripped))  */{
-			return new Some<>(new Tuple<>(state, stripped));
+			return new Some(new Tuple(state, stripped));
 		}
-		return new None<>();
+		return new None();
 	}
 	/* private static */ operation(state : CompileState, value : string, depth : number, infix : string) : Option<[CompileState, string]> {
 		return first(value, infix, (s,  s2) => {
 			let leftTuple = value(state, s, depth);
 			let rightTuple = value(leftTuple.left, s2, depth);
-			return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
+			return new Some(new Tuple(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
 		});
 	}
 	/* private static */ compileValues(state : CompileState, params : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@368239c8]) : [CompileState, string] {
-		let parsed = parseValuesOrEmpty(state, params, (state1,  s) => new Some<>(mapper.apply(state1, s)));
+		let parsed = parseValuesOrEmpty(state, params, (state1,  s) => new Some(mapper.apply(state1, s)));
 		let generated = generateValues(parsed.right);
-		return new Tuple<>(parsed.left, generated);
+		return new Tuple(parsed.left, generated);
 	}
 	/* private static */ generateValues(elements : List<string>) : string {
 		return generateAll(Main.mergeValues, elements);
 	}
 	/* private static  */ parseValuesOrEmpty<T>(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@9e89d68]) : [CompileState, List<T>] {
-		return parseValues(state, input, mapper).orElseGet(() => new Tuple<>(state, Lists.empty()));
+		return parseValues(state, input, mapper).orElseGet(() => new Tuple(state, Lists.empty()));
 	}
 	/* private static  */ parseValues<T>(state : CompileState, input : string, mapper : (arg0 : Symbol[input=CompileState], arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@3b192d32]) : Option<[CompileState, List<T>]> {
 		return getCompileStateListTuple(state, input, Main.foldValueChar, mapper);
 	}
 	/* private static */ compileParameter(state : CompileState, input : string) : [CompileState, string] {
 		/* if (input.isBlank())  */{
-			return new Tuple<>(state, "");
+			return new Tuple(state, "");
 		}
 		return compileDefinition(state, input);
 	}
 	/* private static */ compileDefinition(state : CompileState, input : string) : [CompileState, string] {
-		return parseDefinition(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
+		return parseDefinition(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
 	}
 	/* private static */ mergeValues(cache : StringBuilder, element : string) : StringBuilder {
 		/* if (cache.isEmpty())  */{
@@ -924,7 +924,7 @@
 		return suffix(input.strip(), ";", (withoutEnd) => {
 			return parseDefinition(state, withoutEnd).map((result) => {
 				let generated = createIndent(depth) + result.right.generate() + ";";
-				return new Tuple<>(result.left, generated);
+				return new Tuple(result.left, generated);
 			});
 		});
 	}
@@ -933,8 +933,8 @@
 			return split(() => toLast(beforeName, " ", Main.foldTypeSeparator), (beforeType,  type) => {
 				return suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
 					return first(withoutTypeParamStart, "<", (beforeTypeParams,  typeParamsString) => {
-						let /* final */ compileStateStringTupleBiFunction : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@16f65612] = (state1,  s) => new Tuple<>(state1, s.strip());
-						let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1,  s) => new Some<>(compileStateStringTupleBiFunction.apply(state1, s)));
+						let /* final */ compileStateStringTupleBiFunction : (arg0 : Symbol[input=CompileState], arg1 : String) => TupleType[arguments=magma.Main$Lists$JVMList@16f65612] = (state1,  s) => new Tuple(state1, s.strip());
+						let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1,  s) => new Some(compileStateStringTupleBiFunction.apply(state1, s)));
 						return assembleDefinition(typeParams.left, new Some<string>(beforeTypeParams), name, typeParams.right, type);
 					});
 				}).or(() => {
@@ -950,7 +950,7 @@
 		return divisions.removeLast().map((removed) => {
 			let left = removed.left.iterate().collect(new Joiner(separator)).orElse("");
 			let right = removed.right;
-			return new Tuple<>(left, right);
+			return new Tuple(left, right);
 		});
 	}
 	/* private static */ foldTypeSeparator(state : DivideState, c : Character) : DivideState {
@@ -969,7 +969,7 @@
 	/* private static */ assembleDefinition(state : CompileState, beforeTypeParams : Option<string>, name : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
 		let type1 = typeOrPlaceholder(state, type);
 		let node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams);
-		return new Some<>(new Tuple<>(type1.left, node));
+		return new Some(new Tuple(type1.left, node));
 	}
 	/* private static */ foldValueChar(state : DivideState, c : char) : DivideState {
 		/* if (c == ',' && state.isLevel())  */{
@@ -993,21 +993,21 @@
 		return appended;
 	}
 	/* private static */ typeOrPlaceholder(state : CompileState, input : string) : [CompileState, string] {
-		return compileType(state, input).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
+		return compileType(state, input).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
 	}
 	/* private static */ compileType(state : CompileState, input : string) : Option<[CompileState, string]> {
-		return type(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
+		return type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate()));
 	}
 	/* private static */ type(state : CompileState, input : string) : Option<[CompileState, Type]> {
 		let stripped = input.strip();
 		/* if (stripped.equals("int") || stripped.equals("Integer"))  */{
-			return new Some<>(new Tuple<>(state, Primitive.Int));
+			return new Some(new Tuple(state, Primitive.Int));
 		}
 		/* if (stripped.equals("String"))  */{
-			return new Some<>(new Tuple<>(state, Primitive.String));
+			return new Some(new Tuple(state, Primitive.String));
 		}
 		/* if (isSymbol(stripped))  */{
-			return new Some<>(new Tuple<>(state, new Symbol(stripped)));
+			return new Some(new Tuple(state, new Symbol(stripped)));
 		}
 		return template(state, input).or(() => varArgs(state, input));
 	}
@@ -1016,7 +1016,7 @@
 			return type(state, s).map((inner) => {
 				let newState = inner.left;
 				let child = inner.right;
-				return new Tuple<>(newState, new ArrayType(child));
+				return new Tuple(newState, new ArrayType(child));
 			});
 		});
 	}
@@ -1025,41 +1025,43 @@
 			return first(withoutEnd, "<", (base,  argumentsString) => {
 				let strippedBase = base.strip();
 				return parseValues(state, argumentsString, Main.argument).map((argumentsTuple) => {
-					return getCompileStateTuple(base, argumentsTuple, strippedBase);
+					return assembleTemplate(base, strippedBase, argumentsTuple.left, argumentsTuple.right);
 				});
 			});
 		});
 	}
-	/* private static */ getCompileStateTuple(base : string, argumentsTuple : [CompileState, List<Argument>], strippedBase : string) : [CompileState, Type] {
-		let argumentsState = argumentsTuple.left;
-		let arguments = argumentsTuple.right.iterate().map(Main.retainType).flatMap(Iterators.fromOption).collect(new ListCollector<>());
+	/* private static */ assembleTemplate(base : string, strippedBase : string, state : CompileState, arguments : List<Argument>) : [CompileState, Type] {
+		let children = arguments.iterate().map(Main.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
 		/* if (base.equals("BiFunction"))  */{
-			return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+			return new Tuple(state, new FunctionType(Lists.of(children.get(0), children.get(1)), children.get(2)));
 		}
 		/* if (base.equals("Function"))  */{
-			return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+			return new Tuple(state, new FunctionType(Lists.of(children.get(0)), children.get(1)));
 		}
 		/* if (base.equals("Predicate"))  */{
-			return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0)), Primitive.Boolean));
+			return new Tuple(state, new FunctionType(Lists.of(children.get(0)), Primitive.Boolean));
 		}
 		/* if (base.equals("Supplier"))  */{
-			return new Tuple<>(argumentsState, new FunctionType(Lists.empty(), arguments.get(0)));
+			return new Tuple(state, new FunctionType(Lists.empty(), children.get(0)));
 		}
-		/* if (base.equals("Tuple") && arguments.size() >= 2)  */{
-			return new Tuple<>(argumentsState, new TupleType(arguments));
+		/* if (base.equals("Tuple") && children.size() >= 2)  */{
+			return new Tuple(state, new TupleType(children));
 		}
-		return new Tuple<>(argumentsState, new Template(strippedBase, arguments));
+		return new Tuple(state, new Template(strippedBase, children));
 	}
 	/* private static */ retainType(argument : Argument) : Option<Type> {
 		/* if (argument instanceof Type type)  */{
-			return new Some<>(type);
+			return new Some(type);
 		}
 		/* else  */{
 			return new None<Type>();
 		}
 	}
 	/* private static */ argument(state : CompileState, input : string) : Option<[CompileState, Argument]> {
-		return type(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right));
+		/* if (input.isBlank())  */{
+			return new Some(new Tuple(state, new Whitespace()));
+		}
+		return type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right));
 	}
 	/* private static  */ last<T>(input : string, infix : string, mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@311d617d]) : Option<T> {
 		return infix(input, infix, Main.findLast, mapper);
@@ -1069,7 +1071,7 @@
 		/* if (index == -1)  */{
 			return new None<number>();
 		}
-		return new Some<>(index);
+		return new Some(index);
 	}
 	/* private static  */ first<T>(input : string, infix : string, mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@7c53a9eb]) : Option<T> {
 		return infix(input, infix, Main.findFirst, mapper);
@@ -1078,7 +1080,7 @@
 		return split(() => locator.apply(input, infix).map((index) => {
 			let left = input.substring(0, index);
 			let right = input.substring(index + infix.length());
-			return new Tuple<>(left, right);
+			return new Tuple(left, right);
 		}), mapper);
 	}
 	/* private static  */ split<T>(splitter : () => Template[base=Option, arguments=magma.Main$Lists$JVMList@707f7052], mapper : (arg0 : String, arg1 : String) => Template[base=Option, arguments=magma.Main$Lists$JVMList@11028347]) : Option<T> {
@@ -1089,7 +1091,7 @@
 		/* if (index == -1)  */{
 			return new None<number>();
 		}
-		return new Some<>(index);
+		return new Some(index);
 	}
 	/* private static */ generatePlaceholder(input : string) : string {
 		let replaced = input.replace("/*", "content-start").replace("*/", "content-end");

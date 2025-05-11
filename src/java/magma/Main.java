@@ -798,7 +798,11 @@ public class Main {
             return new None<>();
         }
 
-        var joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map(inner -> "<" + inner + ">").orElse("");
+        var joinedTypeParams = typeParams.iterate()
+                .collect(new Joiner(", "))
+                .map(inner -> "<" + inner + ">")
+                .orElse("");
+
         var parsed = parseStatements(state, content, (state0, input) -> compileClassSegment(state0, input, 1));
 
         List<String> parsed1;
@@ -1286,41 +1290,40 @@ public class Main {
             return first(withoutEnd, "<", (base, argumentsString) -> {
                 var strippedBase = base.strip();
                 return parseValues(state, argumentsString, Main::argument).map(argumentsTuple -> {
-                    return getCompileStateTuple(base, argumentsTuple, strippedBase);
+                    return assembleTemplate(base, strippedBase, argumentsTuple.left, argumentsTuple.right);
                 });
             });
         });
     }
 
-    private static Tuple<CompileState, Type> getCompileStateTuple(String base, Tuple<CompileState, List<Argument>> argumentsTuple, String strippedBase) {
-        var argumentsState = argumentsTuple.left;
-        var arguments = argumentsTuple.right
+    private static Tuple<CompileState, Type> assembleTemplate(String base, String strippedBase, CompileState state, List<Argument> arguments) {
+        var children = arguments
                 .iterate()
                 .map(Main::retainType)
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
 
         if (base.equals("BiFunction")) {
-            return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+            return new Tuple<>(state, new FunctionType(Lists.of(children.get(0), children.get(1)), children.get(2)));
         }
 
         if (base.equals("Function")) {
-            return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+            return new Tuple<>(state, new FunctionType(Lists.of(children.get(0)), children.get(1)));
         }
 
         if (base.equals("Predicate")) {
-            return new Tuple<>(argumentsState, new FunctionType(Lists.of(arguments.get(0)), Primitive.Boolean));
+            return new Tuple<>(state, new FunctionType(Lists.of(children.get(0)), Primitive.Boolean));
         }
 
         if (base.equals("Supplier")) {
-            return new Tuple<>(argumentsState, new FunctionType(Lists.empty(), arguments.get(0)));
+            return new Tuple<>(state, new FunctionType(Lists.empty(), children.get(0)));
         }
 
-        if (base.equals("Tuple") && arguments.size() >= 2) {
-            return new Tuple<>(argumentsState, new TupleType(arguments));
+        if (base.equals("Tuple") && children.size() >= 2) {
+            return new Tuple<>(state, new TupleType(children));
         }
 
-        return new Tuple<>(argumentsState, new Template(strippedBase, arguments));
+        return new Tuple<>(state, new Template(strippedBase, children));
     }
 
     private static Option<Type> retainType(Argument argument) {
@@ -1333,6 +1336,9 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Argument>> argument(CompileState state, String input) {
+        if (input.isBlank()) {
+            return new Some<>(new Tuple<>(state, new Whitespace()));
+        }
         return type(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right));
     }
 
