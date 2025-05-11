@@ -238,10 +238,23 @@
         /* private String generate()  */ {
             return this.generateWithParams("");
         }
-        /* public String generateWithParams(String params)  */ {
-            let joined = this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
-            let before = this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
-            return before + this.name + joined + params + " : " + this.type;
+        /* public String generateWithParams(String params) {{
+            var joined = this.typeParams.iterate()
+                    .collect(new Joiner())
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+
+            var before = this.maybeBefore
+                    .filter(value -> !value.isEmpty())
+                    .map(Main::generatePlaceholder)
+                    .map(inner -> inner + " ")
+                    .orElse("");
+
+            var s = before + this.name + joined + params;
+            if (this.type.equals("var"))  */ {
+            return s;
+            /* }
+            return s + " : " + this.type */ ;
         }
     }
     /* public static */ main() {

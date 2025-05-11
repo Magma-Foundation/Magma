@@ -361,7 +361,11 @@ public class Main {
                     .map(inner -> inner + " ")
                     .orElse("");
 
-            return before + this.name + joined + params + " : " + this.type;
+            var s = before + this.name + joined + params;
+            if (this.type.equals("var")) {
+                return s;
+            }
+            return s + " : " + this.type;
         }
     }
 
