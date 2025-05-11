@@ -60,13 +60,13 @@ public class Main {
 
         int size();
 
-        List<T> addAll(List<T> other);
-
         boolean isEmpty();
 
         List<T> addFirst(T element);
 
         Iterator<Tuple<Integer, T>> iterateWithIndices();
+
+        Option<Tuple<T, List<T>>> removeFirst();
     }
 
     private interface Head<T> {
@@ -320,12 +320,6 @@ public class Main {
             }
 
             @Override
-            public List<T> addAll(List<T> other) {
-                List<T> initial = this;
-                return other.iterate().fold(initial, List::addLast);
-            }
-
-            @Override
             public boolean isEmpty() {
                 return this.elements.isEmpty();
             }
@@ -339,6 +333,17 @@ public class Main {
             @Override
             public Iterator<Tuple<Integer, T>> iterateWithIndices() {
                 return new HeadedIterator<>(new RangeHead(this.elements.size())).map(index -> new Tuple<>(index, this.elements.get(index)));
+            }
+
+            @Override
+            public Option<Tuple<T, List<T>>> removeFirst() {
+                if (this.elements.isEmpty()) {
+                    return new None<>();
+                }
+
+                var first = this.elements.getFirst();
+                var slice = this.elements.subList(1, this.elements.size());
+                return new Some<>(new Tuple<T, List<T>>(first, new JVMList<>(slice)));
             }
         }
 
@@ -667,15 +672,7 @@ public class Main {
         }
     }
 
-    private static class BlockLambdaValue implements LambdaValue {
-        private final String right;
-        private final int depth;
-
-        public BlockLambdaValue(String right, int depth) {
-            this.right = right;
-            this.depth = depth;
-        }
-
+    private record BlockLambdaValue(String right, int depth) implements LambdaValue {
         @Override
         public String generate() {
             return "{" + this.right + createIndent(this.depth) + "}";
@@ -1067,7 +1064,13 @@ public class Main {
     private static Option<Tuple<CompileState, String>> block(CompileState state, int depth, String stripped) {
         return suffix(stripped, "}", withoutEnd -> {
             return split(() -> {
-                return toLast(withoutEnd, "{", Main::foldBlockStart);
+                var divisions = divideAll(withoutEnd, Main::foldBlockStart);
+                return divisions.removeFirst().map(removed -> {
+                    var right = removed.left;
+                    var left = removed.right.iterate().collect(new Joiner("")).orElse("");
+
+                    return new Tuple<>(right, left);
+                });
             }, (beforeContent, content) -> {
                 return suffix(beforeContent, "{", s -> {
                     var compiled = compileFunctionSegments(state, content, depth);
@@ -1080,8 +1083,14 @@ public class Main {
 
     private static DivideState foldBlockStart(DivideState state, Character c) {
         var appended = state.append(c);
-        if (c == '{') {
+        if (c == '{' && state.isLevel()) {
             return appended.advance();
+        }
+        if(c == '{') {
+            return appended.enter();
+        }
+        if(c == '}') {
+            return appended.exit();
         }
         return appended;
     }

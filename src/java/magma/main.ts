@@ -26,10 +26,10 @@
 	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : T;
 	size() : number;
-	addAll(other : List<T>) : List<T>;
 	isEmpty() : boolean;
 	addFirst(element : T) : List<T>;
 	iterateWithIndices() : Iterator<[number, T]>;
+	removeFirst() : Option<[T, List<T>]>;
 }
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
@@ -147,14 +147,15 @@
 	/* @Override
         public  */ fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		let current = initial;
-		/* while (true) {{
-                R finalCurrent = current;
-                var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
-                if (optional.isPresent()) {{
-                    current = optional.orElse(null);
-                }
-                else  */{
-			return current;/* } */
+		/* while (true)  */{
+			let finalCurrent : R = current;
+			let optional = this.head.next().map((inner) => folder(finalCurrent, inner));
+			/* if (optional.isPresent())  */{
+				let /* current  */ = optional.orElse(null);
+			}
+			/* else  */{
+				return current;
+			}
 		}
 	}
 	/* @Override
@@ -234,11 +235,6 @@
 		return this.elements.size();
 	}
 	/* @Override
-            public */ addAll(other : List<T>) : List<T> {
-		let initial : List<T> = this;
-		return other.iterate().fold(initial, List.addLast);
-	}
-	/* @Override
             public */ isEmpty() : boolean {
 		return this.elements.isEmpty();
 	}
@@ -250,6 +246,15 @@
 	/* @Override
             public */ iterateWithIndices() : Iterator<[number, T]> {
 		return new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple(index, this.elements.get(index)));
+	}
+	/* @Override
+            public */ removeFirst() : Option<[T, List<T>]> {
+		/* if (this.elements.isEmpty())  */{
+			return new None();
+		}
+		let first = this.elements.getFirst();
+		let slice = this.elements.subList(1, this.elements.size());
+		return new Some(new [T, List<T>](first, new JVMList(slice)));
 	}
 }
 /* private static */class Lists/*  */ {
@@ -381,24 +386,24 @@
 	}
 	/* @Override
         public */ next() : Option<R> {
-		/* while (true) {{
-                if (this.current.isPresent()) {{
-                    Iterator<R> inner = this.current.orElse(null);
-                    Option<R> maybe = inner.next();
-                    if (maybe.isPresent()) {{
-                        return maybe;
-                    }
-                    else {{
-                        this.current = new None<>();
-                    }
-                }
-
-                Option<T> outer = this.head.next();
-                if (outer.isPresent()) {{
-                    this.current = outer.map(this.mapper);
-                }
-                else  */{
-			return new None();/* } */
+		/* while (true)  */{
+			/* if (this.current.isPresent())  */{
+				let inner : Iterator<R> = this.current.orElse(null);
+				let maybe : Option<R> = inner.next();
+				/* if (maybe.isPresent())  */{
+					return maybe;
+				}
+				/* else  */{
+					let /* this.current  */ = new None();
+				}
+			}
+			let outer : Option<T> = this.head.next();
+			/* if (outer.isPresent())  */{
+				let /* this.current  */ = outer.map(this.mapper);
+			}
+			/* else  */{
+				return new None();
+			}
 		}
 	}
 }
@@ -522,13 +527,10 @@
 		return "!" + this.value.generate();
 	}
 }
-/* private static */class BlockLambdaValue/*  */ {
-	/* private final */ right : string;
-	/* private final */ depth : number;
-	BlockLambdaValue(right : string, depth : number) : public {
-		let /* this.right  */ = right;
-		let /* this.depth  */ = depth;
+/* private */class BlockLambdaValue/*  */ {
+	constructor (right : string, depth : number) {
 	}
+
 	/* @Override
         public */ generate() : string {
 		return "{" + this.right + createIndent(this.depth) + "}";
@@ -631,42 +633,37 @@
 	}
 	/* private static */ divideAll(input : string, folder : (arg0 : DivideState, arg1 : Character) => DivideState) : List<string> {
 		let current = new DivideState(input);
-		/* while (true) {{
-            var maybePopped = current.pop().map(tuple -> {{
-                return foldSingleQuotes(tuple)
-                        .or(() -> foldDoubleQuotes(tuple))
-                        .orElseGet(() -> folder.apply(tuple.right, tuple.left));
-            });
-
-            if (maybePopped.isPresent()) {{
-                current = maybePopped.orElse(current);
-            }
-            else  */{
-			/* break */;/* } */
+		/* while (true)  */{
+			let maybePopped = current.pop().map((tuple) => {
+				return foldSingleQuotes(tuple).or(() => foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple.right, tuple.left));
+			});
+			/* if (maybePopped.isPresent())  */{
+				let /* current  */ = maybePopped.orElse(current);
+			}
+			/* else  */{
+				/* break */;
+			}
 		}
 		return current.advance().segments;
 	}
 	/* private static */ foldDoubleQuotes(tuple : [Character, DivideState]) : Option<DivideState> {
-		/* if (tuple.left == '\"') {{
-            var current = tuple.right.append(tuple.left);
-            while (true) {{
-                var maybePopped = current.popAndAppendToTuple();
-                if (maybePopped.isEmpty()) {{
-                    break;
-                }
-
-                var popped = maybePopped.orElse(null);
-                current = popped.right;
-
-                if (popped.left == '\\') {{
-                    current = current.popAndAppendToOption().orElse(current);
-                }
-                if (popped.left == '\"')  */{
-			/* break */;
-			/* }
-            }
-
-            return new Some<>(current) */;
+		/* if (tuple.left == '\"')  */{
+			let current = tuple.right.append(tuple.left);
+			/* while (true)  */{
+				let maybePopped = current.popAndAppendToTuple();
+				/* if (maybePopped.isEmpty())  */{
+					/* break */;
+				}
+				let popped = maybePopped.orElse(null);
+				let /* current  */ = popped.right;
+				/* if (popped.left == '\\')  */{
+					let /* current  */ = current.popAndAppendToOption().orElse(current);
+				}
+				/* if (popped.left == '\"')  */{
+					/* break */;
+				}
+			}
+			return new Some(current);
 		}
 		return new None();
 	}
@@ -771,12 +768,12 @@
 		return new None();
 	}
 	/* private static */ isSymbol(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++) {{
-            var c = input.charAt(i);
-            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c)))  */{
-			/* continue */;
-			/* }
-            return false */;
+		/* for (var i = 0; i < input.length(); i++)  */{
+			let c = input.charAt(i);
+			/* if (Character.isLetter(c) || (i != 0 && Character.isDigit(c)))  */{
+				/* continue */;
+			}
+			return false;
 		}
 		return true;
 	}
@@ -852,7 +849,12 @@
 	/* private static */ block(state : CompileState, depth : number, stripped : string) : Option<[CompileState, string]> {
 		return suffix(stripped, "}", (withoutEnd) => {
 			return split(() => {
-				return toLast(withoutEnd, "{", Main.foldBlockStart);
+				let divisions = divideAll(withoutEnd, Main.foldBlockStart);
+				return divisions.removeFirst().map((removed) => {
+					let right = removed.left;
+					let left = removed.right.iterate().collect(new Joiner("")).orElse("");
+					return new Tuple(right, left);
+				});
 			}, (beforeContent,  content) => {
 				return suffix(beforeContent, "{", (s) => {
 					let compiled = compileFunctionSegments(state, content, depth);
@@ -864,8 +866,14 @@
 	}
 	/* private static */ foldBlockStart(state : DivideState, c : Character) : DivideState {
 		let appended = state.append(c);
-		/* if (c == '{')  */{
+		/* if (c == '{' && state.isLevel())  */{
 			return appended.advance();
+		}
+		/* if(c == '{')  */{
+			return appended.enter();
+		}
+		/* if(c == '}')  */{
+			return appended.exit();
 		}
 		return appended;
 	}
@@ -943,12 +951,12 @@
 		return new None();
 	}
 	/* private static */ isNumber(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++) {{
-            var c = input.charAt(i);
-            if (Character.isDigit(c))  */{
-			/* continue */;
-			/* }
-            return false */;
+		/* for (var i = 0; i < input.length(); i++)  */{
+			let c = input.charAt(i);
+			/* if (Character.isDigit(c))  */{
+				/* continue */;
+			}
+			return false;
 		}
 		return true;
 	}
@@ -969,10 +977,11 @@
 		});
 	}
 	/* private static */ modifyCaller(state : CompileState, oldCaller : Caller) : Caller {
-		/* if (oldCaller instanceof DataAccess access) {{
-            var type = resolveType(access.parent, state);
-            if (type instanceof FunctionType)  */{
-			return access.parent;/* } */
+		/* if (oldCaller instanceof DataAccess access)  */{
+			let type = resolveType(access.parent, state);
+			/* if (type instanceof FunctionType)  */{
+				return access.parent;
+			}
 		}
 		return oldCaller;
 	}
@@ -990,27 +999,27 @@
 		/*  */;
 	}
 	/* private static */ invocationHeader(state : CompileState, depth : number, callerString1 : string) : [CompileState, Caller] {
-		/* if (callerString1.startsWith("new ")) {{
-            String input1 = callerString1.substring("new ".length());
-            var map = parseType(state, input1).map(type -> {{
-                var right = type.right;
-                return new Tuple<CompileState, Caller>(type.left, new ConstructionCaller(right));
-            });
-
-            if (map.isPresent())  */{
-			return map.orElse(null);/* } */
+		/* if (callerString1.startsWith("new "))  */{
+			let input1 : string = callerString1.substring("new ".length());
+			let map = parseType(state, input1).map((type) => {
+				let right = type.right;
+				return new [CompileState, Caller](type.left, new ConstructionCaller(right));
+			});
+			/* if (map.isPresent())  */{
+				return map.orElse(null);
+			}
 		}
 		let tuple = parseValue(state, callerString1, depth);
 		return new Tuple(tuple.left, tuple.right);
 	}
 	/* private static */ foldInvocationStart(state : DivideState, c : char) : DivideState {
 		let appended = state.append(c);
-		/* if (c == '(') {{
-            var enter = appended.enter();
-            if (enter.isShallow())  */{
-			return enter.advance();
-			/* }
-            return enter */;
+		/* if (c == '(')  */{
+			let enter = appended.enter();
+			/* if (enter.isShallow())  */{
+				return enter.advance();
+			}
+			return enter;
 		}
 		/* if (c == ')')  */{
 			return appended.exit();
@@ -1139,13 +1148,14 @@
 			return state.advance();
 		}
 		let appended = state.append(c);
-		/* if (c == '-') {{
-            var peeked = appended.peek();
-            if (peeked == '>') {{
-                return appended.popAndAppendToOption().orElse(appended);
-            }
-            else  */{
-			return appended;/* } */
+		/* if (c == '-')  */{
+			let peeked = appended.peek();
+			/* if (peeked == '>')  */{
+				return appended.popAndAppendToOption().orElse(appended);
+			}
+			/* else  */{
+				return appended;
+			}
 		}
 		/* if (c == '<' || c == '(' || c == '{')  */{
 			return appended.enter();
