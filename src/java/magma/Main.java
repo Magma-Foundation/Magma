@@ -807,7 +807,16 @@ public class Main {
             return new Tuple<>(state, stripped);
         }
 
-        return template(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
+        return template(state, input)
+                .or(() -> varArgs(state, input))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped)));
+    }
+
+    private static Option<Tuple<CompileState, String>> varArgs(CompileState state, String input) {
+        return suffix(input, "...", s -> {
+            var inner = type(state, s);
+            return new Some<>(new Tuple<>(inner.left, inner.right + "[]"));
+        });
     }
 
     private static Option<Tuple<CompileState, String>> template(CompileState state, String input) {

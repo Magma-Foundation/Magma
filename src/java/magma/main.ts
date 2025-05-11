@@ -151,7 +151,7 @@
 	/* public static  */ empty<T>() : List<T> {
 		return /* new JVMList<>() */;
 	}
-	/* public static  */ of<T>(elements : /* T... */) : List<T> {
+	/* public static  */ of<T>(elements : T[]) : List<T> {
 		return /* new JVMList<>(new ArrayList<>(Arrays.asList(elements))) */;
 	}
 }
@@ -617,7 +617,18 @@
         } *//* if (isSymbol(stripped)) {
             return new Tuple<>(state, stripped);
         } */
-		return /* template(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped))) */;
+		return /* template(state, input)
+                .or(() -> varArgs(state, input))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(stripped))) */;
+	}
+	/* private static */ varArgs(state : CompileState, input : string) : Option<[CompileState, string]> {
+		return /* suffix(input, "...", new Function<String, Option<Tuple<CompileState, String>>>() {
+            @Override
+            public Option<Tuple<CompileState, String>> apply(String s) {
+                var inner = type(state, s);
+                return new Some<>(new Tuple<>(inner.left, inner.right  */ + /*  "[]"));
+            }
+        }) */;
 	}
 	/* private static */ template(state : CompileState, input : string) : Option<[CompileState, string]> {
 		return /* suffix(input.strip(), ">", withoutEnd -> {
