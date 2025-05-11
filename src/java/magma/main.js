@@ -91,7 +91,7 @@
     }
     /* @Override
         public  */ collect(collector) {
-        return this.fold(collector.createInitial());
+        return this.fold(collector.createInitial(), collector.fold);
     }
 }
 /* private static */ class RangeHead /*  */ {
@@ -122,7 +122,7 @@
     }
     /* @Override
             public */ iterate() {
-        return new HeadedIterator(new RangeHead(this.elements.size())).map( /* this.elements::get */);
+        return new HeadedIterator(new RangeHead(this.elements.size())).map(this.elements.get);
     }
     /* @Override
             public */ removeLast() {
@@ -195,7 +195,7 @@
         return this.pop().map((tuple) => new Tuple(tuple.left, tuple.right.append(tuple.left)));
     }
     /* public */ popAndAppendToOption() {
-        return this.popAndAppendToTuple().map( /* Tuple::right */);
+        return this.popAndAppendToTuple().map(Tuple.right);
     }
     /* public */ peek() {
         return this.input.charAt(this.index);
@@ -241,7 +241,7 @@
         }
         /* public String generateWithParams(String params)  */ {
             let joined = this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
-            let before = this.maybeBefore.filter((value) => !value.isEmpty()).map( /* Main::generatePlaceholder */).map((inner) => inner + " ").orElse("");
+            let before = this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
             return before + this.name + joined + params + " : " + this.type;
         }
     }
@@ -262,12 +262,12 @@
         }
     }
     /* private static */ compile(input) {
-        let tuple = compileStatements(new CompileState(), input);
+        let tuple = compileStatements(new CompileState(), input, Main.compileRootSegment);
         let joined = tuple.left.structures.iterate().collect(new Joiner()).orElse("");
         return joined + tuple.right;
     }
     /* private static */ compileStatements(state, input, mapper) {
-        return compileAll(state, input, mapper);
+        return compileAll(state, input, Main.foldStatementChar, mapper, Main.mergeStatements);
     }
     /* private static */ compileAll(state, input, folder, mapper, merger) {
         let parsed = parseAll(state, input, folder, mapper);
@@ -329,7 +329,7 @@
             return new None();
         }
         let appended = tuple.right.append(tuple.left);
-        return appended.popAndAppendToTuple().map( /* Main::foldEscaped */).flatMap( /* DivideState::popAndAppendToOption */);
+        return appended.popAndAppendToTuple().map(Main.foldEscaped).flatMap(DivideState.popAndAppendToOption);
     }
     /* private static */ foldEscaped(escaped) {
         /* if (escaped.left == '\\')  */ {
@@ -430,382 +430,450 @@
     /* private static */ method(state, input, depth) {
         return first(input, "(", (definition, withParams) => {
             return first(withParams, ")", (params, rawContent) => {
-                let definitionTuple = parseDefinition(state, definition).map(/* definition1 -> {
-                            var paramsTuple = compileValues(state, params, Main::compileParameter);
-                            var generated = definition1.right.generateWithParams("("  */ +paramsTuple.right +
-                /*  ")");
-                return new Tuple<>(paramsTuple.left, generated);
-            } */).orElseGet(() => new Tuple(state, generatePlaceholder(definition)));
-                let content = rawContent.strip();
-                let indent = createIndent(depth);
-                /* if (content.equals(";"))  */ {
-                    let s = indent + definitionTuple.right + ";";
-                    return new Some(new Tuple(definitionTuple.left, s));
-                }
-                /* if (content.startsWith(" */ {
-                    let substring = /* content.substring(1, content.length() - 1);
-                    var statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
-                    var generated = indent  */ +definitionTuple.right + " {" + statementsTuple.right + indent + /*  "}";
-                    return new Some<> */
-                        (new Tuple(statementsTuple.left, generated));
-                }
-                return new None();
+                let definitionTuple = parseDefinition(state, definition).map() /* definition1 -> {
+                            var paramsTuple = compileValues(state, params, Main */
+                    .compileParameter;
             });
-        });
-    }
-    /* private static */ compileFunctionSegments(state, input, depth) {
-        return compileStatements(state, input, (state1, input1) => compileFunctionSegment(depth + 1));
-    }
-    /* private static */ compileFunctionSegment(state, input, depth) {
-        let stripped = input.strip();
-        /* if (stripped.isEmpty())  */ {
-            return new Tuple(state, "");
-        }
-        return suffix(stripped, ";", (s) => {
-            let tuple = statementValue(state, s, depth);
-            return new Some(new Tuple(tuple.left, createIndent(depth) + tuple.right + ";"));
-        }).or(() => {
-            return compileBlock(state, depth, stripped);
-        }).orElseGet(() => {
-            return new Tuple(state, generatePlaceholder(stripped));
-        });
-    }
-    /* private static */ compileBlock(state, depth, stripped) {
-        return suffix(stripped, "}", (withoutEnd) => {
-            return first(withoutEnd, "{", (beforeContent, content) => {
-                let compiled = compileFunctionSegments(state, content, depth);
-                let indent = createIndent(depth);
-                return new Some(new Tuple(compiled.left, indent + generatePlaceholder(beforeContent) + "{" + compiled.right + indent + "}"));
-            });
-        });
-    }
-    /* private static */ statementValue(state, input, depth) {
-        let stripped = input.strip();
-        /* if (stripped.startsWith("return "))  */ {
-            let value = stripped.substring("return ".length());
-            let tuple = value(state, value, depth);
-            return new Tuple(tuple.left, "return " + tuple.right);
-        }
-        return first(stripped, "=", (s, s2) => {
-            let definitionTuple = compileDefinition(state, s);
-            let valueTuple = value(definitionTuple.left, depth);
-            return new Some(new Tuple(valueTuple.left, "let " + definitionTuple.right + " = " + valueTuple.right));
-        }).orElseGet(() => {
-            return new Tuple(state, generatePlaceholder(stripped));
-        });
-    }
-    /* private static */ value(state, input, depth) {
-        return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth)).or(() => digits(state, input)).or(() => not(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
-    }
-    /* private static */ not(state, input, depth) {
-        let stripped = input.strip();
-        /* if (stripped.startsWith("!"))  */ {
-            let slice = stripped.substring(1);
-            let value = value(state, slice, depth);
-            return new Some(new Tuple(value.left, "!" + value.right));
-        }
-        return new None();
-    }
-    /* private static */ lambda(state, input, depth) {
-        return first(input, "->", (beforeArrow, valueString) => {
-            let strippedBeforeArrow = beforeArrow.strip();
-            /* if (isSymbol(strippedBeforeArrow))  */ {
-                return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString, depth);
+            var generated = definition1.right.generateWithParams("(" + paramsTuple.right +
+            /*  ")");
+            return new Tuple<>(paramsTuple.left, generated);
+        } */).orElseGet(() => new Tuple(state, generatePlaceholder(definition)));
+            let content = rawContent.strip();
+            let indent = createIndent(depth);
+            /* if (content.equals(";"))  */ {
+                let s = indent + definitionTuple.right + ";";
+                return new Some(new Tuple(definitionTuple.left, s));
             }
-            /* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */ {
-                let parameterNames = divideAll(strippedBeforeArrow.substring(1));
-                return assembleLambda(state, parameterNames, valueString, depth);
+            /* if (content.startsWith(" */ {
+                let substring = /* content.substring(1, content.length() - 1);
+                var statementsTuple = compileFunctionSegments(definitionTuple.left, substring, depth);
+                var generated = indent  */ +definitionTuple.right + " {" + statementsTuple.right + indent + /*  "}";
+                return new Some<> */
+                    (new Tuple(statementsTuple.left, generated));
             }
             return new None();
         });
     }
-    /* private static */ assembleLambda(state, paramNames, valueString, depth) {
-        /* Tuple<CompileState, String> value */ ;
-        let strippedValueString = valueString.strip();
-        /* String s */ ;
-        /* if (strippedValueString.startsWith(" */ {
-            let value = /*  compileFunctionSegments(state, strippedValueString.substring(1, strippedValueString.length() - 1), depth);
-            s = "{"  */ +value.right + createIndent(depth) + "}";
-        }
-        /* else  */ {
-            let /* value  */ = value(state, strippedValueString, depth);
-            let /* s  */ = value.right;
-        }
-        let joined = paramNames.iterate().collect(new Joiner(", ")).orElse("");
-        return new Some(new Tuple(value.left, "(" + joined + ") => " + s));
+    ;
+}
+/* private static */ compileFunctionSegments(state, CompileState, input, string, depth, number);
+[CompileState, string];
+{
+    return compileStatements(state, input, (state1, input1) => compileFunctionSegment(depth + 1));
+}
+/* private static */ compileFunctionSegment(state, CompileState, input, string, depth, number);
+[CompileState, string];
+{
+    let stripped = input.strip();
+    /* if (stripped.isEmpty())  */ {
+        return new Tuple(state, "");
     }
-    /* private static */ digits(state, input) {
-        let stripped = input.strip();
-        /* if (isNumber(stripped))  */ {
-            return new Some(new Tuple(state, stripped));
+    return suffix(stripped, ";", (s) => {
+        let tuple = statementValue(state, s, depth);
+        return new Some(new Tuple(tuple.left, createIndent(depth) + tuple.right + ";"));
+    }).or(() => {
+        return compileBlock(state, depth, stripped);
+    }).orElseGet(() => {
+        return new Tuple(state, generatePlaceholder(stripped));
+    });
+}
+/* private static */ compileBlock(state, CompileState, depth, number, stripped, string);
+Option < [CompileState, string] > {
+    return: suffix(stripped, "}", (withoutEnd) => {
+        return first(withoutEnd, "{", (beforeContent, content) => {
+            let compiled = compileFunctionSegments(state, content, depth);
+            let indent = createIndent(depth);
+            return new Some(new Tuple(compiled.left, indent + generatePlaceholder(beforeContent) + "{" + compiled.right + indent + "}"));
+        });
+    })
+};
+/* private static */ statementValue(state, CompileState, input, string, depth, number);
+[CompileState, string];
+{
+    let stripped = input.strip();
+    /* if (stripped.startsWith("return "))  */ {
+        let value = stripped.substring("return ".length());
+        let tuple = value(state, value, depth);
+        return new Tuple(tuple.left, "return " + tuple.right);
+    }
+    return first(stripped, "=", (s, s2) => {
+        let definitionTuple = compileDefinition(state, s);
+        let valueTuple = value(definitionTuple.left, depth);
+        return new Some(new Tuple(valueTuple.left, "let " + definitionTuple.right + " = " + valueTuple.right));
+    }).orElseGet(() => {
+        return new Tuple(state, generatePlaceholder(stripped));
+    });
+}
+/* private static */ value(state, CompileState, input, string, depth, number);
+[CompileState, string];
+{
+    return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth)).or(() => digits(state, input)).or(() => not(state, input, depth)).or(() => methodReference(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
+}
+/* private static */ methodReference(state, CompileState, input, string, depth, number);
+Option < [CompileState, string] > {
+    return: last(input, "::", (s, s2) => {
+        let value = value(state, s, depth);
+        return new Some(new Tuple(value.left, value.right + "." +  /*  s2 */));
+    })
+};
+/* private static */ not(state, CompileState, input, string, depth, number);
+Option < [CompileState, string] > {
+    let, stripped: , var:  = input.strip()
+};
+/* if (stripped.startsWith("!"))  */ {
+    let slice = stripped.substring(1);
+    let value = value(state, slice, depth);
+    return new Some(new Tuple(value.left, "!" + value.right));
+}
+return new None();
+/* private static */ lambda(state, CompileState, input, string, depth, number);
+Option < [CompileState, string] > {
+    return: first(input, "->", (beforeArrow, valueString) => {
+        let strippedBeforeArrow = beforeArrow.strip();
+        /* if (isSymbol(strippedBeforeArrow))  */ {
+            return assembleLambda(state, Lists.of(strippedBeforeArrow), valueString, depth);
+        }
+        /* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */ {
+            let parameterNames = divideAll(strippedBeforeArrow.substring(1), Main.foldValueChar);
+            return assembleLambda(state, parameterNames, valueString, depth);
         }
         return new None();
-    }
-    /* private static */ isNumber(input) {
-        /* for (var i = 0; i < input.length(); i++)  */ {
-            let c = input.charAt(i);
-            /* if (Character.isDigit(c))  */ {
-                /* continue */ ;
-            }
-            return false;
+    })
+};
+/* private static */ assembleLambda(state, CompileState, paramNames, (List), valueString, string, depth, number);
+Some < [CompileState, string] > {
+    let, strippedValueString: , var:  = valueString.strip()
+};
+/* if (strippedValueString.startsWith(" */ {
+    let value = /*  compileFunctionSegments(state, strippedValueString.substring(1, strippedValueString.length() - 1), depth);
+    s = "{"  */ +value.right + createIndent(depth) + "}";
+}
+/* else  */ {
+    let /* value  */ = value(state, strippedValueString, depth);
+    let /* s  */ = value.right;
+}
+let joined = paramNames.iterate().collect(new Joiner(", ")).orElse("");
+return new Some(new Tuple(value.left, "(" + joined + ") => " + s));
+/* private static */ digits(state, CompileState, input, string);
+Option < [CompileState, string] > {
+    let, stripped: , var:  = input.strip()
+};
+/* if (isNumber(stripped))  */ {
+    return new Some(new Tuple(state, stripped));
+}
+return new None();
+/* private static */ isNumber(input, string);
+boolean;
+{
+    /* for (var i = 0; i < input.length(); i++)  */ {
+        let c = input.charAt(i);
+        /* if (Character.isDigit(c))  */ {
+            /* continue */ ;
         }
-        return true;
+        return false;
     }
-    /* private static */ invocation(state, input, depth) {
-        return suffix(input.strip(), ")", (withoutEnd) => {
-            return split(() => toLast(withoutEnd, ""), (callerWithEnd, argumentsString) => {
-                return suffix(callerWithEnd, "(", (callerString) => {
-                    let callerString1 = callerString.strip();
-                    let callerTuple = invocationHeader(state, depth);
-                    let argumentsTuple = compileValues(callerTuple.left, argumentsString, (state1, input1) => value(depth));
-                    return new Some(new Tuple(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
-                });
+    return true;
+}
+/* private static */ invocation(state, CompileState, input, string, depth, number);
+Option < [CompileState, string] > {
+    return: suffix(input.strip(), ")", (withoutEnd) => {
+        return split(() => toLast(withoutEnd, "", Main.foldInvocationStart), (callerWithEnd, argumentsString) => {
+            return suffix(callerWithEnd, "(", (callerString) => {
+                let callerString1 = callerString.strip();
+                let callerTuple = invocationHeader(state, depth);
+                let argumentsTuple = compileValues(callerTuple.left, argumentsString, (state1, input1) => value(depth));
+                return new Some(new Tuple(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
             });
         });
-    }
-    /* private static */ invocationHeader(state, depth, callerString1) {
-        /* if (callerString1.startsWith("new "))  */ {
-            let input1 = /* callerString1 */ .substring("new ".length());
-            let map = type(state).map((type) => {
-                return new Tuple(type.left, "new " + type.right);
-            });
-            /* if (map.isPresent())  */ {
-                return map.orElse(null);
-            }
-        }
-        return value(state, depth);
-    }
-    /* private static */ foldInvocationStart(state, c) {
-        let appended = state.append(c);
-        /* if (c == '(')  */ {
-            let enter = appended.enter();
-            /* if (enter.isShallow())  */ {
-                return enter.advance();
-            }
-            return enter;
-        }
-        /* if (c == ')')  */ {
-            return appended.exit();
-        }
-        return appended;
-    }
-    /* private static */ dataAccess(state, input, depth) {
-        return last(input.strip(), ".", (parent, property) => {
-            /* if (!isSymbol(property))  */ {
-                return new None();
-            }
-            let value = value(state, parent, depth);
-            return new Some(new Tuple(value.left, value.right + "." + property));
+    })
+};
+/* private static */ invocationHeader(state, CompileState, depth, number, callerString1, string);
+[CompileState, string];
+{
+    /* if (callerString1.startsWith("new "))  */ {
+        let input1 = /* callerString1 */ .substring("new ".length());
+        let map = type(state).map((type) => {
+            return new Tuple(type.left, "new " + type.right);
         });
-    }
-    /* private static */ stringValue(state, input) {
-        let stripped = input.strip();
-        /* if (stripped.startsWith("\"") && stripped.endsWith("\""))  */ {
-            return new Some(new Tuple(state, stripped));
+        /* if (map.isPresent())  */ {
+            return map.orElse(null);
         }
-        return new None();
     }
-    /* private static */ symbolValue(state, value) {
-        let stripped = value.strip();
-        /* if (isSymbol(stripped))  */ {
-            return new Some(new Tuple(state, stripped));
+    return value(state, depth);
+}
+/* private static */ foldInvocationStart(state, DivideState, c, char);
+DivideState;
+{
+    let appended = state.append(c);
+    /* if (c == '(')  */ {
+        let enter = appended.enter();
+        /* if (enter.isShallow())  */ {
+            return enter.advance();
         }
-        return new None();
+        return enter;
     }
-    /* private static */ operation(state, value, depth) {
-        return first(value, "+", (s, s2) => {
-            let leftTuple = value(state, s, depth);
-            let rightTuple = value(leftTuple.left, depth);
-            return new Some(new Tuple(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+    /* if (c == ')')  */ {
+        return appended.exit();
+    }
+    return appended;
+}
+/* private static */ dataAccess(state, CompileState, input, string, depth, number);
+Option < [CompileState, string] > {
+    return: last(input.strip(), ".", (parent, property) => {
+        /* if (!isSymbol(property))  */ {
+            return new None();
+        }
+        let value = value(state, parent, depth);
+        return new Some(new Tuple(value.left, value.right + "." + property));
+    })
+};
+/* private static */ stringValue(state, CompileState, input, string);
+Option < [CompileState, string] > {
+    let, stripped: , var:  = input.strip()
+};
+/* if (stripped.startsWith("\"") && stripped.endsWith("\""))  */ {
+    return new Some(new Tuple(state, stripped));
+}
+return new None();
+/* private static */ symbolValue(state, CompileState, value, string);
+Option < [CompileState, string] > {
+    let, stripped: , var:  = value.strip()
+};
+/* if (isSymbol(stripped))  */ {
+    return new Some(new Tuple(state, stripped));
+}
+return new None();
+/* private static */ operation(state, CompileState, value, string, depth, number);
+Option < [CompileState, string] > {
+    return: first(value, "+", (s, s2) => {
+        let leftTuple = value(state, s, depth);
+        let rightTuple = value(leftTuple.left, depth);
+        return new Some(new Tuple(rightTuple.left, leftTuple.right + " + " + rightTuple.right));
+    })
+};
+/* private static */ compileValues(state, CompileState, params, string, mapper, (CompileState, string) => [CompileState, string]);
+[CompileState, string];
+{
+    let parsed = parseValues(state, params, mapper);
+    let generated = generateValues(parsed.right);
+    return new Tuple(parsed.left, generated);
+}
+/* private static */ generateValues(elements, (List));
+string;
+{
+    return generateAll(Main.mergeValues, elements);
+}
+/* private static */ parseValues(state, CompileState, input, string, mapper, (CompileState, string) => [CompileState, string]);
+[CompileState, (List)];
+{
+    return parseAll(state, input, Main.foldValueChar, mapper);
+}
+/* private static */ compileParameter(state, CompileState, input, string);
+[CompileState, string];
+{
+    /* if (input.isBlank())  */ {
+        return new Tuple(state, "");
+    }
+    return compileDefinition(state, input);
+}
+/* private static */ compileDefinition(state, CompileState, input, string);
+[CompileState, string];
+{
+    return parseDefinition(state, input).map((Tuple < CompileState, Definition > tuple), new Tuple(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
+}
+/* private static */ mergeValues(cache, StringBuilder, element, string);
+StringBuilder;
+{
+    /* if (cache.isEmpty())  */ {
+        return cache.append(element);
+    }
+    return cache.append(", ").append(element);
+}
+/* private static */ createIndent(depth, number);
+string;
+{
+    return "\n" + "\t".repeat(depth);
+}
+/* private static */ compileDefinitionStatement(input, string, depth, number, state, CompileState);
+Option < [CompileState, string] > {
+    return: suffix(input.strip(), ";", (withoutEnd) => {
+        return parseDefinition(state, withoutEnd).map((result) => {
+            let generated = createIndent(depth) + result.right.generate() + ";";
+            return new Tuple(result.left, generated);
         });
-    }
-    /* private static */ compileValues(state, params, mapper) {
-        let parsed = parseValues(state, params, mapper);
-        let generated = generateValues(parsed.right);
-        return new Tuple(parsed.left, generated);
-    }
-    /* private static */ generateValues(elements) {
-        return generateAll(elements);
-    }
-    /* private static */ parseValues(state, input, mapper) {
-        return parseAll(state, input, mapper);
-    }
-    /* private static */ compileParameter(state, input) {
-        /* if (input.isBlank())  */ {
-            return new Tuple(state, "");
-        }
-        return compileDefinition(state, input);
-    }
-    /* private static */ compileDefinition(state, input) {
-        return parseDefinition(state, input).map((Tuple < CompileState, Definition > tuple), new Tuple(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
-    }
-    /* private static */ mergeValues(cache, element) {
-        /* if (cache.isEmpty())  */ {
-            return cache.append(element);
-        }
-        return cache.append(", ").append(element);
-    }
-    /* private static */ createIndent(depth) {
-        return "\n" + "\t".repeat(depth);
-    }
-    /* private static */ compileDefinitionStatement(input, depth, state) {
-        return suffix(input.strip(), ";", (withoutEnd) => {
-            return parseDefinition(state, withoutEnd).map((result) => {
-                let generated = createIndent(depth) + result.right.generate() + ";";
-                return new Tuple(result.left, generated);
-            });
-        });
-    }
-    /* private static */ parseDefinition(state, input) {
-        return last(input.strip(), " ", (beforeName, name) => {
-            return split(() => toLast(beforeName, " "), (beforeType, type) => {
-                return suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
-                    return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
-                        let typeParams = parseValues(state, typeParamsString, (state1, s) => new Tuple(s.strip()));
-                        return assembleDefinition(typeParams.left, new Some(beforeTypeParams), name, typeParams.right, type);
-                    });
-                }).or(() => {
-                    return assembleDefinition(state, new Some(beforeType), name, Lists.empty(), type);
+    })
+};
+/* private static */ parseDefinition(state, CompileState, input, string);
+Option < [CompileState, Definition] > {
+    return: last(input.strip(), " ", (beforeName, name) => {
+        return split(() => toLast(beforeName, " ", Main.foldTypeSeparator), (beforeType, type) => {
+            return suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
+                return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
+                    let typeParams = parseValues(state, typeParamsString, (state1, s) => new Tuple(s.strip()));
+                    return assembleDefinition(typeParams.left, new Some(beforeTypeParams), name, typeParams.right, type);
                 });
             }).or(() => {
-                return assembleDefinition(state, new None(), name, Lists.empty(), beforeName);
+                return assembleDefinition(state, new Some(beforeType), name, Lists.empty(), type);
             });
+        }).or(() => {
+            return assembleDefinition(state, new None(), name, Lists.empty(), beforeName);
         });
+    })
+};
+/* private static */ toLast(input, string, separator, string, folder, (DivideState, Character) => DivideState);
+Option < [string, string] > {
+    let, divisions: , var:  = divideAll(input, folder),
+    return: divisions.removeLast().map((removed) => {
+        let left = removed.left.iterate().collect(new Joiner(separator)).orElse("");
+        let right = removed.right;
+        return new Tuple(left, right);
+    })
+};
+/* private static */ foldTypeSeparator(state, DivideState, c, Character);
+DivideState;
+{
+    /* if (c == ' ' && state.isLevel())  */ {
+        return state.advance();
     }
-    /* private static */ toLast(input, separator, folder) {
-        let divisions = divideAll(input, folder);
-        return divisions.removeLast().map((removed) => {
-            let left = removed.left.iterate().collect(new Joiner(separator)).orElse("");
-            let right = removed.right;
-            return new Tuple(left, right);
-        });
+    let appended = state.append(c);
+    /* if (c == '<')  */ {
+        return appended.enter();
     }
-    /* private static */ foldTypeSeparator(state, c) {
-        /* if (c == ' ' && state.isLevel())  */ {
-            return state.advance();
-        }
-        let appended = state.append(c);
-        /* if (c == '<')  */ {
-            return appended.enter();
-        }
-        /* if (c == '>')  */ {
-            return appended.exit();
-        }
-        return appended;
+    /* if (c == '>')  */ {
+        return appended.exit();
     }
-    /* private static */ assembleDefinition(state, beforeTypeParams, name, typeParams, type) {
-        let type1 = typeOrPlaceholder(state, type);
-        let node = new Definition(beforeTypeParams, right, name.strip(), typeParams);
-        return new Some(new Tuple(left, node));
+    return appended;
+}
+/* private static */ assembleDefinition(state, CompileState, beforeTypeParams, (Option), name, string, typeParams, (List), type, string);
+Option < [CompileState, Definition] > {
+    let, type1: , var:  = typeOrPlaceholder(state, type),
+    let, node: , var:  = new Definition(beforeTypeParams) /* type1 */.right, name, : .strip(), typeParams,
+    return: new Some(new Tuple() /* type1 */.left, node)
+};
+/* private static */ foldValueChar(state, DivideState, c, char);
+DivideState;
+{
+    /* if (c == ',' && state.isLevel())  */ {
+        return state.advance();
     }
-    /* private static */ foldValueChar(state, c) {
-        /* if (c == ',' && state.isLevel())  */ {
-            return state.advance();
+    let appended = state.append(c);
+    /* if (c == '-')  */ {
+        let peeked = appended.peek();
+        /* if (peeked == '>')  */ {
+            return appended.popAndAppendToOption().orElse(appended);
         }
-        let appended = state.append(c);
-        /* if (c == '-')  */ {
-            let peeked = appended.peek();
-            /* if (peeked == '>')  */ {
-                return appended.popAndAppendToOption().orElse(appended);
+        /* else  */ {
+            return appended;
+        }
+    }
+    /* if (c == '<' || c == '(' || c == ' */ {
+        /* ') {
+        return appended.enter() */ ;
+    }
+    /* if (c == '>' || c == ')' || c == '}')  */ {
+        return appended.exit();
+    }
+    return appended;
+}
+/* private static */ typeOrPlaceholder(state, CompileState, input, string);
+[CompileState, string];
+{
+    return type(state, input).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
+}
+/* private static */ type(state, CompileState, input, string);
+Option < [CompileState, string] > {
+    let, stripped: , var:  = input.strip()
+};
+/* if (stripped.equals("int"))  */ {
+    return new Some(new Tuple(state, "number"));
+}
+/* if (stripped.equals("String"))  */ {
+    return new Some(new Tuple(state, "string"));
+}
+/* if (isSymbol(stripped))  */ {
+    return new Some(new Tuple(state, stripped));
+}
+return template(state, input).or(() => varArgs(state, input));
+/* private static */ varArgs(state, CompileState, input, string);
+Option < [CompileState, string] > {
+    return: suffix(input, "...", (s) => {
+        let inner = typeOrPlaceholder(state, s);
+        return new Some(new Tuple(inner.left, inner.right + "[]"));
+    })
+};
+/* private static */ template(state, CompileState, input, string);
+Option < [CompileState, string] > {
+    return: suffix(input.strip(), ">", (withoutEnd) => {
+        return first(withoutEnd, "<", (base, argumentsString) => {
+            let strippedBase = base.strip();
+            let argumentsTuple = parseValues(state, argumentsString, Main.typeOrPlaceholder);
+            let argumentsState = argumentsTuple.left;
+            let arguments = argumentsTuple.right;
+            /* if (base.equals("BiFunction"))  */ {
+                return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
             }
-            /* else  */ {
-                return appended;
+            /* if (base.equals("Function"))  */ {
+                return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
             }
-        }
-        /* if (c == '<' || c == '(' || c == ' */ {
-            /* ') {
-            return appended.enter() */ ;
-        }
-        /* if (c == '>' || c == ')' || c == '}')  */ {
-            return appended.exit();
-        }
-        return appended;
-    }
-    /* private static */ typeOrPlaceholder(state, input) {
-        return type(state, input).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
-    }
-    /* private static */ type(state, input) {
-        let stripped = input.strip();
-        /* if (stripped.equals("int"))  */ {
-            return new Some(new Tuple(state, "number"));
-        }
-        /* if (stripped.equals("String"))  */ {
-            return new Some(new Tuple(state, "string"));
-        }
-        /* if (isSymbol(stripped))  */ {
-            return new Some(new Tuple(state, stripped));
-        }
-        return template(state, input).or(() => varArgs(state, input));
-    }
-    /* private static */ varArgs(state, input) {
-        return suffix(input, "...", (s) => {
-            let inner = typeOrPlaceholder(state, s);
-            return new Some(new Tuple(inner.left, inner.right + "[]"));
+            /* if (base.equals("Predicate"))  */ {
+                return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
+            }
+            /* if (base.equals("Supplier"))  */ {
+                return new Some(new Tuple(argumentsState, generate(Lists.empty(), arguments.get(0))));
+            }
+            /* if (base.equals("Tuple") && arguments.size() >= 2)  */ {
+                return new Some(new Tuple(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
+            }
+            return new Some(new Tuple(argumentsState, strippedBase + "<" + generateValues(arguments) + ">"));
         });
-    }
-    /* private static */ template(state, input) {
-        return suffix(input.strip(), ">", (withoutEnd) => {
-            return first(withoutEnd, "<", (base, argumentsString) => {
-                let strippedBase = base.strip();
-                let argumentsTuple = parseValues(state, argumentsString);
-                let argumentsState = argumentsTuple.left;
-                let arguments = argumentsTuple.right;
-                /* if (base.equals("BiFunction"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2))));
-                }
-                /* if (base.equals("Function"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), arguments.get(1))));
-                }
-                /* if (base.equals("Predicate"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.of(arguments.get(0)), "boolean")));
-                }
-                /* if (base.equals("Supplier"))  */ {
-                    return new Some(new Tuple(argumentsState, generate(Lists.empty(), arguments.get(0))));
-                }
-                /* if (base.equals("Tuple") && arguments.size() >= 2)  */ {
-                    return new Some(new Tuple(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
-                }
-                return new Some(new Tuple(argumentsState, strippedBase + "<" + generateValues(arguments) + ">"));
-            });
-        });
-    }
-    /* private static */ generate(arguments, returns) {
-        let joined = arguments.iterate().collect(new Joiner(", ")).orElse("");
-        return "(" + joined + ") => " + returns;
-    }
-    /* private static  */ last(input, infix, mapper) {
-        return infix(input, infix, mapper);
-    }
-    /* private static */ findLast(input, infix) {
-        let index = input.lastIndexOf(infix);
-        /* if (index == -1)  */ {
-            return new None();
-        }
-        return new Some(index);
-    }
-    /* private static  */ first(input, infix, mapper) {
-        return infix(input, infix, mapper);
-    }
-    /* private static  */ infix(input, infix, locator, mapper) {
-        return split(() => locator.apply(input, infix).map((index) => {
-            let left = input.substring(0, index);
-            let right = input.substring(index + infix.length());
-            return new Tuple(left, right);
-        }), mapper);
-    }
-    /* private static  */ split(splitter, mapper) {
-        return splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
-    }
-    /* private static */ findFirst(input, infix) {
-        let index = input.indexOf(infix);
-        /* if (index == -1)  */ {
-            return new None();
-        }
-        return new Some(index);
-    }
-    /* private static */ generatePlaceholder(input) {
-        let replaced = input.replace("/*", "content-start").replace("*/", "content-end");
-        return "/* " + replaced + " */";
-    }
+    })
+};
+/* private static */ generate(arguments, (List), returns, string);
+string;
+{
+    let joined = arguments.iterate().collect(new Joiner(", ")).orElse("");
+    return "(" + joined + ") => " + returns;
+}
+/* private static  */ last(input, string, infix, string, mapper, (string, string) => Option);
+Option < T > {
+    return: infix(input, infix, Main.findLast, mapper)
+};
+/* private static */ findLast(input, string, infix, string);
+Option < Integer > {
+    let, index: , var:  = input.lastIndexOf(infix)
+};
+/* if (index == -1)  */ {
+    return new None();
+}
+return new Some(index);
+/* private static  */ first(input, string, infix, string, mapper, (string, string) => Option);
+Option < T > {
+    return: infix(input, infix, Main.findFirst, mapper)
+};
+/* private static  */ infix(input, string, infix, string, locator, (string, string) => Option, mapper, (string, string) => Option);
+Option < T > {
+    return: split(() => locator.apply(input, infix).map((index) => {
+        let left = input.substring(0, index);
+        let right = input.substring(index + infix.length());
+        return new Tuple(left, right);
+    }), mapper)
+};
+/* private static  */ split(splitter, () => Option, mapper, (string, string) => Option);
+Option < T > {
+    return: splitter.get().flatMap((tuple) => mapper.apply(tuple.left, tuple.right))
+};
+/* private static */ findFirst(input, string, infix, string);
+Option < Integer > {
+    let, index: , var:  = input.indexOf(infix)
+};
+/* if (index == -1)  */ {
+    return new None();
+}
+return new Some(index);
+/* private static */ generatePlaceholder(input, string);
+string;
+{
+    let replaced = input.replace("/*", "content-start").replace("*/", "content-end");
+    return "/* " + replaced + " */";
 }
 /*  */ 

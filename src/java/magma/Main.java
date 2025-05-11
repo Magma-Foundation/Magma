@@ -719,7 +719,15 @@ public class Main {
                 .or(() -> operation(state, input, depth))
                 .or(() -> digits(state, input))
                 .or(() -> not(state, input, depth))
+                .or(() -> methodReference(state, input, depth))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> methodReference(CompileState state, String input, int depth) {
+        return last(input, "::", (s, s2) -> {
+            var value = value(state, s, depth);
+            return new Some<>(new Tuple<>(value.left, value.right + "." + s2));
+        });
     }
 
     private static Option<Tuple<CompileState, String>> not(CompileState state, String input, int depth) {
