@@ -718,7 +718,19 @@ public class Main {
                 .or(() -> invocation(state, input, depth))
                 .or(() -> operation(state, input, depth))
                 .or(() -> digits(state, input))
+                .or(() -> not(state, input, depth))
                 .orElseGet(() -> new Tuple<CompileState, String>(state, generatePlaceholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, String>> not(CompileState state, String input, int depth) {
+        var stripped = input.strip();
+        if (stripped.startsWith("!")) {
+            var slice = stripped.substring(1);
+            var value = value(state, slice, depth);
+            return new Some<>(new Tuple<>(value.left, "!" + value.right));
+        }
+
+        return new None<>();
     }
 
     private static Option<Tuple<CompileState, String>> lambda(CompileState state, String input, int depth) {

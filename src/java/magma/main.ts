@@ -277,7 +277,7 @@
 		}
 		/* public String generateWithParams(String params)  */{
 			let joined : var = this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
-			let before : var = this.maybeBefore.filter((value) => /* !value */.isEmpty()).map(/* Main::generatePlaceholder */).map((inner) => inner + " ").orElse("");
+			let before : var = this.maybeBefore.filter((value) => !value.isEmpty()).map(/* Main::generatePlaceholder */).map((inner) => inner + " ").orElse("");
 			return before + this.name + joined + params + " : " + this.type;
 		}
 	}
@@ -536,7 +536,16 @@
 		});
 	}
 	/* private static */ value(state : CompileState, input : string, depth : number) : [CompileState, string] {
-		return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth)).or(() => digits(state, input)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
+		return lambda(state, input, depth).or(() => stringValue(state, input)).or(() => dataAccess(state, input, depth)).or(() => symbolValue(state, input)).or(() => invocation(state, input, depth)).or(() => operation(state, input, depth)).or(() => digits(state, input)).or(() => not(state, input, depth)).orElseGet(() => new [CompileState, string](state, generatePlaceholder(input)));
+	}
+	/* private static */ not(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
+		let stripped : var = input.strip();
+		/* if (stripped.startsWith("!"))  */{
+			let slice : var = stripped.substring(1);
+			let value : var = value(state, slice, depth);
+			return new Some<>(new Tuple<>(value.left, "!" + value.right));
+		}
+		return new None<>();
 	}
 	/* private static */ lambda(state : CompileState, input : string, depth : number) : Option<[CompileState, string]> {
 		return first(input, "->", (beforeArrow,  valueString) => {
