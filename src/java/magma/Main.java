@@ -672,7 +672,7 @@ public class Main {
     private static Option<Tuple<CompileState, String>> dataAccess(CompileState state, String input) {
         return last(input.strip(), ".", (parent, property) -> {
             var value = value(state, parent);
-            if (isSymbol(property)) {
+            if (!isSymbol(property)) {
                 return new None<>();
             }
             return new Some<>(new Tuple<>(value.left, value.right + "." + property));
