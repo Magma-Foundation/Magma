@@ -661,7 +661,7 @@
         return compileDefinition(state, input);
     }
     /* private static */ compileDefinition(state, input) {
-        return parseDefinition(state, input).map((Tuple < CompileState, Definition > tuple), new Tuple(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
+        return parseDefinition(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate())).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
     }
     /* private static */ mergeValues(cache, element) {
         /* if (cache.isEmpty())  */ {

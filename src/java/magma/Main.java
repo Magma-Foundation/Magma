@@ -880,7 +880,7 @@ public class Main {
         return first(value, infix, (s, s2) -> {
             var leftTuple = value(state, s, depth);
             var rightTuple = value(leftTuple.left, s2, depth);
-            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " " + infix + " "  + rightTuple.right));
+            return new Some<>(new Tuple<>(rightTuple.left, leftTuple.right + " " + infix + " " + rightTuple.right));
         });
     }
 
@@ -908,7 +908,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileDefinition(CompileState state, String input) {
         return parseDefinition(state, input)
-                .map((Tuple<CompileState, Definition> tuple) -> new Tuple<>(tuple.left, tuple.right.generate()))
+                .map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
