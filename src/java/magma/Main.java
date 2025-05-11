@@ -432,28 +432,44 @@ public class Main {
         }
     }
 
-    private record Definition(Option<String> maybeBefore, String type, String name, List<String> typeParams) {
+    private record Definition(
+            Option<String> maybeBefore,
+            Type type,
+            String name,
+            List<String> typeParams
+    ) {
         private String generate() {
             return this.generateWithParams("");
         }
 
         public String generateWithParams(String params) {
-            var joined = this.typeParams.iterate()
-                    .collect(new Joiner())
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
+            var joined = this.joinTypeParams();
+            var before = this.joinBefore();
+            var typeString = this.generateType();
+            return before + this.name + joined + params + typeString;
+        }
 
-            var before = this.maybeBefore
+        private String generateType() {
+            if (this.type.equals(Primitive.Var)) {
+                return "";
+            }
+
+            return " : " + this.type.generate();
+        }
+
+        private String joinBefore() {
+            return this.maybeBefore
                     .filter(value -> !value.isEmpty())
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
                     .orElse("");
+        }
 
-            var s = before + this.name + joined + params;
-            if (this.type.equals("var")) {
-                return s;
-            }
-            return s + " : " + this.type;
+        private String joinTypeParams() {
+            return this.typeParams.iterate()
+                    .collect(new Joiner())
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
         }
     }
 
@@ -1219,9 +1235,10 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> beforeTypeParams, String name, List<String> typeParams, String type) {
-        var type1 = typeOrPlaceholder(state, type);
-        var node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams);
-        return new Some<>(new Tuple<>(type1.left, node));
+        return parseType(state, type).map(type1 -> {
+            var node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams);
+            return new Tuple<>(type1.left, node);
+        });
     }
 
     private static DivideState foldValueChar(DivideState state, char c) {
@@ -1254,10 +1271,10 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileType(CompileState state, String input) {
-        return type(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+        return parseType(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Option<Tuple<CompileState, Type>> type(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> parseType(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.equals("int") || stripped.equals("Integer")) {
             return new Some<>(new Tuple<>(state, Primitive.Int));
@@ -1265,6 +1282,10 @@ public class Main {
 
         if (stripped.equals("String")) {
             return new Some<>(new Tuple<>(state, Primitive.String));
+        }
+
+        if (stripped.equals("var")) {
+            return new Some<>(new Tuple<>(state, Primitive.Var));
         }
 
         if (isSymbol(stripped)) {
@@ -1277,7 +1298,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Type>> varArgs(CompileState state, String input) {
         return suffix(input, "...", s -> {
-            return type(state, s).map(inner -> {
+            return parseType(state, s).map(inner -> {
                 var newState = inner.left;
                 var child = inner.right;
                 return new Tuple<>(newState, new ArrayType(child));
@@ -1339,7 +1360,7 @@ public class Main {
         if (input.isBlank()) {
             return new Some<>(new Tuple<>(state, new Whitespace()));
         }
-        return type(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right));
+        return parseType(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right));
     }
 
     private static <T> Option<T> last(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
@@ -1394,7 +1415,8 @@ public class Main {
     private enum Primitive implements Type {
         Int("number"),
         String("string"),
-        Boolean("boolean");
+        Boolean("boolean"),
+        Var("var");
 
         private final String value;
 

@@ -379,23 +379,24 @@
         /* private String generate()  */ {
             return this.generateWithParams("");
         }
-        /* public String generateWithParams(String params) {{
-            var joined = this.typeParams.iterate()
-                    .collect(new Joiner())
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
-
-            var before = this.maybeBefore
-                    .filter(value -> !value.isEmpty())
-                    .map(Main::generatePlaceholder)
-                    .map(inner -> inner + " ")
-                    .orElse("");
-
-            var s = before + this.name + joined + params;
-            if (this.type.equals("var"))  */ {
-            return s;
+        /* public String generateWithParams(String params)  */ {
+            let joined = this.joinTypeParams();
+            let before = this.joinBefore();
+            let typeString = this.generateType();
+            return before + this.name + joined + params + typeString;
+        }
+        /* private String generateType() {{
+            if (this.type.equals(Primitive.Var))  */ {
+            return "";
             /* }
-            return s + " : " + this.type */ ;
+
+            return " : " + this.type.generate() */ ;
+        }
+        /* private String joinBefore()  */ {
+            return this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
+        }
+        /* private String joinTypeParams()  */ {
+            return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
         }
     }
     /* public static */ main() {
@@ -905,9 +906,10 @@
         return appended;
     }
     /* private static */ assembleDefinition(state, beforeTypeParams, name, typeParams, type) {
-        let type1 = typeOrPlaceholder(state, type);
-        let node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams);
-        return new Some(new Tuple(type1.left, node));
+        return parseType(state, type).map((type1) => {
+            let node = new Definition(beforeTypeParams, type1.right, name.strip(), typeParams);
+            return new Tuple(type1.left, node);
+        });
     }
     /* private static */ foldValueChar(state, c) {
         /* if (c == ',' && state.isLevel())  */ {
@@ -934,15 +936,18 @@
         return compileType(state, input).orElseGet(() => new Tuple(state, generatePlaceholder(input)));
     }
     /* private static */ compileType(state, input) {
-        return type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate()));
+        return parseType(state, input).map((tuple) => new Tuple(tuple.left, tuple.right.generate()));
     }
-    /* private static */ type(state, input) {
+    /* private static */ parseType(state, input) {
         let stripped = input.strip();
         /* if (stripped.equals("int") || stripped.equals("Integer"))  */ {
             return new Some(new Tuple(state, Primitive.Int));
         }
         /* if (stripped.equals("String"))  */ {
             return new Some(new Tuple(state, Primitive.String));
+        }
+        /* if (stripped.equals("var"))  */ {
+            return new Some(new Tuple(state, Primitive.Var));
         }
         /* if (isSymbol(stripped))  */ {
             return new Some(new Tuple(state, new Symbol(stripped)));
@@ -951,7 +956,7 @@
     }
     /* private static */ varArgs(state, input) {
         return suffix(input, "...", (s) => {
-            return type(state, s).map((inner) => {
+            return parseType(state, s).map((inner) => {
                 let newState = inner.left;
                 let child = inner.right;
                 return new Tuple(newState, new ArrayType(child));
@@ -999,7 +1004,7 @@
         /* if (input.isBlank())  */ {
             return new Some(new Tuple(state, new Whitespace()));
         }
-        return type(state, input).map((tuple) => new Tuple(tuple.left, tuple.right));
+        return parseType(state, input).map((tuple) => new Tuple(tuple.left, tuple.right));
     }
     /* private static  */ last(input, infix, mapper) {
         return infix(input, infix, Main.findLast, mapper);
@@ -1039,7 +1044,8 @@
     private enum Primitive implements Type {
         Int("number"),
         String("string"),
-        Boolean("boolean");
+        Boolean("boolean"),
+        Var("var");
 
         private final String value;
 
