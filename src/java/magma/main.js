@@ -846,7 +846,14 @@
                 /* if (base.equals("Tuple") && arguments.size() >= 2)  */ {
                     return new Some(new Tuple(argumentsState, "[" + arguments.get(0) + ", " + arguments.get(1) + "]"));
                 }
-                return new Some(new Tuple(argumentsState, strippedBase + "<" + generateValues(arguments) + ">"));
+                /* String s */ ;
+                /* if (arguments.isEmpty())  */ {
+                    let /* s  */ = "";
+                }
+                /* else  */ {
+                    let /* s  */ = "<" + generateValues(arguments) + ">";
+                }
+                return new Some(new Tuple(argumentsState, strippedBase + s));
             });
         });
     }
