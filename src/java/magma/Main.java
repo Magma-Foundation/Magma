@@ -234,18 +234,22 @@ public class Main {
     }
 
     private static class DivideState {
+        private final String input;
+        private final int index;
+        private int depth;
         private List<String> segments;
         private StringBuilder buffer;
-        private int depth;
 
-        public DivideState(List<String> segments, StringBuilder buffer, int depth) {
+        public DivideState(String input, int index, List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+            this.input = input;
+            this.index = index;
         }
 
-        public DivideState() {
-            this(Lists.empty(), new StringBuilder(), 0);
+        public DivideState(String input) {
+            this(input, 0, Lists.empty(), new StringBuilder(), 0);
         }
 
         private DivideState advance() {
@@ -275,6 +279,23 @@ public class Main {
 
         public boolean isShallow() {
             return this.depth == 1;
+        }
+
+        public Option<Tuple<Character, DivideState>> pop() {
+            if (this.index < this.input.length()) {
+                var c = this.input.charAt(this.index);
+                return new Some<>(new Tuple<>(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
+            }
+
+            return new None<>();
+        }
+
+        public Option<Tuple<Character, DivideState>> popAndAppendToTuple() {
+            return this.pop().map(tuple -> new Tuple<>(tuple.left, tuple.right.append(tuple.left)));
+        }
+
+        public Option<DivideState> popAndAppendToOption() {
+            return popAndAppendToTuple().map(Tuple::right);
         }
     }
 
@@ -397,13 +418,34 @@ public class Main {
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState();
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            current = folder.apply(current, c);
+        var current = new DivideState(input);
+        while (true) {
+            var maybePopped = current.pop().map(tuple -> {
+                return divideSingleQuotes(tuple)
+                        .orElseGet(() -> folder.apply(tuple.right, tuple.left));
+            });
+
+            if (maybePopped.isPresent()) {
+                current = maybePopped.orElse(current);
+            }
+            else {
+                break;
+            }
         }
 
         return current.advance().segments;
+    }
+
+    private static Option<DivideState> divideSingleQuotes(Tuple<Character, DivideState> tuple) {
+        if (tuple.left == '\'') {
+            var appended = tuple.right.append(tuple.left);
+            return appended.popAndAppendToTuple()
+                    .map(escaped -> escaped.left == '\\' ? escaped.right.popAndAppendToOption().orElse(escaped.right) : escaped.right)
+                    .flatMap(DivideState::popAndAppendToOption);
+        }
+
+        return new None<>();
+
     }
 
     private static DivideState foldStatementChar(DivideState state, char c) {
