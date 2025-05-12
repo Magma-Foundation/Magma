@@ -1111,7 +1111,7 @@ public class Main {
         }
     }
 
-    private static final boolean isDebug = false;
+    private static final boolean isDebug = true;
 
     public static void main() {
         try {
@@ -1604,25 +1604,37 @@ public class Main {
             return new Tuple2Impl<>(tuple.left(), "return " + tuple.right());
         }
 
+        return compileAssignment(state, depth, stripped).orElseGet(() -> {
+            return new Tuple2Impl<>(state, generatePlaceholder(stripped));
+        });
+    }
+
+    private static Option<Tuple2Impl<CompileState, String>> compileAssignment(CompileState state, int depth, String stripped) {
         return first(stripped, "=", (beforeEquals, valueString) -> {
-            var sourceTuple = compileValue(state, valueString, depth);
+            var sourceTuple = parseValue(state, valueString, depth);
             var sourceState = sourceTuple.left();
-            var sourceString = sourceTuple.right();
+            var source = sourceTuple.right();
+            var generatedSource = source.generate();
 
             return parseDefinition(sourceState, beforeEquals).flatMap(definitionTuple -> {
                 var definitionState = definitionTuple.left();
-                var definition = definitionTuple.right();
+                var definition = definitionTuple.right().mapType(type -> {
+                    if (type.equals(Primitive.Unknown)) {
+                        return source.type();
+                    }
+                    else {
+                        return type;
+                    }
+                });
 
-                return new Some<>(new Tuple2Impl<>(definitionState.withDefinition(definition), "let " + definition.generate() + " = " + sourceString));
+                return new Some<>(new Tuple2Impl<>(definitionState.withDefinition(definition), "let " + definition.generate() + " = " + generatedSource));
             }).or(() -> {
                 var destinationTuple = compileValue(sourceState, beforeEquals, depth);
                 var destinationState = destinationTuple.left();
                 var destinationString = destinationTuple.right();
 
-                return new Some<>(new Tuple2Impl<>(destinationState, destinationString + " = " + sourceString));
+                return new Some<>(new Tuple2Impl<>(destinationState, destinationString + " = " + generatedSource));
             });
-        }).orElseGet(() -> {
-            return new Tuple2Impl<>(state, generatePlaceholder(stripped));
         });
     }
 
