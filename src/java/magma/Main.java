@@ -1741,7 +1741,7 @@ public class Main {
 
         var parameters = retainDefinitions(rawParameters);
         var prototype = new MethodPrototype(depth, header, parameters, rawContent.strip());
-        return new Some<>(new Tuple2Impl<>(parametersTuple.left(), prototype));
+        return new Some<>(new Tuple2Impl<>(parametersTuple.left().define(prototype.createDefinition()), prototype));
     }
 
     private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(CompileState state, MethodPrototype prototype) {
