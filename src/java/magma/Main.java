@@ -823,7 +823,7 @@ public class Main {
     private record DataAccess(Value parent, String property, Type type) implements Value {
         @Override
         public String generate() {
-            return this.parent.generate() + "." + this.property + generatePlaceholder(": " + this.type.generate());
+            return this.parent.generate() + "." + this.property + createDebugString(this.type);
         }
 
         @Override
@@ -900,7 +900,7 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.caller.generate() + "(" + joined + ")" + generatePlaceholder(": " + this.type.generate());
+            return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
         }
     }
 
@@ -919,7 +919,7 @@ public class Main {
     private record SymbolValue(String stripped, Type type) implements Value {
         @Override
         public String generate() {
-            return this.stripped + generatePlaceholder(": " + this.type.generate());
+            return this.stripped + createDebugString(this.type);
         }
     }
 
@@ -935,6 +935,8 @@ public class Main {
             return current;
         }
     }
+
+    private static final boolean isDebug = false;
 
     public static void main() {
         try {
@@ -1942,6 +1944,10 @@ public class Main {
                 .replace("*/", "content-end");
 
         return "/* " + replaced + " */";
+    }
+
+    private static String createDebugString(Type type) {
+        return Main.isDebug ? generatePlaceholder(": " + type.generate()) : "";
     }
 
     private enum Primitive implements Type {
