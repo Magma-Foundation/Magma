@@ -179,6 +179,9 @@ public class Main {
         }
     }
 
+    private record Tuple2Impl<A, B>(A left, B right) implements Tuple2<A, B> {
+    }
+
     private record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -700,9 +703,6 @@ public class Main {
         public List<T> fold(List<T> current, T element) {
             return current.addLast(element);
         }
-    }
-
-    private record Tuple2Impl<A, B>(A left, B right) implements Tuple2<A, B> {
     }
 
     private static class FlatMapHead<T, R> implements Head<R> {

@@ -31,6 +31,10 @@
         return new None();
     }
 }
+/* private */ class Tuple2Impl {
+    constructor(left, right) {
+    }
+}
 /* private */ class Some {
     constructor(value) {
     }
@@ -62,7 +66,7 @@
         return false;
     }
     and(other) {
-        return other.get().map((otherValue) => new /* Tuple2Impl */ (this.value, otherValue));
+        return other.get().map((otherValue) => new Tuple2Impl(this.value, otherValue));
     }
 }
 /* private static */ class SingleHead {
@@ -160,7 +164,7 @@ Option < [(List), T] > {
 }
 let slice = this.elements.subList(0, this.elements.size() - 1);
 let last = this.elements.getLast();
-return new Some(new /* Tuple2Impl */ (new JVMList(slice), last));
+return new Some(new Tuple2Impl(new JVMList(slice), last));
 size();
 number;
 {
@@ -177,7 +181,7 @@ List < T > {
 };
 iterateWithIndices();
 Iterator < [number, T] > {
-    return: new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new /* Tuple2Impl */ (index, this.elements.get(index)))
+    return: new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple2Impl(index, this.elements.get(index)))
 };
 removeFirst();
 Option < [T, (List)] > {
@@ -188,7 +192,7 @@ Option < [T, (List)] > {
 }
 let first = this.elements.getFirst();
 let slice = this.elements.subList(1, this.elements.size());
-return new Some(new /* Tuple2Impl */ (first, new JVMList(slice)));
+return new Some(new Tuple2Impl(first, new JVMList(slice)));
 addAllLast(others, (List));
 List < T > {
     let, initial: (List) = this,
@@ -282,7 +286,7 @@ Option < T > {
     }
     resolveValue(name) {
         if (name.equals("this")) {
-            return new Some(new ObjectType(name, typeParams));
+            return new Some(new ObjectType(name, this.typeParams, this.definitions));
         }
         return this.definitions.iterate().filter((definition) => definition.name.equals(name)).next().map(Definition.type);
     }
@@ -373,7 +377,7 @@ Option < [string, DivideState] > {
 };
 {
     let c = this.input.charAt(this.index);
-    return new Some(new /* Tuple2Impl */ (c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
+    return new Some(new Tuple2Impl(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
 }
 return new None();
 popAndAppendToTuple();
@@ -381,7 +385,7 @@ Option < [string, DivideState] > {
     return: this.pop().map((tuple) => {
         let c = tuple[0]();
         let right = tuple[1]();
-        return new /* Tuple2Impl */ (c, right(c));
+        return new Tuple2Impl(c, right(c));
     })
 };
 popAndAppendToOption();
@@ -409,10 +413,6 @@ string;
     }
     fold(current, element) {
         return current.addLast(element);
-    }
-}
-/* private */ class Tuple2Impl {
-    constructor(left, right) {
     }
 }
 /* private static */ class FlatMapHead {
