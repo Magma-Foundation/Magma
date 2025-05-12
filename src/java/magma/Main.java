@@ -1167,7 +1167,7 @@ public class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> structureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
-        return suffix(beforeContent, ")", s -> {
+        return suffix(beforeContent.strip(), ")", s -> {
             return first(s, "(", (s1, s2) -> {
                 var parsed = parseParameters(state, s2);
                 return getOred(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right());
