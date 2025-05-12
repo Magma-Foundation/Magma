@@ -27,11 +27,11 @@
     }
     /* @Override
         public  */ flatMap(mapper) {
-        return mapper /* : (arg0 : T) => Option<R> */(value /* : unknown */) /* : Option<R> */;
+        return mapper /* : (arg0 : T) => R */(value /* : unknown */) /* : R */;
     }
     /* @Override
         public  */ and(other) {
-        return other /* : () => Option<R> */( /*  */) /* : Option<R> */.map /* : (arg0 : (arg0 : R) => R) => Option<R> */((otherValue) => new /* Tuple */ ( /* this */.value /* : unknown */, otherValue /* : R */) /* : content-start Tuple content-end */) /* : Option<R> */;
+        return other /* : T */.get /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((otherValue) => new /* Tuple */ ( /* this */.value /* : unknown */, otherValue /* : unknown */) /* : content-start Tuple content-end */) /* : unknown */;
     }
 }
 /* private static */ class None {
@@ -53,7 +53,7 @@
     }
     /* @Override
         public */ or(other) {
-        return other /* : () => Option<T> */( /*  */) /* : Option<T> */;
+        return other /* : T */.get /* : unknown */( /*  */) /* : unknown */;
     }
     /* @Override
         public  */ flatMap(mapper) {
@@ -93,7 +93,7 @@ return new Some(value /* : unknown */) /* : Some */;
         let current = initial /* : R */;
         /* while (true)  */ {
             let finalCurrent =  /* current */;
-            let optional = /* this */ .head /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((inner) => /* folder */ .apply /* : unknown */(inner /* : unknown */) /* : unknown */) /* : unknown */;
+            let optional = /* this */ .head /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((inner) => folder /* : (arg0 : R, arg1 : T) => R */(inner /* : unknown */) /* : R */) /* : unknown */;
             /* if (optional.isPresent())  */ {
                 let /* current  */ = /* optional */ .orElse /* : unknown */( /* null */) /* : unknown */;
             }
@@ -104,7 +104,7 @@ return new Some(value /* : unknown */) /* : Some */;
     }
     /* @Override
         public  */ map(mapper) {
-        return new HeadedIterator(() => /* this */ .head /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */( /* mapper */) /* : unknown */) /* : HeadedIterator */;
+        return new HeadedIterator(() => /* this */ .head /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(mapper /* : (arg0 : T) => R */) /* : unknown */) /* : HeadedIterator */;
     }
     /* @Override
         public  */ collect(collector) {
@@ -129,7 +129,7 @@ return new Some(value /* : unknown */) /* : Some */;
     }
     /* @Override
         public  */ zip(other) {
-        return new HeadedIterator(() => /* HeadedIterator */ .this /* : unknown */.head /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.and /* : unknown */(next /* : unknown */) /* : unknown */) /* : HeadedIterator */;
+        return new HeadedIterator(() => /* HeadedIterator */ .this /* : unknown */.head /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.and /* : unknown */(other /* : T */.next /* : unknown */) /* : unknown */) /* : HeadedIterator */;
     }
 }
 /* private static */ class RangeHead /*  */ {
@@ -144,7 +144,7 @@ Option < number > {
 /* if (this.counter < this.length)  */ {
     let value = /* this */ .counter /* : unknown */;
     /* this.counter++ */ ;
-    return new Some( /* value */) /* : Some */;
+    return new Some(value /* : T */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static final */ class JVMList {
@@ -195,7 +195,7 @@ List < T > {
 /* @Override
         public */ iterateWithIndices();
 Iterator < [number, T] > {
-    return: new HeadedIterator(new RangeHead() /* this */.elements /* : unknown */.size /* : unknown */( /*  */) /* : unknown */) /* : RangeHead */, /* : HeadedIterator */ : /* : HeadedIterator */ .map /* : unknown */((index) => new /* Tuple */ (index /* : unknown */, /* this */ .elements /* : unknown */.get /* : unknown */(index /* : unknown */) /* : unknown */) /* : content-start Tuple content-end */) /* : unknown */
+    return: new HeadedIterator(new RangeHead() /* this */.elements /* : unknown */.size /* : unknown */( /*  */) /* : unknown */) /* : RangeHead */, /* : HeadedIterator */ : /* : HeadedIterator */ .map /* : (arg0 : (arg0 : T) => R) => Option<R> */((index) => new /* Tuple */ (index /* : T */, /* this */ .elements /* : unknown */.get /* : unknown */(index /* : T */) /* : unknown */) /* : content-start Tuple content-end */) /* : Option<R> */
 };
 /* @Override
         public */ removeFirst();
@@ -211,14 +211,14 @@ return new Some(new [T, (List)](new JVMList( /* slice */) /* : JVMList */) /* : 
         public */ addAllLast(others, (List));
 List < T > {
     let, initial: (List) =  /* this */,
-    return: others /* : List<T> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.fold /* : (arg0 : C, arg1 : T) => C */( /* initial */) /* List */.addLast /* : unknown */
+    return: others /* : List<T> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.fold /* : (arg0 : C, arg1 : T) => C */(initial /* : R */) /* List */.addLast /* : unknown */
 };
 /* @Override
         public */ get(index, number);
 Option < T > {
 /* if (index < this.elements.size())  */ };
 /* if (index < this.elements.size())  */ {
-    return new Some(elements /* : unknown */.get /* : unknown */(index /* : number */) /* : unknown */) /* : Some */;
+    return new Some(elements /* : unknown */.get /* : unknown */(index /* : T */) /* : unknown */) /* : Some */;
 }
 /* else  */ {
     return new None( /*  */) /* : None */;
@@ -228,7 +228,7 @@ Option < T > {
         return new JVMList( /*  */) /* : JVMList */;
     }
     /* public static  */ of(elements) {
-        return new JVMList(new /* ArrayList */ ( /* Arrays */.asList /* : unknown */(elements /* : T[] */) /* : unknown */) /* : content-start ArrayList content-end */) /* : JVMList */;
+        return new JVMList(new /* ArrayList */ ( /* Arrays */.asList /* : unknown */(elements /* : content-start java.util.List content-end<T> */) /* : unknown */) /* : content-start ArrayList content-end */) /* : JVMList */;
     }
 }
 /* private */ class ObjectType /*  */ {
@@ -239,11 +239,11 @@ Option < T > {
         return /* this */ .name /* : unknown */;
     }
 }
-return new ObjectType(name /* : unknown */, typeParams /* : unknown */, definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((definition) => definition /* : unknown */.mapType /* : unknown */((type) => type /* : unknown */.replace /* : unknown */( /* mapping */) /* : unknown */) /* : unknown */) /* : unknown */.collect /* : unknown */(new /* ListCollector */ ( /*  */) /* : content-start ListCollector content-end */) /* : unknown */) /* : ObjectType */;
+return new ObjectType(name /* : unknown */, typeParams /* : unknown */, definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((definition) => definition /* : unknown */.mapType /* : unknown */((type) => type /* : unknown */.replace /* : unknown */(mapping /* : content-start Map content-end<string, content-start Type content-end> */) /* : unknown */) /* : unknown */) /* : unknown */.collect /* : unknown */(new /* ListCollector */ ( /*  */) /* : content-start ListCollector content-end */) /* : unknown */) /* : ObjectType */;
 /* @Override
     public */ find(name, string);
 Option <  /* Type */ > {
-    return /* this */: /* this */ .definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((definition) => definition /* : unknown */.name /* : unknown */.equals /* : unknown */( /* name */) /* : unknown */) /* : unknown */.map /* : unknown */() /* Definition */.type /* : unknown */, /* : unknown */ : /* : unknown */ .next /* : unknown */( /*  */) /* : unknown */
+    return /* this */: /* this */ .definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((definition) => definition /* : unknown */.name /* : unknown */.equals /* : unknown */(name /* : string */) /* : unknown */) /* : unknown */.map /* : unknown */() /* Definition */.type /* : unknown */, /* : unknown */ : /* : unknown */ .next /* : unknown */( /*  */) /* : unknown */
 };
 /* private */ class TypeParam /*  */ {
     constructor(value) {
@@ -263,7 +263,7 @@ Option <  /* Type */ > {
         this.let /* this.buffer  */ = buffer /* : content-start StringBuilder content-end */;
         this.let /* this.depth  */ = depth /* : number */;
         this.let /* this.input  */ = input /* : string */;
-        this.let /* this.index  */ = index /* : number */;
+        this.let /* this.index  */ = index /* : T */;
     }
 }
 DivideState(input, string);
@@ -308,7 +308,7 @@ Option < [/* Character */ , DivideState] > {
 /* if (this.index < this.input.length())  */ };
 /* if (this.index < this.input.length())  */ {
     let c = /* this */ .input /* : unknown */.charAt /* : unknown */(index /* : unknown */) /* : unknown */;
-    return new Some(new /* Tuple */ ( /* c */, new DivideState(input /* : unknown */, index /* : unknown */ + 1 /* : number */, segments /* : unknown */, buffer /* : unknown */, depth /* : unknown */) /* : DivideState */) /* : content-start Tuple content-end */) /* : Some */;
+    return new Some(new /* Tuple */ (c /* : content-start char content-end */, new DivideState(input /* : unknown */, index /* : unknown */ + 1 /* : number */, segments /* : unknown */, buffer /* : unknown */, depth /* : unknown */) /* : DivideState */) /* : content-start Tuple content-end */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* public */ popAndAppendToTuple();
@@ -332,7 +332,7 @@ Option < DivideState > {
     }
     /* @Override
         public */ fold(current, element) {
-        return new Some(current /* : Option<string> */.map /* : (arg0 : (arg0 : string) => R) => Option<R> */((inner) => inner /* : string */ + /* this */ .delimiter /* : unknown */ +  /* element */) /* : Option<R> */.orElse /* : (arg0 : R) => T */( /* element */) /* : T */) /* : Some */;
+        return new Some(current /* : Option<string> */.map /* : (arg0 : (arg0 : string) => R) => Option<R> */((inner) => inner /* : unknown */ + /* this */ .delimiter /* : unknown */ + element /* : unknown */) /* : Option<R> */.orElse /* : (arg0 : R) => T */(element /* : unknown */) /* : T */) /* : Some */;
     }
 }
 /* private */ class Definition /*  */ {
@@ -354,13 +354,13 @@ Option < DivideState > {
         return " : " + /* this */ .type /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */;
     }
     /* private */ joinBefore() {
-        return /* this */ .maybeBefore /* : unknown */.filter /* : unknown */((value) => !value /* : unknown */.isEmpty /* : unknown */( /*  */) /* : unknown */) /* : unknown */.map /* : unknown */(generatePlaceholder /* : unknown */) /* : unknown */.map /* : unknown */((inner) => inner /* : unknown */ + " ") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return /* this */ .maybeBefore /* : unknown */.filter /* : unknown */((value) => !value /* : T */.isEmpty /* : unknown */( /*  */) /* : unknown */) /* : unknown */.map /* : unknown */(generatePlaceholder /* : unknown */) /* : unknown */.map /* : unknown */((inner) => inner /* : unknown */ + " ") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     /* private */ joinTypeParams() {
         return /* this */ .typeParams /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner( /*  */) /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     /* public */ mapType(mapper /* Type */) {
-        return new Definition(maybeBefore /* : unknown */, name /* : unknown */, mapper /* : (arg0 : content-start Type content-end) => content-start Type content-end */(type /* : unknown */) /* : content-start Type content-end */, typeParams /* : unknown */) /* : Definition */;
+        return new Definition(maybeBefore /* : unknown */, name /* : unknown */, mapper /* : (arg0 : T) => R */(type /* : unknown */) /* : R */, typeParams /* : unknown */) /* : Definition */;
     }
 }
 /* private static */ class ListCollector {
@@ -370,14 +370,14 @@ Option < DivideState > {
     }
     /* @Override
         public */ fold(current, element) {
-        return current /* : List<T> */.addLast /* : (arg0 : T) => List<T> */(element /* : T */) /* : List<T> */;
+        return current /* : Option<string> */.addLast /* : (arg0 : string) => List<T> */(element /* : unknown */) /* : List<T> */;
     }
 }
 /* private */ class Tuple {
 }
 /* private static */ class FlatMapHead {
     constructor() {
-        this.let /* this.mapper  */ = mapper /* : (arg0 : T) => Iterator<R> */;
+        this.let /* this.mapper  */ = mapper /* : (arg0 : T) => R */;
         this.let /* this.current  */ = new None( /*  */) /* : None */;
         this.let /* this.head  */ = head /* : Head<T> */;
     }
@@ -389,7 +389,7 @@ Option < R > {
 /* while (true)  */ {
     /* if (this.current.isPresent())  */ {
         let inner = /* this */ .current /* : unknown */.orElse /* : unknown */( /* null */) /* : unknown */;
-        let maybe = /* inner */ .next /* : unknown */( /*  */) /* : unknown */;
+        let maybe = inner /* : unknown */.next /* : unknown */( /*  */) /* : unknown */;
         /* if (maybe.isPresent())  */ {
             return /* maybe */;
         }
@@ -417,7 +417,7 @@ Option < R > {
 }
 /* private static */ class Iterators /*  */ {
     /* public static  */ fromOption(option) {
-        let single = option /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(new  /* : unknown */) /* : Option<R> */;
+        let single = option /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(SingleHead /* : (arg0 : T) => content-start public content-end */.new /* : unknown */) /* : Option<R> */;
         return new HeadedIterator(orElseGet /* : unknown */(new  /* : unknown */) /* : unknown */) /* : HeadedIterator */;
     }
 }
@@ -430,7 +430,7 @@ Option < R > {
         return "(" + /* joined */ +") => " + /* this */ .returns /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */;
     }
 }
-return new FunctionType(arguments /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((type) => type /* : unknown */.replace /* : unknown */( /* mapping */) /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */, returns /* : unknown */) /* : FunctionType */;
+return new FunctionType(arguments /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((type) => type /* : unknown */.replace /* : unknown */(mapping /* : content-start Map content-end<string, content-start Type content-end> */) /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */, returns /* : unknown */) /* : FunctionType */;
 /* private */ class TupleType /*  */ {
     constructor(arguments) {
     }
@@ -456,7 +456,7 @@ return new FunctionType(arguments /* : unknown */.iterate /* : unknown */( /*  *
         public */ find(name) {
         return /* this */ .base /* : unknown */.find /* : unknown */(name /* : string */) /* : unknown */.map /* : unknown */((found) => {
             let mapping = /* this */ .base /* : unknown */.typeParams /* : unknown */( /*  */) /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.zip /* : unknown */(arguments /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */) /* : unknown */.collect /* : unknown */(new /* MapCollector */ ( /*  */) /* : content-start MapCollector content-end */) /* : unknown */;
-            return found /* : unknown */.replace /* : unknown */( /* mapping */) /* : unknown */;
+            return found /* : unknown */.replace /* : unknown */(mapping /* : content-start Map content-end<string, content-start Type content-end> */) /* : unknown */;
         }) /* : unknown */;
     }
 }
@@ -539,7 +539,7 @@ return /* Primitive */ .Unknown /* : unknown */;
     }
     /* @Override
         public */ generate() {
-        let joined = /* this */ .parameters /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(generate /* : unknown */) /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joined = /* this */ .parameters /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(Definition /* : (arg0 : string, arg1 : content-start Type content-end) => content-start public content-end */.generate /* : unknown */) /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "(" + /* joined */ +") => " + /* this */ .body /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */;
     }
 }
@@ -578,7 +578,7 @@ return new /* HashMap */ ( /*  */) /* : content-start HashMap content-end */;
 /* @Override
     public */ fold(current, /* Map */ , V > , element, [K, V]);
 , V > {
-    return: current /* : content-start Map content-end<K, V> */
+    return: current /* : Option<string> */
 };
 /* public */ class Main /*  */ {
     /* private */ CompileState(structures, definitions, objectTypes, maybeStructName, typeParams, expectedType) {
@@ -586,35 +586,35 @@ return new /* HashMap */ ( /*  */) /* : content-start HashMap content-end */;
     }
 }
 /* private Option<Type> resolveValue(String name)  */ {
-    return /* this */ .definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((definition) => definition /* : unknown */.name /* : unknown */.equals /* : unknown */( /* name */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(type /* : unknown */) /* : unknown */;
+    return /* this */ .definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((definition) => definition /* : unknown */.name /* : unknown */.equals /* : unknown */(name /* : string */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(type /* : unknown */) /* : unknown */;
 }
 /* public CompileState addStructure(String structure)  */ {
     return new /* CompileState */ ( /* this */.structures /* : unknown */.addLast /* : unknown */( /* structure */) /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withDefinitions(List<Definition> definitions)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */,  /* definitions */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addAllLast /* : unknown */(definitions /* : List<content-start Definition content-end> */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public Option<Type> resolveType(String name)  */ {
     /* if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent())  */ {
-        return new Some(new ObjectType(typeParams /* : unknown */, definitions /* : unknown */) /* : ObjectType */) /* : Some */;
+        return new Some(new ObjectType(name /* : string */, typeParams /* : unknown */, definitions /* : unknown */) /* : ObjectType */) /* : Some */;
     }
-    let maybeTypeParam = /* this */ .typeParams /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((param) => param /* : unknown */.equals /* : unknown */( /* name */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */;
+    let maybeTypeParam = /* this */ .typeParams /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((param) => param /* : unknown */.equals /* : unknown */(name /* : string */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */;
     /* if (maybeTypeParam instanceof Some(var value))  */ {
-        return new Some(new TypeParam( /* value */) /* : TypeParam */) /* : Some */;
+        return new Some(new TypeParam(value /* : T */) /* : TypeParam */) /* : Some */;
     }
-    return /* this */ .objectTypes /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((type) => type /* : unknown */.name /* : unknown */.equals /* : unknown */( /* name */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((type) => type /* : unknown */) /* : unknown */;
+    return /* this */ .objectTypes /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((type) => type /* : unknown */.name /* : unknown */.equals /* : unknown */(name /* : string */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((type) => type /* : unknown */) /* : unknown */;
 }
 /* public CompileState addType(ObjectType type)  */ {
     return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */.addLast /* : unknown */(type /* : unknown */) /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withDefinition(Definition definition)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addLast /* : unknown */( /* definition */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addLast /* : unknown */(definition /* : unknown */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withStructName(String name)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, new Some( /* name */) /* : Some */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, new Some(name /* : string */) /* : Some */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withTypeParams(List<String> typeParams)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */.addAllLast /* : unknown */( /* typeParams */) /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */.addAllLast /* : unknown */(typeParams /* : List<string> */) /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withExpectedType(Type type)  */ {
     return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, new Some(type /* : unknown */) /* : Some */) /* : content-start CompileState content-end */;
@@ -640,13 +640,13 @@ return new /* HashMap */ ( /*  */) /* : content-start HashMap content-end */;
 string;
 {
     let tuple = /* compileStatements */ (new /* CompileState */ ( /*  */) /* : content-start CompileState content-end */, input /* : string */, /* Main */ .compileRootSegment /* : unknown */) /* : unknown */;
-    let joined = /* tuple */ .left /* : unknown */.structures /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner( /*  */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-    return /* joined */ +.right /* : unknown */;
+    let joined = tuple /* : unknown */.left /* : unknown */.structures /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner( /*  */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+    return /* joined */ +tuple /* : unknown */.right /* : unknown */;
 }
 /* private static */ compileStatements(state, input, string, mapper, (arg0 /* CompileState */, arg1) => [/* CompileState */ , string]);
 [/* CompileState */ , string];
 {
-    let parsed = /* parseStatements */ (state /* : content-start CompileState content-end */, input /* : string */, mapper /* : (arg0 : content-start CompileState content-end, arg1 : string) => [content-start CompileState content-end, string] */) /* : unknown */;
+    let parsed = /* parseStatements */ (state /* : content-start CompileState content-end */, input /* : string */, mapper /* : (arg0 : T) => R */) /* : unknown */;
     return new Tuple(left /* : unknown */, /* generateStatements */ ( /* parsed */.right /* : unknown */) /* : unknown */) /* : Tuple */;
 }
 /* private static */ generateStatements(statements, (List));
@@ -657,32 +657,32 @@ string;
 /* private static */ parseStatements(state, input, string, mapper, (arg0 /* CompileState */, arg1) => [/* CompileState */ , string]);
 [/* CompileState */ , (List)];
 {
-    return /* parseAll0 */ (state /* : content-start CompileState content-end */, input /* : string */, /* Main */ .foldStatementChar /* : unknown */, mapper /* : (arg0 : content-start CompileState content-end, arg1 : string) => [content-start CompileState content-end, string] */) /* : unknown */;
+    return /* parseAll0 */ (state /* : content-start CompileState content-end */, input /* : string */, /* Main */ .foldStatementChar /* : unknown */, mapper /* : (arg0 : T) => R */) /* : unknown */;
 }
 /* private static */ generateAll(merger, (arg0 /* StringBuilder */, arg1) =>  /* StringBuilder */, elements, (List));
 string;
 {
-    return elements /* : List<string> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.fold /* : (arg0 : C, arg1 : T) => C */(new /* StringBuilder */ ( /*  */) /* : content-start StringBuilder content-end */, merger /* : (arg0 : content-start StringBuilder content-end, arg1 : string) => content-start StringBuilder content-end */) /* : C */.toString /* : unknown */( /*  */) /* : unknown */;
+    return elements /* : content-start java.util.List content-end<T> */.iterate /* : unknown */( /*  */) /* : unknown */.fold /* : unknown */(new /* StringBuilder */ ( /*  */) /* : content-start StringBuilder content-end */, merger /* : (arg0 : content-start StringBuilder content-end, arg1 : string) => content-start StringBuilder content-end */) /* : unknown */.toString /* : unknown */( /*  */) /* : unknown */;
 }
 /* private static  */ parseAll0(state, input, string, folder, (arg0, arg1 /* Character */) => DivideState, mapper, (arg0 /* CompileState */, arg1) => [/* CompileState */ , T]);
 [/* CompileState */ , (List)];
 {
-    return /* getCompileStateListTuple */ (state /* : content-start CompileState content-end */, input /* : string */, folder /* : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState */, (state1, s) => new Some(apply /* : unknown */(state1 /* : unknown */, s /* : unknown */) /* : unknown */) /* : Some */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */;
+    return /* getCompileStateListTuple */ (state /* : content-start CompileState content-end */, input /* : string */, folder /* : (arg0 : R, arg1 : T) => R */, (state1, s) => new Some(mapper /* : (arg0 : T) => R */(state1 /* : unknown */, s /* : unknown */) /* : R */) /* : Some */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(state /* : content-start CompileState content-end */, empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */;
 }
 /* private static  */ getCompileStateListTuple(state, input, string, folder, (arg0, arg1 /* Character */) => DivideState, mapper, (arg0 /* CompileState */, arg1) => Option);
 Option < [/* CompileState */ , (List)] > {
-    return /* parseAll */(state /* : content-start CompileState content-end */, input /* : string */, folder /* : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState */) { }
+    return /* parseAll */(state /* : content-start CompileState content-end */, input /* : string */, folder /* : (arg0 : R, arg1 : T) => R */) { }
 }(state1, tuple);
-apply /* : unknown */(state1 /* : unknown */, tuple /* : unknown */.right /* : unknown */); /* : unknown */
+mapper /* : (arg0 : T) => R */(state1 /* : unknown */, tuple /* : unknown */.right /* : unknown */); /* : R */
 ;
 /* private static  */ parseAll(state, input, string, folder, (arg0, arg1 /* Character */) => DivideState, mapper, (arg0 /* CompileState */, arg1) => Option);
 Option < [/* CompileState */ , (List)] > {
     let, initial: (Option) = new Some(new Tuple(state /* : content-start CompileState content-end */) /* Lists */.empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */,
-    return /* divideAll */(input /* : string */, folder /* : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState */) { } /* : unknown */, /* : unknown */ : /* : unknown */ .iterateWithIndices /* : unknown */( /*  */) /* : unknown */.fold /* : unknown */((tuple, element) => {
+    return /* divideAll */(input /* : string */, folder /* : (arg0 : R, arg1 : T) => R */) { } /* : unknown */, /* : unknown */ : /* : unknown */ .iterateWithIndices /* : unknown */( /*  */) /* : unknown */.fold /* : unknown */(initial /* : R */, (tuple, element) => {
         return tuple /* : unknown */.flatMap /* : unknown */((inner) => {
             let state1 = inner /* : unknown */.left /* : unknown */;
             let right = inner /* : unknown */.right /* : unknown */;
-            return /* mapper */ .apply /* : unknown */( /* state1 */) /* : unknown */.map /* : unknown */((applied) => {
+            return mapper /* : (arg0 : T) => R */(state1 /* : unknown */, element /* : unknown */) /* : R */.map /* : unknown */((applied) => {
                 return new Tuple(applied /* : unknown */.left /* : unknown */) /* right */.addLast /* : unknown */(applied /* : unknown */.right /* : unknown */);
             } /* : unknown */) /* : Tuple */;
         }) /* : unknown */;
@@ -698,37 +698,37 @@ List < string > {
     let, current = new DivideState(input /* : string */) /* : DivideState */
 };
 /* while (true)  */ {
-    let maybePopped = /* current */ .pop /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((tuple) => {
-        return /* foldSingleQuotes */ (tuple /* : unknown */) /* : unknown */.or /* : unknown */(() => /* foldDoubleQuotes */ ( /* tuple */) /* : unknown */) /* : unknown */.orElseGet /* : unknown */(() => /* folder */ .apply /* : unknown */(right /* : unknown */, left /* : unknown */) /* : unknown */) /* : unknown */;
-    }) /* : unknown */;
+    let maybePopped = current /* : Option<string> */.pop /* : () => Option<[content-start Character content-end, DivideState]> */( /*  */) /* : Option<[content-start Character content-end, DivideState]> */.map /* : (arg0 : (arg0 : [content-start Character content-end, DivideState]) => R) => Option<R> */((tuple) => {
+        return /* foldSingleQuotes */ (tuple /* : unknown */) /* : unknown */.or /* : unknown */(() => /* foldDoubleQuotes */ (tuple /* : unknown */) /* : unknown */) /* : unknown */.orElseGet /* : unknown */(() => folder /* : (arg0 : R, arg1 : T) => R */(tuple /* : unknown */.right /* : unknown */, tuple /* : unknown */.left /* : unknown */) /* : R */) /* : unknown */;
+    }) /* : Option<R> */;
     /* if (maybePopped.isPresent())  */ {
-        let /* current  */ = /* maybePopped */ .orElse /* : unknown */( /* current */) /* : unknown */;
+        let /* current  */ = /* maybePopped */ .orElse /* : unknown */(current /* : Option<string> */) /* : unknown */;
     }
     /* else  */ {
         /* break */ ;
     }
 }
-return /* current */ .advance /* : unknown */( /*  */) /* : unknown */.segments /* : unknown */;
+return current /* : Option<string> */.advance /* : () => DivideState */( /*  */) /* : DivideState */.segments /* : List<string> */;
 /* private static */ foldDoubleQuotes(tuple, [/* Character */ , DivideState]);
 Option < DivideState > {
 /* if (tuple.left == '\"')  */ };
 /* if (tuple.left == '\"')  */ {
-    let current = tuple /* : [content-start Character content-end, DivideState] */[1 /* : number */].append /* : unknown */(tuple /* : [content-start Character content-end, DivideState] */[0 /* : number */]) /* : unknown */;
+    let current = tuple /* : unknown */.right /* : unknown */.append /* : unknown */(tuple /* : unknown */.left /* : unknown */) /* : unknown */;
     /* while (true)  */ {
-        let maybePopped = /* current */ .popAndAppendToTuple /* : unknown */( /*  */) /* : unknown */;
+        let maybePopped = current /* : Option<string> */.popAndAppendToTuple /* : () => Option<[content-start Character content-end, DivideState]> */( /*  */) /* : Option<[content-start Character content-end, DivideState]> */;
         /* if (maybePopped.isEmpty())  */ {
             /* break */ ;
         }
         let popped = /* maybePopped */ .orElse /* : unknown */( /* null */) /* : unknown */;
         let /* current  */ = /* popped */ .right /* : unknown */;
         /* if (popped.left == '\\')  */ {
-            let /* current  */ = /* current */ .popAndAppendToOption /* : unknown */( /*  */) /* : unknown */.orElse /* : unknown */( /* current */) /* : unknown */;
+            let /* current  */ = current /* : Option<string> */.popAndAppendToOption /* : () => Option<DivideState> */( /*  */) /* : Option<DivideState> */.orElse /* : (arg0 : DivideState) => T */(current /* : Option<string> */) /* : T */;
         }
         /* if (popped.left == '\"')  */ {
             /* break */ ;
         }
     }
-    return new Some( /* current */) /* : Some */;
+    return new Some(current /* : Option<string> */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static */ foldSingleQuotes(tuple, [/* Character */ , DivideState]);
@@ -737,8 +737,8 @@ Option < DivideState > {
 /* if (tuple.left != '\'')  */ {
     return new None( /*  */) /* : None */;
 }
-let appended = tuple /* : [content-start Character content-end, DivideState] */[1 /* : number */].append /* : unknown */(tuple /* : [content-start Character content-end, DivideState] */[0 /* : number */]) /* : unknown */;
-return /* appended */ .popAndAppendToTuple /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(foldEscaped /* : unknown */) /* : unknown */.flatMap /* : unknown */(popAndAppendToOption /* : unknown */) /* : unknown */;
+let appended = tuple /* : unknown */.right /* : unknown */.append /* : unknown */(tuple /* : unknown */.left /* : unknown */) /* : unknown */;
+return /* appended */ .popAndAppendToTuple /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(foldEscaped /* : unknown */) /* : unknown */.flatMap /* : unknown */(DivideState /* : (arg0 : string, arg1 : number, arg2 : List<string>, arg3 : content-start StringBuilder content-end, arg4 : number) => content-start public content-end */.popAndAppendToOption /* : unknown */) /* : unknown */;
 /* private static */ foldEscaped(escaped, [/* Character */ , DivideState]);
 DivideState;
 {
@@ -750,20 +750,20 @@ DivideState;
 /* private static */ foldStatementChar(state, DivideState, c);
 DivideState;
 {
-    let append = state /* : DivideState */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
+    let append = state /* : content-start CompileState content-end */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
     /* if (c == ';' && append.isLevel())  */ {
-        return /* append */ .advance /* : unknown */( /*  */) /* : unknown */;
+        return append /* : (arg0 : content-start char content-end) => DivideState */( /*  */) /* : DivideState */;
     }
     /* if (c == '}' && append.isShallow())  */ {
-        return /* append */ .advance /* : unknown */( /*  */) /* : unknown */.exit /* : unknown */( /*  */) /* : unknown */;
+        return append /* : (arg0 : content-start char content-end) => DivideState */( /*  */) /* : DivideState */.exit /* : () => DivideState */( /*  */) /* : DivideState */;
     }
     /* if (c == '{' || c == '(')  */ {
-        return /* append */ .enter /* : unknown */( /*  */) /* : unknown */;
+        return append /* : (arg0 : content-start char content-end) => DivideState */( /*  */) /* : DivideState */;
     }
     /* if (c == '}' || c == ')')  */ {
-        return /* append */ .exit /* : unknown */( /*  */) /* : unknown */;
+        return append /* : (arg0 : content-start char content-end) => DivideState */( /*  */) /* : DivideState */;
     }
-    return /* append */;
+    return append /* : (arg0 : content-start char content-end) => DivideState */;
 }
 /* private static */ compileRootSegment(state, input, string);
 [/* CompileState */ , string];
@@ -772,7 +772,7 @@ DivideState;
     /* if (stripped.startsWith("package ") || stripped.startsWith("import "))  */ {
         return new Tuple(state /* : content-start CompileState content-end */, "") /* : Tuple */;
     }
-    return /* compileClass */ ( /* stripped */, 0 /* : number */, state /* : content-start CompileState content-end */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(/* generatePlaceholder */ ( /* stripped */) /* : unknown */) /* : Tuple */) /* : unknown */;
+    return /* compileClass */ ( /* stripped */, 0 /* : number */, state /* : content-start CompileState content-end */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(state /* : content-start CompileState content-end */, /* generatePlaceholder */ ( /* stripped */) /* : unknown */) /* : Tuple */) /* : unknown */;
 }
 /* private static */ compileClass(stripped, string, depth, number, state);
 Option < [/* CompileState */ , string] > {};
@@ -784,10 +784,10 @@ Option < [/* CompileState */ , string] > {
     return /* first */ (right /* : unknown */, "{", (beforeContent, withEnd) => {
         let strippedWithEnd = withEnd /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
         return /* suffix */ ( /* strippedWithEnd */, "}", (content1) => {
-            return /* first */ ( /* beforeContent */, " implements ", (s, s2) => {
-                return /* structureWithMaybeParams */ ( /* targetInfix */,  /* state */,  /* beforeInfix */, s /* : unknown */,  /* content1 */) /* : unknown */;
+            return /* first */ (beforeContent /* : unknown */, " implements ", (s, s2) => {
+                return /* structureWithMaybeParams */ (targetInfix /* : string */, state /* : content-start CompileState content-end */, beforeInfix /* : unknown */, s /* : unknown */, content1 /* : unknown */) /* : unknown */;
             }) /* : unknown */.or /* : unknown */(() => {
-                return /* structureWithMaybeParams */ ( /* targetInfix */,  /* state */,  /* beforeInfix */,  /* beforeContent */,  /* content1 */) /* : unknown */;
+                return /* structureWithMaybeParams */ (targetInfix /* : string */, state /* : content-start CompileState content-end */, beforeInfix /* : unknown */, beforeContent /* : unknown */, content1 /* : unknown */) /* : unknown */;
             }) /* : unknown */;
         }) /* : unknown */;
     }) /* : unknown */;
@@ -795,30 +795,30 @@ Option < [/* CompileState */ , string] > {
 ;
 /* private static */ structureWithMaybeParams(targetInfix, string, state, beforeInfix, string, beforeContent, string, content1, string);
 Option < [/* CompileState */ , string] > {
-    return /* suffix */(beforeContent /* : string */, ) { }
+    return /* suffix */(beforeContent /* : unknown */, ) { }
 }(s);
 {
     return /* first */ (s /* : unknown */, "(", (s1, s2) => {
-        let parsed = /* parseParameters */ ( /* state */, s2 /* : unknown */) /* : unknown */;
-        return /* getOred */ ( /* targetInfix */, /* parsed */ .left /* : unknown */,  /* beforeInfix */, s1 /* : unknown */,  /* content1 */, /* parsed */ .right /* : unknown */) /* : unknown */;
+        let parsed = /* parseParameters */ (state /* : content-start CompileState content-end */, s2 /* : unknown */) /* : unknown */;
+        return /* getOred */ (targetInfix /* : string */, /* parsed */ .left /* : unknown */, beforeInfix /* : unknown */, s1 /* : unknown */, content1 /* : unknown */, /* parsed */ .right /* : unknown */) /* : unknown */;
     }) /* : unknown */;
 }
 or /* : unknown */(() => {
-    return /* getOred */ ( /* targetInfix */,  /* state */,  /* beforeInfix */,  /* beforeContent */,  /* content1 */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
+    return /* getOred */ (targetInfix /* : string */, state /* : content-start CompileState content-end */, beforeInfix /* : unknown */, beforeContent /* : unknown */, content1 /* : unknown */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
 }) /* : unknown */;
 /* private static */ getOred(targetInfix, string, state, beforeInfix, string, beforeContent, string, content1, string, params, (List));
 Option < [/* CompileState */ , string] > {
-    return /* first */(beforeContent /* : string */, ) { }
+    return /* first */(beforeContent /* : unknown */, ) { }
 }(name, withTypeParams);
 {
     return /* first */ (withTypeParams /* : unknown */, ">", (typeParamsString, afterTypeParams) => {
         let /* final */ compileStateStringTupleBiFunction = (state1, s) => new Tuple(state1 /* : unknown */, s /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */) /* : Tuple */;
-        let typeParams = /* parseValuesOrEmpty */ ( /* state */,  /* typeParamsString */, (state1, s) => new Some(apply /* : unknown */(state1 /* : unknown */, s /* : unknown */) /* : unknown */) /* : Some */) /* : unknown */;
-        return /* assembleStructure */ ( /* typeParams */.left /* : unknown */,  /* targetInfix */,  /* beforeInfix */,  /* name */,  /* content1 */, /* typeParams */ .right /* : unknown */,  /* afterTypeParams */,  /* params */) /* : unknown */;
+        let typeParams = /* parseValuesOrEmpty */ (state /* : content-start CompileState content-end */, typeParamsString /* : unknown */, (state1, s) => new Some(apply /* : unknown */(state1 /* : unknown */, s /* : unknown */) /* : unknown */) /* : Some */) /* : unknown */;
+        return /* assembleStructure */ (typeParams /* : List<string> */.left /* : unknown */, targetInfix /* : string */, beforeInfix /* : unknown */, name /* : string */, content1 /* : unknown */, typeParams /* : List<string> */.right /* : unknown */, afterTypeParams /* : unknown */, params /* : string */) /* : unknown */;
     }) /* : unknown */;
 }
 or /* : unknown */(() => {
-    return /* assembleStructure */ ( /* state */,  /* targetInfix */,  /* beforeInfix */,  /* beforeContent */,  /* content1 */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */, "",  /* params */) /* : unknown */;
+    return /* assembleStructure */ (state /* : content-start CompileState content-end */, targetInfix /* : string */, beforeInfix /* : unknown */, beforeContent /* : unknown */, content1 /* : unknown */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */, "", params /* : string */) /* : unknown */;
 }) /* : unknown */;
 /* private static */ assembleStructure(state, targetInfix, string, beforeInfix, string, rawName, string, content, string, typeParams, (List), afterTypeParams, string, params, (List));
 Option < [/* CompileState */ , string] > {
@@ -828,24 +828,24 @@ Option < [/* CompileState */ , string] > {
     return new None( /*  */) /* : None */;
 }
 let joinedTypeParams = typeParams /* : List<string> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.collect /* : (arg0 : Collector<T, R>) => R */(new Joiner(", ") /* : Joiner */) /* : R */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-let parsed = /* parseStatements */ ( /* state */.withStructName /* : unknown */( /* name */) /* : unknown */.withTypeParams /* : unknown */( /* typeParams */) /* : unknown */,  /* content */, (state0, input) => /* compileClassSegment */ (state0 /* : unknown */, input /* : unknown */, 1 /* : number */) /* : unknown */) /* : unknown */;
+let parsed = parseStatements /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : (arg0 : content-start CompileState content-end, arg1 : string) => [content-start CompileState content-end, string]) => [content-start CompileState content-end, List<string>] */(state /* : content-start CompileState content-end */.withStructName /* : unknown */(name /* : string */) /* : unknown */.withTypeParams /* : unknown */(typeParams /* : List<string> */) /* : unknown */, content /* : string */, (state0, input) => /* compileClassSegment */ (state0 /* : unknown */, input /* : string */, 1 /* : number */) /* : unknown */) /* : [content-start CompileState content-end, List<string>] */;
 /* List<String> parsed1 */ ;
 /* if (params.isEmpty())  */ {
     let /* parsed1  */ = /* parsed */ .right /* : unknown */;
 }
 /* else  */ {
-    let joined = /* joinValues */ ( /* retainDefinitions */( /* params */) /* : unknown */) /* : unknown */;
+    let joined = /* joinValues */ ( /* retainDefinitions */(params /* : string */) /* : unknown */) /* : unknown */;
     let constructorIndent = /* createIndent */ (1 /* : number */) /* : unknown */;
     let /* parsed1  */ = /* parsed */ .right /* : unknown */.addFirst /* : unknown */(/* constructorIndent */ +"constructor (" + joined + ") {" + constructorIndent + "}\n") /* : unknown */;
 }
 let parsed2 = /* parsed1 */ .iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner( /*  */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-let generated = /* generatePlaceholder */ ( /* beforeInfix */.strip /* : unknown */( /*  */) /* : unknown */) /* : unknown */ + /* targetInfix */ + + +( /* afterTypeParams */) /* : unknown */ + " {" + parsed2 + "\n}\n";
-return new Some(new Tuple(left /* : unknown */.addStructure /* : unknown */( /* generated */) /* : unknown */.addType /* : unknown */(new ObjectType(left /* : unknown */.definitions /* : unknown */) /* : ObjectType */) /* : unknown */, "") /* : Tuple */) /* : Some */;
+let generated = /* generatePlaceholder */ (beforeInfix /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */) /* : unknown */ + targetInfix /* : string */ + name /* : string */ + /* joinedTypeParams */ +(afterTypeParams /* : unknown */) /* : unknown */ + " {" + parsed2 + "\n}\n";
+return new Some(new Tuple(left /* : unknown */.addStructure /* : unknown */( /* generated */) /* : unknown */.addType /* : unknown */(new ObjectType(name /* : string */, typeParams /* : List<string> */, left /* : unknown */.definitions /* : unknown */) /* : ObjectType */) /* : unknown */, "") /* : Tuple */) /* : Some */;
 /* private static */ retainDefinition(parameter, Parameter);
 Option < Definition > {
 /* if (parameter instanceof Definition definition)  */ };
 /* if (parameter instanceof Definition definition)  */ {
-    return new Some( /* definition */) /* : Some */;
+    return new Some(definition /* : unknown */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static */ isSymbol(input, string);
@@ -866,11 +866,11 @@ Option < T > {
     return new None( /*  */) /* : None */;
 }
 let slice = input /* : string */.substring /* : unknown */(0 /* : number */, input /* : string */.length /* : unknown */( /*  */) /* : unknown */ - suffix /* : string */.length /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
-return mapper /* : (arg0 : string) => Option<T> */( /* slice */) /* : Option<T> */;
+return mapper /* : (arg0 : T) => R */( /* slice */) /* : R */;
 /* private static */ compileClassSegment(state, input, string, depth, number);
 [/* CompileState */ , string];
 {
-    return /* compileWhitespace */ (input /* : string */, state /* : content-start CompileState content-end */) /* : unknown */.or /* : unknown */(() => /* compileClass */ ( /* input */,  /* depth */,  /* state */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* compileStructure */ ( /* input */, "interface ", "interface ",  /* state */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* compileStructure */ ( /* input */, "record ", "class ",  /* state */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* compileMethod */ ( /* state */,  /* input */,  /* depth */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* compileDefinitionStatement */ ( /* input */,  /* depth */,  /* state */) /* : unknown */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(/* generatePlaceholder */ ( /* input */) /* : unknown */) /* : Tuple */) /* : unknown */;
+    return /* compileWhitespace */ (input /* : string */, state /* : content-start CompileState content-end */) /* : unknown */.or /* : unknown */(() => compileClass /* : (arg0 : string, arg1 : number, arg2 : content-start CompileState content-end) => Option<[content-start CompileState content-end, string]> */(input /* : string */, depth /* : number */, state /* : content-start CompileState content-end */) /* : Option<[content-start CompileState content-end, string]> */) /* : unknown */.or /* : unknown */(() => compileStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : content-start CompileState content-end) => Option<[content-start CompileState content-end, string]> */(input /* : string */, "interface ", "interface ", state /* : content-start CompileState content-end */) /* : Option<[content-start CompileState content-end, string]> */) /* : unknown */.or /* : unknown */(() => compileStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : content-start CompileState content-end) => Option<[content-start CompileState content-end, string]> */(input /* : string */, "record ", "class ", state /* : content-start CompileState content-end */) /* : Option<[content-start CompileState content-end, string]> */) /* : unknown */.or /* : unknown */(() => /* compileMethod */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* compileDefinitionStatement */ (input /* : string */, depth /* : number */, state /* : content-start CompileState content-end */) /* : unknown */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(state /* : content-start CompileState content-end */, /* generatePlaceholder */ (input /* : string */) /* : unknown */) /* : Tuple */) /* : unknown */;
 }
 /* private static */ compileWhitespace(input, string, state);
 Option < [/* CompileState */ , string] > {
@@ -885,24 +885,24 @@ Option < [/* CompileState */ , string] > {
 }(definitionString, withParams);
 {
     return /* first */ (withParams /* : unknown */, ")", (parametersString, rawContent) => {
-        return /* parseDefinition */ ( /* state */,  /* definitionString */) /* : unknown */.flatMap /* : unknown */((definitionTuple) => {
+        return /* parseDefinition */ (state /* : content-start CompileState content-end */, definitionString /* : unknown */) /* : unknown */.flatMap /* : unknown */((definitionTuple) => {
             let definitionState = definitionTuple /* : unknown */.left /* : unknown */;
             let definition = definitionTuple /* : unknown */.right /* : unknown */;
-            let parametersTuple = /* parseParameters */ ( /* definitionState */,  /* parametersString */) /* : unknown */;
+            let parametersTuple = /* parseParameters */ ( /* definitionState */, parametersString /* : unknown */) /* : unknown */;
             let rawParameters = /* parametersTuple */ .right /* : unknown */;
             let parameters = /* retainDefinitions */ ( /* rawParameters */) /* : unknown */;
             let joinedParameters = /* joinValues */ ( /* parameters */) /* : unknown */;
-            let content = /* rawContent */ .strip /* : unknown */( /*  */) /* : unknown */;
-            let indent = /* createIndent */ ( /* depth */) /* : unknown */;
-            let paramTypes = /* parameters */ .iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(type /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */;
-            let toDefine = new Definition(name /* : unknown */, new FunctionType(type /* : unknown */) /* : FunctionType */) /* : Definition */;
-            let generatedHeader = /* definition */ .generateWithParams /* : unknown */("(" + joinedParameters + ")") /* : unknown */;
+            let content = rawContent /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
+            let indent = /* createIndent */ (depth /* : number */) /* : unknown */;
+            let paramTypes = /* parameters */ .iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(Definition /* : (arg0 : string, arg1 : content-start Type content-end) => content-start public content-end */.type /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */;
+            let toDefine = new Definition(definition /* : unknown */.name /* : unknown */, new FunctionType(definition /* : unknown */.type /* : unknown */) /* : FunctionType */) /* : Definition */;
+            let generatedHeader = definition /* : unknown */.generateWithParams /* : unknown */("(" + joinedParameters + ")") /* : unknown */;
             /* if (content.equals(";"))  */ {
                 return new Some(new Tuple(left /* : unknown */.withDefinition /* : unknown */( /* toDefine */) /* : unknown */, /* indent */ + +";") /* : Tuple */) /* : Some */;
             }
             /* if (content.startsWith("{") && content.endsWith("}"))  */ {
-                let substring = /* content */ .substring /* : unknown */(1 /* : number */, length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */;
-                let statementsTuple = /* compileFunctionSegments */ ( /* parametersTuple */.left /* : unknown */.withDefinitions /* : unknown */( /* parameters */) /* : unknown */,  /* substring */,  /* depth */) /* : unknown */;
+                let substring = content /* : string */.substring /* : unknown */(1 /* : number */, content /* : string */.length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */;
+                let statementsTuple = /* compileFunctionSegments */ ( /* parametersTuple */.left /* : unknown */.withDefinitions /* : unknown */( /* parameters */) /* : unknown */,  /* substring */, depth /* : number */) /* : unknown */;
                 let generated = /* indent */ + +" {" + statementsTuple.right + indent + "}";
                 return new Some(new Tuple(left /* : unknown */.withDefinition /* : unknown */( /* toDefine */) /* : unknown */) /* : Tuple */) /* : Some */;
             }
@@ -914,11 +914,11 @@ Option < [/* CompileState */ , string] > {
 /* private static */ joinValues(retainParameters, (List));
 string;
 {
-    return retainParameters /* : List<Definition> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(generate /* : unknown */) /* : Option<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new Joiner(", ") /* : Joiner */) /* : R */.orElse /* : unknown */("") /* : unknown */;
+    return retainParameters /* : List<Definition> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(Definition /* : (arg0 : string, arg1 : content-start Type content-end) => content-start public content-end */.generate /* : unknown */) /* : Option<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new Joiner(", ") /* : Joiner */) /* : R */.orElse /* : unknown */("") /* : unknown */;
 }
 /* private static */ retainDefinitions(right, (List));
 List < Definition > {
-    return: right /* : List<Parameter> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */() /* Main */.retainDefinition /* : unknown */, /* : Option<R> */ : /* : Option<R> */ .flatMap /* : (arg0 : (arg0 : R) => Option<R>) => Option<R> */() /* Iterators */.fromOption /* : unknown */, /* : Option<R> */ : /* : Option<R> */ .collect /* : (arg0 : Collector<T, R>) => R */(new ListCollector( /*  */) /* : ListCollector */) /* : R */
+    return: right /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */() /* Main */.retainDefinition /* : unknown */, /* : unknown */ : /* : unknown */ .flatMap /* : unknown */() /* Iterators */.fromOption /* : unknown */, /* : unknown */ : /* : unknown */ .collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */
 };
 /* private static */ parseParameters(state, params, string);
 [/* CompileState */ , (List)];
@@ -928,7 +928,7 @@ List < Definition > {
 /* private static */ compileFunctionSegments(state, input, string, depth, number);
 [/* CompileState */ , string];
 {
-    return /* compileStatements */ (state /* : content-start CompileState content-end */, input /* : string */, (state1, input1) => /* compileFunctionSegment */ (state1 /* : unknown */, input1 /* : unknown */, /* depth */ +1 /* : number */) /* : unknown */) /* : unknown */;
+    return compileStatements /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : (arg0 : content-start CompileState content-end, arg1 : string) => [content-start CompileState content-end, string]) => [content-start CompileState content-end, string] */(state /* : content-start CompileState content-end */, input /* : string */, (state1, input1) => /* compileFunctionSegment */ (state1 /* : unknown */, input1 /* : unknown */, depth /* : number */ + 1 /* : number */) /* : unknown */) /* : [content-start CompileState content-end, string] */;
 }
 /* private static */ compileFunctionSegment(state, input, string, depth, number);
 [/* CompileState */ , string];
@@ -937,40 +937,40 @@ List < Definition > {
     /* if (stripped.isEmpty())  */ {
         return new Tuple(state /* : content-start CompileState content-end */, "") /* : Tuple */;
     }
-    return /* suffix */ ( /* stripped */, ";", (s) => {
-        let tuple = /* statementValue */ ( /* state */, s /* : unknown */,  /* depth */) /* : unknown */;
-        return new Some(new Tuple(left /* : unknown */, /* createIndent */ ( /* depth */) /* : unknown */ + /* tuple */ .right /* : unknown */ + ";") /* : Tuple */) /* : Some */;
+    return suffix /* : string */(stripped /* : string */, ";", (s) => {
+        let tuple = /* statementValue */ (state /* : content-start CompileState content-end */, s /* : unknown */, depth /* : number */) /* : unknown */;
+        return new Some(new Tuple(tuple /* : unknown */.left /* : unknown */, /* createIndent */ (depth /* : number */) /* : unknown */ + tuple /* : unknown */.right /* : unknown */ + ";") /* : Tuple */) /* : Some */;
     }) /* : unknown */.or /* : unknown */(() => {
-        return /* block */ ( /* state */,  /* depth */,  /* stripped */) /* : unknown */;
+        return /* block */ (state /* : content-start CompileState content-end */, depth /* : number */, stripped /* : string */) /* : unknown */;
     }) /* : unknown */.orElseGet /* : unknown */(() => {
-        return new Tuple(/* generatePlaceholder */ ( /* stripped */) /* : unknown */) /* : Tuple */;
+        return new Tuple(state /* : content-start CompileState content-end */, /* generatePlaceholder */ (stripped /* : string */) /* : unknown */) /* : Tuple */;
     }) /* : unknown */;
 }
 /* private static */ block(state, depth, number, stripped, string);
 Option < [/* CompileState */ , string] > {
-    return /* suffix */(stripped /* : string */, ) { }
-}(withoutEnd);
-{
-    return /* split */ (() => {
-        let divisions = /* divideAll */ ( /* withoutEnd */, /* Main */ .foldBlockStart /* : unknown */) /* : unknown */;
+    return: suffix /* : string */(stripped /* : string */, "}", (withoutEnd) => {
+        return /* split */ (() => {
+            let divisions = divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState) => List<string> */(withoutEnd /* : unknown */) /* Main */.foldBlockStart;
+        } /* : unknown */) /* : List<string> */;
         return /* divisions */ .removeFirst /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((removed) => {
             let right = removed /* : unknown */.left /* : unknown */;
             let left = removed /* : unknown */.right /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner("") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-            return new Tuple( /* right */) /* : Tuple */;
+            return new Tuple(right /* : unknown */) /* : Tuple */;
         }) /* : unknown */;
     }, (beforeContent, content) => {
-        return /* suffix */ (beforeContent /* : unknown */, "{", (s) => {
-            let compiled = /* compileFunctionSegments */ ( /* state */,  /* content */,  /* depth */) /* : unknown */;
-            let indent = /* createIndent */ ( /* depth */) /* : unknown */;
-            return new Some(new Tuple(left /* : unknown */, /* indent */ +(s /* : unknown */) /* : unknown */ + "{" + compiled.right + indent + "}") /* : Tuple */) /* : Some */;
-        }) /* : unknown */;
-    }) /* : unknown */;
-}
+        return suffix /* : string */(beforeContent /* : unknown */, "{", (s) => {
+            let compiled = compileFunctionSegments /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, string] */(state /* : content-start CompileState content-end */, content /* : string */, depth /* : number */) /* : [content-start CompileState content-end, string] */;
+            let indent = /* createIndent */ (depth /* : number */) /* : unknown */;
+            return new Some(new Tuple() /* compiled */.left /* : unknown */, /* indent */ +(s /* : unknown */) /* : unknown */ + "{" + compiled.right + indent + "}");
+        } /* : Tuple */) /* : Some */;
+    }) /* : unknown */
+};
+;
 ;
 /* private static */ foldBlockStart(state, DivideState, c);
 DivideState;
 {
-    let appended = state /* : DivideState */.append /* : unknown */(c /* : content-start Character content-end */) /* : unknown */;
+    let appended = state /* : content-start CompileState content-end */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
     /* if (c == '{' && state.isLevel())  */ {
         return /* appended */ .advance /* : unknown */( /*  */) /* : unknown */;
     }
@@ -987,36 +987,36 @@ DivideState;
 {
     let stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */;
     /* if (stripped.startsWith("return "))  */ {
-        let value = /* stripped */ .substring /* : unknown */("return ".length /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
-        let tuple = /* compileValue */ (state /* : content-start CompileState content-end */,  /* value */, depth /* : number */) /* : unknown */;
-        return new Tuple(left /* : unknown */, "return " + /* tuple */ .right /* : unknown */) /* : Tuple */;
+        let value = stripped /* : string */.substring /* : unknown */("return ".length /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
+        let tuple = /* compileValue */ (state /* : content-start CompileState content-end */, value /* : T */, depth /* : number */) /* : unknown */;
+        return new Tuple(tuple /* : unknown */.left /* : unknown */, "return " + tuple /* : unknown */.right /* : unknown */) /* : Tuple */;
     }
-    return /* first */ ( /* stripped */, "=", (s, s2) => {
-        let definitionTuple = /* compileDefinition */ ( /* state */, s /* : unknown */) /* : unknown */;
-        let valueTuple = /* compileValue */ ( /* definitionTuple */.left /* : unknown */, s2 /* : unknown */,  /* depth */) /* : unknown */;
-        return new Some(new Tuple(left /* : unknown */, "let " + /* definitionTuple */ .right /* : unknown */ + " = " + /* valueTuple */ .right /* : unknown */) /* : Tuple */) /* : Some */;
+    return /* first */ (stripped /* : string */, "=", (s, s2) => {
+        let definitionTuple = /* compileDefinition */ (state /* : content-start CompileState content-end */, s /* : unknown */) /* : unknown */;
+        let valueTuple = /* compileValue */ (definitionTuple /* : unknown */.left /* : unknown */, s2 /* : unknown */, depth /* : number */) /* : unknown */;
+        return new Some(new Tuple(left /* : unknown */, "let " + definitionTuple /* : unknown */.right /* : unknown */ + " = " + /* valueTuple */ .right /* : unknown */) /* : Tuple */) /* : Some */;
     }) /* : unknown */.orElseGet /* : unknown */(() => {
-        return new Tuple(/* generatePlaceholder */ ( /* stripped */) /* : unknown */) /* : Tuple */;
+        return new Tuple(state /* : content-start CompileState content-end */, /* generatePlaceholder */ (stripped /* : string */) /* : unknown */) /* : Tuple */;
     }) /* : unknown */;
 }
 /* private static */ compileValue(state, input, string, depth, number);
 [/* CompileState */ , string];
 {
     let tuple = /* parseValue */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */;
-    return new Tuple(left /* : unknown */, right /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */) /* : Tuple */;
+    return new Tuple(tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */) /* : Tuple */;
 }
 /* private static */ parseValue(state, input, string, depth, number);
 [/* CompileState */ , /* Value */];
 {
-    return /* parseLambda */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */.or /* : unknown */(() => /* parseString */ ( /* state */,  /* input */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseDataAccess */ ( /* state */,  /* input */,  /* depth */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseSymbolValue */ ( /* state */,  /* input */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseInvocation */ ( /* state */,  /* input */,  /* depth */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseOperation */ ( /* state */,  /* input */,  /* depth */, "+") /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseOperation */ ( /* state */,  /* input */,  /* depth */, "-") /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseDigits */ ( /* state */,  /* input */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseNot */ ( /* state */,  /* input */,  /* depth */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseMethodReference */ ( /* state */,  /* input */,  /* depth */) /* : unknown */) /* : unknown */.orElseGet /* : unknown */(() => new [/* CompileState */ , /* Value */](new Placeholder( /* input */) /* : Placeholder */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : unknown */;
+    return /* parseLambda */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */.or /* : unknown */(() => /* parseString */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseDataAccess */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseSymbolValue */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseInvocation */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseOperation */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */, "+") /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseOperation */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */, "-") /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseDigits */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseNot */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */) /* : unknown */.or /* : unknown */(() => /* parseMethodReference */ (state /* : content-start CompileState content-end */, input /* : string */, depth /* : number */) /* : unknown */) /* : unknown */.orElseGet /* : unknown */(() => new [/* CompileState */ , /* Value */](state /* : content-start CompileState content-end */, new Placeholder(input /* : string */) /* : Placeholder */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : unknown */;
 }
 /* private static */ parseMethodReference(state, input, string, depth, number);
 Option < [/* CompileState */ , /* Value */] > {
     return /* last */(input /* : string */, ) { }
 }(s, s2);
 {
-    let tuple = /* parseValue */ ( /* state */, s /* : unknown */,  /* depth */) /* : unknown */;
-    return new Some(new Tuple(left /* : unknown */, new DataAccess(right /* : unknown */, s2 /* : unknown */, Unknown /* : unknown */) /* : DataAccess */) /* : Tuple */) /* : Some */;
+    let tuple = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(state /* : content-start CompileState content-end */, s /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+    return new Some(new Tuple(tuple /* : unknown */.left /* : unknown */, new DataAccess(tuple /* : unknown */.right /* : unknown */, s2 /* : unknown */, Unknown /* : unknown */) /* : DataAccess */) /* : Tuple */) /* : Some */;
 }
 ;
 /* private static */ parseNot(state, input, string, depth, number);
@@ -1024,10 +1024,10 @@ Option < [/* CompileState */ , /* Value */] > {
     let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (stripped.startsWith("!"))  */ {
-    let slice = /* stripped */ .substring /* : unknown */(1 /* : number */) /* : unknown */;
-    let tuple = /* parseValue */ (state /* : content-start CompileState content-end */,  /* slice */, depth /* : number */) /* : unknown */;
-    let value = /* tuple */ .right /* : unknown */;
-    return new Some(new Tuple(left /* : unknown */, new Not( /* value */) /* : Not */) /* : Tuple */) /* : Some */;
+    let slice = stripped /* : string */.substring /* : unknown */(1 /* : number */) /* : unknown */;
+    let tuple = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(state /* : content-start CompileState content-end */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+    let value = tuple /* : unknown */.right /* : unknown */;
+    return new Some(new Tuple(tuple /* : unknown */.left /* : unknown */, new Not(value /* : T */) /* : Not */) /* : Tuple */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static */ parseLambda(state, input, string, depth, number);
@@ -1043,37 +1043,37 @@ Option < [/* CompileState */ , /* Value */] > {
                 let /* type  */ = /* functionType */ .arguments /* : unknown */.get /* : unknown */(0 /* : number */) /* : unknown */.orElse /* : unknown */( /* null */) /* : unknown */;
             }
         }
-        return /* assembleLambda */ ( /* state */, /* Lists */ .of /* : unknown */(new Definition( /* strippedBeforeArrow */) /* : Definition */) /* : unknown */, valueString /* : unknown */,  /* depth */) /* : unknown */;
+        return /* assembleLambda */ (state /* : content-start CompileState content-end */, /* Lists */ .of /* : unknown */(new Definition(type /* : unknown */) /* : Definition */) /* : unknown */, valueString /* : unknown */, depth /* : number */) /* : unknown */;
     }
     /* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */ {
-        let parameterNames = /* divideAll */ ( /* strippedBeforeArrow */.substring /* : unknown */(1 /* : number */, length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */, /* Main */ .foldValueChar /* : unknown */) /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(strip /* : unknown */) /* : unknown */.filter /* : unknown */((value) => !value /* : unknown */.isEmpty /* : unknown */( /*  */) /* : unknown */) /* : unknown */.map /* : unknown */((name) => new Definition(name /* : unknown */, Unknown /* : unknown */) /* : Definition */) /* : unknown */.collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */;
-        return /* assembleLambda */ ( /* state */,  /* parameterNames */,  /* valueString */,  /* depth */) /* : unknown */;
+        let parameterNames = divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState) => List<string> */(substring /* : unknown */(1 /* : number */, length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */, foldValueChar /* : unknown */) /* : List<string> */.iterate /* : () => Iterator<T> */( /*  */) /* : Iterator<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(strip /* : unknown */) /* : Option<R> */.filter /* : (arg0 : (arg0 : R) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */( /*  */) /* : unknown */) /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((name) => new Definition(name /* : string */, Unknown /* : unknown */) /* : Definition */) /* : Option<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new ListCollector( /*  */) /* : ListCollector */) /* : R */;
+        return /* assembleLambda */ (state /* : content-start CompileState content-end */,  /* parameterNames */, valueString /* : unknown */, depth /* : number */) /* : unknown */;
     }
     return new None( /*  */) /* : None */;
 }
 ;
 /* private static */ assembleLambda(state, definitions, (List), valueString, string, depth, number);
 Some < [/* CompileState */ , /* Value */] > {
-    let, strippedValueString = valueString /* : string */.strip /* : unknown */( /*  */) /* : unknown */,
-    let, state2 = state /* : content-start CompileState content-end */.withDefinitions /* : unknown */(definitions /* : List<Definition> */) /* : unknown */
+    let, strippedValueString = valueString /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */,
+    let, state2 = state /* : content-start CompileState content-end */.withDefinitions /* : unknown */(definitions /* : List<content-start Definition content-end> */) /* : unknown */
 };
 /* if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}"))  */ {
-    let value1 = /* compileStatements */ ( /* state2 */, /* strippedValueString */ .substring /* : unknown */(1 /* : number */, length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */, (state1, input1) => /* compileFunctionSegment */ (state1 /* : unknown */, input1 /* : unknown */, /* depth */ +1 /* : number */) /* : unknown */) /* : unknown */;
+    let value1 = compileStatements /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : (arg0 : content-start CompileState content-end, arg1 : string) => [content-start CompileState content-end, string]) => [content-start CompileState content-end, string] */(substring /* : unknown */(1 /* : number */, length /* : unknown */( /*  */) /* : unknown */ - 1 /* : number */) /* : unknown */, (state1, input1) => compileFunctionSegment /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, string] */(state1 /* : unknown */, input1 /* : unknown */, depth /* : number */ + 1 /* : number */) /* : [content-start CompileState content-end, string] */) /* : [content-start CompileState content-end, string] */;
     let right = /* value1 */ .right /* : unknown */;
-    let /* value  */ = new Tuple(left /* : unknown */, new BlockLambdaValue( /* right */) /* : BlockLambdaValue */) /* : Tuple */;
+    let /* value  */ = new Tuple(left /* : unknown */, new BlockLambdaValue(right /* : unknown */, depth /* : number */) /* : BlockLambdaValue */) /* : Tuple */;
 }
 /* else  */ {
-    let value1 = /* parseValue */ ( /* state2 */,  /* strippedValueString */,  /* depth */) /* : unknown */;
+    let value1 = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
     let /* value  */ = new Tuple(left /* : unknown */, right /* : unknown */) /* : Tuple */;
 }
-let right = /* value */ .right /* : unknown */;
-return new Some(new Tuple(left /* : unknown */, new Lambda( /* definitions */) /* : Lambda */) /* : Tuple */) /* : Some */;
+let right = value /* : T */.right /* : unknown */;
+return new Some(new Tuple(value /* : T */.left /* : unknown */, new Lambda(definitions /* : List<content-start Definition content-end> */, right /* : unknown */) /* : Lambda */) /* : Tuple */) /* : Some */;
 /* private static */ parseDigits(state, input, string);
 Option < [/* CompileState */ , /* Value */] > {
     let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (isNumber(stripped))  */ {
-    return new Some(new [/* CompileState */ , /* Value */](state /* : content-start CompileState content-end */, new SymbolValue(Int /* : unknown */) /* : SymbolValue */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : Some */;
+    return new Some(new [/* CompileState */ , /* Value */](state /* : content-start CompileState content-end */, new SymbolValue(stripped /* : string */, Int /* : unknown */) /* : SymbolValue */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static */ isNumber(input, string);
@@ -1089,39 +1089,40 @@ return new None( /*  */) /* : None */;
 }
 /* private static */ parseInvocation(state, input, string, depth, number);
 Option < [/* CompileState */ , /* Value */] > {
-    return /* suffix */(input) { } /* : string */, /* : string */ : /* : string */ .strip /* : unknown */( /*  */) /* : unknown */, ")": ,
-}(withoutEnd);
-{
-    return /* split */ (() => /* toLast */ ( /* withoutEnd */, "", /* Main */ .foldInvocationStart /* : unknown */) /* : unknown */, (callerWithEnd, argumentsString) => {
-        return /* suffix */ (callerWithEnd /* : unknown */, "(", (callerString) => {
-            let callerString1 = callerString /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
-            let callerTuple = /* invocationHeader */ ( /* state */,  /* depth */,  /* callerString1 */) /* : unknown */;
-            let oldCaller = /* callerTuple */ .right /* : unknown */;
-            let newCaller = /* modifyCaller */ ( /* callerTuple */.left /* : unknown */,  /* oldCaller */) /* : unknown */;
-            let callerType = new FunctionType(empty /* : unknown */( /*  */) /* : unknown */, Unknown /* : unknown */) /* : FunctionType */;
-            /* switch (newCaller)  */ {
-                /* case ConstructionCaller constructionCaller ->  */ {
-                    let /* callerType  */ = /* constructionCaller */ .toFunction /* : unknown */( /*  */) /* : unknown */;
-                }
-                /* case Value value ->  */ {
-                    let type = /* value */ .type /* : unknown */( /*  */) /* : unknown */;
-                    /* if (type instanceof FunctionType functionType)  */ {
-                        let /* callerType  */ =  /* functionType */;
-                    }
+    return: suffix /* : string */(input /* : string */.strip /* : unknown */( /*  */) /* : unknown */, ")", (withoutEnd) => {
+        return /* split */ (() => /* toLast */ (withoutEnd /* : unknown */, "", /* Main */ .foldInvocationStart /* : unknown */) /* : unknown */, (callerWithEnd, argumentsString) => {
+            return suffix /* : string */(callerWithEnd /* : unknown */, "(", (callerString) => {
+                let callerString1 = callerString /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
+                let callerTuple = /* invocationHeader */ (state /* : content-start CompileState content-end */, depth /* : number */,  /* callerString1 */) /* : unknown */;
+                let oldCaller = /* callerTuple */ .right /* : unknown */;
+                let newCaller = /* modifyCaller */ ( /* callerTuple */.left /* : unknown */,  /* oldCaller */) /* : unknown */;
+                let callerType = new FunctionType() /* Lists */.empty /* : unknown */( /*  */) /* : unknown */;
+            }) /* Primitive */.Unknown;
+        } /* : unknown */) /* : FunctionType */;
+        /* switch (newCaller)  */ {
+            /* case ConstructionCaller constructionCaller ->  */ {
+                let /* callerType  */ = /* constructionCaller */ .toFunction /* : unknown */( /*  */) /* : unknown */;
+            }
+            /* case Value value ->  */ {
+                let type = value /* : T */.type /* : unknown */( /*  */) /* : unknown */;
+                /* if (type instanceof FunctionType functionType)  */ {
+                    let /* callerType  */ =  /* functionType */;
                 }
             }
-            let finalCallerType =  /* callerType */;
-            let parsed = /* parseValuesWithIndices */ ( /* callerTuple */.left /* : unknown */,  /* argumentsString */, (state3, pair) => {
-                let argumentType = /* finalCallerType */ .arguments /* : unknown */.get /* : unknown */(pair /* : unknown */.left /* : unknown */) /* : unknown */.orElse /* : unknown */(Unknown /* : unknown */) /* : unknown */;
-                let state4 = state3 /* : unknown */.withExpectedType /* : unknown */( /* argumentType */) /* : unknown */;
-                return new Some(/* parseValue */ ( /* state4 */, pair /* : unknown */.right /* : unknown */,  /* depth */) /* : unknown */) /* : Some */;
-            }) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(left /* : unknown */, empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */;
-            let arguments = /* parsed */ .right /* : unknown */;
-            let invokable = new Invokable(returns /* : unknown */) /* : Invokable */;
-            return new Some(new Tuple(left /* : unknown */) /* : Tuple */) /* : Some */;
-        }) /* : unknown */;
-    }) /* : unknown */;
-}
+        }
+        let finalCallerType =  /* callerType */;
+        let parsed = /* parseValuesWithIndices */ ( /* callerTuple */.left /* : unknown */, argumentsString /* : unknown */, (state3, pair) => {
+            let argumentType = /* finalCallerType */ .arguments /* : unknown */.get /* : unknown */(pair /* : unknown */.left /* : unknown */) /* : unknown */.orElse /* : unknown */() /* Primitive */.Unknown;
+        } /* : unknown */) /* : unknown */;
+        let state4 = state3 /* : unknown */.withExpectedType /* : unknown */( /* argumentType */) /* : unknown */;
+        return new Some(parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(pair /* : unknown */.right /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : Some */;
+    }) /* : unknown */.orElseGet /* : unknown */(() => new Tuple() /* callerTuple */.left /* : unknown */) /* Lists */.empty /* : unknown */( /*  */) /* : unknown */,
+    let, arguments = .right /* : unknown */,
+    let, invokable = new Invokable( /* newCaller */) /* callerType */.returns /* : unknown */,
+    return: new Some(new Tuple() /* parsed */.left /* : unknown */) /* : Tuple */
+};
+;
+;
 ;
 /* private static */ modifyCaller(state, oldCaller, Caller);
 Caller;
@@ -1154,27 +1155,27 @@ Caller;
 {
     /* if (callerString1.startsWith("new "))  */ {
         let input1 = callerString1 /* : string */.substring /* : unknown */("new ".length /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
-        let map = /* parseType */ (state /* : content-start CompileState content-end */,  /* input1 */) /* : unknown */.map /* : unknown */((type) => {
+        let map = /* parseType */ (state /* : content-start CompileState content-end */, input1 /* : unknown */) /* : unknown */.map /* : unknown */((type) => {
             let right = type /* : unknown */.right /* : unknown */;
-            return new [/* CompileState */ , Caller](type /* : unknown */.left /* : unknown */, new ConstructionCaller( /* right */) /* : ConstructionCaller */) /* : [content-start CompileState content-end, Caller] */;
+            return new [/* CompileState */ , Caller](type /* : unknown */.left /* : unknown */, new ConstructionCaller(right /* : unknown */) /* : ConstructionCaller */) /* : [content-start CompileState content-end, Caller] */;
         }) /* : unknown */;
         /* if (map.isPresent())  */ {
-            return /* map */ .orElse /* : unknown */( /* null */) /* : unknown */;
+            return map /* : (arg0 : (arg0 : T) => R) => Option<R> */( /* null */) /* : Option<R> */;
         }
     }
-    let tuple = /* parseValue */ ( /* state */,  /* callerString1 */,  /* depth */) /* : unknown */;
-    return new Tuple(left /* : unknown */, right /* : unknown */) /* : Tuple */;
+    let tuple = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(state /* : content-start CompileState content-end */, callerString1 /* : string */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+    return new Tuple(tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */) /* : Tuple */;
 }
 /* private static */ foldInvocationStart(state, DivideState, c);
 DivideState;
 {
-    let appended = state /* : DivideState */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
+    let appended = state /* : content-start CompileState content-end */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
     /* if (c == '(')  */ {
         let enter = /* appended */ .enter /* : unknown */( /*  */) /* : unknown */;
         /* if (enter.isShallow())  */ {
-            return /* enter */ .advance /* : unknown */( /*  */) /* : unknown */;
+            return enter /* : () => DivideState */( /*  */) /* : DivideState */;
         }
-        return /* enter */;
+        return enter /* : () => DivideState */;
     }
     /* if (c == ')')  */ {
         return /* appended */ .exit /* : unknown */( /*  */) /* : unknown */;
@@ -1190,15 +1191,15 @@ Option < [/* CompileState */ , /* Value */] > {
     /* if (!isSymbol(property))  */ {
         return new None( /*  */) /* : None */;
     }
-    let tuple = /* parseValue */ ( /* state */, parentString /* : unknown */,  /* depth */) /* : unknown */;
-    let parent = /* tuple */ .right /* : unknown */;
+    let tuple = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(state /* : content-start CompileState content-end */, parentString /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+    let parent = tuple /* : unknown */.right /* : unknown */;
     let parentType = /* parent */ .type /* : unknown */( /*  */) /* : unknown */;
     /* if (parentType instanceof TupleType)  */ {
         /* if (property.equals("left"))  */ {
-            return new Some(new Tuple(new IndexValue(new SymbolValue("0", Int /* : unknown */) /* : SymbolValue */) /* : IndexValue */) /* : Tuple */) /* : Some */;
+            return new Some(new Tuple(state /* : content-start CompileState content-end */, new IndexValue(new SymbolValue("0", Int /* : unknown */) /* : SymbolValue */) /* : IndexValue */) /* : Tuple */) /* : Some */;
         }
         /* if (property.equals("right"))  */ {
-            return new Some(new Tuple(new IndexValue(new SymbolValue("1", Int /* : unknown */) /* : SymbolValue */) /* : IndexValue */) /* : Tuple */) /* : Some */;
+            return new Some(new Tuple(state /* : content-start CompileState content-end */, new IndexValue(new SymbolValue("1", Int /* : unknown */) /* : SymbolValue */) /* : IndexValue */) /* : Tuple */) /* : Some */;
         }
     }
     let type = /* Primitive */ .Unknown /* : unknown */;
@@ -1207,7 +1208,7 @@ Option < [/* CompileState */ , /* Value */] > {
             let /* type  */ =  /* memberType */;
         }
     }
-    return new Some(new Tuple(left /* : unknown */, new DataAccess( /* parent */) /* : DataAccess */) /* : Tuple */) /* : Some */;
+    return new Some(new Tuple(tuple /* : unknown */.left /* : unknown */, new DataAccess(type /* : unknown */) /* : DataAccess */) /* : Tuple */) /* : Some */;
 }
 ;
 /* private static */ parseString(state, input, string);
@@ -1215,58 +1216,58 @@ Option < [/* CompileState */ , /* Value */] > {
     let, stripped = input /* : string */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (stripped.startsWith("\"") && stripped.endsWith("\""))  */ {
-    return new Some(new Tuple(state /* : content-start CompileState content-end */, new StringValue( /* stripped */) /* : StringValue */) /* : Tuple */) /* : Some */;
+    return new Some(new Tuple(state /* : content-start CompileState content-end */, new StringValue(stripped /* : string */) /* : StringValue */) /* : Tuple */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static */ parseSymbolValue(state, value, string);
 Option < [/* CompileState */ , /* Value */] > {
-    let, stripped = value /* : string */.strip /* : unknown */( /*  */) /* : unknown */
+    let, stripped = value /* : T */.strip /* : unknown */( /*  */) /* : unknown */
 };
 /* if (isSymbol(stripped))  */ {
     /* if (state.resolveValue(stripped) instanceof Some(var type))  */ {
-        return new Some(new Tuple(state /* : content-start CompileState content-end */, new SymbolValue( /* stripped */) /* : SymbolValue */) /* : Tuple */) /* : Some */;
+        return new Some(new Tuple(state /* : content-start CompileState content-end */, new SymbolValue(stripped /* : string */, type /* : unknown */) /* : SymbolValue */) /* : Tuple */) /* : Some */;
     }
-    return new Some(new Tuple(state /* : content-start CompileState content-end */, new Placeholder( /* stripped */) /* : Placeholder */) /* : Tuple */) /* : Some */;
+    return new Some(new Tuple(state /* : content-start CompileState content-end */, new Placeholder(stripped /* : string */) /* : Placeholder */) /* : Tuple */) /* : Some */;
 }
 return new None( /*  */) /* : None */;
 /* private static */ parseOperation(state, value, string, depth, number, infix, string);
 Option < [/* CompileState */ , /* Value */] > {
-    return /* first */(value /* : string */, infix /* : string */) { }
+    return /* first */(value /* : T */, infix /* : string */) { }
 }(s, s2);
 {
-    let tuple = /* parseValue */ ( /* state */, s /* : unknown */,  /* depth */) /* : unknown */;
-    let tuple1 = /* parseValue */ ( /* tuple */.left /* : unknown */, s2 /* : unknown */,  /* depth */) /* : unknown */;
-    let left = /* tuple */ .right /* : unknown */;
+    let tuple = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(state /* : content-start CompileState content-end */, s /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+    let tuple1 = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(tuple /* : unknown */.left /* : unknown */, s2 /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+    let left = tuple /* : unknown */.right /* : unknown */;
     let right = /* tuple1 */ .right /* : unknown */;
-    return new Some(new Tuple(left /* : unknown */, new Operation( /* left */) /* : Operation */) /* : Tuple */) /* : Some */;
+    return new Some(new Tuple(left /* : unknown */, new Operation(infix /* : string */, right /* : unknown */) /* : Operation */) /* : Tuple */) /* : Some */;
 }
 ;
 /* private static */ compileValues(state, params, string, mapper, (arg0 /* CompileState */, arg1) => [/* CompileState */ , string]);
 [/* CompileState */ , string];
 {
-    let parsed = /* parseValuesOrEmpty */ (state /* : content-start CompileState content-end */, params /* : string */, (state1, s) => new Some(apply /* : unknown */(state1 /* : unknown */, s /* : unknown */) /* : unknown */) /* : Some */) /* : unknown */;
+    let parsed = /* parseValuesOrEmpty */ (state /* : content-start CompileState content-end */, params /* : string */, (state1, s) => new Some(mapper /* : (arg0 : T) => R */(state1 /* : unknown */, s /* : unknown */) /* : R */) /* : Some */) /* : unknown */;
     let generated = /* generateValues */ ( /* parsed */.right /* : unknown */) /* : unknown */;
     return new Tuple(left /* : unknown */) /* : Tuple */;
 }
 /* private static */ generateValues(elements, (List));
 string;
 {
-    return /* generateAll */ ( /* Main */.mergeValues /* : unknown */, elements /* : List<string> */) /* : unknown */;
+    return generateAll /* : (arg0 : (arg0 : content-start StringBuilder content-end, arg1 : string) => content-start StringBuilder content-end, arg1 : List<string>) => string */(mergeValues /* : unknown */, elements /* : content-start java.util.List content-end<T> */) /* : string */;
 }
 /* private static  */ parseValuesOrEmpty(state, input, string, mapper, (arg0 /* CompileState */, arg1) => Option);
 [/* CompileState */ , (List)];
 {
-    return /* parseValues */ (state /* : content-start CompileState content-end */, input /* : string */, mapper /* : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, T]> */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */;
+    return /* parseValues */ (state /* : content-start CompileState content-end */, input /* : string */, mapper /* : (arg0 : T) => R */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(state /* : content-start CompileState content-end */, empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */;
 }
 /* private static  */ parseValues(state, input, string, mapper, (arg0 /* CompileState */, arg1) => Option);
 Option < [/* CompileState */ , (List)] > {
     return /* parseValuesWithIndices */(state /* : content-start CompileState content-end */, input /* : string */) { }
 }(state1, tuple);
-apply /* : unknown */(state1 /* : unknown */, tuple /* : unknown */.right /* : unknown */); /* : unknown */
+mapper /* : (arg0 : T) => R */(state1 /* : unknown */, tuple /* : unknown */.right /* : unknown */); /* : R */
 ;
 /* private static  */ parseValuesWithIndices(state, input, string, mapper, (arg0 /* CompileState */, arg1) => Option);
 Option < [/* CompileState */ , (List)] > {
-    return /* parseAll */(state /* : content-start CompileState content-end */, input /* : string */) { } /* Main */, /* Main */ : /* Main */ .foldValueChar /* : unknown */, mapper /* : (arg0 : content-start CompileState content-end, arg1 : [number, string]) => Option<[content-start CompileState content-end, T]> */
+    return: parseAll /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState, arg3 : (arg0 : content-start CompileState content-end, arg1 : [number, string]) => Option<[content-start CompileState content-end, T]>) => Option<[content-start CompileState content-end, List<T>]> */(state /* : content-start CompileState content-end */, input /* : string */) /* Main */.foldValueChar /* : unknown */, mapper /* : (arg0 : T) => R */
 };
 /* private static */ compileParameter(state, input, string);
 [/* CompileState */ , Parameter];
@@ -1274,19 +1275,19 @@ Option < [/* CompileState */ , (List)] > {
     /* if (input.isBlank())  */ {
         return new Tuple(state /* : content-start CompileState content-end */, new Whitespace( /*  */) /* : Whitespace */) /* : Tuple */;
     }
-    return /* parseDefinition */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.map /* : unknown */((tuple) => new [/* CompileState */ , Parameter](tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */) /* : [content-start CompileState content-end, Parameter] */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(new Placeholder( /* input */) /* : Placeholder */) /* : Tuple */) /* : unknown */;
+    return /* parseDefinition */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.map /* : unknown */((tuple) => new [/* CompileState */ , Parameter](tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */) /* : [content-start CompileState content-end, Parameter] */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(state /* : content-start CompileState content-end */, new Placeholder(input /* : string */) /* : Placeholder */) /* : Tuple */) /* : unknown */;
 }
 /* private static */ compileDefinition(state, input, string);
 [/* CompileState */ , string];
 {
-    return /* parseDefinition */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.map /* : unknown */((tuple) => new Tuple(tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(/* generatePlaceholder */ ( /* input */) /* : unknown */) /* : Tuple */) /* : unknown */;
+    return /* parseDefinition */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.map /* : unknown */((tuple) => new Tuple(tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */) /* : Tuple */) /* : unknown */.orElseGet /* : unknown */(() => new Tuple(state /* : content-start CompileState content-end */, /* generatePlaceholder */ (input /* : string */) /* : unknown */) /* : Tuple */) /* : unknown */;
 }
 /* private static */ mergeValues(cache, element, string);
 {
     /* if (cache.isEmpty())  */ {
-        return cache /* : content-start StringBuilder content-end */.append /* : unknown */(element /* : string */) /* : unknown */;
+        return cache /* : content-start StringBuilder content-end */.append /* : unknown */(element /* : unknown */) /* : unknown */;
     }
-    return cache /* : content-start StringBuilder content-end */.append /* : unknown */(", ") /* : unknown */.append /* : unknown */(element /* : string */) /* : unknown */;
+    return cache /* : content-start StringBuilder content-end */.append /* : unknown */(", ") /* : unknown */.append /* : unknown */(element /* : unknown */) /* : unknown */;
 }
 /* private static */ createIndent(depth, number);
 string;
@@ -1295,51 +1296,49 @@ string;
 }
 /* private static */ compileDefinitionStatement(input, string, depth, number, state);
 Option < [/* CompileState */ , string] > {
-    return /* suffix */(input) { } /* : string */, /* : string */ : /* : string */ .strip /* : unknown */( /*  */) /* : unknown */, ";": ,
-}(withoutEnd);
-{
-    return /* parseDefinition */ ( /* state */, withoutEnd /* : unknown */) /* : unknown */.map /* : unknown */((result) => {
-        let generated = /* createIndent */ ( /* depth */) /* : unknown */ + result /* : unknown */.right /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */ + ";";
-        return new Tuple(result /* : unknown */.left /* : unknown */) /* : Tuple */;
-    }) /* : unknown */;
-}
-;
+    return: suffix /* : string */(input /* : string */.strip /* : unknown */( /*  */) /* : unknown */, ";", (withoutEnd) => {
+        return /* parseDefinition */ (state /* : content-start CompileState content-end */, withoutEnd /* : unknown */) /* : unknown */.map /* : unknown */((result) => {
+            let generated = createIndent /* : (arg0 : number) => string */(depth /* : number */) /* : string */ + result /* : unknown */.right /* : unknown */.generate /* : unknown */( /*  */) /* : unknown */ + ";";
+            return new Tuple(result /* : unknown */.left /* : unknown */) /* : Tuple */;
+        }) /* : unknown */;
+    }) /* : unknown */
+};
 /* private static */ parseDefinition(state, input, string);
 Option < [/* CompileState */ , Definition] > {
     return /* last */(input) { } /* : string */, /* : string */ : /* : string */ .strip /* : unknown */( /*  */) /* : unknown */, " ": ,
 }(beforeName, name);
 {
-    return /* split */ (() => /* toLast */ ( /* beforeName */, " ", /* Main */ .foldTypeSeparator /* : unknown */) /* : unknown */, (beforeType, type) => {
-        return /* suffix */ (beforeType /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */, ">", (withoutTypeParamStart) => {
+    return /* split */ (() => /* toLast */ (beforeName /* : unknown */, " ", /* Main */ .foldTypeSeparator /* : unknown */) /* : unknown */, (beforeType, type) => {
+        return suffix /* : string */(beforeType /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */, ">", (withoutTypeParamStart) => {
             return /* first */ (withoutTypeParamStart /* : unknown */, "<", (beforeTypeParams, typeParamsString) => {
                 let /* final */ compileStateStringTupleBiFunction = (state1, s) => new Tuple(state1 /* : unknown */, s /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */) /* : Tuple */;
-                let typeParams = /* parseValuesOrEmpty */ ( /* state */,  /* typeParamsString */, (state1, s) => new Some(apply /* : unknown */(state1 /* : unknown */, s /* : unknown */) /* : unknown */) /* : Some */) /* : unknown */;
-                return /* assembleDefinition */ ( /* typeParams */.left /* : unknown */, new Some( /* beforeTypeParams */) /* : Some<string> */,  /* name */, /* typeParams */ .right /* : unknown */,  /* type */) /* : unknown */;
+                let typeParams = parseValuesOrEmpty /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, T]>) => [content-start CompileState content-end, List<T>] */(state /* : content-start CompileState content-end */, typeParamsString /* : unknown */, (state1, s) => new Some(apply /* : unknown */(state1 /* : unknown */, s /* : unknown */) /* : unknown */) /* : Some */) /* : [content-start CompileState content-end, List<T>] */;
+                return /* assembleDefinition */ (typeParams /* : List<string> */.left /* : unknown */, new Some(beforeTypeParams /* : unknown */) /* : Some<string> */, name /* : string */, typeParams /* : List<string> */.right /* : unknown */, type /* : unknown */) /* : unknown */;
             }) /* : unknown */;
         }) /* : unknown */.or /* : unknown */(() => {
-            return /* assembleDefinition */ ( /* state */, new Some( /* beforeType */) /* : Some<string> */,  /* name */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */,  /* type */) /* : unknown */;
+            return /* assembleDefinition */ (state /* : content-start CompileState content-end */, new Some(beforeType /* : unknown */) /* : Some<string> */, name /* : string */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */, type /* : unknown */) /* : unknown */;
         }) /* : unknown */;
     }) /* : unknown */.or /* : unknown */(() => {
-        return /* assembleDefinition */ ( /* state */, new None( /*  */) /* : None<string> */,  /* name */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */,  /* beforeName */) /* : unknown */;
+        return /* assembleDefinition */ (state /* : content-start CompileState content-end */, new None( /*  */) /* : None<string> */, name /* : string */, /* Lists */ .empty /* : unknown */( /*  */) /* : unknown */, beforeName /* : unknown */) /* : unknown */;
     }) /* : unknown */;
 }
 ;
 /* private static */ toLast(input, string, separator, string, folder, (arg0, arg1 /* Character */) => DivideState);
 Option < [string, string] > {
-    let, divisions = (input /* : string */, folder /* : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState */) /* : unknown */,
+    let, divisions = divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : content-start Character content-end) => DivideState) => List<string> */(input /* : string */, folder /* : (arg0 : R, arg1 : T) => R */) /* : List<string> */,
     return /* divisions */: /* divisions */ .removeLast /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((removed) => {
-        let left = removed /* : unknown */.left /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner( /* separator */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let left = removed /* : unknown */.left /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.collect /* : unknown */(new Joiner(separator /* : string */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         let right = removed /* : unknown */.right /* : unknown */;
-        return new Tuple( /* left */) /* : Tuple */;
+        return new Tuple(right /* : unknown */) /* : Tuple */;
     }) /* : unknown */
 };
 /* private static */ foldTypeSeparator(state, DivideState, c);
 DivideState;
 {
     /* if (c == ' ' && state.isLevel())  */ {
-        return state /* : DivideState */.advance /* : unknown */( /*  */) /* : unknown */;
+        return state /* : content-start CompileState content-end */.advance /* : unknown */( /*  */) /* : unknown */;
     }
-    let appended = state /* : DivideState */.append /* : unknown */(c /* : content-start Character content-end */) /* : unknown */;
+    let appended = state /* : content-start CompileState content-end */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
     /* if (c == '<')  */ {
         return /* appended */ .enter /* : unknown */( /*  */) /* : unknown */;
     }
@@ -1350,19 +1349,18 @@ DivideState;
 }
 /* private static */ assembleDefinition(state, beforeTypeParams, (Option), name, string, typeParams, (List), type, string);
 Option < [/* CompileState */ , Definition] > {
-    return /* parseType */(state) { } /* : content-start CompileState content-end */, /* : content-start CompileState content-end */ : /* : content-start CompileState content-end */ .withTypeParams /* : unknown */(typeParams /* : List<string> */) /* : unknown */, type /* : string */, /* : unknown */ : /* : unknown */ .map /* : unknown */((type1) => {
-        let node = new Definition( /* beforeTypeParams */) /* name */.strip /* : unknown */( /*  */) /* : unknown */, type1;
-    }) /* : unknown */.right /* : unknown */,
-    return: new Tuple(type1 /* : unknown */.left /* : unknown */) /* : Tuple */
+    return /* parseType */(state) { } /* : content-start CompileState content-end */, /* : content-start CompileState content-end */ : /* : content-start CompileState content-end */ .withTypeParams /* : unknown */(typeParams /* : List<string> */) /* : unknown */, type /* : unknown */, /* : unknown */ : /* : unknown */ .map /* : unknown */((type1) => {
+        let node = new Definition(beforeTypeParams /* : unknown */, name /* : string */.strip /* : unknown */( /*  */) /* : unknown */, type1 /* : unknown */.right /* : unknown */, typeParams /* : List<string> */) /* : Definition */;
+        return new Tuple(type1 /* : unknown */.left /* : unknown */) /* : Tuple */;
+    }) /* : unknown */
 };
-;
 /* private static */ foldValueChar(state, DivideState, c);
 DivideState;
 {
     /* if (c == ',' && state.isLevel())  */ {
-        return state /* : DivideState */.advance /* : unknown */( /*  */) /* : unknown */;
+        return state /* : content-start CompileState content-end */.advance /* : unknown */( /*  */) /* : unknown */;
     }
-    let appended = state /* : DivideState */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
+    let appended = state /* : content-start CompileState content-end */.append /* : unknown */(c /* : content-start char content-end */) /* : unknown */;
     /* if (c == '-')  */ {
         let peeked = /* appended */ .peek /* : unknown */( /*  */) /* : unknown */;
         /* if (peeked == '>')  */ {
@@ -1402,34 +1400,31 @@ Option < [/* CompileState */ , /* Type */] > {
         return new Some(new Tuple(state /* : content-start CompileState content-end */) /* : Tuple */) /* : Some */;
     }
     /* else  */ {
-        return new Some(new Tuple(state /* : content-start CompileState content-end */, new Placeholder( /* stripped */) /* : Placeholder */) /* : Tuple */) /* : Some */;
+        return new Some(new Tuple(state /* : content-start CompileState content-end */, new Placeholder(stripped /* : string */) /* : Placeholder */) /* : Tuple */) /* : Some */;
     }
 }
-return /* parseTemplate */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.or /* : unknown */(() => /* varArgs */ ( /* state */,  /* input */) /* : unknown */) /* : unknown */;
+return /* parseTemplate */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.or /* : unknown */(() => /* varArgs */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */) /* : unknown */;
 /* private static */ varArgs(state, input, string);
 Option < [/* CompileState */ , /* Type */] > {
-    return /* suffix */(input /* : string */, ) { }
-}(s);
-{
-    return /* parseType */ ( /* state */, s /* : unknown */) /* : unknown */.map /* : unknown */((inner) => {
-        let newState = inner /* : unknown */.left /* : unknown */;
-        let child = inner /* : unknown */.right /* : unknown */;
-        return new Tuple(new ArrayType( /* child */) /* : ArrayType */) /* : Tuple */;
-    }) /* : unknown */;
-}
-;
+    return: suffix /* : string */(input /* : string */, "...", (s) => {
+        return parseType /* : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, content-start Type content-end]> */(state /* : content-start CompileState content-end */, s /* : unknown */) /* : Option<[content-start CompileState content-end, content-start Type content-end]> */.map /* : (arg0 : (arg0 : [content-start CompileState content-end, content-start Type content-end]) => R) => Option<R> */((inner) => {
+            let newState = inner /* : unknown */.left /* : unknown */;
+            let child = inner /* : unknown */.right /* : unknown */;
+            return new Tuple(new ArrayType( /* child */) /* : ArrayType */) /* : Tuple */;
+        }) /* : Option<R> */;
+    }) /* : unknown */
+};
 /* private static */ parseTemplate(state, input, string);
 Option < [/* CompileState */ , /* Type */] > {
-    return /* suffix */(input) { } /* : string */, /* : string */ : /* : string */ .strip /* : unknown */( /*  */) /* : unknown */, ">": ,
-}(withoutEnd);
-{
-    return /* first */ (withoutEnd /* : unknown */, "<", (base, argumentsString) => {
-        let strippedBase = base /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
-        return /* parseValues */ ( /* state */, argumentsString /* : unknown */, /* Main */ .argument /* : unknown */) /* : unknown */.map /* : unknown */((argumentsTuple) => {
-            return /* assembleTemplate */ ( /* strippedBase */, argumentsTuple /* : unknown */.left /* : unknown */, argumentsTuple /* : unknown */.right /* : unknown */) /* : unknown */;
-        }) /* : unknown */;
-    }) /* : unknown */;
-}
+    return: suffix /* : string */(input /* : string */.strip /* : unknown */( /*  */) /* : unknown */, ">", (withoutEnd) => {
+        return /* first */ (withoutEnd /* : unknown */, "<", (base, argumentsString) => {
+            let strippedBase = base /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
+            return parseValues /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, T]>) => Option<[content-start CompileState content-end, List<T>]> */(state /* : content-start CompileState content-end */, argumentsString /* : unknown */) /* Main */.argument;
+        } /* : unknown */) /* : Option<[content-start CompileState content-end, List<T>]> */.map /* : (arg0 : (arg0 : [content-start CompileState content-end, List<T>]) => R) => Option<R> */((argumentsTuple) => {
+            return /* assembleTemplate */ ( /* strippedBase */, argumentsTuple /* : [content-start CompileState content-end, List<T>] */[0 /* : number */], argumentsTuple /* : [content-start CompileState content-end, List<T>] */[1 /* : number */]) /* : unknown */;
+        }) /* : Option<R> */;
+    }) /* : unknown */
+};
 ;
 /* private static */ assembleTemplate(base, string, state, arguments, (List));
 [/* CompileState */ , /* Type */];
@@ -1453,13 +1448,13 @@ Option < [/* CompileState */ , /* Type */] > {
     /* if (state.resolveType(base) instanceof Some(var baseType) && baseType instanceof FindableType findableType)  */ {
         return new Tuple(state /* : content-start CompileState content-end */, new Template( /* findableType */) /* : Template */) /* : Tuple */;
     }
-    return new Tuple(state /* : content-start CompileState content-end */, new Template(new Placeholder(base /* : string */) /* : Placeholder */) /* : Template */) /* : Tuple */;
+    return new Tuple(state /* : content-start CompileState content-end */, new Template(new Placeholder(base /* : unknown */) /* : Placeholder */) /* : Template */) /* : Tuple */;
 }
 /* private static */ retainType(argument, Argument);
 Option <  /* Type */ > {
 /* if (argument instanceof Type type)  */ };
 /* if (argument instanceof Type type)  */ {
-    return new Some( /* type */) /* : Some */;
+    return new Some(type /* : unknown */) /* : Some */;
 }
 /* else  */ {
     return new None( /*  */) /* : None<content-start Type content-end> */;
@@ -1470,10 +1465,10 @@ Option < [/* CompileState */ , Argument] > {
 /* if (input.isBlank())  */ {
     return new Some(new Tuple(state /* : content-start CompileState content-end */, new Whitespace( /*  */) /* : Whitespace */) /* : Tuple */) /* : Some */;
 }
-return /* parseType */ (state /* : content-start CompileState content-end */, input /* : string */) /* : unknown */.map /* : unknown */((tuple) => new Tuple(tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */) /* : Tuple */) /* : unknown */;
+return parseType /* : (arg0 : content-start CompileState content-end, arg1 : string) => Option<[content-start CompileState content-end, content-start Type content-end]> */(state /* : content-start CompileState content-end */, input /* : string */) /* : Option<[content-start CompileState content-end, content-start Type content-end]> */.map /* : (arg0 : (arg0 : [content-start CompileState content-end, content-start Type content-end]) => R) => Option<R> */((tuple) => new Tuple(tuple /* : unknown */.left /* : unknown */, tuple /* : unknown */.right /* : unknown */) /* : Tuple */) /* : Option<R> */;
 /* private static  */ last(input, string, infix, string, mapper, (arg0, arg1) => Option);
 Option < T > {
-    return: infix /* : string */(input /* : string */, infix /* : string */) /* Main */.findLast /* : unknown */, mapper /* : (arg0 : string, arg1 : string) => Option<T> */
+    return: infix /* : string */(input /* : string */, infix /* : string */) /* Main */.findLast /* : unknown */, mapper /* : (arg0 : T) => R */
 };
 /* private static */ findLast(input, string, infix, string);
 Option < number > {
@@ -1482,24 +1477,24 @@ Option < number > {
 /* if (index == -1)  */ {
     return new None( /*  */) /* : None<number> */;
 }
-return new Some( /* index */) /* : Some */;
+return new Some(index /* : T */) /* : Some */;
 /* private static  */ first(input, string, infix, string, mapper, (arg0, arg1) => Option);
 Option < T > {
-    return: infix /* : string */(input /* : string */, infix /* : string */) /* Main */.findFirst /* : unknown */, mapper /* : (arg0 : string, arg1 : string) => Option<T> */
+    return: infix /* : string */(input /* : string */, infix /* : string */) /* Main */.findFirst /* : unknown */, mapper /* : (arg0 : T) => R */
 };
 /* private static  */ infix(input, string, infix, string, locator, (arg0, arg1) => Option, mapper, (arg0, arg1) => Option);
 Option < T > {
     return /* split */() { }
 }();
-apply /* : unknown */( /* input */) /* : unknown */.map /* : unknown */((index) => {
-    let left = /* input */ .substring /* : unknown */(0 /* : number */, index /* : unknown */) /* : unknown */;
-    let right = /* input */ .substring /* : unknown */(index /* : unknown */ + /* infix */ .length /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
-    return new Tuple( /* left */) /* : Tuple */;
-}) /* : unknown */, ; /* mapper */
+locator /* : (arg0 : string, arg1 : string) => Option<number> */(input /* : string */, infix /* : string */) /* : Option<number> */.map /* : (arg0 : (arg0 : number) => R) => Option<R> */((index) => {
+    let left = input /* : string */.substring /* : unknown */(0 /* : number */, index /* : T */) /* : unknown */;
+    let right = input /* : string */.substring /* : unknown */(index /* : T */ + infix /* : string */.length /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
+    return new Tuple(right /* : unknown */) /* : Tuple */;
+}) /* : Option<R> */, mapper; /* : (arg0 : T) => R */
 ;
-/* private static  */ split(splitter, () => Option, mapper, (arg0, arg1) => Option);
+/* private static  */ split(splitter, () => Option, splitMapper, (arg0, arg1) => Option);
 Option < T > {
-    return: splitter /* : () => Option<[string, string]> */( /*  */) /* : Option<[string, string]> */.flatMap /* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((tuple) => /* mapper */ .apply /* : unknown */(tuple /* : [string, string] */[0 /* : number */], tuple /* : [string, string] */[1 /* : number */]) /* : unknown */) /* : Option<R> */
+    return: splitter /* : () => Option<[string, string]> */( /*  */) /* : Option<[string, string]> */.flatMap /* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((splitTuple) => splitMapper /* : (arg0 : string, arg1 : string) => Option<T> */(splitTuple /* : [string, string] */[0 /* : number */], splitTuple /* : [string, string] */[1 /* : number */]) /* : Option<T> */) /* : Option<R> */
 };
 /* private static */ findFirst(input, string, infix, string);
 Option < number > {
@@ -1508,7 +1503,7 @@ Option < number > {
 /* if (index == -1)  */ {
     return new None( /*  */) /* : None<number> */;
 }
-return new Some( /* index */) /* : Some */;
+return new Some(index /* : T */) /* : Some */;
 /* private static */ generatePlaceholder(input, string);
 string;
 {

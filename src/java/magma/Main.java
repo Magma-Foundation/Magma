@@ -472,7 +472,7 @@ public class Main {
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, definitions, this.objectTypes, this.maybeStructName, this.typeParams, this.expectedType);
+            return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.maybeStructName, this.typeParams, this.expectedType);
         }
 
         public Option<Type> resolveType(String name) {
@@ -1904,8 +1904,8 @@ public class Main {
         }), mapper);
     }
 
-    private static <T> Option<T> split(Supplier<Option<Tuple<String, String>>> splitter, BiFunction<String, String, Option<T>> mapper) {
-        return splitter.get().flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
+    private static <T> Option<T> split(Supplier<Option<Tuple<String, String>>> splitter, BiFunction<String, String, Option<T>> splitMapper) {
+        return splitter.get().flatMap(splitTuple -> splitMapper.apply(splitTuple.left, splitTuple.right));
     }
 
     private static Option<Integer> findFirst(String input, String infix) {
