@@ -182,6 +182,7 @@ public class Main {
     }
 
     private sealed interface IncompleteClassSegment {
+        Option<Definition> createDefinition();
     }
 
     private static class None<T> implements Option<T> {
@@ -831,6 +832,11 @@ public class Main {
         public String generate() {
             return "";
         }
+
+        @Override
+        public Option<Definition> createDefinition() {
+            return new None<>();
+        }
     }
 
     private static class Iterators {
@@ -964,6 +970,11 @@ public class Main {
 
         @Override
         public Option<String> findName() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Definition> createDefinition() {
             return new None<>();
         }
     }
@@ -1248,9 +1259,18 @@ public class Main {
                     .map(Definition::type)
                     .collect(new ListCollector<>());
         }
+
+        @Override
+        public Option<Definition> createDefinition() {
+            return new Some<>(this.header.createDefinition(this.findParamTypes()));
+        }
     }
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
+        @Override
+        public Option<Definition> createDefinition() {
+            return new None<>();
+        }
     }
 
     private static final boolean isDebug = true;
@@ -1489,7 +1509,17 @@ public class Main {
         }
 
         var segmentsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) -> parseClassSegment(state0, input, 1));
-        return mapUsingState(segmentsTuple.left(), segmentsTuple.right(), (state1, entry) -> switch (entry.right()) {
+        var segmentsState = segmentsTuple.left();
+        var segments = segmentsTuple.right();
+
+        var definitions = segments.iterate()
+                .map(IncompleteClassSegment::createDefinition)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+
+        var objectType = new ObjectType(name, typeParams, definitions);
+        var state2 = segmentsState.withDefinition(ImmutableDefinition.createSimpleDefinition("this", objectType));
+        return mapUsingState(state2, segments, (state1, entry) -> switch (entry.right()) {
             case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment));
             case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype);
             case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace));
@@ -1497,7 +1527,6 @@ public class Main {
         }).map(completedTuple -> {
             var completedState = completedTuple.left();
             var completed = completedTuple.right();
-
             return completeStructure(completedState, targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed);
         });
     }
