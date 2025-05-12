@@ -192,7 +192,7 @@ public class Main {
         String generate();
     }
 
-    private sealed interface IncompleteClassSegment permits ClassDefinition, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
+    private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
         Option<Definition> maybeCreateDefinition();
     }
 
@@ -1335,7 +1335,7 @@ public class Main {
     private record Initialization(Definition definition, Value source) implements StatementValue {
         @Override
         public String generate() {
-            return "let " + this.definition.generate() + " = " + this.source.generate();
+            return this.definition.generate() + " = " + this.source.generate();
         }
     }
 
@@ -1381,15 +1381,24 @@ public class Main {
         public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
-
     }
 
-    private record ClassDefinition(Definition definition, int depth) implements IncompleteClassSegment {
+    private record ClassDefinition(int depth, Definition definition) implements IncompleteClassSegment {
         @Override
         public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
+    }
 
+    private record ClassInitialization(
+            int depth,
+            Definition definition,
+            Value value
+    ) implements IncompleteClassSegment {
+        @Override
+        public Option<Definition> maybeCreateDefinition() {
+            return new Some<>(this.definition);
+        }
     }
 
     private record StructurePrototype(
@@ -1526,9 +1535,7 @@ public class Main {
                 .mapValue(this::compile)
                 .match(target::writeString, Some::new)
                 .or(this::executeTSC)
-                .ifPresent(error ->  {
-                    System.err.println(error.display());
-                });
+                .ifPresent(error -> System.err.println(error.display()));
     }
 
     @Actual
@@ -1885,12 +1892,19 @@ public class Main {
             case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace));
             case Placeholder placeholder -> new Some<>(new Tuple2Impl<>(state1, placeholder));
             case ClassDefinition classDefinition -> this.completeDefinition(state1, classDefinition);
+            case ClassInitialization classInitialization -> this.completeInitialization(state1, classInitialization);
             case StructurePrototype structurePrototype -> this.completeStructure(state1, structurePrototype);
         };
     }
 
+    private Option<Tuple2<CompileState, ClassSegment>> completeInitialization(CompileState state1, ClassInitialization classInitialization) {
+        var definition = classInitialization.definition;
+        var statement = new Statement(classInitialization.depth, new Initialization(definition, classInitialization.value));
+        return new Some<>(new Tuple2Impl<>(state1, statement));
+    }
+
     private Option<Tuple2<CompileState, ClassSegment>> completeDefinition(CompileState state1, ClassDefinition classDefinition) {
-        StatementValue definition = classDefinition.definition;
+        var definition = classDefinition.definition;
         var statement = new Statement(classDefinition.depth, definition);
         return new Some<>(new Tuple2Impl<>(state1, statement));
     }
@@ -1937,8 +1951,8 @@ public class Main {
                 .or(() -> this.typed(() -> this.parseStructure(input, "interface ", "interface ", state)))
                 .or(() -> this.typed(() -> this.parseStructure(input, "record ", "class ", state)))
                 .or(() -> this.typed(() -> this.parseStructure(input, "enum ", "class ", state)))
+                .or(() -> this.typed(() -> this.parseField(input, depth, state)))
                 .or(() -> this.parseMethod(state, input, depth))
-                .or(() -> this.typed(() -> this.parseDefinitionStatement(input, depth, state)))
                 .orElseGet(() -> new Tuple2Impl<>(state, new Placeholder(input)));
     }
 
@@ -2537,11 +2551,25 @@ public class Main {
                 .orElseGet(() -> new Tuple2Impl<>(state, new Placeholder(input)));
     }
 
-    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
+    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseField(String input, int depth, CompileState state) {
         return this.suffix(input.strip(), ";", withoutEnd -> {
-            return this.parseDefinition(state, withoutEnd).map(result -> {
-                var definition = result.right();
-                return new Tuple2Impl<>(result.left(), new ClassDefinition(definition, depth));
+            return this.parseClassInitialization(depth, state, withoutEnd).or(() -> {
+                return this.parseClassDefinition(depth, state, withoutEnd);
+            });
+        });
+    }
+
+    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseClassDefinition(int depth, CompileState state, String withoutEnd) {
+        return this.parseDefinition(state, withoutEnd).map(result -> {
+            return new Tuple2Impl<>(result.left(), new ClassDefinition(depth, result.right()));
+        });
+    }
+
+    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseClassInitialization(int depth, CompileState state, String withoutEnd) {
+        return this.first(withoutEnd, "=", (s, s2) -> {
+            return this.parseDefinition(state, s).map(result -> {
+                var valueTuple = this.parseValue(result.left(), s2, depth);
+                return new Tuple2Impl<>(valueTuple.left(), new ClassInitialization(depth, result.right(), valueTuple.right()));
             });
         });
     }
@@ -2598,13 +2626,18 @@ public class Main {
     private Option<Tuple2<CompileState, Definition>> assembleDefinition(
             CompileState state,
             List<String> annotations, Option<String> beforeTypeParams,
-            String name,
+            String rawName,
             List<String> typeParams,
             String type
     ) {
-        return this.parseType(state.withTypeParams(typeParams), type).map(type1 -> {
-            var node = new ImmutableDefinition(annotations, beforeTypeParams, name.strip(), type1.right(), typeParams);
-            return new Tuple2Impl<>(type1.left(), node);
+        return this.parseType(state.withTypeParams(typeParams), type).flatMap(type1 -> {
+            var stripped = rawName.strip();
+            if (!this.isSymbol(stripped)) {
+                return new None<>();
+            }
+
+            var node = new ImmutableDefinition(annotations, beforeTypeParams, stripped, type1.right(), typeParams);
+            return new Some<>(new Tuple2Impl<>(type1.left(), node));
         });
     }
 
