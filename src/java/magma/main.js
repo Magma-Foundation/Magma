@@ -1515,18 +1515,6 @@ Option < [CompileState, Type] > {
         });
     })
 };
-parseTemplate(state, CompileState, input, string);
-Option < [CompileState, Type] > {
-    return: suffix(input.strip(), ">", (withoutEnd) => {
-        return first(withoutEnd, "<", (base, argumentsString) => {
-            let strippedBase = base.strip();
-            return parseValues(state, argumentsString) /* Main */.argument;
-        }).map((argumentsTuple) => {
-            return /* assembleTemplate */ (strippedBase, argumentsTuple.left(), argumentsTuple.right());
-        });
-    })
-};
-;
 assembleTemplate(base, string, state, CompileState, arguments, (List));
 [CompileState, Type];
 {
@@ -1551,6 +1539,18 @@ assembleTemplate(base, string, state, CompileState, arguments, (List));
     }
     return new Tuple2Impl(state, new Template(new Placeholder(base), children));
 }
+parseTemplate(state, CompileState, input, string);
+Option < [CompileState, Type] > {
+    return: suffix(input.strip(), ">", (withoutEnd) => {
+        return first(withoutEnd, "<", (base, argumentsString) => {
+            let strippedBase = base.strip();
+            return parseValues(state, argumentsString) /* Main */.argument;
+        }).map((argumentsTuple) => {
+            return assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
+        });
+    })
+};
+;
 retainType(argument, Argument);
 Option < Type > {
     if( /* argument instanceof Type type */) {

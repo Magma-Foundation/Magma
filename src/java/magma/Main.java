@@ -1951,16 +1951,6 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
-        return suffix(input.strip(), ">", withoutEnd -> {
-            return first(withoutEnd, "<", (base, argumentsString) -> {
-                var strippedBase = base.strip();
-                return parseValues(state, argumentsString, Main::argument).map(argumentsTuple -> {
-                    return assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
-                });
-            });
-        });
-    }
 
     private static Tuple2<CompileState, Type> assembleTemplate(String base, CompileState state, List<Argument> arguments) {
         var children = arguments
@@ -1994,6 +1984,17 @@ public class Main {
         }
 
         return new Tuple2Impl<>(state, new Template(new Placeholder(base), children));
+    }
+
+    private static Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
+        return suffix(input.strip(), ">", withoutEnd -> {
+            return first(withoutEnd, "<", (base, argumentsString) -> {
+                var strippedBase = base.strip();
+                return parseValues(state, argumentsString, Main::argument).map(argumentsTuple -> {
+                    return assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
+                });
+            });
+        });
     }
 
     private static Option<Type> retainType(Argument argument) {
