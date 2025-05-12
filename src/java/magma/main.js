@@ -71,6 +71,8 @@ type();
 Type;
 typeParams();
 List;
+containsAnnotation(annotation, string);
+boolean;
 var IncompleteClassSegmentVariant;
 (function (IncompleteClassSegmentVariant) {
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassDefinition"] = 0] = "ClassDefinition";
@@ -367,32 +369,8 @@ var IncompleteClassSegmentVariant;
         })(),
         _a;
 })();
-/* private static */ let Lists = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _empty_decorators;
-    let _of_decorators;
-    return _a = class Lists /*  */ {
-            empty() {
-                return new /* JVMList */ ();
-            }
-            of(elements) {
-                return new /* JVMList */ (new /* ArrayList */ ( /* Arrays */.asList(elements)));
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _empty_decorators = [Actual];
-            _of_decorators = [Actual];
-            __esDecorate(_a, null, _empty_decorators, { kind: "method", name: "empty", static: false, private: false, access: { has: obj => "empty" in obj, get: obj => obj.empty }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _of_decorators, { kind: "method", name: "of", static: false, private: false, access: { has: obj => "of" in obj, get: obj => obj.of }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private static */ class Lists /*  */ {
+}
 /* private */ let ImmutableDefinition = (() => {
     var _a;
     let _instanceExtraInitializers = [];
@@ -400,6 +378,7 @@ var IncompleteClassSegmentVariant;
     let _mapType_decorators;
     let _generateWithParams_decorators;
     let _createDefinition_decorators;
+    let _containsAnnotation_decorators;
     return _a = class ImmutableDefinition /*  */ {
             constructor(annotations, maybeBefore, name, type, typeParams) {
                 __runInitializers(this, _instanceExtraInitializers);
@@ -433,7 +412,11 @@ var IncompleteClassSegmentVariant;
                 return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
             }
             createDefinition(paramTypes) {
-                return _a.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
+                let type1 = new FunctionType(paramTypes, this.type);
+                return new _a(this.annotations, this.maybeBefore, this.name, type1, this.typeParams);
+            }
+            containsAnnotation(annotation) {
+                return this.annotations.contains(annotation);
             }
         },
         (() => {
@@ -442,10 +425,12 @@ var IncompleteClassSegmentVariant;
             _mapType_decorators = [Override];
             _generateWithParams_decorators = [Override];
             _createDefinition_decorators = [Override];
+            _containsAnnotation_decorators = [Override];
             __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(_a, null, _mapType_decorators, { kind: "method", name: "mapType", static: false, private: false, access: { has: obj => "mapType" in obj, get: obj => obj.mapType }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(_a, null, _generateWithParams_decorators, { kind: "method", name: "generateWithParams", static: false, private: false, access: { has: obj => "generateWithParams" in obj, get: obj => obj.generateWithParams }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(_a, null, _createDefinition_decorators, { kind: "method", name: "createDefinition", static: false, private: false, access: { has: obj => "createDefinition" in obj, get: obj => obj.createDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
+            __esDecorate(_a, null, _containsAnnotation_decorators, { kind: "method", name: "containsAnnotation", static: false, private: false, access: { has: obj => "containsAnnotation" in obj, get: obj => obj.containsAnnotation }, metadata: _metadata }, null, _instanceExtraInitializers);
             if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
         })(),
         _a;
@@ -1473,7 +1458,7 @@ string;
                 __runInitializers(this, _instanceExtraInitializers);
             }
             createDefinition() {
-                return this.header().createDefinition(this.findParamTypes());
+                return this.header.createDefinition(this.findParamTypes());
             }
             findParamTypes() {
                 return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
@@ -2037,7 +2022,7 @@ Option < [CompileState, IncompleteClassSegment] > {
 completeMethod(state, CompileState, prototype, MethodPrototype);
 Option < [CompileState, ClassSegment] > {
     let, definition: Definition = prototype.createDefinition(),
-    if(prototype) { }, : .content().equals(";")
+    if(prototype) { }, : .content().equals(";") || definition.containsAnnotation("Actual")
 };
 {
     return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));

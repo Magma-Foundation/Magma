@@ -108,6 +108,7 @@ enum CallerVariant {
 	name() : string;
 	type() : Type;
 	typeParams() : List<string>;
+	containsAnnotation(annotation : string) : boolean;
 }
 /* private */interface Header/*  */ {
 	createDefinition(paramTypes : List<Type>) : Definition;
@@ -283,12 +284,8 @@ enum IncompleteClassSegmentVariant {
 	}
 }
 /* private static */class Lists/*  */ {
-	@Actual empty<T>() : List<T> {
-		return new /* JVMList */();
-	}
-	@Actual of<T>(elements : T[]) : List<T> {
-		return new /* JVMList */(new /* ArrayList */(/* Arrays */.asList(elements)));
-	}
+	@Actual empty<T>() : List<T>;
+	@Actual of<T>(elements : T[]) : List<T>;
 }
 /* private */class ImmutableDefinition/*  */ {
 	constructor (annotations : List<string>, maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
@@ -322,7 +319,11 @@ enum IncompleteClassSegmentVariant {
 		return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
 	}
 	@Override createDefinition(paramTypes : List<Type>) : Definition {
-		return ImmutableDefinition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
+		let type1 : Type = new FunctionType(paramTypes, this.type);
+		return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, type1, this.typeParams);
+	}
+	@Override containsAnnotation(annotation : string) : boolean {
+		return this.annotations.contains(annotation);
 	}
 }
 /* private */class ObjectType/*  */ {
@@ -841,7 +842,7 @@ enum IncompleteClassSegmentVariant {
 	constructor (depth : number, header : Header, parameters : List<Definition>, content : string) {
 	}
 	createDefinition() : Definition {
-		return this.header().createDefinition(this.findParamTypes());
+		return this.header.createDefinition(this.findParamTypes());
 	}
 	findParamTypes() : List<Type> {
 		return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
@@ -1251,7 +1252,7 @@ enum IncompleteClassSegmentVariant {
 	}
 	completeMethod(state : CompileState, prototype : MethodPrototype) : Option<[CompileState, ClassSegment]> {
 		let definition : Definition = prototype.createDefinition();
-		if (prototype.content().equals(";")){
+		if (prototype.content().equals(";") || definition.containsAnnotation("Actual")){
 			return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));
 		}
 		if (prototype.content().startsWith("{") && prototype.content().endsWith("}")){

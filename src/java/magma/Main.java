@@ -159,6 +159,8 @@ public class Main {
         Type type();
 
         List<String> typeParams();
+
+        boolean containsAnnotation(String annotation);
     }
 
     private interface Header {
@@ -582,7 +584,13 @@ public class Main {
 
         @Override
         public Definition createDefinition(List<Type> paramTypes) {
-            return ImmutableDefinition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
+            Type type1 = new FunctionType(paramTypes, this.type);
+            return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, type1, this.typeParams);
+        }
+
+        @Override
+        public boolean containsAnnotation(String annotation) {
+            return this.annotations.contains(annotation);
         }
     }
 
@@ -1294,10 +1302,14 @@ public class Main {
         }
     }
 
-    private record MethodPrototype(int depth, Header header, List<Definition> parameters,
-                                   String content) implements IncompleteClassSegment {
+    private record MethodPrototype(
+            int depth,
+            Header header,
+            List<Definition> parameters,
+            String content
+    ) implements IncompleteClassSegment {
         private Definition createDefinition() {
-            return this.header().createDefinition(this.findParamTypes());
+            return this.header.createDefinition(this.findParamTypes());
         }
 
         private List<Type> findParamTypes() {
@@ -1807,7 +1819,7 @@ public class Main {
 
     private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(CompileState state, MethodPrototype prototype) {
         var definition = prototype.createDefinition();
-        if (prototype.content().equals(";")) {
+        if (prototype.content().equals(";") || definition.containsAnnotation("Actual")) {
             return new Some<>(new Tuple2Impl<>(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
         }
 
