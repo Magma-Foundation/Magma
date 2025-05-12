@@ -2618,6 +2618,10 @@ public class Main {
             return new Some<>(new Tuple2Impl<>(state, Primitive.Boolean));
         }
 
+        if(stripped.equals("void")) {
+            return new Some<>(new Tuple2Impl<>(state, Primitive.Void));
+        }
+
         if (isSymbol(stripped)) {
             if (state.resolveType(stripped) instanceof Some(var resolved)) {
                 return new Some<>(new Tuple2Impl<>(state, resolved));
@@ -2766,7 +2770,8 @@ public class Main {
         Int("number"),
         String("string"),
         Boolean("boolean"),
-        Unknown("unknown");
+        Unknown("unknown"),
+        Void("void");
 
         private final String value;
 

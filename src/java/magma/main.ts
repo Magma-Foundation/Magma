@@ -17,7 +17,7 @@ enum OptionVariant {
 	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
 	isEmpty() : boolean;
 	and<R>(other : () => Option<R>) : Option<[T, R]>;
-	ifPresent(consumer : /* Consumer */<T>) : /* void */;
+	ifPresent(consumer : /* Consumer */<T>) : void;
 }
 /* private */interface Collector<T, C>/*   */ {
 	createInitial() : C;
@@ -184,7 +184,7 @@ enum ResultVariant {
 	and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return new None();
 	}
-	ifPresent(consumer : /* Consumer */<T>) : /* void */ {
+	ifPresent(consumer : /* Consumer */<T>) : void {
 	}
 }
 /* private */class Tuple2Impl<A, B>/*  */ {
@@ -224,7 +224,7 @@ enum ResultVariant {
 	and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return other().map((otherValue : R) => new Tuple2Impl(this.value, otherValue));
 	}
-	ifPresent(consumer : /* Consumer */<T>) : /* void */ {
+	ifPresent(consumer : /* Consumer */<T>) : void {
 		/* consumer.accept(this.value) */;
 	}
 }
@@ -919,7 +919,7 @@ enum ResultVariant {
 	}
 }
 /* private */class Primitive/*  */ {
-	@nt("number"), @tring("string"), @oolean("boolean"), Unknown("unknown") : /*  */;
+	@nt("number"), @tring("string"), @oolean("boolean"), @nknown("unknown"), Void("void") : /*  */;
 	value : string;
 	constructor (value : string) {
 		this.value = value;
@@ -948,7 +948,7 @@ enum ResultVariant {
 }
 /* public */class Main/*  */ {/* 
     private static final boolean isDebug = false; */
-	main() : /* void */ {
+	main() : void {
 		let parent : Path = findRoot();
 		let source : Path = parent.resolve("Main.java");
 		let target : Path = parent.resolve("main.ts");
@@ -1795,6 +1795,9 @@ enum ResultVariant {
 		}
 		if (stripped.equals("boolean")){
 			return new Some(new Tuple2Impl(state, Primitive.Boolean));
+		}
+		if (stripped.equals("void")){
+			return new Some(new Tuple2Impl(state, Primitive.Void));
 		}
 		if (isSymbol(stripped)){
 			if (/* state.resolveType(stripped) instanceof Some */(/* var resolved */)){
