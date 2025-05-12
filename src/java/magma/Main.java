@@ -1476,40 +1476,50 @@ public class Main {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(() -> toLast(withoutEnd, "", Main::foldInvocationStart), (callerWithEnd, argumentsString) -> {
                 return suffix(callerWithEnd, "(", callerString -> {
-                    var callerString1 = callerString.strip();
-
-                    var callerTuple = invocationHeader(state, depth, callerString1);
-
-                    var oldCaller = callerTuple.right;
-                    var newCaller = modifyCaller(callerTuple.left, oldCaller);
-
-                    FunctionType callerType = new FunctionType(Lists.empty(), Primitive.Unknown);
-                    switch (newCaller) {
-                        case ConstructionCaller constructionCaller -> {
-                            callerType = constructionCaller.toFunction();
-                        }
-                        case Value value -> {
-                            var type = value.type();
-                            if (type instanceof FunctionType functionType) {
-                                callerType = functionType;
-                            }
-                        }
-                    }
-
-                    FunctionType finalCallerType = callerType;
-                    var parsed = parseValuesWithIndices(callerTuple.left, argumentsString, (state3, pair) -> {
-                        var argumentType = finalCallerType.arguments.get(pair.left).orElse(Primitive.Unknown);
-                        CompileState state4 = state3.withExpectedType(argumentType);
-
-                        return new Some<>(parseValue(state4, pair.right, depth));
-                    }).orElseGet(() -> new Tuple<>(callerTuple.left, Lists.empty()));
-
-                    var arguments = parsed.right;
-                    var invokable = new Invokable(newCaller, arguments, callerType.returns);
-                    return new Some<>(new Tuple<>(parsed.left, invokable));
+                    return assembleInvocation(state, depth, argumentsString, callerString.strip());
                 });
             });
         });
+    }
+
+    private static Some<Tuple<CompileState, Value>> assembleInvocation(CompileState state, int depth, String argumentsString, String callerString) {
+        var callerTuple = invocationHeader(state, depth, callerString);
+        var oldCallerState = callerTuple.left;
+        var oldCaller = callerTuple.right;
+
+        var newCaller = modifyCaller(oldCallerState, oldCaller);
+        var callerType = findCallerType(newCaller);
+
+        var argumentsTuple = parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) -> {
+            var index = pair.left;
+            var element = pair.right;
+
+            var expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
+            var withExpected = currentState.withExpectedType(expectedType);
+
+            return new Some<>(parseValue(withExpected, element, depth));
+        }).orElseGet(() -> new Tuple<>(oldCallerState, Lists.empty()));
+
+        var argumentsState = argumentsTuple.left;
+        var arguments = argumentsTuple.right;
+        var invokable = new Invokable(newCaller, arguments, callerType.returns);
+        return new Some<>(new Tuple<>(argumentsState, invokable));
+    }
+
+    private static FunctionType findCallerType(Caller newCaller) {
+        FunctionType callerType = new FunctionType(Lists.empty(), Primitive.Unknown);
+        switch (newCaller) {
+            case ConstructionCaller constructionCaller -> {
+                callerType = constructionCaller.toFunction();
+            }
+            case Value value -> {
+                var type = value.type();
+                if (type instanceof FunctionType functionType) {
+                    callerType = functionType;
+                }
+            }
+        }
+        return callerType;
     }
 
     private static Caller modifyCaller(CompileState state, Caller oldCaller) {
