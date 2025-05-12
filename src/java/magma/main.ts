@@ -109,7 +109,7 @@ enum CallerVariant {
 	type() : Type;
 	typeParams() : List<string>;
 	containsAnnotation(annotation : string) : boolean;
-	removeAnnotations() : /* Header */;
+	removeAnnotations() : Definition;
 }
 /* private */interface Header/*  */ {
 	createDefinition(paramTypes : List<Type>) : Definition;
@@ -326,7 +326,7 @@ enum IncompleteClassSegmentVariant {
 	containsAnnotation(annotation : string) : boolean {
 		return this.annotations.contains(annotation);
 	}
-	removeAnnotations() : Header {
+	removeAnnotations() : Definition {
 		return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
 	}
 }

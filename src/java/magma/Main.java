@@ -162,7 +162,7 @@ public class Main {
 
         boolean containsAnnotation(String annotation);
 
-        Header removeAnnotations();
+        Definition removeAnnotations();
     }
 
     private interface Header {
@@ -596,7 +596,7 @@ public class Main {
         }
 
         @Override
-        public Header removeAnnotations() {
+        public Definition removeAnnotations() {
             return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
         }
     }
