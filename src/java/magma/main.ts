@@ -76,7 +76,7 @@
 		return new None();
 	}
 	isPresent() : boolean {
-		return /* false */;
+		return false;
 	}
 	orElse(other : T) : T {
 		return other;
@@ -94,7 +94,7 @@
 		return new None();
 	}
 	isEmpty() : boolean {
-		return /* true */;
+		return true;
 	}
 	and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return new None();
@@ -108,7 +108,7 @@
 		return new Some(mapper(/* this */.value));
 	}
 	isPresent() : boolean {
-		return /* true */;
+		return true;
 	}
 	orElse(other : T) : T {
 		return /* this */.value;
@@ -129,7 +129,7 @@
 		return mapper(/* this */.value);
 	}
 	isEmpty() : boolean {
-		return /* false */;
+		return false;
 	}
 	and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return other.get().map((otherValue) => new /* Tuple2Impl */(/* this */.value, otherValue));
@@ -140,13 +140,13 @@
 	retrieved : boolean;
 	SingleHead(value : T) : /* public */ {
 		/* this */.value = value;
-		/* this */.retrieved = /* false */;
+		/* this */.retrieved = false;
 	}
 	next() : Option<T> {
 		if (/* this */.retrieved){
 			return new None();
 		}
-		/* this */.retrieved = /* true */;
+		/* this */.retrieved = true;
 		return new Some(/* this */.value);
 	}
 }
@@ -720,17 +720,6 @@
 		return current.with(element.left(), element.right());
 	}
 }
-/* private */class InstanceOf/*  */ {
-	constructor (value : Value, definition : Definition) {
-	}
-
-	generate() : string {
-		return /* this */.value.generate() + " instanceof " + /* this */.definition.generate();
-	}
-	type() : Type {
-		return /* Primitive */.Boolean;
-	}
-}
 /* private */class Primitive/*  */ {
 	Unknown("unknown") : /*  */;
 	value : string;/* 
@@ -759,7 +748,21 @@
             this.targetRepresentation = targetRepresentation;
         } */
 }
+/* private */class BooleanValue/*  */ {/* True("true"), False("false"); */
+	value : string;/* 
+
+        BooleanValue(String value) {
+            this.value = value;
+        } */
+	generate() : string {
+		return /* this */.value;
+	}
+	type() : Type {
+		return Primitive.Boolean;
+	}
+}
 /* public */class Main/*  */ {/* 
+
     private static final boolean isDebug = false; */
 	main() : /* void */ {
 		/* try */{
@@ -927,8 +930,8 @@
 	getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>) : Option<[CompileState, string]> {
 		return first(beforeContent, "<", (name, withTypeParams) => {
 			return first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
-				let compileStateStringTupleBiFunction : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => new Tuple2Impl(state1, s.strip());
-				let typeParams = /* parseValuesOrEmpty */(state, typeParamsString, (state1, s) => new Some(compileStateStringTupleBiFunction(state1, s)));
+				let mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => new Tuple2Impl(state1, s.strip());
+				let typeParams = /* parseValuesOrEmpty */(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
 				return /* assembleStructure */(typeParams(), targetInfix, beforeInfix, name, content1, typeParams(), afterTypeParams, params);
 			});
 		}).or(() => {
@@ -967,9 +970,9 @@
 			if (/* Character */.isLetter(c) || /*  */(/* i != 0  */ && /* Character */.isDigit(c))){
 				/* continue */;
 			}
-			return /* false */;
+			return false;
 		}
-		return /* true */;
+		return true;
 	}
 	prefix<T>(input : string, prefix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
 		if (!input.startsWith(prefix)){
@@ -1126,7 +1129,17 @@
 		return new Tuple2Impl(tuple.left(), tuple.right().generate());
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.AND)).or(() => /* parseOperation */(state, input, depth, /* Operator */.OR)).or(() => /* parseOperation */(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).or(() => /* parseInstanceOf */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return /* parseBoolean */(state, input).or(() => /* parseLambda */(state, input, depth)).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.AND)).or(() => /* parseOperation */(state, input, depth, /* Operator */.OR)).or(() => /* parseOperation */(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).or(() => /* parseInstanceOf */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+	}
+	parseBoolean(state : CompileState, input : string) : Option<[CompileState, Value]> {
+		let stripped = input.strip();
+		if (stripped.equals("false")){
+			return new Some(new Tuple2Impl(state, /* BooleanValue */.False));
+		}
+		if (stripped.equals("true")){
+			return new Some(new Tuple2Impl(state, /* BooleanValue */.True));
+		}
+		return new None();
 	}
 	parseInstanceOf(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last(input, "instanceof", (s, s2) => {
@@ -1214,9 +1227,9 @@
 			if (/* Character */.isDigit(c)){
 				/* continue */;
 			}
-			return /* false */;
+			return false;
 		}
-		return /* true */;
+		return true;
 	}
 	parseInvokable(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return suffix(input.strip(), ")", (withoutEnd) => {
@@ -1288,19 +1301,7 @@
 		return oldCaller;
 	}
 	resolveType(value : Value, state : CompileState) : Type {
-		/* return switch (value) */{
-			/* case DataAccess dataAccess -> Primitive.Unknown */;
-			/* case Invokable invokable -> Primitive.Unknown */;
-			/* case Lambda lambda -> Primitive.Unknown */;
-			/* case Not not -> Primitive.Unknown */;
-			/* case Operation operation -> Primitive.Unknown */;
-			/* case Placeholder placeholder -> Primitive.Unknown */;
-			/* case StringValue stringValue -> Primitive.Unknown */;
-			/* case SymbolValue symbolValue -> symbolValue.type */;
-			/* case IndexValue indexValue -> Primitive.Unknown */;
-			/* case InstanceOf instanceOf -> Primitive.Boolean */;
-		}
-		/*  */;
+		return value.type();
 	}
 	invocationHeader(state : CompileState, depth : number, callerString1 : string) : [CompileState, Caller] {
 		if (callerString1.startsWith("new ")){

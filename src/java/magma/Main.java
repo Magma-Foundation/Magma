@@ -997,17 +997,6 @@ public class Main {
         }
     }
 
-    private record InstanceOf(Value value, Definition definition) implements Value {
-        @Override
-        public String generate() {
-            return this.value.generate() + " instanceof " + this.definition.generate();
-        }
-
-        @Override
-        public Type type() {
-            return Primitive.Boolean;
-        }
-    }
     private static final boolean isDebug = false;
 
     public static void main() {
@@ -1230,8 +1219,8 @@ public class Main {
     private static Option<Tuple2<CompileState, String>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
-                final BiFunction<CompileState, String, Tuple2<CompileState, String>> compileStateStringTupleBiFunction = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
-                var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(compileStateStringTupleBiFunction.apply(state1, s)));
+                final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
+                var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(mapper.apply(state1, s)));
                 return assembleStructure(typeParams.left(), targetInfix, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params);
             });
         }).or(() -> {
@@ -1502,7 +1491,8 @@ public class Main {
     }
 
     private static Tuple2<CompileState, Value> parseValue(CompileState state, String input, int depth) {
-        return parseLambda(state, input, depth)
+        return parseBoolean(state, input)
+                .or(() -> parseLambda(state, input, depth))
                 .or(() -> parseString(state, input))
                 .or(() -> parseDataAccess(state, input, depth))
                 .or(() -> parseSymbolValue(state, input))
@@ -1518,6 +1508,19 @@ public class Main {
                 .or(() -> parseMethodReference(state, input, depth))
                 .or(() -> parseInstanceOf(state, input, depth))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+    }
+
+    private static Option<Tuple2<CompileState, Value>> parseBoolean(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.equals("false")) {
+            return new Some<>(new Tuple2Impl<>(state, BooleanValue.False));
+        }
+
+        if (stripped.equals("true")) {
+            return new Some<>(new Tuple2Impl<>(state, BooleanValue.True));
+        }
+
+        return new None<>();
     }
 
     private static Option<Tuple2<CompileState, Value>> parseInstanceOf(CompileState state, String input, int depth) {
@@ -1724,18 +1727,7 @@ public class Main {
     }
 
     private static Type resolveType(Value value, CompileState state) {
-        return switch (value) {
-            case DataAccess dataAccess -> Primitive.Unknown;
-            case Invokable invokable -> Primitive.Unknown;
-            case Lambda lambda -> Primitive.Unknown;
-            case Not not -> Primitive.Unknown;
-            case Operation operation -> Primitive.Unknown;
-            case Placeholder placeholder -> Primitive.Unknown;
-            case StringValue stringValue -> Primitive.Unknown;
-            case SymbolValue symbolValue -> symbolValue.type;
-            case IndexValue indexValue -> Primitive.Unknown;
-            case InstanceOf instanceOf -> Primitive.Boolean;
-        };
+        return value.type();
     }
 
     private static Tuple2<CompileState, Caller> invocationHeader(CompileState state, int depth, String callerString1) {
@@ -2167,6 +2159,26 @@ public class Main {
         Operator(String sourceRepresentation, String targetRepresentation) {
             this.sourceRepresentation = sourceRepresentation;
             this.targetRepresentation = targetRepresentation;
+        }
+    }
+
+    private enum BooleanValue implements Value {
+        True("true"), False("false");
+
+        private final String value;
+
+        BooleanValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Boolean;
         }
     }
 }
