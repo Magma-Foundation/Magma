@@ -1629,17 +1629,29 @@ public class Main {
             var completedState = completedTuple.left();
             var completed = completedTuple.right();
 
-            CompileState state1 = completedState.exitDefinitions();
-            List<Definition> parameters = prototype.parameters();
-
-            List<ClassSegment> withMaybeConstructor;
-            if (parameters.isEmpty()) {
-                withMaybeConstructor = completed;
+            var exited = completedState.exitDefinitions();
+            CompileState withEnum;
+            List<ClassSegment> completed1;
+            if (prototype.variants.isEmpty()) {
+                withEnum = exited;
+                completed1 = completed;
             }
             else {
-                withMaybeConstructor = completed.addFirst(new Method(1, new ConstructorHeader(), parameters, new Some<>(Lists.empty())));
+                var joined = prototype.variants.iterate()
+                        .map(inner -> "\n\t" + inner)
+                        .collect(new Joiner(","))
+                        .orElse("");
+
+                var enumName = prototype.name + "Variant";
+                withEnum = exited.addStructure("enum " + enumName + " {" +
+                        joined +
+                        "\n}\n");
+
+                var definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
+                completed1 = completed.addFirst(new Statement(1, definition));
             }
 
+            var withMaybeConstructor = atttachConstructor(prototype, completed1);
             var parsed2 = withMaybeConstructor.iterate()
                     .map(ClassSegment::generate)
                     .collect(new Joiner())
@@ -1651,26 +1663,22 @@ public class Main {
                     .orElse("");
 
             var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
-            var compileState = state1.popStructName();
+            var compileState = withEnum.popStructName();
 
-            CompileState withEnum;
-            if (prototype.variants.isEmpty()) {
-                withEnum = compileState;
-            }
-            else {
-                var joined = prototype.variants.iterate()
-                        .map(inner -> "\n\t" + inner)
-                        .collect(new Joiner(","))
-                        .orElse("");
-
-                withEnum = compileState.addStructure("enum " + prototype.name + "Variant {" +
-                        joined +
-                        "\n}\n");
-            }
-
-            var definedState = withEnum.addStructure(generated);
+            var definedState = compileState.addStructure(generated);
             return new Tuple2Impl<>(definedState, new Whitespace());
         });
+    }
+
+    private static List<ClassSegment> atttachConstructor(StructurePrototype prototype, List<ClassSegment> segments) {
+        List<ClassSegment> withMaybeConstructor;
+        if (prototype.parameters().isEmpty()) {
+            withMaybeConstructor = segments;
+        }
+        else {
+            withMaybeConstructor = segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some<>(Lists.empty())));
+        }
+        return withMaybeConstructor;
     }
 
     private static Option<Tuple2<CompileState, ClassSegment>> completeClassSegment(CompileState state1, Tuple2<Integer, IncompleteClassSegment> entry) {

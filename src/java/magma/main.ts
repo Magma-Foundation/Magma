@@ -7,6 +7,7 @@ enum OptionVariant {
 	None
 }
 /* private sealed */interface Option<T>/*  */ {
+	_variant : OptionVariant;
 	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
@@ -1171,32 +1172,40 @@ enum OptionVariant {
 		return mapUsingState(state2, prototype.segments(), Main.completeClassSegment).map((completedTuple : [CompileState, List<R>]) => {
 			let completedState = completedTuple[0]();
 			let completed = completedTuple[1]();
-			let state1 : CompileState = completedState.exitDefinitions();
-			let parameters : List<Definition> = prototype.parameters();
-			/* List<ClassSegment> withMaybeConstructor */;
-			if (parameters.isEmpty()){
-				/* withMaybeConstructor */ = completed;
-			}
-			else {
-				/* withMaybeConstructor */ = completed.addFirst(new Method(1, new ConstructorHeader(), parameters, new Some(Lists.empty())));
-			}
-			let parsed2 = /* withMaybeConstructor */.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
-			let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-			let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
-			let compileState : CompileState = state1.popStructName();
+			let exited = completedState.exitDefinitions();
 			/* CompileState withEnum */;
+			/* List<ClassSegment> completed1 */;
 			if (prototype.variants.isEmpty()){
-				/* withEnum */ = compileState;
+				/* withEnum */ = exited;
+				/* completed1 */ = completed;
 			}
 			else {
 				let joined = prototype.variants.iterate().map((inner) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
-				/* withEnum */ = compileState.addStructure("enum " + prototype.name + "Variant {" +
+				let enumName = prototype.name + "Variant";
+				/* withEnum */ = exited.addStructure("enum " + enumName + " {" +
                         joined +
                         "\n}\n");
+				let definition : Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
+				/* completed1 */ = completed.addFirst(new Statement(1, definition));
 			}
-			let definedState = /* withEnum */.addStructure(generated);
+			let withMaybeConstructor : List<ClassSegment> = atttachConstructor(prototype, /* completed1 */);
+			let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
+			let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+			let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
+			let compileState = /* withEnum */.popStructName();
+			let definedState = compileState.addStructure(generated);
 			return new Tuple2Impl(definedState, new Whitespace());
 		});
+	}
+	atttachConstructor(prototype : StructurePrototype, segments : List<ClassSegment>) : List<ClassSegment> {
+		/* List<ClassSegment> withMaybeConstructor */;
+		if (prototype.parameters().isEmpty()){
+			/* withMaybeConstructor */ = segments;
+		}
+		else {
+			/* withMaybeConstructor */ = segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty())));
+		}
+		return /* withMaybeConstructor */;
 	}
 	completeClassSegment(state1 : CompileState, entry : [number, IncompleteClassSegment]) : Option<[CompileState, ClassSegment]> {
 		/* return switch (entry.right()) */{

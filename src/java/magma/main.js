@@ -1093,33 +1093,42 @@ Option < [CompileState, ClassSegment] > {
     return: mapUsingState(state2, prototype.segments(), Main.completeClassSegment).map((completedTuple) => {
         let completedState = completedTuple[0]();
         let completed = completedTuple[1]();
-        let state1 = completedState.exitDefinitions();
-        let parameters = prototype.parameters();
-        /* List<ClassSegment> withMaybeConstructor */ ;
-        if (parameters.isEmpty()) {
+        let exited = completedState.exitDefinitions();
+        /* CompileState withEnum */ ;
+        /* List<ClassSegment> completed1 */ ;
+        if (prototype.variants.isEmpty()) {
+            exited;
             completed;
         }
         else {
-            completed.addFirst(new Method(1, new ConstructorHeader(), parameters, new Some(Lists.empty())));
-        }
-        let parsed2 = /* withMaybeConstructor */ .iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
-        let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-        let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
-        let compileState = state1.popStructName();
-        /* CompileState withEnum */ ;
-        if (prototype.variants.isEmpty()) {
-            compileState;
-        }
-        else {
             let joined = prototype.variants.iterate().map((inner) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
-            compileState.addStructure("enum " + prototype.name + "Variant {" +
+            let enumName = prototype.name + "Variant";
+            exited.addStructure("enum " + enumName + " {" +
                 joined +
                 "\n}\n");
+            let definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
+            completed.addFirst(new Statement(1, definition));
         }
-        let definedState = /* withEnum */ .addStructure(generated);
+        let withMaybeConstructor = atttachConstructor(prototype);
+        let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
+        let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+        let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
+        let compileState = /* withEnum */ .popStructName();
+        let definedState = compileState.addStructure(generated);
         return new Tuple2Impl(definedState, new Whitespace());
     })
 };
+atttachConstructor(prototype, StructurePrototype, segments, (List));
+List < ClassSegment > {
+    if(prototype) { }, : .parameters().isEmpty()
+};
+{
+    segments;
+}
+{
+    segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty())));
+}
+return /* withMaybeConstructor */;
 completeClassSegment(state1, CompileState, entry, [number, IncompleteClassSegment]);
 Option < [CompileState, ClassSegment] > {
 /* return switch (entry.right()) */ };
