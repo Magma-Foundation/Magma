@@ -381,8 +381,8 @@
 	index : number;
 	depth : number;
 	segments : List<string>;
-	buffer : /* StringBuilder */;
-	DivideState(input : string, index : number, segments : List<string>, buffer : /* StringBuilder */, depth : number) : /* public */ {
+	buffer : string;
+	DivideState(input : string, index : number, segments : List<string>, buffer : string, depth : number) : /* public */ {
 		/* this */.segments = segments;
 		/* this */.buffer = buffer;
 		/* this */.depth = depth;
@@ -390,15 +390,15 @@
 		/* this */.index = index;
 	}
 	DivideState(input : string) : /* public */ {
-		/* this(input, 0, Lists.empty(), new StringBuilder(), 0) */;
+		/* this(input, 0, Lists.empty(), "", 0) */;
 	}
 	advance() : DivideState {
-		/* this */.segments = /* this */.segments.addLast(/* this */.buffer.toString());
-		/* this */.buffer = new /* StringBuilder */();
+		/* this */.segments = /* this */.segments.addLast(/* this */.buffer);
+		/* this */.buffer = "";
 		return /* this */;
 	}
 	append(c : string) : DivideState {
-		/* this.buffer.append(c) */;
+		/* this */.buffer = /* this */.buffer + c;
 		return /* this */;
 	}
 	enter() : DivideState {
@@ -735,8 +735,8 @@
 	parseStatements(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, List<string>] {
 		return /* parseAll0 */(state, input, /* Main */.foldStatementChar, mapper);
 	}
-	generateAll(merger : (arg0 : /* StringBuilder */, arg1 : string) => /* StringBuilder */, elements : List<string>) : string {
-		return elements.iterate().fold(new /* StringBuilder */(), merger).toString();
+	generateAll(merger : (arg0 : string, arg1 : string) => string, elements : List<string>) : string {
+		return elements.iterate().fold("", merger);
 	}
 	parseAll0<T>(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : string) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, T]) : [CompileState, List<T>] {
 		return /* getCompileStateListTuple */(state, input, folder, (state1, s) => new Some(mapper(state1, s))).orElseGet(() => new Tuple2Impl(state, /* Lists */.empty()));
@@ -756,8 +756,8 @@
 			});
 		});
 	}
-	mergeStatements(stringBuilder : /* StringBuilder */, str : string) : /* StringBuilder */ {
-		return stringBuilder.append(str);
+	mergeStatements(cache : string, statement : string) : string {
+		return cache + statement;
 	}
 	divideAll(input : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : List<string> {
 		let current = new DivideState(input);
@@ -1304,11 +1304,11 @@
 	compileDefinition(state : CompileState, input : string) : [CompileState, string] {
 		return /* parseDefinition */(state, input).map((tuple) => new Tuple2Impl(tuple.left(), tuple.right().generate())).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */(input)));
 	}
-	mergeValues(cache : /* StringBuilder */, element : string) : /* StringBuilder */ {
+	mergeValues(cache : string, element : string) : string {
 		/* if (cache.isEmpty())  */{
-			return cache.append(element);
+			return element;
 		}
-		return cache.append(", ").append(element);
+		return cache + ", " + element;
 	}
 	createIndent(depth : number) : string {
 		return "\n" + "\t".repeat(depth);

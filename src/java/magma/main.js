@@ -322,19 +322,19 @@ Option < T > {
 }
 DivideState(input, string);
 {
-    /* this(input, 0, Lists.empty(), new StringBuilder(), 0) */ ;
+    /* this(input, 0, Lists.empty(), "", 0) */ ;
 }
 advance();
 DivideState;
 {
-    segments = /* this */ .segments.addLast(buffer.toString());
-    buffer = new /* StringBuilder */ ();
+    segments = /* this */ .segments.addLast(buffer);
+    buffer = "";
     return /* this */;
 }
 append(c, string);
 DivideState;
 {
-    /* this.buffer.append(c) */ ;
+    buffer = /* this */ .buffer + c;
     return /* this */;
 }
 enter();
@@ -657,10 +657,10 @@ parseStatements(state, CompileState, input, string, mapper, (arg0, arg1) => [Com
 {
     return /* parseAll0 */ (state, input, /* Main */ .foldStatementChar, mapper);
 }
-generateAll(merger, (arg0 /* StringBuilder */, arg1) =>  /* StringBuilder */, elements, (List));
+generateAll(merger, (arg0, arg1) => string, elements, (List));
 string;
 {
-    return elements.iterate().fold(new /* StringBuilder */ (), merger).toString();
+    return elements.iterate().fold("", merger);
 }
 parseAll0(state, CompileState, input, string, folder, (arg0, arg1) => DivideState, mapper, (arg0, arg1) => [CompileState, T]);
 [CompileState, (List)];
@@ -686,9 +686,10 @@ Option < [CompileState, (List)] > {
         });
     })
 };
-mergeStatements(stringBuilder, str, string);
+mergeStatements(cache, string, statement, string);
+string;
 {
-    return stringBuilder.append(str);
+    return cache + statement;
 }
 divideAll(input, string, folder, (arg0, arg1) => DivideState);
 List < string > {
@@ -1322,12 +1323,13 @@ compileDefinition(state, CompileState, input, string);
 {
     return /* parseDefinition */ (state, input).map((tuple) => new Tuple2Impl(tuple.left(), tuple.right().generate())).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (input)));
 }
-mergeValues(cache, element, string);
+mergeValues(cache, string, element, string);
+string;
 {
     /* if (cache.isEmpty())  */ {
-        return cache.append(element);
+        return element;
     }
-    return cache.append(", ").append(element);
+    return cache + ", " + element;
 }
 createIndent(depth, number);
 string;

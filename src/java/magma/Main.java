@@ -585,9 +585,9 @@ public class Main {
         private final int index;
         private int depth;
         private List<String> segments;
-        private StringBuilder buffer;
+        private String buffer;
 
-        public DivideState(String input, int index, List<String> segments, StringBuilder buffer, int depth) {
+        public DivideState(String input, int index, List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -596,17 +596,17 @@ public class Main {
         }
 
         public DivideState(String input) {
-            this(input, 0, Lists.empty(), new StringBuilder(), 0);
+            this(input, 0, Lists.empty(), "", 0);
         }
 
         private DivideState advance() {
-            this.segments = this.segments.addLast(this.buffer.toString());
-            this.buffer = new StringBuilder();
+            this.segments = this.segments.addLast(this.buffer);
+            this.buffer = "";
             return this;
         }
 
         private DivideState append(char c) {
-            this.buffer.append(c);
+            this.buffer = this.buffer + c;
             return this;
         }
 
@@ -996,11 +996,10 @@ public class Main {
         return parseAll0(state, input, Main::foldStatementChar, mapper);
     }
 
-    private static String generateAll(BiFunction<StringBuilder, String, StringBuilder> merger, List<String> elements) {
+    private static String generateAll(BiFunction<String, String, String> merger, List<String> elements) {
         return elements
                 .iterate()
-                .fold(new StringBuilder(), merger)
-                .toString();
+                .fold("", merger);
     }
 
     private static <T> Tuple2<CompileState, List<T>> parseAll0(
@@ -1041,8 +1040,8 @@ public class Main {
         });
     }
 
-    private static StringBuilder mergeStatements(StringBuilder stringBuilder, String str) {
-        return stringBuilder.append(str);
+    private static String mergeStatements(String cache, String statement) {
+        return cache + statement;
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
@@ -1761,11 +1760,12 @@ public class Main {
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(input)));
     }
 
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+    private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
-            return cache.append(element);
+            return element;
         }
-        return cache.append(", ").append(element);
+
+        return cache + ", " + element;
     }
 
     private static String createIndent(int depth) {
