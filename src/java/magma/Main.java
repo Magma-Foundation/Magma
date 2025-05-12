@@ -80,6 +80,8 @@ public class Main {
         Option<Tuple2<T, List<T>>> removeFirst();
 
         List<T> addAllLast(List<T> others);
+
+        Option<T> last();
     }
 
     private interface Head<T> {
@@ -398,6 +400,14 @@ public class Main {
             }
 
             @Override
+            public Option<T> last() {
+                if (this.elements.isEmpty()) {
+                    return new None<>();
+                }
+                return new Some<>(this.elements.getLast());
+            }
+
+            @Override
             public Option<T> get(int index) {
                 if (index < this.elements.size()) {
                     return new Some<>(this.elements.get(index));
@@ -518,13 +528,13 @@ public class Main {
             List<String> structures,
             List<Definition> definitions,
             List<ObjectType> objectTypes,
-            Option<String> maybeStructName,
+            List<String> structNames,
             List<String> typeParams,
             Option<Type> typeRegister
     ) {
 
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty(), new None<>());
+            this(Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), new None<>());
         }
 
         private Option<Type> resolveValue(String name) {
@@ -535,15 +545,15 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.maybeStructName, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.maybeStructName, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
         public Option<Type> resolveType(String name) {
-            if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent()) {
+            if (this.structNames.last().filter(inner -> inner.equals(name)).isPresent()) {
                 return new Some<>(new ObjectType(name, this.typeParams, this.definitions));
             }
 
@@ -562,23 +572,27 @@ public class Main {
         }
 
         public CompileState addType(ObjectType type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.maybeStructName, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.structNames, this.typeParams, this.typeRegister);
         }
 
         public CompileState withDefinition(Definition definition) {
-            return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.maybeStructName, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
-        public CompileState withStructName(String name) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, new Some<>(name), this.typeParams, this.typeRegister);
+        public CompileState pushStructName(String name) {
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister);
         }
 
         public CompileState withTypeParams(List<String> typeParams) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.maybeStructName, this.typeParams.addAllLast(typeParams), this.typeRegister);
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister);
         }
 
         public CompileState withExpectedType(Type type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.maybeStructName, this.typeParams, new Some<>(type));
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some<>(type));
+        }
+
+        public CompileState popStructName() {
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister);
         }
     }
 
@@ -1233,22 +1247,24 @@ public class Main {
                 .map(inner -> "<" + inner + ">")
                 .orElse("");
 
-        var parsed = parseStatements(state.withStructName(name).withTypeParams(typeParams), content, (state0, input) -> compileClassSegment(state0, input, 1));
+        var statementsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) -> compileClassSegment(state0, input, 1));
 
         List<String> parsed1;
         if (params.isEmpty()) {
-            parsed1 = parsed.right();
+            parsed1 = statementsTuple.right();
         }
         else {
             var joined = joinValues(retainDefinitions(params));
             var constructorIndent = createIndent(1);
-            parsed1 = parsed.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
+            parsed1 = statementsTuple.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
         }
 
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
 
-        return new Some<>(new Tuple2Impl<>(parsed.left().addStructure(generated).addType(new ObjectType(name, typeParams, parsed.left().definitions)), ""));
+        return new Some<>(new Tuple2Impl<>(statementsTuple.left()
+                .popStructName()
+                .addStructure(generated).addType(new ObjectType(name, typeParams, statementsTuple.left().definitions)), ""));
     }
 
     private static Option<Definition> retainDefinition(Parameter parameter) {
