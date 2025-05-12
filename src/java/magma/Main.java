@@ -292,10 +292,10 @@ public class Main {
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
             while (true) {
-                R finalCurrent = current;
-                var optional = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
-                if (optional.isPresent()) {
-                    current = optional.orElse(null);
+                var finalCurrent = current;
+                var option = this.head.next().map(inner -> folder.apply(finalCurrent, inner));
+                if (option instanceof Some<R> some) {
+                    current = some.value;
                 }
                 else {
                     return current;

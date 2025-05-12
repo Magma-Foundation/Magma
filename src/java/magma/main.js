@@ -91,9 +91,9 @@
         let current = initial;
         while (true) {
             let finalCurrent = current;
-            let optional = this.head.next().map((inner) => folder(finalCurrent, inner));
-            if (optional.isPresent()) {
-                current = optional.orElse( /* null */);
+            let option = this.head.next().map((inner) => folder(finalCurrent, inner));
+            if (option._variant === (unknownVariant.Some)) {
+                current = /* some */ .value;
             }
             else {
                 return current;

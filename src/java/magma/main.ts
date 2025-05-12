@@ -179,10 +179,10 @@
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		let current = initial;
 		while (true){
-			let finalCurrent : R = current;
-			let optional = this.head.next().map((inner) => folder(finalCurrent, inner));
-			if (optional.isPresent()){
-				current = optional.orElse(/* null */);
+			let finalCurrent = current;
+			let option = this.head.next().map((inner) => folder(finalCurrent, inner));
+			if (option._variant === unknownVariant.Some<R>){
+				current = /* some */.value;
 			}
 			else {
 				return current;
