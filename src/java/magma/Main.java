@@ -1133,15 +1133,26 @@ public class Main {
     private static Option<Tuple2<CompileState, String>> compileStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (beforeContent, withEnd) -> {
-                var strippedWithEnd = withEnd.strip();
-                return suffix(strippedWithEnd, "}", content1 -> {
-                    return first(beforeContent, " implements ", (s, s2) -> {
-                        return structureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
-                    }).or(() -> {
-                        return structureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
-                    });
+                return suffix(withEnd.strip(), "}", content1 -> {
+                    return getOr(targetInfix, state, beforeInfix, beforeContent, content1);
                 });
             });
+        });
+    }
+
+    private static Option<Tuple2<CompileState, String>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+        return first(beforeContent, " implements ", (s, s2) -> {
+            return structureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1);
+        }).or(() -> {
+            return structureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1);
+        });
+    }
+
+    private static Option<Tuple2<CompileState, String>> structureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+        return first(beforeContent, " extends ", (s, s2) -> {
+            return structureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
+        }).or(() -> {
+            return structureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
         });
     }
 
