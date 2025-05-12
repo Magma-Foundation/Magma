@@ -1346,7 +1346,7 @@ public class Main {
 
     private static Option<Tuple2<CompileState, String>> compileFunctionStatement(CompileState state, int depth, String stripped) {
         return suffix(stripped, ";", s -> {
-            var tuple = statementValue(state, s, depth);
+            var tuple = compileStatementValue(state, s, depth);
             return new Some<>(new Tuple2Impl<>(tuple.left(), createIndent(depth) + tuple.right() + ";"));
         });
     }
@@ -1385,7 +1385,7 @@ public class Main {
         return appended;
     }
 
-    private static Tuple2<CompileState, String> statementValue(CompileState state, String input, int depth) {
+    private static Tuple2<CompileState, String> compileStatementValue(CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
             var value = stripped.substring("return ".length());
@@ -1393,10 +1393,14 @@ public class Main {
             return new Tuple2Impl<>(tuple.left(), "return " + tuple.right());
         }
 
-        return first(stripped, "=", (s, s2) -> {
-            var definitionTuple = compileDefinition(state, s);
-            var valueTuple = compileValue(definitionTuple.left(), s2, depth);
-            return new Some<>(new Tuple2Impl<>(valueTuple.left(), "let " + definitionTuple.right() + " = " + valueTuple.right()));
+        return first(stripped, "=", (definitionString, valueString) -> {
+            return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
+                var definitionState = definitionTuple.left();
+                var definition = definitionTuple.right();
+
+                var valueTuple = compileValue(definitionState, valueString, depth);
+                return new Some<>(new Tuple2Impl<>(valueTuple.left().withDefinition(definition), "let " + definition.generate() + " = " + valueTuple.right()));
+            });
         }).orElseGet(() -> {
             return new Tuple2Impl<>(state, generatePlaceholder(stripped));
         });
