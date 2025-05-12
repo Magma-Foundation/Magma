@@ -67,9 +67,6 @@
 /* private */interface FindableType/*  */ {
 	typeParams : List<string>;
 	find(name : string) : Option<Type>;
-	replace(mapping : Map<string, Type>) : Type {
-		return this;
-	}
 }
 /* private */interface Header/*  */ {
 	createDefinition(paramTypes : List<Type>) : /* Definition */;
@@ -575,6 +572,9 @@
 			return found.replace(mapping);
 		});
 	}
+	replace(mapping : Map<string, Type>) : Type {
+		return this;
+	}
 }
 /* private */class Placeholder/*  */ {
 	constructor ((input : string)) {
@@ -591,6 +591,9 @@
 	}
 	find(name : string) : Option<Type> {
 		return new None();
+	}
+	replace(mapping : Map<string, Type>) : Type {
+		return this;
 	}
 }
 /* private */class StringValue/*  */ {

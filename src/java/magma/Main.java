@@ -124,11 +124,6 @@ public class Main {
         List<String> typeParams();
 
         Option<Type> find(String name);
-
-        @Override
-        default Type replace(Map<String, Type> mapping) {
-            return this;
-        }
     }
 
 
@@ -836,6 +831,11 @@ public class Main {
                 return found.replace(mapping);
             });
         }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
+        }
     }
 
     private record Placeholder(String input) implements Parameter, Value, FindableType {
@@ -857,6 +857,11 @@ public class Main {
         @Override
         public Option<Type> find(String name) {
             return new None<>();
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
         }
     }
 

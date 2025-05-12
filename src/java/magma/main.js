@@ -1,7 +1,4 @@
 "use strict";
-{
-    return this;
-}
 /* private static */ class None {
     map(mapper) {
         return new None();
@@ -591,6 +588,11 @@ Option < Type > {
         return found.replace(mapping);
     })
 };
+replace(mapping, (Map));
+Type;
+{
+    return this;
+}
 /* private */ class Placeholder /*  */ {
     constructor() { }
 }
@@ -612,6 +614,11 @@ find(name, string);
 Option < Type > {
     return: new None()
 };
+replace(mapping, (Map));
+Type;
+{
+    return this;
+}
 /* private */ class StringValue /*  */ {
     constructor() { }
 }
