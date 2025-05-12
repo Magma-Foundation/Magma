@@ -1,11 +1,4 @@
 "use strict";
-var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
-    var useValue = arguments.length > 2;
-    for (var i = 0; i < initializers.length; i++) {
-        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
-    }
-    return useValue ? value : void 0;
-};
 var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
     function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
     var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
@@ -33,6 +26,13 @@ var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, 
     if (target) Object.defineProperty(target, contextIn.name, descriptor);
     done = true;
 };
+var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
+    var useValue = arguments.length > 2;
+    for (var i = 0; i < initializers.length; i++) {
+        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+    }
+    return useValue ? value : void 0;
+};
 var OptionVariant;
 (function (OptionVariant) {
     OptionVariant[OptionVariant["Some"] = 0] = "Some";
@@ -57,22 +57,6 @@ var CallerVariant;
     CallerVariant[CallerVariant["ConstructionCaller"] = 0] = "ConstructionCaller";
     CallerVariant[CallerVariant["Value"] = 1] = "Value";
 })(CallerVariant || (CallerVariant = {}));
-toString();
-string;
-generateWithParams(joinedParameters, string);
-string;
-createDefinition(paramTypes, (List));
-Definition;
-maybeBefore();
-Option;
-name();
-string;
-type();
-Type;
-typeParams();
-List;
-containsAnnotation(annotation, string);
-boolean;
 var IncompleteClassSegmentVariant;
 (function (IncompleteClassSegmentVariant) {
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassDefinition"] = 0] = "ClassDefinition";
@@ -82,429 +66,218 @@ var IncompleteClassSegmentVariant;
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["StructurePrototype"] = 4] = "StructurePrototype";
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Whitespace"] = 5] = "Whitespace";
 })(IncompleteClassSegmentVariant || (IncompleteClassSegmentVariant = {}));
-/* private static final */ let None = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _map_decorators;
-    let _isPresent_decorators;
-    let _orElse_decorators;
-    let _filter_decorators;
-    let _orElseGet_decorators;
-    let _or_decorators;
-    let _flatMap_decorators;
-    let _isEmpty_decorators;
-    let _and_decorators;
-    return _a = class None {
-            map(mapper) {
-                return new _a();
-            }
-            isPresent() {
-                return false;
-            }
-            orElse(other) {
-                return other;
-            }
-            filter(predicate) {
-                return new _a();
-            }
-            orElseGet(supplier) {
-                return supplier();
-            }
-            or(other) {
-                return other();
-            }
-            flatMap(mapper) {
-                return new _a();
-            }
-            isEmpty() {
-                return true;
-            }
-            and(other) {
-                return new _a();
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _map_decorators = [Override];
-            _isPresent_decorators = [Override];
-            _orElse_decorators = [Override];
-            _filter_decorators = [Override];
-            _orElseGet_decorators = [Override];
-            _or_decorators = [Override];
-            _flatMap_decorators = [Override];
-            _isEmpty_decorators = [Override];
-            _and_decorators = [Override];
-            __esDecorate(_a, null, _map_decorators, { kind: "method", name: "map", static: false, private: false, access: { has: obj => "map" in obj, get: obj => obj.map }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _isPresent_decorators, { kind: "method", name: "isPresent", static: false, private: false, access: { has: obj => "isPresent" in obj, get: obj => obj.isPresent }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _orElse_decorators, { kind: "method", name: "orElse", static: false, private: false, access: { has: obj => "orElse" in obj, get: obj => obj.orElse }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _filter_decorators, { kind: "method", name: "filter", static: false, private: false, access: { has: obj => "filter" in obj, get: obj => obj.filter }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _orElseGet_decorators, { kind: "method", name: "orElseGet", static: false, private: false, access: { has: obj => "orElseGet" in obj, get: obj => obj.orElseGet }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _or_decorators, { kind: "method", name: "or", static: false, private: false, access: { has: obj => "or" in obj, get: obj => obj.or }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _flatMap_decorators, { kind: "method", name: "flatMap", static: false, private: false, access: { has: obj => "flatMap" in obj, get: obj => obj.flatMap }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _isEmpty_decorators, { kind: "method", name: "isEmpty", static: false, private: false, access: { has: obj => "isEmpty" in obj, get: obj => obj.isEmpty }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _and_decorators, { kind: "method", name: "and", static: false, private: false, access: { has: obj => "and" in obj, get: obj => obj.and }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private static final */ class None {
+    map(mapper) {
+        return new None();
+    }
+    isPresent() {
+        return false;
+    }
+    orElse(other) {
+        return other;
+    }
+    filter(predicate) {
+        return new None();
+    }
+    orElseGet(supplier) {
+        return supplier();
+    }
+    or(other) {
+        return other();
+    }
+    flatMap(mapper) {
+        return new None();
+    }
+    isEmpty() {
+        return true;
+    }
+    and(other) {
+        return new None();
+    }
+}
 /* private */ class Tuple2Impl {
     constructor(left, right) {
     }
 }
-/* private */ let Some = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _map_decorators;
-    let _isPresent_decorators;
-    let _orElse_decorators;
-    let _filter_decorators;
-    let _orElseGet_decorators;
-    let _or_decorators;
-    let _flatMap_decorators;
-    let _isEmpty_decorators;
-    let _and_decorators;
-    return _a = class Some {
-            constructor(value) {
-                __runInitializers(this, _instanceExtraInitializers);
+/* private */ class Some {
+    constructor(value) {
+    }
+    map(mapper) {
+        return new Some(mapper(this.value));
+    }
+    isPresent() {
+        return true;
+    }
+    orElse(other) {
+        return this.value;
+    }
+    filter(predicate) {
+        if (predicate(this.value)) {
+            return this;
+        }
+        return new None();
+    }
+    orElseGet(supplier) {
+        return this.value;
+    }
+    or(other) {
+        return this;
+    }
+    flatMap(mapper) {
+        return mapper(this.value);
+    }
+    isEmpty() {
+        return false;
+    }
+    and(other) {
+        return other().map((otherValue) => new Tuple2Impl(this.value, otherValue));
+    }
+}
+/* private static */ class SingleHead {
+    constructor(value) {
+        this.value = value;
+        this.retrieved = false;
+    }
+    next() {
+        if (this.retrieved) {
+            return new None();
+        }
+        this.retrieved = true;
+        return new Some(this.value);
+    }
+}
+/* private static */ class EmptyHead {
+    next() {
+        return new None();
+    }
+}
+/* private */ class HeadedIterator {
+    constructor(head) {
+    }
+    fold(initial, folder) {
+        let current = initial;
+        while (true) {
+            let finalCurrent = current;
+            let option = this.head.next().map((inner) => folder(finalCurrent, inner));
+            if (option._variant === OptionVariant.Some) {
+                let some = option;
+                current = some.value;
             }
-            map(mapper) {
-                return new _a(mapper(this.value));
+            else {
+                return current;
             }
-            isPresent() {
-                return true;
+        }
+    }
+    map(mapper) {
+        return new HeadedIterator(() => this.head.next().map(mapper));
+    }
+    collect(collector) {
+        return this.fold(collector.createInitial(), collector.fold);
+    }
+    filter(predicate) {
+        return this.flatMap((element) => {
+            if (predicate(element)) {
+                return new HeadedIterator(new SingleHead(element));
             }
-            orElse(other) {
-                return this.value;
-            }
-            filter(predicate) {
-                if (predicate(this.value)) {
-                    return this;
-                }
-                return new None();
-            }
-            orElseGet(supplier) {
-                return this.value;
-            }
-            or(other) {
-                return this;
-            }
-            flatMap(mapper) {
-                return mapper(this.value);
-            }
-            isEmpty() {
-                return false;
-            }
-            and(other) {
-                return other().map((otherValue) => new Tuple2Impl(this.value, otherValue));
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _map_decorators = [Override];
-            _isPresent_decorators = [Override];
-            _orElse_decorators = [Override];
-            _filter_decorators = [Override];
-            _orElseGet_decorators = [Override];
-            _or_decorators = [Override];
-            _flatMap_decorators = [Override];
-            _isEmpty_decorators = [Override];
-            _and_decorators = [Override];
-            __esDecorate(_a, null, _map_decorators, { kind: "method", name: "map", static: false, private: false, access: { has: obj => "map" in obj, get: obj => obj.map }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _isPresent_decorators, { kind: "method", name: "isPresent", static: false, private: false, access: { has: obj => "isPresent" in obj, get: obj => obj.isPresent }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _orElse_decorators, { kind: "method", name: "orElse", static: false, private: false, access: { has: obj => "orElse" in obj, get: obj => obj.orElse }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _filter_decorators, { kind: "method", name: "filter", static: false, private: false, access: { has: obj => "filter" in obj, get: obj => obj.filter }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _orElseGet_decorators, { kind: "method", name: "orElseGet", static: false, private: false, access: { has: obj => "orElseGet" in obj, get: obj => obj.orElseGet }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _or_decorators, { kind: "method", name: "or", static: false, private: false, access: { has: obj => "or" in obj, get: obj => obj.or }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _flatMap_decorators, { kind: "method", name: "flatMap", static: false, private: false, access: { has: obj => "flatMap" in obj, get: obj => obj.flatMap }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _isEmpty_decorators, { kind: "method", name: "isEmpty", static: false, private: false, access: { has: obj => "isEmpty" in obj, get: obj => obj.isEmpty }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _and_decorators, { kind: "method", name: "and", static: false, private: false, access: { has: obj => "and" in obj, get: obj => obj.and }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static */ let SingleHead = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _next_decorators;
-    return _a = class SingleHead {
-            constructor(value) {
-                this.value = __runInitializers(this, _instanceExtraInitializers);
-                this.value = value;
-                this.retrieved = false;
-            }
-            next() {
-                if (this.retrieved) {
-                    return new None();
-                }
-                this.retrieved = true;
-                return new Some(this.value);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _next_decorators = [Override];
-            __esDecorate(_a, null, _next_decorators, { kind: "method", name: "next", static: false, private: false, access: { has: obj => "next" in obj, get: obj => obj.next }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static */ let EmptyHead = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _next_decorators;
-    return _a = class EmptyHead {
-            next() {
-                return new None();
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _next_decorators = [Override];
-            __esDecorate(_a, null, _next_decorators, { kind: "method", name: "next", static: false, private: false, access: { has: obj => "next" in obj, get: obj => obj.next }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let HeadedIterator = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _fold_decorators;
-    let _map_decorators;
-    let _collect_decorators;
-    let _filter_decorators;
-    let _next_decorators;
-    let _flatMap_decorators;
-    let _zip_decorators;
-    return _a = class HeadedIterator {
-            constructor(head) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            fold(initial, folder) {
-                let current = initial;
-                while (true) {
-                    let finalCurrent = current;
-                    let option = this.head.next().map((inner) => folder(finalCurrent, inner));
-                    if (option._variant === OptionVariant.Some) {
-                        let some = option;
-                        current = some.value;
-                    }
-                    else {
-                        return current;
-                    }
-                }
-            }
-            map(mapper) {
-                return new _a(() => this.head.next().map(mapper));
-            }
-            collect(collector) {
-                return this.fold(collector.createInitial(), collector.fold);
-            }
-            filter(predicate) {
-                return this.flatMap((element) => {
-                    if (predicate(element)) {
-                        return new _a(new SingleHead(element));
-                    }
-                    return new _a(new EmptyHead());
-                });
-            }
-            next() {
-                return this.head.next();
-            }
-            flatMap(f) {
-                return new _a(new FlatMapHead(this.head, f));
-            }
-            zip(other) {
-                return new _a(() => _a.this.head.next().and(other.next));
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _fold_decorators = [Override];
-            _map_decorators = [Override];
-            _collect_decorators = [Override];
-            _filter_decorators = [Override];
-            _next_decorators = [Override];
-            _flatMap_decorators = [Override];
-            _zip_decorators = [Override];
-            __esDecorate(_a, null, _fold_decorators, { kind: "method", name: "fold", static: false, private: false, access: { has: obj => "fold" in obj, get: obj => obj.fold }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _map_decorators, { kind: "method", name: "map", static: false, private: false, access: { has: obj => "map" in obj, get: obj => obj.map }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _collect_decorators, { kind: "method", name: "collect", static: false, private: false, access: { has: obj => "collect" in obj, get: obj => obj.collect }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _filter_decorators, { kind: "method", name: "filter", static: false, private: false, access: { has: obj => "filter" in obj, get: obj => obj.filter }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _next_decorators, { kind: "method", name: "next", static: false, private: false, access: { has: obj => "next" in obj, get: obj => obj.next }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _flatMap_decorators, { kind: "method", name: "flatMap", static: false, private: false, access: { has: obj => "flatMap" in obj, get: obj => obj.flatMap }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _zip_decorators, { kind: "method", name: "zip", static: false, private: false, access: { has: obj => "zip" in obj, get: obj => obj.zip }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static */ let RangeHead = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _next_decorators;
-    return _a = class RangeHead /*  */ {
-            constructor(length) {
-                this.length = __runInitializers(this, _instanceExtraInitializers);
-                this.length = length;
-            }
-            next() {
-                if (this.counter < this.length) {
-                    let value = this.counter;
-                    /* this.counter++ */ ;
-                    return new Some(value);
-                }
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _next_decorators = [Override];
-            __esDecorate(_a, null, _next_decorators, { kind: "method", name: "next", static: false, private: false, access: { has: obj => "next" in obj, get: obj => obj.next }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+            return new HeadedIterator(new EmptyHead());
+        });
+    }
+    next() {
+        return this.head.next();
+    }
+    flatMap(f) {
+        return new HeadedIterator(new FlatMapHead(this.head, f));
+    }
+    zip(other) {
+        return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
+    }
+}
+/* private static */ class RangeHead /*  */ {
+    constructor(length) {
+        this.length = length;
+    }
+    next() {
+        if (this.counter < this.length) {
+            let value = this.counter;
+            /* this.counter++ */ ;
+            return new Some(value);
+        }
+        return new None();
+    }
+}
 /* private static */ class Lists /*  */ {
 }
-/* private */ let ImmutableDefinition = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _mapType_decorators;
-    let _generateWithParams_decorators;
-    let _createDefinition_decorators;
-    let _containsAnnotation_decorators;
-    return _a = class ImmutableDefinition /*  */ {
-            constructor(annotations, maybeBefore, name, type, typeParams) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            createSimpleDefinition(name, type) {
-                return new _a(Lists.empty(), new None(), name, type, Lists.empty());
-            }
-            generate() {
-                return this.generateWithParams("");
-            }
-            generateType() {
-                if (this.type.equals(Primitive.Unknown)) {
-                    return "";
-                }
-                return " : " + this.type.generate();
-            }
-            joinBefore() {
-                return !.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
-            }
-            joinTypeParams() {
-                return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
-            }
-            mapType(mapper) {
-                return new _a(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
-            }
-            generateWithParams(joinedParameters) {
-                let joinedAnnotations = this.annotations.iterate().map((value) => "@" + value + " ").collect(new Joiner()).orElse("");
-                let joined = this.joinTypeParams();
-                let before = this.joinBefore();
-                let typeString = this.generateType();
-                return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
-            }
-            createDefinition(paramTypes) {
-                let type1 = new FunctionType(paramTypes, this.type);
-                return new _a(this.annotations, this.maybeBefore, this.name, type1, this.typeParams);
-            }
-            containsAnnotation(annotation) {
-                return this.annotations.contains(annotation);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _mapType_decorators = [Override];
-            _generateWithParams_decorators = [Override];
-            _createDefinition_decorators = [Override];
-            _containsAnnotation_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _mapType_decorators, { kind: "method", name: "mapType", static: false, private: false, access: { has: obj => "mapType" in obj, get: obj => obj.mapType }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _generateWithParams_decorators, { kind: "method", name: "generateWithParams", static: false, private: false, access: { has: obj => "generateWithParams" in obj, get: obj => obj.generateWithParams }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _createDefinition_decorators, { kind: "method", name: "createDefinition", static: false, private: false, access: { has: obj => "createDefinition" in obj, get: obj => obj.createDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _containsAnnotation_decorators, { kind: "method", name: "containsAnnotation", static: false, private: false, access: { has: obj => "containsAnnotation" in obj, get: obj => obj.containsAnnotation }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let ObjectType = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _replace_decorators;
-    let _find_decorators;
-    let _findName_decorators;
-    return _a = class ObjectType /*  */ {
-            constructor(name, typeParams, definitions) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.name;
-            }
-            replace(mapping) {
-                return new _a(this.name, this.typeParams, this.definitions.iterate().map((definition) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()));
-            }
-            find(name) {
-                return this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next();
-            }
-            findName() {
-                return new Some(this.name);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _replace_decorators = [Override];
-            _find_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _find_decorators, { kind: "method", name: "find", static: false, private: false, access: { has: obj => "find" in obj, get: obj => obj.find }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let TypeParam = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
-    return _a = class TypeParam /*  */ {
-            constructor(value) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.value;
-            }
-            replace(mapping) {
-                return mapping.find(this.value).orElse(this);
-            }
-            findName() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class ImmutableDefinition /*  */ {
+    constructor(annotations, maybeBefore, name, type, typeParams) {
+    }
+    createSimpleDefinition(name, type) {
+        return new ImmutableDefinition(Lists.empty(), new None(), name, type, Lists.empty());
+    }
+    generate() {
+        return this.generateWithParams("");
+    }
+    generateType() {
+        if (this.type.equals(Primitive.Unknown)) {
+            return "";
+        }
+        return " : " + this.type.generate();
+    }
+    joinBefore() {
+        return !.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
+    }
+    joinTypeParams() {
+        return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
+    }
+    mapType(mapper) {
+        return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
+    }
+    generateWithParams(joinedParameters) {
+        let joinedAnnotations = this.annotations.iterate().map((value) => "@" + value + " ").collect(new Joiner()).orElse("");
+        let joined = this.joinTypeParams();
+        let before = this.joinBefore();
+        let typeString = this.generateType();
+        return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
+    }
+    createDefinition(paramTypes) {
+        let type1 = new FunctionType(paramTypes, this.type);
+        return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, type1, this.typeParams);
+    }
+    containsAnnotation(annotation) {
+        return this.annotations.contains(annotation);
+    }
+    removeAnnotations() {
+        return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
+    }
+}
+/* private */ class ObjectType /*  */ {
+    constructor(name, typeParams, definitions) {
+    }
+    generate() {
+        return this.name;
+    }
+    replace(mapping) {
+        return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()));
+    }
+    find(name) {
+        return this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next();
+    }
+    findName() {
+        return new Some(this.name);
+    }
+}
+/* private */ class TypeParam /*  */ {
+    constructor(value) {
+    }
+    generate() {
+        return this.value;
+    }
+    replace(mapping) {
+        return mapping.find(this.value).orElse(this);
+    }
+    findName() {
+        return new None();
+    }
+}
 /* private */ class CompileState /*  */ {
     constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister, functionSegments) {
     }
@@ -632,58 +405,24 @@ string;
 {
     return this.input.charAt(this.index);
 }
-/* private */ let Joiner = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _createInitial_decorators;
-    let _fold_decorators;
-    return _a = class Joiner /*  */ {
-            constructor(delimiter) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            createInitial() {
-                return new None();
-            }
-            fold(current, element) {
-                return new Some(current.map((inner) => inner + this.delimiter + element).orElse(element));
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _createInitial_decorators = [Override];
-            _fold_decorators = [Override];
-            __esDecorate(_a, null, _createInitial_decorators, { kind: "method", name: "createInitial", static: false, private: false, access: { has: obj => "createInitial" in obj, get: obj => obj.createInitial }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _fold_decorators, { kind: "method", name: "fold", static: false, private: false, access: { has: obj => "fold" in obj, get: obj => obj.fold }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static */ let ListCollector = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _createInitial_decorators;
-    let _fold_decorators;
-    return _a = class ListCollector {
-            createInitial() {
-                return Lists.empty();
-            }
-            fold(current, element) {
-                return current.addLast(element);
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _createInitial_decorators = [Override];
-            _fold_decorators = [Override];
-            __esDecorate(_a, null, _createInitial_decorators, { kind: "method", name: "createInitial", static: false, private: false, access: { has: obj => "createInitial" in obj, get: obj => obj.createInitial }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _fold_decorators, { kind: "method", name: "fold", static: false, private: false, access: { has: obj => "fold" in obj, get: obj => obj.fold }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class Joiner /*  */ {
+    constructor(delimiter) {
+    }
+    createInitial() {
+        return new None();
+    }
+    fold(current, element) {
+        return new Some(current.map((inner) => inner + this.delimiter + element).orElse(element));
+    }
+}
+/* private static */ class ListCollector {
+    createInitial() {
+        return Lists.empty();
+    }
+    fold(current, element) {
+        return current.addLast(element);
+    }
+}
 /* private static */ class FlatMapHead {
 }
 this.mapper = mapper;
@@ -711,583 +450,246 @@ Option < R > {
         }
     }
 };
-/* private */ let ArrayType = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
-    return _a = class ArrayType /*  */ {
-            constructor(right) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.right().generate() + "[]";
-            }
-            replace(mapping) {
-                return this;
-            }
-            findName() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static final */ let Whitespace = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _maybeCreateDefinition_decorators;
-    return _a = class Whitespace /*  */ {
-            generate() {
-                return "";
-            }
-            maybeCreateDefinition() {
-                return new None();
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _maybeCreateDefinition_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _maybeCreateDefinition_decorators, { kind: "method", name: "maybeCreateDefinition", static: false, private: false, access: { has: obj => "maybeCreateDefinition" in obj, get: obj => obj.maybeCreateDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class ArrayType /*  */ {
+    constructor(right) {
+    }
+    generate() {
+        return this.right().generate() + "[]";
+    }
+    replace(mapping) {
+        return this;
+    }
+    findName() {
+        return new None();
+    }
+}
+/* private static final */ class Whitespace /*  */ {
+    generate() {
+        return "";
+    }
+    maybeCreateDefinition() {
+        return new None();
+    }
+}
 /* private static */ class Iterators /*  */ {
     fromOption(option) {
         let single = option.map(SingleHead.new);
         return new HeadedIterator(single.orElseGet(EmptyHead.new));
     }
 }
-/* private */ let FunctionType = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
-    return _a = class FunctionType /*  */ {
-            constructor(arguments, returns) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
-                return "(" + joined + ") => " + this.returns.generate();
-            }
-            replace(mapping) {
-                return new _a(this.arguments.iterate().map((type) => type.replace(mapping)).collect(new ListCollector()), this.returns);
-            }
-            findName() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let TupleType = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
-    return _a = class TupleType /*  */ {
-            constructor(arguments) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).orElse("");
-                return "[" + joinedArguments + "]";
-            }
-            replace(mapping) {
-                return this;
-            }
-            findName() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Template = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _typeParams_decorators;
-    let _find_decorators;
-    let _name_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
-    return _a = class Template /*  */ {
-            constructor(base, arguments) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-                return this.base.generate() + joinedArguments;
-            }
-            typeParams() {
-                return this.base.typeParams();
-            }
-            find(name) {
-                return this.base.find(name).map((found) => {
-                    let mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
-                    return found.replace(mapping);
-                });
-            }
-            name() {
-                return this.base.name();
-            }
-            replace(mapping) {
-                return this;
-            }
-            findName() {
-                return this.base.findName();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _typeParams_decorators = [Override];
-            _find_decorators = [Override];
-            _name_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _typeParams_decorators, { kind: "method", name: "typeParams", static: false, private: false, access: { has: obj => "typeParams" in obj, get: obj => obj.typeParams }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _find_decorators, { kind: "method", name: "find", static: false, private: false, access: { has: obj => "find" in obj, get: obj => obj.find }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _name_decorators, { kind: "method", name: "name", static: false, private: false, access: { has: obj => "name" in obj, get: obj => obj.name }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Placeholder = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    let _typeParams_decorators;
-    let _find_decorators;
-    let _name_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
-    let _maybeCreateDefinition_decorators;
-    return _a = class Placeholder /*  */ {
-            constructor(input) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return generatePlaceholder(this.input);
-            }
-            type() {
-                return Primitive.Unknown;
-            }
-            typeParams() {
-                return Lists.empty();
-            }
-            find(name) {
-                return new None();
-            }
-            name() {
-                return this.input;
-            }
-            replace(mapping) {
-                return this;
-            }
-            findName() {
-                return new None();
-            }
-            maybeCreateDefinition() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            _typeParams_decorators = [Override];
-            _find_decorators = [Override];
-            _name_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            _maybeCreateDefinition_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _typeParams_decorators, { kind: "method", name: "typeParams", static: false, private: false, access: { has: obj => "typeParams" in obj, get: obj => obj.typeParams }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _find_decorators, { kind: "method", name: "find", static: false, private: false, access: { has: obj => "find" in obj, get: obj => obj.find }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _name_decorators, { kind: "method", name: "name", static: false, private: false, access: { has: obj => "name" in obj, get: obj => obj.name }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _maybeCreateDefinition_decorators, { kind: "method", name: "maybeCreateDefinition", static: false, private: false, access: { has: obj => "maybeCreateDefinition" in obj, get: obj => obj.maybeCreateDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let StringValue = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class StringValue /*  */ {
-            constructor(stripped) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.stripped;
-            }
-            type() {
-                return Primitive.Unknown;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let DataAccess = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class DataAccess /*  */ {
-            constructor(parent, property, type) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.parent.generate() + "." + this.property + createDebugString(this.type);
-            }
-            type() {
-                return this.type;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let ConstructionCaller = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class ConstructionCaller /*  */ {
-            constructor(type) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return "new " + this.type.generate();
-            }
-            toFunction() {
-                return new FunctionType(Lists.empty(), this.type);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Operation = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class Operation /*  */ {
-            constructor(left, operator /* Operator */, right) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
-            }
-            type() {
-                return Primitive.Unknown;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Not = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class Not /*  */ {
-            constructor(value) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return "!" + this.value.generate();
-            }
-            type() {
-                return Primitive.Unknown;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let BlockLambdaValue = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class BlockLambdaValue /*  */ {
-            constructor(depth, statements) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return "{" + this.joinStatements() + createIndent(this.depth) + "}";
-            }
-            joinStatements() {
-                return this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Lambda = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class Lambda /*  */ {
-            constructor(parameters, body) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                let joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
-                return "(" + joined + ") => " + this.body.generate();
-            }
-            type() {
-                return Primitive.Unknown;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Invokable = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Invokable /*  */ {
-            constructor(caller, arguments, type) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                let joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
-                return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let IndexValue = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class IndexValue /*  */ {
-            constructor(parent, child) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.parent.generate() + "[" + this.child.generate() + "]";
-            }
-            type() {
-                return Primitive.Unknown;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let SymbolValue = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class SymbolValue /*  */ {
-            constructor(stripped, type) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.stripped + createDebugString(this.type);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let JVMMap = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _find_decorators;
-    let _with_decorators;
-    return _a = class JVMMap {
-            constructor(map) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            find(key) {
-                if (this.map.containsKey(key)) {
-                    return new Some(this.map.get(key));
-                }
-                return new None();
-            }
-            with(key, value) {
-                /* this.map.put(key, value) */ ;
-                return this;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _find_decorators = [Override];
-            _with_decorators = [Override];
-            __esDecorate(_a, null, _find_decorators, { kind: "method", name: "find", static: false, private: false, access: { has: obj => "find" in obj, get: obj => obj.find }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _with_decorators, { kind: "method", name: "with", static: false, private: false, access: { has: obj => "with" in obj, get: obj => obj.with }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class FunctionType /*  */ {
+    constructor(arguments, returns) {
+    }
+    generate() {
+        let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
+        return "(" + joined + ") => " + this.returns.generate();
+    }
+    replace(mapping) {
+        return new FunctionType(this.arguments.iterate().map((type) => type.replace(mapping)).collect(new ListCollector()), this.returns);
+    }
+    findName() {
+        return new None();
+    }
+}
+/* private */ class TupleType /*  */ {
+    constructor(arguments) {
+    }
+    generate() {
+        let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).orElse("");
+        return "[" + joinedArguments + "]";
+    }
+    replace(mapping) {
+        return this;
+    }
+    findName() {
+        return new None();
+    }
+}
+/* private */ class Template /*  */ {
+    constructor(base, arguments) {
+    }
+    generate() {
+        let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+        return this.base.generate() + joinedArguments;
+    }
+    typeParams() {
+        return this.base.typeParams();
+    }
+    find(name) {
+        return this.base.find(name).map((found) => {
+            let mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
+            return found.replace(mapping);
+        });
+    }
+    name() {
+        return this.base.name();
+    }
+    replace(mapping) {
+        return this;
+    }
+    findName() {
+        return this.base.findName();
+    }
+}
+/* private */ class Placeholder /*  */ {
+    constructor(input) {
+    }
+    generate() {
+        return generatePlaceholder(this.input);
+    }
+    type() {
+        return Primitive.Unknown;
+    }
+    typeParams() {
+        return Lists.empty();
+    }
+    find(name) {
+        return new None();
+    }
+    name() {
+        return this.input;
+    }
+    replace(mapping) {
+        return this;
+    }
+    findName() {
+        return new None();
+    }
+    maybeCreateDefinition() {
+        return new None();
+    }
+}
+/* private */ class StringValue /*  */ {
+    constructor(stripped) {
+    }
+    generate() {
+        return this.stripped;
+    }
+    type() {
+        return Primitive.Unknown;
+    }
+}
+/* private */ class DataAccess /*  */ {
+    constructor(parent, property, type) {
+    }
+    generate() {
+        return this.parent.generate() + "." + this.property + createDebugString(this.type);
+    }
+    type() {
+        return this.type;
+    }
+}
+/* private */ class ConstructionCaller /*  */ {
+    constructor(type) {
+    }
+    generate() {
+        return "new " + this.type.generate();
+    }
+    toFunction() {
+        return new FunctionType(Lists.empty(), this.type);
+    }
+}
+/* private */ class Operation /*  */ {
+    constructor(left, operator /* Operator */, right) {
+    }
+    generate() {
+        return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
+    }
+    type() {
+        return Primitive.Unknown;
+    }
+}
+/* private */ class Not /*  */ {
+    constructor(value) {
+    }
+    generate() {
+        return "!" + this.value.generate();
+    }
+    type() {
+        return Primitive.Unknown;
+    }
+}
+/* private */ class BlockLambdaValue /*  */ {
+    constructor(depth, statements) {
+    }
+    generate() {
+        return "{" + this.joinStatements() + createIndent(this.depth) + "}";
+    }
+    joinStatements() {
+        return this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+    }
+}
+/* private */ class Lambda /*  */ {
+    constructor(parameters, body) {
+    }
+    generate() {
+        let joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+        return "(" + joined + ") => " + this.body.generate();
+    }
+    type() {
+        return Primitive.Unknown;
+    }
+}
+/* private */ class Invokable /*  */ {
+    constructor(caller, arguments, type) {
+    }
+    generate() {
+        let joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
+        return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
+    }
+}
+/* private */ class IndexValue /*  */ {
+    constructor(parent, child) {
+    }
+    generate() {
+        return this.parent.generate() + "[" + this.child.generate() + "]";
+    }
+    type() {
+        return Primitive.Unknown;
+    }
+}
+/* private */ class SymbolValue /*  */ {
+    constructor(stripped, type) {
+    }
+    generate() {
+        return this.stripped + createDebugString(this.type);
+    }
+}
+/* private */ class JVMMap {
+    constructor(map) {
+    }
+    find(key) {
+        if (this.map.containsKey(key)) {
+            return new Some(this.map.get(key));
+        }
+        return new None();
+    }
+    with(key, value) {
+        /* this.map.put(key, value) */ ;
+        return this;
+    }
+}
 /* private static */ class Maps /*  */ {
     empty() {
         return new JVMMap();
     }
 }
-/* private */ let MapCollector = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _createInitial_decorators;
-    let _fold_decorators;
-    return _a = class MapCollector {
-            createInitial() {
-                return Maps.empty();
-            }
-            fold(current, element) {
-                return current.with(element[0](), element[1]());
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _createInitial_decorators = [Override];
-            _fold_decorators = [Override];
-            __esDecorate(_a, null, _createInitial_decorators, { kind: "method", name: "createInitial", static: false, private: false, access: { has: obj => "createInitial" in obj, get: obj => obj.createInitial }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _fold_decorators, { kind: "method", name: "fold", static: false, private: false, access: { has: obj => "fold" in obj, get: obj => obj.fold }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static */ let ConstructorHeader = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _createDefinition_decorators;
-    let _generateWithParams_decorators;
-    return _a = class ConstructorHeader /*  */ {
-            createDefinition(paramTypes) {
-                return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
-            }
-            generateWithParams(joinedParameters) {
-                return "constructor " + joinedParameters;
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _createDefinition_decorators = [Override];
-            _generateWithParams_decorators = [Override];
-            __esDecorate(_a, null, _createDefinition_decorators, { kind: "method", name: "createDefinition", static: false, private: false, access: { has: obj => "createDefinition" in obj, get: obj => obj.createDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _generateWithParams_decorators, { kind: "method", name: "generateWithParams", static: false, private: false, access: { has: obj => "generateWithParams" in obj, get: obj => obj.generateWithParams }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class MapCollector {
+    createInitial() {
+        return Maps.empty();
+    }
+    fold(current, element) {
+        return current.with(element[0](), element[1]());
+    }
+}
+/* private static */ class ConstructorHeader /*  */ {
+    createDefinition(paramTypes) {
+        return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
+    }
+    generateWithParams(joinedParameters) {
+        return "constructor " + joinedParameters;
+    }
+}
 /* private static */ class Method /*  */ {
 }
 this.depth = depth;
@@ -1307,261 +709,102 @@ string;
     let generatedStatements = this.statements.map(Method.joinStatements).map((inner) => " {" + inner + indent + "}").orElse(";");
     return indent + generatedHeader + generatedStatements;
 }
-/* private */ let Block = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Block /*  */ {
-            constructor(depth, header, statements) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                let indent = createIndent(this.depth);
-                let collect = this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
-                return indent + this.header.generate() + "{" + collect + indent + "}";
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Conditional = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Conditional /*  */ {
-            constructor(prefix, value1) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.prefix + " (" + this.value1.generate() + ")";
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private static */ let Else = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Else /*  */ {
-            generate() {
-                return "else ";
-            }
-            constructor() {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Return = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Return /*  */ {
-            constructor(value) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return "return " + this.value.generate();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Initialization = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Initialization /*  */ {
-            constructor(definition, source) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return "let " + this.definition.generate() + " = " + this.source.generate();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Assignment = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Assignment /*  */ {
-            constructor(destination, source) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.destination.generate() + " = " + this.source.generate();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Statement = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Statement /*  */ {
-            constructor(depth, value) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return createIndent(this.depth) + this.value.generate() + ";";
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let MethodPrototype = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _maybeCreateDefinition_decorators;
-    return _a = class MethodPrototype /*  */ {
-            constructor(depth, header, parameters, content) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            createDefinition() {
-                return this.header.createDefinition(this.findParamTypes());
-            }
-            findParamTypes() {
-                return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
-            }
-            maybeCreateDefinition() {
-                return new Some(this.header.createDefinition(this.findParamTypes()));
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _maybeCreateDefinition_decorators = [Override];
-            __esDecorate(_a, null, _maybeCreateDefinition_decorators, { kind: "method", name: "maybeCreateDefinition", static: false, private: false, access: { has: obj => "maybeCreateDefinition" in obj, get: obj => obj.maybeCreateDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let IncompleteClassSegmentWrapper = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _maybeCreateDefinition_decorators;
-    return _a = class IncompleteClassSegmentWrapper /*  */ {
-            constructor(segment) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            maybeCreateDefinition() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _maybeCreateDefinition_decorators = [Override];
-            __esDecorate(_a, null, _maybeCreateDefinition_decorators, { kind: "method", name: "maybeCreateDefinition", static: false, private: false, access: { has: obj => "maybeCreateDefinition" in obj, get: obj => obj.maybeCreateDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let ClassDefinition = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _maybeCreateDefinition_decorators;
-    return _a = class ClassDefinition /*  */ {
-            constructor(definition, depth) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            maybeCreateDefinition() {
-                return new Some(this.definition);
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _maybeCreateDefinition_decorators = [Override];
-            __esDecorate(_a, null, _maybeCreateDefinition_decorators, { kind: "method", name: "maybeCreateDefinition", static: false, private: false, access: { has: obj => "maybeCreateDefinition" in obj, get: obj => obj.maybeCreateDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let StructurePrototype = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _maybeCreateDefinition_decorators;
-    return _a = class StructurePrototype /*  */ {
-            constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            createObjectType() {
-                let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
-                return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
-            }
-            maybeCreateDefinition() {
-                return new None();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _maybeCreateDefinition_decorators = [Override];
-            __esDecorate(_a, null, _maybeCreateDefinition_decorators, { kind: "method", name: "maybeCreateDefinition", static: false, private: false, access: { has: obj => "maybeCreateDefinition" in obj, get: obj => obj.maybeCreateDefinition }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
-/* private */ let Cast = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    return _a = class Cast /*  */ {
-            constructor(value, type) {
-                __runInitializers(this, _instanceExtraInitializers);
-            }
-            generate() {
-                return this.value.generate() + " as " + this.type.generate();
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class Block /*  */ {
+    constructor(depth, header, statements) {
+    }
+    generate() {
+        let indent = createIndent(this.depth);
+        let collect = this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+        return indent + this.header.generate() + "{" + collect + indent + "}";
+    }
+}
+/* private */ class Conditional /*  */ {
+    constructor(prefix, value1) {
+    }
+    generate() {
+        return this.prefix + " (" + this.value1.generate() + ")";
+    }
+}
+/* private static */ class Else /*  */ {
+    generate() {
+        return "else ";
+    }
+}
+/* private */ class Return /*  */ {
+    constructor(value) {
+    }
+    generate() {
+        return "return " + this.value.generate();
+    }
+}
+/* private */ class Initialization /*  */ {
+    constructor(definition, source) {
+    }
+    generate() {
+        return "let " + this.definition.generate() + " = " + this.source.generate();
+    }
+}
+/* private */ class Assignment /*  */ {
+    constructor(destination, source) {
+    }
+    generate() {
+        return this.destination.generate() + " = " + this.source.generate();
+    }
+}
+/* private */ class Statement /*  */ {
+    constructor(depth, value) {
+    }
+    generate() {
+        return createIndent(this.depth) + this.value.generate() + ";";
+    }
+}
+/* private */ class MethodPrototype /*  */ {
+    constructor(depth, header, parameters, content) {
+    }
+    createDefinition() {
+        return this.header.createDefinition(this.findParamTypes());
+    }
+    findParamTypes() {
+        return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
+    }
+    maybeCreateDefinition() {
+        return new Some(this.header.createDefinition(this.findParamTypes()));
+    }
+}
+/* private */ class IncompleteClassSegmentWrapper /*  */ {
+    constructor(segment) {
+    }
+    maybeCreateDefinition() {
+        return new None();
+    }
+}
+/* private */ class ClassDefinition /*  */ {
+    constructor(definition, depth) {
+    }
+    maybeCreateDefinition() {
+        return new Some(this.definition);
+    }
+}
+/* private */ class StructurePrototype /*  */ {
+    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants) {
+    }
+    createObjectType() {
+        let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+        return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
+    }
+    maybeCreateDefinition() {
+        return new None();
+    }
+}
+/* private */ class Cast /*  */ {
+    constructor(value, type) {
+    }
+    generate() {
+        return this.value.generate() + " as " + this.type.generate();
+    }
+}
 /* private */ let Primitive = (() => {
     var _a;
-    let _instanceExtraInitializers = [];
     let __decorators;
     let __initializers = [];
     let __extraInitializers = [];
@@ -1571,12 +814,9 @@ string;
     let __decorators_2;
     let __initializers_2 = [];
     let __extraInitializers_2 = [];
-    let _generate_decorators;
-    let _replace_decorators;
-    let _findName_decorators;
     return _a = class Primitive /*  */ {
             constructor(value) {
-                this. = (__runInitializers(this, _instanceExtraInitializers), __runInitializers(this, __initializers, void 0));
+                this. = __runInitializers(this, __initializers, void 0);
                 this. = (__runInitializers(this, __extraInitializers), __runInitializers(this, __initializers_1, void 0));
                 this. = (__runInitializers(this, __extraInitializers_1), __runInitializers(this, __initializers_2, void 0));
                 this.value = __runInitializers(this, __extraInitializers_2);
@@ -1597,12 +837,6 @@ string;
             __decorators = [nt("number")];
             __decorators_1 = [tring("string")];
             __decorators_2 = [oolean("boolean")];
-            _generate_decorators = [Override];
-            _replace_decorators = [Override];
-            _findName_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _replace_decorators, { kind: "method", name: "replace", static: false, private: false, access: { has: obj => "replace" in obj, get: obj => obj.replace }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _findName_decorators, { kind: "method", name: "findName", static: false, private: false, access: { has: obj => "findName" in obj, get: obj => obj.findName }, metadata: _metadata }, null, _instanceExtraInitializers);
             __esDecorate(null, null, __decorators, { kind: "field", name: "", static: false, private: false, access: { has: obj => "" in obj, get: obj => obj., set: (obj, value) => { obj. = value; } }, metadata: _metadata }, __initializers, __extraInitializers);
             __esDecorate(null, null, __decorators_1, { kind: "field", name: "", static: false, private: false, access: { has: obj => "" in obj, get: obj => obj., set: (obj, value) => { obj. = value; } }, metadata: _metadata }, __initializers_1, __extraInitializers_1);
             __esDecorate(null, null, __decorators_2, { kind: "field", name: "", static: false, private: false, access: { has: obj => "" in obj, get: obj => obj., set: (obj, value) => { obj. = value; } }, metadata: _metadata }, __initializers_2, __extraInitializers_2);
@@ -1616,33 +850,17 @@ string;
         this.targetRepresentation = targetRepresentation;
     }
 }
-/* private */ let BooleanValue = (() => {
-    var _a;
-    let _instanceExtraInitializers = [];
-    let _generate_decorators;
-    let _type_decorators;
-    return _a = class BooleanValue /*  */ {
-            constructor(value) {
-                this.value = __runInitializers(this, _instanceExtraInitializers);
-                this.value = value;
-            }
-            generate() {
-                return this.value;
-            }
-            type() {
-                return Primitive.Boolean;
-            }
-        },
-        (() => {
-            const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _generate_decorators = [Override];
-            _type_decorators = [Override];
-            __esDecorate(_a, null, _generate_decorators, { kind: "method", name: "generate", static: false, private: false, access: { has: obj => "generate" in obj, get: obj => obj.generate }, metadata: _metadata }, null, _instanceExtraInitializers);
-            __esDecorate(_a, null, _type_decorators, { kind: "method", name: "type", static: false, private: false, access: { has: obj => "type" in obj, get: obj => obj.type }, metadata: _metadata }, null, _instanceExtraInitializers);
-            if (_metadata) Object.defineProperty(_a, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-        })(),
-        _a;
-})();
+/* private */ class BooleanValue /*  */ {
+    constructor(value) {
+        this.value = value;
+    }
+    generate() {
+        return this.value;
+    }
+    type() {
+        return Primitive.Boolean;
+    }
+}
 /* public */ class Main /*  */ {
     main() {
         let parent = /* Paths */ .get(".", "src", "java", "magma");
@@ -2022,17 +1240,25 @@ Option < [CompileState, IncompleteClassSegment] > {
 completeMethod(state, CompileState, prototype, MethodPrototype);
 Option < [CompileState, ClassSegment] > {
     let, definition: Definition = prototype.createDefinition(),
-    if(prototype) { }, : .content().equals(";") || definition.containsAnnotation("Actual")
+    let, oldHeader = prototype.header(),
+    if(oldHeader) { }, : ._variant === Variant.Definition
 };
 {
-    return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));
+    let maybeDefinition = oldHeader;
+    maybeDefinition.removeAnnotations();
+}
+{
+    oldHeader;
+}
+if (prototype.content().equals(";") || definition.containsAnnotation("Actual")) {
+    return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.parameters(), new None())));
 }
 if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
     let substring = prototype.content().substring(1, prototype.content().length() - 1);
     let withDefined = state.enterDefinitions().defineAll(prototype.parameters());
     let statementsTuple = parseStatements(withDefined, substring, (state1, input1) => parseFunctionSegment(state1, input1, prototype.depth() + 1));
     let statements = statementsTuple[1]();
-    return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some(statements))));
+    return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.parameters(), new Some(statements))));
 }
 return new None();
 parseConstructor(state, CompileState, input, string);

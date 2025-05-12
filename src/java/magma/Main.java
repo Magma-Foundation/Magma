@@ -161,6 +161,8 @@ public class Main {
         List<String> typeParams();
 
         boolean containsAnnotation(String annotation);
+
+        Header removeAnnotations();
     }
 
     private interface Header {
@@ -591,6 +593,11 @@ public class Main {
         @Override
         public boolean containsAnnotation(String annotation) {
             return this.annotations.contains(annotation);
+        }
+
+        @Override
+        public Header removeAnnotations() {
+            return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
         }
     }
 
@@ -1819,8 +1826,18 @@ public class Main {
 
     private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(CompileState state, MethodPrototype prototype) {
         var definition = prototype.createDefinition();
+
+        var oldHeader = prototype.header();
+        Header newHeader;
+        if (oldHeader instanceof Definition maybeDefinition) {
+            newHeader = maybeDefinition.removeAnnotations();
+        }
+        else {
+            newHeader = oldHeader;
+        }
+
         if (prototype.content().equals(";") || definition.containsAnnotation("Actual")) {
-            return new Some<>(new Tuple2Impl<>(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
+            return new Some<>(new Tuple2Impl<>(state.define(definition), new Method(prototype.depth(), newHeader, prototype.parameters(), new None<>())));
         }
 
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
@@ -1829,7 +1846,7 @@ public class Main {
             var withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, prototype.depth() + 1));
             var statements = statementsTuple.right();
-            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
+            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(definition), new Method(prototype.depth(), newHeader, prototype.parameters(), new Some<>(statements))));
         }
 
         return new None<>();
