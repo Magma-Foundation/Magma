@@ -282,20 +282,6 @@
 		return new JVMList(new /* ArrayList */(/* Arrays */.asList(elements)));
 	}
 }
-/* private */class Primitive/*  */ {
-	Unknown("unknown") : /*  */;
-	value : string;/* 
-
-        Primitive(String value) {
-            this.value = value;
-        } */
-	generate() : string {
-		return /* this */.value;
-	}
-	replace(mapping : Map<string, Type>) : Type {
-		return /* this */;
-	}
-}
 /* private */class Definition/*  */ {
 	constructor (maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
 	}
@@ -313,7 +299,7 @@
 		return before + /* this */.name + joined + params + typeString;
 	}
 	generateType() : string {
-		if (/* this */.type.equals(Primitive.Unknown)){
+		if (/* this */.type.equals(/* Primitive */.Unknown)){
 			return "";
 		}
 		return " : " + /* this */.type.generate();
@@ -588,7 +574,7 @@
 		return /* generatePlaceholder */(/* this */.input);
 	}
 	type() : Type {
-		return Primitive.Unknown;
+		return /* Primitive */.Unknown;
 	}
 	typeParams() : List<string> {
 		return Lists.empty();
@@ -605,7 +591,7 @@
 		return /* this */.stripped;
 	}
 	type() : Type {
-		return Primitive.Unknown;
+		return /* Primitive */.Unknown;
 	}
 }
 /* private */class DataAccess/*  */ {
@@ -638,7 +624,7 @@
 		return /* this */.left().generate() + " " + /* this */.operator.targetRepresentation + " " + /* this */.right().generate();
 	}
 	type() : Type {
-		return Primitive.Unknown;
+		return /* Primitive */.Unknown;
 	}
 }
 /* private */class Not/*  */ {
@@ -649,7 +635,7 @@
 		return "!" + /* this */.value.generate();
 	}
 	type() : Type {
-		return Primitive.Unknown;
+		return /* Primitive */.Unknown;
 	}
 }
 /* private */class BlockLambdaValue/*  */ {
@@ -669,7 +655,7 @@
 		return "(" + joined + ") => " + /* this */.body.generate();
 	}
 	type() : Type {
-		return Primitive.Unknown;
+		return /* Primitive */.Unknown;
 	}
 }
 /* private */class Invokable/*  */ {
@@ -689,7 +675,7 @@
 		return /* this */.parent.generate() + "[" + this.child.generate() + "]";
 	}
 	type() : Type {
-		return Primitive.Unknown;
+		return /* Primitive */.Unknown;
 	}
 }
 /* private */class SymbolValue/*  */ {
@@ -742,7 +728,21 @@
 		return /* this */.value.generate() + " instanceof " + /* this */.definition.generate();
 	}
 	type() : Type {
-		return Primitive.Boolean;
+		return /* Primitive */.Boolean;
+	}
+}
+/* private */class Primitive/*  */ {
+	Unknown("unknown") : /*  */;
+	value : string;/* 
+
+        Primitive(String value) {
+            this.value = value;
+        } */
+	generate() : string {
+		return /* this */.value;
+	}
+	replace(mapping : Map<string, Type>) : Type {
+		return /* this */;
 	}
 }
 /* private */class Operator/*  */ {/* ADD("+", "+"),
@@ -760,7 +760,6 @@
         } */
 }
 /* public */class Main/*  */ {/* 
-
     private static final boolean isDebug = false; */
 	main() : /* void */ {
 		/* try */{
@@ -1135,8 +1134,8 @@
 			return /* parseDefinition */(childTuple.left(), s2).map((definitionTuple) => {
 				let value = childTuple.right();
 				let definition = definitionTuple.right();
-				let variant = new DataAccess(value, "_variant", Primitive.Unknown);
-				let temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate(), Primitive.Unknown);
+				let variant = new DataAccess(value, "_variant", /* Primitive */.Unknown);
+				let temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate(), /* Primitive */.Unknown);
 				return new Tuple2Impl(definitionTuple.left(), new Operation(variant, /* Operator */.EQUALS, temp));
 			});
 		});
@@ -1144,7 +1143,7 @@
 	parseMethodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last(input, "::", (s, s2) => {
 			let tuple = parseValue(state, s, depth);
-			return new Some(new Tuple2Impl(tuple.left(), new DataAccess(tuple.right(), s2, Primitive.Unknown)));
+			return new Some(new Tuple2Impl(tuple.left(), new DataAccess(tuple.right(), s2, /* Primitive */.Unknown)));
 		});
 	}
 	parseNot(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
@@ -1161,7 +1160,7 @@
 		return first(input, "->", (beforeArrow, valueString) => {
 			let strippedBeforeArrow = beforeArrow.strip();
 			if (isSymbol(strippedBeforeArrow)){
-				let type : Type = Primitive.Unknown;
+				let type : Type = /* Primitive */.Unknown;
 				if (/* state.typeRegister instanceof Some */(/* var expectedType */)){
 					if (/* expectedType */._variant === unknownVariant.FunctionType){
 						type = /* functionType */.arguments.get(0).orElse(/* null */);
@@ -1170,7 +1169,7 @@
 				return /* assembleLambda */(state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
 			}
 			if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")){
-				let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => Definition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
+				let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => Definition.createSimpleDefinition(name, /* Primitive */.Unknown)).collect(new ListCollector());
 				return /* assembleLambda */(state, parameterNames, valueString, depth);
 			}
 			return new None();
@@ -1195,7 +1194,7 @@
 	parseDigits(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
 		if (/* isNumber */(stripped)){
-			return new Some(new Tuple2Impl<CompileState, Value>(state, new SymbolValue(stripped, Primitive.Int)));
+			return new Some(new Tuple2Impl<CompileState, Value>(state, new SymbolValue(stripped, /* Primitive */.Int)));
 		}
 		return new None();
 	}
@@ -1237,12 +1236,12 @@
 		let argumentsTuple = /* parseValuesWithIndices */(oldCallerState, argumentsString, (currentState, pair) => {
 			let index = pair.left();
 			let element = pair.right();
-			let expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
+			let expectedType = callerType.arguments.get(index).orElse(/* Primitive */.Unknown);
 			let withExpected = currentState.withExpectedType(expectedType);
 			let valueTuple = /* parseArgument */(withExpected, element, depth);
 			let valueState = valueTuple.left();
 			let value = valueTuple.right();
-			let actualType = valueTuple.left().typeRegister.orElse(Primitive.Unknown);
+			let actualType = valueTuple.left().typeRegister.orElse(/* Primitive */.Unknown);
 			return new Some(new Tuple2Impl(valueState, new Tuple2Impl(value, actualType)));
 		}).orElseGet(() => new Tuple2Impl(oldCallerState, Lists.empty()));
 		let argumentsState = argumentsTuple.left();
@@ -1265,7 +1264,7 @@
 		return new Tuple2Impl(tuple.left(), tuple.right());
 	}
 	findCallerType(newCaller : Caller) : FunctionType {
-		let callerType : FunctionType = new FunctionType(Lists.empty(), Primitive.Unknown);
+		let callerType : FunctionType = new FunctionType(Lists.empty(), /* Primitive */.Unknown);
 		/* switch (newCaller) */{
 			/* case ConstructionCaller constructionCaller -> */{
 				callerType = /* constructionCaller */.toFunction();
@@ -1342,13 +1341,13 @@
 			let parentType = parent.type();
 			if (/* parentType instanceof TupleType */){
 				if (property.equals("left")){
-					return new Some(new Tuple2Impl(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
+					return new Some(new Tuple2Impl(state, new IndexValue(parent, new SymbolValue("0", /* Primitive */.Int))));
 				}
 				if (property.equals("right")){
-					return new Some(new Tuple2Impl(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
+					return new Some(new Tuple2Impl(state, new IndexValue(parent, new SymbolValue("1", /* Primitive */.Int))));
 				}
 			}
-			let type : Type = Primitive.Unknown;
+			let type : Type = /* Primitive */.Unknown;
 			if (parentType._variant === unknownVariant.FindableType){
 				if (/* objectType.find(property) instanceof Some */(/* var memberType */)){
 					type = /* memberType */;
@@ -1487,16 +1486,16 @@
 	parseType(state : CompileState, input : string) : Option<[CompileState, Type]> {
 		let stripped = input.strip();
 		if (stripped.equals("int") || stripped.equals("Integer")){
-			return new Some(new Tuple2Impl(state, Primitive.Int));
+			return new Some(new Tuple2Impl(state, /* Primitive */.Int));
 		}
 		if (stripped.equals("String") || stripped.equals("char") || stripped.equals("Character")){
-			return new Some(new Tuple2Impl(state, Primitive.String));
+			return new Some(new Tuple2Impl(state, /* Primitive */.String));
 		}
 		if (stripped.equals("var")){
-			return new Some(new Tuple2Impl(state, Primitive.Unknown));
+			return new Some(new Tuple2Impl(state, /* Primitive */.Unknown));
 		}
 		if (stripped.equals("boolean")){
-			return new Some(new Tuple2Impl(state, Primitive.Boolean));
+			return new Some(new Tuple2Impl(state, /* Primitive */.Boolean));
 		}
 		if (isSymbol(stripped)){
 			if (/* state.resolveType(stripped) instanceof Some */(/* var resolved */)){
@@ -1526,7 +1525,7 @@
 			return new Tuple2Impl(state, new FunctionType(Lists.of(children.get(0).orElse(/* null */)), children.get(1).orElse(/* null */)));
 		}
 		if (base.equals("Predicate")){
-			return new Tuple2Impl(state, new FunctionType(Lists.of(children.get(0).orElse(/* null */)), Primitive.Boolean));
+			return new Tuple2Impl(state, new FunctionType(Lists.of(children.get(0).orElse(/* null */)), /* Primitive */.Boolean));
 		}
 		if (base.equals("Supplier")){
 			return new Tuple2Impl(state, new FunctionType(Lists.empty(), children.get(0).orElse(/* null */)));
@@ -1534,8 +1533,11 @@
 		if (base.equals("Tuple2") && children.size() >= 2){
 			return new Tuple2Impl(state, new TupleType(children));
 		}
-		if (/* state.resolveType(base) instanceof Some */(/* var baseType */) && /* baseType */._variant === unknownVariant.FindableType){
-			return new Tuple2Impl(state, new Template(/* findableType */, children));
+		if (state.resolveType(base)._variant === Option<Type>Variant.Some<Type>){
+			let baseType = /* some */.value;
+			if (baseType._variant === unknownVariant.FindableType){
+				return new Tuple2Impl(state, new Template(/* findableType */, children));
+			}
 		}
 		return new Tuple2Impl(state, new Template(new Placeholder(base), children));
 	}

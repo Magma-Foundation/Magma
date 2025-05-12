@@ -427,29 +427,6 @@ public class Main {
         }
     }
 
-    private enum Primitive implements Type {
-        Int("number"),
-        String("string"),
-        Boolean("boolean"),
-        Unknown("unknown");
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-
-        @Override
-        public Type replace(Map<String, Type> mapping) {
-            return this;
-        }
-    }
-
     private record Definition(
             Option<String> maybeBefore,
             String name,
@@ -1031,7 +1008,6 @@ public class Main {
             return Primitive.Boolean;
         }
     }
-
     private static final boolean isDebug = false;
 
     public static void main() {
@@ -2033,7 +2009,6 @@ public class Main {
         });
     }
 
-
     private static Tuple2<CompileState, Type> assembleTemplate(String base, CompileState state, List<Argument> arguments) {
         var children = arguments
                 .iterate()
@@ -2061,8 +2036,11 @@ public class Main {
             return new Tuple2Impl<>(state, new TupleType(children));
         }
 
-        if (state.resolveType(base) instanceof Some(var baseType) && baseType instanceof FindableType findableType) {
-            return new Tuple2Impl<>(state, new Template(findableType, children));
+        if (state.resolveType(base) instanceof Some<Type> some) {
+            var baseType = some.value;
+            if (baseType instanceof FindableType findableType) {
+                return new Tuple2Impl<>(state, new Template(findableType, children));
+            }
         }
 
         return new Tuple2Impl<>(state, new Template(new Placeholder(base), children));
@@ -2150,6 +2128,29 @@ public class Main {
         }
 
         return generatePlaceholder(": " + type.generate());
+    }
+
+    private enum Primitive implements Type {
+        Int("number"),
+        String("string"),
+        Boolean("boolean"),
+        Unknown("unknown");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
+        }
     }
 
     private enum Operator {
