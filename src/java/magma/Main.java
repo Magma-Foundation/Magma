@@ -1561,7 +1561,7 @@ public class Main {
                 .or(() -> parseStructure(input, "interface ", "interface ", state))
                 .or(() -> parseStructure(input, "record ", "class ", state))
                 .or(() -> parseStructure(input, "enum ", "class ", state))
-                .or(() -> parseMethod(state, input, depth))
+                .or(() -> parseMethod(state, input, depth).flatMap(tuple -> completeMethod(tuple.left(), tuple.right())))
                 .or(() -> parseDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple2Impl<>(state, new Placeholder(input)));
     }
@@ -1577,20 +1577,17 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> parseMethod(CompileState state, String input, int depth) {
+    private static Option<Tuple2<CompileState, MethodPrototype>> parseMethod(CompileState state, String input, int depth) {
         return first(input, "(", (definitionString, withParams) -> {
             return first(withParams, ")", (parametersString, rawContent) -> {
                 return parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()))
                         .or(() -> parseConstructor(state, definitionString))
-                        .flatMap(definitionTuple -> {
-                            return assembleMethod(depth, parametersString, rawContent, definitionTuple);
-                        });
-
+                        .flatMap(definitionTuple -> assembleMethod(depth, parametersString, rawContent, definitionTuple));
             });
         });
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> assembleMethod(int depth, String parametersString, String rawContent, Tuple2<CompileState, Header> definitionTuple) {
+    private static Option<Tuple2<CompileState, MethodPrototype>> assembleMethod(int depth, String parametersString, String rawContent, Tuple2<CompileState, Header> definitionTuple) {
         var definitionState = definitionTuple.left();
         var header = definitionTuple.right();
 
@@ -1598,7 +1595,7 @@ public class Main {
         var rawParameters = parametersTuple.right();
 
         var parameters = retainDefinitions(rawParameters);
-        return completeMethod(parametersTuple.left(), new MethodPrototype(depth, header, parameters, rawContent));
+        return new Some<>(new Tuple2Impl<>(parametersTuple.left(), new MethodPrototype(depth, header, parameters, rawContent));
     }
 
     private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(CompileState state, MethodPrototype prototype) {
