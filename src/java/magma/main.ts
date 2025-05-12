@@ -17,6 +17,7 @@ enum OptionVariant {
 	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
 	isEmpty() : boolean;
 	and<R>(other : () => Option<R>) : Option<[T, R]>;
+	ifPresent(consumer : /* Consumer */<T>) : /* void */;
 }
 /* private */interface Collector<T, C>/*   */ {
 	createInitial() : C;
@@ -141,6 +142,15 @@ enum IncompleteClassSegmentVariant {
 }
 /* private @ */interface Actual/*  */ {
 }
+enum ResultVariant {
+	Ok,
+	Err
+}
+/* private sealed */interface Result<T, X>/*  */ {
+	_variant : ResultVariant;
+	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X>;
+	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R) : R;
+}
 /* private static final */class None<T>/*  */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
@@ -168,6 +178,8 @@ enum IncompleteClassSegmentVariant {
 	}
 	and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return new None();
+	}
+	ifPresent(consumer : /* Consumer */<T>) : /* void */ {
 	}
 }
 /* private */class Tuple2Impl<A, B>/*  */ {
@@ -206,6 +218,9 @@ enum IncompleteClassSegmentVariant {
 	}
 	and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return other().map((otherValue : R) => new Tuple2Impl(this.value, otherValue));
+	}
+	ifPresent(consumer : /* Consumer */<T>) : /* void */ {
+		/* consumer.accept(this.value) */;
 	}
 }
 /* private static */class SingleHead<T>/*  */ {
@@ -878,6 +893,26 @@ enum IncompleteClassSegmentVariant {
 		return this.value.generate() + " as " + this.type.generate();
 	}
 }
+/* private */class Ok<T, X>/*  */ {
+	constructor (value : T) {
+	}
+	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
+		return new Ok(mapper(this.value));
+	}
+	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R) : R {
+		return whenOk(this.value);
+	}
+}
+/* private */class Err<T, X>/*  */ {
+	constructor (error : X) {
+	}
+	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
+		return new Err(this.error);
+	}
+	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R) : R {
+		return whenErr(this.error);
+	}
+}
 /* private */class Primitive/*  */ {
 	@nt("number"), @tring("string"), @oolean("boolean"), Unknown("unknown") : /*  */;
 	value : string;
@@ -910,21 +945,18 @@ enum IncompleteClassSegmentVariant {
 
     private static final boolean isDebug = false; */
 	main() : /* void */ {
-		/* try */{
-			let parent = /* Paths */.get(".", "src", "java", "magma");
-			let source = parent.resolve("Main.java");
-			let target = parent.resolve("main.ts");
-			let input = /* Files */.readString(source);
-			/* Files.writeString(target, compile(input)) */;
-			/* new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
-                    .inheritIO()
-                    .start()
-                    .waitFor() */;
-		}
-		/* catch (IOException | InterruptedException e) */{
-			/* throw new RuntimeException(e) */;
-		}
+		let parent = /* Paths */.get(".", "src", "java", "magma");
+		let source = parent.resolve("Main.java");
+		let target = parent.resolve("main.ts");
+		/* readString(source)
+                .mapValue(Main::compile)
+                .match(output -> writeString(target, output), Some::new)
+                .or(Main::executeTSC)
+                .ifPresent(Throwable::printStackTrace) */;
 	}
+	writeString(target : /* Path */, output : string) : Option</* IOException */>;
+	readString(source : /* Path */) : Result<string, /* IOException */>;
+	executeTSC() : Option</* IOException */>;
 	compile(input : string) : string {
 		let state : CompileState = CompileState.createInitial();
 		let parsed : [CompileState, List<T>] = parseStatements(state, input, Main.compileRootSegment);

@@ -66,6 +66,11 @@ var IncompleteClassSegmentVariant;
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["StructurePrototype"] = 4] = "StructurePrototype";
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Whitespace"] = 5] = "Whitespace";
 })(IncompleteClassSegmentVariant || (IncompleteClassSegmentVariant = {}));
+var ResultVariant;
+(function (ResultVariant) {
+    ResultVariant[ResultVariant["Ok"] = 0] = "Ok";
+    ResultVariant[ResultVariant["Err"] = 1] = "Err";
+})(ResultVariant || (ResultVariant = {}));
 /* private static final */ class None {
     map(mapper) {
         return new None();
@@ -781,6 +786,26 @@ var IncompleteClassSegmentVariant;
         return this.value.generate() + " as " + this.type.generate();
     }
 }
+/* private */ class Ok {
+    constructor(value) {
+    }
+    mapValue(mapper) {
+        return new Ok(mapper(this.value));
+    }
+    match(whenOk, whenErr) {
+        return whenOk(this.value);
+    }
+}
+/* private */ class Err {
+    constructor(error) {
+    }
+    mapValue(mapper) {
+        return new Err(this.error);
+    }
+    match(whenOk, whenErr) {
+        return whenErr(this.error);
+    }
+}
 /* private */ let Primitive = (() => {
     var _a;
     let __decorators;
@@ -834,21 +859,21 @@ var IncompleteClassSegmentVariant;
     }
 }
 /* public */ class Main /*  */ {
-    main() {
-        let parent = /* Paths */ .get(".", "src", "java", "magma");
-        let source = parent.resolve("Main.java");
-        let target = parent.resolve("main.ts");
-        let input = /* Files */ .readString(source);
-        /* Files.writeString(target, compile(input)) */ ;
-        /* new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
-                .inheritIO()
-                .start()
-                .waitFor() */ ;
-    }
 }
-/* catch (IOException | InterruptedException e) */ {
-    /* throw new RuntimeException(e) */ ;
-}
+let parent = /* Paths */ .get(".", "src", "java", "magma");
+let source = parent.resolve("Main.java");
+let target = parent.resolve("main.ts");
+/* readString(source)
+        .mapValue(Main::compile)
+        .match(output -> writeString(target, output), Some::new)
+        .or(Main::executeTSC)
+        .ifPresent(Throwable::printStackTrace) */ ;
+writeString(target, output, string);
+Option;
+readString(source);
+Result;
+executeTSC();
+Option;
 compile(input, string);
 string;
 {

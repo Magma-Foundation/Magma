@@ -2,11 +2,13 @@ package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -36,6 +38,8 @@ public class Main {
         boolean isEmpty();
 
         <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other);
+
+        void ifPresent(Consumer<T> consumer);
     }
 
     private interface Collector<T, C> {
@@ -194,6 +198,12 @@ public class Main {
     private @interface Actual {
     }
 
+    private sealed interface Result<T, X> permits Ok, Err {
+        <R> Result<R, X> mapValue(Function<T, R> mapper);
+
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
     private static final class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -238,6 +248,10 @@ public class Main {
         @Override
         public <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other) {
             return new None<>();
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
         }
     }
 
@@ -291,6 +305,11 @@ public class Main {
         @Override
         public <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other) {
             return other.get().map(otherValue -> new Tuple2Impl<>(this.value, otherValue));
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
         }
     }
 
@@ -1392,25 +1411,78 @@ public class Main {
         }
     }
 
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> Result<R, X> mapValue(Function<T, R> mapper) {
+            return new Err<>(this.error);
+        }
+
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+    }
+
     private static final boolean isDebug = false;
 
     public static void main() {
+        var parent = Paths.get(".", "src", "java", "magma");
+        var source = parent.resolve("Main.java");
+        var target = parent.resolve("main.ts");
+
+        readString(source)
+                .mapValue(Main::compile)
+                .match(output -> writeString(target, output), Some::new)
+                .or(Main::executeTSC)
+                .ifPresent(Throwable::printStackTrace);
+    }
+
+    @Actual
+    private static Option<IOException> writeString(Path target, String output) {
         try {
-            var parent = Paths.get(".", "src", "java", "magma");
-            var source = parent.resolve("Main.java");
-            var target = parent.resolve("main.ts");
+            Files.writeString(target, output);
+            return new None<>();
+        } catch (IOException e) {
+            return new Some<>(e);
+        }
+    }
 
-            var input = Files.readString(source);
-            Files.writeString(target, compile(input));
+    @Actual
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
+    }
 
+    @Actual
+    private static Option<IOException> executeTSC() {
+        try {
             new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
                     .inheritIO()
                     .start()
                     .waitFor();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            return new None<>();
+        } catch (InterruptedException e) {
+            return new Some<>(new IOException(e));
+        } catch (IOException e) {
+            return new Some<>(e);
         }
     }
+
 
     private static String compile(String input) {
         var state = CompileState.createInitial();
