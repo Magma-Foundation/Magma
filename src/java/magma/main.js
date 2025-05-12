@@ -764,10 +764,10 @@ DivideState;
     if (c ===  /*  '}'  */ && append.isShallow()) {
         return append().exit();
     }
-    if (c ===  /*  '{' || c  */ ===  /*  '(' */) {
+    if (c ===  /*  '{'  */ || c ===  /*  '(' */) {
         return append();
     }
-    if (c ===  /*  '}' || c  */ ===  /*  ')' */) {
+    if (c ===  /*  '}'  */ || c ===  /*  ')' */) {
         return append();
     }
     return append;
@@ -776,7 +776,7 @@ compileRootSegment(state, CompileState, input, string);
 [CompileState, string];
 {
     let stripped = input.strip();
-    if ( /* stripped.startsWith("package ") || stripped */.startsWith("import ")) {
+    if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
         return new Tuple2Impl(state, "");
     }
     return /* compileClass */ (stripped, 0, state).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (stripped)));
@@ -868,7 +868,7 @@ boolean;
 {
     /* for (var i = 0; i < input.length(); i++) */ {
         let c = input.charAt( /* i */);
-        if ( /* Character.isLetter(c) || */( /* i != 0  */ && /* Character */ .isDigit(c))) {
+        if ( /* Character */.isLetter(c) || /*  */ ( /* i != 0  */ && /* Character */ .isDigit(c))) {
             /* continue */ ;
         }
         return /* false */;
@@ -1062,7 +1062,7 @@ compileValue(state, CompileState, input, string, depth, number);
 parseValue(state, CompileState, input, string, depth, number);
 [CompileState, Value];
 {
-    return /* parseLambda */ (state, input, depth).or(() => /* parseString */ (state, input)).or(() => /* parseDataAccess */ (state, input, depth)).or(() => /* parseSymbolValue */ (state, input)).or(() => /* parseInvokable */ (state, input, depth)).or(() => /* parseDigits */ (state, input)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .ADD)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .EQUALS)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .SUBTRACT)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .AND)).or(() => /* parseOperation */ (state, input, depth,  /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */ (state, input, depth)).or(() => /* parseMethodReference */ (state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
+    return /* parseLambda */ (state, input, depth).or(() => /* parseString */ (state, input)).or(() => /* parseDataAccess */ (state, input, depth)).or(() => /* parseSymbolValue */ (state, input)).or(() => /* parseInvokable */ (state, input, depth)).or(() => /* parseDigits */ (state, input)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .ADD)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .EQUALS)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .SUBTRACT)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .AND)).or(() => /* parseOperation */ (state, input, depth, /* Operator */ .OR)).or(() => /* parseOperation */ (state, input, depth,  /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */ (state, input, depth)).or(() => /* parseMethodReference */ (state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
 }
 parseMethodReference(state, CompileState, input, string, depth, number);
 Option < [CompileState, Value] > {
@@ -1467,10 +1467,10 @@ DivideState;
             return appended;
         }
     }
-    if (c ===  /*  '<' || c  */ ===  /*  '(' || c  */ ===  /*  '{' */) {
+    if (c ===  /*  '<'  */ || c ===  /*  '('  */ || c ===  /*  '{' */) {
         return appended.enter();
     }
-    if (c ===  /*  '>' || c  */ ===  /*  ')' || c  */ ===  /*  '}' */) {
+    if (c ===  /*  '>'  */ || c ===  /*  ')'  */ || c ===  /*  '}' */) {
         return appended.exit();
     }
     return appended;
@@ -1482,12 +1482,12 @@ Option < [CompileState, string] > {
 parseType(state, CompileState, input, string);
 Option < [CompileState, Type] > {
     let, stripped = input.strip(),
-    if() { } /* stripped.equals("int") || stripped */, /* stripped.equals("int") || stripped */ : /* stripped.equals("int") || stripped */ .equals("Integer")
+    if(stripped) { }, : .equals("int") || stripped.equals("Integer")
 };
 {
     return new Some(new Tuple2Impl(state, Int));
 }
-if ( /* stripped.equals("String") || stripped.equals("char") || stripped */.equals("Character")) {
+if (stripped.equals("String") || stripped.equals("char") || stripped.equals("Character")) {
     return new Some(new Tuple2Impl(state, String));
 }
 if (stripped.equals("var")) {

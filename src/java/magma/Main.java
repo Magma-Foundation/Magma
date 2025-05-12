@@ -1458,6 +1458,7 @@ public class Main {
                 .or(() -> parseOperation(state, input, depth, Operator.EQUALS))
                 .or(() -> parseOperation(state, input, depth, Operator.SUBTRACT))
                 .or(() -> parseOperation(state, input, depth, Operator.AND))
+                .or(() -> parseOperation(state, input, depth, Operator.OR))
                 .or(() -> parseOperation(state, input, depth, Operator.GREATER_THAN_OR_EQUALS))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
@@ -2075,7 +2076,8 @@ public class Main {
         SUBTRACT("-", "-"),
         EQUALS("==", "==="),
         AND("&&", "&&"),
-        GREATER_THAN_OR_EQUALS(">=", ">=");
+        GREATER_THAN_OR_EQUALS(">=", ">="),
+        OR("||", "||");
 
         private final String sourceRepresentation;
         private final String targetRepresentation;
