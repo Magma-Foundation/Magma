@@ -969,6 +969,13 @@
 		return /* createIndent */(/* this */.depth/* : unknown */)/* : unknown */ + /* this */.value/* : unknown */.generate/* : unknown */()/* : unknown */ + ";";
 	}
 }
+/* private */class MethodPrototype/*  */ {
+	constructor (depth : number, header : Header, parameters : List<Definition>, content : string) {
+	}
+	/* private */ findParamTypes() : List<Type> {
+		return /* this */.parameters/* : unknown */()/* : unknown */.iterate/* : unknown */()/* : unknown */.map/* : unknown */(Definition/* : Definition */.type/* : unknown */)/* : unknown */.collect/* : unknown */(new ListCollector()/* : ListCollector */)/* : unknown */;
+	}
+}
 /* private */class Primitive/*  */ {
 	/* Int("number"),
         String("string"),
@@ -1243,7 +1250,7 @@
 		return mapper/* : (arg0 : T) => R */(slice/* : unknown */)/* : R */;
 	}
 	/* private static */ parseClassSegment(state : CompileState, input : string, depth : number) : [CompileState, ClassSegment] {
-		return /* Main.<Whitespace, ClassSegment>typed */(() => /* parseWhitespace */(input/* : string */, state/* : CompileState */)/* : unknown */)/* : unknown */.or/* : unknown */(() => parseClass/* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "interface ", "interface ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "record ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "enum ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => /* parseMethod */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseDefinitionStatement */(input/* : string */, depth/* : number */, state/* : CompileState */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
+		return /* Main.<Whitespace, ClassSegment>typed */(() => /* parseWhitespace */(input/* : string */, state/* : CompileState */)/* : unknown */)/* : unknown */.or/* : unknown */(() => parseClass/* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "interface ", "interface ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "record ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "enum ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => /* parseMethod */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */.flatMap/* : unknown */((tuple) => /* completeMethod */(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseDefinitionStatement */(input/* : string */, depth/* : number */, state/* : CompileState */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
 	/* private static  */ typed<T extends SS>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
 		return action/* : () => Option<[CompileState, T]> */()/* : Option<[CompileState, T]> */.map/* : (arg0 : (arg0 : [CompileState, T]) => R) => Option<R> */((tuple : [CompileState, T]) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : Option<R> */;
@@ -1254,33 +1261,33 @@
 		}
 		return new None()/* : None */;
 	}
-	/* private static */ parseMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, ClassSegment]> {
+	/* private static */ parseMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, MethodPrototype]> {
 		return first/* : unknown */(input/* : string */, "(", (definitionString, withParams) => {
 			return first/* : unknown */(withParams/* : unknown */, ")", (parametersString, rawContent) => {
-				return /* parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.or/* : unknown */(() => /* parseConstructor */(state/* : CompileState */, definitionString/* : unknown */)/* : unknown */)/* : unknown */.flatMap/* : unknown */((definitionTuple) => {
-					return /* assembleMethod */(depth/* : number */, parametersString/* : unknown */, rawContent/* : unknown */, definitionTuple/* : unknown */)/* : unknown */;
-				})/* : unknown */;
+				return /* parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.or/* : unknown */(() => /* parseConstructor */(state/* : CompileState */, definitionString/* : unknown */)/* : unknown */)/* : unknown */.flatMap/* : unknown */((definitionTuple) => /* assembleMethod */(depth/* : number */, parametersString/* : unknown */, rawContent/* : unknown */, definitionTuple/* : unknown */)/* : unknown */)/* : unknown */;
 			})/* : unknown */;
 		})/* : unknown */;
 	}
-	/* private static */ assembleMethod(depth : number, parametersString : string, rawContent : string, definitionTuple : [CompileState, Header]) : Option<[CompileState, ClassSegment]> {
+	/* private static */ assembleMethod(depth : number, parametersString : string, rawContent : string, definitionTuple : [CompileState, Header]) : Option<[CompileState, MethodPrototype]> {
 		let definitionState = definitionTuple/* : unknown */.left/* : unknown */()/* : unknown */;
 		let header = definitionTuple/* : unknown */.right/* : unknown */()/* : unknown */;
 		let parametersTuple = /* parseParameters */(definitionState/* : unknown */, parametersString/* : unknown */)/* : unknown */;
 		let rawParameters = parametersTuple/* : unknown */.right/* : unknown */()/* : unknown */;
 		let parameters = /* retainDefinitions */(rawParameters/* : List<Parameter> */)/* : unknown */;
-		let content = rawContent/* : unknown */.strip/* : unknown */()/* : unknown */;
-		let paramTypes : R = parameters/* : List<Definition> */.iterate/* : () => Iterator<T> */()/* : Iterator<T> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(Definition/* : Definition */.type/* : unknown */)/* : Option<R> */.collect/* : (arg0 : Collector<T, R>) => R */(new ListCollector()/* : ListCollector */)/* : R */;
-		let toDefine : Definition = header/* : Header */.createDefinition/* : (arg0 : List<Type>) => Definition */(paramTypes/* : List<Type> */)/* : Definition */;
-		if (content/* : string */.equals/* : unknown */(";")/* : unknown */){
-			return new Some(new Tuple2Impl(parametersTuple/* : unknown */.left/* : unknown */()/* : unknown */.withDefinition/* : unknown */(toDefine/* : Definition */)/* : unknown */, new Method(depth/* : number */, header/* : Header */, parameters/* : List<Definition> */, new None()/* : None */)/* : Method */)/* : Tuple2Impl */)/* : Some */;
+		return new Some(new Tuple2Impl(parametersTuple/* : unknown */.left/* : unknown */()/* : unknown */, new MethodPrototype(depth/* : number */, header/* : Header */, parameters/* : List<Definition> */, rawContent/* : unknown */.strip/* : unknown */()/* : unknown */)/* : MethodPrototype */)/* : Tuple2Impl */)/* : Some */;
+	}
+	/* private static */ completeMethod(state : CompileState, prototype : MethodPrototype) : Option<[CompileState, ClassSegment]> {
+		let paramTypes : List<Type> = prototype/* : MethodPrototype */.findParamTypes/* : () => List<Type> */()/* : List<Type> */;
+		let toDefine = prototype/* : MethodPrototype */.header/* : Header */()/* : unknown */.createDefinition/* : unknown */(paramTypes/* : List<Type> */)/* : unknown */;
+		if (prototype/* : MethodPrototype */.content/* : string */()/* : unknown */.equals/* : unknown */(";")/* : unknown */){
+			return new Some(new Tuple2Impl(state/* : CompileState */.withDefinition/* : (arg0 : Definition) => CompileState */(toDefine/* : unknown */)/* : CompileState */, new Method(prototype/* : MethodPrototype */.depth/* : number */()/* : unknown */, prototype/* : MethodPrototype */.header/* : Header */()/* : unknown */, prototype/* : MethodPrototype */.parameters/* : List<Definition> */()/* : unknown */, new None()/* : None */)/* : Method */)/* : Tuple2Impl */)/* : Some */;
 		}
-		if (content/* : string */.startsWith/* : unknown */("{")/* : unknown */ && content/* : string */.endsWith/* : unknown */("}")/* : unknown */){
-			let substring = content/* : string */.substring/* : unknown */(1/* : number */, content/* : string */.length/* : unknown */()/* : unknown */ - 1/* : number */)/* : unknown */;
-			let state : CompileState = parametersTuple/* : unknown */.left/* : unknown */()/* : unknown */.withDefinitions/* : unknown */(parameters/* : List<Definition> */)/* : unknown */;
-			let statementsTuple : [CompileState, List<T>] = parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state/* : CompileState */, substring/* : unknown */, (state1, input1) => /* parseFunctionSegment */(state1/* : unknown */, input1/* : unknown */, depth/* : number */ + 1/* : number */)/* : unknown */)/* : [CompileState, List<T>] */;
+		if (prototype/* : MethodPrototype */.content/* : string */()/* : unknown */.startsWith/* : unknown */("{")/* : unknown */ && prototype/* : MethodPrototype */.content/* : unknown */()/* : unknown */.endsWith/* : unknown */("}")/* : unknown */){
+			let substring = prototype/* : MethodPrototype */.content/* : string */()/* : unknown */.substring/* : unknown */(1/* : number */, prototype/* : MethodPrototype */.content/* : string */()/* : unknown */.length/* : unknown */()/* : unknown */ - 1/* : number */)/* : unknown */;
+			let withDefined : CompileState = state/* : CompileState */.withDefinitions/* : (arg0 : List<Definition>) => CompileState */(prototype/* : MethodPrototype */.parameters/* : List<Definition> */()/* : unknown */)/* : CompileState */;
+			let statementsTuple : [CompileState, List<T>] = parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(withDefined/* : CompileState */, substring/* : unknown */, (state1, input1) => /* parseFunctionSegment */(state1/* : unknown */, input1/* : unknown */, prototype/* : MethodPrototype */.depth/* : number */()/* : unknown */ + 1/* : number */)/* : unknown */)/* : [CompileState, List<T>] */;
 			let statements = statementsTuple/* : [CompileState, List<T>] */[1/* : number */]()/* : unknown */;
-			return new Some(new Tuple2Impl(statementsTuple/* : [CompileState, List<T>] */[0/* : number */]()/* : unknown */.withDefinition/* : unknown */(toDefine/* : Definition */)/* : unknown */, new Method(depth/* : number */, header/* : Header */, parameters/* : List<Definition> */, new Some(statements/* : List<FunctionSegment> */)/* : Some */)/* : Method */)/* : Tuple2Impl */)/* : Some */;
+			return new Some(new Tuple2Impl(statementsTuple/* : [CompileState, List<T>] */[0/* : number */]()/* : unknown */.withDefinition/* : unknown */(toDefine/* : unknown */)/* : unknown */, new Method(prototype/* : MethodPrototype */.depth/* : number */()/* : unknown */, prototype/* : MethodPrototype */.header/* : Header */()/* : unknown */, prototype/* : MethodPrototype */.parameters/* : List<Definition> */()/* : unknown */, new Some(statements/* : List<FunctionSegment> */)/* : Some */)/* : Method */)/* : Tuple2Impl */)/* : Some */;
 		}
 		return new None()/* : None */;
 	}
