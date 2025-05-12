@@ -1,5 +1,5 @@
 "use strict";
-/* private static */ class None {
+/* private static final */ class None {
     map(mapper) {
         return new None();
     }

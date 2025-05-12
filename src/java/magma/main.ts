@@ -2,7 +2,7 @@
 	left() : A;
 	right() : B;
 }
-/* private */interface Option<T>/*   */ {
+/* private sealed */interface Option<T>/*  permits Some, None  */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
@@ -106,7 +106,7 @@
 	maybeCreateObjectType() : Option</* ObjectType */>;
 	maybeCreateDefinition() : Option<Definition>;
 }
-/* private static */class None<T>/*  */ {
+/* private static final */class None<T>/*  */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
 	}

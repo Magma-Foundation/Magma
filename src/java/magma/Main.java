@@ -18,7 +18,7 @@ public class Main {
         B right();
     }
 
-    private interface Option<T> {
+    private sealed interface Option<T> permits Some, None {
         <R> Option<R> map(Function<T, R> mapper);
 
         boolean isPresent();
@@ -191,7 +191,7 @@ public class Main {
         Option<Definition> maybeCreateDefinition();
     }
 
-    private static class None<T> implements Option<T> {
+    private static final class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<>();
