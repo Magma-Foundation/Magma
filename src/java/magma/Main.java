@@ -1243,6 +1243,15 @@ public class Main {
         return true;
     }
 
+    private static <T> Option<T> prefix(String input, String prefix, Function<String, Option<T>> mapper) {
+        if (!input.startsWith(prefix)) {
+            return new None<>();
+        }
+
+        var slice = input.substring(prefix.length());
+        return mapper.apply(slice);
+    }
+
     private static <T> Option<T> suffix(String input, String suffix, Function<String, Option<T>> mapper) {
         if (!input.endsWith(suffix)) {
             return new None<>();
@@ -1352,21 +1361,41 @@ public class Main {
 
     private static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, int depth, String stripped) {
         return suffix(stripped, "}", withoutEnd -> {
-            return split(() -> {
-                var divisions = divideAll(withoutEnd, Main::foldBlockStart);
-                return divisions.removeFirst().map(removed -> {
-                    var right = removed.left();
-                    var left = removed.right().iterate().collect(new Joiner("")).orElse("");
-
-                    return new Tuple2Impl<>(right, left);
-                });
-            }, (beforeContent, content) -> {
+            return split(() -> toFirst(withoutEnd), (beforeContent, content) -> {
                 return suffix(beforeContent, "{", s -> {
                     var compiled = compileFunctionSegments(state, content, depth);
                     var indent = createIndent(depth);
-                    return new Some<>(new Tuple2Impl<>(compiled.left(), indent + generatePlaceholder(s) + "{" + compiled.right() + indent + "}"));
+                    var headerTuple = compileBlockHeader(state, s, depth);
+                    var headerState = headerTuple.left();
+                    var header = headerTuple.right();
+
+                    return new Some<>(new Tuple2Impl<>(headerState, indent + header + "{" + compiled.right() + indent + "}"));
                 });
             });
+        });
+    }
+
+    private static Option<Tuple2<String, String>> toFirst(String input) {
+        var divisions = divideAll(input, Main::foldBlockStart);
+        return divisions.removeFirst().map(removed -> {
+            var right = removed.left();
+            var left = removed.right().iterate().collect(new Joiner("")).orElse("");
+
+            return new Tuple2Impl<>(right, left);
+        });
+    }
+
+    private static Tuple2<CompileState, String> compileBlockHeader(CompileState state, String input, int depth) {
+        var stripped = input.strip();
+        return prefix(stripped, "if", withoutPrefix -> {
+            return prefix(withoutPrefix.strip(), "(", withoutValueStart -> {
+                return suffix(withoutValueStart, ")", value -> {
+                    var compiled = compileValue(state, value, depth);
+                    return new Some<>(new Tuple2Impl<>(compiled.left(), "if (" + compiled.right() + ")"));
+                });
+            });
+        }).orElseGet(() -> {
+            return new Tuple2Impl<>(state, generatePlaceholder(stripped));
         });
     }
 
