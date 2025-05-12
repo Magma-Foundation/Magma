@@ -2,7 +2,7 @@
 	left() : A;
 	right() : B;
 }
-/* private sealed */interface Option<T>/*  permits Some, None  */ {
+/* private sealed */interface Option<T>/*  */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
@@ -850,13 +850,11 @@
 		return "else ";
 	}
 }
-/* private static */class Return/*  */ {
-	value1 : Value;
-	Return(value1 : Value) : /* public */ {
-		this.value1 = value1;
+/* private */class Return/*  */ {
+	constructor (value : Value) {
 	}
 	generate() : string {
-		return "return " + this.value1.generate();
+		return "return " + this.value.generate();
 	}
 }
 /* private */class Initialization/*  */ {
@@ -1103,9 +1101,16 @@
 		return first(stripped, sourceInfix, (beforeInfix, right) => {
 			return first(right, "{", (beforeContent, withEnd) => {
 				return suffix(withEnd.strip(), "}", (content1 : string) => {
-					return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
+					return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1);
 				});
 			});
+		});
+	}
+	parseStructureWithMaybePermits(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, StructurePrototype]> {
+		return last(beforeContent, " permits ", (s, s2) => {
+			return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1);
+		}).or(() => {
+			return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
 		});
 	}
 	parseStructureWithMaybeImplements(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, StructurePrototype]> {

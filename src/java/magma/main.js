@@ -751,13 +751,12 @@ string;
         return "else ";
     }
 }
-/* private static */ class Return /*  */ {
-}
-this.value1 = value1;
-generate();
-string;
-{
-    return "return " + this.value1.generate();
+/* private */ class Return /*  */ {
+    constructor(value) {
+    }
+    generate() {
+        return "return " + this.value.generate();
+    }
 }
 /* private */ class Initialization /*  */ {
     constructor(definition, source) {
@@ -1014,9 +1013,17 @@ Option < [CompileState, StructurePrototype] > {
     return: first(stripped, sourceInfix, (beforeInfix, right) => {
         return first(right, "{", (beforeContent, withEnd) => {
             return suffix(withEnd.strip(), "}", (content1) => {
-                return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
+                return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1);
             });
         });
+    })
+};
+parseStructureWithMaybePermits(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);
+Option < [CompileState, StructurePrototype] > {
+    return: last(beforeContent, " permits ", (s, s2) => {
+        return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1);
+    }).or(() => {
+        return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
     })
 };
 parseStructureWithMaybeImplements(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);

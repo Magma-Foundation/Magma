@@ -1259,16 +1259,10 @@ public class Main {
         }
     }
 
-    private static class Return implements StatementValue {
-        private final Value value1;
-
-        public Return(Value value1) {
-            this.value1 = value1;
-        }
-
+    private record Return(Value value) implements StatementValue {
         @Override
         public String generate() {
-            return "return " + this.value1.generate();
+            return "return " + this.value.generate();
         }
     }
 
@@ -1544,9 +1538,17 @@ public class Main {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (beforeContent, withEnd) -> {
                 return suffix(withEnd.strip(), "}", content1 -> {
-                    return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
+                    return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1);
                 });
             });
+        });
+    }
+
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+        return last(beforeContent, " permits ", (s, s2) -> {
+            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1);
+        }).or(() -> {
+            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
         });
     }
 
