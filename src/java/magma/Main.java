@@ -1687,10 +1687,11 @@ public class Main {
 
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
             var substring = prototype.content().substring(1, prototype.content().length() - 1);
-            var withDefined = state.withDefinitions(prototype.parameters());
+
+            var withDefined = state.enterDefinitions().withDefinitions(prototype.parameters());
             var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, prototype.depth() + 1));
             var statements = statementsTuple.right();
-            return new Some<>(new Tuple2Impl<>(statementsTuple.left().withDefinition(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
+            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().withDefinition(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
         }
 
         return new None<>();
