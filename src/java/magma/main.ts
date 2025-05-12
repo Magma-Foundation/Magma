@@ -1,161 +1,101 @@
 /* private */interface Tuple2<A, B>/*   */ {
-	left() : A {;
-	}
-	right() : B {;
-	}
+	left() : A;
+	right() : B;
 }
 /* private */interface Option<T>/*   */ {
-	map<R>(mapper : (arg0 : T) => R) : Option<R> {;
-	}
-	isPresent() : boolean {;
-	}
-	orElse(other : T) : T {;
-	}
-	filter(predicate : (arg0 : T) => boolean) : Option<T> {;
-	}
-	orElseGet(supplier : () => T) : T {;
-	}
-	or(other : () => Option<T>) : Option<T> {;
-	}
-	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {;
-	}
-	isEmpty() : boolean {;
-	}
-	and<R>(other : () => Option<R>) : Option<[T, R]> {;
-	}
+	map<R>(mapper : (arg0 : T) => R) : Option<R>;
+	isPresent() : boolean;
+	orElse(other : T) : T;
+	filter(predicate : (arg0 : T) => boolean) : Option<T>;
+	orElseGet(supplier : () => T) : T;
+	or(other : () => Option<T>) : Option<T>;
+	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
+	isEmpty() : boolean;
+	and<R>(other : () => Option<R>) : Option<[T, R]>;
 }
 /* private */interface Collector<T, C>/*   */ {
-	createInitial() : C {;
-	}
-	fold(current : C, element : T) : C {;
-	}
+	createInitial() : C;
+	fold(current : C, element : T) : C;
 }
 /* private */interface Iterator<T>/*   */ {
-	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {;
-	}
-	map<R>(mapper : (arg0 : T) => R) : Iterator<R> {;
-	}
-	collect<R>(collector : Collector<T, R>) : R {;
-	}
-	filter(predicate : (arg0 : T) => boolean) : Iterator<T> {;
-	}
-	next() : Option<T> {;
-	}
-	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {;
-	}
-	zip<R>(other : Iterator<R>) : Iterator<[T, R]> {;
-	}
+	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R;
+	map<R>(mapper : (arg0 : T) => R) : Iterator<R>;
+	collect<R>(collector : Collector<T, R>) : R;
+	filter(predicate : (arg0 : T) => boolean) : Iterator<T>;
+	next() : Option<T>;
+	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R>;
+	zip<R>(other : Iterator<R>) : Iterator<[T, R]>;
 }
 /* private */interface List<T>/*   */ {
-	addLast(element : T) : List<T> {;
-	}
-	iterate() : Iterator<T> {;
-	}
-	removeLast() : Option<[List<T>, T]> {;
-	}
-	get(index : number) : Option<T> {;
-	}
-	size() : number {;
-	}
-	isEmpty() : boolean {;
-	}
-	addFirst(element : T) : List<T> {;
-	}
-	iterateWithIndices() : Iterator<[number, T]> {;
-	}
-	removeFirst() : Option<[T, List<T>]> {;
-	}
-	addAllLast(others : List<T>) : List<T> {;
-	}
-	last() : Option<T> {;
-	}
+	addLast(element : T) : List<T>;
+	iterate() : Iterator<T>;
+	removeLast() : Option<[List<T>, T]>;
+	get(index : number) : Option<T>;
+	size() : number;
+	isEmpty() : boolean;
+	addFirst(element : T) : List<T>;
+	iterateWithIndices() : Iterator<[number, T]>;
+	removeFirst() : Option<[T, List<T>]>;
+	addAllLast(others : List<T>) : List<T>;
+	last() : Option<T>;
 }
 /* private */interface Head<T>/*   */ {
-	next() : Option<T> {;
-	}
+	next() : Option<T>;
 }
 /* private */interface Map<K, V>/*   */ {
-	find(key : K) : Option<V> {;
-	}
-	with(key : K, value : V) : Map<K, V> {;
-	}
+	find(key : K) : Option<V>;
+	with(key : K, value : V) : Map<K, V>;
 }
 /* private */interface Type/*  */ {
-	generate() : string {;
-	}
-	replace(mapping : Map<string, Type>) : Type {;
-	}
-	findName() : Option<string> {;
-	}
+	generate() : string;
+	replace(mapping : Map<string, Type>) : Type;
+	findName() : Option<string>;
 }
 /* private */interface Argument/*  */ {
 }
 /* private */interface Parameter/*  */ {
 }
 /* private sealed */interface Value/*  */ {
-	generate() : string {;
-	}
-	type() : Type {;
-	}
+	generate() : string;
+	type() : Type;
 }
 /* private */interface LambdaValue/*  */ {
-	generate() : string {;
-	}
+	generate() : string;
 }
 /* private sealed */interface Caller/*  */ {
-	generate() : string {;
-	}
+	generate() : string;
 }
 /* private */interface FindableType/*  */ {
-	typeParams() : List<string> {;
-	}
-	find(name : string) : Option<Type> {;
-	}
-	name() : string {;
-	}
+	typeParams() : List<string>;
+	find(name : string) : Option<Type>;
+	name() : string;
 }
 /* private */interface Definition/*  */ {
-	generate() : string {;
-	}
-	generateType() : string {;
-	}
-	joinBefore() : string {;
-	}
-	joinTypeParams() : string {;
-	}
-	mapType(mapper : (arg0 : Type) => Type) : Definition {;
-	}
+	generate() : string;
+	generateType() : string;
+	joinBefore() : string;
+	joinTypeParams() : string;
+	mapType(mapper : (arg0 : Type) => Type) : Definition;
 	/* @Override
-        */ toString() : string {;
-	}
+        */ toString() : string;
 	/* @Override
-        */ generateWithParams(joinedParameters : string) : string {;
-	}
+        */ generateWithParams(joinedParameters : string) : string;
 	/* @Override
-        */ createDefinition(paramTypes : List<Type>) : Definition {;
-	}
-	maybeBefore() : Option<string> {;
-	}
-	name() : string {;
-	}
-	type() : Type {;
-	}
-	typeParams() : List<string> {;
-	}
+        */ createDefinition(paramTypes : List<Type>) : Definition;
+	maybeBefore() : Option<string>;
+	name() : string;
+	type() : Type;
+	typeParams() : List<string>;
 }
 /* private */interface Header/*  */ {
-	createDefinition(paramTypes : List<Type>) : Definition {;
-	}
-	generateWithParams(joinedParameters : string) : string {;
-	}
+	createDefinition(paramTypes : List<Type>) : Definition;
+	generateWithParams(joinedParameters : string) : string;
 }
 /* private */interface ClassSegment/*  */ {
-	generate() : string {;
-	}
+	generate() : string;
 }
 /* private */interface FunctionSegment/*  */ {
-	generate() : string {;
-	}
+	generate() : string;
 }
 /* private static */class None<T>/*  */ {
 	/* @Override
@@ -216,7 +156,7 @@
 	}
 	/* @Override
         public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
-		if (predicate/* : (arg0 : T) => boolean */(/* this */.value/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@3ada9e37
+		if (predicate/* : (arg0 : T) => boolean */(/* this */.value/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@8807e25
 		}
 		return new None()/* : None */;
 	}
@@ -250,7 +190,7 @@
 	}
 	/* @Override
         public */ next() : Option<T> {
-		if (/* this */.retrieved/* : unknown */){magma.Main$Lists$JVMList@1761e840
+		if (/* this */.retrieved/* : unknown */){magma.Main$Lists$JVMList@6c629d6e
 		}
 		/* this */.retrieved/* : unknown */ = true;
 		return new Some(/* this */.value/* : unknown */)/* : Some */;
@@ -268,7 +208,7 @@
 	/* @Override
         public  */ fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		let current : R = initial/* : R */;
-		while (true){magma.Main$Lists$JVMList@5b1d2887
+		while (true){magma.Main$Lists$JVMList@46f5f779
 		}
 	}
 	/* @Override
@@ -282,7 +222,7 @@
 	/* @Override
         public */ filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
 		return /* this */.flatMap/* : unknown */((element) => {
-			if (predicate/* : (arg0 : T) => boolean */(element/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@24273305
+			if (predicate/* : (arg0 : T) => boolean */(element/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@5b1d2887
 			}
 			return new HeadedIterator(new EmptyHead()/* : EmptyHead */)/* : HeadedIterator */;
 		})/* : unknown */;
@@ -308,7 +248,7 @@
 	}
 	/* @Override
         public */ next() : Option<number> {
-		if (/* this.counter < this */.length/* : unknown */){magma.Main$Lists$JVMList@46f5f779
+		if (/* this.counter < this */.length/* : unknown */){magma.Main$Lists$JVMList@1c2c22f3
 		}
 		return new None()/* : None */;
 	}
@@ -332,7 +272,7 @@
 	}
 	/* @Override
             public */ removeLast() : Option<[List<T>, T]> {
-		if (/* this */.elements/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@18e8568
+		if (/* this */.elements/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@33e5ccce
 		}
 		let slice = /* this */.elements/* : unknown */.subList/* : unknown */(0/* : number */, /* this */.elements/* : unknown */.size/* : unknown */()/* : unknown */ - 1/* : number */)/* : unknown */;
 		let last = /* this */.elements/* : unknown */.getLast/* : unknown */()/* : unknown */;
@@ -357,7 +297,7 @@
 	}
 	/* @Override
             public */ removeFirst() : Option<[T, List<T>]> {
-		if (/* this */.elements/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@33e5ccce
+		if (/* this */.elements/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@5a42bbf4
 		}
 		let first = /* this */.elements/* : unknown */.getFirst/* : unknown */()/* : unknown */;
 		let slice = /* this */.elements/* : unknown */.subList/* : unknown */(1/* : number */, /* this */.elements/* : unknown */.size/* : unknown */()/* : unknown */)/* : unknown */;
@@ -370,15 +310,15 @@
 	}
 	/* @Override
             public */ last() : Option<T> {
-		if (/* this */.elements/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@5a42bbf4
+		if (/* this */.elements/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@270421f5
 		}
 		return new Some(/* this */.elements/* : unknown */.getLast/* : unknown */()/* : unknown */)/* : Some */;
 	}
 	/* @Override
             public */ get(index : number) : Option<T> {
-		if (/* index < this */.elements/* : unknown */.size/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@270421f5
+		if (/* index < this */.elements/* : unknown */.size/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@52d455b8
 		}
-		else {magma.Main$Lists$JVMList@52d455b8
+		else {magma.Main$Lists$JVMList@4f4a7090
 		}
 	}
 }
@@ -402,7 +342,7 @@
 	}
 	/* @Override
         public */ generateType() : string {
-		if (/* this */.type/* : unknown */.equals/* : unknown */(/* Primitive */.Unknown/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@6aceb1a5
+		if (/* this */.type/* : unknown */.equals/* : unknown */(/* Primitive */.Unknown/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@2d6d8735
 		}
 		return " : " + /* this */.type/* : unknown */.generate/* : unknown */()/* : unknown */;
 	}
@@ -486,10 +426,10 @@
 		return new CompileState(/* this */.structures/* : unknown */, /* this */.definitions/* : unknown */.addAllLast/* : unknown */(definitions/* : List<Definition> */)/* : unknown */, /* this */.objectTypes/* : unknown */, /* this */.structNames/* : unknown */, /* this */.typeParams/* : unknown */, /* this */.typeRegister/* : unknown */)/* : CompileState */;
 	}
 	/* public */ resolveType(name : string) : Option<Type> {
-		if (/* this */.structNames/* : unknown */.last/* : unknown */()/* : unknown */.filter/* : unknown */((inner) => inner/* : unknown */.equals/* : unknown */(name/* : () => string */)/* : unknown */)/* : unknown */.isPresent/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@2d6d8735
+		if (/* this */.structNames/* : unknown */.last/* : unknown */()/* : unknown */.filter/* : unknown */((inner) => inner/* : unknown */.equals/* : unknown */(name/* : () => string */)/* : unknown */)/* : unknown */.isPresent/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@ba4d54
 		}
 		let maybeTypeParam = /* this */.typeParams/* : unknown */.iterate/* : unknown */()/* : unknown */.filter/* : unknown */((param) => param/* : unknown */.equals/* : unknown */(name/* : () => string */)/* : unknown */)/* : unknown */.next/* : unknown */()/* : unknown */;
-		if (/* maybeTypeParam instanceof Some */(/* var value */)/* : unknown */){magma.Main$Lists$JVMList@ba4d54
+		if (/* maybeTypeParam instanceof Some */(/* var value */)/* : unknown */){magma.Main$Lists$JVMList@12bc6874
 		}
 		return /* this */.objectTypes/* : unknown */.iterate/* : unknown */()/* : unknown */.filter/* : unknown */((type) => type/* : () => Type */.name/* : unknown */.equals/* : unknown */(name/* : () => string */)/* : unknown */)/* : unknown */.next/* : unknown */()/* : unknown */.map/* : unknown */((type) => type/* : () => Type */)/* : unknown */;
 	}
@@ -552,7 +492,7 @@
 		return /* this */.depth/* : unknown */ === 1/* : number */;
 	}
 	/* public */ pop() : Option<[string, DivideState]> {
-		if (/* this.index < this */.input/* : unknown */.length/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@12bc6874
+		if (/* this.index < this */.input/* : unknown */.length/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@de0a01f
 		}
 		return new None()/* : None */;
 	}
@@ -606,7 +546,7 @@
 	}
 	/* @Override
         public */ next() : Option<R> {
-		while (true){magma.Main$Lists$JVMList@de0a01f
+		while (true){magma.Main$Lists$JVMList@4c75cab9
 		}
 	}
 }
@@ -856,7 +796,7 @@
 	}
 	/* @Override
             public */ find(key : K) : Option<V> {
-		if (/* this */.map/* : unknown */.containsKey/* : unknown */(key/* : K */)/* : unknown */){magma.Main$Lists$JVMList@4c75cab9
+		if (/* this */.map/* : unknown */.containsKey/* : unknown */(key/* : K */)/* : unknown */){magma.Main$Lists$JVMList@1ef7fe8e
 		}
 		return new None()/* : None */;
 	}
@@ -921,10 +861,10 @@
 	}
 	/* @Override
         public */ generate() : string {
-		let generatedHeader = /* this */.header/* : unknown */.generateWithParams/* : unknown */(/* joinValues */(/* this */.parameters/* : unknown */)/* : unknown */)/* : unknown */;
-		let generatedStatements = /* this */.statements/* : unknown */.map/* : unknown */(Method/* : (arg0 : number, arg1 : Header, arg2 : List<Definition>, arg3 : Option<List<FunctionSegment>>) => content-start public content-end */.joinStatements/* : unknown */)/* : unknown */.orElse/* : unknown */(";")/* : unknown */;
 		let indent = /* createIndent */(/* this */.depth/* : unknown */)/* : unknown */;
-		return indent/* : unknown */ + generatedHeader/* : unknown */ + " {" + generatedStatements + indent + "}";
+		let generatedHeader = /* this */.header/* : unknown */.generateWithParams/* : unknown */(/* joinValues */(/* this */.parameters/* : unknown */)/* : unknown */)/* : unknown */;
+		let generatedStatements = /* this */.statements/* : unknown */.map/* : unknown */(Method/* : (arg0 : number, arg1 : Header, arg2 : List<Definition>, arg3 : Option<List<FunctionSegment>>) => content-start public content-end */.joinStatements/* : unknown */)/* : unknown */.map/* : unknown */((inner) => " {" + inner + indent + "}")/* : unknown */.orElse/* : unknown */(";")/* : unknown */;
+		return indent/* : unknown */ + generatedHeader/* : unknown */ + generatedStatements/* : unknown */;
 	}
 }
 /* private */class Primitive/*  */ {
@@ -980,9 +920,9 @@
 
     private static final boolean isDebug = true; */
 	/* public static */ main() : /* void */ {
-		/* try */{magma.Main$Lists$JVMList@5c0369c4
+		/* try */{magma.Main$Lists$JVMList@2be94b0f
 		}
-		/* catch (IOException | InterruptedException e) */{magma.Main$Lists$JVMList@2be94b0f
+		/* catch (IOException | InterruptedException e) */{magma.Main$Lists$JVMList@d70c109
 		}
 	}
 	/* private static */ compile(input : string) : string {
@@ -1026,41 +966,41 @@
 	}
 	/* private static */ divideAll(input : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : List<string> {
 		let current : DivideState = new DivideState(input/* : string */)/* : DivideState */;
-		while (true){magma.Main$Lists$JVMList@d70c109
+		while (true){magma.Main$Lists$JVMList@17ed40e0
 		}
 		return current/* : R */.advance/* : unknown */()/* : unknown */.segments/* : unknown */;
 	}
 	/* private static */ foldDoubleQuotes(tuple : [string, DivideState]) : Option<DivideState> {
-		if (tuple/* : unknown */.left/* : unknown */()/* : unknown */ === /*  '\"' */){magma.Main$Lists$JVMList@17ed40e0
+		if (tuple/* : unknown */.left/* : unknown */()/* : unknown */ === /*  '\"' */){magma.Main$Lists$JVMList@50675690
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ foldSingleQuotes(tuple : [string, DivideState]) : Option<DivideState> {
-		if (/* tuple.left() != '\'' */){magma.Main$Lists$JVMList@50675690
+		if (/* tuple.left() != '\'' */){magma.Main$Lists$JVMList@31b7dea0
 		}
 		let appended = tuple/* : unknown */.right/* : unknown */()/* : unknown */.append/* : unknown */(tuple/* : unknown */.left/* : unknown */()/* : unknown */)/* : unknown */;
 		return appended/* : unknown */.popAndAppendToTuple/* : unknown */()/* : unknown */.map/* : unknown */(Main/* : Main */.foldEscaped/* : unknown */)/* : unknown */.flatMap/* : unknown */(DivideState/* : (arg0 : string, arg1 : number, arg2 : List<string>, arg3 : string, arg4 : number) => content-start public content-end */.popAndAppendToOption/* : unknown */)/* : unknown */;
 	}
 	/* private static */ foldEscaped(escaped : [string, DivideState]) : DivideState {
-		if (escaped/* : [string, DivideState] */[0/* : number */]()/* : unknown */ === /*  '\\' */){magma.Main$Lists$JVMList@31b7dea0
+		if (escaped/* : [string, DivideState] */[0/* : number */]()/* : unknown */ === /*  '\\' */){magma.Main$Lists$JVMList@3ac42916
 		}
 		return escaped/* : [string, DivideState] */[1/* : number */]()/* : unknown */;
 	}
 	/* private static */ foldStatementChar(state : DivideState, c : string) : DivideState {
 		let append : DivideState = state/* : CompileState */.append/* : (arg0 : string) => DivideState */(c/* : string */)/* : DivideState */;
-		if (c/* : string */ === /*  ';'  */ && append/* : (arg0 : string) => DivideState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@3ac42916
+		if (c/* : string */ === /*  ';'  */ && append/* : (arg0 : string) => DivideState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@47d384ee
 		}
-		if (c/* : string */ === /*  '}'  */ && append/* : (arg0 : string) => DivideState */.isShallow/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@47d384ee
+		if (c/* : string */ === /*  '}'  */ && append/* : (arg0 : string) => DivideState */.isShallow/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@2d6a9952
 		}
-		if (c/* : string */ === /*  '{'  */ || c/* : string */ === /*  '(' */){magma.Main$Lists$JVMList@2d6a9952
+		if (c/* : string */ === /*  '{'  */ || c/* : string */ === /*  '(' */){magma.Main$Lists$JVMList@22a71081
 		}
-		if (c/* : string */ === /*  '}'  */ || c/* : string */ === /*  ')' */){magma.Main$Lists$JVMList@22a71081
+		if (c/* : string */ === /*  '}'  */ || c/* : string */ === /*  ')' */){magma.Main$Lists$JVMList@3930015a
 		}
 		return append/* : (arg0 : string) => DivideState */;
 	}
 	/* private static */ compileRootSegment(state : CompileState, input : string) : [CompileState, string] {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.startsWith/* : unknown */("package ")/* : unknown */ || stripped/* : unknown */.startsWith/* : unknown */("import ")/* : unknown */){magma.Main$Lists$JVMList@3930015a
+		if (stripped/* : unknown */.startsWith/* : unknown */("package ")/* : unknown */ || stripped/* : unknown */.startsWith/* : unknown */("import ")/* : unknown */){magma.Main$Lists$JVMList@629f0666
 		}
 		return /* compileClass */(stripped/* : unknown */, 0/* : number */, state/* : CompileState */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.generate/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, /* generatePlaceholder */(stripped/* : unknown */)/* : unknown */)/* : Tuple2Impl */)/* : unknown */;
 	}
@@ -1113,14 +1053,14 @@
 	}
 	/* private static */ assembleStructure(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, afterTypeParams : string, rawParameters : List<Parameter>) : Option<[CompileState, ClassSegment]> {
 		let name = rawName/* : string */.strip/* : unknown */()/* : unknown */;
-		if (!/* isSymbol */(name/* : () => string */)/* : unknown */){magma.Main$Lists$JVMList@629f0666
+		if (!/* isSymbol */(name/* : () => string */)/* : unknown */){magma.Main$Lists$JVMList@1bc6a36e
 		}
 		let joinedTypeParams = typeParams/* : () => List<string> */()/* : List<string> */.collect/* : (arg0 : Collector<T, R>) => R */(new Joiner(", ")/* : Joiner */)/* : R */.map/* : unknown */((inner) => "<" + inner + ">")/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 		let statementsTuple : [CompileState, List<T>] = parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state/* : CompileState */.pushStructName/* : (arg0 : string) => CompileState */(name/* : () => string */)/* : CompileState */.withTypeParams/* : (arg0 : List<string>) => CompileState */(typeParams/* : () => List<string> */)/* : CompileState */, content/* : string */, (state0, input) => /* compileClassSegment */(state0/* : unknown */, input/* : string */, 1/* : number */)/* : unknown */)/* : [CompileState, List<T>] */;
 		/* List<ClassSegment> withMaybeConstructor */;
-		if (rawParameters/* : List<Parameter> */.isEmpty/* : () => boolean */()/* : boolean */){magma.Main$Lists$JVMList@1bc6a36e
+		if (rawParameters/* : List<Parameter> */.isEmpty/* : () => boolean */()/* : boolean */){magma.Main$Lists$JVMList@1ff8b8f
 		}
-		else {magma.Main$Lists$JVMList@1ff8b8f
+		else {magma.Main$Lists$JVMList@387c703b
 		}
 		let parsed2 = /* withMaybeConstructor */.iterate/* : unknown */()/* : unknown */.map/* : unknown */(ClassSegment/* : ClassSegment */.generate/* : unknown */)/* : unknown */.collect/* : unknown */(new Joiner()/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 		let generated = /* generatePlaceholder */(beforeInfix/* : unknown */.strip/* : unknown */()/* : unknown */)/* : unknown */ + targetInfix/* : string */ + name/* : () => string */ + joinedTypeParams/* : unknown */ + /* generatePlaceholder */(afterTypeParams/* : unknown */)/* : unknown */ + " {" + parsed2 + "\n}\n";
@@ -1128,23 +1068,23 @@
 		return new Some(new Tuple2Impl(compileState/* : unknown */, new Whitespace()/* : Whitespace */)/* : Tuple2Impl */)/* : Some */;
 	}
 	/* private static */ retainDefinition(parameter : Parameter) : Option<Definition> {
-		if (parameter/* : Parameter */._variant/* : unknown */ === ParameterVariant.Definition/* : unknown */){magma.Main$Lists$JVMList@387c703b
+		if (parameter/* : Parameter */._variant/* : unknown */ === ParameterVariant.Definition/* : unknown */){magma.Main$Lists$JVMList@224aed64
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ isSymbol(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++) */{magma.Main$Lists$JVMList@224aed64
+		/* for (var i = 0; i < input.length(); i++) */{magma.Main$Lists$JVMList@c39f790
 		}
 		return true;
 	}
 	/* private static  */ prefix<T>(input : string, prefix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
-		if (!input/* : string */.startsWith/* : unknown */(prefix/* : string */)/* : unknown */){magma.Main$Lists$JVMList@c39f790
+		if (!input/* : string */.startsWith/* : unknown */(prefix/* : string */)/* : unknown */){magma.Main$Lists$JVMList@71e7a66b
 		}
 		let slice = input/* : string */.substring/* : unknown */(prefix/* : string */.length/* : unknown */()/* : unknown */)/* : unknown */;
 		return mapper/* : (arg0 : T) => R */(slice/* : unknown */)/* : R */;
 	}
 	/* private static  */ suffix<T>(input : string, suffix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
-		if (!input/* : string */.endsWith/* : unknown */(suffix/* : string */)/* : unknown */){magma.Main$Lists$JVMList@71e7a66b
+		if (!input/* : string */.endsWith/* : unknown */(suffix/* : string */)/* : unknown */){magma.Main$Lists$JVMList@2ac1fdc4
 		}
 		let slice = input/* : string */.substring/* : unknown */(0/* : number */, input/* : string */.length/* : unknown */()/* : unknown */ - suffix/* : string */.length/* : unknown */()/* : unknown */)/* : unknown */;
 		return mapper/* : (arg0 : T) => R */(slice/* : unknown */)/* : R */;
@@ -1156,7 +1096,7 @@
 		return action/* : () => Option<[CompileState, T]> */()/* : Option<[CompileState, T]> */.map/* : (arg0 : (arg0 : [CompileState, T]) => R) => Option<R> */((tuple : [CompileState, T]) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : Option<R> */;
 	}
 	/* private static */ compileWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
-		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@2ac1fdc4
+		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@5f150435
 		}
 		return new None()/* : None */;
 	}
@@ -1178,15 +1118,15 @@
 		let content = rawContent/* : unknown */.strip/* : unknown */()/* : unknown */;
 		let paramTypes : R = parameters/* : List<Definition> */.iterate/* : () => Iterator<T> */()/* : Iterator<T> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(Definition/* : Definition */.type/* : unknown */)/* : Option<R> */.collect/* : (arg0 : Collector<T, R>) => R */(new ListCollector()/* : ListCollector */)/* : R */;
 		let toDefine : Definition = header/* : Header */.createDefinition/* : (arg0 : List<Type>) => Definition */(paramTypes/* : List<Type> */)/* : Definition */;
-		if (content/* : string */.equals/* : unknown */(";")/* : unknown */){magma.Main$Lists$JVMList@5f150435
+		if (content/* : string */.equals/* : unknown */(";")/* : unknown */){magma.Main$Lists$JVMList@1c53fd30
 		}
-		if (content/* : string */.startsWith/* : unknown */("{")/* : unknown */ && content/* : string */.endsWith/* : unknown */("}")/* : unknown */){magma.Main$Lists$JVMList@1c53fd30
+		if (content/* : string */.startsWith/* : unknown */("{")/* : unknown */ && content/* : string */.endsWith/* : unknown */("}")/* : unknown */){magma.Main$Lists$JVMList@50cbc42f
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ parseConstructor(state : CompileState, input : string) : Option<[CompileState, Header]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.equals/* : unknown */(state/* : CompileState */.structNames/* : unknown */.last/* : unknown */()/* : unknown */.orElse/* : unknown */("")/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@50cbc42f
+		if (stripped/* : unknown */.equals/* : unknown */(state/* : CompileState */.structNames/* : unknown */.last/* : unknown */()/* : unknown */.orElse/* : unknown */("")/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@75412c2f
 		}
 		return new None()/* : None */;
 	}
@@ -1205,7 +1145,7 @@
 	}
 	/* private static */ parseFunctionSegment(state : CompileState, input : string, depth : number) : [CompileState, FunctionSegment] {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@75412c2f
+		if (stripped/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@282ba1e
 		}
 		return /* parseFunctionStatement */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */.or/* : unknown */(() => /* compileBlock */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(stripped/* : unknown */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
@@ -1243,7 +1183,7 @@
 	}
 	/* private static */ compileElse(state : CompileState, input : string) : Option<[CompileState, string]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.equals/* : unknown */("else")/* : unknown */){magma.Main$Lists$JVMList@282ba1e
+		if (stripped/* : unknown */.equals/* : unknown */("else")/* : unknown */){magma.Main$Lists$JVMList@13b6d03
 		}
 		return new None()/* : None */;
 	}
@@ -1259,17 +1199,17 @@
 	}
 	/* private static */ foldBlockStart(state : DivideState, c : string) : DivideState {
 		let appended : DivideState = state/* : CompileState */.append/* : (arg0 : string) => DivideState */(c/* : string */)/* : DivideState */;
-		if (c/* : string */ === /*  '{'  */ && state/* : CompileState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@13b6d03
+		if (c/* : string */ === /*  '{'  */ && state/* : CompileState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@f5f2bb7
 		}
-		if (c/* : string */ === /*  '{' */){magma.Main$Lists$JVMList@f5f2bb7
+		if (c/* : string */ === /*  '{' */){magma.Main$Lists$JVMList@73035e27
 		}
-		if (c/* : string */ === /*  '}' */){magma.Main$Lists$JVMList@73035e27
+		if (c/* : string */ === /*  '}' */){magma.Main$Lists$JVMList@64c64813
 		}
 		return appended/* : unknown */;
 	}
 	/* private static */ compileStatementValue(state : CompileState, input : string, depth : number) : [CompileState, string] {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.startsWith/* : unknown */("return ")/* : unknown */){magma.Main$Lists$JVMList@64c64813
+		if (stripped/* : unknown */.startsWith/* : unknown */("return ")/* : unknown */){magma.Main$Lists$JVMList@3ecf72fd
 		}
 		return /* compileAssignment */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => {
 			return new Tuple2Impl(state/* : CompileState */, /* generatePlaceholder */(stripped/* : unknown */)/* : unknown */)/* : Tuple2Impl */;
@@ -1284,9 +1224,9 @@
 			return /* parseDefinition */(sourceState/* : unknown */, beforeEquals/* : unknown */)/* : unknown */.flatMap/* : unknown */((definitionTuple) => {
 				let definitionState = definitionTuple/* : unknown */.left/* : unknown */()/* : unknown */;
 				let definition = definitionTuple/* : unknown */.right/* : unknown */()/* : unknown */.mapType/* : unknown */((type) => {
-					if (type/* : () => Type */(/* Primitive */.Unknown/* : unknown */)/* : Type */){magma.Main$Lists$JVMList@6f79caec
+					if (type/* : () => Type */(/* Primitive */.Unknown/* : unknown */)/* : Type */){magma.Main$Lists$JVMList@67117f44
 					}
-					else {magma.Main$Lists$JVMList@67117f44
+					else {magma.Main$Lists$JVMList@5d3411d
 					}
 				})/* : unknown */;
 				return new Some(new Tuple2Impl(definitionState/* : unknown */.withDefinition/* : unknown */(definition/* : unknown */)/* : unknown */, "let " + definition/* : unknown */.generate/* : unknown */()/* : unknown */ + " = " + generatedSource/* : unknown */)/* : Tuple2Impl */)/* : Some */;
@@ -1307,9 +1247,9 @@
 	}
 	/* private static */ parseBoolean(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.equals/* : unknown */("false")/* : unknown */){magma.Main$Lists$JVMList@3ecf72fd
+		if (stripped/* : unknown */.equals/* : unknown */("false")/* : unknown */){magma.Main$Lists$JVMList@483bf400
 		}
-		if (stripped/* : unknown */.equals/* : unknown */("true")/* : unknown */){magma.Main$Lists$JVMList@483bf400
+		if (stripped/* : unknown */.equals/* : unknown */("true")/* : unknown */){magma.Main$Lists$JVMList@21a06946
 		}
 		return new None()/* : None */;
 	}
@@ -1335,16 +1275,16 @@
 	}
 	/* private static */ parseNot(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.startsWith/* : unknown */("!")/* : unknown */){magma.Main$Lists$JVMList@21a06946
+		if (stripped/* : unknown */.startsWith/* : unknown */("!")/* : unknown */){magma.Main$Lists$JVMList@77f03bb1
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ parseLambda(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return first/* : unknown */(input/* : string */, "->", (beforeArrow, valueString) => {
 			let strippedBeforeArrow = beforeArrow/* : unknown */.strip/* : unknown */()/* : unknown */;
-			if (isSymbol/* : (arg0 : string) => boolean */(strippedBeforeArrow/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@5d3411d
+			if (isSymbol/* : (arg0 : string) => boolean */(strippedBeforeArrow/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@2471cca7
 			}
-			if (strippedBeforeArrow/* : unknown */.startsWith/* : unknown */("(")/* : unknown */ && strippedBeforeArrow/* : unknown */.endsWith/* : unknown */(")")/* : unknown */){magma.Main$Lists$JVMList@2471cca7
+			if (strippedBeforeArrow/* : unknown */.startsWith/* : unknown */("(")/* : unknown */ && strippedBeforeArrow/* : unknown */.endsWith/* : unknown */(")")/* : unknown */){magma.Main$Lists$JVMList@5fe5c6f
 			}
 			return new None()/* : None */;
 		})/* : unknown */;
@@ -1353,29 +1293,29 @@
 		let strippedValueString = valueString/* : unknown */.strip/* : unknown */()/* : unknown */;
 		/* Tuple2Impl<CompileState, LambdaValue> value */;
 		let state2 : CompileState = state/* : CompileState */.withDefinitions/* : (arg0 : List<Definition>) => CompileState */(definitions/* : List<Definition> */)/* : CompileState */;
-		if (strippedValueString/* : unknown */.startsWith/* : unknown */("{")/* : unknown */ && strippedValueString/* : unknown */.endsWith/* : unknown */("}")/* : unknown */){magma.Main$Lists$JVMList@77f03bb1
+		if (strippedValueString/* : unknown */.startsWith/* : unknown */("{")/* : unknown */ && strippedValueString/* : unknown */.endsWith/* : unknown */("}")/* : unknown */){magma.Main$Lists$JVMList@326de728
 		}
-		else {magma.Main$Lists$JVMList@326de728
+		else {magma.Main$Lists$JVMList@25618e91
 		}
 		let right = value/* : T */.right/* : unknown */()/* : unknown */;
 		return new Some(new Tuple2Impl(value/* : T */.left/* : unknown */()/* : unknown */, new Lambda(definitions/* : List<Definition> */, right/* : () => B */)/* : Lambda */)/* : Tuple2Impl */)/* : Some */;
 	}
 	/* private static */ parseDigits(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (/* isNumber */(stripped/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@25618e91
+		if (/* isNumber */(stripped/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@7a92922
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ isNumber(input : string) : boolean {
 		/* String maybeTruncated */;
-		if (input/* : string */.startsWith/* : unknown */("-")/* : unknown */){magma.Main$Lists$JVMList@7a92922
+		if (input/* : string */.startsWith/* : unknown */("-")/* : unknown */){magma.Main$Lists$JVMList@71f2a7d5
 		}
-		else {magma.Main$Lists$JVMList@71f2a7d5
+		else {magma.Main$Lists$JVMList@2cfb4a64
 		}
 		return /* areAllDigits */(/* maybeTruncated */)/* : unknown */;
 	}
 	/* private static */ areAllDigits(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++) */{magma.Main$Lists$JVMList@2cfb4a64
+		/* for (var i = 0; i < input.length(); i++) */{magma.Main$Lists$JVMList@5474c6c
 		}
 		return true;
 	}
@@ -1412,24 +1352,24 @@
 		return new Some(new Tuple2Impl(argumentsState/* : unknown */, invokable/* : Invokable */)/* : Tuple2Impl */)/* : Some */;
 	}
 	/* private static */ retainValue(argument : Argument) : Option<Value> {
-		if (argument/* : Argument */._variant/* : unknown */ === ArgumentVariant.Value/* : unknown */){magma.Main$Lists$JVMList@5474c6c
+		if (argument/* : Argument */._variant/* : unknown */ === ArgumentVariant.Value/* : unknown */){magma.Main$Lists$JVMList@4b6995df
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ parseArgument(state : CompileState, element : string, depth : number) : [CompileState, Argument] {
-		if (element/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@4b6995df
+		if (element/* : unknown */.isEmpty/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@2fc14f68
 		}
 		let tuple : [CompileState, Value] = parseValue/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state/* : CompileState */, element/* : unknown */, depth/* : number */)/* : [CompileState, Value] */;
 		return new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */;
 	}
 	/* private static */ findCallerType(newCaller : Caller) : FunctionType {
 		let callerType : FunctionType = new FunctionType(Lists/* : Lists */.empty/* : () => List<T> */()/* : List<T> */, /* Primitive */.Unknown/* : unknown */)/* : FunctionType */;
-		/* switch (newCaller) */{magma.Main$Lists$JVMList@2fc14f68
+		/* switch (newCaller) */{magma.Main$Lists$JVMList@591f989e
 		}
 		return callerType/* : unknown */;
 	}
 	/* private static */ modifyCaller(state : CompileState, oldCaller : Caller) : Caller {
-		if (oldCaller/* : unknown */._variant/* : unknown */ === Variant.DataAccess/* : unknown */){magma.Main$Lists$JVMList@591f989e
+		if (oldCaller/* : unknown */._variant/* : unknown */ === Variant.DataAccess/* : unknown */){magma.Main$Lists$JVMList@66048bfd
 		}
 		return oldCaller/* : unknown */;
 	}
@@ -1437,44 +1377,44 @@
 		return value/* : T */.type/* : unknown */()/* : unknown */;
 	}
 	/* private static */ invocationHeader(state : CompileState, depth : number, callerString1 : string) : [CompileState, Caller] {
-		if (callerString1/* : string */.startsWith/* : unknown */("new ")/* : unknown */){magma.Main$Lists$JVMList@66048bfd
+		if (callerString1/* : string */.startsWith/* : unknown */("new ")/* : unknown */){magma.Main$Lists$JVMList@61443d8f
 		}
 		let tuple : [CompileState, Value] = parseValue/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state/* : CompileState */, callerString1/* : string */, depth/* : number */)/* : [CompileState, Value] */;
 		return new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */;
 	}
 	/* private static */ foldInvocationStart(state : DivideState, c : string) : DivideState {
 		let appended : DivideState = state/* : CompileState */.append/* : (arg0 : string) => DivideState */(c/* : string */)/* : DivideState */;
-		if (c/* : string */ === /*  '(' */){magma.Main$Lists$JVMList@61443d8f
+		if (c/* : string */ === /*  '(' */){magma.Main$Lists$JVMList@445b84c0
 		}
-		if (c/* : string */ === /*  ')' */){magma.Main$Lists$JVMList@445b84c0
+		if (c/* : string */ === /*  ')' */){magma.Main$Lists$JVMList@61a52fbd
 		}
 		return appended/* : unknown */;
 	}
 	/* private static */ parseDataAccess(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last/* : () => Option<T> */(input/* : string */.strip/* : unknown */()/* : unknown */, ".", (parentString, rawProperty) => {
 			let property = rawProperty/* : unknown */.strip/* : unknown */()/* : unknown */;
-			if (!isSymbol/* : (arg0 : string) => boolean */(property/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@5fe5c6f
+			if (!isSymbol/* : (arg0 : string) => boolean */(property/* : unknown */)/* : unknown */){magma.Main$Lists$JVMList@6979e8cb
 			}
 			let tuple : [CompileState, Value] = parseValue/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state/* : CompileState */, parentString/* : unknown */, depth/* : number */)/* : [CompileState, Value] */;
 			let parent = tuple/* : unknown */.right/* : unknown */()/* : unknown */;
 			let parentType = parent/* : unknown */.type/* : unknown */()/* : unknown */;
-			if (/* parentType instanceof TupleType */){magma.Main$Lists$JVMList@6979e8cb
+			if (/* parentType instanceof TupleType */){magma.Main$Lists$JVMList@763d9750
 			}
 			let type : Type = /* Primitive */.Unknown/* : unknown */;
-			if (parentType/* : unknown */._variant/* : unknown */ === Variant.FindableType/* : unknown */){magma.Main$Lists$JVMList@763d9750
+			if (parentType/* : unknown */._variant/* : unknown */ === Variant.FindableType/* : unknown */){magma.Main$Lists$JVMList@5c0369c4
 			}
 			return new Some(new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, new DataAccess(parent/* : unknown */, property/* : unknown */, type/* : () => Type */)/* : DataAccess */)/* : Tuple2Impl */)/* : Some */;
 		})/* : Option<T> */;
 	}
 	/* private static */ parseString(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.startsWith/* : unknown */("\"")/* : unknown */ && stripped/* : unknown */.endsWith/* : unknown */("\"")/* : unknown */){magma.Main$Lists$JVMList@61a52fbd
+		if (stripped/* : unknown */.startsWith/* : unknown */("\"")/* : unknown */ && stripped/* : unknown */.endsWith/* : unknown */("\"")/* : unknown */){magma.Main$Lists$JVMList@233c0b17
 		}
 		return new None()/* : None */;
 	}
 	/* private static */ parseSymbolValue(state : CompileState, value : string) : Option<[CompileState, Value]> {
 		let stripped = value/* : T */.strip/* : unknown */()/* : unknown */;
-		if (isSymbol/* : (arg0 : string) => boolean */(stripped/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@233c0b17
+		if (isSymbol/* : (arg0 : string) => boolean */(stripped/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@63d4e2ba
 		}
 		return new None()/* : None */;
 	}
@@ -1497,7 +1437,7 @@
 		return parseAll/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : DivideState, arg1 : string) => DivideState, arg3 : (arg0 : CompileState, arg1 : [number, string]) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state/* : CompileState */, input/* : string */, Main/* : Main */.foldValueChar/* : unknown */, mapper/* : (arg0 : T) => R */)/* : Option<[CompileState, List<T>]> */;
 	}
 	/* private static */ compileParameter(state : CompileState, input : string) : [CompileState, Parameter] {
-		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@63d4e2ba
+		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@7bb11784
 		}
 		return /* parseDefinition */(state/* : CompileState */, input/* : string */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl<CompileState, Parameter>(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl<CompileState, Parameter> */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
@@ -1541,12 +1481,12 @@
 		})/* : Option<R> */;
 	}
 	/* private static */ foldTypeSeparator(state : DivideState, c : string) : DivideState {
-		if (c/* : string */ === /*  ' '  */ && state/* : CompileState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@7bb11784
+		if (c/* : string */ === /*  ' '  */ && state/* : CompileState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@33a10788
 		}
 		let appended : DivideState = state/* : CompileState */.append/* : (arg0 : string) => DivideState */(c/* : string */)/* : DivideState */;
-		if (c/* : string */ === /*  '<' */){magma.Main$Lists$JVMList@33a10788
+		if (c/* : string */ === /*  '<' */){magma.Main$Lists$JVMList@7006c658
 		}
-		if (c/* : string */ === /*  '>' */){magma.Main$Lists$JVMList@7006c658
+		if (c/* : string */ === /*  '>' */){magma.Main$Lists$JVMList@34033bd0
 		}
 		return appended/* : unknown */;
 	}
@@ -1557,14 +1497,14 @@
 		})/* : unknown */;
 	}
 	/* private static */ foldValueChar(state : DivideState, c : string) : DivideState {
-		if (c/* : string */ === /*  ','  */ && state/* : CompileState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@34033bd0
+		if (c/* : string */ === /*  ','  */ && state/* : CompileState */.isLevel/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@47fd17e3
 		}
 		let appended : DivideState = state/* : CompileState */.append/* : (arg0 : string) => DivideState */(c/* : string */)/* : DivideState */;
-		if (c/* : string */ === /*  ' */ - /* ' */){magma.Main$Lists$JVMList@47fd17e3
+		if (c/* : string */ === /*  ' */ - /* ' */){magma.Main$Lists$JVMList@7cdbc5d3
 		}
-		if (c/* : string */ === /*  '<'  */ || c/* : string */ === /*  '('  */ || c/* : string */ === /*  '{' */){magma.Main$Lists$JVMList@7cdbc5d3
+		if (c/* : string */ === /*  '<'  */ || c/* : string */ === /*  '('  */ || c/* : string */ === /*  '{' */){magma.Main$Lists$JVMList@3aa9e816
 		}
-		if (c/* : string */ === /*  '>'  */ || c/* : string */ === /*  ')'  */ || c/* : string */ === /*  '}' */){magma.Main$Lists$JVMList@3aa9e816
+		if (c/* : string */ === /*  '>'  */ || c/* : string */ === /*  ')'  */ || c/* : string */ === /*  '}' */){magma.Main$Lists$JVMList@17d99928
 		}
 		return appended/* : unknown */;
 	}
@@ -1573,15 +1513,15 @@
 	}
 	/* private static */ parseType(state : CompileState, input : string) : Option<[CompileState, Type]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		if (stripped/* : unknown */.equals/* : unknown */("int")/* : unknown */ || stripped/* : unknown */.equals/* : unknown */("Integer")/* : unknown */){magma.Main$Lists$JVMList@17d99928
+		if (stripped/* : unknown */.equals/* : unknown */("int")/* : unknown */ || stripped/* : unknown */.equals/* : unknown */("Integer")/* : unknown */){magma.Main$Lists$JVMList@3834d63f
 		}
-		if (stripped/* : unknown */.equals/* : unknown */("String")/* : unknown */ || stripped/* : unknown */.equals/* : unknown */("char")/* : unknown */ || stripped/* : unknown */.equals/* : unknown */("Character")/* : unknown */){magma.Main$Lists$JVMList@3834d63f
+		if (stripped/* : unknown */.equals/* : unknown */("String")/* : unknown */ || stripped/* : unknown */.equals/* : unknown */("char")/* : unknown */ || stripped/* : unknown */.equals/* : unknown */("Character")/* : unknown */){magma.Main$Lists$JVMList@1ae369b7
 		}
-		if (stripped/* : unknown */.equals/* : unknown */("var")/* : unknown */){magma.Main$Lists$JVMList@1ae369b7
+		if (stripped/* : unknown */.equals/* : unknown */("var")/* : unknown */){magma.Main$Lists$JVMList@6fffcba5
 		}
-		if (stripped/* : unknown */.equals/* : unknown */("boolean")/* : unknown */){magma.Main$Lists$JVMList@6fffcba5
+		if (stripped/* : unknown */.equals/* : unknown */("boolean")/* : unknown */){magma.Main$Lists$JVMList@34340fab
 		}
-		if (isSymbol/* : (arg0 : string) => boolean */(stripped/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@34340fab
+		if (isSymbol/* : (arg0 : string) => boolean */(stripped/* : unknown */)/* : boolean */){magma.Main$Lists$JVMList@2aafb23c
 		}
 		return /* parseTemplate */(state/* : CompileState */, input/* : string */)/* : unknown */.or/* : unknown */(() => /* varArgs */(state/* : CompileState */, input/* : string */)/* : unknown */)/* : unknown */;
 	}
@@ -1596,17 +1536,17 @@
 	}
 	/* private static */ assembleTemplate(base : string, state : CompileState, arguments : List<Argument>) : [CompileState, Type] {
 		let children = arguments/* : unknown */.iterate/* : unknown */()/* : unknown */.map/* : unknown */(Main/* : Main */.retainType/* : unknown */)/* : unknown */.flatMap/* : unknown */(Iterators/* : Iterators */.fromOption/* : unknown */)/* : unknown */.collect/* : unknown */(new ListCollector()/* : ListCollector */)/* : unknown */;
-		if (base/* : string */.equals/* : unknown */("BiFunction")/* : unknown */){magma.Main$Lists$JVMList@2aafb23c
+		if (base/* : string */.equals/* : unknown */("BiFunction")/* : unknown */){magma.Main$Lists$JVMList@2b80d80f
 		}
-		if (base/* : string */.equals/* : unknown */("Function")/* : unknown */){magma.Main$Lists$JVMList@2b80d80f
+		if (base/* : string */.equals/* : unknown */("Function")/* : unknown */){magma.Main$Lists$JVMList@3ab39c39
 		}
-		if (base/* : string */.equals/* : unknown */("Predicate")/* : unknown */){magma.Main$Lists$JVMList@3ab39c39
+		if (base/* : string */.equals/* : unknown */("Predicate")/* : unknown */){magma.Main$Lists$JVMList@2eee9593
 		}
-		if (base/* : string */.equals/* : unknown */("Supplier")/* : unknown */){magma.Main$Lists$JVMList@2eee9593
+		if (base/* : string */.equals/* : unknown */("Supplier")/* : unknown */){magma.Main$Lists$JVMList@7907ec20
 		}
-		if (base/* : string */.equals/* : unknown */("Tuple2")/* : unknown */ && children/* : unknown */.size/* : unknown */()/* : unknown */ >= 2/* : number */){magma.Main$Lists$JVMList@7907ec20
+		if (base/* : string */.equals/* : unknown */("Tuple2")/* : unknown */ && children/* : unknown */.size/* : unknown */()/* : unknown */ >= 2/* : number */){magma.Main$Lists$JVMList@546a03af
 		}
-		if (state/* : CompileState */.resolveType/* : (arg0 : string) => Option<Type> */(base/* : string */)/* : Option<Type> */._variant/* : unknown */ === OptionVariant.Some/* : unknown */){magma.Main$Lists$JVMList@546a03af
+		if (state/* : CompileState */.resolveType/* : (arg0 : string) => Option<Type> */(base/* : string */)/* : Option<Type> */._variant/* : unknown */ === OptionVariant.Some/* : unknown */){magma.Main$Lists$JVMList@721e0f4f
 		}
 		return new Tuple2Impl(state/* : CompileState */, new Template(new Placeholder(base/* : string */)/* : Placeholder */, children/* : unknown */)/* : Template */)/* : Tuple2Impl */;
 	}
@@ -1621,13 +1561,13 @@
 		})/* : unknown */;
 	}
 	/* private static */ retainType(argument : Argument) : Option<Type> {
-		if (argument/* : Argument */._variant/* : unknown */ === ArgumentVariant.Type/* : unknown */){magma.Main$Lists$JVMList@721e0f4f
+		if (argument/* : Argument */._variant/* : unknown */ === ArgumentVariant.Type/* : unknown */){magma.Main$Lists$JVMList@28864e92
 		}
-		else {magma.Main$Lists$JVMList@28864e92
+		else {magma.Main$Lists$JVMList@6ea6d14e
 		}
 	}
 	/* private static */ argument(state : CompileState, input : string) : Option<[CompileState, Argument]> {
-		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@6ea6d14e
+		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){magma.Main$Lists$JVMList@6ad5c04e
 		}
 		return parseType/* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state/* : CompileState */, input/* : string */)/* : Option<[CompileState, Type]> */.map/* : (arg0 : (arg0 : [CompileState, Type]) => R) => Option<R> */((tuple : [CompileState, Type]) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : Option<R> */;
 	}
@@ -1636,7 +1576,7 @@
 	}
 	/* private static */ findLast(input : string, infix : string) : Option<number> {
 		let index = input/* : string */.lastIndexOf/* : unknown */(infix/* : string */)/* : unknown */;
-		if (index/* : T */ === -1/* : number */){magma.Main$Lists$JVMList@6ad5c04e
+		if (index/* : T */ === -1/* : number */){magma.Main$Lists$JVMList@6833ce2c
 		}
 		return new Some(index/* : T */)/* : Some */;
 	}
@@ -1655,7 +1595,7 @@
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
 		let index = input/* : string */.indexOf/* : unknown */(infix/* : string */)/* : unknown */;
-		if (index/* : T */ === -1/* : number */){magma.Main$Lists$JVMList@6833ce2c
+		if (index/* : T */ === -1/* : number */){magma.Main$Lists$JVMList@725bef66
 		}
 		return new Some(index/* : T */)/* : Some */;
 	}
@@ -1664,7 +1604,7 @@
 		return "/* " + replaced + " */";
 	}
 	/* private static */ createDebugString(type : Type) : string {
-		if (!Main/* : Main */.isDebug/* : unknown */){magma.Main$Lists$JVMList@725bef66
+		if (!Main/* : Main */.isDebug/* : unknown */){magma.Main$Lists$JVMList@2aaf7cc2
 		}
 		return generatePlaceholder/* : (arg0 : string) => string */(": " + type/* : () => Type */.generate/* : unknown */()/* : unknown */)/* : string */;
 	}

@@ -1163,10 +1163,14 @@ public class Main {
 
         @Override
         public String generate() {
-            var generatedHeader = this.header.generateWithParams(joinValues(this.parameters));
-            var generatedStatements = this.statements.map(Method::joinStatements).orElse(";");
             var indent = createIndent(this.depth);
-            return indent + generatedHeader + " {" + generatedStatements + indent + "}";
+
+            var generatedHeader = this.header.generateWithParams(joinValues(this.parameters));
+            var generatedStatements = this.statements.map(Method::joinStatements)
+                    .map(inner -> " {" + inner + indent + "}")
+                    .orElse(";");
+
+            return indent + generatedHeader + generatedStatements ;
         }
     }
 
