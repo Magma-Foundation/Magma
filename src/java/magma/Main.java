@@ -1,6 +1,5 @@
 package magma;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -425,6 +424,29 @@ public class Main {
 
         public static <T> List<T> of(T... elements) {
             return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
+        }
+    }
+
+    private enum Primitive implements Type {
+        Int("number"),
+        String("string"),
+        Boolean("boolean"),
+        Unknown("unknown");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String generate() {
+            return this.value;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
         }
     }
 
@@ -1840,16 +1862,6 @@ public class Main {
         });
     }
 
-    private static Tuple2<CompileState, String> compileValues(CompileState state, String params, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
-        var parsed = parseValuesOrEmpty(state, params, (state1, s) -> new Some<>(mapper.apply(state1, s)));
-        var generated = generateValues(parsed.right());
-        return new Tuple2Impl<>(parsed.left(), generated);
-    }
-
-    private static String generateValues(List<String> elements) {
-        return generateAll(Main::mergeValues, elements);
-    }
-
     private static <T> Tuple2<CompileState, List<T>> parseValuesOrEmpty(
             CompileState state,
             String input,
@@ -1880,14 +1892,6 @@ public class Main {
         return parseDefinition(state, input)
                 .map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right().generate()))
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(input)));
-    }
-
-    private static String mergeValues(String cache, String element) {
-        if (cache.isEmpty()) {
-            return element;
-        }
-
-        return cache + ", " + element;
     }
 
     private static String createIndent(int depth) {
@@ -2162,29 +2166,6 @@ public class Main {
         Operator(String sourceRepresentation, String targetRepresentation) {
             this.sourceRepresentation = sourceRepresentation;
             this.targetRepresentation = targetRepresentation;
-        }
-    }
-
-    private enum Primitive implements Type {
-        Int("number"),
-        String("string"),
-        Boolean("boolean"),
-        Unknown("unknown");
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-
-        @Override
-        public Type replace(Map<String, Type> mapping) {
-            return this;
         }
     }
 }
