@@ -98,6 +98,8 @@ public class Main {
         String generate();
 
         Type replace(Map<String, Type> mapping);
+
+        Option<String> findName();
     }
 
     private interface Argument {
@@ -124,6 +126,8 @@ public class Main {
         List<String> typeParams();
 
         Option<Type> find(String name);
+
+        String name();
     }
 
     private interface Definition extends Parameter, Header {
@@ -552,6 +556,11 @@ public class Main {
                     .map(Definition::type)
                     .next();
         }
+
+        @Override
+        public Option<String> findName() {
+            return new Some<>(this.name);
+        }
     }
 
     private record TypeParam(String value) implements Type {
@@ -563,6 +572,11 @@ public class Main {
         @Override
         public Type replace(Map<String, Type> mapping) {
             return mapping.find(this.value).orElse(this);
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
         }
     }
 
@@ -790,6 +804,11 @@ public class Main {
         public Type replace(Map<String, Type> mapping) {
             return this;
         }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
+        }
     }
 
     private static class Whitespace implements Argument, Parameter {
@@ -817,6 +836,11 @@ public class Main {
         public Type replace(Map<String, Type> mapping) {
             return new FunctionType(this.arguments.iterate().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns);
         }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
+        }
     }
 
     private record TupleType(List<Type> arguments) implements Type {
@@ -833,6 +857,11 @@ public class Main {
         @Override
         public Type replace(Map<String, Type> mapping) {
             return this;
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
         }
     }
 
@@ -866,8 +895,18 @@ public class Main {
         }
 
         @Override
+        public String name() {
+            return this.base.name();
+        }
+
+        @Override
         public Type replace(Map<String, Type> mapping) {
             return this;
+        }
+
+        @Override
+        public Option<String> findName() {
+            return this.base.findName();
         }
     }
 
@@ -893,8 +932,18 @@ public class Main {
         }
 
         @Override
+        public String name() {
+            return this.input;
+        }
+
+        @Override
         public Type replace(Map<String, Type> mapping) {
             return this;
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
         }
     }
 
@@ -1623,7 +1672,10 @@ public class Main {
                 var definition = definitionTuple.right();
 
                 var variant = new DataAccess(value, "_variant", Primitive.Unknown);
-                var temp = new SymbolValue(value.type().generate() + "Variant." + definition.type().generate(), Primitive.Unknown);
+                var type = value.type();
+
+                var generate = type.findName().orElse("");
+                var temp = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
                 return new Tuple2Impl<>(definitionTuple.left(), new Operation(variant, Operator.EQUALS, temp));
             });
         });
@@ -2234,6 +2286,11 @@ public class Main {
         @Override
         public Type replace(Map<String, Type> mapping) {
             return this;
+        }
+
+        @Override
+        public Option<String> findName() {
+            return new None<>();
         }
     }
 
