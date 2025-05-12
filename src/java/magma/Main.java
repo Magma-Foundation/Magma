@@ -595,7 +595,8 @@ public class Main {
 
         private Option<Type> resolveValue(String name) {
             if (name.equals("this")) {
-                return new Some<>(new ObjectType(name, this.typeParams, this.definitions));
+                var lastName = this.structNames.last().orElse("");
+                return new Some<>(new ObjectType(lastName, this.typeParams, this.definitions));
             }
 
             return this.definitions.iterate()
