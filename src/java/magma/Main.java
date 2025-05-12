@@ -1971,6 +1971,10 @@ public class Main {
         return infix(input, infix, Main::findFirst, mapper);
     }
 
+    private static <T> Option<T> split(Supplier<Option<Tuple2<String, String>>> splitter, BiFunction<String, String, Option<T>> splitMapper) {
+        return splitter.get().flatMap(splitTuple -> splitMapper.apply(splitTuple.left(), splitTuple.right()));
+    }
+
     private static <T> Option<T> infix(
             String input,
             String infix,
@@ -1982,10 +1986,6 @@ public class Main {
             var right = input.substring(index + infix.length());
             return new Tuple2Impl<>(left, right);
         }), mapper);
-    }
-
-    private static <T> Option<T> split(Supplier<Option<Tuple2<String, String>>> splitter, BiFunction<String, String, Option<T>> splitMapper) {
-        return splitter.get().flatMap(splitTuple -> splitMapper.apply(splitTuple.left(), splitTuple.right()));
     }
 
     private static Option<Integer> findFirst(String input, String infix) {

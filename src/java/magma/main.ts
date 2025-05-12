@@ -1469,15 +1469,15 @@
 	first<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return infix(input, infix, /* Main */.findFirst, mapper);
 	}
+	split<T>(splitter : () => Option<[string, string]>, splitMapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
+		return splitter().flatMap((splitTuple : [string, string]) => splitMapper(splitTuple[0](), splitTuple[1]()));
+	}
 	infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return /* split */(() => locator(input, infix).map((index : number) => {
+		return split(() => locator(input, infix).map((index : number) => {
 			let left = input.substring(0, index);
 			let right = input.substring(index + infix.length());
 			return new Tuple2Impl(left, right);
 		}), mapper);
-	}
-	split<T>(splitter : () => Option<[string, string]>, splitMapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return splitter().flatMap((splitTuple : [string, string]) => splitMapper(splitTuple[0](), splitTuple[1]()));
 	}
 	findFirst(input : string, infix : string) : Option<number> {
 		let index = input.indexOf(infix);

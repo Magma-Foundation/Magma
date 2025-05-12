@@ -1531,19 +1531,17 @@ first(input, string, infix, string, mapper, (arg0, arg1) => Option);
 Option < T > {
     return: infix(input, infix) /* Main */.findFirst, mapper
 };
-infix(input, string, infix, string, locator, (arg0, arg1) => Option, mapper, (arg0, arg1) => Option);
-Option < T > {
-    return /* split */() { }
-}();
-locator(input, infix).map((index) => {
-    let left = input.substring(0, index);
-    let right = input.substring(index + infix.length());
-    return new Tuple2Impl(left, right);
-}), mapper;
-;
 split(splitter, () => Option, splitMapper, (arg0, arg1) => Option);
 Option < T > {
     return: splitter().flatMap((splitTuple) => splitMapper(splitTuple[0](), splitTuple[1]()))
+};
+infix(input, string, infix, string, locator, (arg0, arg1) => Option, mapper, (arg0, arg1) => Option);
+Option < T > {
+    return: split(() => locator(input, infix).map((index) => {
+        let left = input.substring(0, index);
+        let right = input.substring(index + infix.length());
+        return new Tuple2Impl(left, right);
+    }), mapper)
 };
 findFirst(input, string, infix, string);
 Option < number > {
