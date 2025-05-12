@@ -173,6 +173,10 @@ public class Main {
         String generate();
     }
 
+    private interface BlockHeader {
+        String generate();
+    }
+
     private static class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -918,7 +922,8 @@ public class Main {
         }
     }
 
-    private record Placeholder(String input) implements Parameter, Value, FindableType, ClassSegment, FunctionSegment {
+    private record Placeholder(
+            String input) implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -1170,7 +1175,35 @@ public class Main {
                     .map(inner -> " {" + inner + indent + "}")
                     .orElse(";");
 
-            return indent + generatedHeader + generatedStatements ;
+            return indent + generatedHeader + generatedStatements;
+        }
+    }
+
+    private record Block(int depth, BlockHeader header, List<FunctionSegment> statements) implements FunctionSegment {
+        @Override
+        public String generate() {
+            var indent = createIndent(this.depth);
+            var collect = this.statements
+                    .iterate()
+                    .map(FunctionSegment::generate)
+                    .collect(new Joiner())
+                    .orElse("");
+
+            return indent + this.header.generate() + "{" + collect + indent + "}";
+        }
+    }
+
+    private record Conditional(String prefix, Value value1) implements BlockHeader {
+        @Override
+        public String generate() {
+            return this.prefix + " (" + this.value1.generate() + ")";
+        }
+    }
+
+    private static class Else implements BlockHeader {
+        @Override
+        public String generate() {
+            return "else ";
         }
     }
 
@@ -1608,12 +1641,12 @@ public class Main {
             return split(() -> toFirst(withoutEnd), (beforeContent, content) -> {
                 return suffix(beforeContent, "{", s -> {
                     var compiled = parseFunctionSegments(state, content, depth);
-                    var indent = createIndent(depth);
-                    var headerTuple = compileBlockHeader(state, s, depth);
+                    var headerTuple = parseBlockHeader(state, s, depth);
                     var headerState = headerTuple.left();
                     var header = headerTuple.right();
+                    var right = compiled.right();
 
-                    return new Some<>(new Tuple2Impl<>(headerState, () -> indent + header + "{" + compiled.right() + indent + "}"));
+                    return new Some<>(new Tuple2Impl<>(headerState, new Block(depth, header, right)));
                 });
             });
         });
@@ -1629,29 +1662,30 @@ public class Main {
         });
     }
 
-    private static Tuple2<CompileState, String> compileBlockHeader(CompileState state, String input, int depth) {
+    private static Tuple2<CompileState, BlockHeader> parseBlockHeader(CompileState state, String input, int depth) {
         var stripped = input.strip();
         return compileConditional(state, stripped, "if", depth)
                 .or(() -> compileConditional(state, stripped, "while", depth))
                 .or(() -> compileElse(state, input))
-                .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(stripped)));
+                .orElseGet(() -> new Tuple2Impl<>(state, new Placeholder(stripped)));
     }
 
-    private static Option<Tuple2<CompileState, String>> compileElse(CompileState state, String input) {
+    private static Option<Tuple2<CompileState, BlockHeader>> compileElse(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.equals("else")) {
-            return new Some<>(new Tuple2Impl<>(state, "else "));
+            return new Some<>(new Tuple2Impl<>(state, new Else()));
         }
 
         return new None<>();
     }
 
-    private static Option<Tuple2<CompileState, String>> compileConditional(CompileState state, String input, String prefix, int depth) {
+    private static Option<Tuple2<CompileState, BlockHeader>> compileConditional(CompileState state, String input, String prefix, int depth) {
         return prefix(input, prefix, withoutPrefix -> {
             return prefix(withoutPrefix.strip(), "(", withoutValueStart -> {
                 return suffix(withoutValueStart, ")", value -> {
-                    var compiled = compileValue(state, value, depth);
-                    return new Some<>(new Tuple2Impl<>(compiled.left(), prefix + " (" + compiled.right() + ")"));
+                    var compiled = parseValue(state, value, depth);
+                    var value1 = compiled.right();
+                    return new Some<>(new Tuple2Impl<>(compiled.left(), new Conditional(prefix, value1)));
                 });
             });
         });
