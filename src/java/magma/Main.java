@@ -1585,7 +1585,7 @@ public class Main {
                     return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
                 }
 
-                if (property.equals("type")) {
+                if (property.equals("right")) {
                     return new Some<>(new Tuple<>(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
                 }
             }

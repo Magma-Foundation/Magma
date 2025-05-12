@@ -713,7 +713,7 @@ return /* current */ .advance /* : unknown */( /*  */) /* : unknown */.segments 
 Option < DivideState > {
 /* if (tuple.left == '\"')  */ };
 /* if (tuple.left == '\"')  */ {
-    let current = tuple /* : [content-start Character content-end, DivideState] */.right /* : unknown */.append /* : unknown */(tuple /* : [content-start Character content-end, DivideState] */[0 /* : number */]) /* : unknown */;
+    let current = tuple /* : [content-start Character content-end, DivideState] */[1 /* : number */].append /* : unknown */(tuple /* : [content-start Character content-end, DivideState] */[0 /* : number */]) /* : unknown */;
     /* while (true)  */ {
         let maybePopped = /* current */ .popAndAppendToTuple /* : unknown */( /*  */) /* : unknown */;
         /* if (maybePopped.isEmpty())  */ {
@@ -737,15 +737,15 @@ Option < DivideState > {
 /* if (tuple.left != '\'')  */ {
     return new None( /*  */) /* : None */;
 }
-let appended = tuple /* : [content-start Character content-end, DivideState] */.right /* : unknown */.append /* : unknown */(tuple /* : [content-start Character content-end, DivideState] */[0 /* : number */]) /* : unknown */;
+let appended = tuple /* : [content-start Character content-end, DivideState] */[1 /* : number */].append /* : unknown */(tuple /* : [content-start Character content-end, DivideState] */[0 /* : number */]) /* : unknown */;
 return /* appended */ .popAndAppendToTuple /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(foldEscaped /* : unknown */) /* : unknown */.flatMap /* : unknown */(popAndAppendToOption /* : unknown */) /* : unknown */;
 /* private static */ foldEscaped(escaped, [/* Character */ , DivideState]);
 DivideState;
 {
     /* if (escaped.left == '\\')  */ {
-        return escaped /* : [content-start Character content-end, DivideState] */.right /* : unknown */.popAndAppendToOption /* : unknown */( /*  */) /* : unknown */.orElse /* : unknown */(escaped /* : [content-start Character content-end, DivideState] */.right /* : unknown */) /* : unknown */;
+        return escaped /* : [content-start Character content-end, DivideState] */[1 /* : number */].popAndAppendToOption /* : unknown */( /*  */) /* : unknown */.orElse /* : unknown */(escaped /* : [content-start Character content-end, DivideState] */[1 /* : number */]) /* : unknown */;
     }
-    return escaped /* : [content-start Character content-end, DivideState] */.right /* : unknown */;
+    return escaped /* : [content-start Character content-end, DivideState] */[1 /* : number */];
 }
 /* private static */ foldStatementChar(state, DivideState, c);
 DivideState;
@@ -1197,7 +1197,7 @@ Option < [/* CompileState */ , /* Value */] > {
         /* if (property.equals("left"))  */ {
             return new Some(new Tuple(new IndexValue(new SymbolValue("0", Int /* : unknown */) /* : SymbolValue */) /* : IndexValue */) /* : Tuple */) /* : Some */;
         }
-        /* if (property.equals("type"))  */ {
+        /* if (property.equals("right"))  */ {
             return new Some(new Tuple(new IndexValue(new SymbolValue("1", Int /* : unknown */) /* : SymbolValue */) /* : IndexValue */) /* : Tuple */) /* : Some */;
         }
     }
@@ -1499,7 +1499,7 @@ apply /* : unknown */( /* input */) /* : unknown */.map /* : unknown */((index) 
 ;
 /* private static  */ split(splitter, () => Option, mapper, (arg0, arg1) => Option);
 Option < T > {
-    return: splitter /* : () => Option<[string, string]> */( /*  */) /* : Option<[string, string]> */.flatMap /* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((tuple) => /* mapper */ .apply /* : unknown */(tuple /* : [string, string] */[0 /* : number */], tuple /* : [string, string] */.right /* : unknown */) /* : unknown */) /* : Option<R> */
+    return: splitter /* : () => Option<[string, string]> */( /*  */) /* : Option<[string, string]> */.flatMap /* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((tuple) => /* mapper */ .apply /* : unknown */(tuple /* : [string, string] */[0 /* : number */], tuple /* : [string, string] */[1 /* : number */]) /* : unknown */) /* : Option<R> */
 };
 /* private static */ findFirst(input, string, infix, string);
 Option < number > {

@@ -830,7 +830,7 @@
 	}
 	/* private static */ foldDoubleQuotes(tuple : [/* Character */, DivideState]) : Option<DivideState> {
 		/* if (tuple.left == '\"')  */{
-			let current = tuple/* : [content-start Character content-end, DivideState] */.right/* : unknown */.append/* : unknown */(tuple/* : [content-start Character content-end, DivideState] */[0/* : number */])/* : unknown */;
+			let current = tuple/* : [content-start Character content-end, DivideState] */[1/* : number */].append/* : unknown */(tuple/* : [content-start Character content-end, DivideState] */[0/* : number */])/* : unknown */;
 			/* while (true)  */{
 				let maybePopped = /* current */.popAndAppendToTuple/* : unknown */(/*  */)/* : unknown */;
 				/* if (maybePopped.isEmpty())  */{
@@ -853,14 +853,14 @@
 		/* if (tuple.left != '\'')  */{
 			return new None(/*  */)/* : None */;
 		}
-		let appended = tuple/* : [content-start Character content-end, DivideState] */.right/* : unknown */.append/* : unknown */(tuple/* : [content-start Character content-end, DivideState] */[0/* : number */])/* : unknown */;
+		let appended = tuple/* : [content-start Character content-end, DivideState] */[1/* : number */].append/* : unknown */(tuple/* : [content-start Character content-end, DivideState] */[0/* : number */])/* : unknown */;
 		return /* appended */.popAndAppendToTuple/* : unknown */(/*  */)/* : unknown */.map/* : unknown */(/* Main */.foldEscaped/* : unknown */)/* : unknown */.flatMap/* : unknown */(/* DivideState */.popAndAppendToOption/* : unknown */)/* : unknown */;
 	}
 	/* private static */ foldEscaped(escaped : [/* Character */, DivideState]) : DivideState {
 		/* if (escaped.left == '\\')  */{
-			return escaped/* : [content-start Character content-end, DivideState] */.right/* : unknown */.popAndAppendToOption/* : unknown */(/*  */)/* : unknown */.orElse/* : unknown */(escaped/* : [content-start Character content-end, DivideState] */.right/* : unknown */)/* : unknown */;
+			return escaped/* : [content-start Character content-end, DivideState] */[1/* : number */].popAndAppendToOption/* : unknown */(/*  */)/* : unknown */.orElse/* : unknown */(escaped/* : [content-start Character content-end, DivideState] */[1/* : number */])/* : unknown */;
 		}
-		return escaped/* : [content-start Character content-end, DivideState] */.right/* : unknown */;
+		return escaped/* : [content-start Character content-end, DivideState] */[1/* : number */];
 	}
 	/* private static */ foldStatementChar(state : DivideState, c : /* char */) : DivideState {
 		let append = state/* : DivideState */.append/* : unknown */(c/* : content-start char content-end */)/* : unknown */;
@@ -1248,7 +1248,7 @@
 				/* if (property.equals("left"))  */{
 					return new Some(new Tuple(/* state */, new IndexValue(/* parent */, new SymbolValue("0", /* Primitive */.Int/* : unknown */)/* : SymbolValue */)/* : IndexValue */)/* : Tuple */)/* : Some */;
 				}
-				/* if (property.equals("type"))  */{
+				/* if (property.equals("right"))  */{
 					return new Some(new Tuple(/* state */, new IndexValue(/* parent */, new SymbolValue("1", /* Primitive */.Int/* : unknown */)/* : SymbolValue */)/* : IndexValue */)/* : Tuple */)/* : Some */;
 				}
 			}
@@ -1496,7 +1496,7 @@
 		})/* : unknown */, /* mapper */)/* : unknown */;
 	}
 	/* private static  */ split<T>(splitter : () => Option<[string, string]>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
-		return splitter/* : () => Option<[string, string]> */(/*  */)/* : Option<[string, string]> */.flatMap/* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((tuple : [string, string]) => /* mapper */.apply/* : unknown */(tuple/* : [string, string] */[0/* : number */], tuple/* : [string, string] */.right/* : unknown */)/* : unknown */)/* : Option<R> */;
+		return splitter/* : () => Option<[string, string]> */(/*  */)/* : Option<[string, string]> */.flatMap/* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((tuple : [string, string]) => /* mapper */.apply/* : unknown */(tuple/* : [string, string] */[0/* : number */], tuple/* : [string, string] */[1/* : number */])/* : unknown */)/* : Option<R> */;
 	}
 	/* private static */ findFirst(input : string, infix : string) : Option<number> {
 		let index = input/* : string */.indexOf/* : unknown */(infix/* : string */)/* : unknown */;
