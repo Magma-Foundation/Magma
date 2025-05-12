@@ -331,7 +331,7 @@ DivideState;
     let /* this.buffer  */ = new /* StringBuilder */ ();
     return /* this */;
 }
-append(c);
+append(c, string);
 DivideState;
 {
     /* this.buffer.append(c) */ ;
@@ -360,7 +360,7 @@ boolean;
     return /* this.depth == 1 */;
 }
 pop();
-Option < [/* Character */ , DivideState] > {
+Option < [string, DivideState] > {
 /* if (this.index < this.input.length())  */ };
 /* if (this.index < this.input.length())  */ {
     let c = /* this */ .input.charAt(index);
@@ -368,7 +368,7 @@ Option < [/* Character */ , DivideState] > {
 }
 return new None();
 popAndAppendToTuple();
-Option < [/* Character */ , DivideState] > {
+Option < [string, DivideState] > {
     return /* this */: /* this */ .pop().map((tuple) => {
         let c = tuple.left();
         let right = tuple.right();
@@ -380,6 +380,7 @@ Option < DivideState > {
     return /* this */: /* this */ .popAndAppendToTuple().map() /* Tuple2 */.right
 };
 peek();
+string;
 {
     return /* this */ .input.charAt(index);
 }
@@ -661,18 +662,18 @@ string;
 {
     return elements.iterate().fold(new /* StringBuilder */ (), merger).toString();
 }
-parseAll0(state, CompileState, input, string, folder, (arg0, arg1 /* Character */) => DivideState, mapper, (arg0, arg1) => [CompileState, T]);
+parseAll0(state, CompileState, input, string, folder, (arg0, arg1) => DivideState, mapper, (arg0, arg1) => [CompileState, T]);
 [CompileState, (List)];
 {
     return /* getCompileStateListTuple */ (state, input, folder, (state1, s) => new Some(mapper(state1, s))).orElseGet(() => new Tuple2Impl(state, empty()));
 }
-getCompileStateListTuple(state, CompileState, input, string, folder, (arg0, arg1 /* Character */) => DivideState, mapper, (arg0, arg1) => Option);
+getCompileStateListTuple(state, CompileState, input, string, folder, (arg0, arg1) => DivideState, mapper, (arg0, arg1) => Option);
 Option < [CompileState, (List)] > {
     return /* parseAll */(state, input, folder) { }
 }(state1, tuple);
 mapper(state1, tuple.right());
 ;
-parseAll(state, CompileState, input, string, folder, (arg0, arg1 /* Character */) => DivideState, mapper, (arg0, arg1) => Option);
+parseAll(state, CompileState, input, string, folder, (arg0, arg1) => DivideState, mapper, (arg0, arg1) => Option);
 Option < [CompileState, (List)] > {
     let, initial: (Option) = new Some(new Tuple2Impl(state) /* Lists */.empty()),
     return /* divideAll */(input, folder) { }, : .iterateWithIndices().fold(initial, (tuple, element) => {
@@ -689,7 +690,7 @@ mergeStatements(stringBuilder, str, string);
 {
     return stringBuilder.append(str);
 }
-divideAll(input, string, folder, (arg0, arg1 /* Character */) => DivideState);
+divideAll(input, string, folder, (arg0, arg1) => DivideState);
 List < string > {
     let, current = new DivideState(input)
 };
@@ -705,7 +706,7 @@ List < string > {
     }
 }
 return current.advance().segments;
-foldDoubleQuotes(tuple, [/* Character */ , DivideState]);
+foldDoubleQuotes(tuple, [string, DivideState]);
 Option < DivideState > {
 /* if (tuple.left() == '\"')  */ };
 /* if (tuple.left() == '\"')  */ {
@@ -727,7 +728,7 @@ Option < DivideState > {
     return new Some(current);
 }
 return new None();
-foldSingleQuotes(tuple, [/* Character */ , DivideState]);
+foldSingleQuotes(tuple, [string, DivideState]);
 Option < DivideState > {
 /* if (tuple.left() != '\'')  */ };
 /* if (tuple.left() != '\'')  */ {
@@ -735,7 +736,7 @@ Option < DivideState > {
 }
 let appended = tuple.right().append(tuple.left());
 return /* appended */ .popAndAppendToTuple().map(foldEscaped).flatMap(DivideState.popAndAppendToOption);
-foldEscaped(escaped, [/* Character */ , DivideState]);
+foldEscaped(escaped, [string, DivideState]);
 DivideState;
 {
     /* if (escaped.left() == '\\')  */ {
@@ -743,7 +744,7 @@ DivideState;
     }
     return escaped[1]();
 }
-foldStatementChar(state, DivideState, c);
+foldStatementChar(state, DivideState, c, string);
 DivideState;
 {
     let append = state.append(c);
@@ -979,7 +980,7 @@ Option < [CompileState, string] > {
 };
 ;
 ;
-foldBlockStart(state, DivideState, c);
+foldBlockStart(state, DivideState, c, string);
 DivideState;
 {
     let appended = state.append(c);
@@ -1210,7 +1211,7 @@ invocationHeader(state, CompileState, depth, number, callerString1, string);
     let tuple = parseValue(state, callerString1, depth);
     return new Tuple2Impl(tuple.left(), tuple.right());
 }
-foldInvocationStart(state, DivideState, c);
+foldInvocationStart(state, DivideState, c, string);
 DivideState;
 {
     let appended = state.append(c);
@@ -1367,7 +1368,7 @@ Option < [CompileState, Definition] > {
     });
 }
 ;
-toLast(input, string, separator, string, folder, (arg0, arg1 /* Character */) => DivideState);
+toLast(input, string, separator, string, folder, (arg0, arg1) => DivideState);
 Option < [string, string] > {
     let, divisions = divideAll(input, folder),
     return /* divisions */: /* divisions */ .removeLast().map((removed) => {
@@ -1376,7 +1377,7 @@ Option < [string, string] > {
         return new Tuple2Impl(left, right);
     })
 };
-foldTypeSeparator(state, DivideState, c);
+foldTypeSeparator(state, DivideState, c, string);
 DivideState;
 {
     /* if (c == ' ' && state.isLevel())  */ {
@@ -1398,7 +1399,7 @@ Option < [CompileState, Definition] > {
         return new Tuple2Impl(type1.left());
     })
 };
-foldValueChar(state, DivideState, c);
+foldValueChar(state, DivideState, c, string);
 DivideState;
 {
     /* if (c == ',' && state.isLevel())  */ {
@@ -1433,7 +1434,7 @@ Option < [CompileState, Type] > {
 /* if (stripped.equals("int") || stripped.equals("Integer"))  */ {
     return new Some(new Tuple2Impl(state, Int));
 }
-/* if (stripped.equals("String"))  */ {
+/* if (stripped.equals("String") || stripped.equals("char") || stripped.equals("Character"))  */ {
     return new Some(new Tuple2Impl(state, String));
 }
 /* if (stripped.equals("var"))  */ {

@@ -1859,7 +1859,7 @@ public class Main {
             return new Some<>(new Tuple2Impl<>(state, Primitive.Int));
         }
 
-        if (stripped.equals("String")) {
+        if (stripped.equals("String") || stripped.equals("char") || stripped.equals("Character")) {
             return new Some<>(new Tuple2Impl<>(state, Primitive.String));
         }
 
