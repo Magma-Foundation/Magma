@@ -181,6 +181,9 @@ public class Main {
         String generate();
     }
 
+    private sealed interface IncompleteClassSegment {
+    }
+
     private static class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -823,7 +826,7 @@ public class Main {
         }
     }
 
-    private static class Whitespace implements Argument, Parameter, ClassSegment, FunctionSegment {
+    private static final class Whitespace implements Argument, Parameter, ClassSegment, FunctionSegment, IncompleteClassSegment {
         @Override
         public String generate() {
             return "";
@@ -928,7 +931,7 @@ public class Main {
 
     private record Placeholder(
             String input
-    ) implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader, StatementValue {
+    ) implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -1238,12 +1241,16 @@ public class Main {
         }
     }
 
-    private record MethodPrototype(int depth, Header header, List<Definition> parameters, String content) {
+    private record MethodPrototype(int depth, Header header, List<Definition> parameters,
+                                   String content) implements IncompleteClassSegment {
         private List<Type> findParamTypes() {
             return this.parameters().iterate()
                     .map(Definition::type)
                     .collect(new ListCollector<>());
         }
+    }
+
+    private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
     }
 
     private static final boolean isDebug = true;
@@ -1278,7 +1285,9 @@ public class Main {
     }
 
     private static <T> Tuple2<CompileState, List<T>> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, T>> mapper) {
-        return parseAll0(state, input, Main::foldStatementChar, mapper);
+        return parseAllWithIndices(state, input, Main::foldStatementChar,
+                (state3, tuple) -> ((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>>) (state1, s) -> new Some<>(mapper.apply(state1, s))).apply(state3, tuple.right()))
+                .orElseGet(() -> new Tuple2Impl<>(state, Lists.empty()));
     }
 
     private static String generateAll(BiFunction<String, String, String> merger, List<String> elements) {
@@ -1287,33 +1296,22 @@ public class Main {
                 .fold("", merger);
     }
 
-    private static <T> Tuple2<CompileState, List<T>> parseAll0(
-            CompileState state,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Tuple2<CompileState, T>> mapper
-    ) {
-        return getCompileStateListTuple(state, input, folder, (state1, s) -> new Some<>(mapper.apply(state1, s)))
-                .orElseGet(() -> new Tuple2Impl<>(state, Lists.empty()));
-    }
-
-    private static <T> Option<Tuple2<CompileState, List<T>>> getCompileStateListTuple(
-            CompileState state,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> mapper
-    ) {
-        return parseAll(state, input, folder, (state1, tuple) -> mapper.apply(state1, tuple.right()));
-    }
-
-    private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(
+    private static <T> Option<Tuple2<CompileState, List<T>>> parseAllWithIndices(
             CompileState state,
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
             BiFunction<CompileState, Tuple2<Integer, String>, Option<Tuple2<CompileState, T>>> mapper
     ) {
-        Option<Tuple2<CompileState, List<T>>> initial = new Some<>(new Tuple2Impl<>(state, Lists.empty()));
-        return divideAll(input, folder).iterateWithIndices().fold(initial, (tuple, element) -> {
+        var stringList = divideAll(input, folder);
+        return mapUsingState(state, stringList, mapper);
+    }
+
+    private static <T, R> Option<Tuple2<CompileState, List<R>>> mapUsingState(
+            CompileState state,
+            List<T> elements, BiFunction<CompileState, Tuple2<Integer, T>, Option<Tuple2<CompileState, R>>> mapper
+    ) {
+        Option<Tuple2<CompileState, List<R>>> initial = new Some<>(new Tuple2Impl<>(state, Lists.empty()));
+        return elements.iterateWithIndices().fold(initial, (tuple, element) -> {
             return tuple.flatMap(inner -> {
                 var state1 = inner.left();
                 var right = inner.right();
@@ -1417,15 +1415,17 @@ public class Main {
         }
 
         return parseClass(stripped, state)
-                .map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right().generate()))
+                .map(tuple -> {
+                    return new Tuple2Impl<>(tuple.left(), tuple.right().segment.generate());
+                })
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(stripped)));
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> parseClass(String stripped, CompileState state) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> parseClass(String stripped, CompileState state) {
         return parseStructure(stripped, "class ", "class ", state);
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (beforeContent, withEnd) -> {
                 return suffix(withEnd.strip(), "}", content1 -> {
@@ -1435,7 +1435,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return first(beforeContent, " implements ", (s, s2) -> {
             return structureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1);
         }).or(() -> {
@@ -1443,7 +1443,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> structureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> structureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return first(beforeContent, " extends ", (s, s2) -> {
             return structureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
         }).or(() -> {
@@ -1451,7 +1451,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> structureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> structureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return suffix(beforeContent.strip(), ")", s -> {
             return first(s, "(", (s1, s2) -> {
                 var parsed = parseParameters(state, s2);
@@ -1462,7 +1462,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
@@ -1474,13 +1474,13 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> assembleStructure(
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> assembleStructure(
             CompileState state, String targetInfix,
             String beforeInfix,
             String rawName,
             String content,
             List<String> typeParams,
-            String afterTypeParams,
+            String after,
             List<Parameter> rawParameters
     ) {
         var name = rawName.strip();
@@ -1488,20 +1488,35 @@ public class Main {
             return new None<>();
         }
 
-        var joinedTypeParams = typeParams.iterate()
-                .collect(new Joiner(", "))
-                .map(inner -> "<" + inner + ">")
-                .orElse("");
+        var segmentsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) -> parseClassSegment(state0, input, 1));
+        return mapUsingState(segmentsTuple.left(), segmentsTuple.right(), (state1, entry) -> switch (entry.right()) {
+            case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment));
+            case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype);
+            case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace));
+            case Placeholder placeholder -> new Some<>(new Tuple2Impl<>(state1, placeholder));
+        }).map(completedTuple -> {
+            var completedState = completedTuple.left();
+            var completed = completedTuple.right();
 
-        var statementsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) -> parseClassSegment(state0, input, 1));
+            return completeStructure(completedState, targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed);
+        });
+    }
 
+    private static Tuple2Impl<CompileState, IncompleteClassSegmentWrapper> completeStructure(
+            CompileState state,
+            String targetInfix,
+            String beforeInfix,
+            String name, List<String> typeParams,
+            List<Definition> parameters,
+            String after,
+            List<ClassSegment> segments
+    ) {
         List<ClassSegment> withMaybeConstructor;
-        if (rawParameters.isEmpty()) {
-            withMaybeConstructor = statementsTuple.right();
+        if (parameters.isEmpty()) {
+            withMaybeConstructor = segments;
         }
         else {
-            var parameters = retainDefinitions(rawParameters);
-            withMaybeConstructor = statementsTuple.right().addFirst(new Method(1, new ConstructorHeader(), parameters, new Some<>(Lists.empty())));
+            withMaybeConstructor = segments.addFirst(new Method(1, new ConstructorHeader(), parameters, new Some<>(Lists.empty())));
         }
 
         var parsed2 = withMaybeConstructor.iterate()
@@ -1509,14 +1524,18 @@ public class Main {
                 .collect(new Joiner())
                 .orElse("");
 
-        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(afterTypeParams) + " {" + parsed2 + "\n}\n";
+        var joinedTypeParams = typeParams.iterate()
+                .collect(new Joiner(", "))
+                .map(inner -> "<" + inner + ">")
+                .orElse("");
 
-        var definedState = statementsTuple.left()
+        var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(after) + " {" + parsed2 + "\n}\n";
+        var definedState = state
                 .popStructName()
                 .addStructure(generated)
-                .addType(new ObjectType(name, typeParams, statementsTuple.left().definitions));
+                .addType(new ObjectType(name, typeParams, state.definitions));
 
-        return new Some<>(new Tuple2Impl<>(definedState, new Whitespace()));
+        return new Tuple2Impl<>(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
     }
 
     private static Option<Definition> retainDefinition(Parameter parameter) {
@@ -1555,14 +1574,14 @@ public class Main {
         return mapper.apply(slice);
     }
 
-    private static Tuple2<CompileState, ClassSegment> parseClassSegment(CompileState state, String input, int depth) {
-        return Main.<Whitespace, ClassSegment>typed(() -> parseWhitespace(input, state))
-                .or(() -> parseClass(input, state))
-                .or(() -> parseStructure(input, "interface ", "interface ", state))
-                .or(() -> parseStructure(input, "record ", "class ", state))
-                .or(() -> parseStructure(input, "enum ", "class ", state))
-                .or(() -> parseMethod(state, input, depth).flatMap(tuple -> completeMethod(tuple.left(), tuple.right())))
-                .or(() -> parseDefinitionStatement(input, depth, state))
+    private static Tuple2<CompileState, IncompleteClassSegment> parseClassSegment(CompileState state, String input, int depth) {
+        return Main.<Whitespace, IncompleteClassSegment>typed(() -> parseWhitespace(input, state))
+                .or(() -> typed(() -> parseClass(input, state)))
+                .or(() -> typed(() -> parseStructure(input, "interface ", "interface ", state)))
+                .or(() -> typed(() -> parseStructure(input, "record ", "class ", state)))
+                .or(() -> typed(() -> parseStructure(input, "enum ", "class ", state)))
+                .or(() -> parseMethod(state, input, depth))
+                .or(() -> typed(() -> parseDefinitionStatement(input, depth, state)))
                 .orElseGet(() -> new Tuple2Impl<>(state, new Placeholder(input)));
     }
 
@@ -1577,7 +1596,7 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple2<CompileState, MethodPrototype>> parseMethod(CompileState state, String input, int depth) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseMethod(CompileState state, String input, int depth) {
         return first(input, "(", (definitionString, withParams) -> {
             return first(withParams, ")", (parametersString, rawContent) -> {
                 return parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()))
@@ -1587,7 +1606,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, MethodPrototype>> assembleMethod(int depth, String parametersString, String rawContent, Tuple2<CompileState, Header> definitionTuple) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> assembleMethod(int depth, String parametersString, String rawContent, Tuple2<CompileState, Header> definitionTuple) {
         var definitionState = definitionTuple.left();
         var header = definitionTuple.right();
 
@@ -2141,7 +2160,7 @@ public class Main {
     }
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseValuesWithIndices(CompileState state, String input, BiFunction<CompileState, Tuple2<Integer, String>, Option<Tuple2<CompileState, T>>> mapper) {
-        return parseAll(state, input, Main::foldValueChar, mapper);
+        return parseAllWithIndices(state, input, Main::foldValueChar, mapper);
     }
 
     private static Tuple2<CompileState, Parameter> parseParameter(CompileState state, String input) {
@@ -2158,11 +2177,11 @@ public class Main {
         return "\n" + "\t".repeat(depth);
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> parseDefinitionStatement(String input, int depth, CompileState state) {
         return suffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(state, withoutEnd).map(result -> {
                 var definition = result.right();
-                return new Tuple2Impl<>(result.left(), new DefinitionStatement(depth, definition));
+                return new Tuple2Impl<>(result.left(), new IncompleteClassSegmentWrapper(new DefinitionStatement(depth, definition)));
             });
         });
     }
