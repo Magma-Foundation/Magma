@@ -860,18 +860,16 @@ var ResultVariant;
 }
 /* public */ class Main /*  */ {
 }
-let parent = /* Paths */ .get(".", "src", "java", "magma");
+let parent = findRoot();
 let source = parent.resolve("Main.java");
 let target = parent.resolve("main.ts");
-/* readString(source)
+/* source.readString()
         .mapValue(Main::compile)
-        .match(output -> writeString(target, output), Some::new)
+        .match(target::writeString, Some::new)
         .or(Main::executeTSC)
         .ifPresent(Throwable::printStackTrace) */ ;
-writeString(target, output, string);
-Option;
-readString(source);
-Result;
+findRoot();
+Path;
 executeTSC();
 Option;
 compile(input, string);

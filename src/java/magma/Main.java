@@ -2,7 +2,6 @@ package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,6 +201,14 @@ public class Main {
         <R> Result<R, X> mapValue(Function<T, R> mapper);
 
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+    }
+
+    private interface Path {
+        Result<String, IOException> readString();
+
+        Option<IOException> writeString(String output);
+
+        Path resolve(String childName);
     }
 
     private static final class None<T> implements Option<T> {
@@ -1435,37 +1442,51 @@ public class Main {
         }
     }
 
+    @Actual
+    private record JVMPath(java.nio.file.Path path) implements Main.Path {
+        @Actual
+        @Override
+        public Option<IOException> writeString(String output) {
+            try {
+                Files.writeString(this.path, output);
+                return new None<>();
+            } catch (IOException e) {
+                return new Some<>(e);
+            }
+        }
+
+        @Override
+        public Path resolve(String childName) {
+            return new JVMPath(this.path.resolve(childName));
+        }
+
+        @Actual
+        @Override
+        public Result<String, IOException> readString() {
+            try {
+                return new Ok<>(Files.readString(this.path));
+            } catch (IOException e) {
+                return new Err<>(e);
+            }
+        }
+    }
     private static final boolean isDebug = false;
 
     public static void main() {
-        var parent = Paths.get(".", "src", "java", "magma");
+        var parent = findRoot();
         var source = parent.resolve("Main.java");
         var target = parent.resolve("main.ts");
 
-        readString(source)
+        source.readString()
                 .mapValue(Main::compile)
-                .match(output -> writeString(target, output), Some::new)
+                .match(target::writeString, Some::new)
                 .or(Main::executeTSC)
                 .ifPresent(Throwable::printStackTrace);
     }
 
     @Actual
-    private static Option<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return new None<>();
-        } catch (IOException e) {
-            return new Some<>(e);
-        }
-    }
-
-    @Actual
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
+    private static Path findRoot() {
+        return new JVMPath(Paths.get(".", "src", "java", "magma"));
     }
 
     @Actual

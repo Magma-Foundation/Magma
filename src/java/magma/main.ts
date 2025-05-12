@@ -151,6 +151,11 @@ enum ResultVariant {
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X>;
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R) : R;
 }
+/* private */interface Path/*  */ {
+	readString() : Result<string, /* IOException */>;
+	writeString(output : string) : Option</* IOException */>;
+	resolve(childName : string) : Path;
+}
 /* private static final */class None<T>/*  */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
@@ -942,20 +947,18 @@ enum ResultVariant {
 	}
 }
 /* public */class Main/*  */ {/* 
-
     private static final boolean isDebug = false; */
 	main() : /* void */ {
-		let parent = /* Paths */.get(".", "src", "java", "magma");
-		let source = parent.resolve("Main.java");
-		let target = parent.resolve("main.ts");
-		/* readString(source)
+		let parent : Path = findRoot();
+		let source : Path = parent.resolve("Main.java");
+		let target : Path = parent.resolve("main.ts");
+		/* source.readString()
                 .mapValue(Main::compile)
-                .match(output -> writeString(target, output), Some::new)
+                .match(target::writeString, Some::new)
                 .or(Main::executeTSC)
                 .ifPresent(Throwable::printStackTrace) */;
 	}
-	writeString(target : /* Path */, output : string) : Option</* IOException */>;
-	readString(source : /* Path */) : Result<string, /* IOException */>;
+	findRoot() : Path;
 	executeTSC() : Option</* IOException */>;
 	compile(input : string) : string {
 		let state : CompileState = CompileState.createInitial();
