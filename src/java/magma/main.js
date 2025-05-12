@@ -7,15 +7,16 @@ var OptionVariant;
 var ValueVariant;
 (function (ValueVariant) {
     ValueVariant[ValueVariant["BooleanValue"] = 0] = "BooleanValue";
-    ValueVariant[ValueVariant["DataAccess"] = 1] = "DataAccess";
-    ValueVariant[ValueVariant["IndexValue"] = 2] = "IndexValue";
-    ValueVariant[ValueVariant["Invokable"] = 3] = "Invokable";
-    ValueVariant[ValueVariant["Lambda"] = 4] = "Lambda";
-    ValueVariant[ValueVariant["Not"] = 5] = "Not";
-    ValueVariant[ValueVariant["Operation"] = 6] = "Operation";
-    ValueVariant[ValueVariant["Placeholder"] = 7] = "Placeholder";
-    ValueVariant[ValueVariant["StringValue"] = 8] = "StringValue";
-    ValueVariant[ValueVariant["SymbolValue"] = 9] = "SymbolValue";
+    ValueVariant[ValueVariant["Cast"] = 1] = "Cast";
+    ValueVariant[ValueVariant["DataAccess"] = 2] = "DataAccess";
+    ValueVariant[ValueVariant["IndexValue"] = 3] = "IndexValue";
+    ValueVariant[ValueVariant["Invokable"] = 4] = "Invokable";
+    ValueVariant[ValueVariant["Lambda"] = 5] = "Lambda";
+    ValueVariant[ValueVariant["Not"] = 6] = "Not";
+    ValueVariant[ValueVariant["Operation"] = 7] = "Operation";
+    ValueVariant[ValueVariant["Placeholder"] = 8] = "Placeholder";
+    ValueVariant[ValueVariant["StringValue"] = 9] = "StringValue";
+    ValueVariant[ValueVariant["SymbolValue"] = 10] = "SymbolValue";
 })(ValueVariant || (ValueVariant = {}));
 var CallerVariant;
 (function (CallerVariant) {
@@ -125,7 +126,8 @@ var IncompleteClassSegmentVariant;
             let finalCurrent = current;
             let option = this.head.next().map((inner) => folder(finalCurrent, inner));
             if (option._variant === OptionVariant.Some) {
-                current = /* some */ .value;
+                let some = option;
+                current = some.value;
             }
             else {
                 return current;
@@ -243,6 +245,10 @@ mapLast(mapper, (arg0) => T);
 List < T > {
     return: this.last().map(mapper).map((newLast) => this.set(this.elements.size() - 1, newLast)).orElse(this)
 };
+addAllFirst(others, (List));
+List < T > {
+    return: new JVMList().addAllLast(others).addAllLast(this)
+};
 set(index, number, element, T);
 JVMList < T > {
     return: this
@@ -332,17 +338,17 @@ Option < T > {
     }
 }
 /* private */ class CompileState /*  */ {
-    constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister) {
+    constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister, functionSegments) {
     }
     resolveValue(name) {
         return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition) => definition.name().equals(name)).next().map(Definition.type);
     }
     addStructure(structure) {
-        return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+        return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
     }
     defineAll(definitions) {
         let defined = this.definitions.mapLast((frame) => frame.addAllLast(definitions));
-        return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
     }
     resolveType(name) {
         if (this.structNames.last().filter((inner) => inner.equals(name)).isPresent()) {
@@ -355,29 +361,35 @@ Option < T > {
         return this.objectTypes.iterate().filter((type) => type.name.equals(name)).next().map((type) => type);
     }
     define(definition) {
-        return new CompileState(this.structures, this.definitions.mapLast((frame) => frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, this.definitions.mapLast((frame) => frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
     }
     pushStructName(name) {
-        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister, this.functionSegments);
     }
     withTypeParams(typeParams) {
-        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister);
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
     }
     withExpectedType(type) {
-        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some(type));
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some(type), this.functionSegments);
     }
     popStructName() {
-        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2.left).orElse(this.structNames), this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2.left).orElse(this.structNames), this.typeParams, this.typeRegister, this.functionSegments);
     }
     enterDefinitions() {
-        return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
     }
     exitDefinitions() {
         let removed = this.definitions.removeLast().map(Tuple2.left).orElse(this.definitions);
-        return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
     }
     addType(thisType) {
-        return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister);
+        return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+    }
+    addFunctionSegment(segment) {
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments.addLast(segment));
+    }
+    clearFunctionSegments() {
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
     }
 }
 /* private static */ class DivideState /*  */ {
@@ -843,6 +855,13 @@ string;
         return new None();
     }
 }
+/* private */ class Cast /*  */ {
+    constructor(value, type) {
+    }
+    generate() {
+        return this.value.generate() + " as " + this.type.generate();
+    }
+}
 /* private */ class Primitive /*  */ {
     constructor(value) {
         this.value = value;
@@ -1161,7 +1180,8 @@ Option < Definition > {
     if(parameter) { }, : ._variant === ParameterVariant.Definition
 };
 {
-    return new Some( /* definition */);
+    let definition = parameter;
+    return new Some(definition);
 }
 return new None();
 isSymbol(input, string);
@@ -1296,13 +1316,14 @@ parseBlock(state, CompileState, depth, number, stripped, string);
 Option < [CompileState, FunctionSegment] > {
     return: suffix(stripped, "}", (withoutEnd) => {
         return split(() => toFirst(withoutEnd), (beforeContent, content) => {
-            return suffix(beforeContent, "{", (s) => {
-                let statements = parseFunctionSegments(state, content, depth);
-                let headerTuple = parseBlockHeader(state, s, depth);
+            return suffix(beforeContent, "{", (headerString) => {
+                let headerTuple = parseBlockHeader(state, headerString, depth);
                 let headerState = headerTuple[0]();
                 let header = headerTuple[1]();
-                let right = statements[1]();
-                return new Some(new Tuple2Impl(headerState, new Block(depth, header, right)));
+                let statementsTuple = parseFunctionSegments(headerState, content, depth);
+                let statementsState = statementsTuple[0]();
+                let statements = statementsTuple[1]().addAllFirst(statementsState.functionSegments);
+                return new Some(new Tuple2Impl(statementsState.clearFunctionSegments(), new Block(depth, header, statements)));
             });
         });
     })
@@ -1428,7 +1449,8 @@ Option < [CompileState, Value] > {
             let type = value.type();
             let generate = type.findName().orElse("");
             let temp = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
-            return new Tuple2Impl(definitionTuple[0](), new Operation(variant, Operator.EQUALS, temp));
+            let functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.type())));
+            return new Tuple2Impl(definitionTuple[0]().addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp));
         });
     })
 };
@@ -1459,7 +1481,8 @@ Option < [CompileState, Value] > {
             let type = Primitive.Unknown;
             if ( /* state.typeRegister instanceof Some */( /* var expectedType */)) {
                 if ( /* expectedType */._variant === Variant.FunctionType) {
-                    type = /* functionType */ .arguments.get(0).orElse( /* null */);
+                    let functionType = /* expectedType */ as, FunctionType;
+                    type = functionType.arguments.get(0).orElse( /* null */);
                 }
             }
             return assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
@@ -1561,7 +1584,8 @@ Option < Value > {
     if(argument) { }, : ._variant === ArgumentVariant.Value
 };
 {
-    return new Some( /* value */);
+    let value = argument;
+    return new Some(value);
 }
 return new None();
 parseArgument(state, CompileState, element, string, depth, number);
@@ -1584,7 +1608,8 @@ FunctionType;
         /* case Value value -> */ {
             let type = /* value */ .type();
             if (type._variant === Variant.FunctionType) {
-                callerType =  /* functionType */;
+                let functionType = type;
+                callerType = functionType;
             }
         }
     }
@@ -1594,9 +1619,10 @@ modifyCaller(state, CompileState, oldCaller, Caller);
 Caller;
 {
     if (oldCaller._variant === CallerVariant.DataAccess) {
-        let type = resolveType(parent, state);
+        let type = resolveType(access.parent, state);
         if ( /* type instanceof FunctionType */) {
-            return /* access */ .parent;
+            let access = oldCaller;
+            return access.parent;
         }
     }
     return oldCaller;
@@ -1659,6 +1685,7 @@ Option < [CompileState, Value] > {
         let type = Primitive.Unknown;
         if (parentType._variant === Variant.FindableType) {
             if ( /* objectType.find(property) instanceof Some */( /* var memberType */)) {
+                let objectType = parentType;
                 type =  /* memberType */;
             }
         }
@@ -1862,9 +1889,11 @@ assembleTemplate(base, string, state, CompileState, arguments, (List));
         return new Tuple2Impl(state, new TupleType(children));
     }
     if (state.resolveType(base)._variant === OptionVariant.Some) {
-        let baseType = /* some */ .value;
-        if (baseType._variant === Variant.FindableType) {
-            return new Tuple2Impl(state, new Template(children));
+        let baseType = some.value;
+        if (baseType._variant === TypeVariant.FindableType) {
+            let some = state.resolveType(base);
+            let findableType = baseType;
+            return new Tuple2Impl(state, new Template(findableType, children));
         }
     }
     return new Tuple2Impl(state, new Template(new Placeholder(base), children));
@@ -1885,6 +1914,7 @@ Option < Type > {
     if(argument) { }, : ._variant === ArgumentVariant.Type
 };
 {
+    let type = argument;
     return new Some(type);
 }
 {

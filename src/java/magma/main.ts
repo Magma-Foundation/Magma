@@ -45,6 +45,7 @@ enum OptionVariant {
 	last() : Option<T>;
 	iterateReversed() : Iterator<T>;
 	mapLast(mapper : (arg0 : T) => T) : List<T>;
+	addAllFirst(others : List<T>) : List<T>;
 }
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
@@ -64,6 +65,7 @@ enum OptionVariant {
 }
 enum ValueVariant {
 	BooleanValue,
+	Cast,
 	DataAccess,
 	IndexValue,
 	Invokable,
@@ -230,7 +232,8 @@ enum IncompleteClassSegmentVariant {
 			let finalCurrent : R = current;
 			let option : Option<R> = this.head.next().map((inner : T) => folder(finalCurrent, inner));
 			if (option._variant === OptionVariant.Some){
-				current = /* some */.value;
+				let some : Some<R> = option as Some<R>;
+				current = some.value;
 			}
 			else {
 				return current;
@@ -336,6 +339,9 @@ enum IncompleteClassSegmentVariant {
 	mapLast(mapper : (arg0 : T) => T) : List<T> {
 		return this.last().map(mapper).map((newLast : T) => this.set(this.elements.size() - 1, newLast)).orElse(this);
 	}
+	addAllFirst(others : List<T>) : List<T> {
+		return new JVMList<T>().addAllLast(others).addAllLast(this);
+	}
 	set(index : number, element : T) : JVMList<T> {
 		/* this.elements.set(index, element) */;
 		return this;
@@ -424,20 +430,20 @@ enum IncompleteClassSegmentVariant {
 	}
 }
 /* private */class CompileState/*  */ {
-	constructor (structures : List<string>, definitions : List<List<Definition>>, objectTypes : List<ObjectType>, structNames : List<string>, typeParams : List<string>, typeRegister : Option<Type>) {
+	constructor (structures : List<string>, definitions : List<List<Definition>>, objectTypes : List<ObjectType>, structNames : List<string>, typeParams : List<string>, typeRegister : Option<Type>, functionSegments : List<FunctionSegment>) {
 	}
 	CompileState() : /* public */ {
-		/* this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>()) */;
+		/* this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty()) */;
 	}
 	resolveValue(name : string) : Option<Type> {
 		return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition : T) => definition.name().equals(name)).next().map(Definition.type);
 	}
 	addStructure(structure : string) : CompileState {
-		return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+		return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	defineAll(definitions : List<Definition>) : CompileState {
 		let defined : List<T> = this.definitions.mapLast((frame : List<Definition>) => frame.addAllLast(definitions));
-		return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	resolveType(name : string) : Option<Type> {
 		if (this.structNames.last().filter((inner : T) => inner.equals(name)).isPresent()){
@@ -450,29 +456,35 @@ enum IncompleteClassSegmentVariant {
 		return this.objectTypes.iterate().filter((type : T) => type.name.equals(name)).next().map((type : T) => type);
 	}
 	define(definition : Definition) : CompileState {
-		return new CompileState(this.structures, this.definitions.mapLast((frame : List<Definition>) => frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, this.definitions.mapLast((frame : List<Definition>) => frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	pushStructName(name : string) : CompileState {
-		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	withTypeParams(typeParams : List<string>) : CompileState {
-		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister);
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
 	}
 	withExpectedType(type : Type) : CompileState {
-		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some(type));
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some(type), this.functionSegments);
 	}
 	popStructName() : CompileState {
-		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2.left).orElse(this.structNames), this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2.left).orElse(this.structNames), this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	enterDefinitions() : CompileState {
-		return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	exitDefinitions() : CompileState {
 		let removed : T = this.definitions.removeLast().map(Tuple2.left).orElse(this.definitions);
-		return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	addType(thisType : ObjectType) : CompileState {
-		return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister);
+		return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+	}
+	addFunctionSegment(segment : FunctionSegment) : CompileState {
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments.addLast(segment));
+	}
+	clearFunctionSegments() : CompileState {
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
 	}
 }
 /* private static */class DivideState/*  */ {
@@ -938,6 +950,13 @@ enum IncompleteClassSegmentVariant {
 		return new None();
 	}
 }
+/* private */class Cast/*  */ {
+	constructor (value : Value, type : Type) {
+	}
+	generate() : string {
+		return this.value.generate() + " as " + this.type.generate();
+	}
+}
 /* private */class Primitive/*  */ {
 	Unknown("unknown") : /*  */;
 	value : string;
@@ -1185,7 +1204,7 @@ enum IncompleteClassSegmentVariant {
 				/* completed1 */ = completed;
 			}
 			else {
-				let joined = prototype.variants.iterate().map((inner) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
+				let joined = prototype.variants.iterate().map((inner : T) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
 				let enumName = prototype.name + "Variant";
 				/* withEnum */ = exited.addStructure("enum " + enumName + " {" +
                         joined +
@@ -1230,7 +1249,8 @@ enum IncompleteClassSegmentVariant {
 	}
 	retainDefinition(parameter : Parameter) : Option<Definition> {
 		if (parameter._variant === ParameterVariant.Definition){
-			return new Some(/* definition */);
+			let definition : Definition = parameter as Definition;
+			return new Some(definition);
 		}
 		return new None();
 	}
@@ -1338,13 +1358,14 @@ enum IncompleteClassSegmentVariant {
 	parseBlock(state : CompileState, depth : number, stripped : string) : Option<[CompileState, FunctionSegment]> {
 		return suffix(stripped, "}", (withoutEnd : string) => {
 			return split(() => toFirst(withoutEnd), (beforeContent, content) => {
-				return suffix(beforeContent, "{", (s : string) => {
-					let statements : [CompileState, List<FunctionSegment>] = parseFunctionSegments(state, content, depth);
-					let headerTuple : [CompileState, BlockHeader] = parseBlockHeader(state, s, depth);
+				return suffix(beforeContent, "{", (headerString : string) => {
+					let headerTuple : [CompileState, BlockHeader] = parseBlockHeader(state, headerString, depth);
 					let headerState = headerTuple[0]();
 					let header = headerTuple[1]();
-					let right = statements[1]();
-					return new Some(new Tuple2Impl(headerState, new Block(depth, header, right)));
+					let statementsTuple : [CompileState, List<FunctionSegment>] = parseFunctionSegments(headerState, content, depth);
+					let statementsState = statementsTuple[0]();
+					let statements = statementsTuple[1]().addAllFirst(statementsState.functionSegments);
+					return new Some(new Tuple2Impl(statementsState.clearFunctionSegments(), new Block(depth, header, statements)));
 				});
 			});
 		});
@@ -1452,7 +1473,8 @@ enum IncompleteClassSegmentVariant {
 				let type = value.type();
 				let generate = type.findName().orElse("");
 				let temp : SymbolValue = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
-				return new Tuple2Impl(definitionTuple[0](), new Operation(variant, Operator.EQUALS, temp));
+				let functionSegment : Statement = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.type())));
+				return new Tuple2Impl(definitionTuple[0]().addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp));
 			});
 		});
 	}
@@ -1479,7 +1501,8 @@ enum IncompleteClassSegmentVariant {
 				let type : Type = Primitive.Unknown;
 				if (/* state.typeRegister instanceof Some */(/* var expectedType */)){
 					if (/* expectedType */._variant === Variant.FunctionType){
-						type = /* functionType */.arguments.get(0).orElse(/* null */);
+						let functionType : FunctionType = /* expectedType */ as FunctionType;
+						type = functionType.arguments.get(0).orElse(/* null */);
 					}
 				}
 				return assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
@@ -1568,7 +1591,8 @@ enum IncompleteClassSegmentVariant {
 	}
 	retainValue(argument : Argument) : Option<Value> {
 		if (argument._variant === ArgumentVariant.Value){
-			return new Some(/* value */);
+			let value : Value = argument as Value;
+			return new Some(value);
 		}
 		return new None();
 	}
@@ -1588,7 +1612,8 @@ enum IncompleteClassSegmentVariant {
 			/* case Value value -> */{
 				let type = /* value */.type();
 				if (type._variant === Variant.FunctionType){
-					callerType = /* functionType */;
+					let functionType : FunctionType = type as FunctionType;
+					callerType = functionType;
 				}
 			}
 		}
@@ -1596,9 +1621,10 @@ enum IncompleteClassSegmentVariant {
 	}
 	modifyCaller(state : CompileState, oldCaller : Caller) : Caller {
 		if (oldCaller._variant === CallerVariant.DataAccess){
-			let type : Option<Type> = resolveType(/* access */.parent, state);
+			let type : Option<Type> = resolveType(access.parent, state);
 			if (/* type instanceof FunctionType */){
-				return /* access */.parent;
+			let access : DataAccess = oldCaller as DataAccess;
+				return access.parent;
 			}
 		}
 		return oldCaller;
@@ -1654,6 +1680,7 @@ enum IncompleteClassSegmentVariant {
 			let type : Type = Primitive.Unknown;
 			if (parentType._variant === Variant.FindableType){
 				if (/* objectType.find(property) instanceof Some */(/* var memberType */)){
+				let objectType : FindableType = parentType as FindableType;
 					type = /* memberType */;
 				}
 			}
@@ -1831,9 +1858,11 @@ enum IncompleteClassSegmentVariant {
 			return new Tuple2Impl(state, new TupleType(children));
 		}
 		if (state.resolveType(base)._variant === OptionVariant.Some){
-			let baseType = /* some */.value;
-			if (baseType._variant === Variant.FindableType){
-				return new Tuple2Impl(state, new Template(/* findableType */, children));
+			let baseType : Type = some.value;
+			if (baseType._variant === TypeVariant.FindableType){
+			let some : Some<Type> = state.resolveType(base) as Some<Type>;
+				let findableType : FindableType = baseType as FindableType;
+				return new Tuple2Impl(state, new Template(findableType, children));
 			}
 		}
 		return new Tuple2Impl(state, new Template(new Placeholder(base), children));
@@ -1850,6 +1879,7 @@ enum IncompleteClassSegmentVariant {
 	}
 	retainType(argument : Argument) : Option<Type> {
 		if (argument._variant === ArgumentVariant.Type){
+			let type : Type = argument as Type;
 			return new Some(type);
 		}
 		else {

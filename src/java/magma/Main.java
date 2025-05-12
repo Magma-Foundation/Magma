@@ -86,6 +86,8 @@ public class Main {
         Iterator<T> iterateReversed();
 
         List<T> mapLast(Function<T, T> mapper);
+
+        List<T> addAllFirst(List<T> others);
     }
 
     private interface Head<T> {
@@ -112,7 +114,7 @@ public class Main {
     private interface Parameter {
     }
 
-    private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue {
+    private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue {
         String generate();
 
         Type type();
@@ -477,6 +479,13 @@ public class Main {
                         .orElse(this);
             }
 
+            @Override
+            public List<T> addAllFirst(List<T> others) {
+                return new JVMList<T>()
+                        .addAllLast(others)
+                        .addAllLast(this);
+            }
+
             private JVMList<T> set(int index, T element) {
                 this.elements.set(index, element);
                 return this;
@@ -622,11 +631,11 @@ public class Main {
             List<ObjectType> objectTypes,
             List<String> structNames,
             List<String> typeParams,
-            Option<Type> typeRegister
-    ) {
+            Option<Type> typeRegister,
+            List<FunctionSegment> functionSegments) {
 
         public CompileState() {
-            this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>());
+            this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty());
         }
 
         private Option<Type> resolveValue(String name) {
@@ -638,12 +647,12 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState defineAll(List<Definition> definitions) {
             var defined = this.definitions.mapLast(frame -> frame.addAllLast(definitions));
-            return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public Option<Type> resolveType(String name) {
@@ -666,36 +675,44 @@ public class Main {
         }
 
         public CompileState define(Definition definition) {
-            return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState pushStructName(String name) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState withTypeParams(List<String> typeParams) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister);
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
         }
 
         public CompileState withExpectedType(Type type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some<>(type));
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some<>(type), this.functionSegments);
         }
 
         public CompileState popStructName() {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState enterDefinitions() {
-            return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState exitDefinitions() {
             var removed = this.definitions.removeLast().map(Tuple2::left).orElse(this.definitions);
-            return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState addType(ObjectType thisType) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+        }
+
+        public CompileState addFunctionSegment(FunctionSegment segment) {
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments.addLast(segment));
+        }
+
+        public CompileState clearFunctionSegments() {
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
         }
     }
 
@@ -1328,6 +1345,13 @@ public class Main {
 
     }
 
+    private record Cast(Value value, Type type) implements Value {
+        @Override
+        public String generate() {
+            return this.value.generate() + " as " + this.type.generate();
+        }
+    }
+
     private static final boolean isDebug = false;
 
     public static void main() {
@@ -1817,14 +1841,15 @@ public class Main {
     private static Option<Tuple2<CompileState, FunctionSegment>> parseBlock(CompileState state, int depth, String stripped) {
         return suffix(stripped, "}", withoutEnd -> {
             return split(() -> toFirst(withoutEnd), (beforeContent, content) -> {
-                return suffix(beforeContent, "{", s -> {
-                    var statements = parseFunctionSegments(state, content, depth);
-                    var headerTuple = parseBlockHeader(state, s, depth);
+                return suffix(beforeContent, "{", headerString -> {
+                    var headerTuple = parseBlockHeader(state, headerString, depth);
                     var headerState = headerTuple.left();
                     var header = headerTuple.right();
-                    var right = statements.right();
 
-                    return new Some<>(new Tuple2Impl<>(headerState, new Block(depth, header, right)));
+                    var statementsTuple = parseFunctionSegments(headerState, content, depth);
+                    var statementsState = statementsTuple.left();
+                    var statements = statementsTuple.right().addAllFirst(statementsState.functionSegments);
+                    return new Some<>(new Tuple2Impl<>(statementsState.clearFunctionSegments(), new Block(depth, header, statements)));
                 });
             });
         });
@@ -1975,7 +2000,10 @@ public class Main {
 
                 var generate = type.findName().orElse("");
                 var temp = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
-                return new Tuple2Impl<>(definitionTuple.left(), new Operation(variant, Operator.EQUALS, temp));
+                var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.type())));
+                return new Tuple2Impl<>(definitionTuple.left()
+                        .addFunctionSegment(functionSegment)
+                        .define(definition), new Operation(variant, Operator.EQUALS, temp));
             });
         });
     }
