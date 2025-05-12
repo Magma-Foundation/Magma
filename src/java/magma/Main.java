@@ -1467,15 +1467,19 @@ public class Main {
 
     private static Tuple2<CompileState, String> compileBlockHeader(CompileState state, String input, int depth) {
         var stripped = input.strip();
-        return prefix(stripped, "if", withoutPrefix -> {
+        return compileConditional(state, stripped, "if", depth)
+                .or(() -> compileConditional(state, stripped, "while", depth))
+                .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(stripped)));
+    }
+
+    private static Option<Tuple2Impl<CompileState, String>> compileConditional(CompileState state, String input, String prefix, int depth) {
+        return prefix(input, prefix, withoutPrefix -> {
             return prefix(withoutPrefix.strip(), "(", withoutValueStart -> {
                 return suffix(withoutValueStart, ")", value -> {
                     var compiled = compileValue(state, value, depth);
-                    return new Some<>(new Tuple2Impl<>(compiled.left(), "if (" + compiled.right() + ")"));
+                    return new Some<>(new Tuple2Impl<>(compiled.left(), prefix + " (" + compiled.right() + ")"));
                 });
             });
-        }).orElseGet(() -> {
-            return new Tuple2Impl<>(state, generatePlaceholder(stripped));
         });
     }
 

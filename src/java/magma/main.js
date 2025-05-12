@@ -133,7 +133,7 @@ R;
 {
     let current;
     () = initial;
-    /* while (true) */ {
+    while (true) {
         let finalCurrent;
         () => ;
         current;
@@ -595,32 +595,32 @@ List < T > {
 }
 next();
 Option < R > {
-/* while (true) */ };
-/* while (true) */ {
-    if (this.current.isPresent()) {
-        let inner;
+    while() {
+        if (this.current.isPresent()) {
+            let inner;
+            () => ;
+            this.current.orElse( /* null */);
+            let maybe;
+            () => ;
+            inner.next();
+            if (maybe.isPresent()) {
+                return maybe;
+            }
+            /* else */ {
+                this.current = new None();
+            }
+        }
+        let outer;
         () => ;
-        this.current.orElse( /* null */);
-        let maybe;
-        () => ;
-        inner.next();
-        if (maybe.isPresent()) {
-            return maybe;
+        this.head.next();
+        if (outer.isPresent()) {
+            this.current = outer.map(this.mapper);
         }
         /* else */ {
-            this.current = new None();
+            return new None();
         }
     }
-    let outer;
-    () => ;
-    this.head.next();
-    if (outer.isPresent()) {
-        this.current = outer.map(this.mapper);
-    }
-    /* else */ {
-        return new None();
-    }
-}
+};
 /* private */ class ArrayType /*  */ {
     constructor(right) { }
 }
@@ -1073,21 +1073,21 @@ string;
 }
 divideAll(input(), string, folder(), (arg0, arg1) => DivideState);
 List < string > {
-    let, current() { }, new: DivideState(input)
+    let, current() { }, new: DivideState(input),
+    while() {
+        let maybePopped;
+        () = current.pop().map((tuple()), {
+            return /* foldSingleQuotes */(tuple) { }, : .or(() => /* foldDoubleQuotes */ (tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()))
+        });
+        if (maybePopped.isPresent()) {
+            current = maybePopped.orElse(current);
+        }
+        /* else */ {
+            /* break */ ;
+        }
+    },
+    return: current.advance().segments
 };
-/* while (true) */ {
-    let maybePopped;
-    () = current.pop().map((tuple()), {
-        return /* foldSingleQuotes */(tuple) { }, : .or(() => /* foldDoubleQuotes */ (tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()))
-    });
-    if (maybePopped.isPresent()) {
-        current = maybePopped.orElse(current);
-    }
-    /* else */ {
-        /* break */ ;
-    }
-}
-return current.advance().segments;
 foldDoubleQuotes(tuple(), [string, DivideState]);
 Option < DivideState > {
     if(tuple, [], ) { }
@@ -1095,7 +1095,7 @@ Option < DivideState > {
 {
     let current;
     () = tuple[1]().append(tuple[0]());
-    /* while (true) */ {
+    while (true) {
         let maybePopped;
         () = current.popAndAppendToTuple();
         if (maybePopped.isEmpty()) {
@@ -1414,18 +1414,20 @@ compileBlockHeader(state(), CompileState, input(), string, depth(), number);
 {
     let stripped;
     () = input.strip();
-    return prefix(stripped, "if", (withoutPrefix()), {
+    return /* compileConditional */ (state, stripped, "if", depth).or(() => /* compileConditional */ (state, stripped, "while", depth)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (stripped)));
+}
+compileConditional(state(), CompileState, input(), string, prefix(), string, depth(), number);
+Option < Tuple2Impl < CompileState, string >> {
+    return: prefix(input, prefix, (withoutPrefix()), {
         return: prefix(withoutPrefix.strip(), "(", (withoutValueStart()), {
             return: suffix(withoutValueStart, ")", (value()), {
                 let, compiled() { }
             } /* compileValue */(state, value, depth)),
-            return: new Some(new Tuple2Impl(compiled.left(), "if (" + compiled.right() + ")"))
+            return: new Some(new Tuple2Impl(compiled.left(), prefix + " (" + compiled.right() + ")"))
         })
-    });
-}
-orElseGet(() => {
-    return new Tuple2Impl(state, /* generatePlaceholder */ (stripped));
-});
+    })
+};
+;
 foldBlockStart(state(), DivideState, c(), string);
 DivideState;
 {

@@ -170,7 +170,7 @@
 
 	fold<R>(initial() : R, folder() : (arg0 : R, arg1 : T) => R) : R {
 		let current() = initial;
-		/* while (true) */{
+		while (true){
 			let finalCurrent() : R = current;
 			let optional() = this.head.next().map((inner()) => folder(finalCurrent, inner));
 			if (optional.isPresent()){
@@ -494,7 +494,7 @@
 		this.head = head;
 	}
 	next() : Option<R> {
-		/* while (true) */{
+		while (true){
 			if (this.current.isPresent()){
 				let inner() : Iterator<R> = this.current.orElse(/* null */);
 				let maybe() : Option<R> = inner.next();
@@ -836,7 +836,7 @@
 	}
 	divideAll(input() : string, folder() : (arg0 : DivideState, arg1 : string) => DivideState) : List<string> {
 		let current() = new DivideState(input);
-		/* while (true) */{
+		while (true){
 			let maybePopped() = current.pop().map((tuple()) => {
 				return /* foldSingleQuotes */(tuple).or(() => /* foldDoubleQuotes */(tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()));
 			});
@@ -852,7 +852,7 @@
 	foldDoubleQuotes(tuple() : [string, DivideState]) : Option<DivideState> {
 		if (tuple[0]() === /*  '\"' */){
 			let current() = tuple[1]().append(tuple[0]());
-			/* while (true) */{
+			while (true){
 				let maybePopped() = current.popAndAppendToTuple();
 				if (maybePopped.isEmpty()){
 					/* break */;
@@ -1097,15 +1097,16 @@
 	}
 	compileBlockHeader(state() : CompileState, input() : string, depth() : number) : [CompileState, string] {
 		let stripped() = input.strip();
-		return prefix(stripped, "if", (withoutPrefix()) => {
+		return /* compileConditional */(state, stripped, "if", depth).or(() => /* compileConditional */(state, stripped, "while", depth)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */(stripped)));
+	}
+	compileConditional(state() : CompileState, input() : string, prefix() : string, depth() : number) : Option<Tuple2Impl<CompileState, string>> {
+		return prefix(input, prefix, (withoutPrefix()) => {
 			return prefix(withoutPrefix.strip(), "(", (withoutValueStart()) => {
 				return suffix(withoutValueStart, ")", (value()) => {
 					let compiled() = /* compileValue */(state, value, depth);
-					return new Some(new Tuple2Impl(compiled.left(), "if (" + compiled.right() + ")"));
+					return new Some(new Tuple2Impl(compiled.left(), prefix + " (" + compiled.right() + ")"));
 				});
 			});
-		}).orElseGet(() => {
-			return new Tuple2Impl(state, /* generatePlaceholder */(stripped));
 		});
 	}
 	foldBlockStart(state() : DivideState, c() : string) : DivideState {
