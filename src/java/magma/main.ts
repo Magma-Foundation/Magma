@@ -406,14 +406,14 @@
 		return /* this */;
 	}
 	isLevel() : boolean {
-		return /* this.depth == 0 */;
+		return /* this */.depth === 0;
 	}
 	exit() : DivideState {
 		/* this.depth-- */;
 		return /* this */;
 	}
 	isShallow() : boolean {
-		return /* this.depth == 1 */;
+		return /* this */.depth === 1;
 	}
 	pop() : Option<[string, DivideState]> {
 		if (/* this.index < this */.input.length()){
@@ -606,11 +606,11 @@
 	}
 }
 /* private */class Operation/*  */ {
-	constructor (left : Value, infix : string, right : Value) {
+	constructor (left : Value, operator : /* Operator */, right : Value) {
 	}
 
 	generate() : string {
-		return /* this */.left().generate() + " " + /* this */.infix + " " + /* this */.right().generate();
+		return /* this */.left().generate() + " " + /* this */.operator.targetRepresentation + " " + /* this */.right().generate();
 	}
 	type() : Type {
 		return /* Primitive */.Unknown;
@@ -686,6 +686,17 @@
 		/* current.put(element.left(), element.right()) */;
 		return current;
 	}
+}
+/* private */class Operator/*  */ {/* ADD("+", "+"),
+        SUBTRACT("-", "-"),
+        EQUALS("==", "==="); */
+	sourceRepresentation : string;
+	targetRepresentation : string;/* 
+
+        Operator(String sourceRepresentation, String targetRepresentation) {
+            this.sourceRepresentation = sourceRepresentation;
+            this.targetRepresentation = targetRepresentation;
+        } */
 }
 /* private */class Primitive/*  */ {
 	Unknown("unknown") : /*  */;
@@ -775,7 +786,7 @@
 		return current.advance().segments;
 	}
 	foldDoubleQuotes(tuple : [string, DivideState]) : Option<DivideState> {
-		if (/* tuple.left() == '\"' */){
+		if (tuple.left() === /*  '\"' */){
 			let current = tuple.right().append(tuple.left());
 			/* while (true) */{
 				let maybePopped = current.popAndAppendToTuple();
@@ -784,10 +795,10 @@
 				}
 				let popped = maybePopped.orElse(/* null */);
 				current = popped.right();
-				if (/* popped.left() == '\\' */){
+				if (popped.left() === /*  '\\' */){
 					current = current.popAndAppendToOption().orElse(current);
 				}
-				if (/* popped.left() == '\"' */){
+				if (popped.left() === /*  '\"' */){
 					/* break */;
 				}
 			}
@@ -803,23 +814,23 @@
 		return appended.popAndAppendToTuple().map(/* Main */.foldEscaped).flatMap(DivideState.popAndAppendToOption);
 	}
 	foldEscaped(escaped : [string, DivideState]) : DivideState {
-		if (/* escaped.left() == '\\' */){
+		if (escaped[0]() === /*  '\\' */){
 			return escaped[1]().popAndAppendToOption().orElse(escaped[1]());
 		}
 		return escaped[1]();
 	}
 	foldStatementChar(state : DivideState, c : string) : DivideState {
 		let append = state.append(c);
-		if (/* c == ';' && append */.isLevel()){
+		if (c === /*  ';' && append */.isLevel()){
 			return append();
 		}
-		if (/* c == '}' && append */.isShallow()){
+		if (c === /*  '}' && append */.isShallow()){
 			return append().exit();
 		}
-		if (/* c == '{' || c == '(' */){
+		if (c === /*  '{' || c  */ === /*  '(' */){
 			return append();
 		}
-		if (/* c == '}' || c == ')' */){
+		if (c === /*  '}' || c  */ === /*  ')' */){
 			return append();
 		}
 		return append;
@@ -1028,13 +1039,13 @@
 	}
 	foldBlockStart(state : DivideState, c : string) : DivideState {
 		let appended = state.append(c);
-		if (/* c == '{' && state */.isLevel()){
+		if (c === /*  '{' && state */.isLevel()){
 			return appended.advance();
 		}
-		if (/* c == '{' */){
+		if (c === /*  '{' */){
 			return appended.enter();
 		}
-		if (/* c == '}' */){
+		if (c === /*  '}' */){
 			return appended.exit();
 		}
 		return appended;
@@ -1069,7 +1080,7 @@
 		return new Tuple2Impl(tuple.left(), tuple.right().generate());
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseOperation */(state, input, depth, "+")).or(() => /* parseOperation */(state, input, depth, "-")).or(() => /* parseDigits */(state, input)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseDigits */(state, input)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
 	}
 	parseMethodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last(input, "::", (s, s2) => {
@@ -1238,14 +1249,14 @@
 	}
 	foldInvocationStart(state : DivideState, c : string) : DivideState {
 		let appended = state.append(c);
-		if (/* c == '(' */){
+		if (c === /*  '(' */){
 			let enter = appended.enter();
 			if (enter()){
 				return enter();
 			}
 			return enter;
 		}
-		if (/* c == ')' */){
+		if (c === /*  ')' */){
 			return appended.exit();
 		}
 		return appended;
@@ -1293,13 +1304,13 @@
 		}
 		return new None();
 	}
-	parseOperation(state : CompileState, value : string, depth : number, infix : string) : Option<[CompileState, Value]> {
-		return first(value, infix, (s, s2) => {
-			let tuple = parseValue(state, s, depth);
-			let tuple1 = parseValue(tuple.left(), s2, depth);
-			let left = tuple.right();
-			let right = tuple1.right();
-			return new Some(new Tuple2Impl(tuple1.left(), new Operation(left, infix, right)));
+	parseOperation(state : CompileState, value : string, depth : number, operator : /* Operator */) : Option<[CompileState, Value]> {
+		return first(value, operator.sourceRepresentation, (leftString, rightString) => {
+			let leftTuple = parseValue(state, leftString, depth);
+			let rightTuple = parseValue(leftTuple.left(), rightString, depth);
+			let left = leftTuple.right();
+			let right = rightTuple.right();
+			return new Some(new Tuple2Impl(rightTuple.left(), new Operation(left, operator, right)));
 		});
 	}
 	compileValues(state : CompileState, params : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
@@ -1371,14 +1382,14 @@
 		});
 	}
 	foldTypeSeparator(state : DivideState, c : string) : DivideState {
-		if (/* c == ' ' && state */.isLevel()){
+		if (c === /*  ' ' && state */.isLevel()){
 			return state.advance();
 		}
 		let appended = state.append(c);
-		if (/* c == '<' */){
+		if (c === /*  '<' */){
 			return appended.enter();
 		}
-		if (/* c == '>' */){
+		if (c === /*  '>' */){
 			return appended.exit();
 		}
 		return appended;
@@ -1390,23 +1401,23 @@
 		});
 	}
 	foldValueChar(state : DivideState, c : string) : DivideState {
-		if (/* c == ',' && state */.isLevel()){
+		if (c === /*  ',' && state */.isLevel()){
 			return state.advance();
 		}
 		let appended = state.append(c);
-		if (/* c == ' */ - /* ' */){
+		if (c === /*  ' */ - /* ' */){
 			let peeked = appended.peek();
-			if (/* peeked == '>' */){
+			if (peeked === /*  '>' */){
 				return appended.popAndAppendToOption().orElse(appended);
 			}
 			/* else */{
 				return appended;
 			}
 		}
-		if (/* c == '<' || c == '(' || c == '{' */){
+		if (c === /*  '<' || c  */ === /*  '(' || c  */ === /*  '{' */){
 			return appended.enter();
 		}
-		if (/* c == '>' || c == ')' || c == '}' */){
+		if (c === /*  '>' || c  */ === /*  ')' || c  */ === /*  '}' */){
 			return appended.exit();
 		}
 		return appended;
@@ -1498,7 +1509,7 @@
 	}
 	findLast(input : string, infix : string) : Option<number> {
 		let index = input.lastIndexOf(infix);
-		if (/* index ==  */ - 1){
+		if (index === /*  */ - 1){
 			return new None<number>();
 		}
 		return new Some(index);
@@ -1518,7 +1529,7 @@
 	}
 	findFirst(input : string, infix : string) : Option<number> {
 		let index = input.indexOf(infix);
-		if (/* index ==  */ - 1){
+		if (index === /*  */ - 1){
 			return new None<number>();
 		}
 		return new Some(index);

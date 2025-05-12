@@ -864,11 +864,10 @@ public class Main {
         }
     }
 
-    private record Operation(Value left, String infix, Value right) implements Value {
-
+    private record Operation(Value left, Operator operator, Value right) implements Value {
         @Override
         public String generate() {
-            return this.left().generate() + " " + this.infix + " " + this.right().generate();
+            return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
         }
 
         @Override
@@ -1454,8 +1453,9 @@ public class Main {
                 .or(() -> parseDataAccess(state, input, depth))
                 .or(() -> parseSymbolValue(state, input))
                 .or(() -> parseInvokable(state, input, depth))
-                .or(() -> parseOperation(state, input, depth, "+"))
-                .or(() -> parseOperation(state, input, depth, "-"))
+                .or(() -> parseOperation(state, input, depth, Operator.ADD))
+                .or(() -> parseOperation(state, input, depth, Operator.SUBTRACT))
+                .or(() -> parseOperation(state, input, depth, Operator.EQUALS))
                 .or(() -> parseDigits(state, input))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
@@ -1737,13 +1737,15 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<Tuple2<CompileState, Value>> parseOperation(CompileState state, String value, int depth, String infix) {
-        return first(value, infix, (s, s2) -> {
-            var tuple = parseValue(state, s, depth);
-            var tuple1 = parseValue(tuple.left(), s2, depth);
-            var left = tuple.right();
-            var right = tuple1.right();
-            return new Some<>(new Tuple2Impl<>(tuple1.left(), new Operation(left, infix, right)));
+    private static Option<Tuple2<CompileState, Value>> parseOperation(CompileState state, String value, int depth, Operator operator) {
+        return first(value, operator.sourceRepresentation, (leftString, rightString) -> {
+            var leftTuple = parseValue(state, leftString, depth);
+            var rightTuple = parseValue(leftTuple.left(), rightString, depth);
+
+            var left = leftTuple.right();
+            var right = rightTuple.right();
+
+            return new Some<>(new Tuple2Impl<>(rightTuple.left(), new Operation(left, operator, right)));
         });
     }
 
@@ -2052,6 +2054,20 @@ public class Main {
         }
 
         return generatePlaceholder(": " + type.generate());
+    }
+
+    private enum Operator {
+        ADD("+", "+"),
+        SUBTRACT("-", "-"),
+        EQUALS("==", "===");
+
+        private final String sourceRepresentation;
+        private final String targetRepresentation;
+
+        Operator(String sourceRepresentation, String targetRepresentation) {
+            this.sourceRepresentation = sourceRepresentation;
+            this.targetRepresentation = targetRepresentation;
+        }
     }
 
     private enum Primitive implements Type {
