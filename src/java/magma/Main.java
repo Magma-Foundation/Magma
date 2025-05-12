@@ -491,7 +491,7 @@ public class Main {
             var joined = this.joinTypeParams();
             var before = this.joinBefore();
             var typeString = this.generateType();
-            return before + this.name + joined + "(" + joinedParameters + ")" + typeString;
+            return before + this.name + joined + joinedParameters + typeString;
         }
 
         @Override
@@ -1020,7 +1020,7 @@ public class Main {
 
         @Override
         public String generateWithParams(String joinedParameters) {
-            return "constructor (" + joinedParameters + ")";
+            return "constructor " + joinedParameters;
         }
     }
 
@@ -1403,6 +1403,7 @@ public class Main {
         return retainParameters.iterate()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
+                .map(inner -> "(" + inner + ")")
                 .orElse("");
     }
 
