@@ -125,7 +125,7 @@ R;
         if (optional.isPresent()) {
             current = optional.orElse( /* null */);
         }
-        /* else */ {
+        else {
             return current;
         }
     }
@@ -236,7 +236,7 @@ Option < T > {
 {
     return new Some(this.elements.get(index));
 }
-/* else */ {
+{
     return new None();
 }
 /* private static */ class Lists /*  */ {
@@ -502,7 +502,7 @@ next: Option < R > {
             if (maybe.isPresent()) {
                 return maybe;
             }
-            /* else */ {
+            else {
                 this.current = new None();
             }
         }
@@ -510,7 +510,7 @@ next: Option < R > {
         if (outer.isPresent()) {
             this.current = outer.map(this.mapper);
         }
-        /* else */ {
+        else {
             return new None();
         }
     }
@@ -902,7 +902,7 @@ List < string > {
         if (maybePopped.isPresent()) {
             current = maybePopped.orElse(current);
         }
-        /* else */ {
+        else {
             /* break */ ;
         }
     },
@@ -1041,7 +1041,7 @@ let statementsTuple = parseStatements(state.pushStructName(name).withTypeParams(
 if (params.isEmpty()) {
     statementsTuple.right();
 }
-/* else */ {
+else {
     let joined = /* joinValues */ ( /* retainDefinitions */(params));
     let constructorIndent = /* createIndent */ (1);
     statementsTuple.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
@@ -1202,10 +1202,19 @@ compileBlockHeader(state, CompileState, input, string, depth, number);
 [CompileState, string];
 {
     let stripped = input.strip();
-    return /* compileConditional */ (state, stripped, "if", depth).or(() => /* compileConditional */ (state, stripped, "while", depth)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (stripped)));
+    return /* compileConditional */ (state, stripped, "if", depth).or(() => /* compileConditional */ (state, stripped, "while", depth)).or(() => /* compileElse */ (state, input)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (stripped)));
 }
+compileElse(state, CompileState, input, string);
+Option < [CompileState, string] > {
+    let, stripped = input.strip(),
+    if(stripped) { }, : .equals("else")
+};
+{
+    return new Some(new Tuple2Impl(state, "else "));
+}
+return new None();
 compileConditional(state, CompileState, input, string, prefix, string, depth, number);
-Option < Tuple2Impl < CompileState, string >> {
+Option < [CompileState, string] > {
     return: prefix(input, prefix, (withoutPrefix) => {
         return prefix(withoutPrefix.strip(), "(", (withoutValueStart) => {
             return suffix(withoutValueStart, ")", (value) => {
@@ -1346,7 +1355,7 @@ Some < [CompileState, Value] > {
     let right = value1.right();
     value = new Tuple2Impl(value1.left(), new BlockLambdaValue(right, depth));
 }
-/* else */ {
+{
     let value1 = parseValue(state2, strippedValueString, depth);
     value = new Tuple2Impl(value1.left(), value1.right());
 }
@@ -1368,7 +1377,7 @@ boolean;
     if (input.startsWith("-")) {
         input.substring(1);
     }
-    /* else */ {
+    else {
         input;
     }
     return /* areAllDigits */ ( /* maybeTruncated */);
@@ -1668,7 +1677,7 @@ DivideState;
         if (peeked ===  /*  '>' */) {
             return appended.popAndAppendToOption().orElse(appended);
         }
-        /* else */ {
+        else {
             return appended;
         }
     }
@@ -1705,7 +1714,7 @@ if (isSymbol(stripped)) {
     if ( /* state.resolveType(stripped) instanceof Some */( /* var resolved */)) {
         return new Some(new Tuple2Impl(state));
     }
-    /* else */ {
+    else {
         return new Some(new Tuple2Impl(state, new Placeholder(stripped)));
     }
 }
@@ -1765,7 +1774,7 @@ Option < Type > {
 {
     return new Some(type);
 }
-/* else */ {
+{
     return new None();
 }
 argument(state, CompileState, input, string);

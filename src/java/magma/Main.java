@@ -1470,10 +1470,20 @@ public class Main {
         var stripped = input.strip();
         return compileConditional(state, stripped, "if", depth)
                 .or(() -> compileConditional(state, stripped, "while", depth))
+                .or(() -> compileElse(state, input))
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(stripped)));
     }
 
-    private static Option<Tuple2Impl<CompileState, String>> compileConditional(CompileState state, String input, String prefix, int depth) {
+    private static Option<Tuple2<CompileState, String>> compileElse(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.equals("else")) {
+            return new Some<>(new Tuple2Impl<>(state, "else "));
+        }
+
+        return new None<>();
+    }
+
+    private static Option<Tuple2<CompileState, String>> compileConditional(CompileState state, String input, String prefix, int depth) {
         return prefix(input, prefix, withoutPrefix -> {
             return prefix(withoutPrefix.strip(), "(", withoutValueStart -> {
                 return suffix(withoutValueStart, ")", value -> {
