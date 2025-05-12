@@ -1393,13 +1393,22 @@ public class Main {
             return new Tuple2Impl<>(tuple.left(), "return " + tuple.right());
         }
 
-        return first(stripped, "=", (definitionString, valueString) -> {
-            return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
+        return first(stripped, "=", (beforeEquals, valueString) -> {
+            var sourceTuple = compileValue(state, valueString, depth);
+            var sourceState = sourceTuple.left();
+            var sourceString = sourceTuple.right();
+
+            return parseDefinition(sourceState, beforeEquals).flatMap(definitionTuple -> {
                 var definitionState = definitionTuple.left();
                 var definition = definitionTuple.right();
 
-                var valueTuple = compileValue(definitionState, valueString, depth);
-                return new Some<>(new Tuple2Impl<>(valueTuple.left().withDefinition(definition), "let " + definition.generate() + " = " + valueTuple.right()));
+                return new Some<>(new Tuple2Impl<>(definitionState.withDefinition(definition), "let " + definition.generate() + " = " + sourceString));
+            }).or(() -> {
+                var destinationTuple = compileValue(sourceState, beforeEquals, depth);
+                var destinationState = destinationTuple.left();
+                var destinationString = destinationTuple.right();
+
+                return new Some<>(new Tuple2Impl<>(destinationState, destinationString + " = " + sourceString));
             });
         }).orElseGet(() -> {
             return new Tuple2Impl<>(state, generatePlaceholder(stripped));

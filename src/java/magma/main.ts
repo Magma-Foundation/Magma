@@ -134,14 +134,14 @@
 	value : T;
 	retrieved : boolean;
 	SingleHead(value : T) : /* public */ {
-		/* this.value = value */;
-		/* this.retrieved = false */;
+		/* this */.value = value;
+		/* this */.retrieved = /* false */;
 	}
 	next() : Option<T> {
 		/* if (this.retrieved)  */{
 			return new None();
 		}
-		/* this.retrieved = true */;
+		/* this */.retrieved = /* true */;
 		return new Some(/* this */.value);
 	}
 }
@@ -160,7 +160,7 @@
 			let finalCurrent : R = current;
 			let optional = /* this */.head.next().map((inner) => folder(finalCurrent, inner));
 			/* if (optional.isPresent())  */{
-				/* current = optional.orElse(null) */;
+				current = optional.orElse(/* null */);
 			}
 			/* else  */{
 				return current;
@@ -195,7 +195,7 @@
 	length : number;
 	counter : number;
 	RangeHead(length : number) : /* public */ {
-		/* this.length = length */;
+		/* this */.length = length;
 	}
 	next() : Option<number> {
 		/* if (this.counter < this.length)  */{
@@ -209,7 +209,7 @@
 /* private static final */class JVMList<T>/*  */ {
 	elements : /* java.util.List */<T>;
 	JVMList(elements : /* java.util.List */<T>) : /* private */ {
-		/* this.elements = elements */;
+		/* this */.elements = elements;
 	}
 	JVMList() : /* public */ {
 		/* this(new ArrayList<>()) */;
@@ -383,18 +383,18 @@
 	segments : List<string>;
 	buffer : /* StringBuilder */;
 	DivideState(input : string, index : number, segments : List<string>, buffer : /* StringBuilder */, depth : number) : /* public */ {
-		/* this.segments = segments */;
-		/* this.buffer = buffer */;
-		/* this.depth = depth */;
-		/* this.input = input */;
-		/* this.index = index */;
+		/* this */.segments = segments;
+		/* this */.buffer = buffer;
+		/* this */.depth = depth;
+		/* this */.input = input;
+		/* this */.index = index;
 	}
 	DivideState(input : string) : /* public */ {
 		/* this(input, 0, Lists.empty(), new StringBuilder(), 0) */;
 	}
 	advance() : DivideState {
-		/* this.segments = this.segments.addLast(this.buffer.toString()) */;
-		/* this.buffer = new StringBuilder() */;
+		/* this */.segments = /* this */.segments.addLast(/* this */.buffer.toString());
+		/* this */.buffer = new /* StringBuilder */();
 		return /* this */;
 	}
 	append(c : string) : DivideState {
@@ -468,9 +468,9 @@
 	head : Head<T>;
 	current : Option<Iterator<R>>;
 	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Iterator<R>) : /* public */ {
-		/* this.mapper = mapper */;
-		/* this.current = new None<>() */;
-		/* this.head = head */;
+		/* this */.mapper = mapper;
+		/* this */.current = new None();
+		/* this */.head = head;
 	}
 	next() : Option<R> {
 		/* while (true)  */{
@@ -481,12 +481,12 @@
 					return maybe;
 				}
 				/* else  */{
-					/* this.current = new None<>() */;
+					/* this */.current = new None();
 				}
 			}
 			let outer : Option<T> = /* this */.head.next();
 			/* if (outer.isPresent())  */{
-				/* this.current = outer.map(this.mapper) */;
+				/* this */.current = outer.map(/* this */.mapper);
 			}
 			/* else  */{
 				return new None();
@@ -766,7 +766,7 @@
 				return /* foldSingleQuotes */(tuple).or(() => /* foldDoubleQuotes */(tuple)).orElseGet(() => folder(tuple.right(), tuple.left()));
 			});
 			/* if (maybePopped.isPresent())  */{
-				/* current = maybePopped.orElse(current) */;
+				current = maybePopped.orElse(current);
 			}
 			/* else  */{
 				/* break */;
@@ -783,9 +783,9 @@
 					/* break */;
 				}
 				let popped = maybePopped.orElse(/* null */);
-				/* current = popped.right() */;
+				current = popped.right();
 				/* if (popped.left() == '\\')  */{
-					/* current = current.popAndAppendToOption().orElse(current) */;
+					current = current.popAndAppendToOption().orElse(current);
 				}
 				/* if (popped.left() == '\"')  */{
 					/* break */;
@@ -887,12 +887,12 @@
 		let parsed = parseStatements(state.withStructName(name).withTypeParams(typeParams), content, (state0, input) => /* compileClassSegment */(state0, input, 1));
 		/* List<String> parsed1 */;
 		/* if (params.isEmpty())  */{
-			/* parsed1 = parsed.right() */;
+			/* parsed1 */ = parsed.right();
 		}
 		/* else  */{
 			let joined = /* joinValues */(/* retainDefinitions */(params));
 			let constructorIndent = /* createIndent */(1);
-			/* parsed1 = parsed.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n") */;
+			/* parsed1 */ = parsed.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
 		}
 		let parsed2 = /* parsed1 */.iterate().collect(new Joiner()).orElse("");
 		let generated = /* generatePlaceholder */(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + /* generatePlaceholder */(afterTypeParams) + " {" + parsed2 + "\n}\n";
@@ -1022,12 +1022,19 @@
 			let tuple = /* compileValue */(state, value, depth);
 			return new Tuple2Impl(tuple.left(), "return " + tuple.right());
 		}
-		return first(stripped, "=", (definitionString, valueString) => {
-			return /* parseDefinition */(state, definitionString).flatMap((definitionTuple) => {
+		return first(stripped, "=", (beforeEquals, valueString) => {
+			let sourceTuple = /* compileValue */(state, valueString, depth);
+			let sourceState = sourceTuple.left();
+			let sourceString = sourceTuple.right();
+			return /* parseDefinition */(sourceState, beforeEquals).flatMap((definitionTuple) => {
 				let definitionState = definitionTuple.left();
 				let definition = definitionTuple.right();
-				let valueTuple = /* compileValue */(definitionState, valueString, depth);
-				return new Some(new Tuple2Impl(valueTuple.left().withDefinition(definition), "let " + definition.generate() + " = " + valueTuple.right()));
+				return new Some(new Tuple2Impl(definitionState.withDefinition(definition), "let " + definition.generate() + " = " + sourceString));
+			}).or(() => {
+				let destinationTuple = /* compileValue */(sourceState, beforeEquals, depth);
+				let destinationState = destinationTuple.left();
+				let destinationString = destinationTuple.right();
+				return new Some(new Tuple2Impl(destinationState, destinationString + " = " + sourceString));
 			});
 		}).orElseGet(() => {
 			return new Tuple2Impl(state, /* generatePlaceholder */(stripped));
@@ -1063,7 +1070,7 @@
 				let type : Type = /* Primitive */.Unknown;
 				/* if (state.typeRegister instanceof Some(var expectedType))  */{
 					/* if (expectedType instanceof FunctionType functionType)  */{
-						/* type = functionType.arguments.get(0).orElse(null) */;
+						type = /* functionType */.arguments.get(0).orElse(/* null */);
 					}
 				}
 				return /* assembleLambda */(state, /* Lists */.of(/* Definition */.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
@@ -1082,11 +1089,11 @@
 		/* if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}"))  */{
 			let value1 = compileStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => compileFunctionSegment(state1, input1, depth + 1));
 			let right = value1.right();
-			/* value = new Tuple2Impl<>(value1.left(), new BlockLambdaValue(right, depth)) */;
+			value = new Tuple2Impl(value1.left(), new BlockLambdaValue(right, depth));
 		}
 		/* else  */{
 			let value1 = parseValue(state2, strippedValueString, depth);
-			/* value = new Tuple2Impl<>(value1.left(), value1.right()) */;
+			value = new Tuple2Impl(value1.left(), value1.right());
 		}
 		let right = value.right();
 		return new Some(new Tuple2Impl(value.left(), new Lambda(definitions, right)));
@@ -1157,12 +1164,12 @@
 		let callerType : FunctionType = new FunctionType(/* Lists */.empty(), /* Primitive */.Unknown);
 		/* switch (newCaller)  */{
 			/* case ConstructionCaller constructionCaller ->  */{
-				/* callerType = constructionCaller.toFunction() */;
+				callerType = /* constructionCaller */.toFunction();
 			}
 			/* case Value value ->  */{
 				let type = value.type();
 				/* if (type instanceof FunctionType functionType)  */{
-					/* callerType = functionType */;
+					callerType = /* functionType */;
 				}
 			}
 		}
@@ -1239,7 +1246,7 @@
 			let type : Type = /* Primitive */.Unknown;
 			/* if (parentType instanceof FindableType objectType)  */{
 				/* if (objectType.find(property) instanceof Some(var memberType))  */{
-					/* type = memberType */;
+					type = /* memberType */;
 				}
 			}
 			return new Some(new Tuple2Impl(tuple.left(), new DataAccess(parent, property, type)));
