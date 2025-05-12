@@ -1453,10 +1453,10 @@ public class Main {
                 .or(() -> parseDataAccess(state, input, depth))
                 .or(() -> parseSymbolValue(state, input))
                 .or(() -> parseInvokable(state, input, depth))
-                .or(() -> parseOperation(state, input, depth, Operator.ADD))
-                .or(() -> parseOperation(state, input, depth, Operator.SUBTRACT))
-                .or(() -> parseOperation(state, input, depth, Operator.EQUALS))
                 .or(() -> parseDigits(state, input))
+                .or(() -> parseOperation(state, input, depth, Operator.ADD))
+                .or(() -> parseOperation(state, input, depth, Operator.EQUALS))
+                .or(() -> parseOperation(state, input, depth, Operator.SUBTRACT))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
@@ -1540,6 +1540,17 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
+        String maybeTruncated;
+        if (input.startsWith("-")) {
+            maybeTruncated = input.substring(1);
+        }
+        else {
+            maybeTruncated = input;
+        }
+        return areAllDigits(maybeTruncated);
+    }
+
+    private static boolean areAllDigits(String input) {
         for (var i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (Character.isDigit(c)) {

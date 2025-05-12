@@ -1080,7 +1080,7 @@
 		return new Tuple2Impl(tuple.left(), tuple.right().generate());
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseDigits */(state, input)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
 	}
 	parseMethodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last(input, "::", (s, s2) => {
@@ -1141,6 +1141,16 @@
 		return new None();
 	}
 	isNumber(input : string) : boolean {
+		/* String maybeTruncated */;
+		if (input.startsWith("-")){
+			/* maybeTruncated */ = input.substring(1);
+		}
+		/* else */{
+			/* maybeTruncated */ = input;
+		}
+		return /* areAllDigits */(/* maybeTruncated */);
+	}
+	areAllDigits(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++) */{
 			let c = input.charAt(/* i */);
 			if (/* Character */.isDigit(c)){
@@ -1509,7 +1519,7 @@
 	}
 	findLast(input : string, infix : string) : Option<number> {
 		let index = input.lastIndexOf(infix);
-		if (index === /*  */ - 1){
+		if (index === -1){
 			return new None<number>();
 		}
 		return new Some(index);
@@ -1529,7 +1539,7 @@
 	}
 	findFirst(input : string, infix : string) : Option<number> {
 		let index = input.indexOf(infix);
-		if (index === /*  */ - 1){
+		if (index === -1){
 			return new None<number>();
 		}
 		return new Some(index);
