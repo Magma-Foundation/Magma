@@ -706,6 +706,25 @@
 		return current;
 	}
 }
+/* private */class Primitive/*  */ {
+	/* Int("number"),
+        String("string"),
+        Boolean("boolean"),
+       */ Unknown("unknown") : /*  */;
+	/* private final */ value : string;/* 
+
+        Primitive(String value) {
+            this.value = value;
+        } */
+	/* @Override
+        public */ generate() : string {
+		return /* this */.value;
+	}
+	/* @Override
+        public */ replace(mapping : /* Map */<string, /* Type */>) : /* Type */ {
+		return /* this */;
+	}
+}
 /* public */class Main/*  */ {/* 
 
     private interface Type extends Argument {
@@ -980,7 +999,7 @@
 		return mapper(/* slice */);
 	}
 	/* private static */ compileClassSegment(state : /* CompileState */, input : string, depth : number) : [/* CompileState */, string] {
-		return /* compileWhitespace */(input, state).or(() => compileClass(input, depth, state)).or(() => compileStructure(input, "interface ", "interface ", state)).or(() => compileStructure(input, "record ", "class ", state)).or(() => /* compileMethod */(state, input, depth)).or(() => /* compileDefinitionStatement */(input, depth, state)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */(input)));
+		return /* compileWhitespace */(input, state).or(() => compileClass(input, depth, state)).or(() => compileStructure(input, "interface ", "interface ", state)).or(() => compileStructure(input, "record ", "class ", state)).or(() => compileStructure(input, "enum ", "class ", state)).or(() => /* compileMethod */(state, input, depth)).or(() => /* compileDefinitionStatement */(input, depth, state)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */(input)));
 	}
 	/* private static */ compileWhitespace(input : string, state : /* CompileState */) : Option<[/* CompileState */, string]> {
 		/* if (input.isBlank())  */{
@@ -1556,29 +1575,6 @@
 			return "";
 		}
 		return generatePlaceholder(": " + type.generate());
-	}/* 
-
-    private enum Primitive implements Type {
-        Int("number"),
-        String("string"),
-        Boolean("boolean"),
-        Unknown("unknown");
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-
-        @Override
-        public Type replace(Map<String, Type> mapping) {
-            return this;
-        }
-    } */
+	}
 }
 /*  */

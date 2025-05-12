@@ -605,6 +605,12 @@ return new /* HashMap */ ();
 , V > {
     return: current
 };
+/* private */ class Primitive /*  */ {
+    /* @Override
+        public */ generate() {
+        return /* this */ .value;
+    }
+}
 /* public */ class Main /*  */ {
     /* private */ CompileState(structures, definitions, objectTypes, maybeStructName, typeParams, typeRegister) {
         /* this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty(), new None<>()) */ ;
@@ -895,7 +901,7 @@ return mapper( /* slice */);
 /* private static */ compileClassSegment(state, input, string, depth, number);
 [/* CompileState */ , string];
 {
-    return /* compileWhitespace */ (input, state).or(() => compileClass(input, depth, state)).or(() => compileStructure(input, "interface ", "interface ", state)).or(() => compileStructure(input, "record ", "class ", state)).or(() => /* compileMethod */ (state, input, depth)).or(() => /* compileDefinitionStatement */ (input, depth, state)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (input)));
+    return /* compileWhitespace */ (input, state).or(() => compileClass(input, depth, state)).or(() => compileStructure(input, "interface ", "interface ", state)).or(() => compileStructure(input, "record ", "class ", state)).or(() => compileStructure(input, "enum ", "class ", state)).or(() => /* compileMethod */ (state, input, depth)).or(() => /* compileDefinitionStatement */ (input, depth, state)).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */ (input)));
 }
 /* private static */ compileWhitespace(input, string, state);
 Option < [/* CompileState */ , string] > {
@@ -1576,28 +1582,5 @@ string;
         return "";
     }
     return generatePlaceholder(": " + type.generate());
-} /*
-
-private enum Primitive implements Type {
-    Int("number"),
-    String("string"),
-    Boolean("boolean"),
-    Unknown("unknown");
-
-    private final String value;
-
-    Primitive(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String generate() {
-        return this.value;
-    }
-
-    @Override
-    public Type replace(Map<String, Type> mapping) {
-        return this;
-    }
-} */
+}
 /*  */ 

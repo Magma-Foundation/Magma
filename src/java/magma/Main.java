@@ -1237,6 +1237,7 @@ public class Main {
                 .or(() -> compileClass(input, depth, state))
                 .or(() -> compileStructure(input, "interface ", "interface ", state))
                 .or(() -> compileStructure(input, "record ", "class ", state))
+                .or(() -> compileStructure(input, "enum ", "class ", state))
                 .or(() -> compileMethod(state, input, depth))
                 .or(() -> compileDefinitionStatement(input, depth, state))
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(input)));
