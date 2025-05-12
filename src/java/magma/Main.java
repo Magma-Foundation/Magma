@@ -513,23 +513,25 @@ public class Main {
             }
         }
 
+        @Actual
         public static <T> List<T> empty() {
             return new JVMList<>();
         }
 
+        @Actual
         public static <T> List<T> of(T... elements) {
             return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
         }
     }
 
     private record ImmutableDefinition(
-            Option<String> maybeBefore,
+            List<String> annotations, Option<String> maybeBefore,
             String name,
             Type type,
             List<String> typeParams
     ) implements Definition {
         public static Definition createSimpleDefinition(String name, Type type) {
-            return new ImmutableDefinition(new None<>(), name, type, Lists.empty());
+            return new ImmutableDefinition(Lists.empty(), new None<>(), name, type, Lists.empty());
         }
 
         @Override
@@ -562,24 +564,20 @@ public class Main {
 
         @Override
         public Definition mapType(Function<Type, Type> mapper) {
-            return new ImmutableDefinition(this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
-        }
-
-        @Override
-        public String toString() {
-            return "Definition[" +
-                    "maybeBefore=" + this.maybeBefore + ", " +
-                    "name=" + this.name + ", " +
-                    "type=" + this.type + ", " +
-                    "typeParams=" + this.typeParams + ']';
+            return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
         }
 
         @Override
         public String generateWithParams(String joinedParameters) {
+            var joinedAnnotations = this.annotations.iterate()
+                    .map(value -> "@" + value + " ")
+                    .collect(new Joiner())
+                    .orElse("");
+
             var joined = this.joinTypeParams();
             var before = this.joinBefore();
             var typeString = this.generateType();
-            return before + this.name + joined + joinedParameters + typeString;
+            return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
         }
 
         @Override
@@ -1539,15 +1537,7 @@ public class Main {
             return first(right, "{", (beforeContent, withEnd) -> {
                 return suffix(withEnd.strip(), "}", content1 -> {
                     return last(beforeInfix.strip(), "\n", (annotationsString, s2) -> {
-                        var annotations = divideAll(annotationsString, Main::foldByDelimiter)
-                                .iterate()
-                                .map(String::strip)
-                                .filter(value -> !value.isEmpty())
-                                .map(value -> value.substring(1))
-                                .map(String::strip)
-                                .filter(value -> !value.isEmpty())
-                                .collect(new ListCollector<>());
-
+                        var annotations = parseAnnotations(annotationsString);
                         return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
                     }).or(() -> {
                         return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
@@ -1555,6 +1545,17 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static List<String> parseAnnotations(String annotationsString) {
+        return divideAll(annotationsString.strip(), Main::foldByDelimiter)
+                .iterate()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .map(value -> value.substring(1))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
     }
 
     private static DivideState foldByDelimiter(DivideState state1, Character c) {
@@ -2381,17 +2382,24 @@ public class Main {
     private static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return last(input.strip(), " ", (beforeName, name) -> {
             return split(() -> toLast(beforeName, " ", Main::foldTypeSeparator), (beforeType, type) -> {
-                return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
-                    return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
-                        var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(new Tuple2Impl<>(state1, s.strip())));
-                        return assembleDefinition(typeParams.left(), new Some<String>(beforeTypeParams), name, typeParams.right(), type);
-                    });
+                return last(beforeType, "\n", (s, s2) -> {
+                    var annotations = parseAnnotations(s);
+                    return getOr(state, name, s2, type, annotations);
                 }).or(() -> {
-                    return assembleDefinition(state, new Some<String>(beforeType), name, Lists.empty(), type);
+                    return getOr(state, name, beforeType, type, Lists.empty());
                 });
-            }).or(() -> {
-                return assembleDefinition(state, new None<String>(), name, Lists.empty(), beforeName);
+            }).or(() -> assembleDefinition(state, Lists.empty(), new None<String>(), name, Lists.empty(), beforeName));
+        });
+    }
+
+    private static Option<Tuple2<CompileState, Definition>> getOr(CompileState state, String name, String beforeType, String type, List<String> annotations) {
+        return suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
+            return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
+                var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(new Tuple2Impl<>(state1, s.strip())));
+                return assembleDefinition(typeParams.left(), annotations, new Some<String>(beforeTypeParams), name, typeParams.right(), type);
             });
+        }).or(() -> {
+            return assembleDefinition(state, annotations, new Some<String>(beforeType), name, Lists.empty(), type);
         });
     }
 
@@ -2422,13 +2430,13 @@ public class Main {
 
     private static Option<Tuple2<CompileState, Definition>> assembleDefinition(
             CompileState state,
-            Option<String> beforeTypeParams,
+            List<String> annotations, Option<String> beforeTypeParams,
             String name,
             List<String> typeParams,
             String type
     ) {
         return parseType(state.withTypeParams(typeParams), type).map(type1 -> {
-            var node = new ImmutableDefinition(beforeTypeParams, name.strip(), type1.right(), typeParams);
+            var node = new ImmutableDefinition(annotations, beforeTypeParams, name.strip(), type1.right(), typeParams);
             return new Tuple2Impl<>(type1.left(), node);
         });
     }

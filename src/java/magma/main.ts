@@ -101,9 +101,9 @@ enum CallerVariant {
 /* private */interface Definition/*  */ {
 	generate() : string;
 	mapType(mapper : (arg0 : Type) => Type) : Definition;
-	toString() : string;
-	generateWithParams(joinedParameters : string) : string;
-	createDefinition(paramTypes : List<Type>) : Definition;
+	@Override toString() : string;
+	@Override generateWithParams(joinedParameters : string) : string;
+	@Override createDefinition(paramTypes : List<Type>) : Definition;
 	maybeBefore() : Option<string>;
 	name() : string;
 	type() : Type;
@@ -140,31 +140,31 @@ enum IncompleteClassSegmentVariant {
 /* private @ */interface Actual/*  */ {
 }
 /* private static final */class None<T>/*  */ {
-	map<R>(mapper : (arg0 : T) => R) : Option<R> {
+	@Override map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
 	}
-	isPresent() : boolean {
+	@Override isPresent() : boolean {
 		return false;
 	}
-	orElse(other : T) : T {
+	@Override orElse(other : T) : T {
 		return other;
 	}
-	filter(predicate : (arg0 : T) => boolean) : Option<T> {
+	@Override filter(predicate : (arg0 : T) => boolean) : Option<T> {
 		return new None();
 	}
-	orElseGet(supplier : () => T) : T {
+	@Override orElseGet(supplier : () => T) : T {
 		return supplier();
 	}
-	or(other : () => Option<T>) : Option<T> {
+	@Override or(other : () => Option<T>) : Option<T> {
 		return other();
 	}
-	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
+	@Override flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
 		return new None();
 	}
-	isEmpty() : boolean {
+	@Override isEmpty() : boolean {
 		return true;
 	}
-	and<R>(other : () => Option<R>) : Option<[T, R]> {
+	@Override and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return new None();
 	}
 }
@@ -175,34 +175,34 @@ enum IncompleteClassSegmentVariant {
 /* private */class Some<T>/*  */ {
 	constructor (value : T) {
 	}
-	map<R>(mapper : (arg0 : T) => R) : Option<R> {
+	@Override map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new Some(mapper(this.value));
 	}
-	isPresent() : boolean {
+	@Override isPresent() : boolean {
 		return true;
 	}
-	orElse(other : T) : T {
+	@Override orElse(other : T) : T {
 		return this.value;
 	}
-	filter(predicate : (arg0 : T) => boolean) : Option<T> {
+	@Override filter(predicate : (arg0 : T) => boolean) : Option<T> {
 		if (predicate(this.value)){
 			return this;
 		}
 		return new None();
 	}
-	orElseGet(supplier : () => T) : T {
+	@Override orElseGet(supplier : () => T) : T {
 		return this.value;
 	}
-	or(other : () => Option<T>) : Option<T> {
+	@Override or(other : () => Option<T>) : Option<T> {
 		return this;
 	}
-	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
+	@Override flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
 		return mapper(this.value);
 	}
-	isEmpty() : boolean {
+	@Override isEmpty() : boolean {
 		return false;
 	}
-	and<R>(other : () => Option<R>) : Option<[T, R]> {
+	@Override and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return other().map((otherValue : R) => new Tuple2Impl(this.value, otherValue));
 	}
 }
@@ -213,7 +213,7 @@ enum IncompleteClassSegmentVariant {
 		this.value = value;
 		this.retrieved = false;
 	}
-	next() : Option<T> {
+	@Override next() : Option<T> {
 		if (this.retrieved){
 			return new None();
 		}
@@ -222,14 +222,14 @@ enum IncompleteClassSegmentVariant {
 	}
 }
 /* private static */class EmptyHead<T>/*  */ {
-	next() : Option<T> {
+	@Override next() : Option<T> {
 		return new None();
 	}
 }
 /* private */class HeadedIterator<T>/*  */ {
 	constructor (head : Head<T>) {
 	}
-	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
+	@Override fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		let current : R = initial;
 		while (true){
 			let finalCurrent : R = current;
@@ -243,13 +243,13 @@ enum IncompleteClassSegmentVariant {
 			}
 		}
 	}
-	map<R>(mapper : (arg0 : T) => R) : Iterator<R> {
+	@Override map<R>(mapper : (arg0 : T) => R) : Iterator<R> {
 		return new HeadedIterator(() => this.head.next().map(mapper));
 	}
-	collect<R>(collector : Collector<T, R>) : R {
+	@Override collect<R>(collector : Collector<T, R>) : R {
 		return this.fold(collector.createInitial(), collector.fold);
 	}
-	filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
+	@Override filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
 		return this.flatMap((element : T) => {
 			if (predicate(element)){
 				return new HeadedIterator(new SingleHead(element));
@@ -257,13 +257,13 @@ enum IncompleteClassSegmentVariant {
 			return new HeadedIterator(new EmptyHead());
 		});
 	}
-	next() : Option<T> {
+	@Override next() : Option<T> {
 		return this.head.next();
 	}
-	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
+	@Override flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
 		return new HeadedIterator(new FlatMapHead(this.head, f));
 	}
-	zip<R>(other : Iterator<R>) : Iterator<[T, R]> {
+	@Override zip<R>(other : Iterator<R>) : Iterator<[T, R]> {
 		return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
 	}
 }
@@ -273,7 +273,7 @@ enum IncompleteClassSegmentVariant {
 	constructor (length : number) {
 		this.length = length;
 	}
-	next() : Option<number> {
+	@Override next() : Option<number> {
 		if (this.counter < this.length){
 			let value : number = this.counter;
 			/* this.counter++ */;
@@ -283,20 +283,20 @@ enum IncompleteClassSegmentVariant {
 	}
 }
 /* private static */class Lists/*  */ {
-	empty<T>() : List<T> {
+	@Actual empty<T>() : List<T> {
 		return new /* JVMList */();
 	}
-	of<T>(elements : T[]) : List<T> {
+	@Actual of<T>(elements : T[]) : List<T> {
 		return new /* JVMList */(new /* ArrayList */(/* Arrays */.asList(elements)));
 	}
 }
 /* private */class ImmutableDefinition/*  */ {
-	constructor (maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
+	constructor (annotations : List<string>, maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
 	}
 	createSimpleDefinition(name : string, type : Type) : Definition {
-		return new ImmutableDefinition(new None(), name, type, Lists.empty());
+		return new ImmutableDefinition(Lists.empty(), new None(), name, type, Lists.empty());
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.generateWithParams("");
 	}
 	generateType() : string {
@@ -311,48 +311,46 @@ enum IncompleteClassSegmentVariant {
 	joinTypeParams() : string {
 		return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
 	}
-	mapType(mapper : (arg0 : Type) => Type) : Definition {
-		return new ImmutableDefinition(this.maybeBefore, this.name, mapper(this.type), this.typeParams);
+	@Override mapType(mapper : (arg0 : Type) => Type) : Definition {
+		return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
 	}
-	toString() : string {
-		return "Definition[" + "maybeBefore=" + this.maybeBefore + ", " + "name=" + this.name + ", " + "type=" + this.type + ", " + "typeParams=" + this.typeParams + /*  ']' */;
-	}
-	generateWithParams(joinedParameters : string) : string {
+	@Override generateWithParams(joinedParameters : string) : string {
+		let joinedAnnotations = this.annotations.iterate().map((value : T) => "@" + value + " ").collect(new Joiner()).orElse("");
 		let joined : string = this.joinTypeParams();
 		let before : string = this.joinBefore();
 		let typeString : string = this.generateType();
-		return before + this.name + joined + joinedParameters + typeString;
+		return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
 	}
-	createDefinition(paramTypes : List<Type>) : Definition {
+	@Override createDefinition(paramTypes : List<Type>) : Definition {
 		return ImmutableDefinition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
 	}
 }
 /* private */class ObjectType/*  */ {
 	constructor (name : string, typeParams : List<string>, definitions : List<Definition>) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.name;
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition : T) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()));
 	}
-	find(name : string) : Option<Type> {
+	@Override find(name : string) : Option<Type> {
 		return this.definitions.iterate().filter((definition : T) => definition.name().equals(name)).map(Definition.type).next();
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new Some(this.name);
 	}
 }
 /* private */class TypeParam/*  */ {
 	constructor (value : string) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.value;
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return mapping.find(this.value).orElse(this);
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new None();
 	}
 }
@@ -480,18 +478,18 @@ enum IncompleteClassSegmentVariant {
 	Joiner() : /* private */ {
 		/* this("") */;
 	}
-	createInitial() : Option<string> {
+	@Override createInitial() : Option<string> {
 		return new None();
 	}
-	fold(current : Option<string>, element : string) : Option<string> {
+	@Override fold(current : Option<string>, element : string) : Option<string> {
 		return new Some(current.map((inner : string) => inner + this.delimiter + element).orElse(element));
 	}
 }
 /* private static */class ListCollector<T>/*  */ {
-	createInitial() : List<T> {
+	@Override createInitial() : List<T> {
 		return Lists.empty();
 	}
-	fold(current : List<T>, element : T) : List<T> {
+	@Override fold(current : List<T>, element : T) : List<T> {
 		return current.addLast(element);
 	}
 }
@@ -504,7 +502,7 @@ enum IncompleteClassSegmentVariant {
 		this.current = new None();
 		this.head = head;
 	}
-	next() : Option<R> {
+	@Override next() : Option<R> {
 		while (true){
 			if (this.current.isPresent()){
 				let inner : Iterator<R> = this.current.orElse(/* null */);
@@ -529,21 +527,21 @@ enum IncompleteClassSegmentVariant {
 /* private */class ArrayType/*  */ {
 	constructor (right : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.right().generate() + "[]";
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new None();
 	}
 }
 /* private static final */class Whitespace/*  */ {
-	generate() : string {
+	@Override generate() : string {
 		return "";
 	}
-	maybeCreateDefinition() : Option<Definition> {
+	@Override maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 }
@@ -556,109 +554,109 @@ enum IncompleteClassSegmentVariant {
 /* private */class FunctionType/*  */ {
 	constructor (arguments : List<Type>, returns : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
 		return "(" + joined + ") => " + this.returns.generate();
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return new FunctionType(this.arguments.iterate().map((type : T) => type.replace(mapping)).collect(new ListCollector()), this.returns);
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new None();
 	}
 }
 /* private */class TupleType/*  */ {
 	constructor (arguments : List<Type>) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).orElse("");
 		return "[" + joinedArguments + "]";
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new None();
 	}
 }
 /* private */class Template/*  */ {
 	constructor (base : FindableType, arguments : List<Type>) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 		return this.base.generate() + joinedArguments;
 	}
-	typeParams() : List<string> {
+	@Override typeParams() : List<string> {
 		return this.base.typeParams();
 	}
-	find(name : string) : Option<Type> {
+	@Override find(name : string) : Option<Type> {
 		return this.base.find(name).map((found : Type) => {
 			let mapping : R = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
 			return found.replace(mapping);
 		});
 	}
-	name() : string {
+	@Override name() : string {
 		return this.base.name();
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return this.base.findName();
 	}
 }
 /* private */class Placeholder/*  */ {
 	constructor (input : string) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return generatePlaceholder(this.input);
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Unknown;
 	}
-	typeParams() : List<string> {
+	@Override typeParams() : List<string> {
 		return Lists.empty();
 	}
-	find(name : string) : Option<Type> {
+	@Override find(name : string) : Option<Type> {
 		return new None();
 	}
-	name() : string {
+	@Override name() : string {
 		return this.input;
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new None();
 	}
-	maybeCreateDefinition() : Option<Definition> {
+	@Override maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 }
 /* private */class StringValue/*  */ {
 	constructor (stripped : string) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.stripped;
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Unknown;
 	}
 }
 /* private */class DataAccess/*  */ {
 	constructor (parent : Value, property : string, type : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.parent.generate() + "." + this.property + createDebugString(this.type);
 	}
-	type() : Type {
+	@Override type() : Type {
 		return this.type;
 	}
 }
 /* private */class ConstructionCaller/*  */ {
 	constructor (type : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return "new " + this.type.generate();
 	}
 	toFunction() : FunctionType {
@@ -668,27 +666,27 @@ enum IncompleteClassSegmentVariant {
 /* private */class Operation/*  */ {
 	constructor (left : Value, operator : /* Operator */, right : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Unknown;
 	}
 }
 /* private */class Not/*  */ {
 	constructor (value : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return "!" + this.value.generate();
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Unknown;
 	}
 }
 /* private */class BlockLambdaValue/*  */ {
 	constructor (depth : number, statements : List<FunctionSegment>) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return "{" + this.joinStatements() + createIndent(this.depth) + "}";
 	}
 	joinStatements() : string {
@@ -698,18 +696,18 @@ enum IncompleteClassSegmentVariant {
 /* private */class Lambda/*  */ {
 	constructor (parameters : List<Definition>, body : LambdaValue) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		let joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
 		return "(" + joined + ") => " + this.body.generate();
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Unknown;
 	}
 }
 /* private */class Invokable/*  */ {
 	constructor (caller : Caller, arguments : List<Value>, type : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		let joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
 		return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
 	}
@@ -717,17 +715,17 @@ enum IncompleteClassSegmentVariant {
 /* private */class IndexValue/*  */ {
 	constructor (parent : Value, child : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.parent.generate() + "[" + this.child.generate() + "]";
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Unknown;
 	}
 }
 /* private */class SymbolValue/*  */ {
 	constructor (stripped : string, type : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.stripped + createDebugString(this.type);
 	}
 }
@@ -737,13 +735,13 @@ enum IncompleteClassSegmentVariant {
 	JVMMap() : /* public */ {
 		/* this(new HashMap<>()) */;
 	}
-	find(key : K) : Option<V> {
+	@Override find(key : K) : Option<V> {
 		if (this.map.containsKey(key)){
 			return new Some(this.map.get(key));
 		}
 		return new None();
 	}
-	with(key : K, value : V) : Map<K, V> {
+	@Override with(key : K, value : V) : Map<K, V> {
 		/* this.map.put(key, value) */;
 		return this;
 	}
@@ -754,18 +752,18 @@ enum IncompleteClassSegmentVariant {
 	}
 }
 /* private */class MapCollector<K, V>/*  */ {
-	createInitial() : Map<K, V> {
+	@Override createInitial() : Map<K, V> {
 		return Maps.empty();
 	}
-	fold(current : Map<K, V>, element : [K, V]) : Map<K, V> {
+	@Override fold(current : Map<K, V>, element : [K, V]) : Map<K, V> {
 		return current.with(element[0](), element[1]());
 	}
 }
 /* private static */class ConstructorHeader/*  */ {
-	createDefinition(paramTypes : List<Type>) : Definition {
+	@Override createDefinition(paramTypes : List<Type>) : Definition {
 		return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
 	}
-	generateWithParams(joinedParameters : string) : string {
+	@Override generateWithParams(joinedParameters : string) : string {
 		return "constructor " + joinedParameters;
 	}
 }
@@ -783,7 +781,7 @@ enum IncompleteClassSegmentVariant {
 	joinStatements(statements : List<FunctionSegment>) : string {
 		return statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
 	}
-	generate() : string {
+	@Override generate() : string {
 		let indent : string = createIndent(this.depth);
 		let generatedHeader : string = this.header.generateWithParams(joinValues(this.parameters));
 		let generatedStatements : T = this.statements.map(Method.joinStatements).map((inner : T) => " {" + inner + indent + "}").orElse(";");
@@ -793,7 +791,7 @@ enum IncompleteClassSegmentVariant {
 /* private */class Block/*  */ {
 	constructor (depth : number, header : BlockHeader, statements : List<FunctionSegment>) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		let indent : string = createIndent(this.depth);
 		let collect = this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
 		return indent + this.header.generate() + "{" + collect + indent + "}";
@@ -802,40 +800,40 @@ enum IncompleteClassSegmentVariant {
 /* private */class Conditional/*  */ {
 	constructor (prefix : string, value1 : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.prefix + " (" + this.value1.generate() + ")";
 	}
 }
 /* private static */class Else/*  */ {
-	generate() : string {
+	@Override generate() : string {
 		return "else ";
 	}
 }
 /* private */class Return/*  */ {
 	constructor (value : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return "return " + this.value.generate();
 	}
 }
 /* private */class Initialization/*  */ {
 	constructor (definition : Definition, source : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return "let " + this.definition.generate() + " = " + this.source.generate();
 	}
 }
 /* private */class Assignment/*  */ {
 	constructor (destination : Value, source : Value) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.destination.generate() + " = " + this.source.generate();
 	}
 }
 /* private */class Statement/*  */ {
 	constructor (depth : number, value : StatementValue) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return createIndent(this.depth) + this.value.generate() + ";";
 	}
 }
@@ -848,21 +846,21 @@ enum IncompleteClassSegmentVariant {
 	findParamTypes() : List<Type> {
 		return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
 	}
-	maybeCreateDefinition() : Option<Definition> {
+	@Override maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.header.createDefinition(this.findParamTypes()));
 	}
 }
 /* private */class IncompleteClassSegmentWrapper/*  */ {
 	constructor (segment : ClassSegment) {
 	}
-	maybeCreateDefinition() : Option<Definition> {
+	@Override maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 }
 /* private */class ClassDefinition/*  */ {
 	constructor (definition : Definition, depth : number) {
 	}
-	maybeCreateDefinition() : Option<Definition> {
+	@Override maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
 }
@@ -873,30 +871,30 @@ enum IncompleteClassSegmentVariant {
 		let definitionFromSegments : R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
 		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
 	}
-	maybeCreateDefinition() : Option<Definition> {
+	@Override maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 }
 /* private */class Cast/*  */ {
 	constructor (value : Value, type : Type) {
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.value.generate() + " as " + this.type.generate();
 	}
 }
 /* private */class Primitive/*  */ {
-	Unknown("unknown") : /*  */;
+	@nt("number"), @tring("string"), @oolean("boolean"), Unknown("unknown") : /*  */;
 	value : string;
 	constructor (value : string) {
 		this.value = value;
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.value;
 	}
-	replace(mapping : Map<string, Type>) : Type {
+	@Override replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	findName() : Option<string> {
+	@Override findName() : Option<string> {
 		return new None();
 	}
 }
@@ -919,10 +917,10 @@ enum IncompleteClassSegmentVariant {
 	constructor (value : string) {
 		this.value = value;
 	}
-	generate() : string {
+	@Override generate() : string {
 		return this.value;
 	}
-	type() : Type {
+	@Override type() : Type {
 		return Primitive.Boolean;
 	}
 }
@@ -1059,7 +1057,7 @@ enum IncompleteClassSegmentVariant {
 			return first(right, "{", (beforeContent, withEnd) => {
 				return suffix(withEnd.strip(), "}", (content1 : string) => {
 					return last(beforeInfix.strip(), "\n", (annotationsString, s2) => {
-						let annotations : R = divideAll(annotationsString, Main.foldByDelimiter).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((value : T) => value.substring(1)).map(/* String */.strip).filter((value : T) => !value.isEmpty()).collect(new ListCollector());
+						let annotations : List<string> = parseAnnotations(annotationsString);
 						return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
 					}).or(() => {
 						return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
@@ -1067,6 +1065,9 @@ enum IncompleteClassSegmentVariant {
 				});
 			});
 		});
+	}
+	parseAnnotations(annotationsString : string) : List<string> {
+		return divideAll(annotationsString.strip(), Main.foldByDelimiter).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((value : T) => value.substring(1)).map(/* String */.strip).filter((value : T) => !value.isEmpty()).collect(new ListCollector());
 	}
 	foldByDelimiter(state1 : DivideState, c : string) : DivideState {
 		if (c === /*  '\n' */){
@@ -1687,17 +1688,23 @@ enum IncompleteClassSegmentVariant {
 	parseDefinition(state : CompileState, input : string) : Option<[CompileState, Definition]> {
 		return last(input.strip(), " ", (beforeName, name) => {
 			return split(() => toLast(beforeName, " ", Main.foldTypeSeparator), (beforeType, type) => {
-				return suffix(beforeType.strip(), ">", (withoutTypeParamStart : string) => {
-					return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
-						let typeParams : [CompileState, List<T>] = parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(new Tuple2Impl(state1, s.strip())));
-						return assembleDefinition(typeParams[0](), new Some<string>(beforeTypeParams), name, typeParams[1](), type);
-					});
+				return last(beforeType, "\n", (s, s2) => {
+					let annotations : List<string> = parseAnnotations(s);
+					return getOr(state, name, s2, type, annotations);
 				}).or(() => {
-					return assembleDefinition(state, new Some<string>(beforeType), name, Lists.empty(), type);
+					return getOr(state, name, beforeType, type, Lists.empty());
 				});
-			}).or(() => {
-				return assembleDefinition(state, new None<string>(), name, Lists.empty(), beforeName);
+			}).or(() => assembleDefinition(state, Lists.empty(), new None<string>(), name, Lists.empty(), beforeName));
+		});
+	}
+	getOr(state : CompileState, name : string, beforeType : string, type : string, annotations : List<string>) : Option<[CompileState, Definition]> {
+		return suffix(beforeType.strip(), ">", (withoutTypeParamStart : string) => {
+			return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
+				let typeParams : [CompileState, List<T>] = parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(new Tuple2Impl(state1, s.strip())));
+				return assembleDefinition(typeParams[0](), annotations, new Some<string>(beforeTypeParams), name, typeParams[1](), type);
 			});
+		}).or(() => {
+			return assembleDefinition(state, annotations, new Some<string>(beforeType), name, Lists.empty(), type);
 		});
 	}
 	toLast(input : string, separator : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : Option<[string, string]> {
@@ -1721,9 +1728,9 @@ enum IncompleteClassSegmentVariant {
 		}
 		return appended;
 	}
-	assembleDefinition(state : CompileState, beforeTypeParams : Option<string>, name : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
+	assembleDefinition(state : CompileState, annotations : List<string>, beforeTypeParams : Option<string>, name : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
 		return parseType(state.withTypeParams(typeParams), type).map((type1 : [CompileState, Type]) => {
-			let node : ImmutableDefinition = new ImmutableDefinition(beforeTypeParams, name.strip(), type1[1](), typeParams);
+			let node : ImmutableDefinition = new ImmutableDefinition(annotations, beforeTypeParams, name.strip(), type1[1](), typeParams);
 			return new Tuple2Impl(type1[0](), node);
 		});
 	}
