@@ -171,104 +171,12 @@ var IncompleteClassSegmentVariant;
         return new None();
     }
 }
-/* private static final */ class JVMList {
-}
-this.elements = elements;
-JVMList();
-{
-    /* this(new ArrayList<>()) */ ;
-}
-addLast(element, T);
-List < T > {
-    return: this
-};
-iterate();
-Iterator < T > {
-    return: this.iterateWithIndices().map(Tuple2.right)
-};
-removeLast();
-Option < [(List), T] > {
-    : .elements.isEmpty()
-};
-{
-    return new None();
-}
-let slice = this.elements.subList(0, this.elements.size() - 1);
-let last = this.elements.getLast();
-return new Some(new Tuple2Impl(new JVMList(slice), last));
-size();
-number;
-{
-    return this.elements.size();
-}
-isEmpty();
-boolean;
-{
-    return this.elements.isEmpty();
-}
-addFirst(element, T);
-List < T > {
-    return: this
-};
-iterateWithIndices();
-Iterator < [number, T] > {
-    return: new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple2Impl(index, this.elements.get(index)))
-};
-removeFirst();
-Option < [T, (List)] > {
-    : .elements.isEmpty()
-};
-{
-    return new None();
-}
-let first = this.elements.getFirst();
-let slice = this.elements.subList(1, this.elements.size());
-return new Some(new Tuple2Impl(first, new JVMList(slice)));
-addAllLast(others, (List));
-List < T > {
-    let, initial: (List) = this,
-    return: others.iterate().fold(initial, List.addLast)
-};
-last();
-Option < T > {
-    : .elements.isEmpty()
-};
-{
-    return new None();
-}
-return new Some(this.elements.getLast());
-iterateReversed();
-Iterator < T > {
-    return: new HeadedIterator(new RangeHead(this.elements.size())).map((index) => this.elements.size() - index - 1).map(this.elements.get)
-};
-mapLast(mapper, (arg0) => T);
-List < T > {
-    return: this.last().map(mapper).map((newLast) => this.set(this.elements.size() - 1, newLast)).orElse(this)
-};
-addAllFirst(others, (List));
-List < T > {
-    return: new JVMList().addAllLast(others).addAllLast(this)
-};
-set(index, number, element, T);
-JVMList < T > {
-    return: this
-};
-get(index, number);
-Option < T > {
-    : .elements.size()
-};
-{
-    return new Some(this.elements.get(index));
-}
-{
-    return new None();
-}
 /* private static */ class Lists /*  */ {
     empty() {
-        return new JVMList();
+        return new /* JVMList */ ();
     }
     of(elements) {
-        return new JVMList(new /* ArrayList */ ( /* Arrays */.asList(elements)));
+        return new /* JVMList */ (new /* ArrayList */ ( /* Arrays */.asList(elements)));
     }
 }
 /* private */ class ImmutableDefinition /*  */ {
@@ -1035,78 +943,96 @@ compileRootSegment(state, CompileState, input, string);
     if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
         return new Tuple2Impl(state, "");
     }
-    return parseClass(stripped, state).flatMap((tuple) => completeStructure(tuple[0](), tuple[1]())).map((tuple) => new Tuple2Impl(tuple[0](), tuple[1]().generate())).orElseGet(() => new Tuple2Impl(state, generatePlaceholder(stripped)));
+    return parseClass(stripped, state).flatMap((tuple) => completeClassSegment(tuple[0](), tuple[1]())).map((tuple0) => new Tuple2Impl(tuple0.left(), tuple0.right().generate())).orElseGet(() => new Tuple2Impl(state, generatePlaceholder(stripped)));
 }
 parseClass(stripped, string, state, CompileState);
-Option < [CompileState, StructurePrototype] > {
+Option < [CompileState, IncompleteClassSegment] > {
     return: parseStructure(stripped, "class ", "class ", state)
 };
 parseStructure(stripped, string, sourceInfix, string, targetInfix, string, state, CompileState);
-Option < [CompileState, StructurePrototype] > {
+Option < [CompileState, IncompleteClassSegment] > {
     return: first(stripped, sourceInfix, (beforeInfix, right) => {
         return first(right, "{", (beforeContent, withEnd) => {
             return suffix(withEnd.strip(), "}", (content1) => {
-                return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1);
-            });
+                return last(beforeInfix.strip(), "\n", (annotationsString, s2) => {
+                    let annotations = divideAll(annotationsString, Main.foldByDelimiter).iterate().map() /* String */.strip;
+                }).filter((value) => !value.isEmpty()).map((value) => value.substring(1)).map() /* String */.strip;
+            }).filter((value) => !value.isEmpty()).collect(new ListCollector());
+            return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
+        }).or(() => {
+            return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
         });
     })
 };
-parseStructureWithMaybePermits(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);
-Option < [CompileState, StructurePrototype] > {
+;
+;
+foldByDelimiter(state1, DivideState, c, string);
+DivideState;
+{
+    if (c ===  /*  '\n' */) {
+        return state1.advance();
+    }
+    return state1.append(c);
+}
+parseStructureWithMaybePermits(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, annotations, (List));
+Option < [CompileState, IncompleteClassSegment] > {
     return: last(beforeContent, " permits ", (s, s2) => {
         let variants = divideAll(s2, Main.foldValueChar).iterate().map() /* String */.strip;
     }).filter((value) => !value.isEmpty()).collect(new ListCollector()),
-    return: parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants)
+    return: parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants, annotations)
 };
 or(() => {
-    return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+    return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations);
 });
-parseStructureWithMaybeImplements(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List));
-Option < [CompileState, StructurePrototype] > {
+parseStructureWithMaybeImplements(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List), annotations, (List));
+Option < [CompileState, IncompleteClassSegment] > {
     return: first(beforeContent, " implements ", (s, s2) => {
-        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants);
+        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations);
     }).or(() => {
-        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants);
+        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
     })
 };
-parseStructureWithMaybeExtends(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List));
-Option < [CompileState, StructurePrototype] > {
+parseStructureWithMaybeExtends(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List), annotations, (List));
+Option < [CompileState, IncompleteClassSegment] > {
     return: first(beforeContent, " extends ", (s, s2) => {
-        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants);
+        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations);
     }).or(() => {
-        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants);
+        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
     })
 };
-parseStructureWithMaybeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List));
-Option < [CompileState, StructurePrototype] > {
+parseStructureWithMaybeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List), annotations, (List));
+Option < [CompileState, IncompleteClassSegment] > {
     return: suffix(beforeContent.strip(), ")", (s) => {
         return first(s, "(", (s1, s2) => {
             let parsed = parseParameters(state, s2);
-            return parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants);
+            return parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations);
         });
     }).or(() => {
-        return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants);
+        return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations);
     })
 };
-parseStructureWithMaybeTypeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, params, (List), variants, (List));
-Option < [CompileState, StructurePrototype] > {
+parseStructureWithMaybeTypeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, params, (List), variants, (List), annotations, (List));
+Option < [CompileState, IncompleteClassSegment] > {
     return: first(beforeContent, "<", (name, withTypeParams) => {
         return first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
             let mapper = (state1, s) => new Tuple2Impl(state1, s.strip());
             let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-            return assembleStructure(typeParams[0](), targetInfix, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
+            return assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
         });
     }).or(() => {
-        return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
+        return assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
     })
 };
-assembleStructure(state, CompileState, targetInfix, string, beforeInfix, string, rawName, string, content, string, typeParams, (List), after, string, rawParameters, (List), variants, (List));
-Option < [CompileState, StructurePrototype] > {
+assembleStructure(state, CompileState, targetInfix, string, annotations, (List), beforeInfix, string, rawName, string, content, string, typeParams, (List), after, string, rawParameters, (List), variants, (List));
+Option < [CompileState, IncompleteClassSegment] > {
     let, name = rawName.strip(),
     if(, isSymbol) { }
 }(name);
 {
     return new None();
+}
+if (annotations.contains("Actual")) {
+    return new Some(new Tuple2Impl(state, new Whitespace()));
 }
 let segmentsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) => parseClassSegment(state0, input, 1));
 let segmentsState = segmentsTuple[0]();
@@ -1118,7 +1044,7 @@ completeStructure(state, CompileState, prototype, StructurePrototype);
 Option < [CompileState, ClassSegment] > {
     let, thisType: ObjectType = prototype.createObjectType(),
     let, state2: CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType)),
-    return: mapUsingState(state2, prototype.segments(), Main.completeClassSegment).map((completedTuple) => {
+    return: mapUsingState(state2, prototype.segments(), (state1, entry) => completeClassSegment(state1, entry.right())).map((completedTuple) => {
         let completedState = completedTuple[0]();
         let completed = completedTuple[1]();
         let exited = completedState.exitDefinitions();
@@ -1157,10 +1083,10 @@ List < ClassSegment > {
     segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty())));
 }
 return /* withMaybeConstructor */;
-completeClassSegment(state1, CompileState, entry, [number, IncompleteClassSegment]);
+completeClassSegment(state1, CompileState, segment, IncompleteClassSegment);
 Option < [CompileState, ClassSegment] > {
-/* return switch (entry.right()) */ };
-/* return switch (entry.right()) */ {
+/* return switch (segment) */ };
+/* return switch (segment) */ {
     /* case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment)) */ ;
     /* case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype) */ ;
     /* case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace)) */ ;

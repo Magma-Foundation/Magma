@@ -88,6 +88,8 @@ public class Main {
         List<T> mapLast(Function<T, T> mapper);
 
         List<T> addAllFirst(List<T> others);
+
+        boolean contains(T element);
     }
 
     private interface Head<T> {
@@ -183,6 +185,9 @@ public class Main {
 
     private sealed interface IncompleteClassSegment permits ClassDefinition, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
         Option<Definition> maybeCreateDefinition();
+    }
+
+    private @interface Actual {
     }
 
     private static final class None<T> implements Option<T> {
@@ -384,6 +389,7 @@ public class Main {
     }
 
     private static class Lists {
+        @Actual
         private static final class JVMList<T> implements List<T> {
             private final java.util.List<T> elements;
 
@@ -484,6 +490,11 @@ public class Main {
                 return new JVMList<T>()
                         .addAllLast(others)
                         .addAllLast(this);
+            }
+
+            @Override
+            public boolean contains(T element) {
+                return this.elements.contains(element);
             }
 
             private JVMList<T> set(int index, T element) {
@@ -1514,26 +1525,46 @@ public class Main {
         }
 
         return parseClass(stripped, state)
-                .flatMap(tuple -> completeStructure(tuple.left(), tuple.right()))
-                .map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right().generate()))
+                .flatMap(tuple -> completeClassSegment(tuple.left(), tuple.right()))
+                .map(tuple0 -> new Tuple2Impl<>(tuple0.left(), tuple0.right().generate()))
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(stripped)));
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseClass(String stripped, CompileState state) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseClass(String stripped, CompileState state) {
         return parseStructure(stripped, "class ", "class ", state);
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (beforeContent, withEnd) -> {
                 return suffix(withEnd.strip(), "}", content1 -> {
-                    return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1);
+                    return last(beforeInfix.strip(), "\n", (annotationsString, s2) -> {
+                        var annotations = divideAll(annotationsString, Main::foldByDelimiter)
+                                .iterate()
+                                .map(String::strip)
+                                .filter(value -> !value.isEmpty())
+                                .map(value -> value.substring(1))
+                                .map(String::strip)
+                                .filter(value -> !value.isEmpty())
+                                .collect(new ListCollector<>());
+
+                        return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
+                    }).or(() -> {
+                        return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+                    });
                 });
             });
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static DivideState foldByDelimiter(DivideState state1, Character c) {
+        if (c == '\n') {
+            return state1.advance();
+        }
+        return state1.append(c);
+    }
+
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> annotations) {
         return last(beforeContent, " permits ", (s, s2) -> {
             var variants = divideAll(s2, Main::foldValueChar)
                     .iterate()
@@ -1541,53 +1572,55 @@ public class Main {
                     .filter(value -> !value.isEmpty())
                     .collect(new ListCollector<>());
 
-            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants);
+            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants, annotations);
         }).or(() -> {
-            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeImplements(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeImplements(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants, List<String> annotations) {
         return first(beforeContent, " implements ", (s, s2) -> {
-            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants);
+            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations);
         }).or(() -> {
-            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants);
+            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants, List<String> annotations) {
         return first(beforeContent, " extends ", (s, s2) -> {
-            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants);
+            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations);
         }).or(() -> {
-            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants);
+            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants, List<String> annotations) {
         return suffix(beforeContent.strip(), ")", s -> {
             return first(s, "(", (s1, s2) -> {
                 var parsed = parseParameters(state, s2);
-                return parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants);
+                return parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants, annotations);
             });
         }).or(() -> {
-            return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants);
+            return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params, List<String> variants) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params, List<String> variants, List<String> annotations) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
                 var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(mapper.apply(state1, s)));
-                return assembleStructure(typeParams.left(), targetInfix, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants);
+                return assembleStructure(typeParams.left(), targetInfix, annotations, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants);
             });
         }).or(() -> {
-            return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
+            return assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> assembleStructure(
-            CompileState state, String targetInfix,
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> assembleStructure(
+            CompileState state,
+            String targetInfix,
+            List<String> annotations,
             String beforeInfix,
             String rawName,
             String content,
@@ -1599,6 +1632,10 @@ public class Main {
         var name = rawName.strip();
         if (!isSymbol(name)) {
             return new None<>();
+        }
+
+        if (annotations.contains("Actual")) {
+            return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
 
         var segmentsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) -> parseClassSegment(state0, input, 1));
@@ -1614,7 +1651,7 @@ public class Main {
         var thisType = prototype.createObjectType();
         var state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        return mapUsingState(state2, prototype.segments(), Main::completeClassSegment).map(completedTuple -> {
+        return mapUsingState(state2, prototype.segments(), (state1, entry) -> completeClassSegment(state1, entry.right())).map(completedTuple -> {
             var completedState = completedTuple.left();
             var completed = completedTuple.right();
 
@@ -1670,8 +1707,8 @@ public class Main {
         return withMaybeConstructor;
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> completeClassSegment(CompileState state1, Tuple2<Integer, IncompleteClassSegment> entry) {
-        return switch (entry.right()) {
+    private static Option<Tuple2<CompileState, ClassSegment>> completeClassSegment(CompileState state1, IncompleteClassSegment segment) {
+        return switch (segment) {
             case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment));
             case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype);
             case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace));
