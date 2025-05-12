@@ -3,163 +3,132 @@
     map(mapper) {
         return new None();
     }
+    isPresent() {
+        return false;
+    }
+    orElse(other) {
+        return other;
+    }
+    filter(predicate) {
+        return new None();
+    }
+    orElseGet(supplier) {
+        return supplier();
+    }
+    or(other) {
+        return other.get();
+    }
+    flatMap(mapper) {
+        return new None();
+    }
+    isEmpty() {
+        return true;
+    }
+    and(other) {
+        return new None();
+    }
 }
-{
-    return false;
-}
-orElse(other, T);
-T;
-{
-    return other;
-}
-filter(predicate, (arg0) => boolean);
-Option < T > {
-    return: new None()
-};
-orElseGet(supplier, () => T);
-T;
-{
-    return supplier();
-}
-or(other, () => Option);
-Option < T > {
-    return: other.get()
-};
-flatMap(mapper, (arg0) => Option);
-Option < R > {
-    return: new None()
-};
-isEmpty: boolean;
-{
-    return true;
-}
-and(other, () => Option);
-Option < [T, R] > {
-    return: new None()
-};
 /* private */ class Tuple2Impl {
-}
-(left, right) => ;
-{
+    constructor(left, right) {
+    }
 }
 /* private */ class Some {
+    constructor(value) {
+    }
+    map(mapper) {
+        return new Some(mapper(this.value));
+    }
+    isPresent() {
+        return true;
+    }
+    orElse(other) {
+        return this.value;
+    }
+    filter(predicate) {
+        if (predicate(this.value)) {
+            return this;
+        }
+        return new None();
+    }
+    orElseGet(supplier) {
+        return this.value;
+    }
+    or(other) {
+        return this;
+    }
+    flatMap(mapper) {
+        return mapper(this.value);
+    }
+    isEmpty() {
+        return false;
+    }
+    and(other) {
+        return other.get().map((otherValue) => new Tuple2Impl(this.value, otherValue));
+    }
 }
-(value) => ;
-{
-}
-map(mapper, (arg0) => R);
-Option < R > {
-    return: new Some(mapper(this.value))
-};
-isPresent: boolean;
-{
-    return true;
-}
-orElse(other, T);
-T;
-{
-    return this.value;
-}
-filter(predicate, (arg0) => boolean);
-Option < T > {
-    if(predicate) { }
-}(this.value);
-{
-    return this;
-}
-return new None();
-orElseGet(supplier, () => T);
-T;
-{
-    return this.value;
-}
-or(other, () => Option);
-Option < T > {
-    return: this
-};
-flatMap(mapper, (arg0) => Option);
-Option < R > {
-    return: mapper(this.value)
-};
-isEmpty: boolean;
-{
-    return false;
-}
-and(other, () => Option);
-Option < [T, R] > {
-    return: other.get().map((otherValue) => new Tuple2Impl(this.value, otherValue))
-};
 /* private static */ class SingleHead {
     constructor(value) {
         this.value = value;
         this.retrieved = false;
     }
-}
-{
-    if (this.retrieved) {
-        return new None();
+    next() {
+        if (this.retrieved) {
+            return new None();
+        }
+        this.retrieved = true;
+        return new Some(this.value);
     }
-    this.retrieved = true;
-    return new Some(this.value);
 }
 /* private static */ class EmptyHead {
-}
-{
-    return new None();
-}
-/* private */ class HeadedIterator {
-}
-(head) => ;
-{
-}
-fold(initial, R, folder, (arg0, arg1) => R);
-R;
-{
-    let current = initial;
-    while (true) {
-        let finalCurrent = current;
-        let optional = this.head.next().map((inner) => folder(finalCurrent, inner));
-        if (optional.isPresent()) {
-            current = optional.orElse( /* null */);
-        }
-        else {
-            return current;
-        }
+    next() {
+        return new None();
     }
 }
-map(mapper, (arg0) => R);
-Iterator < R > {
-    return: new HeadedIterator(() => this.head.next().map(mapper))
-};
-collect(collector, (Collector));
-R;
-{
-    return this.fold(collector.createInitial(), collector.fold);
-}
-filter(predicate, (arg0) => boolean);
-Iterator < T > {
-    return: this.flatMap((element) => {
-        if (predicate(element)) {
-            return new HeadedIterator(new SingleHead(element));
+/* private */ class HeadedIterator {
+    constructor(head) {
+    }
+    fold(initial, folder) {
+        let current = initial;
+        while (true) {
+            let finalCurrent = current;
+            let optional = this.head.next().map((inner) => folder(finalCurrent, inner));
+            if (optional.isPresent()) {
+                current = optional.orElse( /* null */);
+            }
+            else {
+                return current;
+            }
         }
-        return new HeadedIterator(new EmptyHead());
-    })
-};
-next: Option < T > {
-    return: this.head.next()
-};
-flatMap(f, (arg0) => Iterator);
-Iterator < R > {
-    return: new HeadedIterator(new /* FlatMapHead */ (this.head, f))
-};
-zip(other, (Iterator));
-Iterator < [T, R] > {
-    return: new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next))
-};
+    }
+    map(mapper) {
+        return new HeadedIterator(() => this.head.next().map(mapper));
+    }
+    collect(collector) {
+        return this.fold(collector.createInitial(), collector.fold);
+    }
+    filter(predicate) {
+        return this.flatMap((element) => {
+            if (predicate(element)) {
+                return new HeadedIterator(new SingleHead(element));
+            }
+            return new HeadedIterator(new EmptyHead());
+        });
+    }
+    next() {
+        return this.head.next();
+    }
+    flatMap(f) {
+        return new HeadedIterator(new /* FlatMapHead */ (this.head, f));
+    }
+    zip(other) {
+        return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
+    }
+}
 /* private static */ class RangeHead /*  */ {
 }
 this.length = length;
-next: Option < number > {
+next();
+Option < number > {
     if() { } /* this.counter < this */, /* this.counter < this */ : /* this.counter < this */ .length
 };
 {
@@ -171,17 +140,20 @@ return new None();
 /* private static final */ class JVMList {
 }
 this.elements = elements;
-JVMList: /* public */ {
+JVMList();
+{
     /* this(new ArrayList<>()) */ ;
 }
 addLast(element, T);
 List < T > {
     return: this
 };
-iterate: Iterator < T > {
+iterate();
+Iterator < T > {
     return: this.iterateWithIndices().map(Tuple2.right)
 };
-removeLast: Option < [(List), T] > {
+removeLast();
+Option < [(List), T] > {
     : .elements.isEmpty()
 };
 {
@@ -190,11 +162,13 @@ removeLast: Option < [(List), T] > {
 let slice = this.elements.subList(0, this.elements.size() - 1);
 let last = this.elements.getLast();
 return new Some(new Tuple2Impl(new JVMList(slice), last));
-size: number;
+size();
+number;
 {
     return this.elements.size();
 }
-isEmpty: boolean;
+isEmpty();
+boolean;
 {
     return this.elements.isEmpty();
 }
@@ -202,10 +176,12 @@ addFirst(element, T);
 List < T > {
     return: this
 };
-iterateWithIndices: Iterator < [number, T] > {
+iterateWithIndices();
+Iterator < [number, T] > {
     return: new HeadedIterator(new RangeHead(this.elements.size())).map((index) => new Tuple2Impl(index, this.elements.get(index)))
 };
-removeFirst: Option < [T, (List)] > {
+removeFirst();
+Option < [T, (List)] > {
     : .elements.isEmpty()
 };
 {
@@ -219,7 +195,8 @@ List < T > {
     let, initial: (List) = this,
     return: others.iterate().fold(initial, List.addLast)
 };
-last: Option < T > {
+last();
+Option < T > {
     : .elements.isEmpty()
 };
 {
@@ -245,158 +222,108 @@ Option < T > {
     }
 }
 /* private */ class ImmutableDefinition /*  */ {
-    constructor() { }
-}
-(maybeBefore, name, type, typeParams) => ;
-{
-}
-createSimpleDefinition(name, string, type, Type);
-Definition;
-{
-    return new ImmutableDefinition(new None(), name, type, Lists.empty());
-}
-generate: string;
-{
-    return this.generateWithParams("");
-}
-generateType: string;
-{
-    if (this.type(Unknown)) {
-        return "";
+    constructor(maybeBefore, name, type, typeParams) {
     }
-    return " : " + this.type.generate();
-}
-joinBefore: string;
-{
-    return !.maybeBefore.filter((value) => !value.isEmpty()).map(generatePlaceholder).map((inner) => inner + " ").orElse("");
-}
-joinTypeParams: string;
-{
-    return this.typeParams().collect(new /* Joiner */ ()).map((inner) => "<" + inner + ">").orElse("");
-}
-mapType(mapper, (arg0) => Type);
-Definition;
-{
-    return new ImmutableDefinition(this.maybeBefore, this.name, mapper(this.type), this.typeParams);
-}
-toString: string;
-{
-    return "Definition[" + "maybeBefore=" + this.maybeBefore + ", " + "name=" + this.name + ", " + "type=" + this.type + ", " + "typeParams=" + this.typeParams +  /*  ']' */;
-}
-generateWithParams(joinedParameters, string);
-string;
-{
-    let joined = this.joinTypeParams();
-    let before = this.joinBefore();
-    let typeString = this.generateType();
-    return before + this.name + joined + joinedParameters + typeString;
-}
-createDefinition(paramTypes, (List));
-Definition;
-{
-    return ImmutableDefinition.createSimpleDefinition(this.name, new /* FunctionType */ (paramTypes, this.type));
+    createSimpleDefinition(name, type) {
+        return new ImmutableDefinition(new None(), name, type, Lists.empty());
+    }
+    generate() {
+        return this.generateWithParams("");
+    }
+    generateType() {
+        if (this.type(Unknown)) {
+            return "";
+        }
+        return " : " + this.type.generate();
+    }
+    joinBefore() {
+        return !.maybeBefore.filter((value) => !value.isEmpty()).map(generatePlaceholder).map((inner) => inner + " ").orElse("");
+    }
+    joinTypeParams() {
+        return this.typeParams().collect(new /* Joiner */ ()).map((inner) => "<" + inner + ">").orElse("");
+    }
+    mapType(mapper) {
+        return new ImmutableDefinition(this.maybeBefore, this.name, mapper(this.type), this.typeParams);
+    }
+    toString() {
+        return "Definition[" + "maybeBefore=" + this.maybeBefore + ", " + "name=" + this.name + ", " + "type=" + this.type + ", " + "typeParams=" + this.typeParams +  /*  ']' */;
+    }
+    generateWithParams(joinedParameters) {
+        let joined = this.joinTypeParams();
+        let before = this.joinBefore();
+        let typeString = this.generateType();
+        return before + this.name + joined + joinedParameters + typeString;
+    }
+    createDefinition(paramTypes) {
+        return ImmutableDefinition.createSimpleDefinition(this.name, new /* FunctionType */ (paramTypes, this.type));
+    }
 }
 /* private */ class ObjectType /*  */ {
-    constructor() { }
+    constructor(name, typeParams, definitions) {
+    }
+    generate() {
+        return this.name;
+    }
+    replace(mapping) {
+        return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition) => definition.mapType((type) => type(mapping))).collect(new /* ListCollector */ ()));
+    }
+    find(name) {
+        return this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next();
+    }
 }
-(name, typeParams, definitions) => ;
-{
-}
-generate: string;
-{
-    return this.name;
-}
-replace(mapping, (Map));
-Type;
-{
-    return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition) => definition.mapType((type) => type(mapping))).collect(new /* ListCollector */ ()));
-}
-find(name, string);
-Option < Type > {
-    return: this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next()
-};
 /* private */ class TypeParam /*  */ {
-    constructor() { }
-}
-(value) => ;
-{
-}
-generate: string;
-{
-    return this.value;
-}
-replace(mapping, (Map));
-Type;
-{
-    return mapping.find(this.value).orElse(this);
+    constructor(value) {
+    }
+    generate() {
+        return this.value;
+    }
+    replace(mapping) {
+        return mapping.find(this.value).orElse(this);
+    }
 }
 /* private */ class CompileState /*  */ {
-    constructor() { }
-}
-(structures, definitions, objectTypes, structNames, typeParams, typeRegister) => ;
-{
-}
-CompileState: /* public */ {
-    /* this(Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), new None<>()) */ ;
-}
-resolveValue(name, string);
-Option < Type > {
-    if(name) { }
-}("this");
-{
-    return new Some(new ObjectType(name, this.typeParams, this.definitions));
-}
-return this.definitions.iterate().filter((definition) => definition.name().equals(name)).next().map(Definition.type);
-addStructure(structure, string);
-CompileState;
-{
-    return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
-}
-withDefinitions(definitions, (List));
-CompileState;
-{
-    return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
-}
-resolveType(name, string);
-Option < Type > {
-    : .structNames.last().filter((inner) => inner.equals(name)).isPresent()
-};
-{
-    return new Some(new ObjectType(name, this.typeParams, this.definitions));
-}
-let maybeTypeParam = this.typeParams().filter((param) => param.equals(name)).next();
-if ( /* maybeTypeParam instanceof Some */( /* var value */)) {
-    return new Some(new TypeParam(value));
-}
-return this.objectTypes.iterate().filter((type) => type.name.equals(name)).next().map((type) => type);
-addType(type, ObjectType);
-CompileState;
-{
-    return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.structNames, this.typeParams, this.typeRegister);
-}
-withDefinition(definition, Definition);
-CompileState;
-{
-    return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
-}
-pushStructName(name, string);
-CompileState;
-{
-    return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister);
-}
-withTypeParams(typeParams, (List));
-CompileState;
-{
-    return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams(typeParams), this.typeRegister);
-}
-withExpectedType(type, Type);
-CompileState;
-{
-    return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some(type));
-}
-popStructName: CompileState;
-{
-    return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2.left).orElse(this.structNames), this.typeParams, this.typeRegister);
+    constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister) {
+    }
+    resolveValue(name) {
+        if (name("this")) {
+            return new Some(new ObjectType(name, this.typeParams, this.definitions));
+        }
+        return this.definitions.iterate().filter((definition) => definition.name().equals(name)).next().map(Definition.type);
+    }
+    addStructure(structure) {
+        return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+    }
+    withDefinitions(definitions) {
+        return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+    }
+    resolveType(name) {
+        if (this.structNames.last().filter((inner) => inner.equals(name)).isPresent()) {
+            return new Some(new ObjectType(name, this.typeParams, this.definitions));
+        }
+        let maybeTypeParam = this.typeParams().filter((param) => param.equals(name)).next();
+        if ( /* maybeTypeParam instanceof Some */( /* var value */)) {
+            return new Some(new TypeParam(value));
+        }
+        return this.objectTypes.iterate().filter((type) => type.name.equals(name)).next().map((type) => type);
+    }
+    addType(type) {
+        return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.structNames, this.typeParams, this.typeRegister);
+    }
+    withDefinition(definition) {
+        return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+    }
+    pushStructName(name) {
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister);
+    }
+    withTypeParams(typeParams) {
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams(typeParams), this.typeRegister);
+    }
+    withExpectedType(type) {
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some(type));
+    }
+    popStructName() {
+        return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2.left).orElse(this.structNames), this.typeParams, this.typeRegister);
+    }
 }
 /* private static */ class DivideState /*  */ {
 }
@@ -409,7 +336,8 @@ DivideState(input, string);
 {
     /* this(input, 0, Lists.empty(), "", 0) */ ;
 }
-advance: DivideState;
+advance();
+DivideState;
 {
     this.segments = this.segments.addLast(this.buffer);
     this.buffer = "";
@@ -421,25 +349,30 @@ DivideState;
     this.buffer = this.buffer + c;
     return this;
 }
-enter: DivideState;
+enter();
+DivideState;
 {
     /* this.depth++ */ ;
     return this;
 }
-isLevel: boolean;
+isLevel();
+boolean;
 {
     return this.depth === 0;
 }
-exit: DivideState;
+exit();
+DivideState;
 {
     /* this.depth-- */ ;
     return this;
 }
-isShallow: boolean;
+isShallow();
+boolean;
 {
     return this.depth === 1;
 }
-pop: Option < [string, DivideState] > {
+pop();
+Option < [string, DivideState] > {
     if() { } /* this.index < this */, /* this.index < this */ : /* this.index < this */ .input.length()
 };
 {
@@ -447,51 +380,48 @@ pop: Option < [string, DivideState] > {
     return new Some(new Tuple2Impl(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
 }
 return new None();
-popAndAppendToTuple: Option < [string, DivideState] > {
+popAndAppendToTuple();
+Option < [string, DivideState] > {
     return: this.pop().map((tuple) => {
         let c = tuple[0]();
         let right = tuple[1]();
         return new Tuple2Impl(c, right(c));
     })
 };
-popAndAppendToOption: Option < DivideState > {
+popAndAppendToOption();
+Option < DivideState > {
     return: this.popAndAppendToTuple().map(Tuple2.right)
 };
-peek: string;
+peek();
+string;
 {
     return this.input.charAt(this.index);
 }
 /* private */ class Joiner /*  */ {
-    constructor() { }
+    constructor(delimiter) {
+    }
+    createInitial() {
+        return new None();
+    }
+    fold(current, element) {
+        return new Some(current.map((inner) => inner + this.delimiter + element).orElse(element));
+    }
 }
-(delimiter) => ;
-{
-}
-Joiner: /* private */ {
-    /* this("") */ ;
-}
-createInitial: Option < string > {
-    return: new None()
-};
-fold(current, (Option), element, string);
-Option < string > {
-    return: new Some(current.map((inner) => inner + this.delimiter + element).orElse(element))
-};
 /* private static */ class ListCollector {
+    createInitial() {
+        return Lists.empty();
+    }
+    fold(current, element) {
+        return current.addLast(element);
+    }
 }
-{
-    return Lists.empty();
-}
-fold(current, (List), element, T);
-List < T > {
-    return: current.addLast(element)
-};
 /* private static */ class FlatMapHead {
 }
 this.mapper = mapper;
 this.current = new None();
 this.head = head;
-next: Option < R > {
+next();
+Option < R > {
     while() {
         if (this.current.isPresent()) {
             let inner = this.current.orElse( /* null */);
@@ -513,19 +443,14 @@ next: Option < R > {
     }
 };
 /* private */ class ArrayType /*  */ {
-    constructor() { }
-}
-(right) => ;
-{
-}
-generate: string;
-{
-    return this.right().generate() + "[]";
-}
-replace(mapping, (Map));
-Type;
-{
-    return this;
+    constructor(right) {
+    }
+    generate() {
+        return this.right().generate() + "[]";
+    }
+    replace(mapping) {
+        return this;
+    }
 }
 /* private static */ class Whitespace /*  */ {
 }
@@ -536,241 +461,173 @@ Type;
     }
 }
 /* private */ class FunctionType /*  */ {
-    constructor() { }
-}
-(arguments, returns) => ;
-{
-}
-generate: string;
-{
-    let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
-    return "(" + joined + ") => " + this.returns.generate();
-}
-replace(mapping, (Map));
-Type;
-{
-    return new FunctionType(this.arguments.iterate().map((type) => type(mapping)).collect(new ListCollector()), this.returns);
+    constructor(arguments, returns) {
+    }
+    generate() {
+        let joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
+        return "(" + joined + ") => " + this.returns.generate();
+    }
+    replace(mapping) {
+        return new FunctionType(this.arguments.iterate().map((type) => type(mapping)).collect(new ListCollector()), this.returns);
+    }
 }
 /* private */ class TupleType /*  */ {
-    constructor() { }
-}
-(arguments) => ;
-{
-}
-generate: string;
-{
-    let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).orElse("");
-    return "[" + joinedArguments + "]";
-}
-replace(mapping, (Map));
-Type;
-{
-    return this;
+    constructor(arguments) {
+    }
+    generate() {
+        let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).orElse("");
+        return "[" + joinedArguments + "]";
+    }
+    replace(mapping) {
+        return this;
+    }
 }
 /* private */ class Template /*  */ {
-    constructor() { }
-}
-(base, arguments) => ;
-{
-}
-generate: string;
-{
-    let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-    return this.base.generate() + joinedArguments;
-}
-typeParams: List < string > {
-    return: this.base.typeParams()
-};
-find(name, string);
-Option < Type > {
-    return: this.base.find(name).map((found) => {
-        let mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new /* MapCollector */ ());
-        return found.replace(mapping);
-    })
-};
-replace(mapping, (Map));
-Type;
-{
-    return this;
+    constructor(base, arguments) {
+    }
+    generate() {
+        let joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+        return this.base.generate() + joinedArguments;
+    }
+    typeParams() {
+        return this.base.typeParams();
+    }
+    find(name) {
+        return this.base.find(name).map((found) => {
+            let mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new /* MapCollector */ ());
+            return found.replace(mapping);
+        });
+    }
+    replace(mapping) {
+        return this;
+    }
 }
 /* private */ class Placeholder /*  */ {
-    constructor() { }
-}
-(input) => ;
-{
-}
-generate: string;
-{
-    return /* generatePlaceholder */ (this.input);
-}
-type: Type;
-{
-    return /* Primitive */ .Unknown;
-}
-typeParams: List < string > {
-    return: Lists.empty()
-};
-find(name, string);
-Option < Type > {
-    return: new None()
-};
-replace(mapping, (Map));
-Type;
-{
-    return this;
+    constructor(input) {
+    }
+    generate() {
+        return /* generatePlaceholder */ (this.input);
+    }
+    type() {
+        return /* Primitive */ .Unknown;
+    }
+    typeParams() {
+        return Lists.empty();
+    }
+    find(name) {
+        return new None();
+    }
+    replace(mapping) {
+        return this;
+    }
 }
 /* private */ class StringValue /*  */ {
-    constructor() { }
-}
-(stripped) => ;
-{
-}
-generate: string;
-{
-    return this.stripped;
-}
-type: Type;
-{
-    return /* Primitive */ .Unknown;
+    constructor(stripped) {
+    }
+    generate() {
+        return this.stripped;
+    }
+    type() {
+        return /* Primitive */ .Unknown;
+    }
 }
 /* private */ class DataAccess /*  */ {
-    constructor() { }
-}
-(parent, property, type) => ;
-{
-}
-generate: string;
-{
-    return this.parent.generate() + "." + this.property + /* createDebugString */ (this.type);
-}
-type: Type;
-{
-    return this.type;
+    constructor(parent, property, type) {
+    }
+    generate() {
+        return this.parent.generate() + "." + this.property + /* createDebugString */ (this.type);
+    }
+    type() {
+        return this.type;
+    }
 }
 /* private */ class ConstructionCaller /*  */ {
-    constructor() { }
-}
-(type) => ;
-{
-}
-generate: string;
-{
-    return "new " + this.type.generate();
-}
-toFunction: FunctionType;
-{
-    return new FunctionType(Lists.empty(), this.type);
+    constructor(type) {
+    }
+    generate() {
+        return "new " + this.type.generate();
+    }
+    toFunction() {
+        return new FunctionType(Lists.empty(), this.type);
+    }
 }
 /* private */ class Operation /*  */ {
-    constructor() { }
-}
-(left, operator /* Operator */, right) => ;
-{
-}
-generate: string;
-{
-    return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
-}
-type: Type;
-{
-    return /* Primitive */ .Unknown;
+    constructor(left, operator /* Operator */, right) {
+    }
+    generate() {
+        return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
+    }
+    type() {
+        return /* Primitive */ .Unknown;
+    }
 }
 /* private */ class Not /*  */ {
-    constructor() { }
-}
-(value) => ;
-{
-}
-generate: string;
-{
-    return "!" + this.value.generate();
-}
-type: Type;
-{
-    return /* Primitive */ .Unknown;
+    constructor(value) {
+    }
+    generate() {
+        return "!" + this.value.generate();
+    }
+    type() {
+        return /* Primitive */ .Unknown;
+    }
 }
 /* private */ class BlockLambdaValue /*  */ {
-    constructor() { }
-}
-(right, depth) => ;
-{
-}
-generate: string;
-{
-    return "{" + this.right() + createIndent(this.depth) + "}";
+    constructor(right, depth) {
+    }
+    generate() {
+        return "{" + this.right() + createIndent(this.depth) + "}";
+    }
 }
 /* private */ class Lambda /*  */ {
-    constructor() { }
-}
-(parameters, body) => ;
-{
-}
-generate: string;
-{
-    let joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
-    return "(" + joined + ") => " + this.body.generate();
-}
-type: Type;
-{
-    return /* Primitive */ .Unknown;
+    constructor(parameters, body) {
+    }
+    generate() {
+        let joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+        return "(" + joined + ") => " + this.body.generate();
+    }
+    type() {
+        return /* Primitive */ .Unknown;
+    }
 }
 /* private */ class Invokable /*  */ {
-    constructor() { }
-}
-(caller, arguments, type) => ;
-{
-}
-generate: string;
-{
-    let joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
-    return this.caller.generate() + "(" + joined + ")" + /* createDebugString */ (this.type);
+    constructor(caller, arguments, type) {
+    }
+    generate() {
+        let joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
+        return this.caller.generate() + "(" + joined + ")" + /* createDebugString */ (this.type);
+    }
 }
 /* private */ class IndexValue /*  */ {
-    constructor() { }
-}
-(parent, child) => ;
-{
-}
-generate: string;
-{
-    return this.parent.generate() + "[" + this.child.generate() + "]";
-}
-type: Type;
-{
-    return /* Primitive */ .Unknown;
+    constructor(parent, child) {
+    }
+    generate() {
+        return this.parent.generate() + "[" + this.child.generate() + "]";
+    }
+    type() {
+        return /* Primitive */ .Unknown;
+    }
 }
 /* private */ class SymbolValue /*  */ {
-    constructor() { }
-}
-(stripped, type) => ;
-{
-}
-generate: string;
-{
-    return this.stripped + /* createDebugString */ (this.type);
+    constructor(stripped, type) {
+    }
+    generate() {
+        return this.stripped + /* createDebugString */ (this.type);
+    }
 }
 /* private */ class JVMMap {
+    constructor(map) {
+    }
+    find(key) {
+        if (this.map(key)) {
+            return new Some(this.map(key));
+        }
+        return new None();
+    }
+    with(key, value) {
+        /* this.map.put(key, value) */ ;
+        return this;
+    }
 }
-(map) => ;
-{
-}
-JVMMap: /* public */ {
-    /* this(new HashMap<>()) */ ;
-}
-find(key, K);
-Option < V > {
-    : .map(key)
-};
-{
-    return new Some(this.map(key));
-}
-return new None();
-with (key)
-    : K, value;
-V;
-Map < K, V > {
-    return: this
-};
 /* private static */ class Maps /*  */ {
     empty() {
         return new JVMMap();
@@ -779,14 +636,13 @@ Map < K, V > {
 /* private */ class MapCollector {
     constructor() {
     }
+    createInitial() {
+        return Maps.empty();
+    }
+    fold(current, element) {
+        return current.with(element.left(), element.right());
+    }
 }
-{
-    return Maps.empty();
-}
-fold(current, (Map), element, [K, V]);
-Map < K, V > {
-    return: current.with(element.left(), element.right())
-};
 /* private static */ class ConstructorHeader /*  */ {
     createDefinition(paramTypes) {
         return ImmutableDefinition.createSimpleDefinition("new", Unknown);
@@ -799,14 +655,12 @@ Map < K, V > {
     constructor(value) {
         this.value = value;
     }
-}
-{
-    return this.value;
-}
-replace(mapping, (Map));
-Type;
-{
-    return this;
+    generate() {
+        return this.value;
+    }
+    replace(mapping) {
+        return this;
+    }
 }
 /* private */ class Operator /*  */ {
     constructor(sourceRepresentation, targetRepresentation) {
@@ -818,26 +672,25 @@ Type;
     constructor(value) {
         this.value = value;
     }
-}
-{
-    return this.value;
-}
-type: Type;
-{
-    return Primitive.Boolean;
+    generate() {
+        return this.value;
+    }
+    type() {
+        return Primitive.Boolean;
+    }
 }
 /* public */ class Main /*  */ {
-}
-/* try */ {
-    let parent = /* Paths */ .get(".", "src", "java", "magma");
-    let source = parent.resolve("Main.java");
-    let target = parent.resolve("main.ts");
-    let input = /* Files */ .readString(source);
-    /* Files.writeString(target, compile(input)) */ ;
-    /* new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
-            .inheritIO()
-            .start()
-            .waitFor() */ ;
+    main() {
+        let parent = /* Paths */ .get(".", "src", "java", "magma");
+        let source = parent.resolve("Main.java");
+        let target = parent.resolve("main.ts");
+        let input = /* Files */ .readString(source);
+        /* Files.writeString(target, compile(input)) */ ;
+        /* new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
+                .inheritIO()
+                .start()
+                .waitFor() */ ;
+    }
 }
 /* catch (IOException | InterruptedException e) */ {
     /* throw new RuntimeException(e) */ ;
@@ -1051,7 +904,7 @@ if (params.isEmpty()) {
 else {
     let joined = /* joinValues */ ( /* retainDefinitions */(params));
     let constructorIndent = /* createIndent */ (1);
-    statementsTuple.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
+    statementsTuple.right().addFirst(constructorIndent + "constructor " + joined + " {" + constructorIndent + "}");
 }
 let parsed2 = /* parsed1 */ .iterate().collect(new Joiner()).orElse("");
 let generated = /* generatePlaceholder */ (beforeInfix.strip()) + targetInfix + name + joinedTypeParams + /* generatePlaceholder */ (afterTypeParams) + " {" + parsed2 + "\n}\n";
@@ -1149,7 +1002,8 @@ return new None();
 joinValues(retainParameters, (List));
 string;
 {
-    return retainParameters.iterate().map(Definition.generate).collect(new Joiner(", ")).map((inner) => "(" + inner + ")").orElse("");
+    let inner = retainParameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+    return "(" + inner + ")";
 }
 retainDefinitions(right, (List));
 List < Definition > {

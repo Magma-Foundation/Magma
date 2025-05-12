@@ -1321,7 +1321,7 @@ public class Main {
         else {
             var joined = joinValues(retainDefinitions(params));
             var constructorIndent = createIndent(1);
-            parsed1 = statementsTuple.right().addFirst(constructorIndent + "constructor (" + joined + ") {" + constructorIndent + "}\n");
+            parsed1 = statementsTuple.right().addFirst(constructorIndent + "constructor " + joined + " {" + constructorIndent + "}");
         }
 
         var parsed2 = parsed1.iterate().collect(new Joiner()).orElse("");
@@ -1438,11 +1438,12 @@ public class Main {
     }
 
     private static String joinValues(List<Definition> retainParameters) {
-        return retainParameters.iterate()
+        var inner = retainParameters.iterate()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
-                .map(inner -> "(" + inner + ")")
                 .orElse("");
+
+        return "(" + inner + ")";
     }
 
     private static List<Definition> retainDefinitions(List<Parameter> right) {
