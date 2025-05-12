@@ -1947,7 +1947,11 @@ public class Main {
     }
 
     private static String createDebugString(Type type) {
-        return Main.isDebug ? generatePlaceholder(": " + type.generate()) : "";
+        if (!Main.isDebug) {
+            return "";
+        }
+
+        return generatePlaceholder(": " + type.generate());
     }
 
     private enum Primitive implements Type {

@@ -1526,7 +1526,10 @@
 		return "/* " + replaced + " */";
 	}
 	/* private static */ createDebugString(type : /* Type */) : string {
-		return /* Main.isDebug ? generatePlaceholder(": "  */ + /*  type.generate()) : "" */;
+		/* if (!Main.isDebug)  */{
+			return "";
+		}
+		return generatePlaceholder(": " + type.generate(/*  */));
 	}/* 
 
     private enum Primitive implements Type {
