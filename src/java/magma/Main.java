@@ -453,7 +453,7 @@ public class Main {
             List<ObjectType> objectTypes,
             Option<String> maybeStructName,
             List<String> typeParams,
-            Option<Type> expectedType
+            Option<Type> typeRegister
     ) {
 
         public CompileState() {
@@ -468,11 +468,11 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.maybeStructName, this.typeParams, this.expectedType);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.maybeStructName, this.typeParams, this.typeRegister);
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.maybeStructName, this.typeParams, this.expectedType);
+            return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.maybeStructName, this.typeParams, this.typeRegister);
         }
 
         public Option<Type> resolveType(String name) {
@@ -495,19 +495,19 @@ public class Main {
         }
 
         public CompileState addType(ObjectType type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.maybeStructName, this.typeParams, this.expectedType);
+            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.maybeStructName, this.typeParams, this.typeRegister);
         }
 
         public CompileState withDefinition(Definition definition) {
-            return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.maybeStructName, this.typeParams, this.expectedType);
+            return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.maybeStructName, this.typeParams, this.typeRegister);
         }
 
         public CompileState withStructName(String name) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, new Some<>(name), this.typeParams, this.expectedType);
+            return new CompileState(this.structures, this.definitions, this.objectTypes, new Some<>(name), this.typeParams, this.typeRegister);
         }
 
         public CompileState withTypeParams(List<String> typeParams) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.maybeStructName, this.typeParams.addAllLast(typeParams), this.expectedType);
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.maybeStructName, this.typeParams.addAllLast(typeParams), this.typeRegister);
         }
 
         public CompileState withExpectedType(Type type) {
@@ -1408,7 +1408,7 @@ public class Main {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
                 Type type = Primitive.Unknown;
-                if (state.expectedType instanceof Some(var expectedType)) {
+                if (state.typeRegister instanceof Some(var expectedType)) {
                     if (expectedType instanceof FunctionType functionType) {
                         type = functionType.arguments.get(0).orElse(null);
                     }
@@ -1497,11 +1497,21 @@ public class Main {
             var expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
             var withExpected = currentState.withExpectedType(expectedType);
 
-            return new Some<>(parseValue(withExpected, element, depth));
+            var valueTuple = parseValue(withExpected, element, depth);
+            var valueState = valueTuple.left;
+            var value = valueTuple.right;
+
+            var actualType = valueTuple.left.typeRegister.orElse(Primitive.Unknown);
+            return new Some<>(new Tuple<>(valueState, new Tuple<>(value, actualType)));
         }).orElseGet(() -> new Tuple<>(oldCallerState, Lists.empty()));
 
         var argumentsState = argumentsTuple.left;
-        var arguments = argumentsTuple.right;
+        var argumentsWithActualTypes = argumentsTuple.right;
+
+        var arguments = argumentsWithActualTypes.iterate()
+                .map(Tuple::left)
+                .collect(new ListCollector<>());
+
         var invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some<>(new Tuple<>(argumentsState, invokable));
     }

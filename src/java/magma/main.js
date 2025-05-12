@@ -581,7 +581,7 @@ return new /* HashMap */ ( /*  */) /* : content-start HashMap content-end */;
     return: current /* : Option<string> */
 };
 /* public */ class Main /*  */ {
-    /* private */ CompileState(structures, definitions, objectTypes, maybeStructName, typeParams, expectedType) {
+    /* private */ CompileState(structures, definitions, objectTypes, maybeStructName, typeParams, typeRegister) {
         /* this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty(), new None<>()) */ ;
     }
 }
@@ -589,10 +589,10 @@ return new /* HashMap */ ( /*  */) /* : content-start HashMap content-end */;
     return /* this */ .definitions /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((definition) => definition /* : unknown */.name /* : unknown */.equals /* : unknown */(name /* : string */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */(type /* : unknown */) /* : unknown */;
 }
 /* public CompileState addStructure(String structure)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */.addLast /* : unknown */( /* structure */) /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */.addLast /* : unknown */( /* structure */) /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .typeRegister /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withDefinitions(List<Definition> definitions)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addAllLast /* : unknown */(definitions /* : List<content-start Definition content-end> */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addAllLast /* : unknown */(definitions /* : List<content-start Definition content-end> */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .typeRegister /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public Option<Type> resolveType(String name)  */ {
     /* if (this.maybeStructName.filter(inner -> inner.equals(name)).isPresent())  */ {
@@ -605,16 +605,16 @@ return new /* HashMap */ ( /*  */) /* : content-start HashMap content-end */;
     return /* this */ .objectTypes /* : unknown */.iterate /* : unknown */( /*  */) /* : unknown */.filter /* : unknown */((type) => type /* : unknown */.name /* : unknown */.equals /* : unknown */(name /* : string */) /* : unknown */) /* : unknown */.next /* : unknown */( /*  */) /* : unknown */.map /* : unknown */((type) => type /* : unknown */) /* : unknown */;
 }
 /* public CompileState addType(ObjectType type)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */.addLast /* : unknown */(type /* : unknown */) /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */.addLast /* : unknown */(type /* : unknown */) /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .typeRegister /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withDefinition(Definition definition)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addLast /* : unknown */(definition /* : unknown */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */.addLast /* : unknown */(definition /* : unknown */) /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, /* this */ .typeRegister /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withStructName(String name)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, new Some(name /* : string */) /* : Some */, /* this */ .typeParams /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, new Some(name /* : string */) /* : Some */, /* this */ .typeParams /* : unknown */, /* this */ .typeRegister /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withTypeParams(List<String> typeParams)  */ {
-    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */.addAllLast /* : unknown */(typeParams /* : List<string> */) /* : unknown */, /* this */ .expectedType /* : unknown */) /* : content-start CompileState content-end */;
+    return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */.addAllLast /* : unknown */(typeParams /* : List<string> */) /* : unknown */, /* this */ .typeRegister /* : unknown */) /* : content-start CompileState content-end */;
 }
 /* public CompileState withExpectedType(Type type)  */ {
     return new /* CompileState */ ( /* this */.structures /* : unknown */, /* this */ .definitions /* : unknown */, /* this */ .objectTypes /* : unknown */, /* this */ .maybeStructName /* : unknown */, /* this */ .typeParams /* : unknown */, new Some(type /* : unknown */) /* : Some */) /* : content-start CompileState content-end */;
@@ -1038,7 +1038,7 @@ Option < [/* CompileState */ , /* Value */] > {
     let strippedBeforeArrow = beforeArrow /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
     /* if (isSymbol(strippedBeforeArrow))  */ {
         let type = /* Primitive */ .Unknown /* : unknown */;
-        /* if (state.expectedType instanceof Some(var expectedType))  */ {
+        /* if (state.typeRegister instanceof Some(var expectedType))  */ {
             /* if (expectedType instanceof FunctionType functionType)  */ {
                 let /* type  */ = /* functionType */ .arguments /* : unknown */.get /* : unknown */(0 /* : number */) /* : unknown */.orElse /* : unknown */( /* null */) /* : unknown */;
             }
@@ -1092,38 +1092,52 @@ Option < [/* CompileState */ , /* Value */] > {
     return: suffix /* : string */(input /* : string */.strip /* : unknown */( /*  */) /* : unknown */, ")", (withoutEnd) => {
         return /* split */ (() => /* toLast */ (withoutEnd /* : unknown */, "", /* Main */ .foldInvocationStart /* : unknown */) /* : unknown */, (callerWithEnd, argumentsString) => {
             return suffix /* : string */(callerWithEnd /* : unknown */, "(", (callerString) => {
-                let callerString1 = callerString /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */;
-                let callerTuple = /* invocationHeader */ (state /* : content-start CompileState content-end */, depth /* : number */,  /* callerString1 */) /* : unknown */;
-                let oldCaller = /* callerTuple */ .right /* : unknown */;
-                let newCaller = /* modifyCaller */ ( /* callerTuple */.left /* : unknown */,  /* oldCaller */) /* : unknown */;
-                let callerType = new FunctionType() /* Lists */.empty /* : unknown */( /*  */) /* : unknown */;
-            }) /* Primitive */.Unknown;
-        } /* : unknown */) /* : FunctionType */;
-        /* switch (newCaller)  */ {
-            /* case ConstructionCaller constructionCaller ->  */ {
-                let /* callerType  */ = /* constructionCaller */ .toFunction /* : unknown */( /*  */) /* : unknown */;
-            }
-            /* case Value value ->  */ {
-                let type = value /* : T */.type /* : unknown */( /*  */) /* : unknown */;
-                /* if (type instanceof FunctionType functionType)  */ {
-                    let /* callerType  */ =  /* functionType */;
-                }
+                return /* assembleInvocation */ (state /* : content-start CompileState content-end */, depth /* : number */, argumentsString /* : unknown */, callerString /* : unknown */.strip /* : unknown */( /*  */) /* : unknown */) /* : unknown */;
+            }) /* : unknown */;
+        }) /* : unknown */;
+    }) /* : unknown */
+};
+/* private static */ assembleInvocation(state, depth, number, argumentsString, string, callerString, string);
+Some < [/* CompileState */ , /* Value */] > {
+    let, callerTuple = (state /* : content-start CompileState content-end */, depth /* : number */, callerString /* : unknown */) /* : unknown */,
+    let, oldCallerState = .left /* : unknown */,
+    let, oldCaller = .right /* : unknown */,
+    let, newCaller = ( /* oldCallerState */,  /* oldCaller */) /* : unknown */,
+    let, callerType = ( /* newCaller */) /* : unknown */,
+    let, argumentsTuple = ( /* oldCallerState */, argumentsString /* : unknown */, (currentState, pair) => {
+        let index = pair /* : unknown */.left /* : unknown */;
+        let element = pair /* : unknown */.right /* : unknown */;
+        let expectedType = /* callerType */ .arguments /* : unknown */.get /* : unknown */(index /* : T */) /* : unknown */.orElse /* : unknown */() /* Primitive */.Unknown /* : unknown */ /* : unknown */;
+        let withExpected = currentState /* : unknown */.withExpectedType /* : unknown */( /* expectedType */) /* : unknown */;
+        let valueTuple = parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(element /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */;
+        let valueState = /* valueTuple */ .left /* : unknown */;
+        let value = /* valueTuple */ .right /* : unknown */;
+        let actualType = /* valueTuple */ .left /* : unknown */.typeRegister /* : unknown */.orElse /* : unknown */() /* Primitive */.Unknown /* : unknown */ /* : unknown */;
+        return new Some(new Tuple(new Tuple(value /* : T */) /* : Tuple */) /* : Tuple */) /* : Some */;
+    }) /* : unknown */.orElseGet /* : unknown */(() => new Tuple( /* oldCallerState */) /* Lists */.empty /* : unknown */( /*  */) /* : unknown */) /* : Tuple */,
+    let, argumentsState = .left /* : unknown */,
+    let, argumentsWithActualTypes = .right /* : unknown */,
+    let, arguments = .iterate /* : unknown */( /*  */) /* : unknown */.map /* : unknown */() /* Tuple */.left /* : unknown */, /* : unknown */ : /* : unknown */ .collect /* : unknown */(new ListCollector( /*  */) /* : ListCollector */) /* : unknown */,
+    let, invokable = new Invokable( /* newCaller */) /* callerType */.returns /* : unknown */,
+    return: new Some(new Tuple( /* argumentsState */) /* : Tuple */) /* : Some */
+};
+/* private static */ findCallerType(newCaller, Caller);
+FunctionType;
+{
+    let callerType = new FunctionType(empty /* : unknown */( /*  */) /* : unknown */, Unknown /* : unknown */) /* : FunctionType */;
+    /* switch (newCaller)  */ {
+        /* case ConstructionCaller constructionCaller ->  */ {
+            let /* callerType  */ = /* constructionCaller */ .toFunction /* : unknown */( /*  */) /* : unknown */;
+        }
+        /* case Value value ->  */ {
+            let type = value /* : T */.type /* : unknown */( /*  */) /* : unknown */;
+            /* if (type instanceof FunctionType functionType)  */ {
+                let /* callerType  */ =  /* functionType */;
             }
         }
-        let finalCallerType =  /* callerType */;
-        let parsed = /* parseValuesWithIndices */ ( /* callerTuple */.left /* : unknown */, argumentsString /* : unknown */, (state3, pair) => {
-            let argumentType = /* finalCallerType */ .arguments /* : unknown */.get /* : unknown */(pair /* : unknown */.left /* : unknown */) /* : unknown */.orElse /* : unknown */() /* Primitive */.Unknown;
-        } /* : unknown */) /* : unknown */;
-        let state4 = state3 /* : unknown */.withExpectedType /* : unknown */( /* argumentType */) /* : unknown */;
-        return new Some(parseValue /* : (arg0 : content-start CompileState content-end, arg1 : string, arg2 : number) => [content-start CompileState content-end, content-start Value content-end] */(pair /* : unknown */.right /* : unknown */, depth /* : number */) /* : [content-start CompileState content-end, content-start Value content-end] */) /* : Some */;
-    }) /* : unknown */.orElseGet /* : unknown */(() => new Tuple() /* callerTuple */.left /* : unknown */) /* Lists */.empty /* : unknown */( /*  */) /* : unknown */,
-    let, arguments = .right /* : unknown */,
-    let, invokable = new Invokable( /* newCaller */) /* callerType */.returns /* : unknown */,
-    return: new Some(new Tuple() /* parsed */.left /* : unknown */) /* : Tuple */
-};
-;
-;
-;
+    }
+    return /* callerType */;
+}
 /* private static */ modifyCaller(state, oldCaller, Caller);
 Caller;
 {
