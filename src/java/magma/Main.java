@@ -82,6 +82,10 @@ public class Main {
         List<T> addAllLast(List<T> others);
 
         Option<T> last();
+
+        Iterator<T> iterateReversed();
+
+        List<T> mapLast(Function<T, T> mapper);
     }
 
     private interface Head<T> {
@@ -435,7 +439,8 @@ public class Main {
 
             @Override
             public Iterator<Tuple2<Integer, T>> iterateWithIndices() {
-                return new HeadedIterator<>(new RangeHead(this.elements.size())).map(index -> new Tuple2Impl<>(index, this.elements.get(index)));
+                return new HeadedIterator<>(new RangeHead(this.elements.size()))
+                        .map(index -> new Tuple2Impl<>(index, this.elements.get(index)));
             }
 
             @Override
@@ -461,6 +466,26 @@ public class Main {
                     return new None<>();
                 }
                 return new Some<>(this.elements.getLast());
+            }
+
+            @Override
+            public Iterator<T> iterateReversed() {
+                return new HeadedIterator<>(new RangeHead(this.elements.size()))
+                        .map(index -> this.elements.size() - index - 1)
+                        .map(this.elements::get);
+            }
+
+            @Override
+            public List<T> mapLast(Function<T, T> mapper) {
+                return this.last()
+                        .map(mapper)
+                        .map(newLast -> this.set(this.elements.size() - 1, newLast))
+                        .orElse(this);
+            }
+
+            private JVMList<T> set(int index, T element) {
+                this.elements.set(index, element);
+                return this;
             }
 
             @Override
@@ -602,7 +627,7 @@ public class Main {
 
     private record CompileState(
             List<String> structures,
-            List<Definition> definitions,
+            List<List<Definition>> definitions,
             List<ObjectType> objectTypes,
             List<String> structNames,
             List<String> typeParams,
@@ -610,11 +635,12 @@ public class Main {
     ) {
 
         public CompileState() {
-            this(Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), new None<>());
+            this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>());
         }
 
         private Option<Type> resolveValue(String name) {
-            return this.definitions.iterate()
+            return this.definitions.iterateReversed()
+                    .flatMap(List::iterate)
                     .filter(definition -> definition.name().equals(name))
                     .next()
                     .map(Definition::type);
@@ -625,12 +651,13 @@ public class Main {
         }
 
         public CompileState withDefinitions(List<Definition> definitions) {
-            return new CompileState(this.structures, this.definitions.addAllLast(definitions), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            var defined = this.definitions.mapLast(frame -> frame.addAllLast(definitions));
+            return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
         public Option<Type> resolveType(String name) {
             if (this.structNames.last().filter(inner -> inner.equals(name)).isPresent()) {
-                return new Some<>(new ObjectType(name, this.typeParams, this.definitions));
+                return new Some<>(new ObjectType(name, this.typeParams, this.definitions.last().orElse(Lists.empty())));
             }
 
             var maybeTypeParam = this.typeParams.iterate()
@@ -647,12 +674,8 @@ public class Main {
                     .map(type -> type);
         }
 
-        public CompileState addType(ObjectType type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(type), this.structNames, this.typeParams, this.typeRegister);
-        }
-
         public CompileState withDefinition(Definition definition) {
-            return new CompileState(this.structures, this.definitions.addLast(definition), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+            return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
         public CompileState pushStructName(String name) {
@@ -669,6 +692,15 @@ public class Main {
 
         public CompileState popStructName() {
             return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister);
+        }
+
+        public CompileState enterDefinitions() {
+            return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
+        }
+
+        public CompileState exitDefinitions() {
+            var removed = this.definitions.removeLast().map(Tuple2::left).orElse(this.definitions);
+            return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
     }
 
@@ -1518,7 +1550,7 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var objectType = new ObjectType(name, typeParams, definitions);
-        var state2 = segmentsState.withDefinition(ImmutableDefinition.createSimpleDefinition("this", objectType));
+        var state2 = segmentsState.enterDefinitions().withDefinition(ImmutableDefinition.createSimpleDefinition("this", objectType));
         return mapUsingState(state2, segments, (state1, entry) -> switch (entry.right()) {
             case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment));
             case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype);
@@ -1527,7 +1559,7 @@ public class Main {
         }).map(completedTuple -> {
             var completedState = completedTuple.left();
             var completed = completedTuple.right();
-            return completeStructure(completedState, targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed);
+            return completeStructure(completedState.exitDefinitions(), targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed);
         });
     }
 
@@ -1538,8 +1570,7 @@ public class Main {
             String name, List<String> typeParams,
             List<Definition> parameters,
             String after,
-            List<ClassSegment> segments
-    ) {
+            List<ClassSegment> segments) {
         List<ClassSegment> withMaybeConstructor;
         if (parameters.isEmpty()) {
             withMaybeConstructor = segments;
@@ -1559,11 +1590,8 @@ public class Main {
                 .orElse("");
 
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(after) + " {" + parsed2 + "\n}\n";
-        var definedState = state
-                .popStructName()
-                .addStructure(generated)
-                .addType(new ObjectType(name, typeParams, state.definitions));
 
+        var definedState = state.popStructName().addStructure(generated);
         return new Tuple2Impl<>(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
     }
 
