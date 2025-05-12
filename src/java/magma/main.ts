@@ -720,13 +720,10 @@
 		return current.with(element.left(), element.right());
 	}
 }
-/* private static final */class InstanceOf/*  */ {
-	value : Value;
-	definition : Definition;
-	InstanceOf(value : Value, definition : Definition) : /* public */ {
-		/* this */.value = value;
-		/* this */.definition = definition;
+/* private */class InstanceOf/*  */ {
+	constructor (value : Value, definition : Definition) {
 	}
+
 	generate() : string {
 		return /* this */.value.generate() + " instanceof " + /* this */.definition.generate();
 	}
@@ -960,7 +957,7 @@
 		return new Some(new Tuple2Impl(statementsTuple.left().popStructName().addStructure(generated).addType(new ObjectType(name, typeParams, statementsTuple.left().definitions)), ""));
 	}
 	retainDefinition(parameter : Parameter) : Option<Definition> {
-		if (parameter instanceof definition : Definition){
+		if (parameter._variant === ParameterVariant.Definition){
 			return new Some(definition);
 		}
 		return new None();
@@ -1138,7 +1135,9 @@
 			return /* parseDefinition */(childTuple.left(), s2).map((definitionTuple) => {
 				let value = childTuple.right();
 				let definition = definitionTuple.right();
-				return new Tuple2Impl(definitionTuple.left(), new InstanceOf(value, definition));
+				let variant = new DataAccess(value, "_variant", /* Primitive */.Unknown);
+				let temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate(), /* Primitive */.Unknown);
+				return new Tuple2Impl(definitionTuple.left(), new Operation(variant, /* Operator */.EQUALS, temp));
 			});
 		});
 	}
@@ -1164,7 +1163,7 @@
 			if (isSymbol(strippedBeforeArrow)){
 				let type : Type = /* Primitive */.Unknown;
 				if (/* state.typeRegister instanceof Some */(/* var expectedType */)){
-					if (/* expectedType */ instanceof functionType : FunctionType){
+					if (/* expectedType */._variant === unknownVariant.FunctionType){
 						type = /* functionType */.arguments.get(0).orElse(/* null */);
 					}
 				}
@@ -1253,7 +1252,7 @@
 		return new Some(new Tuple2Impl(argumentsState, invokable));
 	}
 	retainValue(argument : Argument) : Option<Value> {
-		if (argument instanceof value : Value){
+		if (argument._variant === ArgumentVariant.Value){
 			return new Some(value);
 		}
 		return new None();
@@ -1273,7 +1272,7 @@
 			}
 			/* case Value value -> */{
 				let type = value.type();
-				if (type instanceof functionType : FunctionType){
+				if (type._variant === () => TypeVariant.FunctionType){
 					callerType = /* functionType */;
 				}
 			}
@@ -1281,7 +1280,7 @@
 		return callerType;
 	}
 	modifyCaller(state : CompileState, oldCaller : Caller) : Caller {
-		if (oldCaller instanceof access : DataAccess){
+		if (oldCaller._variant === unknownVariant.DataAccess){
 			let type = resolveType(/* access */.parent, state);
 			if (/* type instanceof FunctionType */){
 				return /* access */.parent;
@@ -1350,7 +1349,7 @@
 				}
 			}
 			let type : Type = /* Primitive */.Unknown;
-			if (parentType instanceof objectType : FindableType){
+			if (parentType._variant === unknownVariant.FindableType){
 				if (/* objectType.find(property) instanceof Some */(/* var memberType */)){
 					type = /* memberType */;
 				}
@@ -1549,7 +1548,7 @@
 		if (base.equals("Tuple2") && children.size() >= 2){
 			return new Tuple2Impl(state, new TupleType(children));
 		}
-		if (/* state.resolveType(base) instanceof Some */(/* var baseType */) && /* baseType */ instanceof findableType : FindableType){
+		if (/* state.resolveType(base) instanceof Some */(/* var baseType */) && /* baseType */._variant === unknownVariant.FindableType){
 			return new Tuple2Impl(state, new Template(/* findableType */, children));
 		}
 		return new Tuple2Impl(state, new Template(new Placeholder(base), children));
@@ -1565,7 +1564,7 @@
 		});
 	}
 	retainType(argument : Argument) : Option<Type> {
-		if (argument instanceof type : Type){
+		if (argument._variant === ArgumentVariant.Type){
 			return new Some(type);
 		}
 		/* else */{

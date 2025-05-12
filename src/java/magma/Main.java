@@ -1,5 +1,6 @@
 package magma;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -997,15 +998,7 @@ public class Main {
         }
     }
 
-    private static final class InstanceOf implements Value {
-        private final Value value;
-        private final Definition definition;
-
-        public InstanceOf(Value value, Definition definition) {
-            this.value = value;
-            this.definition = definition;
-        }
-
+    private record InstanceOf(Value value, Definition definition) implements Value {
         @Override
         public String generate() {
             return this.value.generate() + " instanceof " + this.definition.generate();
@@ -1535,7 +1528,10 @@ public class Main {
             return parseDefinition(childTuple.left(), s2).map(definitionTuple -> {
                 var value = childTuple.right();
                 var definition = definitionTuple.right();
-                return new Tuple2Impl<>(definitionTuple.left(), new InstanceOf(value, definition));
+
+                var variant = new DataAccess(value, "_variant", Primitive.Unknown);
+                var temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate(), Primitive.Unknown);
+                return new Tuple2Impl<>(definitionTuple.left(), new Operation(variant, Operator.EQUALS, temp));
             });
         });
     }

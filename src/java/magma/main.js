@@ -644,21 +644,15 @@ Option < R > {
         return current.with(element.left(), element.right());
     }
 }
-/* private static final */ class InstanceOf /*  */ {
-    constructor() {
-        this.value = value;
-        this.definition = definition;
+/* private */ class InstanceOf /*  */ {
+    constructor(value, definition) {
     }
-}
-generate();
-string;
-{
-    return /* this */ .value.generate() + " instanceof " + /* this */ .definition.generate();
-}
-type();
-Type;
-{
-    return /* Primitive */ .Boolean;
+    generate() {
+        return /* this */ .value.generate() + " instanceof " + /* this */ .definition.generate();
+    }
+    type() {
+        return /* Primitive */ .Boolean;
+    }
 }
 /* private */ class Operator /*  */ {
 }
@@ -902,7 +896,7 @@ let generated = /* generatePlaceholder */ (beforeInfix.strip()) + targetInfix + 
 return new Some(new Tuple2Impl(statementsTuple.left().popStructName().addStructure(generated).addType(new ObjectType(name, typeParams, statementsTuple.left().definitions)), ""));
 retainDefinition(parameter, Parameter);
 Option < Definition > {
-    if(parameter) { }, instanceof: definition, Definition
+    if(parameter) { }, : ._variant === ParameterVariant.Definition
 };
 {
     return new Some(definition);
@@ -1115,10 +1109,14 @@ Option < [CompileState, Value] > {
         return /* parseDefinition */ (childTuple.left(), s2).map((definitionTuple) => {
             let value = childTuple.right();
             let definition = definitionTuple.right();
-            return new Tuple2Impl(definitionTuple.left(), new InstanceOf(value, definition));
+            let variant = new DataAccess(value, "_variant") /* Primitive */.Unknown;
         });
-    })
+        let temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate()) /* Primitive */.Unknown;
+    }),
+    return: new Tuple2Impl(definitionTuple.left(), new Operation(variant) /* Operator */.EQUALS, temp)
 };
+;
+;
 parseMethodReference(state, CompileState, input, string, depth, number);
 Option < [CompileState, Value] > {
     return: last(input, "::", (s, s2) => {
@@ -1146,20 +1144,17 @@ Option < [CompileState, Value] > {
         if (isSymbol(strippedBeforeArrow)) {
             let type = /* Primitive */ .Unknown;
             if ( /* state.typeRegister instanceof Some */( /* var expectedType */)) {
-                if ( /* expectedType */ instanceof functionType)
-                    : FunctionType;
+                if ( /* expectedType */._variant === unknownVariant.FunctionType) {
+                    type = /* functionType */ .arguments.get(0).orElse( /* null */);
+                }
             }
+            return /* assembleLambda */ (state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
         }
-    })
+        if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
+            let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map() /* String */.strip;
+        }
+    }).filter((value) => !value.isEmpty()).map((name) => Definition.createSimpleDefinition(name) /* Primitive */.Unknown), : .collect(new ListCollector())
 };
-{
-    type = /* functionType */ .arguments.get(0).orElse( /* null */);
-}
-return /* assembleLambda */ (state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
-if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
-    let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).map((name) => Definition.createSimpleDefinition(name, Unknown)).collect(new ListCollector());
-    return /* assembleLambda */ (state, parameterNames, valueString, depth);
-}
 return new None();
 ;
 assembleLambda(state, CompileState, definitions, (List), valueString, string, depth, number);
@@ -1248,7 +1243,7 @@ Some < [CompileState, Value] > {
 };
 retainValue(argument, Argument);
 Option < Value > {
-    if(argument) { }, instanceof: value, Value
+    if(argument) { }, : ._variant === ArgumentVariant.Value
 };
 {
     return new Some(value);
@@ -1273,8 +1268,8 @@ FunctionType;
         }
         /* case Value value -> */ {
             let type = value.type();
-            if (type instanceof functionType)
-                : FunctionType;
+            if (type._variant === ())
+                () => TypeVariant.FunctionType;
             {
                 callerType =  /* functionType */;
             }
@@ -1285,9 +1280,7 @@ FunctionType;
 modifyCaller(state, CompileState, oldCaller, Caller);
 Caller;
 {
-    if (oldCaller instanceof access)
-        : DataAccess;
-    {
+    if (oldCaller._variant === unknownVariant.DataAccess) {
         let type = resolveType(parent, state);
         if ( /* type instanceof FunctionType */) {
             return /* access */ .parent;
@@ -1365,9 +1358,7 @@ if (property.equals("right")) {
     return new Some(new Tuple2Impl(state, new IndexValue(parent, new SymbolValue("1", Int))));
 }
 let type = /* Primitive */ .Unknown;
-if (parentType instanceof objectType)
-    : FindableType;
-{
+if (parentType._variant === unknownVariant.FindableType) {
     if ( /* objectType.find(property) instanceof Some */( /* var memberType */)) {
         type =  /* memberType */;
     }
@@ -1602,9 +1593,7 @@ assembleTemplate(base, string, state, CompileState, arguments, (List));
     if (base.equals("Tuple2") && children.size() >= 2) {
         return new Tuple2Impl(state, new TupleType(children));
     }
-    if ( /* state.resolveType(base) instanceof Some */( /* var baseType */) && /* baseType */  instanceof findableType)
-        : FindableType;
-    {
+    if ( /* state.resolveType(base) instanceof Some */( /* var baseType */) && /* baseType */ ._variant === unknownVariant.FindableType) {
         return new Tuple2Impl(state, new Template(children));
     }
     return new Tuple2Impl(state, new Template(new Placeholder(base), children));
@@ -1622,7 +1611,7 @@ Option < [CompileState, Type] > {
 };
 retainType(argument, Argument);
 Option < Type > {
-    if(argument) { }, instanceof: type, Type
+    if(argument) { }, : ._variant === ArgumentVariant.Type
 };
 {
     return new Some(type);
