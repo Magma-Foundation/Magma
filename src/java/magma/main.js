@@ -223,7 +223,7 @@ var IncompleteClassSegmentVariant;
         return " : " + this.type.generate();
     }
     joinBefore() {
-        if ( /* isDebug */) {
+        if (Main.isDebug) {
             return this.generateBefore();
         }
         return "";
@@ -286,6 +286,9 @@ var IncompleteClassSegmentVariant;
 }
 /* private */ class CompileState /*  */ {
     constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister, functionSegments) {
+    }
+    createInitial() {
+        return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None(), Lists.empty());
     }
     resolveValue(name) {
         return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition) => definition.name().equals(name)).next().map(Definition.type);
@@ -886,7 +889,7 @@ string;
 compile(input, string);
 string;
 {
-    let state = new CompileState();
+    let state = CompileState.createInitial();
     let parsed = parseStatements(state, input, Main.compileRootSegment);
     let joined = parsed[0]().structures.iterate().collect(new Joiner()).orElse("");
     return joined + generateStatements(parsed[1]());

@@ -304,7 +304,7 @@ enum IncompleteClassSegmentVariant {
 		return " : " + this.type.generate();
 	}
 	joinBefore() : string {
-		if (/* isDebug */){
+		if (Main.isDebug){
 			return this.generateBefore();
 		}
 		return "";
@@ -368,8 +368,8 @@ enum IncompleteClassSegmentVariant {
 /* private */class CompileState/*  */ {
 	constructor (structures : List<string>, definitions : List<List<Definition>>, objectTypes : List<ObjectType>, structNames : List<string>, typeParams : List<string>, typeRegister : Option<Type>, functionSegments : List<FunctionSegment>) {
 	}
-	CompileState() : /* public */ {
-		/* this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty()) */;
+	createInitial() : CompileState {
+		return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None(), Lists.empty());
 	}
 	resolveValue(name : string) : Option<Type> {
 		return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition : T) => definition.name().equals(name)).next().map(Definition.type);
@@ -955,7 +955,7 @@ enum IncompleteClassSegmentVariant {
 		}
 	}
 	compile(input : string) : string {
-		let state : CompileState = new CompileState();
+		let state : CompileState = CompileState.createInitial();
 		let parsed : [CompileState, List<T>] = parseStatements(state, input, Main.compileRootSegment);
 		let joined = parsed[0]().structures.iterate().collect(new Joiner()).orElse("");
 		return joined + generateStatements(parsed[1]());

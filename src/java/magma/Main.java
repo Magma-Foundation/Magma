@@ -552,7 +552,7 @@ public class Main {
         }
 
         private String joinBefore() {
-            if (isDebug) {
+            if (Main.isDebug) {
                 return this.generateBefore();
             }
             return "";
@@ -663,10 +663,10 @@ public class Main {
             List<String> structNames,
             List<String> typeParams,
             Option<Type> typeRegister,
-            List<FunctionSegment> functionSegments) {
-
-        public CompileState() {
-            this(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty());
+            List<FunctionSegment> functionSegments
+    ) {
+        public static CompileState createInitial() {
+            return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty());
         }
 
         private Option<Type> resolveValue(String name) {
@@ -1408,7 +1408,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        var state = new CompileState();
+        var state = CompileState.createInitial();
         var parsed = parseStatements(state, input, Main::compileRootSegment);
         var joined = parsed.left().structures.iterate().collect(new Joiner()).orElse("");
         return joined + generateStatements(parsed.right());
