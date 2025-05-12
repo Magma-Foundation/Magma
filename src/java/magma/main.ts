@@ -897,6 +897,13 @@
 		return new Some(this.definition);
 	}
 }
+/* private */class StructurePrototype/*  */ {
+	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>) {
+	}
+	createObjectType(definitions : List<Definition>) : ObjectType {
+		return new ObjectType(this.name, this.typeParams, definitions.addAllLast(this.parameters));
+	}
+}
 /* private */class Primitive/*  */ {
 	Unknown("unknown") : /*  */;
 	value : string;
@@ -1120,17 +1127,35 @@
 		let segmentsTuple : [CompileState, List<T>] = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) => /* parseClassSegment */(state0, input, 1));
 		let segmentsState = segmentsTuple[0]();
 		let segments = segmentsTuple[1]();
-		let definitions = segments.iterate().map(IncompleteClassSegment.createDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
 		let parameters = /* retainDefinitions */(rawParameters);
-		let thisType : ObjectType = new ObjectType(name, typeParams, definitions.addAllLast(parameters));
-		let state2 = segmentsState.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-		return mapUsingState(state2, segments, (state1, entry) => /* getTuple2Option */(state1, entry)).map((completedTuple : [CompileState, List<R>]) => {
+		let prototype : StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments);
+		let tate = segmentsState.enterDefinitions();
+		return /* completeStructure */(tate, prototype, segments);
+	}
+	completeStructure(state : CompileState, prototype : StructurePrototype, segments : List<IncompleteClassSegment>) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+		let definitionFromSegments = segments.iterate().map(IncompleteClassSegment.createDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+		let thisType : ObjectType = prototype.createObjectType(definitionFromSegments);
+		let state2 : CompileState = state.define(ImmutableDefinition.createSimpleDefinition("this", thisType));
+		return mapUsingState(state2.addType(thisType), prototype.segments(), Main.completeClassSegment).map((completedTuple : [CompileState, List<R>]) => {
 			let completedState = completedTuple[0]();
 			let completed = completedTuple[1]();
-			return /* completeStructure */(completedState.exitDefinitions(), targetInfix, beforeInfix, name, typeParams, parameters, after, completed, thisType);
+			let state1 : CompileState = completedState.exitDefinitions();
+			let parameters : List<Definition> = prototype.parameters();
+			/* List<ClassSegment> withMaybeConstructor */;
+			if (parameters.isEmpty()){
+				/* withMaybeConstructor */ = completed;
+			}
+			else {
+				/* withMaybeConstructor */ = completed.addFirst(new Method(1, new ConstructorHeader(), parameters, new Some(Lists.empty())));
+			}
+			let parsed2 = /* withMaybeConstructor */.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
+			let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+			let generated = /* generatePlaceholder */(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + /* generatePlaceholder */(prototype.after()) + " {" + parsed2 + "\n}\n";
+			let definedState = state1.popStructName().addStructure(generated);
+			return new Tuple2Impl(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
 		});
 	}
-	getTuple2Option(state1 : CompileState, entry : [number, IncompleteClassSegment]) : Option<[CompileState, ClassSegment]> {
+	completeClassSegment(state1 : CompileState, entry : [number, IncompleteClassSegment]) : Option<[CompileState, ClassSegment]> {
 		/* return switch (entry.right()) */{
 			/* case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment)) */;
 			/* case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype) */;
@@ -1144,20 +1169,6 @@
 		let definition : StatementValue = classDefinition.definition;
 		let statement : Statement = new Statement(classDefinition.depth, definition);
 		return new Some(new Tuple2Impl(state1, statement));
-	}
-	completeStructure(state : CompileState, targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<ClassSegment>, thisType : ObjectType) : Tuple2Impl<CompileState, IncompleteClassSegmentWrapper> {
-		/* List<ClassSegment> withMaybeConstructor */;
-		if (parameters.isEmpty()){
-			/* withMaybeConstructor */ = segments;
-		}
-		else {
-			/* withMaybeConstructor */ = segments.addFirst(new Method(1, new ConstructorHeader(), parameters, new Some(Lists.empty())));
-		}
-		let parsed2 = /* withMaybeConstructor */.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
-		let joinedTypeParams = typeParams.iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-		let generated = /* generatePlaceholder */(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + /* generatePlaceholder */(after) + " {" + parsed2 + "\n}\n";
-		let definedState = state.popStructName().addStructure(generated).addType(thisType);
-		return new Tuple2Impl(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
 	}
 	retainDefinition(parameter : Parameter) : Option<Definition> {
 		if (parameter._variant === ParameterVariant.Definition){
