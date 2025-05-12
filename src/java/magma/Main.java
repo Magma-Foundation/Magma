@@ -1341,8 +1341,8 @@ public class Main {
             List<String> typeParams,
             List<Definition> parameters,
             String after,
-            List<IncompleteClassSegment> segments
-    ) implements IncompleteClassSegment {
+            List<IncompleteClassSegment> segments,
+            List<String> variants) implements IncompleteClassSegment {
         private ObjectType createObjectType() {
             var definitionFromSegments = this.segments.iterate()
                     .map(IncompleteClassSegment::maybeCreateDefinition)
@@ -1546,48 +1546,54 @@ public class Main {
 
     private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return last(beforeContent, " permits ", (s, s2) -> {
-            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1);
+            var variants = divideAll(s2, Main::foldValueChar)
+                    .iterate()
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .collect(new ListCollector<>());
+
+            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants);
         }).or(() -> {
-            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
+            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeImplements(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeImplements(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants) {
         return first(beforeContent, " implements ", (s, s2) -> {
-            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1);
+            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants);
         }).or(() -> {
-            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1);
+            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants) {
         return first(beforeContent, " extends ", (s, s2) -> {
-            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
+            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants);
         }).or(() -> {
-            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
+            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants) {
         return suffix(beforeContent.strip(), ")", s -> {
             return first(s, "(", (s1, s2) -> {
                 var parsed = parseParameters(state, s2);
-                return parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right());
+                return parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants);
             });
         }).or(() -> {
-            return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+            return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants);
         });
     }
 
-    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params, List<String> variants) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
                 var typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(mapper.apply(state1, s)));
-                return assembleStructure(typeParams.left(), targetInfix, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params);
+                return assembleStructure(typeParams.left(), targetInfix, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants);
             });
         }).or(() -> {
-            return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
+            return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
         });
     }
 
@@ -1598,7 +1604,8 @@ public class Main {
             String content,
             List<String> typeParams,
             String after,
-            List<Parameter> rawParameters
+            List<Parameter> rawParameters,
+            List<String> variants
     ) {
         var name = rawName.strip();
         if (!isSymbol(name)) {
@@ -1610,7 +1617,7 @@ public class Main {
         var segments = segmentsTuple.right();
 
         var parameters = retainDefinitions(rawParameters);
-        var prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments);
+        var prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants);
         return new Some<>(new Tuple2Impl<>(segmentsState.addType(prototype.createObjectType()), prototype));
     }
 
@@ -1644,7 +1651,24 @@ public class Main {
                     .orElse("");
 
             var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
-            var definedState = state1.popStructName().addStructure(generated);
+            var compileState = state1.popStructName();
+
+            CompileState withEnum;
+            if (prototype.variants.isEmpty()) {
+                withEnum = compileState;
+            }
+            else {
+                var joined = prototype.variants.iterate()
+                        .map(inner -> "\n\t" + inner)
+                        .collect(new Joiner(","))
+                        .orElse("");
+
+                withEnum = compileState.addStructure("enum " + prototype.name + "Variant {" +
+                        joined +
+                        "\n}\n");
+            }
+
+            var definedState = withEnum.addStructure(generated);
             return new Tuple2Impl<>(definedState, new Whitespace());
         });
     }

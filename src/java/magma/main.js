@@ -1,4 +1,9 @@
 "use strict";
+var OptionVariant;
+(function (OptionVariant) {
+    OptionVariant[OptionVariant["Some"] = 0] = "Some";
+    OptionVariant[OptionVariant["None"] = 1] = "None";
+})(OptionVariant || (OptionVariant = {}));
 /* private static final */ class None {
     map(mapper) {
         return new None();
@@ -816,7 +821,7 @@ string;
     }
 }
 /* private */ class StructurePrototype /*  */ {
-    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments) {
+    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants) {
     }
     createObjectType() {
         let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
@@ -1021,51 +1026,53 @@ Option < [CompileState, StructurePrototype] > {
 parseStructureWithMaybePermits(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);
 Option < [CompileState, StructurePrototype] > {
     return: last(beforeContent, " permits ", (s, s2) => {
-        return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1);
-    }).or(() => {
-        return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
-    })
+        let variants = divideAll(s2, Main.foldValueChar).iterate().map() /* String */.strip;
+    }).filter((value) => !value.isEmpty()).collect(new ListCollector()),
+    return: parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants)
 };
-parseStructureWithMaybeImplements(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);
+or(() => {
+    return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+});
+parseStructureWithMaybeImplements(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List));
 Option < [CompileState, StructurePrototype] > {
     return: first(beforeContent, " implements ", (s, s2) => {
-        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1);
+        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants);
     }).or(() => {
-        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1);
+        return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants);
     })
 };
-parseStructureWithMaybeExtends(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);
+parseStructureWithMaybeExtends(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List));
 Option < [CompileState, StructurePrototype] > {
     return: first(beforeContent, " extends ", (s, s2) => {
-        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
+        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants);
     }).or(() => {
-        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
+        return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants);
     })
 };
-parseStructureWithMaybeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string);
+parseStructureWithMaybeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, variants, (List));
 Option < [CompileState, StructurePrototype] > {
     return: suffix(beforeContent.strip(), ")", (s) => {
         return first(s, "(", (s1, s2) => {
             let parsed = parseParameters(state, s2);
-            return parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1]());
+            return parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants);
         });
     }).or(() => {
-        return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+        return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants);
     })
 };
-parseStructureWithMaybeTypeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, params, (List));
+parseStructureWithMaybeTypeParams(targetInfix, string, state, CompileState, beforeInfix, string, beforeContent, string, content1, string, params, (List), variants, (List));
 Option < [CompileState, StructurePrototype] > {
     return: first(beforeContent, "<", (name, withTypeParams) => {
         return first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
             let mapper = (state1, s) => new Tuple2Impl(state1, s.strip());
             let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-            return assembleStructure(typeParams[0](), targetInfix, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params);
+            return assembleStructure(typeParams[0](), targetInfix, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
         });
     }).or(() => {
-        return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
+        return assembleStructure(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
     })
 };
-assembleStructure(state, CompileState, targetInfix, string, beforeInfix, string, rawName, string, content, string, typeParams, (List), after, string, rawParameters, (List));
+assembleStructure(state, CompileState, targetInfix, string, beforeInfix, string, rawName, string, content, string, typeParams, (List), after, string, rawParameters, (List), variants, (List));
 Option < [CompileState, StructurePrototype] > {
     let, name = rawName.strip(),
     if(, isSymbol) { }
@@ -1077,7 +1084,7 @@ let segmentsTuple = parseStatements(state.pushStructName(name).withTypeParams(ty
 let segmentsState = segmentsTuple[0]();
 let segments = segmentsTuple[1]();
 let parameters = retainDefinitions(rawParameters);
-let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments);
+let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants);
 return new Some(new Tuple2Impl(segmentsState.addType(prototype.createObjectType()), prototype));
 completeStructure(state, CompileState, prototype, StructurePrototype);
 Option < [CompileState, ClassSegment] > {
@@ -1098,7 +1105,18 @@ Option < [CompileState, ClassSegment] > {
         let parsed2 = /* withMaybeConstructor */ .iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
         let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
         let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
-        let definedState = state1.popStructName().addStructure(generated);
+        let compileState = state1.popStructName();
+        /* CompileState withEnum */ ;
+        if (prototype.variants.isEmpty()) {
+            compileState;
+        }
+        else {
+            let joined = prototype.variants.iterate().map((inner) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
+            compileState.addStructure("enum " + prototype.name + "Variant {" +
+                joined +
+                "\n}\n");
+        }
+        let definedState = /* withEnum */ .addStructure(generated);
         return new Tuple2Impl(definedState, new Whitespace());
     })
 };
