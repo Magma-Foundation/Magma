@@ -641,7 +641,7 @@ public class Main {
         }
 
         private String joinBefore() {
-            return this.maybeBefore
+            return !isDebug ? "" : this.maybeBefore
                     .filter(value -> !value.isEmpty())
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
