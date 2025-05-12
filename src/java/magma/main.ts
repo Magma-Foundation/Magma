@@ -720,6 +720,20 @@
 		return current.with(element.left(), element.right());
 	}
 }
+/* private static final */class InstanceOf/*  */ {
+	value : Value;
+	definition : Definition;
+	InstanceOf(value : Value, definition : Definition) : /* public */ {
+		/* this */.value = value;
+		/* this */.definition = definition;
+	}
+	generate() : string {
+		return /* this */.value.generate() + " instanceof " + /* this */.definition.generate();
+	}
+	type() : Type {
+		return /* Primitive */.Boolean;
+	}
+}
 /* private */class Operator/*  */ {/* ADD("+", "+"),
         SUBTRACT("-", "-"),
         EQUALS("==", "==="),
@@ -946,7 +960,7 @@
 		return new Some(new Tuple2Impl(statementsTuple.left().popStructName().addStructure(generated).addType(new ObjectType(name, typeParams, statementsTuple.left().definitions)), ""));
 	}
 	retainDefinition(parameter : Parameter) : Option<Definition> {
-		if (/* parameter instanceof Definition definition */){
+		if (parameter instanceof definition : Definition){
 			return new Some(definition);
 		}
 		return new None();
@@ -1116,7 +1130,17 @@
 		return new Tuple2Impl(tuple.left(), tuple.right().generate());
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.AND)).or(() => /* parseOperation */(state, input, depth, /* Operator */.OR)).or(() => /* parseOperation */(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.AND)).or(() => /* parseOperation */(state, input, depth, /* Operator */.OR)).or(() => /* parseOperation */(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).or(() => /* parseInstanceOf */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+	}
+	parseInstanceOf(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
+		return last(input, "instanceof", (s, s2) => {
+			let childTuple = parseValue(state, s, depth);
+			return /* parseDefinition */(childTuple.left(), s2).map((definitionTuple) => {
+				let value = childTuple.right();
+				let definition = definitionTuple.right();
+				return new Tuple2Impl(definitionTuple.left(), new InstanceOf(value, definition));
+			});
+		});
 	}
 	parseMethodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last(input, "::", (s, s2) => {
@@ -1140,7 +1164,7 @@
 			if (isSymbol(strippedBeforeArrow)){
 				let type : Type = /* Primitive */.Unknown;
 				if (/* state.typeRegister instanceof Some */(/* var expectedType */)){
-					if (/* expectedType instanceof FunctionType functionType */){
+					if (/* expectedType */ instanceof functionType : FunctionType){
 						type = /* functionType */.arguments.get(0).orElse(/* null */);
 					}
 				}
@@ -1229,7 +1253,7 @@
 		return new Some(new Tuple2Impl(argumentsState, invokable));
 	}
 	retainValue(argument : Argument) : Option<Value> {
-		if (/* argument instanceof Value value */){
+		if (argument instanceof value : Value){
 			return new Some(value);
 		}
 		return new None();
@@ -1249,7 +1273,7 @@
 			}
 			/* case Value value -> */{
 				let type = value.type();
-				if (/* type instanceof FunctionType functionType */){
+				if (type instanceof functionType : FunctionType){
 					callerType = /* functionType */;
 				}
 			}
@@ -1257,7 +1281,7 @@
 		return callerType;
 	}
 	modifyCaller(state : CompileState, oldCaller : Caller) : Caller {
-		if (/* oldCaller instanceof DataAccess access */){
+		if (oldCaller instanceof access : DataAccess){
 			let type = resolveType(/* access */.parent, state);
 			if (/* type instanceof FunctionType */){
 				return /* access */.parent;
@@ -1276,6 +1300,7 @@
 			/* case StringValue stringValue -> Primitive.Unknown */;
 			/* case SymbolValue symbolValue -> symbolValue.type */;
 			/* case IndexValue indexValue -> Primitive.Unknown */;
+			/* case InstanceOf instanceOf -> Primitive.Boolean */;
 		}
 		/*  */;
 	}
@@ -1325,7 +1350,7 @@
 				}
 			}
 			let type : Type = /* Primitive */.Unknown;
-			if (/* parentType instanceof FindableType objectType */){
+			if (parentType instanceof objectType : FindableType){
 				if (/* objectType.find(property) instanceof Some */(/* var memberType */)){
 					type = /* memberType */;
 				}
@@ -1524,7 +1549,7 @@
 		if (base.equals("Tuple2") && children.size() >= 2){
 			return new Tuple2Impl(state, new TupleType(children));
 		}
-		if (/* state.resolveType(base) instanceof Some */(/* var baseType */) && /*  baseType instanceof FindableType findableType */){
+		if (/* state.resolveType(base) instanceof Some */(/* var baseType */) && /* baseType */ instanceof findableType : FindableType){
 			return new Tuple2Impl(state, new Template(/* findableType */, children));
 		}
 		return new Tuple2Impl(state, new Template(new Placeholder(base), children));
@@ -1540,7 +1565,7 @@
 		});
 	}
 	retainType(argument : Argument) : Option<Type> {
-		if (/* argument instanceof Type type */){
+		if (argument instanceof type : Type){
 			return new Some(type);
 		}
 		/* else */{

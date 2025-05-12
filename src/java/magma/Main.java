@@ -997,6 +997,26 @@ public class Main {
         }
     }
 
+    private static final class InstanceOf implements Value {
+        private final Value value;
+        private final Definition definition;
+
+        public InstanceOf(Value value, Definition definition) {
+            this.value = value;
+            this.definition = definition;
+        }
+
+        @Override
+        public String generate() {
+            return this.value.generate() + " instanceof " + this.definition.generate();
+        }
+
+        @Override
+        public Type type() {
+            return Primitive.Boolean;
+        }
+    }
+
     private static final boolean isDebug = false;
 
     public static void main() {
@@ -1505,7 +1525,19 @@ public class Main {
                 .or(() -> parseOperation(state, input, depth, Operator.GREATER_THAN_OR_EQUALS))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
+                .or(() -> parseInstanceOf(state, input, depth))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+    }
+
+    private static Option<Tuple2<CompileState, Value>> parseInstanceOf(CompileState state, String input, int depth) {
+        return last(input, "instanceof", (s, s2) -> {
+            var childTuple = parseValue(state, s, depth);
+            return parseDefinition(childTuple.left(), s2).map(definitionTuple -> {
+                var value = childTuple.right();
+                var definition = definitionTuple.right();
+                return new Tuple2Impl<>(definitionTuple.left(), new InstanceOf(value, definition));
+            });
+        });
     }
 
     private static Option<Tuple2<CompileState, Value>> parseMethodReference(CompileState state, String input, int depth) {
@@ -1708,6 +1740,7 @@ public class Main {
             case StringValue stringValue -> Primitive.Unknown;
             case SymbolValue symbolValue -> symbolValue.type;
             case IndexValue indexValue -> Primitive.Unknown;
+            case InstanceOf instanceOf -> Primitive.Boolean;
         };
     }
 
