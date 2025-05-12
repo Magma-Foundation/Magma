@@ -62,14 +62,32 @@ enum OptionVariant {
 }
 /* private */interface Parameter/*  */ {
 }
+enum ValueVariant {
+	BooleanValue,
+	DataAccess,
+	IndexValue,
+	Invokable,
+	Lambda,
+	Not,
+	Operation,
+	Placeholder,
+	StringValue,
+	SymbolValue
+}
 /* private sealed */interface Value/*  */ {
+	_variant : ValueVariant;
 	generate() : string;
 	type() : Type;
 }
 /* private */interface LambdaValue/*  */ {
 	generate() : string;
 }
+enum CallerVariant {
+	ConstructionCaller,
+	Value
+}
 /* private sealed */interface Caller/*  */ {
+	_variant : CallerVariant;
 	generate() : string;
 }
 /* private */interface FindableType/*  */ {
@@ -79,9 +97,6 @@ enum OptionVariant {
 }
 /* private */interface Definition/*  */ {
 	generate() : string;
-	generateType() : string;
-	joinBefore() : string;
-	joinTypeParams() : string;
 	mapType(mapper : (arg0 : Type) => Type) : Definition;
 	toString() : string;
 	generateWithParams(joinedParameters : string) : string;
@@ -107,8 +122,16 @@ enum OptionVariant {
 /* private */interface StatementValue/*  */ {
 	generate() : string;
 }
+enum IncompleteClassSegmentVariant {
+	ClassDefinition,
+	IncompleteClassSegmentWrapper,
+	MethodPrototype,
+	Placeholder,
+	StructurePrototype,
+	Whitespace
+}
 /* private sealed */interface IncompleteClassSegment/*  */ {
-	maybeCreateObjectType() : Option</* ObjectType */>;
+	_variant : IncompleteClassSegmentVariant;
 	maybeCreateDefinition() : Option<Definition>;
 }
 /* private static final */class None<T>/*  */ {
@@ -584,9 +607,6 @@ enum OptionVariant {
 	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
-	maybeCreateObjectType() : Option<ObjectType> {
-		return new None();
-	}
 }
 /* private static */class Iterators/*  */ {
 	fromOption<T>(option : Option<T>) : Iterator<T> {
@@ -673,9 +693,6 @@ enum OptionVariant {
 		return new None();
 	}
 	maybeCreateDefinition() : Option<Definition> {
-		return new None();
-	}
-	maybeCreateObjectType() : Option<ObjectType> {
 		return new None();
 	}
 }
@@ -895,17 +912,11 @@ enum OptionVariant {
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.header.createDefinition(this.findParamTypes()));
 	}
-	maybeCreateObjectType() : Option<ObjectType> {
-		return new None();
-	}
 }
 /* private */class IncompleteClassSegmentWrapper/*  */ {
 	constructor (segment : ClassSegment) {
 	}
 	maybeCreateDefinition() : Option<Definition> {
-		return new None();
-	}
-	maybeCreateObjectType() : Option<ObjectType> {
 		return new None();
 	}
 }
@@ -914,9 +925,6 @@ enum OptionVariant {
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
-	}
-	maybeCreateObjectType() : Option<ObjectType> {
-		return new None();
 	}
 }
 /* private */class StructurePrototype/*  */ {
@@ -928,9 +936,6 @@ enum OptionVariant {
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new None();
-	}
-	maybeCreateObjectType() : Option<ObjectType> {
-		return new Some(this.createObjectType());
 	}
 }
 /* private */class Primitive/*  */ {

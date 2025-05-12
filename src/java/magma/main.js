@@ -4,6 +4,33 @@ var OptionVariant;
     OptionVariant[OptionVariant["Some"] = 0] = "Some";
     OptionVariant[OptionVariant["None"] = 1] = "None";
 })(OptionVariant || (OptionVariant = {}));
+var ValueVariant;
+(function (ValueVariant) {
+    ValueVariant[ValueVariant["BooleanValue"] = 0] = "BooleanValue";
+    ValueVariant[ValueVariant["DataAccess"] = 1] = "DataAccess";
+    ValueVariant[ValueVariant["IndexValue"] = 2] = "IndexValue";
+    ValueVariant[ValueVariant["Invokable"] = 3] = "Invokable";
+    ValueVariant[ValueVariant["Lambda"] = 4] = "Lambda";
+    ValueVariant[ValueVariant["Not"] = 5] = "Not";
+    ValueVariant[ValueVariant["Operation"] = 6] = "Operation";
+    ValueVariant[ValueVariant["Placeholder"] = 7] = "Placeholder";
+    ValueVariant[ValueVariant["StringValue"] = 8] = "StringValue";
+    ValueVariant[ValueVariant["SymbolValue"] = 9] = "SymbolValue";
+})(ValueVariant || (ValueVariant = {}));
+var CallerVariant;
+(function (CallerVariant) {
+    CallerVariant[CallerVariant["ConstructionCaller"] = 0] = "ConstructionCaller";
+    CallerVariant[CallerVariant["Value"] = 1] = "Value";
+})(CallerVariant || (CallerVariant = {}));
+var IncompleteClassSegmentVariant;
+(function (IncompleteClassSegmentVariant) {
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassDefinition"] = 0] = "ClassDefinition";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["IncompleteClassSegmentWrapper"] = 1] = "IncompleteClassSegmentWrapper";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["MethodPrototype"] = 2] = "MethodPrototype";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Placeholder"] = 3] = "Placeholder";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["StructurePrototype"] = 4] = "StructurePrototype";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Whitespace"] = 5] = "Whitespace";
+})(IncompleteClassSegmentVariant || (IncompleteClassSegmentVariant = {}));
 /* private static final */ class None {
     map(mapper) {
         return new None();
@@ -490,9 +517,6 @@ Option < R > {
     maybeCreateDefinition() {
         return new None();
     }
-    maybeCreateObjectType() {
-        return new None();
-    }
 }
 /* private static */ class Iterators /*  */ {
     fromOption(option) {
@@ -579,9 +603,6 @@ Option < R > {
         return new None();
     }
     maybeCreateDefinition() {
-        return new None();
-    }
-    maybeCreateObjectType() {
         return new None();
     }
 }
@@ -796,17 +817,11 @@ string;
     maybeCreateDefinition() {
         return new Some(this.header.createDefinition(this.findParamTypes()));
     }
-    maybeCreateObjectType() {
-        return new None();
-    }
 }
 /* private */ class IncompleteClassSegmentWrapper /*  */ {
     constructor(segment) {
     }
     maybeCreateDefinition() {
-        return new None();
-    }
-    maybeCreateObjectType() {
         return new None();
     }
 }
@@ -815,9 +830,6 @@ string;
     }
     maybeCreateDefinition() {
         return new Some(this.definition);
-    }
-    maybeCreateObjectType() {
-        return new None();
     }
 }
 /* private */ class StructurePrototype /*  */ {
@@ -829,9 +841,6 @@ string;
     }
     maybeCreateDefinition() {
         return new None();
-    }
-    maybeCreateObjectType() {
-        return new Some(this.createObjectType());
     }
 }
 /* private */ class Primitive /*  */ {

@@ -112,7 +112,7 @@ public class Main {
     private interface Parameter {
     }
 
-    private sealed interface Value extends LambdaValue, Caller, Argument {
+    private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue {
         String generate();
 
         Type type();
@@ -122,7 +122,7 @@ public class Main {
         String generate();
     }
 
-    private sealed interface Caller {
+    private sealed interface Caller permits ConstructionCaller, Value {
         String generate();
     }
 
@@ -136,12 +136,6 @@ public class Main {
 
     private interface Definition extends Parameter, Header, StatementValue {
         String generate();
-
-        String generateType();
-
-        String joinBefore();
-
-        String joinTypeParams();
 
         Definition mapType(Function<Type, Type> mapper);
 
@@ -185,9 +179,7 @@ public class Main {
         String generate();
     }
 
-    private sealed interface IncompleteClassSegment {
-        Option<ObjectType> maybeCreateObjectType();
-
+    private sealed interface IncompleteClassSegment permits ClassDefinition, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
         Option<Definition> maybeCreateDefinition();
     }
 
@@ -525,8 +517,7 @@ public class Main {
             return this.generateWithParams("");
         }
 
-        @Override
-        public String generateType() {
+        private String generateType() {
             if (this.type.equals(Primitive.Unknown)) {
                 return "";
             }
@@ -534,8 +525,7 @@ public class Main {
             return " : " + this.type.generate();
         }
 
-        @Override
-        public String joinBefore() {
+        private String joinBefore() {
             return !isDebug ? "" : this.maybeBefore
                     .filter(value -> !value.isEmpty())
                     .map(Main::generatePlaceholder)
@@ -543,8 +533,7 @@ public class Main {
                     .orElse("");
         }
 
-        @Override
-        public String joinTypeParams() {
+        private String joinTypeParams() {
             return this.typeParams.iterate()
                     .collect(new Joiner())
                     .map(inner -> "<" + inner + ">")
@@ -876,10 +865,6 @@ public class Main {
             return new None<>();
         }
 
-        @Override
-        public Option<ObjectType> maybeCreateObjectType() {
-            return new None<>();
-        }
     }
 
     private static class Iterators {
@@ -1021,10 +1006,6 @@ public class Main {
             return new None<>();
         }
 
-        @Override
-        public Option<ObjectType> maybeCreateObjectType() {
-            return new None<>();
-        }
     }
 
     private record StringValue(String stripped) implements Value {
@@ -1304,10 +1285,6 @@ public class Main {
             return new Some<>(this.header.createDefinition(this.findParamTypes()));
         }
 
-        @Override
-        public Option<ObjectType> maybeCreateObjectType() {
-            return new None<>();
-        }
     }
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
@@ -1316,10 +1293,6 @@ public class Main {
             return new None<>();
         }
 
-        @Override
-        public Option<ObjectType> maybeCreateObjectType() {
-            return new None<>();
-        }
     }
 
     private record ClassDefinition(Definition definition, int depth) implements IncompleteClassSegment {
@@ -1328,10 +1301,6 @@ public class Main {
             return new Some<>(this.definition);
         }
 
-        @Override
-        public Option<ObjectType> maybeCreateObjectType() {
-            return new None<>();
-        }
     }
 
     private record StructurePrototype(
@@ -1357,10 +1326,6 @@ public class Main {
             return new None<>();
         }
 
-        @Override
-        public Option<ObjectType> maybeCreateObjectType() {
-            return new Some<>(this.createObjectType());
-        }
     }
 
     private static final boolean isDebug = false;
