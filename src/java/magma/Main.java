@@ -132,6 +132,12 @@ public class Main {
     }
 
 
+    private interface Header {
+        Definition createDefinition(List<Type> paramTypes);
+
+        String generateWithParams(String joinedParameters);
+    }
+
     private static class None<T> implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
@@ -236,7 +242,7 @@ public class Main {
         private final T value;
         private boolean retrieved;
 
-        public SingleHead(T value) {
+        SingleHead(T value) {
             this.value = value;
             this.retrieved = false;
         }
@@ -435,20 +441,13 @@ public class Main {
             String name,
             Type type,
             List<String> typeParams
-    ) implements Parameter {
+    ) implements Parameter, Header {
         public static Definition createSimpleDefinition(String name, Type type) {
             return new Definition(new None<>(), name, type, Lists.empty());
         }
 
         private String generate() {
             return this.generateWithParams("");
-        }
-
-        public String generateWithParams(String params) {
-            var joined = this.joinTypeParams();
-            var before = this.joinBefore();
-            var typeString = this.generateType();
-            return before + this.name + joined + params + typeString;
         }
 
         private String generateType() {
@@ -487,6 +486,18 @@ public class Main {
                     "typeParams=" + this.typeParams + ']';
         }
 
+        @Override
+        public String generateWithParams(String joinedParameters) {
+            var joined = this.joinTypeParams();
+            var before = this.joinBefore();
+            var typeString = this.generateType();
+            return before + this.name + joined + "(" + joinedParameters + ")" + typeString;
+        }
+
+        @Override
+        public Definition createDefinition(List<Type> paramTypes) {
+            return Definition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
+        }
     }
 
     private record ObjectType(
@@ -1001,6 +1012,18 @@ public class Main {
         }
     }
 
+    private static class ConstructorHeader implements Header {
+        @Override
+        public Definition createDefinition(List<Type> paramTypes) {
+            return Definition.createSimpleDefinition("new", Primitive.Unknown);
+        }
+
+        @Override
+        public String generateWithParams(String joinedParameters) {
+            return "constructor (" + joinedParameters + ")";
+        }
+    }
+
     private static final boolean isDebug = false;
 
     public static void main() {
@@ -1328,41 +1351,52 @@ public class Main {
     private static Option<Tuple2<CompileState, String>> compileMethod(CompileState state, String input, int depth) {
         return first(input, "(", (definitionString, withParams) -> {
             return first(withParams, ")", (parametersString, rawContent) -> {
-                return parseDefinition(state, definitionString).flatMap(definitionTuple -> {
-                    var definitionState = definitionTuple.left();
-                    var definition = definitionTuple.right();
+                return parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()))
+                        .or(() -> parseConstructor(state, definitionString))
+                        .flatMap(definitionTuple -> {
+                            var definitionState = definitionTuple.left();
+                            var header = definitionTuple.right();
 
-                    var parametersTuple = parseParameters(definitionState, parametersString);
-                    var rawParameters = parametersTuple.right();
+                            var parametersTuple = parseParameters(definitionState, parametersString);
+                            var rawParameters = parametersTuple.right();
 
-                    var parameters = retainDefinitions(rawParameters);
-                    var joinedParameters = joinValues(parameters);
+                            var parameters = retainDefinitions(rawParameters);
+                            var joinedParameters = joinValues(parameters);
 
-                    var content = rawContent.strip();
-                    var indent = createIndent(depth);
+                            var content = rawContent.strip();
+                            var indent = createIndent(depth);
 
-                    var paramTypes = parameters.iterate()
-                            .map(Definition::type)
-                            .collect(new ListCollector<>());
+                            var paramTypes = parameters.iterate()
+                                    .map(Definition::type)
+                                    .collect(new ListCollector<>());
 
-                    var toDefine = Definition.createSimpleDefinition(definition.name, new FunctionType(paramTypes, definition.type));
-                    var generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
-                    if (content.equals(";")) {
-                        return new Some<>(new Tuple2Impl<>(parametersTuple.left().withDefinition(toDefine), indent + generatedHeader + ";"));
-                    }
+                            var toDefine = header.createDefinition(paramTypes);
+                            var generatedHeader = header.generateWithParams(joinedParameters);
+                            if (content.equals(";")) {
+                                return new Some<>(new Tuple2Impl<>(parametersTuple.left().withDefinition(toDefine), indent + generatedHeader + ";"));
+                            }
 
-                    if (content.startsWith("{") && content.endsWith("}")) {
-                        var substring = content.substring(1, content.length() - 1);
-                        var statementsTuple = compileFunctionSegments(parametersTuple.left().withDefinitions(parameters), substring, depth);
-                        var generated = indent + generatedHeader + " {" + statementsTuple.right() + indent + "}";
-                        return new Some<>(new Tuple2Impl<>(statementsTuple.left().withDefinition(toDefine), generated));
-                    }
+                            if (content.startsWith("{") && content.endsWith("}")) {
+                                var substring = content.substring(1, content.length() - 1);
+                                var statementsTuple = compileFunctionSegments(parametersTuple.left().withDefinitions(parameters), substring, depth);
+                                var generated = indent + generatedHeader + " {" + statementsTuple.right() + indent + "}";
+                                return new Some<>(new Tuple2Impl<>(statementsTuple.left().withDefinition(toDefine), generated));
+                            }
 
-                    return new None<>();
-                });
+                            return new None<>();
+                        });
 
             });
         });
+    }
+
+    private static Option<Tuple2<CompileState, Header>> parseConstructor(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.equals(state.structNames.last().orElse(""))) {
+            return new Some<>(new Tuple2Impl<>(state, new ConstructorHeader()));
+        }
+
+        return new None<>();
     }
 
     private static String joinValues(List<Definition> retainParameters) {
