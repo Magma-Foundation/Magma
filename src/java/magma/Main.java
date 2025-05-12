@@ -1813,6 +1813,10 @@ public class Main {
             return new Some<>(new Tuple<>(state, Primitive.Unknown));
         }
 
+        if(stripped.equals("boolean")) {
+            return new Some<>(new Tuple<>(state, Primitive.Boolean));
+        }
+
         if (isSymbol(stripped)) {
             if (state.resolveType(stripped) instanceof Some(var resolved)) {
                 return new Some<>(new Tuple<>(state, resolved));

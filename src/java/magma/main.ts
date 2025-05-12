@@ -1,12 +1,12 @@
 /* private */interface Option<T>/*   */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R>;
-	isPresent() : /* boolean */;
+	isPresent() : boolean;
 	orElse(other : T) : T;
 	filter(predicate : (arg0 : T) => boolean) : Option<T>;
 	orElseGet(supplier : () => T) : T;
 	or(other : () => Option<T>) : Option<T>;
 	flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R>;
-	isEmpty() : /* boolean */;
+	isEmpty() : boolean;
 	and<R>(other : () => Option<R>) : Option<[T, R]>;
 }
 /* private */interface Collector<T, C>/*   */ {
@@ -28,7 +28,7 @@
 	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : Option<T>;
 	size() : number;
-	isEmpty() : /* boolean */;
+	isEmpty() : boolean;
 	addFirst(element : T) : List<T>;
 	iterateWithIndices() : Iterator<[number, T]>;
 	removeFirst() : Option<[T, List<T>]>;
@@ -53,7 +53,7 @@
 		return new None(/*  */);
 	}
 	/* @Override
-        public */ isPresent() : /* boolean */ {
+        public */ isPresent() : boolean {
 		return /* false */;
 	}
 	/* @Override
@@ -77,7 +77,7 @@
 		return new None(/*  */);
 	}
 	/* @Override
-        public */ isEmpty() : /* boolean */ {
+        public */ isEmpty() : boolean {
 		return /* true */;
 	}
 	/* @Override
@@ -94,7 +94,7 @@
 		return new Some(mapper(/* this */.value));
 	}
 	/* @Override
-        public */ isPresent() : /* boolean */ {
+        public */ isPresent() : boolean {
 		return /* true */;
 	}
 	/* @Override
@@ -121,7 +121,7 @@
 		return mapper(/* this */.value);
 	}
 	/* @Override
-        public */ isEmpty() : /* boolean */ {
+        public */ isEmpty() : boolean {
 		return /* false */;
 	}
 	/* @Override
@@ -131,7 +131,7 @@
 }
 /* private static */class SingleHead<T>/*  */ {
 	/* private final */ value : T;
-	/* private */ retrieved : /* boolean */;
+	/* private */ retrieved : boolean;
 	SingleHead(value : T) : /* public */ {
 		let /* this.value  */ = value;
 		let /* this.retrieved  */ = /* false */;
@@ -246,7 +246,7 @@
 		return /* this */.elements.size(/*  */);
 	}
 	/* @Override
-            public */ isEmpty() : /* boolean */ {
+            public */ isEmpty() : boolean {
 		return /* this */.elements.isEmpty(/*  */);
 	}
 	/* @Override
@@ -352,14 +352,14 @@
 		/* this.depth++ */;
 		return /* this */;
 	}
-	/* public */ isLevel() : /* boolean */ {
+	/* public */ isLevel() : boolean {
 		return /* this.depth == 0 */;
 	}
 	/* public */ exit() : DivideState {
 		/* this.depth-- */;
 		return /* this */;
 	}
-	/* public */ isShallow() : /* boolean */ {
+	/* public */ isShallow() : boolean {
 		return /* this.depth == 1 */;
 	}
 	/* public */ pop() : Option<[/* Character */, DivideState]> {
@@ -951,7 +951,7 @@
 		}
 		return new None(/*  */);
 	}
-	/* private static */ isSymbol(input : string) : /* boolean */ {
+	/* private static */ isSymbol(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++)  */{
 			let c = input.charAt(/* i */);
 			/* if (Character.isLetter(c) || (i != 0 && Character.isDigit(c)))  */{
@@ -1143,7 +1143,7 @@
 		}
 		return new None(/*  */);
 	}
-	/* private static */ isNumber(input : string) : /* boolean */ {
+	/* private static */ isNumber(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++)  */{
 			let c = input.charAt(/* i */);
 			/* if (Character.isDigit(c))  */{
@@ -1425,6 +1425,9 @@
 		}
 		/* if (stripped.equals("var"))  */{
 			return new Some(new Tuple(state, /* Primitive */.Unknown));
+		}
+		/* if(stripped.equals("boolean"))  */{
+			return new Some(new Tuple(state, /* Primitive */.Boolean));
 		}
 		/* if (isSymbol(stripped))  */{
 			/* if (state.resolveType(stripped) instanceof Some(var resolved))  */{

@@ -5,6 +5,10 @@
         return new None( /*  */);
     }
     /* @Override
+        public */ isPresent() {
+        return /* false */;
+    }
+    /* @Override
         public */ orElse(other) {
         return other;
     }
@@ -25,6 +29,10 @@
         return new None( /*  */);
     }
     /* @Override
+        public */ isEmpty() {
+        return /* true */;
+    }
+    /* @Override
         public  */ and(other) {
         return new None( /*  */);
     }
@@ -35,6 +43,10 @@
     /* @Override
         public  */ map(mapper) {
         return new Some(mapper(value));
+    }
+    /* @Override
+        public */ isPresent() {
+        return /* true */;
     }
     /* @Override
         public */ orElse(other) {
@@ -58,6 +70,10 @@
     /* @Override
         public  */ flatMap(mapper) {
         return mapper(value);
+    }
+    /* @Override
+        public */ isEmpty() {
+        return /* false */;
     }
     /* @Override
         public  */ and(other) {
@@ -184,6 +200,7 @@ number;
 }
 /* @Override
         public */ isEmpty();
+boolean;
 {
     return /* this */ .elements.isEmpty( /*  */);
 }
@@ -290,6 +307,7 @@ DivideState;
     return /* this */;
 }
 /* public */ isLevel();
+boolean;
 {
     return /* this.depth == 0 */;
 }
@@ -300,6 +318,7 @@ DivideState;
     return /* this */;
 }
 /* public */ isShallow();
+boolean;
 {
     return /* this.depth == 1 */;
 }
@@ -849,6 +868,7 @@ Option < Definition > {
 }
 return new None( /*  */);
 /* private static */ isSymbol(input, string);
+boolean;
 {
     /* for (var i = 0; i < input.length(); i++)  */ {
         let c = input.charAt( /* i */);
@@ -1077,6 +1097,7 @@ Option < [/* CompileState */ , /* Value */] > {
 }
 return new None( /*  */);
 /* private static */ isNumber(input, string);
+boolean;
 {
     /* for (var i = 0; i < input.length(); i++)  */ {
         let c = input.charAt( /* i */);
@@ -1408,6 +1429,9 @@ Option < [/* CompileState */ , /* Type */] > {
 }
 /* if (stripped.equals("var"))  */ {
     return new Some(new Tuple(state, Unknown));
+}
+/* if(stripped.equals("boolean"))  */ {
+    return new Some(new Tuple(state, Boolean));
 }
 /* if (isSymbol(stripped))  */ {
     /* if (state.resolveType(stripped) instanceof Some(var resolved))  */ {
