@@ -1773,6 +1773,11 @@ public class Main {
             if (state.resolveValue(stripped) instanceof Some(var type)) {
                 return new Some<>(new Tuple2Impl<>(state, new SymbolValue(stripped, type)));
             }
+
+            if (state.resolveType(stripped) instanceof Some(var type)) {
+                return new Some<>(new Tuple2Impl<>(state, new SymbolValue(stripped, type)));
+            }
+
             return new Some<>(new Tuple2Impl<>(state, new Placeholder(stripped)));
         }
         return new None<>();
