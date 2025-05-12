@@ -482,7 +482,7 @@ Option < R > {
     generate() {
         return "";
     }
-    createDefinition() {
+    maybeCreateDefinition() {
         return new None();
     }
     maybeCreateObjectType() {
@@ -573,7 +573,7 @@ Option < R > {
     findName() {
         return new None();
     }
-    createDefinition() {
+    maybeCreateDefinition() {
         return new None();
     }
     maybeCreateObjectType() {
@@ -783,10 +783,13 @@ string;
 /* private */ class MethodPrototype /*  */ {
     constructor(depth, header, parameters, content) {
     }
+    createDefinition() {
+        return this.header().createDefinition(this.findParamTypes());
+    }
     findParamTypes() {
         return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
     }
-    createDefinition() {
+    maybeCreateDefinition() {
         return new Some(this.header.createDefinition(this.findParamTypes()));
     }
     maybeCreateObjectType() {
@@ -796,7 +799,7 @@ string;
 /* private */ class IncompleteClassSegmentWrapper /*  */ {
     constructor(segment) {
     }
-    createDefinition() {
+    maybeCreateDefinition() {
         return new None();
     }
     maybeCreateObjectType() {
@@ -806,7 +809,7 @@ string;
 /* private */ class ClassDefinition /*  */ {
     constructor(definition, depth) {
     }
-    createDefinition() {
+    maybeCreateDefinition() {
         return new Some(this.definition);
     }
     maybeCreateObjectType() {
@@ -817,10 +820,10 @@ string;
     constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments) {
     }
     createObjectType() {
-        let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.createDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
         return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
     }
-    createDefinition() {
+    maybeCreateDefinition() {
         return new None();
     }
     maybeCreateObjectType() {
@@ -1189,23 +1192,23 @@ Option < [CompileState, IncompleteClassSegment] > {
     let, parametersTuple = (definitionState, parametersString),
     let, rawParameters = parametersTuple.right(),
     let, parameters = (rawParameters),
-    return: new Some(new Tuple2Impl(parametersTuple.left(), new MethodPrototype(depth, header, parameters, rawContent.strip())))
+    let, prototype: MethodPrototype = new MethodPrototype(depth, header, parameters, rawContent.strip()),
+    return: new Some(new Tuple2Impl(parametersTuple.left(), prototype))
 };
 completeMethod(state, CompileState, prototype, MethodPrototype);
 Option < [CompileState, ClassSegment] > {
-    let, paramTypes: (List) = prototype.findParamTypes(),
-    let, toDefine = prototype.header().createDefinition(paramTypes),
+    let, definition: Definition = prototype.createDefinition(),
     if(prototype) { }, : .content().equals(";")
 };
 {
-    return new Some(new Tuple2Impl(state.define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));
+    return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));
 }
 if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
     let substring = prototype.content().substring(1, prototype.content().length() - 1);
     let withDefined = state.enterDefinitions().defineAll(prototype.parameters());
     let statementsTuple = parseStatements(withDefined, substring, (state1, input1) => /* parseFunctionSegment */ (state1, input1, prototype.depth() + 1));
     let statements = statementsTuple[1]();
-    return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some(statements))));
+    return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some(statements))));
 }
 return new None();
 parseConstructor(state, CompileState, input, string);

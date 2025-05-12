@@ -188,7 +188,7 @@ public class Main {
     private sealed interface IncompleteClassSegment {
         Option<ObjectType> maybeCreateObjectType();
 
-        Option<Definition> createDefinition();
+        Option<Definition> maybeCreateDefinition();
     }
 
     private static class None<T> implements Option<T> {
@@ -872,7 +872,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> createDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1017,7 +1017,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> createDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1295,6 +1295,10 @@ public class Main {
 
     private record MethodPrototype(int depth, Header header, List<Definition> parameters,
                                    String content) implements IncompleteClassSegment {
+        private Definition createDefinition() {
+            return this.header().createDefinition(this.findParamTypes());
+        }
+
         private List<Type> findParamTypes() {
             return this.parameters().iterate()
                     .map(Definition::type)
@@ -1302,7 +1306,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> createDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.header.createDefinition(this.findParamTypes()));
         }
 
@@ -1314,7 +1318,7 @@ public class Main {
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> createDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1326,7 +1330,7 @@ public class Main {
 
     private record ClassDefinition(Definition definition, int depth) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> createDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
 
@@ -1347,7 +1351,7 @@ public class Main {
     ) implements IncompleteClassSegment {
         private ObjectType createObjectType() {
             var definitionFromSegments = this.segments.iterate()
-                    .map(IncompleteClassSegment::createDefinition)
+                    .map(IncompleteClassSegment::maybeCreateDefinition)
                     .flatMap(Iterators::fromOption)
                     .collect(new ListCollector<>());
 
@@ -1355,7 +1359,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> createDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1736,14 +1740,14 @@ public class Main {
         var rawParameters = parametersTuple.right();
 
         var parameters = retainDefinitions(rawParameters);
-        return new Some<>(new Tuple2Impl<>(parametersTuple.left(), new MethodPrototype(depth, header, parameters, rawContent.strip())));
+        var prototype = new MethodPrototype(depth, header, parameters, rawContent.strip());
+        return new Some<>(new Tuple2Impl<>(parametersTuple.left(), prototype));
     }
 
     private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(CompileState state, MethodPrototype prototype) {
-        var paramTypes = prototype.findParamTypes();
-        var toDefine = prototype.header().createDefinition(paramTypes);
+        var definition = prototype.createDefinition();
         if (prototype.content().equals(";")) {
-            return new Some<>(new Tuple2Impl<>(state.define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
+            return new Some<>(new Tuple2Impl<>(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
         }
 
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
@@ -1752,7 +1756,7 @@ public class Main {
             var withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, prototype.depth() + 1));
             var statements = statementsTuple.right();
-            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
+            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
         }
 
         return new None<>();

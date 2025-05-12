@@ -104,7 +104,7 @@
 }
 /* private sealed */interface IncompleteClassSegment/*  */ {
 	maybeCreateObjectType() : Option</* ObjectType */>;
-	createDefinition() : Option<Definition>;
+	maybeCreateDefinition() : Option<Definition>;
 }
 /* private static */class None<T>/*  */ {
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
@@ -576,7 +576,7 @@
 	generate() : string {
 		return "";
 	}
-	createDefinition() : Option<Definition> {
+	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 	maybeCreateObjectType() : Option<ObjectType> {
@@ -667,7 +667,7 @@
 	findName() : Option<string> {
 		return new None();
 	}
-	createDefinition() : Option<Definition> {
+	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 	maybeCreateObjectType() : Option<ObjectType> {
@@ -883,10 +883,13 @@
 /* private */class MethodPrototype/*  */ {
 	constructor (depth : number, header : Header, parameters : List<Definition>, content : string) {
 	}
+	createDefinition() : Definition {
+		return this.header().createDefinition(this.findParamTypes());
+	}
 	findParamTypes() : List<Type> {
 		return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
 	}
-	createDefinition() : Option<Definition> {
+	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.header.createDefinition(this.findParamTypes()));
 	}
 	maybeCreateObjectType() : Option<ObjectType> {
@@ -896,7 +899,7 @@
 /* private */class IncompleteClassSegmentWrapper/*  */ {
 	constructor (segment : ClassSegment) {
 	}
-	createDefinition() : Option<Definition> {
+	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 	maybeCreateObjectType() : Option<ObjectType> {
@@ -906,7 +909,7 @@
 /* private */class ClassDefinition/*  */ {
 	constructor (definition : Definition, depth : number) {
 	}
-	createDefinition() : Option<Definition> {
+	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
 	maybeCreateObjectType() : Option<ObjectType> {
@@ -917,10 +920,10 @@
 	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>) {
 	}
 	createObjectType() : ObjectType {
-		let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.createDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+		let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
 		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
 	}
-	createDefinition() : Option<Definition> {
+	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 	maybeCreateObjectType() : Option<ObjectType> {
@@ -1245,20 +1248,20 @@
 		let parametersTuple = /* parseParameters */(definitionState, parametersString);
 		let rawParameters = parametersTuple.right();
 		let parameters = /* retainDefinitions */(rawParameters);
-		return new Some(new Tuple2Impl(parametersTuple.left(), new MethodPrototype(depth, header, parameters, rawContent.strip())));
+		let prototype : MethodPrototype = new MethodPrototype(depth, header, parameters, rawContent.strip());
+		return new Some(new Tuple2Impl(parametersTuple.left(), prototype));
 	}
 	completeMethod(state : CompileState, prototype : MethodPrototype) : Option<[CompileState, ClassSegment]> {
-		let paramTypes : List<Type> = prototype.findParamTypes();
-		let toDefine = prototype.header().createDefinition(paramTypes);
+		let definition : Definition = prototype.createDefinition();
 		if (prototype.content().equals(";")){
-			return new Some(new Tuple2Impl(state.define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));
+			return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None())));
 		}
 		if (prototype.content().startsWith("{") && prototype.content().endsWith("}")){
 			let substring = prototype.content().substring(1, prototype.content().length() - 1);
 			let withDefined = state.enterDefinitions().defineAll(prototype.parameters());
 			let statementsTuple : [CompileState, List<T>] = parseStatements(withDefined, substring, (state1, input1) => /* parseFunctionSegment */(state1, input1, prototype.depth() + 1));
 			let statements = statementsTuple[1]();
-			return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some(statements))));
+			return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some(statements))));
 		}
 		return new None();
 	}
