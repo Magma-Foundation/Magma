@@ -134,7 +134,7 @@ public class Main {
         String name();
     }
 
-    private interface Definition extends Parameter, Header {
+    private interface Definition extends Parameter, Header, StatementValue {
         String generate();
 
         String generateType();
@@ -650,7 +650,7 @@ public class Main {
             return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
-        public CompileState withDefinitions(List<Definition> definitions) {
+        public CompileState defineAll(List<Definition> definitions) {
             var defined = this.definitions.mapLast(frame -> frame.addAllLast(definitions));
             return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
@@ -674,7 +674,7 @@ public class Main {
                     .map(type -> type);
         }
 
-        public CompileState withDefinition(Definition definition) {
+        public CompileState define(Definition definition) {
             return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
 
@@ -1186,13 +1186,6 @@ public class Main {
         }
     }
 
-    private record DefinitionStatement(int depth, Definition definition) implements ClassSegment {
-        @Override
-        public String generate() {
-            return createIndent(this.depth) + this.definition.generate() + ";";
-        }
-    }
-
     private static class Method implements ClassSegment {
         private final int depth;
         private final Header header;
@@ -1281,7 +1274,7 @@ public class Main {
         }
     }
 
-    private record Statement(int depth, StatementValue value) implements FunctionSegment {
+    private record Statement(int depth, StatementValue value) implements FunctionSegment, ClassSegment {
         @Override
         public String generate() {
             return createIndent(this.depth) + this.value.generate() + ";";
@@ -1306,6 +1299,13 @@ public class Main {
         @Override
         public Option<Definition> createDefinition() {
             return new None<>();
+        }
+    }
+
+    private record ClassDefinition(Definition definition, int depth) implements IncompleteClassSegment {
+        @Override
+        public Option<Definition> createDefinition() {
+            return new Some<>(this.definition);
         }
     }
 
@@ -1342,7 +1342,7 @@ public class Main {
 
     private static <T> Tuple2<CompileState, List<T>> parseStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, T>> mapper) {
         return parseAllWithIndices(state, input, Main::foldStatementChar,
-                (state3, tuple) -> ((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>>) (state1, s) -> new Some<>(mapper.apply(state1, s))).apply(state3, tuple.right()))
+                (state3, tuple) -> new Some<>(mapper.apply(state3, tuple.right())))
                 .orElseGet(() -> new Tuple2Impl<>(state, Lists.empty()));
     }
 
@@ -1553,18 +1553,32 @@ public class Main {
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
 
-        var thisType = new ObjectType(name, typeParams, definitions);
-        var state2 = segmentsState.enterDefinitions().withDefinition(ImmutableDefinition.createSimpleDefinition("this", thisType));
-        return mapUsingState(state2, segments, (state1, entry) -> switch (entry.right()) {
+        var parameters = retainDefinitions(rawParameters);
+        var thisType = new ObjectType(name, typeParams, definitions.addAllLast(parameters));
+
+        var state2 = segmentsState.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
+
+        return mapUsingState(state2, segments, (state1, entry) -> getTuple2Option(state1, entry)).map(completedTuple -> {
+            var completedState = completedTuple.left();
+            var completed = completedTuple.right();
+            return completeStructure(completedState.exitDefinitions(), targetInfix, beforeInfix, name, typeParams, parameters, after, completed, thisType);
+        });
+    }
+
+    private static Option<Tuple2<CompileState, ClassSegment>> getTuple2Option(CompileState state1, Tuple2<Integer, IncompleteClassSegment> entry) {
+        return switch (entry.right()) {
             case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment));
             case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype);
             case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace));
             case Placeholder placeholder -> new Some<>(new Tuple2Impl<>(state1, placeholder));
-        }).map(completedTuple -> {
-            var completedState = completedTuple.left();
-            var completed = completedTuple.right();
-            return completeStructure(completedState.exitDefinitions(), targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed, thisType);
-        });
+            case ClassDefinition classDefinition -> completeDefinition(state1, classDefinition);
+        };
+    }
+
+    private static Option<Tuple2<CompileState, ClassSegment>> completeDefinition(CompileState state1, ClassDefinition classDefinition) {
+        StatementValue definition = classDefinition.definition;
+        var statement = new Statement(classDefinition.depth, definition);
+        return new Some<>(new Tuple2Impl<>(state1, statement));
     }
 
     private static Tuple2Impl<CompileState, IncompleteClassSegmentWrapper> completeStructure(
@@ -1682,16 +1696,16 @@ public class Main {
         var paramTypes = prototype.findParamTypes();
         var toDefine = prototype.header().createDefinition(paramTypes);
         if (prototype.content().equals(";")) {
-            return new Some<>(new Tuple2Impl<>(state.withDefinition(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
+            return new Some<>(new Tuple2Impl<>(state.define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
         }
 
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
             var substring = prototype.content().substring(1, prototype.content().length() - 1);
 
-            var withDefined = state.enterDefinitions().withDefinitions(prototype.parameters());
+            var withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, prototype.depth() + 1));
             var statements = statementsTuple.right();
-            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().withDefinition(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
+            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
         }
 
         return new None<>();
@@ -1863,7 +1877,7 @@ public class Main {
             }
         });
 
-        return new Some<>(new Tuple2Impl<>(state.withDefinition(definition), new Initialization(definition, source)));
+        return new Some<>(new Tuple2Impl<>(state.define(definition), new Initialization(definition, source)));
     }
 
     private static Tuple2<CompileState, Value> parseValue(CompileState state, String input, int depth) {
@@ -1967,7 +1981,7 @@ public class Main {
         var strippedValueString = valueString.strip();
 
         Tuple2Impl<CompileState, LambdaValue> value;
-        var state2 = state.withDefinitions(definitions);
+        var state2 = state.defineAll(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
             var value1 = parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) ->
                     parseFunctionSegment(state1, input1, depth + 1));
@@ -2239,11 +2253,11 @@ public class Main {
         return "\n" + "\t".repeat(depth);
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> parseDefinitionStatement(String input, int depth, CompileState state) {
+    private static Option<Tuple2<CompileState, IncompleteClassSegment>> parseDefinitionStatement(String input, int depth, CompileState state) {
         return suffix(input.strip(), ";", withoutEnd -> {
             return parseDefinition(state, withoutEnd).map(result -> {
                 var definition = result.right();
-                return new Tuple2Impl<>(result.left(), new IncompleteClassSegmentWrapper(new DefinitionStatement(depth, definition)));
+                return new Tuple2Impl<>(result.left(), new ClassDefinition(definition, depth));
             });
         });
     }
