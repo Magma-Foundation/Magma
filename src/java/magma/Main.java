@@ -367,7 +367,7 @@ public class Main {
         private final int length;
         private int counter;
 
-        public RangeHead(int length) {
+        RangeHead(int length) {
             this.length = length;
         }
 
@@ -1969,6 +1969,7 @@ public class Main {
                 .or(() -> parseOperation(state, input, depth, Operator.AND))
                 .or(() -> parseOperation(state, input, depth, Operator.OR))
                 .or(() -> parseOperation(state, input, depth, Operator.GREATER_THAN_OR_EQUALS))
+                .or(() -> parseOperation(state, input, depth, Operator.LESS_THAN))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
                 .or(() -> parseInstanceOf(state, input, depth))
@@ -2616,7 +2617,8 @@ public class Main {
         EQUALS("==", "==="),
         AND("&&", "&&"),
         GREATER_THAN_OR_EQUALS(">=", ">="),
-        OR("||", "||");
+        OR("||", "||"),
+        LESS_THAN("<", "<");
 
         private final String sourceRepresentation;
         private final String targetRepresentation;

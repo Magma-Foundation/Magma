@@ -231,9 +231,8 @@ enum IncompleteClassSegmentVariant {
 		while (true){
 			let finalCurrent : R = current;
 			let option : Option<R> = this.head.next().map((inner : T) => folder(finalCurrent, inner));
-			if (option._variant === OptionVariant.Some){
-				let some : Some<R> = option as Some<R>;
-				current = some.value;
+			if (/* option instanceof Some */ < /* R> some */){
+				current = /* some */.value;
 			}
 			else {
 				return current;
@@ -267,11 +266,11 @@ enum IncompleteClassSegmentVariant {
 /* private static */class RangeHead/*  */ {
 	length : number;
 	counter : number;
-	RangeHead(length : number) : /* public */ {
+	constructor (length : number) {
 		this.length = length;
 	}
 	next() : Option<number> {
-		if (/* this.counter < this */.length){
+		if (this.counter < this.length){
 			let value : number = this.counter;
 			/* this.counter++ */;
 			return new Some(value);
@@ -347,7 +346,7 @@ enum IncompleteClassSegmentVariant {
 		return this;
 	}
 	get(index : number) : Option<T> {
-		if (/* index < this */.elements.size()){
+		if (index < this.elements.size()){
 			return new Some(this.elements.get(index));
 		}
 		else {
@@ -527,7 +526,7 @@ enum IncompleteClassSegmentVariant {
 		return this.depth === 1;
 	}
 	pop() : Option<[string, DivideState]> {
-		if (/* this.index < this */.input.length()){
+		if (this.index < this.input.length()){
 			let c = this.input.charAt(this.index);
 			return new Some(new Tuple2Impl(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
 		}
@@ -978,7 +977,8 @@ enum IncompleteClassSegmentVariant {
         EQUALS("==", "==="),
         AND("&&", "&&"),
         GREATER_THAN_OR_EQUALS(">=", ">="),
-        OR("||", "||"); */
+        OR("||", "||"),
+        LESS_THAN("<", "<"); */
 	sourceRepresentation : string;
 	targetRepresentation : string;
 	constructor (sourceRepresentation : string, targetRepresentation : string) {
@@ -1279,7 +1279,7 @@ enum IncompleteClassSegmentVariant {
 		return mapper(slice);
 	}
 	parseClassSegment(state : CompileState, input : string, depth : number) : [CompileState, IncompleteClassSegment] {
-		return /* Main.<Whitespace, IncompleteClassSegment>typed */(() => parseWhitespace(input, state)).or(() => typed(() => parseClass(input, state))).or(() => typed(() => parseStructure(input, "interface ", "interface ", state))).or(() => typed(() => parseStructure(input, "record ", "class ", state))).or(() => typed(() => parseStructure(input, "enum ", "class ", state))).or(() => parseMethod(state, input, depth)).or(() => typed(() => parseDefinitionStatement(input, depth, state))).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
+		return Main. < /* Whitespace, IncompleteClassSegment>typed */(() => parseWhitespace(input, state)).or(() => typed(() => parseClass(input, state))).or(() => typed(() => parseStructure(input, "interface ", "interface ", state))).or(() => typed(() => parseStructure(input, "record ", "class ", state))).or(() => typed(() => parseStructure(input, "enum ", "class ", state))).or(() => parseMethod(state, input, depth)).or(() => typed(() => parseDefinitionStatement(input, depth, state))).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
 	}
 	typed<T extends SS>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
 		return action().map((tuple : [CompileState, T]) => new Tuple2Impl(tuple[0](), tuple[1]()));
@@ -1293,7 +1293,7 @@ enum IncompleteClassSegmentVariant {
 	parseMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, IncompleteClassSegment]> {
 		return first(input, "(", (definitionString, withParams) => {
 			return first(withParams, ")", (parametersString, rawContent) => {
-				return /* parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map */((tuple) => new Tuple2Impl(tuple.left(), tuple.right())).or(() => parseConstructor(state, definitionString)).flatMap((definitionTuple) => assembleMethod(depth, parametersString, rawContent, definitionTuple));
+				return parseDefinition(state, definitionString). < Tuple2 < /* CompileState, Header>>map */((tuple) => new Tuple2Impl(tuple.left(), tuple.right())).or(() => parseConstructor(state, definitionString)).flatMap((definitionTuple) => assembleMethod(depth, parametersString, rawContent, definitionTuple));
 			});
 		});
 	}
@@ -1451,7 +1451,7 @@ enum IncompleteClassSegmentVariant {
 		return new Some(new Tuple2Impl(state.define(definition), new Initialization(definition, source)));
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).or(() => parseInstanceOf(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => parseOperation(state, input, depth, /*  Operator.LESS_THAN */)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).or(() => parseInstanceOf(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
 	}
 	parseBoolean(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
@@ -1771,7 +1771,7 @@ enum IncompleteClassSegmentVariant {
 			return state.advance();
 		}
 		let appended : DivideState = state.append(c);
-		if (c === /*  '<' */){
+		if (c === /*  ' */ < /* ' */){
 			return appended.enter();
 		}
 		if (c === /*  '>' */){
@@ -1799,7 +1799,7 @@ enum IncompleteClassSegmentVariant {
 				return appended;
 			}
 		}
-		if (c === /*  '<'  */ || c === /*  '('  */ || c === /*  '{' */){
+		if (c === /*  ' */ < /* '  */ || c === /*  '('  */ || c === /*  '{' */){
 			return appended.enter();
 		}
 		if (c === /*  '>'  */ || c === /*  ')'  */ || c === /*  '}' */){
@@ -1857,10 +1857,9 @@ enum IncompleteClassSegmentVariant {
 		if (base.equals("Tuple2") && children.size() >= 2){
 			return new Tuple2Impl(state, new TupleType(children));
 		}
-		if (state.resolveType(base)._variant === OptionVariant.Some){
-			let baseType : Type = some.value;
-			if (baseType._variant === TypeVariant.FindableType){
-			let some : Some<Type> = state.resolveType(base) as Some<Type>;
+		if (/* state.resolveType(base) instanceof Some */ < /* Type> some */){
+			let baseType = /* some */.value;
+			if (baseType._variant === Variant.FindableType){
 				let findableType : FindableType = baseType as FindableType;
 				return new Tuple2Impl(state, new Template(findableType, children));
 			}

@@ -125,9 +125,8 @@ var IncompleteClassSegmentVariant;
         while (true) {
             let finalCurrent = current;
             let option = this.head.next().map((inner) => folder(finalCurrent, inner));
-            if (option._variant === OptionVariant.Some) {
-                let some = option;
-                current = some.value;
+            if ( /* option instanceof Some */ /* R> some */) {
+                current = /* some */ .value;
             }
             else {
                 return current;
@@ -159,18 +158,18 @@ var IncompleteClassSegmentVariant;
     }
 }
 /* private static */ class RangeHead /*  */ {
+    constructor(length) {
+        this.length = length;
+    }
+    next() {
+        if (this.counter < this.length) {
+            let value = this.counter;
+            /* this.counter++ */ ;
+            return new Some(value);
+        }
+        return new None();
+    }
 }
-this.length = length;
-next();
-Option < number > {
-    if() { } /* this.counter < this */, /* this.counter < this */ : /* this.counter < this */ .length
-};
-{
-    let value = this.counter;
-    /* this.counter++ */ ;
-    return new Some(value);
-}
-return new None();
 /* private static final */ class JVMList {
 }
 this.elements = elements;
@@ -255,7 +254,7 @@ JVMList < T > {
 };
 get(index, number);
 Option < T > {
-    if() { } /* index < this */, /* index < this */ : /* index < this */ .elements.size()
+    : .elements.size()
 };
 {
     return new Some(this.elements.get(index));
@@ -440,7 +439,7 @@ boolean;
 }
 pop();
 Option < [string, DivideState] > {
-    if() { } /* this.index < this */, /* this.index < this */ : /* this.index < this */ .input.length()
+    : .index < this.input.length()
 };
 {
     let c = this.input.charAt(this.index);
@@ -1217,7 +1216,7 @@ return mapper(slice);
 parseClassSegment(state, CompileState, input, string, depth, number);
 [CompileState, IncompleteClassSegment];
 {
-    return /* Main.<Whitespace, IncompleteClassSegment>typed */ (() => parseWhitespace(input, state)).or(() => typed(() => parseClass(input, state))).or(() => typed(() => parseStructure(input, "interface ", "interface ", state))).or(() => typed(() => parseStructure(input, "record ", "class ", state))).or(() => typed(() => parseStructure(input, "enum ", "class ", state))).or(() => parseMethod(state, input, depth)).or(() => typed(() => parseDefinitionStatement(input, depth, state))).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
+    return Main. < /* Whitespace, IncompleteClassSegment>typed */ (() => parseWhitespace(input, state)).or(() => typed(() => parseClass(input, state))).or(() => typed(() => parseStructure(input, "interface ", "interface ", state))).or(() => typed(() => parseStructure(input, "record ", "class ", state))).or(() => typed(() => parseStructure(input, "enum ", "class ", state))).or(() => parseMethod(state, input, depth)).or(() => typed(() => parseDefinitionStatement(input, depth, state))).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
 }
 typed(action, () => Option);
 Option < [CompileState, S] > {
@@ -1235,7 +1234,7 @@ parseMethod(state, CompileState, input, string, depth, number);
 Option < [CompileState, IncompleteClassSegment] > {
     return: first(input, "(", (definitionString, withParams) => {
         return first(withParams, ")", (parametersString, rawContent) => {
-            return /* parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map */ ((tuple) => new Tuple2Impl(tuple.left(), tuple.right())).or(() => parseConstructor(state, definitionString)).flatMap((definitionTuple) => assembleMethod(depth, parametersString, rawContent, definitionTuple));
+            return parseDefinition(state, definitionString). < Tuple2 < /* CompileState, Header>>map */ ((tuple) => new Tuple2Impl(tuple.left(), tuple.right())).or(() => parseConstructor(state, definitionString)).flatMap((definitionTuple) => assembleMethod(depth, parametersString, rawContent, definitionTuple));
         });
     })
 };
@@ -1424,7 +1423,7 @@ Option < [CompileState, StatementValue] > {
 parseValue(state, CompileState, input, string, depth, number);
 [CompileState, Value];
 {
-    return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).or(() => parseInstanceOf(state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
+    return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth)).or(() => parseOperation(state, input, depth)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).or(() => parseInstanceOf(state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
 }
 parseBoolean(state, CompileState, input, string);
 Option < [CompileState, Value] > {
@@ -1794,7 +1793,7 @@ DivideState;
         return state.advance();
     }
     let appended = state.append(c);
-    if (c ===  /*  '<' */) {
+    if (c === /*  ' */  /* ' */) {
         return appended.enter();
     }
     if (c ===  /*  '>' */) {
@@ -1825,7 +1824,7 @@ DivideState;
             return appended;
         }
     }
-    if (c ===  /*  '<'  */ || c ===  /*  '('  */ || c ===  /*  '{' */) {
+    if (c === /*  ' */  /* '  */ || c ===  /*  '('  */ || c ===  /*  '{' */) {
         return appended.enter();
     }
     if (c ===  /*  '>'  */ || c ===  /*  ')'  */ || c ===  /*  '}' */) {
@@ -1888,10 +1887,9 @@ assembleTemplate(base, string, state, CompileState, arguments, (List));
     if (base.equals("Tuple2") && children.size() >= 2) {
         return new Tuple2Impl(state, new TupleType(children));
     }
-    if (state.resolveType(base)._variant === OptionVariant.Some) {
-        let baseType = some.value;
-        if (baseType._variant === TypeVariant.FindableType) {
-            let some = state.resolveType(base);
+    if ( /* state.resolveType(base) instanceof Some */ /* Type> some */) {
+        let baseType = /* some */ .value;
+        if (baseType._variant === Variant.FindableType) {
             let findableType = baseType;
             return new Tuple2Impl(state, new Template(findableType, children));
         }
