@@ -209,7 +209,7 @@ var ResultVariant;
         return this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
     }
     joinTypeParams() {
-        return this.typeParams.iterate().collect(Joiner.empty()).map((inner) => "<" + inner + ">").orElse("");
+        return this.typeParams.iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
     }
     mapType(mapper) {
         return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
@@ -428,7 +428,7 @@ var ResultVariant;
     constructor(right) {
     }
     generate() {
-        return this.right().generate() + "[]";
+        return this.right.generate() + "[]";
     }
     replace(mapping) {
         return this;

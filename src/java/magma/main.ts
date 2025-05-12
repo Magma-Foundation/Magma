@@ -337,7 +337,7 @@ enum ResultVariant {
 		return this.maybeBefore.filter((value : string) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner : T) => inner + " ").orElse("");
 	}
 	joinTypeParams() : string {
-		return this.typeParams.iterate().collect(Joiner.empty()).map((inner) => "<" + inner + ">").orElse("");
+		return this.typeParams.iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 	}
 	mapType(mapper : (arg0 : Type) => Type) : Definition {
 		return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
@@ -564,7 +564,7 @@ enum ResultVariant {
 	constructor (right : Type) {
 	}
 	generate() : string {
-		return this.right().generate() + "[]";
+		return this.right.generate() + "[]";
 	}
 	replace(mapping : Map<string, Type>) : Type {
 		return this;
@@ -777,7 +777,7 @@ enum ResultVariant {
 	}
 }
 /* private static */class Maps/*  */ {
-	empty<VK>() : Map<K, V>;
+	empty<V, K>() : Map<K, V>;
 }
 /* private */class MapCollector<K, V>/*  */ implements Collector<[K, V], Map<K, V>> {
 	createInitial() : Map<K, V> {
@@ -1020,7 +1020,7 @@ enum ResultVariant {
 		stringList : List<string> = this.divideAll(input, folder);
 		return this.mapUsingState(state, stringList, mapper);
 	}
-	mapUsingState<TR>(state : CompileState, elements : List<T>, mapper : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) : Option<[CompileState, List<R>]> {
+	mapUsingState<T, R>(state : CompileState, elements : List<T>, mapper : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) : Option<[CompileState, List<R>]> {
 		initial : Option<[CompileState, List<R>]> = new Some(new Tuple2Impl(state, Lists.empty()));
 		return elements.iterateWithIndices().fold(initial, (tuple, element) => {
 			return tuple.flatMap((inner) => {
@@ -1292,7 +1292,7 @@ enum ResultVariant {
 	parseClassSegment(state : CompileState, input : string, depth : number) : [CompileState, IncompleteClassSegment] {
 		return this. < /* Whitespace, IncompleteClassSegment>typed */(() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
 	}
-	typed<T extends SS>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
+	typed<T extends S, S>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
 		return action().map((tuple : [CompileState, T]) => new Tuple2Impl(tuple[0](), tuple[1]()));
 	}
 	parseWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {

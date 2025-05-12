@@ -600,7 +600,7 @@ public class Main {
 
         private String joinTypeParams() {
             return this.typeParams.iterate()
-                    .collect(Joiner.empty())
+                    .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
         }
@@ -920,7 +920,7 @@ public class Main {
     private record ArrayType(Type right) implements Type {
         @Override
         public String generate() {
-            return this.right().generate() + "[]";
+            return this.right.generate() + "[]";
         }
 
         @Override
