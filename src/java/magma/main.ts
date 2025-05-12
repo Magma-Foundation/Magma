@@ -313,13 +313,13 @@ enum IncompleteClassSegmentVariant {
 		return this.maybeBefore.filter((value : string) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner : T) => inner + " ").orElse("");
 	}
 	joinTypeParams() : string {
-		return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
+		return this.typeParams.iterate().collect(Joiner.empty()).map((inner) => "<" + inner + ">").orElse("");
 	}
 	mapType(mapper : (arg0 : Type) => Type) : Definition {
 		return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
 	}
 	generateWithParams(joinedParameters : string) : string {
-		let joinedAnnotations = this.annotations.iterate().map((value : T) => "@" + value + " ").collect(new Joiner()).orElse("");
+		let joinedAnnotations = this.annotations.iterate().map((value : T) => "@" + value + " ").collect(Joiner.empty()).orElse("");
 		let joined : string = this.joinTypeParams();
 		let before : string = this.joinBefore();
 		let typeString : string = this.generateType();
@@ -386,8 +386,9 @@ enum IncompleteClassSegmentVariant {
 			return new Some(new ObjectType(name, this.typeParams, this.definitions.last().orElse(Lists.empty())));
 		}
 		let maybeTypeParam : Option<T> = this.typeParams.iterate().filter((param : T) => param.equals(name)).next();
-		if (/* maybeTypeParam instanceof Some */(/* var value */)){
-			return new Some(new TypeParam(/* value */));
+		if (maybeTypeParam._variant === OptionVariant.Some){
+			let some : Some<string> = maybeTypeParam as Some<string>;
+			return new Some(new TypeParam(some.value));
 		}
 		return this.objectTypes.iterate().filter((type : T) => type.name.equals(name)).next().map((type : T) => type);
 	}
@@ -429,15 +430,15 @@ enum IncompleteClassSegmentVariant {
 	depth : number;
 	segments : List<string>;
 	buffer : string;
-	DivideState(input : string, index : number, segments : List<string>, buffer : string, depth : number) : /* public */ {
+	constructor (input : string, index : number, segments : List<string>, buffer : string, depth : number) {
 		this.segments = segments;
 		this.buffer = buffer;
 		this.depth = depth;
 		this.input = input;
 		this.index = index;
 	}
-	DivideState(input : string) : /* public */ {
-		/* this(input, 0, Lists.empty(), "", 0) */;
+	createInitial(input : string) : DivideState {
+		return new DivideState(input, 0, Lists.empty(), "", 0);
 	}
 	advance() : DivideState {
 		this.segments = this.segments.addLast(this.buffer);
@@ -486,8 +487,8 @@ enum IncompleteClassSegmentVariant {
 /* private */class Joiner/*  */ {
 	constructor (delimiter : string) {
 	}
-	Joiner() : /* private */ {
-		/* this("") */;
+	empty() : Joiner {
+		return new Joiner("");
 	}
 	createInitial() : Option<string> {
 		return new None();
@@ -508,7 +509,7 @@ enum IncompleteClassSegmentVariant {
 	mapper : (arg0 : T) => Iterator<R>;
 	head : Head<T>;
 	current : Option<Iterator<R>>;
-	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Iterator<R>) : /* public */ {
+	constructor (head : Head<T>, mapper : (arg0 : T) => Iterator<R>) {
 		this.mapper = mapper;
 		this.current = new None();
 		this.head = head;
@@ -674,8 +675,19 @@ enum IncompleteClassSegmentVariant {
 		return new FunctionType(Lists.empty(), this.type);
 	}
 }
+/* private */class Operator/*  */ {
+	constructor (sourceRepresentation : string, targetRepresentation : string) {
+	}
+	Operator() : /* new */;
+	Operator() : /* new */;
+	Operator() : /* new */;
+	Operator() : /* new */;
+	Operator() : /* new */;
+	Operator() : /* new */;
+	Operator() : /* new */;
+}
 /* private */class Operation/*  */ {
-	constructor (left : Value, operator : /* Operator */, right : Value) {
+	constructor (left : Value, operator : Operator, right : Value) {
 	}
 	generate() : string {
 		return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
@@ -701,7 +713,7 @@ enum IncompleteClassSegmentVariant {
 		return "{" + this.joinStatements() + createIndent(this.depth) + "}";
 	}
 	joinStatements() : string {
-		return this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+		return this.statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
 	}
 }
 /* private */class Lambda/*  */ {
@@ -740,27 +752,8 @@ enum IncompleteClassSegmentVariant {
 		return this.stripped + createDebugString(this.type);
 	}
 }
-/* private */class JVMMap<K, V>/*  */ {
-	constructor (map : /* java.util.Map */<K, V>) {
-	}
-	JVMMap() : /* public */ {
-		/* this(new HashMap<>()) */;
-	}
-	find(key : K) : Option<V> {
-		if (this.map.containsKey(key)){
-			return new Some(this.map.get(key));
-		}
-		return new None();
-	}
-	with(key : K, value : V) : Map<K, V> {
-		/* this.map.put(key, value) */;
-		return this;
-	}
-}
 /* private static */class Maps/*  */ {
-	empty<VK>() : Map<K, V> {
-		return new JVMMap();
-	}
+	empty<VK>() : Map<K, V>;
 }
 /* private */class MapCollector<K, V>/*  */ {
 	createInitial() : Map<K, V> {
@@ -778,24 +771,16 @@ enum IncompleteClassSegmentVariant {
 		return "constructor " + joinedParameters;
 	}
 }
-/* private static */class Method/*  */ {
-	depth : number;
-	header : Header;
-	parameters : List<Definition>;
-	statements : Option<List<FunctionSegment>>;
-	Method(depth : number, header : Header, parameters : List<Definition>, maybeStatements : Option<List<FunctionSegment>>) : /* public */ {
-		this.depth = depth;
-		this.header = header;
-		this.parameters = parameters;
-		this.statements = maybeStatements;
+/* private */class Method/*  */ {
+	constructor (depth : number, header : Header, parameters : List<Definition>, maybeStatements : Option<List<FunctionSegment>>) {
 	}
 	joinStatements(statements : List<FunctionSegment>) : string {
-		return statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+		return statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
 	}
 	generate() : string {
 		let indent : string = createIndent(this.depth);
 		let generatedHeader : string = this.header.generateWithParams(joinValues(this.parameters));
-		let generatedStatements : T = this.statements.map(Method.joinStatements).map((inner : T) => " {" + inner + indent + "}").orElse(";");
+		let generatedStatements : T = this.maybeStatements.map(Method.joinStatements).map((inner : T) => " {" + inner + indent + "}").orElse(";");
 		return indent + generatedHeader + generatedStatements;
 	}
 }
@@ -804,7 +789,7 @@ enum IncompleteClassSegmentVariant {
 	}
 	generate() : string {
 		let indent : string = createIndent(this.depth);
-		let collect = this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+		let collect = this.statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
 		return indent + this.header.generate() + "{" + collect + indent + "}";
 	}
 }
@@ -909,20 +894,6 @@ enum IncompleteClassSegmentVariant {
 		return new None();
 	}
 }
-/* private */class Operator/*  */ {/* ADD("+", "+"),
-        SUBTRACT("-", "-"),
-        EQUALS("==", "==="),
-        AND("&&", "&&"),
-        GREATER_THAN_OR_EQUALS(">=", ">="),
-        OR("||", "||"),
-        LESS_THAN("<", "<"); */
-	sourceRepresentation : string;
-	targetRepresentation : string;
-	constructor (sourceRepresentation : string, targetRepresentation : string) {
-		this.sourceRepresentation = sourceRepresentation;
-		this.targetRepresentation = targetRepresentation;
-	}
-}
 /* private */class BooleanValue/*  */ {/* True("true"), False("false"); */
 	value : string;
 	constructor (value : string) {
@@ -957,7 +928,7 @@ enum IncompleteClassSegmentVariant {
 	compile(input : string) : string {
 		let state : CompileState = CompileState.createInitial();
 		let parsed : [CompileState, List<T>] = parseStatements(state, input, Main.compileRootSegment);
-		let joined = parsed[0]().structures.iterate().collect(new Joiner()).orElse("");
+		let joined = parsed[0]().structures.iterate().collect(Joiner.empty()).orElse("");
 		return joined + generateStatements(parsed[1]());
 	}
 	generateStatements(statements : List<string>) : string {
@@ -989,7 +960,7 @@ enum IncompleteClassSegmentVariant {
 		return cache + statement;
 	}
 	divideAll(input : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : List<string> {
-		let current : DivideState = new DivideState(input);
+		let current : DivideState = DivideState.createInitial(input);
 		while (true){
 			let maybePopped : Option<R> = current.pop().map((tuple : [string, DivideState]) => {
 				return foldSingleQuotes(tuple).or(() => foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()));
@@ -1167,7 +1138,7 @@ enum IncompleteClassSegmentVariant {
 				/* completed1 */ = completed.addFirst(new Statement(1, definition));
 			}
 			let withMaybeConstructor : List<ClassSegment> = atttachConstructor(prototype, /* completed1 */);
-			let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
+			let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
 			let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 			let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
 			let compileState = /* withEnum */.popStructName();
@@ -1670,7 +1641,7 @@ enum IncompleteClassSegmentVariant {
 		}
 		return new None();
 	}
-	parseOperation(state : CompileState, value : string, depth : number, operator : /* Operator */) : Option<[CompileState, Value]> {
+	parseOperation(state : CompileState, value : string, depth : number, operator : Operator) : Option<[CompileState, Value]> {
 		return first(value, operator.sourceRepresentation, (leftString, rightString) => {
 			let leftTuple : [CompileState, Value] = parseValue(state, leftString, depth);
 			let rightTuple : [CompileState, Value] = parseValue(leftTuple[0](), rightString, depth);

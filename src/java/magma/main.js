@@ -232,13 +232,13 @@ var IncompleteClassSegmentVariant;
         return this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
     }
     joinTypeParams() {
-        return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
+        return this.typeParams.iterate().collect(Joiner.empty()).map((inner) => "<" + inner + ">").orElse("");
     }
     mapType(mapper) {
         return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper(this.type), this.typeParams);
     }
     generateWithParams(joinedParameters) {
-        let joinedAnnotations = this.annotations.iterate().map((value) => "@" + value + " ").collect(new Joiner()).orElse("");
+        let joinedAnnotations = this.annotations.iterate().map((value) => "@" + value + " ").collect(Joiner.empty()).orElse("");
         let joined = this.joinTypeParams();
         let before = this.joinBefore();
         let typeString = this.generateType();
@@ -305,8 +305,9 @@ var IncompleteClassSegmentVariant;
             return new Some(new ObjectType(name, this.typeParams, this.definitions.last().orElse(Lists.empty())));
         }
         let maybeTypeParam = this.typeParams.iterate().filter((param) => param.equals(name)).next();
-        if ( /* maybeTypeParam instanceof Some */( /* var value */)) {
-            return new Some(new TypeParam( /* value */));
+        if (maybeTypeParam._variant === OptionVariant.Some) {
+            let some = maybeTypeParam;
+            return new Some(new TypeParam(some.value));
         }
         return this.objectTypes.iterate().filter((type) => type.name.equals(name)).next().map((type) => type);
     }
@@ -343,79 +344,65 @@ var IncompleteClassSegmentVariant;
     }
 }
 /* private static */ class DivideState /*  */ {
-}
-this.segments = segments;
-this.buffer = buffer;
-this.depth = depth;
-this.input = input;
-this.index = index;
-DivideState(input, string);
-{
-    /* this(input, 0, Lists.empty(), "", 0) */ ;
-}
-advance();
-DivideState;
-{
-    this.segments = this.segments.addLast(this.buffer);
-    this.buffer = "";
-    return this;
-}
-append(c, string);
-DivideState;
-{
-    this.buffer = this.buffer + c;
-    return this;
-}
-enter();
-DivideState;
-{
-    /* this.depth++ */ ;
-    return this;
-}
-isLevel();
-boolean;
-{
-    return this.depth === 0;
-}
-exit();
-DivideState;
-{
-    /* this.depth-- */ ;
-    return this;
-}
-isShallow();
-boolean;
-{
-    return this.depth === 1;
-}
-pop();
-Option < [string, DivideState] > {
-    : .index < this.input.length()
-};
-{
-    let c = this.input.charAt(this.index);
-    return new Some(new Tuple2Impl(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
-}
-return new None();
-popAndAppendToTuple();
-Option < [string, DivideState] > {
-    return: this.pop().map((tuple) => {
-        let c = tuple[0]();
-        let right = tuple[1]();
-        return new Tuple2Impl(c, right.append(c));
-    })
-};
-popAndAppendToOption();
-Option < DivideState > {
-    return: this.popAndAppendToTuple().map(Tuple2.right)
-};
-peek();
-string;
-{
-    return this.input.charAt(this.index);
+    constructor(input, index, segments, buffer, depth) {
+        this.segments = segments;
+        this.buffer = buffer;
+        this.depth = depth;
+        this.input = input;
+        this.index = index;
+    }
+    createInitial(input) {
+        return new DivideState(input, 0, Lists.empty(), "", 0);
+    }
+    advance() {
+        this.segments = this.segments.addLast(this.buffer);
+        this.buffer = "";
+        return this;
+    }
+    append(c) {
+        this.buffer = this.buffer + c;
+        return this;
+    }
+    enter() {
+        /* this.depth++ */ ;
+        return this;
+    }
+    isLevel() {
+        return this.depth === 0;
+    }
+    exit() {
+        /* this.depth-- */ ;
+        return this;
+    }
+    isShallow() {
+        return this.depth === 1;
+    }
+    pop() {
+        if (this.index < this.input.length()) {
+            let c = this.input.charAt(this.index);
+            return new Some(new Tuple2Impl(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
+        }
+        return new None();
+    }
+    popAndAppendToTuple() {
+        return this.pop().map((tuple) => {
+            let c = tuple[0]();
+            let right = tuple[1]();
+            return new Tuple2Impl(c, right.append(c));
+        });
+    }
+    popAndAppendToOption() {
+        return this.popAndAppendToTuple().map(Tuple2.right);
+    }
+    peek() {
+        return this.input.charAt(this.index);
+    }
 }
 /* private */ class Joiner /*  */ {
     constructor(delimiter) {
+    }
+    empty() {
+        return new Joiner("");
     }
     createInitial() {
         return new None();
@@ -433,32 +420,33 @@ string;
     }
 }
 /* private static */ class FlatMapHead {
-}
-this.mapper = mapper;
-this.current = new None();
-this.head = head;
-next();
-Option < R > {
-    while() {
-        if (this.current.isPresent()) {
-            let inner = this.current.orElse( /* null */);
-            let maybe = inner.next();
-            if (maybe.isPresent()) {
-                return maybe;
+    constructor(head, mapper) {
+        this.mapper = mapper;
+        this.current = new None();
+        this.head = head;
+    }
+    next() {
+        while (true) {
+            if (this.current.isPresent()) {
+                let inner = this.current.orElse( /* null */);
+                let maybe = inner.next();
+                if (maybe.isPresent()) {
+                    return maybe;
+                }
+                else {
+                    this.current = new None();
+                }
+            }
+            let outer = this.head.next();
+            if (outer.isPresent()) {
+                this.current = outer.map(this.mapper);
             }
             else {
-                this.current = new None();
+                return new None();
             }
         }
-        let outer = this.head.next();
-        if (outer.isPresent()) {
-            this.current = outer.map(this.mapper);
-        }
-        else {
-            return new None();
-        }
     }
-};
+}
 /* private */ class ArrayType /*  */ {
     constructor(right) {
     }
@@ -598,8 +586,12 @@ Option < R > {
         return new FunctionType(Lists.empty(), this.type);
     }
 }
+/* private */ class Operator /*  */ {
+    constructor(sourceRepresentation, targetRepresentation) {
+    }
+}
 /* private */ class Operation /*  */ {
-    constructor(left, operator /* Operator */, right) {
+    constructor(left, operator, right) {
     }
     generate() {
         return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
@@ -625,7 +617,7 @@ Option < R > {
         return "{" + this.joinStatements() + createIndent(this.depth) + "}";
     }
     joinStatements() {
-        return this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+        return this.statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
     }
 }
 /* private */ class Lambda /*  */ {
@@ -664,24 +656,7 @@ Option < R > {
         return this.stripped + createDebugString(this.type);
     }
 }
-/* private */ class JVMMap {
-    constructor(map) {
-    }
-    find(key) {
-        if (this.map.containsKey(key)) {
-            return new Some(this.map.get(key));
-        }
-        return new None();
-    }
-    with(key, value) {
-        /* this.map.put(key, value) */ ;
-        return this;
-    }
-}
 /* private static */ class Maps /*  */ {
-    empty() {
-        return new JVMMap();
-    }
 }
 /* private */ class MapCollector {
     createInitial() {
@@ -699,31 +674,25 @@ Option < R > {
         return "constructor " + joinedParameters;
     }
 }
-/* private static */ class Method /*  */ {
-}
-this.depth = depth;
-this.header = header;
-this.parameters = parameters;
-this.statements = maybeStatements;
-joinStatements(statements, (List));
-string;
-{
-    return statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
-}
-generate();
-string;
-{
-    let indent = createIndent(this.depth);
-    let generatedHeader = this.header.generateWithParams(joinValues(this.parameters));
-    let generatedStatements = this.statements.map(Method.joinStatements).map((inner) => " {" + inner + indent + "}").orElse(";");
-    return indent + generatedHeader + generatedStatements;
+/* private */ class Method /*  */ {
+    constructor(depth, header, parameters, maybeStatements) {
+    }
+    joinStatements(statements) {
+        return statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
+    }
+    generate() {
+        let indent = createIndent(this.depth);
+        let generatedHeader = this.header.generateWithParams(joinValues(this.parameters));
+        let generatedStatements = this.maybeStatements.map(Method.joinStatements).map((inner) => " {" + inner + indent + "}").orElse(";");
+        return indent + generatedHeader + generatedStatements;
+    }
 }
 /* private */ class Block /*  */ {
     constructor(depth, header, statements) {
     }
     generate() {
         let indent = createIndent(this.depth);
-        let collect = this.statements.iterate().map(FunctionSegment.generate).collect(new Joiner()).orElse("");
+        let collect = this.statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
         return indent + this.header.generate() + "{" + collect + indent + "}";
     }
 }
@@ -853,12 +822,6 @@ string;
         })(),
         _a;
 })();
-/* private */ class Operator /*  */ {
-    constructor(sourceRepresentation, targetRepresentation) {
-        this.sourceRepresentation = sourceRepresentation;
-        this.targetRepresentation = targetRepresentation;
-    }
-}
 /* private */ class BooleanValue /*  */ {
     constructor(value) {
         this.value = value;
@@ -891,7 +854,7 @@ string;
 {
     let state = CompileState.createInitial();
     let parsed = parseStatements(state, input, Main.compileRootSegment);
-    let joined = parsed[0]().structures.iterate().collect(new Joiner()).orElse("");
+    let joined = parsed[0]().structures.iterate().collect(Joiner.empty()).orElse("");
     return joined + generateStatements(parsed[1]());
 }
 generateStatements(statements, (List));
@@ -934,7 +897,7 @@ string;
 }
 divideAll(input, string, folder, (arg0, arg1) => DivideState);
 List < string > {
-    let, current: DivideState = new DivideState(input),
+    let, current: DivideState = DivideState.createInitial(input),
     while() {
         let maybePopped = current.pop().map((tuple) => {
             return foldSingleQuotes(tuple).or(() => foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()));
@@ -1135,7 +1098,7 @@ Option < [CompileState, ClassSegment] > {
             completed.addFirst(new Statement(1, definition));
         }
         let withMaybeConstructor = atttachConstructor(prototype);
-        let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(new Joiner()).orElse("");
+        let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
         let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
         let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
         let compileState = /* withEnum */ .popStructName();
@@ -1721,7 +1684,7 @@ Option < [CompileState, Value] > {
     return new Some(new Tuple2Impl(state, new Placeholder(stripped)));
 }
 return new None();
-parseOperation(state, CompileState, value, string, depth, number, operator);
+parseOperation(state, CompileState, value, string, depth, number, operator, Operator);
 Option < [CompileState, Value] > {
     return: first(value, operator.sourceRepresentation, (leftString, rightString) => {
         let leftTuple = parseValue(state, leftString, depth);

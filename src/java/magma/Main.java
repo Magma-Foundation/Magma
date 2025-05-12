@@ -568,7 +568,7 @@ public class Main {
 
         private String joinTypeParams() {
             return this.typeParams.iterate()
-                    .collect(new Joiner())
+                    .collect(Joiner.empty())
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
         }
@@ -582,7 +582,7 @@ public class Main {
         public String generateWithParams(String joinedParameters) {
             var joinedAnnotations = this.annotations.iterate()
                     .map(value -> "@" + value + " ")
-                    .collect(new Joiner())
+                    .collect(Joiner.empty())
                     .orElse("");
 
             var joined = this.joinTypeParams();
@@ -695,8 +695,8 @@ public class Main {
                     .filter(param -> param.equals(name))
                     .next();
 
-            if (maybeTypeParam instanceof Some(var value)) {
-                return new Some<>(new TypeParam(value));
+            if (maybeTypeParam instanceof Some<String> some) {
+                return new Some<>(new TypeParam(some.value));
             }
 
             return this.objectTypes.iterate()
@@ -754,7 +754,7 @@ public class Main {
         private List<String> segments;
         private String buffer;
 
-        public DivideState(String input, int index, List<String> segments, String buffer, int depth) {
+        DivideState(String input, int index, List<String> segments, String buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -762,8 +762,8 @@ public class Main {
             this.index = index;
         }
 
-        public DivideState(String input) {
-            this(input, 0, Lists.empty(), "", 0);
+        public static DivideState createInitial(String input) {
+            return new DivideState(input, 0, Lists.empty(), "", 0);
         }
 
         private DivideState advance() {
@@ -822,8 +822,8 @@ public class Main {
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private Joiner() {
-            this("");
+        private static Joiner empty() {
+            return new Joiner("");
         }
 
         @Override
@@ -854,7 +854,7 @@ public class Main {
         private final Head<T> head;
         private Option<Iterator<R>> current;
 
-        public FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
+        FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
             this.mapper = mapper;
             this.current = new None<>();
             this.head = head;
@@ -1091,6 +1091,16 @@ public class Main {
         }
     }
 
+    private record Operator(String sourceRepresentation, String targetRepresentation) {
+        static Operator ADD = new Operator("+", "+");
+        static Operator AND = new Operator("&&", "&&");
+        static Operator EQUALS = new Operator("==", "===");
+        static Operator GREATER_THAN_OR_EQUALS = new Operator(">=", ">=");
+        static Operator LESS_THAN = new Operator("<", "<");
+        static Operator OR = new Operator("||", "||");
+        static Operator SUBTRACT = new Operator("-", "-");
+    }
+
     private record Operation(Value left, Operator operator, Value right) implements Value {
         @Override
         public String generate() {
@@ -1124,7 +1134,7 @@ public class Main {
         private String joinStatements() {
             return this.statements.iterate()
                     .map(FunctionSegment::generate)
-                    .collect(new Joiner())
+                    .collect(Joiner.empty())
                     .orElse("");
         }
     }
@@ -1178,6 +1188,7 @@ public class Main {
     }
 
     private static class Maps {
+        @Actual
         private record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
             public JVMMap() {
                 this(new HashMap<>());
@@ -1198,6 +1209,7 @@ public class Main {
             }
         }
 
+        @Actual
         public static <V, K> Map<K, V> empty() {
             return new JVMMap<>();
         }
@@ -1227,23 +1239,16 @@ public class Main {
         }
     }
 
-    private static class Method implements ClassSegment {
-        private final int depth;
-        private final Header header;
-        private final List<Definition> parameters;
-        private final Option<List<FunctionSegment>> statements;
-
-        public Method(int depth, Header header, List<Definition> parameters, Option<List<FunctionSegment>> maybeStatements) {
-            this.depth = depth;
-            this.header = header;
-            this.parameters = parameters;
-            this.statements = maybeStatements;
-        }
-
+    private record Method(
+            int depth,
+            Header header,
+            List<Definition> parameters,
+            Option<List<FunctionSegment>> maybeStatements
+    ) implements ClassSegment {
         private static String joinStatements(List<FunctionSegment> statements) {
             return statements.iterate()
                     .map(FunctionSegment::generate)
-                    .collect(new Joiner())
+                    .collect(Joiner.empty())
                     .orElse("");
         }
 
@@ -1252,7 +1257,7 @@ public class Main {
             var indent = createIndent(this.depth);
 
             var generatedHeader = this.header.generateWithParams(joinValues(this.parameters));
-            var generatedStatements = this.statements.map(Method::joinStatements)
+            var generatedStatements = this.maybeStatements.map(Method::joinStatements)
                     .map(inner -> " {" + inner + indent + "}")
                     .orElse(";");
 
@@ -1267,7 +1272,7 @@ public class Main {
             var collect = this.statements
                     .iterate()
                     .map(FunctionSegment::generate)
-                    .collect(new Joiner())
+                    .collect(Joiner.empty())
                     .orElse("");
 
             return indent + this.header.generate() + "{" + collect + indent + "}";
@@ -1410,7 +1415,7 @@ public class Main {
     private static String compile(String input) {
         var state = CompileState.createInitial();
         var parsed = parseStatements(state, input, Main::compileRootSegment);
-        var joined = parsed.left().structures.iterate().collect(new Joiner()).orElse("");
+        var joined = parsed.left().structures.iterate().collect(Joiner.empty()).orElse("");
         return joined + generateStatements(parsed.right());
     }
 
@@ -1462,7 +1467,7 @@ public class Main {
     }
 
     private static List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState(input);
+        var current = DivideState.createInitial(input);
         while (true) {
             var maybePopped = current.pop().map(tuple -> {
                 return foldSingleQuotes(tuple)
@@ -1707,7 +1712,7 @@ public class Main {
             var withMaybeConstructor = atttachConstructor(prototype, completed1);
             var parsed2 = withMaybeConstructor.iterate()
                     .map(ClassSegment::generate)
-                    .collect(new Joiner())
+                    .collect(Joiner.empty())
                     .orElse("");
 
             var joinedTypeParams = prototype.typeParams().iterate()
@@ -2689,24 +2694,6 @@ public class Main {
         @Override
         public Option<String> findName() {
             return new None<>();
-        }
-    }
-
-    private enum Operator {
-        ADD("+", "+"),
-        SUBTRACT("-", "-"),
-        EQUALS("==", "==="),
-        AND("&&", "&&"),
-        GREATER_THAN_OR_EQUALS(">=", ">="),
-        OR("||", "||"),
-        LESS_THAN("<", "<");
-
-        private final String sourceRepresentation;
-        private final String targetRepresentation;
-
-        Operator(String sourceRepresentation, String targetRepresentation) {
-            this.sourceRepresentation = sourceRepresentation;
-            this.targetRepresentation = targetRepresentation;
         }
     }
 
