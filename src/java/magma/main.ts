@@ -151,9 +151,12 @@ enum ResultVariant {
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X>;
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R) : R;
 }
+/* private */interface IOError/*  */ {
+	display() : string;
+}
 /* private */interface Path/*  */ {
-	readString() : Result<string, /* IOException */>;
-	writeString(output : string) : Option</* IOException */>;
+	readString() : Result<string, IOError>;
+	writeString(output : string) : Option<IOError>;
 	resolve(childName : string) : Path;
 }
 /* private static final */class None<T>/*  */ {
@@ -918,6 +921,15 @@ enum ResultVariant {
 		return whenErr(this.error);
 	}
 }
+/* private */class JVMIOError/*  */ {
+	constructor (error : /* IOException */) {
+	}
+	display() : string {
+		let writer : /* StringWriter */ = new /* StringWriter */();
+		/* this.error.printStackTrace(new PrintWriter(writer)) */;
+		return writer.toString();
+	}
+}
 /* private */class Primitive/*  */ {
 	@nt("number"), @tring("string"), @oolean("boolean"), @nknown("unknown"), Void("void") : /*  */;
 	value : string;
@@ -974,10 +986,12 @@ enum ResultVariant {
                 .mapValue(this::compile)
                 .match(target::writeString, Some::new)
                 .or(this::executeTSC)
-                .ifPresent(Throwable::printStackTrace) */;
+                .ifPresent(error ->  {
+                    System.err.println(error.display());
+                }) */;
 	}
 	findRoot() : Path;
-	executeTSC() : Option</* IOException */>;
+	executeTSC() : Option<IOError>;
 	compile(input : string) : string {
 		let state : CompileState = CompileState.createInitial();
 		let parsed : [CompileState, List<T>] = this.parseStatements(state, input, this.compileRootSegment);

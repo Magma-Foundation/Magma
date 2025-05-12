@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -203,10 +205,14 @@ public class Main {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
-    private interface Path {
-        Result<String, IOException> readString();
+    private interface IOError {
+        String display();
+    }
 
-        Option<IOException> writeString(String output);
+    private interface Path {
+        Result<String, IOError> readString();
+
+        Option<IOError> writeString(String output);
 
         Path resolve(String childName);
     }
@@ -1442,16 +1448,25 @@ public class Main {
         }
     }
 
+    private record JVMIOError(IOException error) implements IOError {
+        @Override
+        public String display() {
+            var writer = new StringWriter();
+            this.error.printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+    }
+
     @Actual
     private record JVMPath(java.nio.file.Path path) implements Main.Path {
         @Actual
         @Override
-        public Option<IOException> writeString(String output) {
+        public Option<IOError> writeString(String output) {
             try {
                 Files.writeString(this.path, output);
                 return new None<>();
             } catch (IOException e) {
-                return new Some<>(e);
+                return new Some<>(new JVMIOError(e));
             }
         }
 
@@ -1462,11 +1477,11 @@ public class Main {
 
         @Actual
         @Override
-        public Result<String, IOException> readString() {
+        public Result<String, IOError> readString() {
             try {
                 return new Ok<>(Files.readString(this.path));
             } catch (IOException e) {
-                return new Err<>(e);
+                return new Err<>(new JVMIOError(e));
             }
         }
     }
@@ -1511,7 +1526,9 @@ public class Main {
                 .mapValue(this::compile)
                 .match(target::writeString, Some::new)
                 .or(this::executeTSC)
-                .ifPresent(Throwable::printStackTrace);
+                .ifPresent(error ->  {
+                    System.err.println(error.display());
+                });
     }
 
     @Actual
@@ -1520,7 +1537,7 @@ public class Main {
     }
 
     @Actual
-    private Option<IOException> executeTSC() {
+    private Option<IOError> executeTSC() {
         try {
             new ProcessBuilder("cmd", "/c", "npm", "exec", "tsc")
                     .inheritIO()
@@ -1528,9 +1545,9 @@ public class Main {
                     .waitFor();
             return new None<>();
         } catch (InterruptedException e) {
-            return new Some<>(new IOException(e));
+            return new Some<>(new JVMIOError(new IOException(e)));
         } catch (IOException e) {
-            return new Some<>(e);
+            return new Some<>(new JVMIOError(e));
         }
     }
 

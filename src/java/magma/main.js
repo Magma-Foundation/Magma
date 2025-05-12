@@ -811,6 +811,15 @@ var ResultVariant;
         return whenErr(this.error);
     }
 }
+/* private */ class JVMIOError /*  */ {
+    constructor(error /* IOException */) {
+    }
+    display() {
+        let writer = new /* StringWriter */ ();
+        /* this.error.printStackTrace(new PrintWriter(writer)) */ ;
+        return writer.toString();
+    }
+}
 /* private */ let Primitive = (() => {
     var _a;
     let __decorators;
@@ -895,7 +904,9 @@ var ResultVariant;
                 .mapValue(this::compile)
                 .match(target::writeString, Some::new)
                 .or(this::executeTSC)
-                .ifPresent(Throwable::printStackTrace) */ ;
+                .ifPresent(error ->  {
+                    System.err.println(error.display());
+                }) */ ;
     }
     compile(input) {
         let state = CompileState.createInitial();
