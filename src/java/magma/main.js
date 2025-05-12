@@ -870,34 +870,51 @@ var ResultVariant;
     }
 }
 /* public */ class Main /*  */ {
+    generatePlaceholder(input) {
+        let replaced = input.replace("/*", "content-start").replace("*/", "content-end");
+        return "/* " + replaced + " */";
+    }
+    joinValues(retainParameters) {
+        let inner = retainParameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+        return "(" + inner + ")";
+    }
+    createIndent(depth) {
+        return "\n" + "\t".repeat(depth);
+    }
+    createDebugString(type) {
+        if (!Main.isDebug) {
+            return "";
+        }
+        return generatePlaceholder(": " + type.generate());
+    }
     main() {
-        let parent = findRoot();
+        let parent = this.findRoot();
         let source = parent.resolve("Main.java");
         let target = parent.resolve("main.ts");
         /* source.readString()
-                .mapValue(Main::compile)
+                .mapValue(this::compile)
                 .match(target::writeString, Some::new)
-                .or(Main::executeTSC)
+                .or(this::executeTSC)
                 .ifPresent(Throwable::printStackTrace) */ ;
     }
     compile(input) {
         let state = CompileState.createInitial();
-        let parsed = parseStatements(state, input, Main.compileRootSegment);
+        let parsed = this.parseStatements(state, input, this.compileRootSegment);
         let joined = parsed[0]().structures.iterate().collect(Joiner.empty()).orElse("");
-        return joined + generateStatements(parsed[1]());
+        return joined + this.generateStatements(parsed[1]());
     }
     generateStatements(statements) {
-        return generateAll(Main.mergeStatements, statements);
+        return this.generateAll(this.mergeStatements, statements);
     }
     parseStatements(state, input, mapper) {
-        return parseAllWithIndices(state, input, Main.foldStatementChar, (state3, tuple) => new Some(mapper(state3, tuple.right()))).orElseGet(() => new Tuple2Impl(state, Lists.empty()));
+        return this.parseAllWithIndices(state, input, this.foldStatementChar, (state3, tuple) => new Some(mapper(state3, tuple.right()))).orElseGet(() => new Tuple2Impl(state, Lists.empty()));
     }
     generateAll(merger, elements) {
         return elements.iterate().fold("", merger);
     }
     parseAllWithIndices(state, input, folder, mapper) {
-        let stringList = divideAll(input, folder);
-        return mapUsingState(state, stringList, mapper);
+        let stringList = this.divideAll(input, folder);
+        return this.mapUsingState(state, stringList, mapper);
     }
     mapUsingState(state, elements, mapper) {
         let initial = new Some(new Tuple2Impl(state, Lists.empty()));
@@ -918,7 +935,7 @@ var ResultVariant;
         let current = DivideState.createInitial(input);
         while (true) {
             let maybePopped = current.pop().map((tuple) => {
-                return foldSingleQuotes(tuple).or(() => foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()));
+                return this.foldSingleQuotes(tuple).or(() => this.foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()));
             });
             if (maybePopped.isPresent()) {
                 current = maybePopped.orElse(current);
@@ -955,7 +972,7 @@ var ResultVariant;
             return new None();
         }
         let appended = tuple[1]().append(tuple[0]());
-        return appended.popAndAppendToTuple().map(Main.foldEscaped).flatMap(DivideState.popAndAppendToOption);
+        return appended.popAndAppendToTuple().map(this.foldEscaped).flatMap(DivideState.popAndAppendToOption);
     }
     foldEscaped(escaped) {
         if (escaped[0]() ===  /*  '\\' */) {
@@ -984,27 +1001,27 @@ var ResultVariant;
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Tuple2Impl(state, "");
         }
-        return parseClass(stripped, state).flatMap((tuple) => completeClassSegment(tuple[0](), tuple[1]())).map((tuple0) => new Tuple2Impl(tuple0.left(), tuple0.right().generate())).orElseGet(() => new Tuple2Impl(state, generatePlaceholder(stripped)));
+        return this.parseClass(stripped, state).flatMap((tuple) => this.completeClassSegment(tuple[0](), tuple[1]())).map((tuple0) => new Tuple2Impl(tuple0.left(), tuple0.right().generate())).orElseGet(() => new Tuple2Impl(state, generatePlaceholder(stripped)));
     }
     parseClass(stripped, state) {
-        return parseStructure(stripped, "class ", "class ", state);
+        return this.parseStructure(stripped, "class ", "class ", state);
     }
     parseStructure(stripped, sourceInfix, targetInfix, state) {
-        return first(stripped, sourceInfix, (beforeInfix, right) => {
-            return first(right, "{", (beforeContent, withEnd) => {
-                return suffix(withEnd.strip(), "}", (content1) => {
-                    return last(beforeInfix.strip(), "\n", (annotationsString, s2) => {
-                        let annotations = parseAnnotations(annotationsString);
-                        return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
+        return this.first(stripped, sourceInfix, (beforeInfix, right) => {
+            return this.first(right, "{", (beforeContent, withEnd) => {
+                return this.suffix(withEnd.strip(), "}", (content1) => {
+                    return this.last(beforeInfix.strip(), "\n", (annotationsString, s2) => {
+                        let annotations = this.parseAnnotations(annotationsString);
+                        return this.parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
                     }).or(() => {
-                        return parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+                        return this.parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
                     });
                 });
             });
         });
     }
     parseAnnotations(annotationsString) {
-        return divideAll(annotationsString.strip(), Main.foldByDelimiter).iterate().map(strip).filter((value) => !value.isEmpty()).map((value) => value.substring(1)).map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
+        return this.divideAll(annotationsString.strip(), this.foldByDelimiter).iterate().map(strip).filter((value) => !value.isEmpty()).map((value) => value.substring(1)).map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
     }
     foldByDelimiter(state1, c) {
         if (c ===  /*  '\n' */) {
@@ -1013,67 +1030,67 @@ var ResultVariant;
         return state1.append(c);
     }
     parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations) {
-        return last(beforeContent, " permits ", (s, s2) => {
-            let variants = divideAll(s2, Main.foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
-            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+        return this.last(beforeContent, " permits ", (s, s2) => {
+            let variants = this.divideAll(s2, this.foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
+            return this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants, annotations);
         }).or(() => {
-            return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations);
+            return this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations);
         });
     }
     parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
-        return first(beforeContent, " implements ", (s, s2) => {
-            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+        return this.first(beforeContent, " implements ", (s, s2) => {
+            return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations);
         }).or(() => {
-            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
+            return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
         });
     }
     parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
-        return first(beforeContent, " extends ", (s, s2) => {
-            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+        return this.first(beforeContent, " extends ", (s, s2) => {
+            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations);
         }).or(() => {
-            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
+            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
         });
     }
     parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
-        return suffix(beforeContent.strip(), ")", (s) => {
-            return first(s, "(", (s1, s2) => {
-                let parsed = parseParameters(state, s2);
-                return parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations);
+        return this.suffix(beforeContent.strip(), ")", (s) => {
+            return this.first(s, "(", (s1, s2) => {
+                let parsed = this.parseParameters(state, s2);
+                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations);
             });
         }).or(() => {
-            return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations);
+            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations);
         });
     }
     parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations) {
-        return first(beforeContent, "<", (name, withTypeParams) => {
-            return first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
+        return this.first(beforeContent, "<", (name, withTypeParams) => {
+            return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
                 let mapper = (state1, s) => new Tuple2Impl(state1, s.strip());
-                let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-                return assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
+                let typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
+                return this.assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
             });
         }).or(() => {
-            return assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
+            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
         });
     }
     assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants) {
         let name = rawName.strip();
-        if (!isSymbol(name)) {
+        if (!this.isSymbol(name)) {
             return new None();
         }
         if (annotations.contains("Actual")) {
             return new Some(new Tuple2Impl(state, new Whitespace()));
         }
-        let segmentsTuple = parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) => parseClassSegment(state0, input, 1));
+        let segmentsTuple = this.parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) => this.parseClassSegment(state0, input, 1));
         let segmentsState = segmentsTuple[0]();
         let segments = segmentsTuple[1]();
-        let parameters = retainDefinitions(rawParameters);
+        let parameters = this.retainDefinitions(rawParameters);
         let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants);
         return new Some(new Tuple2Impl(segmentsState.addType(prototype.createObjectType()), prototype));
     }
     completeStructure(state, prototype) {
         let thisType = prototype.createObjectType();
         let state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-        return mapUsingState(state2, prototype.segments(), (state1, entry) => completeClassSegment(state1, entry.right())).map((completedTuple) => {
+        return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((completedTuple) => {
             let completedState = completedTuple[0]();
             let completed = completedTuple[1]();
             let exited = completedState.exitDefinitions();
@@ -1092,7 +1109,7 @@ var ResultVariant;
                 let definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
                 completed.addFirst(new Statement(1, definition));
             }
-            let withMaybeConstructor = atttachConstructor(prototype);
+            let withMaybeConstructor = this.atttachConstructor(prototype);
             let parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
             let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
             let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
@@ -1114,11 +1131,11 @@ var ResultVariant;
     completeClassSegment(state1, segment) {
         /* return switch (segment) */ {
             /* case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment)) */ ;
-            /* case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype) */ ;
+            /* case MethodPrototype methodPrototype -> this.completeMethod(state1, methodPrototype) */ ;
             /* case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace)) */ ;
             /* case Placeholder placeholder -> new Some<>(new Tuple2Impl<>(state1, placeholder)) */ ;
-            /* case ClassDefinition classDefinition -> completeDefinition(state1, classDefinition) */ ;
-            /* case StructurePrototype structurePrototype -> completeStructure(state1, structurePrototype) */ ;
+            /* case ClassDefinition classDefinition -> this.completeDefinition(state1, classDefinition) */ ;
+            /* case StructurePrototype structurePrototype -> this.completeStructure(state1, structurePrototype) */ ;
         }
         /*  */ ;
     }
@@ -1159,7 +1176,7 @@ var ResultVariant;
         return mapper(slice);
     }
     parseClassSegment(state, input, depth) {
-        return Main. < /* Whitespace, IncompleteClassSegment>typed */ (() => parseWhitespace(input, state)).or(() => typed(() => parseClass(input, state))).or(() => typed(() => parseStructure(input, "interface ", "interface ", state))).or(() => typed(() => parseStructure(input, "record ", "class ", state))).or(() => typed(() => parseStructure(input, "enum ", "class ", state))).or(() => parseMethod(state, input, depth)).or(() => typed(() => parseDefinitionStatement(input, depth, state))).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
+        return this. < /* Whitespace, IncompleteClassSegment>typed */ (() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.parseMethod(state, input, depth)).or(() => this.typed(() => this.parseDefinitionStatement(input, depth, state))).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
     }
     typed(action) {
         return action().map((tuple) => new Tuple2Impl(tuple[0](), tuple[1]()));
@@ -1171,18 +1188,18 @@ var ResultVariant;
         return new None();
     }
     parseMethod(state, input, depth) {
-        return first(input, "(", (definitionString, withParams) => {
-            return first(withParams, ")", (parametersString, rawContent) => {
-                return parseDefinition(state, definitionString). < Tuple2 < /* CompileState, Header>>map */ ((tuple) => new Tuple2Impl(tuple.left(), tuple.right())).or(() => parseConstructor(state, definitionString)).flatMap((definitionTuple) => assembleMethod(depth, parametersString, rawContent, definitionTuple));
+        return this.first(input, "(", (definitionString, withParams) => {
+            return this.first(withParams, ")", (parametersString, rawContent) => {
+                return this.parseDefinition(state, definitionString). < Tuple2 < /* CompileState, Header>>map */ ((tuple) => new Tuple2Impl(tuple.left(), tuple.right())).or(() => this.parseConstructor(state, definitionString)).flatMap((definitionTuple) => this.assembleMethod(depth, parametersString, rawContent, definitionTuple));
             });
         });
     }
     assembleMethod(depth, parametersString, rawContent, definitionTuple) {
         let definitionState = definitionTuple[0]();
         let header = definitionTuple[1]();
-        let parametersTuple = parseParameters(definitionState, parametersString);
+        let parametersTuple = this.parseParameters(definitionState, parametersString);
         let rawParameters = parametersTuple[1]();
-        let parameters = retainDefinitions(rawParameters);
+        let parameters = this.retainDefinitions(rawParameters);
         let prototype = new MethodPrototype(depth, header, parameters, rawContent.strip());
         return new Some(new Tuple2Impl(parametersTuple[0]().define(prototype.createDefinition()), prototype));
     }
@@ -1203,7 +1220,7 @@ var ResultVariant;
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
             let substring = prototype.content().substring(1, prototype.content().length() - 1);
             let withDefined = state.enterDefinitions().defineAll(prototype.parameters());
-            let statementsTuple = parseStatements(withDefined, substring, (state1, input1) => parseFunctionSegment(state1, input1, prototype.depth() + 1));
+            let statementsTuple = this.parseStatements(withDefined, substring, (state1, input1) => this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
             let statements = statementsTuple[1]();
             return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.parameters(), new Some(statements))));
         }
@@ -1216,42 +1233,38 @@ var ResultVariant;
         }
         return new None();
     }
-    joinValues(retainParameters) {
-        let inner = retainParameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
-        return "(" + inner + ")";
-    }
     retainDefinitions(right) {
-        return right.iterate().map(Main.retainDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+        return right.iterate().map(this.retainDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
     }
     parseParameters(state, params) {
-        return parseValuesOrEmpty(state, params, (state1, s) => new Some(parseParameter(state1, s)));
+        return this.parseValuesOrEmpty(state, params, (state1, s) => new Some(this.parseParameter(state1, s)));
     }
     parseFunctionSegments(state, input, depth) {
-        return parseStatements(state, input, (state1, input1) => parseFunctionSegment(state1, input1, depth + 1));
+        return this.parseStatements(state, input, (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
     }
     parseFunctionSegment(state, input, depth) {
         let stripped = input.strip();
         if (stripped.isEmpty()) {
             return new Tuple2Impl(state, new Whitespace());
         }
-        return parseFunctionStatement(state, depth, stripped).or(() => parseBlock(state, depth, stripped)).orElseGet(() => new Tuple2Impl(state, new Placeholder(stripped)));
+        return this.parseFunctionStatement(state, depth, stripped).or(() => this.parseBlock(state, depth, stripped)).orElseGet(() => new Tuple2Impl(state, new Placeholder(stripped)));
     }
     parseFunctionStatement(state, depth, stripped) {
-        return suffix(stripped, ";", (s) => {
-            let tuple = parseStatementValue(state, s, depth);
+        return this.suffix(stripped, ";", (s) => {
+            let tuple = this.parseStatementValue(state, s, depth);
             let left = tuple[0]();
             let right = tuple[1]();
             return new Some(new Tuple2Impl(left, new Statement(depth, right)));
         });
     }
     parseBlock(state, depth, stripped) {
-        return suffix(stripped, "}", (withoutEnd) => {
-            return split(() => toFirst(withoutEnd), (beforeContent, content) => {
-                return suffix(beforeContent, "{", (headerString) => {
-                    let headerTuple = parseBlockHeader(state, headerString, depth);
+        return this.suffix(stripped, "}", (withoutEnd) => {
+            return this.split(() => this.toFirst(withoutEnd), (beforeContent, content) => {
+                return this.suffix(beforeContent, "{", (headerString) => {
+                    let headerTuple = this.parseBlockHeader(state, headerString, depth);
                     let headerState = headerTuple[0]();
                     let header = headerTuple[1]();
-                    let statementsTuple = parseFunctionSegments(headerState, content, depth);
+                    let statementsTuple = this.parseFunctionSegments(headerState, content, depth);
                     let statementsState = statementsTuple[0]();
                     let statements = statementsTuple[1]().addAllFirst(statementsState.functionSegments);
                     return new Some(new Tuple2Impl(statementsState.clearFunctionSegments(), new Block(depth, header, statements)));
@@ -1260,7 +1273,7 @@ var ResultVariant;
         });
     }
     toFirst(input) {
-        let divisions = divideAll(input, Main.foldBlockStart);
+        let divisions = this.divideAll(input, this.foldBlockStart);
         return divisions.removeFirst().map((removed) => {
             let right = removed[0]();
             let left = removed[1]().iterate().collect(new Joiner("")).orElse("");
@@ -1269,7 +1282,7 @@ var ResultVariant;
     }
     parseBlockHeader(state, input, depth) {
         let stripped = input.strip();
-        return parseConditional(state, stripped, "if", depth).or(() => parseConditional(state, stripped, "while", depth)).or(() => parseElse(state, input)).orElseGet(() => new Tuple2Impl(state, new Placeholder(stripped)));
+        return this.parseConditional(state, stripped, "if", depth).or(() => this.parseConditional(state, stripped, "while", depth)).or(() => this.parseElse(state, input)).orElseGet(() => new Tuple2Impl(state, new Placeholder(stripped)));
     }
     parseElse(state, input) {
         let stripped = input.strip();
@@ -1279,10 +1292,10 @@ var ResultVariant;
         return new None();
     }
     parseConditional(state, input, prefix, depth) {
-        return prefix(input, prefix, (withoutPrefix) => {
-            return prefix(withoutPrefix.strip(), "(", (withoutValueStart) => {
-                return suffix(withoutValueStart, ")", (value) => {
-                    let valueTuple = parseValue(state, value, depth);
+        return this.prefix(input, prefix, (withoutPrefix) => {
+            return this.prefix(withoutPrefix.strip(), "(", (withoutValueStart) => {
+                return this.suffix(withoutValueStart, ")", (value) => {
+                    let valueTuple = this.parseValue(state, value, depth);
                     let value1 = valueTuple[1]();
                     return new Some(new Tuple2Impl(valueTuple[0](), new Conditional(prefix, value1)));
                 });
@@ -1306,24 +1319,24 @@ var ResultVariant;
         let stripped = input.strip();
         if (stripped.startsWith("return ")) {
             let value = stripped.substring("return ".length());
-            let tuple = parseValue(state, value, depth);
+            let tuple = this.parseValue(state, value, depth);
             let value1 = tuple[1]();
             return new Tuple2Impl(tuple[0](), new Return(value1));
         }
-        return parseAssignment(state, depth, stripped).orElseGet(() => {
+        return this.parseAssignment(state, depth, stripped).orElseGet(() => {
             return new Tuple2Impl(state, new Placeholder(stripped));
         });
     }
     parseAssignment(state, depth, stripped) {
-        return first(stripped, "=", (beforeEquals, valueString) => {
-            let sourceTuple = parseValue(state, valueString, depth);
+        return this.first(stripped, "=", (beforeEquals, valueString) => {
+            let sourceTuple = this.parseValue(state, valueString, depth);
             let sourceState = sourceTuple[0]();
             let source = sourceTuple[1]();
-            return parseDefinition(sourceState, beforeEquals).flatMap((definitionTuple) => parseInitialization(definitionTuple[0](), definitionTuple[1](), source)).or(() => parseAssignment(depth, beforeEquals, sourceState, source));
+            return this.parseDefinition(sourceState, beforeEquals).flatMap((definitionTuple) => this.parseInitialization(definitionTuple[0](), definitionTuple[1](), source)).or(() => this.parseAssignment(depth, beforeEquals, sourceState, source));
         });
     }
     parseAssignment(depth, beforeEquals, sourceState, source) {
-        let destinationTuple = parseValue(sourceState, beforeEquals, depth);
+        let destinationTuple = this.parseValue(sourceState, beforeEquals, depth);
         let destinationState = destinationTuple[0]();
         let destination = destinationTuple[1]();
         return new Some(new Tuple2Impl(destinationState, new Assignment(destination, source)));
@@ -1340,7 +1353,7 @@ var ResultVariant;
         return new Some(new Tuple2Impl(state.define(definition), new Initialization(definition, source)));
     }
     parseValue(state, input, depth) {
-        return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseInstanceOf(state, input, depth)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth)).or(() => parseOperation(state, input, depth)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
+        return this.parseBoolean(state, input).or(() => this.parseLambda(state, input, depth)).or(() => this.parseString(state, input)).or(() => this.parseDataAccess(state, input, depth)).or(() => this.parseSymbolValue(state, input)).or(() => this.parseInvokable(state, input, depth)).or(() => this.parseDigits(state, input)).or(() => this.parseInstanceOf(state, input, depth)).or(() => this.parseOperation(state, input, depth, Operator.ADD)).or(() => this.parseOperation(state, input, depth, Operator.EQUALS)).or(() => this.parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => this.parseOperation(state, input, depth, Operator.AND)).or(() => this.parseOperation(state, input, depth, Operator.OR)).or(() => this.parseOperation(state, input, depth)).or(() => this.parseOperation(state, input, depth)).or(() => this.parseNot(state, input, depth)).or(() => this.parseMethodReference(state, input, depth)).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
     }
     parseBoolean(state, input) {
         let stripped = input.strip();
@@ -1353,9 +1366,9 @@ var ResultVariant;
         return new None();
     }
     parseInstanceOf(state, input, depth) {
-        return last(input, "instanceof", (s, s2) => {
-            let childTuple = parseValue(state, s, depth);
-            return parseDefinition(childTuple[0](), s2).map((definitionTuple) => {
+        return this.last(input, "instanceof", (s, s2) => {
+            let childTuple = this.parseValue(state, s, depth);
+            return this.parseDefinition(childTuple[0](), s2).map((definitionTuple) => {
                 let value = childTuple[1]();
                 let definition = definitionTuple[1]();
                 let variant = new DataAccess(value, "_variant", Primitive.Unknown);
@@ -1368,8 +1381,8 @@ var ResultVariant;
         });
     }
     parseMethodReference(state, input, depth) {
-        return last(input, "::", (s, s2) => {
-            let tuple = parseValue(state, s, depth);
+        return this.last(input, "::", (s, s2) => {
+            let tuple = this.parseValue(state, s, depth);
             return new Some(new Tuple2Impl(tuple[0](), new DataAccess(tuple[1](), s2, Primitive.Unknown)));
         });
     }
@@ -1377,16 +1390,16 @@ var ResultVariant;
         let stripped = input.strip();
         if (stripped.startsWith("!")) {
             let slice = stripped.substring(1);
-            let tuple = parseValue(state, slice, depth);
+            let tuple = this.parseValue(state, slice, depth);
             let value = tuple[1]();
             return new Some(new Tuple2Impl(tuple[0](), new Not(value)));
         }
         return new None();
     }
     parseLambda(state, input, depth) {
-        return first(input, "->", (beforeArrow, valueString) => {
+        return this.first(input, "->", (beforeArrow, valueString) => {
             let strippedBeforeArrow = beforeArrow.strip();
-            if (isSymbol(strippedBeforeArrow)) {
+            if (this.isSymbol(strippedBeforeArrow)) {
                 let type = Primitive.Unknown;
                 if ( /* state.typeRegister instanceof Some */( /* var expectedType */)) {
                     if ( /* expectedType */._variant === Variant.FunctionType) {
@@ -1394,11 +1407,11 @@ var ResultVariant;
                         type = functionType.arguments.get(0).orElse( /* null */);
                     }
                 }
-                return assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
+                return this.assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
             }
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
-                let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).map((name) => ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
-                return assembleLambda(state, parameterNames, valueString, depth);
+                let parameterNames = this.divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), this.foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).map((name) => ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
+                return this.assembleLambda(state, parameterNames, valueString, depth);
             }
             return new None();
         });
@@ -1408,12 +1421,12 @@ var ResultVariant;
         /* Tuple2Impl<CompileState, LambdaValue> value */ ;
         let state2 = state.defineAll(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
-            let value1 = parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => parseFunctionSegment(state1, input1, depth + 1));
+            let value1 = this.parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
             let right = value1[1]();
             new Tuple2Impl(value1[0](), new BlockLambdaValue(depth, right));
         }
         else {
-            let value1 = parseValue(state2, strippedValueString, depth);
+            let value1 = this.parseValue(state2, strippedValueString, depth);
             new Tuple2Impl(value1[0](), value1[1]());
         }
         let right = /* value */ .right();
@@ -1421,7 +1434,7 @@ var ResultVariant;
     }
     parseDigits(state, input) {
         let stripped = input.strip();
-        if (isNumber(stripped)) {
+        if (this.isNumber(stripped)) {
             return new Some(new Tuple2Impl(state, new SymbolValue(stripped, Primitive.Int)));
         }
         return new None();
@@ -1434,7 +1447,7 @@ var ResultVariant;
         else {
             input;
         }
-        return areAllDigits( /* maybeTruncated */);
+        return this.areAllDigits( /* maybeTruncated */);
     }
     areAllDigits(input) {
         /* for (var i = 0; i < input.length(); i++) */ {
@@ -1447,26 +1460,26 @@ var ResultVariant;
         return true;
     }
     parseInvokable(state, input, depth) {
-        return suffix(input.strip(), ")", (withoutEnd) => {
-            return split(() => toLast(withoutEnd, "", Main.foldInvocationStart), (callerWithEnd, argumentsString) => {
-                return suffix(callerWithEnd, "(", (callerString) => {
-                    return assembleInvokable(state, depth, argumentsString, callerString.strip());
+        return this.suffix(input.strip(), ")", (withoutEnd) => {
+            return this.split(() => this.toLast(withoutEnd, "", this.foldInvocationStart), (callerWithEnd, argumentsString) => {
+                return this.suffix(callerWithEnd, "(", (callerString) => {
+                    return this.assembleInvokable(state, depth, argumentsString, callerString.strip());
                 });
             });
         });
     }
     assembleInvokable(state, depth, argumentsString, callerString) {
-        let callerTuple = invocationHeader(state, depth, callerString);
+        let callerTuple = this.invocationHeader(state, depth, callerString);
         let oldCallerState = callerTuple[0]();
         let oldCaller = callerTuple[1]();
-        let newCaller = modifyCaller(oldCallerState, oldCaller);
-        let callerType = findCallerType(newCaller);
-        let argumentsTuple = parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) => {
+        let newCaller = this.modifyCaller(oldCallerState, oldCaller);
+        let callerType = this.findCallerType(newCaller);
+        let argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) => {
             let index = pair.left();
             let element = pair.right();
             let expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
             let withExpected = currentState.withExpectedType(expectedType);
-            let valueTuple = parseArgument(withExpected, element, depth);
+            let valueTuple = this.parseArgument(withExpected, element, depth);
             let valueState = valueTuple[0]();
             let value = valueTuple[1]();
             let actualType = valueTuple[0]().typeRegister.orElse(Primitive.Unknown);
@@ -1474,7 +1487,7 @@ var ResultVariant;
         }).orElseGet(() => new Tuple2Impl(oldCallerState, Lists.empty()));
         let argumentsState = argumentsTuple.left();
         let argumentsWithActualTypes = argumentsTuple.right();
-        let arguments = argumentsWithActualTypes.iterate().map(Tuple2.left).map(Main.retainValue).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let arguments = argumentsWithActualTypes.iterate().map(Tuple2.left).map(this.retainValue).flatMap(Iterators.fromOption).collect(new ListCollector());
         let invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some(new Tuple2Impl(argumentsState, invokable));
     }
@@ -1489,7 +1502,7 @@ var ResultVariant;
         if (element.isEmpty()) {
             return new Tuple2Impl(state, new Whitespace());
         }
-        let tuple = parseValue(state, element, depth);
+        let tuple = this.parseValue(state, element, depth);
         return new Tuple2Impl(tuple[0](), tuple[1]());
     }
     findCallerType(newCaller) {
@@ -1510,7 +1523,7 @@ var ResultVariant;
     }
     modifyCaller(state, oldCaller) {
         if (oldCaller._variant === CallerVariant.DataAccess) {
-            let type = resolveType(access.parent, state);
+            let type = this.resolveType(access.parent, state);
             if ( /* type instanceof FunctionType */) {
                 let access = oldCaller;
                 return access.parent;
@@ -1524,7 +1537,7 @@ var ResultVariant;
     invocationHeader(state, depth, callerString1) {
         if (callerString1.startsWith("new ")) {
             let input1 = callerString1.substring("new ".length());
-            let map = parseType(state, input1).map((type) => {
+            let map = this.parseType(state, input1).map((type) => {
                 let right = type[1]();
                 return new Tuple2Impl(type[0](), new ConstructionCaller(right));
             });
@@ -1532,7 +1545,7 @@ var ResultVariant;
                 return map.orElse( /* null */);
             }
         }
-        let tuple = parseValue(state, callerString1, depth);
+        let tuple = this.parseValue(state, callerString1, depth);
         return new Tuple2Impl(tuple[0](), tuple[1]());
     }
     foldInvocationStart(state, c) {
@@ -1550,12 +1563,12 @@ var ResultVariant;
         return appended;
     }
     parseDataAccess(state, input, depth) {
-        return last(input.strip(), ".", (parentString, rawProperty) => {
+        return this.last(input.strip(), ".", (parentString, rawProperty) => {
             let property = rawProperty.strip();
-            if (!isSymbol(property)) {
+            if (!this.isSymbol(property)) {
                 return new None();
             }
-            let tuple = parseValue(state, parentString, depth);
+            let tuple = this.parseValue(state, parentString, depth);
             let parent = tuple[1]();
             let parentType = parent.type();
             if ( /* parentType instanceof TupleType */) {
@@ -1585,7 +1598,7 @@ var ResultVariant;
     }
     parseSymbolValue(state, value) {
         let stripped = value.strip();
-        if (isSymbol(stripped)) {
+        if (this.isSymbol(stripped)) {
             if ( /* state.resolveValue(stripped) instanceof Some */( /* var type */)) {
                 return new Some(new Tuple2Impl(state, new SymbolValue(stripped, type)));
             }
@@ -1597,64 +1610,61 @@ var ResultVariant;
         return new None();
     }
     parseOperation(state, value, depth, operator) {
-        return first(value, operator.sourceRepresentation, (leftString, rightString) => {
-            let leftTuple = parseValue(state, leftString, depth);
-            let rightTuple = parseValue(leftTuple[0](), rightString, depth);
+        return this.first(value, operator.sourceRepresentation, (leftString, rightString) => {
+            let leftTuple = this.parseValue(state, leftString, depth);
+            let rightTuple = this.parseValue(leftTuple[0](), rightString, depth);
             let left = leftTuple[1]();
             let right = rightTuple[1]();
             return new Some(new Tuple2Impl(rightTuple[0](), new Operation(left, operator, right)));
         });
     }
     parseValuesOrEmpty(state, input, mapper) {
-        return parseValues(state, input, mapper).orElseGet(() => new Tuple2Impl(state, Lists.empty()));
+        return this.parseValues(state, input, mapper).orElseGet(() => new Tuple2Impl(state, Lists.empty()));
     }
     parseValues(state, input, mapper) {
-        return parseValuesWithIndices(state, input, (state1, tuple) => mapper(state1, tuple.right()));
+        return this.parseValuesWithIndices(state, input, (state1, tuple) => mapper(state1, tuple.right()));
     }
     parseValuesWithIndices(state, input, mapper) {
-        return parseAllWithIndices(state, input, Main.foldValueChar, mapper);
+        return this.parseAllWithIndices(state, input, this.foldValueChar, mapper);
     }
     parseParameter(state, input) {
         if (input.isBlank()) {
             return new Tuple2Impl(state, new Whitespace());
         }
-        return parseDefinition(state, input).map((tuple) => new Tuple2Impl(tuple[0](), tuple[1]())).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
-    }
-    createIndent(depth) {
-        return "\n" + "\t".repeat(depth);
+        return this.parseDefinition(state, input).map((tuple) => new Tuple2Impl(tuple[0](), tuple[1]())).orElseGet(() => new Tuple2Impl(state, new Placeholder(input)));
     }
     parseDefinitionStatement(input, depth, state) {
-        return suffix(input.strip(), ";", (withoutEnd) => {
-            return parseDefinition(state, withoutEnd).map((result) => {
+        return this.suffix(input.strip(), ";", (withoutEnd) => {
+            return this.parseDefinition(state, withoutEnd).map((result) => {
                 let definition = result[1]();
                 return new Tuple2Impl(result[0](), new ClassDefinition(definition, depth));
             });
         });
     }
     parseDefinition(state, input) {
-        return last(input.strip(), " ", (beforeName, name) => {
-            return split(() => toLast(beforeName, " ", Main.foldTypeSeparator), (beforeType, type) => {
-                return last(beforeType, "\n", (s, s2) => {
-                    let annotations = parseAnnotations(s);
-                    return getOr(state, name, s2, type, annotations);
+        return this.last(input.strip(), " ", (beforeName, name) => {
+            return this.split(() => this.toLast(beforeName, " ", this.foldTypeSeparator), (beforeType, type) => {
+                return this.last(beforeType, "\n", (s, s2) => {
+                    let annotations = this.parseAnnotations(s);
+                    return this.getOr(state, name, s2, type, annotations);
                 }).or(() => {
-                    return getOr(state, name, beforeType, type, Lists.empty());
+                    return this.getOr(state, name, beforeType, type, Lists.empty());
                 });
-            }).or(() => assembleDefinition(state, Lists.empty(), new None(), name, Lists.empty(), beforeName));
+            }).or(() => this.assembleDefinition(state, Lists.empty(), new None(), name, Lists.empty(), beforeName));
         });
     }
     getOr(state, name, beforeType, type, annotations) {
-        return suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
-            return first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
-                let typeParams = parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(new Tuple2Impl(state1, s.strip())));
-                return assembleDefinition(typeParams[0](), annotations, new Some(beforeTypeParams), name, typeParams[1](), type);
+        return this.suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
+            return this.first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
+                let typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(new Tuple2Impl(state1, s.strip())));
+                return this.assembleDefinition(typeParams[0](), annotations, new Some(beforeTypeParams), name, typeParams[1](), type);
             });
         }).or(() => {
-            return assembleDefinition(state, annotations, new Some(beforeType), name, Lists.empty(), type);
+            return this.assembleDefinition(state, annotations, new Some(beforeType), name, Lists.empty(), type);
         });
     }
     toLast(input, separator, folder) {
-        let divisions = divideAll(input, folder);
+        let divisions = this.divideAll(input, folder);
         return divisions.removeLast().map((removed) => {
             let left = removed[0]().iterate().collect(new Joiner(separator)).orElse("");
             let right = removed[1]();
@@ -1675,7 +1685,7 @@ var ResultVariant;
         return appended;
     }
     assembleDefinition(state, annotations, beforeTypeParams, name, typeParams, type) {
-        return parseType(state.withTypeParams(typeParams), type).map((type1) => {
+        return this.parseType(state.withTypeParams(typeParams), type).map((type1) => {
             let node = new ImmutableDefinition(annotations, beforeTypeParams, name.strip(), type1[1](), typeParams);
             return new Tuple2Impl(type1[0](), node);
         });
@@ -1719,7 +1729,7 @@ var ResultVariant;
         if (stripped.equals("void")) {
             return new Some(new Tuple2Impl(state, Primitive.Void));
         }
-        if (isSymbol(stripped)) {
+        if (this.isSymbol(stripped)) {
             if ( /* state.resolveType(stripped) instanceof Some */( /* var resolved */)) {
                 return new Some(new Tuple2Impl(state));
             }
@@ -1727,11 +1737,11 @@ var ResultVariant;
                 return new Some(new Tuple2Impl(state, new Placeholder(stripped)));
             }
         }
-        return parseTemplate(state, input).or(() => varArgs(state, input));
+        return this.parseTemplate(state, input).or(() => this.varArgs(state, input));
     }
     varArgs(state, input) {
-        return suffix(input, "...", (s) => {
-            return parseType(state, s).map((inner) => {
+        return this.suffix(input, "...", (s) => {
+            return this.parseType(state, s).map((inner) => {
                 let newState = inner[0]();
                 let child = inner[1]();
                 return new Tuple2Impl(newState, new ArrayType(child));
@@ -1739,7 +1749,7 @@ var ResultVariant;
         });
     }
     assembleTemplate(base, state, arguments) {
-        let children = arguments.iterate().map(Main.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let children = arguments.iterate().map(this.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
         if (base.equals("BiFunction")) {
             return new Tuple2Impl(state, new FunctionType(Lists.of(children.get(0).orElse( /* null */), children.get(1).orElse( /* null */)), children.get(2).orElse( /* null */)));
         }
@@ -1766,11 +1776,11 @@ var ResultVariant;
         return new Tuple2Impl(state, new Template(new Placeholder(base), children));
     }
     parseTemplate(state, input) {
-        return suffix(input.strip(), ">", (withoutEnd) => {
-            return first(withoutEnd, "<", (base, argumentsString) => {
+        return this.suffix(input.strip(), ">", (withoutEnd) => {
+            return this.first(withoutEnd, "<", (base, argumentsString) => {
                 let strippedBase = base.strip();
-                return parseValues(state, argumentsString, Main.argument).map((argumentsTuple) => {
-                    return assembleTemplate(strippedBase, argumentsTuple[0](), argumentsTuple[1]());
+                return this.parseValues(state, argumentsString, this.argument).map((argumentsTuple) => {
+                    return this.assembleTemplate(strippedBase, argumentsTuple[0](), argumentsTuple[1]());
                 });
             });
         });
@@ -1788,10 +1798,10 @@ var ResultVariant;
         if (input.isBlank()) {
             return new Some(new Tuple2Impl(state, new Whitespace()));
         }
-        return parseType(state, input).map((tuple) => new Tuple2Impl(tuple[0](), tuple[1]()));
+        return this.parseType(state, input).map((tuple) => new Tuple2Impl(tuple[0](), tuple[1]()));
     }
     last(input, infix, mapper) {
-        return infix(input, infix, Main.findLast, mapper);
+        return this.infix(input, infix, this.findLast, mapper);
     }
     findLast(input, infix) {
         let index = input.lastIndexOf(infix);
@@ -1801,13 +1811,13 @@ var ResultVariant;
         return new Some(index);
     }
     first(input, infix, mapper) {
-        return infix(input, infix, Main.findFirst, mapper);
+        return this.infix(input, infix, this.findFirst, mapper);
     }
     split(splitter, splitMapper) {
         return splitter().flatMap((splitTuple) => splitMapper(splitTuple[0](), splitTuple[1]()));
     }
     infix(input, infix, locator, mapper) {
-        return split(() => locator(input, infix).map((index) => {
+        return this.split(() => locator(input, infix).map((index) => {
             let left = input.substring(0, index);
             let right = input.substring(index + infix.length());
             return new Tuple2Impl(left, right);
@@ -1819,16 +1829,6 @@ var ResultVariant;
             return new None();
         }
         return new Some(index);
-    }
-    generatePlaceholder(input) {
-        let replaced = input.replace("/*", "content-start").replace("*/", "content-end");
-        return "/* " + replaced + " */";
-    }
-    createDebugString(type) {
-        if (!Main.isDebug) {
-            return "";
-        }
-        return generatePlaceholder(": " + type.generate());
     }
 }
 /*  */ 
