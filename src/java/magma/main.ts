@@ -100,6 +100,9 @@
 /* private */interface BlockHeader/*  */ {
 	generate() : string;
 }
+/* private */interface StatementValue/*  */ {
+	generate() : string;
+}
 /* private static */class None<T>/*  */ {
 	/* @Override
         public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
@@ -878,12 +881,8 @@
 		return "constructor " + joinedParameters/* : string */;
 	}
 }
-/* private static */class DefinitionStatement/*  */ {
-	/* private final */ depth : number;
-	/* private final */ definition : Definition;
-	DefinitionStatement(depth : number, definition : Definition) : /* public */ {
-		/* this */.depth/* : unknown */ = depth/* : number */;
-		/* this */.definition/* : unknown */ = definition/* : unknown */;
+/* private */class DefinitionStatement/*  */ {
+	constructor (depth : number, definition : Definition) {
 	}
 	/* @Override
         public */ generate() : string {
@@ -934,6 +933,40 @@
 	/* @Override
         public */ generate() : string {
 		return "else ";
+	}
+}
+/* private static */class Return/*  */ {
+	/* private final */ value1 : Value;
+	Return(value1 : Value) : /* public */ {
+		/* this */.value1/* : unknown */ = value1/* : Value */;
+	}
+	/* @Override
+        public */ generate() : string {
+		return "return " + /* this */.value1/* : unknown */.generate/* : unknown */()/* : unknown */;
+	}
+}
+/* private */class Initialization/*  */ {
+	constructor (definition : Definition, source : Value) {
+	}
+	/* @Override
+        public */ generate() : string {
+		return "let " + /* this */.definition/* : unknown */.generate/* : unknown */()/* : unknown */ + " = " + /* this */.source/* : unknown */.generate/* : unknown */()/* : unknown */;
+	}
+}
+/* private */class Assignment/*  */ {
+	constructor (destination : Value, source : Value) {
+	}
+	/* @Override
+        public */ generate() : string {
+		return /* this */.destination/* : unknown */.generate/* : unknown */()/* : unknown */ + " = " + /* this */.source/* : unknown */.generate/* : unknown */()/* : unknown */;
+	}
+}
+/* private */class Statement/*  */ {
+	constructor (depth : number, value : StatementValue) {
+	}
+	/* @Override
+        public */ generate() : string {
+		return /* createIndent */(/* this */.depth/* : unknown */)/* : unknown */ + /* this */.value/* : unknown */.generate/* : unknown */()/* : unknown */ + ";";
 	}
 }
 /* private */class Primitive/*  */ {
@@ -1005,13 +1038,10 @@
 		}
 	}
 	/* private static */ compile(input : string) : string {
-		let tuple = /* compileStatements */(new CompileState()/* : CompileState */, input/* : string */, Main/* : Main */.compileRootSegment/* : unknown */)/* : unknown */;
-		let joined = tuple/* : unknown */.left/* : unknown */()/* : unknown */.structures/* : unknown */.iterate/* : unknown */()/* : unknown */.collect/* : unknown */(new Joiner()/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
-		return joined/* : unknown */ + tuple/* : unknown */.right/* : unknown */()/* : unknown */;
-	}
-	/* private static */ compileStatements(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string]) : [CompileState, string] {
-		let parsed = /* parseStatements */(state/* : CompileState */, input/* : string */, mapper/* : (arg0 : T) => R */)/* : unknown */;
-		return new Tuple2Impl(parsed/* : unknown */.left/* : unknown */()/* : unknown */, /* generateStatements */(parsed/* : unknown */.right/* : unknown */()/* : unknown */)/* : unknown */)/* : Tuple2Impl */;
+		let state : CompileState = new CompileState()/* : CompileState */;
+		let parsed = /* parseStatements */(state/* : CompileState */, input/* : string */, Main/* : Main */.compileRootSegment/* : unknown */)/* : unknown */;
+		let joined = parsed/* : unknown */.left/* : unknown */()/* : unknown */.structures/* : unknown */.iterate/* : unknown */()/* : unknown */.collect/* : unknown */(new Joiner()/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
+		return joined/* : unknown */ + /* generateStatements */(parsed/* : unknown */.right/* : unknown */()/* : unknown */)/* : unknown */;
 	}
 	/* private static */ generateStatements(statements : List<string>) : string {
 		return /* generateAll */(Main/* : Main */.mergeStatements/* : unknown */, statements/* : List<FunctionSegment> */)/* : unknown */;
@@ -1113,12 +1143,12 @@
 		if (stripped/* : unknown */.startsWith/* : unknown */("package ")/* : unknown */ || stripped/* : unknown */.startsWith/* : unknown */("import ")/* : unknown */){
 			return new Tuple2Impl(state/* : CompileState */, "")/* : Tuple2Impl */;
 		}
-		return /* compileClass */(stripped/* : unknown */, 0/* : number */, state/* : CompileState */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.generate/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, /* generatePlaceholder */(stripped/* : unknown */)/* : unknown */)/* : Tuple2Impl */)/* : unknown */;
+		return /* parseClass */(stripped/* : unknown */, state/* : CompileState */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.generate/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, /* generatePlaceholder */(stripped/* : unknown */)/* : unknown */)/* : Tuple2Impl */)/* : unknown */;
 	}
-	/* private static */ compileClass(stripped : string, depth : number, state : CompileState) : Option<[CompileState, ClassSegment]> {
-		return /* compileStructure */(stripped/* : unknown */, "class ", "class ", state/* : CompileState */)/* : unknown */;
+	/* private static */ parseClass(stripped : string, state : CompileState) : Option<[CompileState, ClassSegment]> {
+		return /* parseStructure */(stripped/* : unknown */, "class ", "class ", state/* : CompileState */)/* : unknown */;
 	}
-	/* private static */ compileStructure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, ClassSegment]> {
+	/* private static */ parseStructure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, ClassSegment]> {
 		return first/* : unknown */(stripped/* : unknown */, sourceInfix/* : string */, (beforeInfix, right) => {
 			return first/* : unknown */(right/* : () => B */, "{", (beforeContent, withEnd) => {
 				return /* suffix */(withEnd/* : unknown */.strip/* : unknown */()/* : unknown */, "}", (content1) => {
@@ -1168,7 +1198,7 @@
 			return new None()/* : None */;
 		}
 		let joinedTypeParams = typeParams/* : () => List<string> */()/* : List<string> */.collect/* : (arg0 : Collector<T, R>) => R */(new Joiner(", ")/* : Joiner */)/* : R */.map/* : unknown */((inner) => "<" + inner + ">")/* : unknown */.orElse/* : unknown */("")/* : unknown */;
-		let statementsTuple : [CompileState, List<T>] = parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state/* : CompileState */.pushStructName/* : (arg0 : string) => CompileState */(name/* : () => string */)/* : CompileState */.withTypeParams/* : (arg0 : List<string>) => CompileState */(typeParams/* : () => List<string> */)/* : CompileState */, content/* : string */, (state0, input) => /* compileClassSegment */(state0/* : unknown */, input/* : string */, 1/* : number */)/* : unknown */)/* : [CompileState, List<T>] */;
+		let statementsTuple : [CompileState, List<T>] = parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state/* : CompileState */.pushStructName/* : (arg0 : string) => CompileState */(name/* : () => string */)/* : CompileState */.withTypeParams/* : (arg0 : List<string>) => CompileState */(typeParams/* : () => List<string> */)/* : CompileState */, content/* : string */, (state0, input) => /* parseClassSegment */(state0/* : unknown */, input/* : string */, 1/* : number */)/* : unknown */)/* : [CompileState, List<T>] */;
 		/* List<ClassSegment> withMaybeConstructor */;
 		if (rawParameters/* : List<Parameter> */.isEmpty/* : () => boolean */()/* : boolean */){
 			/* withMaybeConstructor */ = statementsTuple/* : [CompileState, List<T>] */[1/* : number */]()/* : unknown */;
@@ -1179,8 +1209,8 @@
 		}
 		let parsed2 = /* withMaybeConstructor */.iterate/* : unknown */()/* : unknown */.map/* : unknown */(ClassSegment/* : ClassSegment */.generate/* : unknown */)/* : unknown */.collect/* : unknown */(new Joiner()/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 		let generated = /* generatePlaceholder */(beforeInfix/* : unknown */.strip/* : unknown */()/* : unknown */)/* : unknown */ + targetInfix/* : string */ + name/* : () => string */ + joinedTypeParams/* : unknown */ + /* generatePlaceholder */(afterTypeParams/* : unknown */)/* : unknown */ + " {" + parsed2 + "\n}\n";
-		let compileState = statementsTuple/* : [CompileState, List<T>] */[0/* : number */]()/* : unknown */.popStructName/* : unknown */()/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */.addType/* : unknown */(new ObjectType(name/* : () => string */, typeParams/* : () => List<string> */, statementsTuple/* : [CompileState, List<T>] */[0/* : number */]()/* : unknown */.definitions/* : unknown */)/* : ObjectType */)/* : unknown */;
-		return new Some(new Tuple2Impl(compileState/* : unknown */, new Whitespace()/* : Whitespace */)/* : Tuple2Impl */)/* : Some */;
+		let definedState = statementsTuple/* : [CompileState, List<T>] */[0/* : number */]()/* : unknown */.popStructName/* : unknown */()/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */.addType/* : unknown */(new ObjectType(name/* : () => string */, typeParams/* : () => List<string> */, statementsTuple/* : [CompileState, List<T>] */[0/* : number */]()/* : unknown */.definitions/* : unknown */)/* : ObjectType */)/* : unknown */;
+		return new Some(new Tuple2Impl(definedState/* : unknown */, new Whitespace()/* : Whitespace */)/* : Tuple2Impl */)/* : Some */;
 	}
 	/* private static */ retainDefinition(parameter : Parameter) : Option<Definition> {
 		if (parameter/* : Parameter */._variant/* : unknown */ === ParameterVariant.Definition/* : unknown */){
@@ -1212,19 +1242,19 @@
 		let slice = input/* : string */.substring/* : unknown */(0/* : number */, input/* : string */.length/* : unknown */()/* : unknown */ - suffix/* : string */.length/* : unknown */()/* : unknown */)/* : unknown */;
 		return mapper/* : (arg0 : T) => R */(slice/* : unknown */)/* : R */;
 	}
-	/* private static */ compileClassSegment(state : CompileState, input : string, depth : number) : [CompileState, ClassSegment] {
-		return /* Main.<Whitespace, ClassSegment>typed */(() => /* compileWhitespace */(input/* : string */, state/* : CompileState */)/* : unknown */)/* : unknown */.or/* : unknown */(() => compileClass/* : (arg0 : string, arg1 : number, arg2 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, depth/* : number */, state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => compileStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "interface ", "interface ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => compileStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "record ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => compileStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "enum ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => /* compileMethod */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* compileDefinitionStatement */(input/* : string */, depth/* : number */, state/* : CompileState */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
+	/* private static */ parseClassSegment(state : CompileState, input : string, depth : number) : [CompileState, ClassSegment] {
+		return /* Main.<Whitespace, ClassSegment>typed */(() => /* parseWhitespace */(input/* : string */, state/* : CompileState */)/* : unknown */)/* : unknown */.or/* : unknown */(() => parseClass/* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "interface ", "interface ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "record ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => parseStructure/* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, ClassSegment]> */(input/* : string */, "enum ", "class ", state/* : CompileState */)/* : Option<[CompileState, ClassSegment]> */)/* : unknown */.or/* : unknown */(() => /* parseMethod */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseDefinitionStatement */(input/* : string */, depth/* : number */, state/* : CompileState */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
 	/* private static  */ typed<T extends SS>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
 		return action/* : () => Option<[CompileState, T]> */()/* : Option<[CompileState, T]> */.map/* : (arg0 : (arg0 : [CompileState, T]) => R) => Option<R> */((tuple : [CompileState, T]) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : Option<R> */;
 	}
-	/* private static */ compileWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
+	/* private static */ parseWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
 		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){
 			return new Some(new Tuple2Impl(state/* : CompileState */, new Whitespace()/* : Whitespace */)/* : Tuple2Impl */)/* : Some */;
 		}
 		return new None()/* : None */;
 	}
-	/* private static */ compileMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, ClassSegment]> {
+	/* private static */ parseMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, ClassSegment]> {
 		return first/* : unknown */(input/* : string */, "(", (definitionString, withParams) => {
 			return first/* : unknown */(withParams/* : unknown */, ")", (parametersString, rawContent) => {
 				return /* parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.or/* : unknown */(() => /* parseConstructor */(state/* : CompileState */, definitionString/* : unknown */)/* : unknown */)/* : unknown */.flatMap/* : unknown */((definitionTuple) => {
@@ -1269,7 +1299,7 @@
 		return right/* : () => B */()/* : B */.map/* : unknown */(Main/* : Main */.retainDefinition/* : unknown */)/* : unknown */.flatMap/* : unknown */(Iterators/* : Iterators */.fromOption/* : unknown */)/* : unknown */.collect/* : unknown */(new ListCollector()/* : ListCollector */)/* : unknown */;
 	}
 	/* private static */ parseParameters(state : CompileState, params : string) : [CompileState, List<Parameter>] {
-		return /* parseValuesOrEmpty */(state/* : CompileState */, params/* : List<Parameter> */, (state1, s) => new Some(/* compileParameter */(state1/* : unknown */, s/* : unknown */)/* : unknown */)/* : Some */)/* : unknown */;
+		return /* parseValuesOrEmpty */(state/* : CompileState */, params/* : List<Parameter> */, (state1, s) => new Some(/* parseParameter */(state1/* : unknown */, s/* : unknown */)/* : unknown */)/* : Some */)/* : unknown */;
 	}
 	/* private static */ parseFunctionSegments(state : CompileState, input : string, depth : number) : [CompileState, List<FunctionSegment>] {
 		return parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state/* : CompileState */, input/* : string */, (state1, input1) => /* parseFunctionSegment */(state1/* : unknown */, input1/* : unknown */, depth/* : number */ + 1/* : number */)/* : unknown */)/* : [CompileState, List<T>] */;
@@ -1279,23 +1309,25 @@
 		if (stripped/* : unknown */.isEmpty/* : unknown */()/* : unknown */){
 			return new Tuple2Impl(state/* : CompileState */, new Whitespace()/* : Whitespace */)/* : Tuple2Impl */;
 		}
-		return /* parseFunctionStatement */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */.or/* : unknown */(() => /* compileBlock */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(stripped/* : unknown */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
+		return /* parseFunctionStatement */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseBlock */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(stripped/* : unknown */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
 	/* private static */ parseFunctionStatement(state : CompileState, depth : number, stripped : string) : Option<[CompileState, FunctionSegment]> {
 		return suffix/* : string */(stripped/* : unknown */, ";", (s) => {
-			let tuple = /* compileStatementValue */(state/* : CompileState */, s/* : unknown */, depth/* : number */)/* : unknown */;
-			return new Some(new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, () => /* createIndent */(depth/* : number */)/* : unknown */ + tuple/* : unknown */.right/* : unknown */()/* : unknown */ + ";")/* : Tuple2Impl */)/* : Some */;
+			let tuple = /* parseStatementValue */(state/* : CompileState */, s/* : unknown */, depth/* : number */)/* : unknown */;
+			let left = tuple/* : unknown */.left/* : unknown */()/* : unknown */;
+			let right = tuple/* : unknown */.right/* : unknown */()/* : unknown */;
+			return new Some(new Tuple2Impl(left/* : () => A */, new Statement(depth/* : number */, right/* : () => B */)/* : Statement */)/* : Tuple2Impl */)/* : Some */;
 		})/* : unknown */;
 	}
-	/* private static */ compileBlock(state : CompileState, depth : number, stripped : string) : Option<[CompileState, FunctionSegment]> {
+	/* private static */ parseBlock(state : CompileState, depth : number, stripped : string) : Option<[CompileState, FunctionSegment]> {
 		return suffix/* : string */(stripped/* : unknown */, "}", (withoutEnd) => {
 			return /* split */(() => /* toFirst */(withoutEnd/* : unknown */)/* : unknown */, (beforeContent, content) => {
 				return suffix/* : string */(beforeContent/* : unknown */, "{", (s) => {
-					let compiled : [CompileState, List<FunctionSegment>] = parseFunctionSegments/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, List<FunctionSegment>] */(state/* : CompileState */, content/* : string */, depth/* : number */)/* : [CompileState, List<FunctionSegment>] */;
+					let statements : [CompileState, List<FunctionSegment>] = parseFunctionSegments/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, List<FunctionSegment>] */(state/* : CompileState */, content/* : string */, depth/* : number */)/* : [CompileState, List<FunctionSegment>] */;
 					let headerTuple = /* parseBlockHeader */(state/* : CompileState */, s/* : unknown */, depth/* : number */)/* : unknown */;
 					let headerState = headerTuple/* : unknown */.left/* : unknown */()/* : unknown */;
 					let header = headerTuple/* : unknown */.right/* : unknown */()/* : unknown */;
-					let right = compiled/* : [CompileState, List<FunctionSegment>] */[1/* : number */]()/* : unknown */;
+					let right : B = statements/* : List<FunctionSegment> */.right/* : () => B */()/* : B */;
 					return new Some(new Tuple2Impl(headerState/* : unknown */, new Block(depth/* : number */, header/* : Header */, right/* : () => B */)/* : Block */)/* : Tuple2Impl */)/* : Some */;
 				})/* : unknown */;
 			})/* : unknown */;
@@ -1311,22 +1343,22 @@
 	}
 	/* private static */ parseBlockHeader(state : CompileState, input : string, depth : number) : [CompileState, BlockHeader] {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
-		return /* compileConditional */(state/* : CompileState */, stripped/* : unknown */, "if", depth/* : number */)/* : unknown */.or/* : unknown */(() => /* compileConditional */(state/* : CompileState */, stripped/* : unknown */, "while", depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* compileElse */(state/* : CompileState */, input/* : string */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(stripped/* : unknown */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
+		return /* parseConditional */(state/* : CompileState */, stripped/* : unknown */, "if", depth/* : number */)/* : unknown */.or/* : unknown */(() => /* parseConditional */(state/* : CompileState */, stripped/* : unknown */, "while", depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseElse */(state/* : CompileState */, input/* : string */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(stripped/* : unknown */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
-	/* private static */ compileElse(state : CompileState, input : string) : Option<[CompileState, BlockHeader]> {
+	/* private static */ parseElse(state : CompileState, input : string) : Option<[CompileState, BlockHeader]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
 		if (stripped/* : unknown */.equals/* : unknown */("else")/* : unknown */){
 			return new Some(new Tuple2Impl(state/* : CompileState */, new Else()/* : Else */)/* : Tuple2Impl */)/* : Some */;
 		}
 		return new None()/* : None */;
 	}
-	/* private static */ compileConditional(state : CompileState, input : string, prefix : string, depth : number) : Option<[CompileState, BlockHeader]> {
+	/* private static */ parseConditional(state : CompileState, input : string, prefix : string, depth : number) : Option<[CompileState, BlockHeader]> {
 		return prefix/* : string */(input/* : string */, prefix/* : string */, (withoutPrefix) => {
 			return prefix/* : string */(withoutPrefix/* : unknown */.strip/* : unknown */()/* : unknown */, "(", (withoutValueStart) => {
 				return suffix/* : string */(withoutValueStart/* : unknown */, ")", (value) => {
-					let compiled = /* parseValue */(state/* : CompileState */, value/* : T */, depth/* : number */)/* : unknown */;
-					let value1 = compiled/* : [CompileState, List<FunctionSegment>] */[1/* : number */]()/* : unknown */;
-					return new Some(new Tuple2Impl(compiled/* : [CompileState, List<FunctionSegment>] */[0/* : number */]()/* : unknown */, new Conditional(prefix/* : string */, value1/* : unknown */)/* : Conditional */)/* : Tuple2Impl */)/* : Some */;
+					let valueTuple = /* parseValue */(state/* : CompileState */, value/* : T */, depth/* : number */)/* : unknown */;
+					let value1 = valueTuple/* : unknown */.right/* : unknown */()/* : unknown */;
+					return new Some(new Tuple2Impl(valueTuple/* : unknown */.left/* : unknown */()/* : unknown */, new Conditional(prefix/* : string */, value1/* : Value */)/* : Conditional */)/* : Tuple2Impl */)/* : Some */;
 				})/* : unknown */;
 			})/* : unknown */;
 		})/* : unknown */;
@@ -1344,45 +1376,42 @@
 		}
 		return appended/* : unknown */;
 	}
-	/* private static */ compileStatementValue(state : CompileState, input : string, depth : number) : [CompileState, string] {
+	/* private static */ parseStatementValue(state : CompileState, input : string, depth : number) : [CompileState, StatementValue] {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;
 		if (stripped/* : unknown */.startsWith/* : unknown */("return ")/* : unknown */){
 			let value = stripped/* : unknown */.substring/* : unknown */("return ".length/* : unknown */()/* : unknown */)/* : unknown */;
-			let tuple = /* compileValue */(state/* : CompileState */, value/* : T */, depth/* : number */)/* : unknown */;
-			return new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, "return " + tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */;
+			let tuple = /* parseValue */(state/* : CompileState */, value/* : T */, depth/* : number */)/* : unknown */;
+			let value1 = tuple/* : unknown */.right/* : unknown */()/* : unknown */;
+			return new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, new Return(value1/* : Value */)/* : Return */)/* : Tuple2Impl */;
 		}
-		return /* compileAssignment */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => {
-			return new Tuple2Impl(state/* : CompileState */, /* generatePlaceholder */(stripped/* : unknown */)/* : unknown */)/* : Tuple2Impl */;
+		return /* parseAssignment */(state/* : CompileState */, depth/* : number */, stripped/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => {
+			return new Tuple2Impl(state/* : CompileState */, new Placeholder(stripped/* : unknown */)/* : Placeholder */)/* : Tuple2Impl */;
 		})/* : unknown */;
 	}
-	/* private static */ compileAssignment(state : CompileState, depth : number, stripped : string) : Option<Tuple2Impl<CompileState, string>> {
+	/* private static */ parseAssignment(state : CompileState, depth : number, stripped : string) : Option<[CompileState, StatementValue]> {
 		return first/* : unknown */(stripped/* : unknown */, "=", (beforeEquals, valueString) => {
 			let sourceTuple = /* parseValue */(state/* : CompileState */, valueString/* : unknown */, depth/* : number */)/* : unknown */;
 			let sourceState = sourceTuple/* : unknown */.left/* : unknown */()/* : unknown */;
 			let source = sourceTuple/* : unknown */.right/* : unknown */()/* : unknown */;
-			let generatedSource = source/* : unknown */.generate/* : unknown */()/* : unknown */;
-			return /* parseDefinition */(sourceState/* : unknown */, beforeEquals/* : unknown */)/* : unknown */.flatMap/* : unknown */((definitionTuple) => {
-				let definitionState = definitionTuple/* : unknown */.left/* : unknown */()/* : unknown */;
-				let definition = definitionTuple/* : unknown */.right/* : unknown */()/* : unknown */.mapType/* : unknown */((type) => {
-					if (type/* : () => Type */(/* Primitive */.Unknown/* : unknown */)/* : Type */){
-						return source/* : unknown */.type/* : unknown */()/* : unknown */;
-					}
-					else {
-						return type/* : () => Type */;
-					}
-				})/* : unknown */;
-				return new Some(new Tuple2Impl(definitionState/* : unknown */.withDefinition/* : unknown */(definition/* : unknown */)/* : unknown */, "let " + definition/* : unknown */.generate/* : unknown */()/* : unknown */ + " = " + generatedSource/* : unknown */)/* : Tuple2Impl */)/* : Some */;
-			})/* : unknown */.or/* : unknown */(() => {
-				let destinationTuple = /* compileValue */(sourceState/* : unknown */, beforeEquals/* : unknown */, depth/* : number */)/* : unknown */;
-				let destinationState = destinationTuple/* : unknown */.left/* : unknown */()/* : unknown */;
-				let destinationString = destinationTuple/* : unknown */.right/* : unknown */()/* : unknown */;
-				return new Some(new Tuple2Impl(destinationState/* : unknown */, destinationString/* : unknown */ + " = " + generatedSource/* : unknown */)/* : Tuple2Impl */)/* : Some */;
-			})/* : unknown */;
+			return /* parseDefinition */(sourceState/* : unknown */, beforeEquals/* : unknown */)/* : unknown */.flatMap/* : unknown */((definitionTuple) => /* parseInitialization */(definitionTuple/* : unknown */.left/* : unknown */()/* : unknown */, definitionTuple/* : unknown */.right/* : unknown */()/* : unknown */, source/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseAssignment */(depth/* : number */, beforeEquals/* : unknown */, sourceState/* : unknown */, source/* : unknown */)/* : unknown */)/* : unknown */;
 		})/* : unknown */;
 	}
-	/* private static */ compileValue(state : CompileState, input : string, depth : number) : [CompileState, string] {
-		let tuple = /* parseValue */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */;
-		return new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.generate/* : unknown */()/* : unknown */)/* : Tuple2Impl */;
+	/* private static */ parseAssignment(depth : number, beforeEquals : string, sourceState : CompileState, source : Value) : Option<[CompileState, StatementValue]> {
+		let destinationTuple = /* parseValue */(sourceState/* : unknown */, beforeEquals/* : unknown */, depth/* : number */)/* : unknown */;
+		let destinationState = destinationTuple/* : unknown */.left/* : unknown */()/* : unknown */;
+		let destination = destinationTuple/* : unknown */.right/* : unknown */()/* : unknown */;
+		return new Some(new Tuple2Impl(destinationState/* : unknown */, new Assignment(destination/* : unknown */, source/* : unknown */)/* : Assignment */)/* : Tuple2Impl */)/* : Some */;
+	}
+	/* private static */ parseInitialization(state : CompileState, rawDefinition : Definition, source : Value) : Option<[CompileState, StatementValue]> {
+		let definition : Definition = rawDefinition/* : Definition */.mapType/* : (arg0 : (arg0 : Type) => Type) => Definition */((type : Type) => {
+			if (type/* : () => Type */(/* Primitive */.Unknown/* : unknown */)/* : Type */){
+				return source/* : unknown */.type/* : unknown */()/* : unknown */;
+			}
+			else {
+				return type/* : () => Type */;
+			}
+		})/* : Definition */;
+		return new Some(new Tuple2Impl(state/* : CompileState */.withDefinition/* : (arg0 : Definition) => CompileState */(definition/* : unknown */)/* : CompileState */, new Initialization(definition/* : unknown */, source/* : unknown */)/* : Initialization */)/* : Tuple2Impl */)/* : Some */;
 	}
 	/* private static */ parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
 		return /* parseBoolean */(state/* : CompileState */, input/* : string */)/* : unknown */.or/* : unknown */(() => /* parseLambda */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseString */(state/* : CompileState */, input/* : string */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseDataAccess */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseSymbolValue */(state/* : CompileState */, input/* : string */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseInvokable */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseDigits */(state/* : CompileState */, input/* : string */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseOperation */(state/* : CompileState */, input/* : string */, depth/* : number */, /* Operator */.ADD/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseOperation */(state/* : CompileState */, input/* : string */, depth/* : number */, /* Operator */.EQUALS/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseOperation */(state/* : CompileState */, input/* : string */, depth/* : number */, /* Operator */.SUBTRACT/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseOperation */(state/* : CompileState */, input/* : string */, depth/* : number */, /* Operator */.AND/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseOperation */(state/* : CompileState */, input/* : string */, depth/* : number */, /* Operator */.OR/* : unknown */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseOperation */(state/* : CompileState */, input/* : string */, depth/* : number */, /*  Operator.GREATER_THAN_OR_EQUALS */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseNot */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseMethodReference */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.or/* : unknown */(() => /* parseInstanceOf */(state/* : CompileState */, input/* : string */, depth/* : number */)/* : unknown */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl<CompileState, Value>(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl<CompileState, Value> */)/* : unknown */;
@@ -1452,12 +1481,12 @@
 		let state2 : CompileState = state/* : CompileState */.withDefinitions/* : (arg0 : List<Definition>) => CompileState */(definitions/* : List<Definition> */)/* : CompileState */;
 		if (strippedValueString/* : unknown */.startsWith/* : unknown */("{")/* : unknown */ && strippedValueString/* : unknown */.endsWith/* : unknown */("}")/* : unknown */){
 			let value1 : [CompileState, List<T>] = parseStatements/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state2/* : CompileState */, strippedValueString/* : unknown */.substring/* : unknown */(1/* : number */, strippedValueString/* : unknown */.length/* : unknown */()/* : unknown */ - 1/* : number */)/* : unknown */, (state1, input1) => parseFunctionSegment/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, FunctionSegment] */(state1/* : unknown */, input1/* : unknown */, depth/* : number */ + 1/* : number */)/* : [CompileState, FunctionSegment] */)/* : [CompileState, List<T>] */;
-			let right = value1/* : unknown */.right/* : unknown */()/* : unknown */;
-			value/* : T */ = new Tuple2Impl(value1/* : unknown */.left/* : unknown */()/* : unknown */, new BlockLambdaValue(depth/* : number */, right/* : () => B */)/* : BlockLambdaValue */)/* : Tuple2Impl */;
+			let right : B = value1/* : Value */.right/* : () => B */()/* : B */;
+			value/* : T */ = new Tuple2Impl(value1/* : Value */.left/* : () => A */()/* : A */, new BlockLambdaValue(depth/* : number */, right/* : () => B */)/* : BlockLambdaValue */)/* : Tuple2Impl */;
 		}
 		else {
 			let value1 : [CompileState, Value] = parseValue/* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state2/* : CompileState */, strippedValueString/* : unknown */, depth/* : number */)/* : [CompileState, Value] */;
-			value/* : T */ = new Tuple2Impl(value1/* : unknown */.left/* : unknown */()/* : unknown */, value1/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl */;
+			value/* : T */ = new Tuple2Impl(value1/* : Value */.left/* : () => A */()/* : A */, value1/* : Value */.right/* : () => B */()/* : B */)/* : Tuple2Impl */;
 		}
 		let right = value/* : T */.right/* : unknown */()/* : unknown */;
 		return new Some(new Tuple2Impl(value/* : T */.left/* : unknown */()/* : unknown */, new Lambda(definitions/* : List<Definition> */, right/* : () => B */)/* : Lambda */)/* : Tuple2Impl */)/* : Some */;
@@ -1653,19 +1682,16 @@
 	/* private static  */ parseValuesWithIndices<T>(state : CompileState, input : string, mapper : (arg0 : CompileState, arg1 : [number, string]) => Option<[CompileState, T]>) : Option<[CompileState, List<T>]> {
 		return parseAll/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : DivideState, arg1 : string) => DivideState, arg3 : (arg0 : CompileState, arg1 : [number, string]) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state/* : CompileState */, input/* : string */, Main/* : Main */.foldValueChar/* : unknown */, mapper/* : (arg0 : T) => R */)/* : Option<[CompileState, List<T>]> */;
 	}
-	/* private static */ compileParameter(state : CompileState, input : string) : [CompileState, Parameter] {
+	/* private static */ parseParameter(state : CompileState, input : string) : [CompileState, Parameter] {
 		if (input/* : string */.isBlank/* : unknown */()/* : unknown */){
 			return new Tuple2Impl(state/* : CompileState */, new Whitespace()/* : Whitespace */)/* : Tuple2Impl */;
 		}
 		return /* parseDefinition */(state/* : CompileState */, input/* : string */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl<CompileState, Parameter>(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */)/* : Tuple2Impl<CompileState, Parameter> */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, new Placeholder(input/* : string */)/* : Placeholder */)/* : Tuple2Impl */)/* : unknown */;
 	}
-	/* private static */ compileDefinition(state : CompileState, input : string) : [CompileState, string] {
-		return /* parseDefinition */(state/* : CompileState */, input/* : string */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.generate/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */.orElseGet/* : unknown */(() => new Tuple2Impl(state/* : CompileState */, /* generatePlaceholder */(input/* : string */)/* : unknown */)/* : Tuple2Impl */)/* : unknown */;
-	}
 	/* private static */ createIndent(depth : number) : string {
 		return "\n" + "\t".repeat/* : unknown */(depth/* : number */)/* : unknown */;
 	}
-	/* private static */ compileDefinitionStatement(input : string, depth : number, state : CompileState) : Option<[CompileState, ClassSegment]> {
+	/* private static */ parseDefinitionStatement(input : string, depth : number, state : CompileState) : Option<[CompileState, ClassSegment]> {
 		return suffix/* : string */(input/* : string */.strip/* : unknown */()/* : unknown */, ";", (withoutEnd) => {
 			return /* parseDefinition */(state/* : CompileState */, withoutEnd/* : unknown */)/* : unknown */.map/* : unknown */((result) => {
 				let definition = result/* : unknown */.right/* : unknown */()/* : unknown */;
@@ -1678,8 +1704,7 @@
 			return /* split */(() => /* toLast */(beforeName/* : unknown */, " ", Main/* : Main */.foldTypeSeparator/* : unknown */)/* : unknown */, (beforeType, type) => {
 				return suffix/* : string */(beforeType/* : unknown */.strip/* : unknown */()/* : unknown */, ">", (withoutTypeParamStart) => {
 					return first/* : unknown */(withoutTypeParamStart/* : unknown */, "<", (beforeTypeParams, typeParamsString) => {
-						let /* final */ compileStateStringTupleBiFunction : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => new Tuple2Impl(state1/* : unknown */, s/* : unknown */.strip/* : unknown */()/* : unknown */)/* : Tuple2Impl */;
-						let typeParams : [CompileState, List<T>] = parseValuesOrEmpty/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state/* : CompileState */, typeParamsString/* : unknown */, (state1, s) => new Some(compileStateStringTupleBiFunction/* : (arg0 : CompileState, arg1 : string) => [CompileState, string] */(state1/* : unknown */, s/* : unknown */)/* : [CompileState, string] */)/* : Some */)/* : [CompileState, List<T>] */;
+						let typeParams : [CompileState, List<T>] = parseValuesOrEmpty/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state/* : CompileState */, typeParamsString/* : unknown */, (state1, s) => new Some(new Tuple2Impl(state1/* : unknown */, s/* : unknown */.strip/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : Some */)/* : [CompileState, List<T>] */;
 						return /* assembleDefinition */(typeParams/* : () => List<string> */()/* : List<string> */, new Some<string>(beforeTypeParams/* : unknown */)/* : Some<string> */, name/* : () => string */, typeParams/* : () => List<string> */()/* : List<string> */, type/* : () => Type */)/* : unknown */;
 					})/* : unknown */;
 				})/* : unknown */.or/* : unknown */(() => {
@@ -1738,9 +1763,6 @@
 			return appended/* : unknown */.exit/* : unknown */()/* : unknown */;
 		}
 		return appended/* : unknown */;
-	}
-	/* private static */ compileType(state : CompileState, input : string) : Option<[CompileState, string]> {
-		return /* parseType */(state/* : CompileState */, input/* : string */)/* : unknown */.map/* : unknown */((tuple) => new Tuple2Impl(tuple/* : unknown */.left/* : unknown */()/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.generate/* : unknown */()/* : unknown */)/* : Tuple2Impl */)/* : unknown */;
 	}
 	/* private static */ parseType(state : CompileState, input : string) : Option<[CompileState, Type]> {
 		let stripped = input/* : string */.strip/* : unknown */()/* : unknown */;

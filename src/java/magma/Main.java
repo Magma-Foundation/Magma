@@ -1136,15 +1136,7 @@ public class Main {
         }
     }
 
-    private static class DefinitionStatement implements ClassSegment {
-        private final int depth;
-        private final Definition definition;
-
-        public DefinitionStatement(int depth, Definition definition) {
-            this.depth = depth;
-            this.definition = definition;
-        }
-
+    private record DefinitionStatement(int depth, Definition definition) implements ClassSegment {
         @Override
         public String generate() {
             return createIndent(this.depth) + this.definition.generate() + ";";
@@ -1236,6 +1228,13 @@ public class Main {
         @Override
         public String generate() {
             return this.destination.generate() + " = " + this.source.generate();
+        }
+    }
+
+    private record Statement(int depth, StatementValue value) implements FunctionSegment {
+        @Override
+        public String generate() {
+            return createIndent(this.depth) + this.value.generate() + ";";
         }
     }
 
@@ -1660,7 +1659,9 @@ public class Main {
     private static Option<Tuple2<CompileState, FunctionSegment>> parseFunctionStatement(CompileState state, int depth, String stripped) {
         return suffix(stripped, ";", s -> {
             var tuple = parseStatementValue(state, s, depth);
-            return new Some<>(new Tuple2Impl<>(tuple.left(), () -> createIndent(depth) + tuple.right() + ";"));
+            var left = tuple.left();
+            var right = tuple.right();
+            return new Some<>(new Tuple2Impl<>(left, new Statement(depth, right)));
         });
     }
 
