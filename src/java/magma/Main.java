@@ -93,7 +93,7 @@ public class Main {
     private interface Parameter {
     }
 
-    private sealed interface Value extends LambdaValue, Caller {
+    private sealed interface Value extends LambdaValue, Caller, Argument {
         String generate();
 
         Type type();
@@ -1377,7 +1377,7 @@ public class Main {
                 .or(() -> parseString(state, input))
                 .or(() -> parseDataAccess(state, input, depth))
                 .or(() -> parseSymbolValue(state, input))
-                .or(() -> parseInvocation(state, input, depth))
+                .or(() -> parseInvokable(state, input, depth))
                 .or(() -> parseOperation(state, input, depth, "+"))
                 .or(() -> parseOperation(state, input, depth, "-"))
                 .or(() -> parseDigits(state, input))
@@ -1474,17 +1474,17 @@ public class Main {
         return true;
     }
 
-    private static Option<Tuple<CompileState, Value>> parseInvocation(CompileState state, String input, int depth) {
+    private static Option<Tuple<CompileState, Value>> parseInvokable(CompileState state, String input, int depth) {
         return suffix(input.strip(), ")", withoutEnd -> {
             return split(() -> toLast(withoutEnd, "", Main::foldInvocationStart), (callerWithEnd, argumentsString) -> {
                 return suffix(callerWithEnd, "(", callerString -> {
-                    return assembleInvocation(state, depth, argumentsString, callerString.strip());
+                    return assembleInvokable(state, depth, argumentsString, callerString.strip());
                 });
             });
         });
     }
 
-    private static Some<Tuple<CompileState, Value>> assembleInvocation(CompileState state, int depth, String argumentsString, String callerString) {
+    private static Some<Tuple<CompileState, Value>> assembleInvokable(CompileState state, int depth, String argumentsString, String callerString) {
         var callerTuple = invocationHeader(state, depth, callerString);
         var oldCallerState = callerTuple.left;
         var oldCaller = callerTuple.right;
@@ -1499,7 +1499,7 @@ public class Main {
             var expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
             var withExpected = currentState.withExpectedType(expectedType);
 
-            var valueTuple = parseValue(withExpected, element, depth);
+            var valueTuple = parseArgument(withExpected, element, depth);
             var valueState = valueTuple.left;
             var value = valueTuple.right;
 
@@ -1512,10 +1512,29 @@ public class Main {
 
         var arguments = argumentsWithActualTypes.iterate()
                 .map(Tuple::left)
+                .map(Main::retainValue)
+                .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
 
         var invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some<>(new Tuple<>(argumentsState, invokable));
+    }
+
+    private static Option<Value> retainValue(Argument argument) {
+        if (argument instanceof Value value) {
+            return new Some<>(value);
+        }
+
+        return new None<>();
+    }
+
+    private static Tuple<CompileState, Argument> parseArgument(CompileState state, String element, int depth) {
+        if (element.isEmpty()) {
+            return new Tuple<>(state, new Whitespace());
+        }
+
+        var tuple = parseValue(state, element, depth);
+        return new Tuple<>(tuple.left, tuple.right);
     }
 
     private static FunctionType findCallerType(Caller newCaller) {
@@ -1813,7 +1832,7 @@ public class Main {
             return new Some<>(new Tuple<>(state, Primitive.Unknown));
         }
 
-        if(stripped.equals("boolean")) {
+        if (stripped.equals("boolean")) {
             return new Some<>(new Tuple<>(state, Primitive.Boolean));
         }
 
