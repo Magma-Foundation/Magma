@@ -223,7 +223,13 @@ var IncompleteClassSegmentVariant;
         return " : " + this.type.generate();
     }
     joinBefore() {
-        return !.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
+        if ( /* isDebug */) {
+            return this.generateBefore();
+        }
+        return "";
+    }
+    generateBefore() {
+        return this.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
     }
     joinTypeParams() {
         return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");

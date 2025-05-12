@@ -304,7 +304,13 @@ enum IncompleteClassSegmentVariant {
 		return " : " + this.type.generate();
 	}
 	joinBefore() : string {
-		return !/* isDebug ? "" : this */.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
+		if (/* isDebug */){
+			return this.generateBefore();
+		}
+		return "";
+	}
+	generateBefore() : string {
+		return this.maybeBefore.filter((value : string) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner : T) => inner + " ").orElse("");
 	}
 	joinTypeParams() : string {
 		return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");

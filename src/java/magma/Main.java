@@ -552,7 +552,14 @@ public class Main {
         }
 
         private String joinBefore() {
-            return !isDebug ? "" : this.maybeBefore
+            if (isDebug) {
+                return this.generateBefore();
+            }
+            return "";
+        }
+
+        private String generateBefore() {
+            return this.maybeBefore
                     .filter(value -> !value.isEmpty())
                     .map(Main::generatePlaceholder)
                     .map(inner -> inner + " ")
