@@ -753,7 +753,7 @@ var ResultVariant;
     }
 }
 /* private */ class StructurePrototype /*  */ {
-    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants) {
+    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces) {
     }
     createObjectType() {
         definitionFromSegments: R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
@@ -997,40 +997,42 @@ var ResultVariant;
     }
     parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
         return this.first(beforeContent, " implements ", (s, s2) => {
-            return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+            return this.parseValues(state, s2, this.parseType).flatMap((interfaces) => {
+                return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces[1]());
+            });
         }).or(() => {
-            return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
+            return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty());
         });
     }
-    parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
+    parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces) {
         return this.first(beforeContent, " extends ", (s, s2) => {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces);
         }).or(() => {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
+            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces);
         });
     }
-    parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
+    parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces) {
         return this.suffix(beforeContent.strip(), ")", (s) => {
             return this.first(s, "(", (s1, s2) => {
                 parsed: [CompileState, (List)] = this.parseParameters(state, s2);
-                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations);
+                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations, interfaces);
             });
         }).or(() => {
-            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations);
+            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces);
         });
     }
-    parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations) {
+    parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations, interfaces) {
         return this.first(beforeContent, "<", (name, withTypeParams) => {
             return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
                 mapper: (arg0, arg1) => [CompileState, string] = (state1, s) => new Tuple2Impl(state1, s.strip());
                 typeParams: [CompileState, (List)] = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-                return this.assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
+                return this.assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants, interfaces);
             });
         }).or(() => {
-            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
+            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces);
         });
     }
-    assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants) {
+    assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants, interfaces) {
         name = rawName.strip();
         if (!this.isSymbol(name)) {
             return new None();
@@ -1042,7 +1044,7 @@ var ResultVariant;
         segmentsState = segmentsTuple[0]();
         segments = segmentsTuple[1]();
         parameters: (List) = this.retainDefinitions(rawParameters);
-        prototype: StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants);
+        prototype: StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces);
         return new Some(new Tuple2Impl(segmentsState.addType(prototype.createObjectType()), prototype));
     }
     completeStructure(state, prototype) {
@@ -1067,16 +1069,18 @@ var ResultVariant;
                 definition: Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
                 completed.addFirst(new Statement(1, definition));
             }
-            withMaybeConstructor: (List) = this.atttachConstructor(prototype);
+            withMaybeConstructor: (List) = this.attachConstructor(prototype);
             parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
             joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-            generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
+            interfaces: (List) = prototype.interfaces;
+            joined = interfaces.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => " implements " + inner).orElse("");
+            generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + joined + " {" + parsed2 + "\n}\n";
             compileState = /* withEnum */ .popStructName();
             definedState = compileState.addStructure(generated);
             return new Tuple2Impl(definedState, new Whitespace());
         });
     }
-    atttachConstructor(prototype, segments) {
+    attachConstructor(prototype, segments) {
         /* List<ClassSegment> withMaybeConstructor */ ;
         if (prototype.parameters().isEmpty()) {
             segments;

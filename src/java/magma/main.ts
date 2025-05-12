@@ -160,7 +160,7 @@ enum ResultVariant {
 	writeString(output : string) : Option<IOError>;
 	resolve(childName : string) : Path;
 }
-/* private static final */class None<T>/*  */ {
+/* private static final */class None<T>/*  */ implements Option<T> {
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
 	}
@@ -191,11 +191,11 @@ enum ResultVariant {
 	ifPresent(consumer : (arg0 : T) => void) : void {
 	}
 }
-/* private */class Tuple2Impl<A, B>/*  */ {
+/* private */class Tuple2Impl<A, B>/*  */ implements [A, B] {
 	constructor (left : A, right : B) {
 	}
 }
-/* private */class Some<T>/*  */ {
+/* private */class Some<T>/*  */ implements Option<T> {
 	constructor (value : T) {
 	}
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
@@ -232,7 +232,7 @@ enum ResultVariant {
 		/* consumer.accept(this.value) */;
 	}
 }
-/* private static */class SingleHead<T>/*  */ {
+/* private static */class SingleHead<T>/*  */ implements Head<T> {
 	value : T;
 	retrieved : boolean;
 	constructor (value : T) {
@@ -247,12 +247,12 @@ enum ResultVariant {
 		return new Some(this.value);
 	}
 }
-/* private static */class EmptyHead<T>/*  */ {
+/* private static */class EmptyHead<T>/*  */ implements Head<T> {
 	next() : Option<T> {
 		return new None();
 	}
 }
-/* private */class HeadedIterator<T>/*  */ {
+/* private */class HeadedIterator<T>/*  */ implements Iterator<T> {
 	constructor (head : Head<T>) {
 	}
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
@@ -293,7 +293,7 @@ enum ResultVariant {
 		return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
 	}
 }
-/* private static */class RangeHead/*  */ {
+/* private static */class RangeHead/*  */ implements Head<number> {
 	length : number;
 	counter : number;
 	constructor (length : number) {
@@ -312,7 +312,7 @@ enum ResultVariant {
 	empty<T>() : List<T>;
 	of<T>(elements : T[]) : List<T>;
 }
-/* private */class ImmutableDefinition/*  */ {
+/* private */class ImmutableDefinition/*  */ implements Definition {
 	constructor (annotations : List<string>, maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
 	}
 	createSimpleDefinition(name : string, type : Type) : Definition {
@@ -360,7 +360,7 @@ enum ResultVariant {
 		return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
 	}
 }
-/* private */class ObjectType/*  */ {
+/* private */class ObjectType/*  */ implements FindableType {
 	constructor (name : string, typeParams : List<string>, definitions : List<Definition>) {
 	}
 	generate() : string {
@@ -376,7 +376,7 @@ enum ResultVariant {
 		return new Some(this.name);
 	}
 }
-/* private */class TypeParam/*  */ {
+/* private */class TypeParam/*  */ implements Type {
 	constructor (value : string) {
 	}
 	generate() : string {
@@ -508,7 +508,7 @@ enum ResultVariant {
 		return this.input.charAt(this.index);
 	}
 }
-/* private */class Joiner/*  */ {
+/* private */class Joiner/*  */ implements Collector<string, Option<string>> {
 	constructor (delimiter : string) {
 	}
 	empty() : Joiner {
@@ -521,7 +521,7 @@ enum ResultVariant {
 		return new Some(current.map((inner : string) => inner + this.delimiter + element).orElse(element));
 	}
 }
-/* private static */class ListCollector<T>/*  */ {
+/* private static */class ListCollector<T>/*  */ implements Collector<T, List<T>> {
 	createInitial() : List<T> {
 		return Lists.empty();
 	}
@@ -529,7 +529,7 @@ enum ResultVariant {
 		return current.addLast(element);
 	}
 }
-/* private static */class FlatMapHead<T, R>/*  */ {
+/* private static */class FlatMapHead<T, R>/*  */ implements Head<R> {
 	mapper : (arg0 : T) => Iterator<R>;
 	head : Head<T>;
 	current : Option<Iterator<R>>;
@@ -560,7 +560,7 @@ enum ResultVariant {
 		}
 	}
 }
-/* private */class ArrayType/*  */ {
+/* private */class ArrayType/*  */ implements Type {
 	constructor (right : Type) {
 	}
 	generate() : string {
@@ -573,7 +573,7 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private static final */class Whitespace/*  */ {
+/* private static final */class Whitespace/*  */ implements Argument, Parameter, ClassSegment, FunctionSegment, IncompleteClassSegment {
 	generate() : string {
 		return "";
 	}
@@ -587,7 +587,7 @@ enum ResultVariant {
 		return new HeadedIterator(single.orElseGet(EmptyHead.new));
 	}
 }
-/* private */class FunctionType/*  */ {
+/* private */class FunctionType/*  */ implements Type {
 	constructor (arguments : List<Type>, returns : Type) {
 	}
 	generate() : string {
@@ -601,7 +601,7 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class TupleType/*  */ {
+/* private */class TupleType/*  */ implements Type {
 	constructor (arguments : List<Type>) {
 	}
 	generate() : string {
@@ -615,7 +615,7 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class Template/*  */ {
+/* private */class Template/*  */ implements FindableType {
 	constructor (base : FindableType, arguments : List<Type>) {
 	}
 	generate() : string {
@@ -641,7 +641,7 @@ enum ResultVariant {
 		return this.base.findName();
 	}
 }
-/* private */class Placeholder/*  */ {
+/* private */class Placeholder/*  */ implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment {
 	constructor (input : string) {
 	}
 	generate() : string {
@@ -669,7 +669,7 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class StringValue/*  */ {
+/* private */class StringValue/*  */ implements Value {
 	constructor (stripped : string) {
 	}
 	generate() : string {
@@ -679,7 +679,7 @@ enum ResultVariant {
 		return Primitive.Unknown;
 	}
 }
-/* private */class DataAccess/*  */ {
+/* private */class DataAccess/*  */ implements Value {
 	constructor (parent : Value, property : string, type : Type) {
 	}
 	generate() : string {
@@ -689,7 +689,7 @@ enum ResultVariant {
 		return this.type;
 	}
 }
-/* private */class ConstructionCaller/*  */ {
+/* private */class ConstructionCaller/*  */ implements Caller {
 	constructor (type : Type) {
 	}
 	generate() : string {
@@ -710,7 +710,7 @@ enum ResultVariant {
 	OR : Operator = new Operator("||", "||");
 	SUBTRACT : Operator = new Operator("-", "-");
 }
-/* private */class Operation/*  */ {
+/* private */class Operation/*  */ implements Value {
 	constructor (left : Value, operator : Operator, right : Value) {
 	}
 	generate() : string {
@@ -720,7 +720,7 @@ enum ResultVariant {
 		return Primitive.Unknown;
 	}
 }
-/* private */class Not/*  */ {
+/* private */class Not/*  */ implements Value {
 	constructor (value : Value) {
 	}
 	generate() : string {
@@ -730,7 +730,7 @@ enum ResultVariant {
 		return Primitive.Unknown;
 	}
 }
-/* private */class BlockLambdaValue/*  */ {
+/* private */class BlockLambdaValue/*  */ implements LambdaValue {
 	constructor (depth : number, statements : List<FunctionSegment>) {
 	}
 	generate() : string {
@@ -740,7 +740,7 @@ enum ResultVariant {
 		return this.statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
 	}
 }
-/* private */class Lambda/*  */ {
+/* private */class Lambda/*  */ implements Value {
 	constructor (parameters : List<Definition>, body : LambdaValue) {
 	}
 	generate() : string {
@@ -751,7 +751,7 @@ enum ResultVariant {
 		return Primitive.Unknown;
 	}
 }
-/* private */class Invokable/*  */ {
+/* private */class Invokable/*  */ implements Value {
 	constructor (caller : Caller, arguments : List<Value>, type : Type) {
 	}
 	generate() : string {
@@ -759,7 +759,7 @@ enum ResultVariant {
 		return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
 	}
 }
-/* private */class IndexValue/*  */ {
+/* private */class IndexValue/*  */ implements Value {
 	constructor (parent : Value, child : Value) {
 	}
 	generate() : string {
@@ -769,7 +769,7 @@ enum ResultVariant {
 		return Primitive.Unknown;
 	}
 }
-/* private */class SymbolValue/*  */ {
+/* private */class SymbolValue/*  */ implements Value {
 	constructor (stripped : string, type : Type) {
 	}
 	generate() : string {
@@ -779,7 +779,7 @@ enum ResultVariant {
 /* private static */class Maps/*  */ {
 	empty<VK>() : Map<K, V>;
 }
-/* private */class MapCollector<K, V>/*  */ {
+/* private */class MapCollector<K, V>/*  */ implements Collector<[K, V], Map<K, V>> {
 	createInitial() : Map<K, V> {
 		return Maps.empty();
 	}
@@ -787,7 +787,7 @@ enum ResultVariant {
 		return current.with(element[0](), element[1]());
 	}
 }
-/* private static */class ConstructorHeader/*  */ {
+/* private static */class ConstructorHeader/*  */ implements Header {
 	createDefinition(paramTypes : List<Type>) : Definition {
 		return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
 	}
@@ -795,7 +795,7 @@ enum ResultVariant {
 		return "constructor " + joinedParameters;
 	}
 }
-/* private */class Method/*  */ {
+/* private */class Method/*  */ implements ClassSegment {
 	constructor (depth : number, header : Header, parameters : List<Definition>, maybeStatements : Option<List<FunctionSegment>>) {
 	}
 	joinStatements(statements : List<FunctionSegment>) : string {
@@ -808,7 +808,7 @@ enum ResultVariant {
 		return indent + generatedHeader + generatedStatements;
 	}
 }
-/* private */class Block/*  */ {
+/* private */class Block/*  */ implements FunctionSegment {
 	constructor (depth : number, header : BlockHeader, statements : List<FunctionSegment>) {
 	}
 	generate() : string {
@@ -817,47 +817,47 @@ enum ResultVariant {
 		return indent + this.header.generate() + "{" + collect + indent + "}";
 	}
 }
-/* private */class Conditional/*  */ {
+/* private */class Conditional/*  */ implements BlockHeader {
 	constructor (prefix : string, value1 : Value) {
 	}
 	generate() : string {
 		return this.prefix + " (" + this.value1.generate() + ")";
 	}
 }
-/* private static */class Else/*  */ {
+/* private static */class Else/*  */ implements BlockHeader {
 	generate() : string {
 		return "else ";
 	}
 }
-/* private */class Return/*  */ {
+/* private */class Return/*  */ implements StatementValue {
 	constructor (value : Value) {
 	}
 	generate() : string {
 		return "return " + this.value.generate();
 	}
 }
-/* private */class Initialization/*  */ {
+/* private */class Initialization/*  */ implements StatementValue {
 	constructor (definition : Definition, source : Value) {
 	}
 	generate() : string {
 		return this.definition.generate() + " = " + this.source.generate();
 	}
 }
-/* private */class Assignment/*  */ {
+/* private */class Assignment/*  */ implements StatementValue {
 	constructor (destination : Value, source : Value) {
 	}
 	generate() : string {
 		return this.destination.generate() + " = " + this.source.generate();
 	}
 }
-/* private */class Statement/*  */ {
+/* private */class Statement/*  */ implements FunctionSegment, ClassSegment {
 	constructor (depth : number, value : StatementValue) {
 	}
 	generate() : string {
 		return createIndent(this.depth) + this.value.generate() + ";";
 	}
 }
-/* private */class MethodPrototype/*  */ {
+/* private */class MethodPrototype/*  */ implements IncompleteClassSegment {
 	constructor (depth : number, header : Header, parameters : List<Definition>, content : string) {
 	}
 	createDefinition() : Definition {
@@ -870,29 +870,29 @@ enum ResultVariant {
 		return new Some(this.header.createDefinition(this.findParamTypes()));
 	}
 }
-/* private */class IncompleteClassSegmentWrapper/*  */ {
+/* private */class IncompleteClassSegmentWrapper/*  */ implements IncompleteClassSegment {
 	constructor (segment : ClassSegment) {
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
 }
-/* private */class ClassDefinition/*  */ {
+/* private */class ClassDefinition/*  */ implements IncompleteClassSegment {
 	constructor (depth : number, definition : Definition) {
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
 }
-/* private */class ClassInitialization/*  */ {
+/* private */class ClassInitialization/*  */ implements IncompleteClassSegment {
 	constructor (depth : number, definition : Definition, value : Value) {
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
 }
-/* private */class StructurePrototype/*  */ {
-	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>, variants : List<string>) {
+/* private */class StructurePrototype/*  */ implements IncompleteClassSegment {
+	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>, variants : List<string>, interfaces : List<Type>) {
 	}
 	createObjectType() : ObjectType {
 		definitionFromSegments : R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
@@ -902,14 +902,14 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class Cast/*  */ {
+/* private */class Cast/*  */ implements Value {
 	constructor (value : Value, type : Type) {
 	}
 	generate() : string {
 		return this.value.generate() + " as " + this.type.generate();
 	}
 }
-/* private */class Ok<T, X>/*  */ {
+/* private */class Ok<T, X>/*  */ implements Result<T, X> {
 	constructor (value : T) {
 	}
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
@@ -919,7 +919,7 @@ enum ResultVariant {
 		return whenOk(this.value);
 	}
 }
-/* private */class Err<T, X>/*  */ {
+/* private */class Err<T, X>/*  */ implements Result<T, X> {
 	constructor (error : X) {
 	}
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
@@ -929,7 +929,7 @@ enum ResultVariant {
 		return whenErr(this.error);
 	}
 }
-/* private */class JVMIOError/*  */ {
+/* private */class JVMIOError/*  */ implements IOError {
 	constructor (error : /* IOException */) {
 	}
 	display() : string {
@@ -938,7 +938,7 @@ enum ResultVariant {
 		return writer.toString();
 	}
 }
-/* private */class Primitive/*  */ {/* Int("number"),
+/* private */class Primitive/*  */ implements Type {/* Int("number"),
         String("string"),
         Boolean("boolean"),
         Unknown("unknown"),
@@ -957,7 +957,7 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class BooleanValue/*  */ {/* True("true"), False("false"); */
+/* private */class BooleanValue/*  */ implements Value {/* True("true"), False("false"); */
 	value : string;
 	constructor (value : string) {
 		this.value = value;
@@ -970,6 +970,7 @@ enum ResultVariant {
 	}
 }
 /* public */class Main/*  */ {
+	JVMPath() : /* record */;
 	isDebug : boolean = false;
 	generatePlaceholder(input : string) : string {
 		replaced = input.replace("/*", "content-start").replace("*/", "content-end");
@@ -1142,40 +1143,42 @@ enum ResultVariant {
 	}
 	parseStructureWithMaybeImplements(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.first(beforeContent, " implements ", (s, s2) => {
-			return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+			return this.parseValues(state, s2, this.parseType).flatMap((interfaces : [CompileState, List<T>]) => {
+				return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces[1]());
+			});
 		}).or(() => {
-			return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
+			return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty());
 		});
 	}
-	parseStructureWithMaybeExtends(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>) : Option<[CompileState, IncompleteClassSegment]> {
+	parseStructureWithMaybeExtends(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.first(beforeContent, " extends ", (s, s2) => {
-			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations);
+			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces);
 		}).or(() => {
-			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations);
+			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces);
 		});
 	}
-	parseStructureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>) : Option<[CompileState, IncompleteClassSegment]> {
+	parseStructureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.suffix(beforeContent.strip(), ")", (s : string) => {
 			return this.first(s, "(", (s1, s2) => {
 				parsed : [CompileState, List<Parameter>] = this.parseParameters(state, s2);
-				return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations);
+				return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations, interfaces);
 			});
 		}).or(() => {
-			return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations);
+			return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces);
 		});
 	}
-	parseStructureWithMaybeTypeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>, variants : List<string>, annotations : List<string>) : Option<[CompileState, IncompleteClassSegment]> {
+	parseStructureWithMaybeTypeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.first(beforeContent, "<", (name, withTypeParams) => {
 			return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
 				mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => new Tuple2Impl(state1, s.strip());
 				typeParams : [CompileState, List<T>] = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-				return this.assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants);
+				return this.assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants, interfaces);
 			});
 		}).or(() => {
-			return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants);
+			return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces);
 		});
 	}
-	assembleStructure(state : CompileState, targetInfix : string, annotations : List<string>, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>, variants : List<string>) : Option<[CompileState, IncompleteClassSegment]> {
+	assembleStructure(state : CompileState, targetInfix : string, annotations : List<string>, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>, variants : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		name = rawName.strip();
 		if (!this.isSymbol(name)){
 			return new None();
@@ -1187,7 +1190,7 @@ enum ResultVariant {
 		segmentsState = segmentsTuple[0]();
 		segments = segmentsTuple[1]();
 		parameters : List<Definition> = this.retainDefinitions(rawParameters);
-		prototype : StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants);
+		prototype : StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces);
 		return new Some(new Tuple2Impl(segmentsState.addType(prototype.createObjectType()), prototype));
 	}
 	completeStructure(state : CompileState, prototype : StructurePrototype) : Option<[CompileState, ClassSegment]> {
@@ -1212,16 +1215,18 @@ enum ResultVariant {
 				definition : Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
 				/* completed1 */ = completed.addFirst(new Statement(1, definition));
 			}
-			withMaybeConstructor : List<ClassSegment> = this.atttachConstructor(prototype, /* completed1 */);
+			withMaybeConstructor : List<ClassSegment> = this.attachConstructor(prototype, /* completed1 */);
 			parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
 			joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-			generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
+			interfaces : List<Type> = prototype.interfaces;
+			joined = interfaces.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => " implements " + inner).orElse("");
+			generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + joined + " {" + parsed2 + "\n}\n";
 			compileState = /* withEnum */.popStructName();
 			definedState = compileState.addStructure(generated);
 			return new Tuple2Impl(definedState, new Whitespace());
 		});
 	}
-	atttachConstructor(prototype : StructurePrototype, segments : List<ClassSegment>) : List<ClassSegment> {
+	attachConstructor(prototype : StructurePrototype, segments : List<ClassSegment>) : List<ClassSegment> {
 		/* List<ClassSegment> withMaybeConstructor */;
 		if (prototype.parameters().isEmpty()){
 			/* withMaybeConstructor */ = segments;
