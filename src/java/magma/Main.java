@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -87,6 +86,12 @@ public class Main {
         Option<T> next();
     }
 
+    private interface Map<K, V> {
+        Option<V> find(K key);
+
+        Map<K, V> with(K key, V value);
+    }
+
     private interface Type extends Argument {
         String generate();
 
@@ -123,6 +128,7 @@ public class Main {
             return this;
         }
     }
+
 
     private static class None<T> implements Option<T> {
         @Override
@@ -504,11 +510,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            if (mapping.containsKey(this.value)) {
-                return mapping.get(this.value);
-            }
-
-            return this;
+            return mapping.find(this.value).orElse(this);
         }
     }
 
@@ -943,16 +945,41 @@ public class Main {
         }
     }
 
+    private static class Maps {
+        private record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
+            public JVMMap() {
+                this(new HashMap<>());
+            }
+
+            @Override
+            public Option<V> find(K key) {
+                if (this.map.containsKey(key)) {
+                    return new Some<>(this.map.get(key));
+                }
+                return new None<>();
+            }
+
+            @Override
+            public Map<K, V> with(K key, V value) {
+                this.map.put(key, value);
+                return this;
+            }
+        }
+
+        public static <V, K> Map<K, V> empty() {
+            return new JVMMap<>();
+        }
+    }
+
     private record MapCollector<K, V>() implements Collector<Tuple2<K, V>, Map<K, V>> {
         @Override
         public Map<K, V> createInitial() {
-            return new HashMap<>();
+            return Maps.empty();
         }
 
         @Override
         public Map<K, V> fold(Map<K, V> current, Tuple2<K, V> element) {
-            current.put(element.left(), element.right());
-            return current;
+            return current.with(element.left(), element.right());
         }
     }
 

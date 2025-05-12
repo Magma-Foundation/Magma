@@ -272,10 +272,7 @@ Option < T > {
         return /* this */ .value;
     }
     replace(mapping) {
-        if (mapping.containsKey(value)) {
-            return mapping.get(value);
-        }
-        return /* this */;
+        return mapping.find(value).orElse( /* this */);
     }
 }
 /* private */ class CompileState /*  */ {
@@ -607,15 +604,35 @@ Option < R > {
         return /* this */ .stripped + /* createDebugString */ ( /* this */.type);
     }
 }
+/* private */ class JVMMap {
+    constructor(map) {
+    }
+    find(key) {
+        if ( /* this */.map.containsKey(key)) {
+            return new Some(map.get(key));
+        }
+        return new None();
+    }
+    with(key, value) {
+        /* this.map.put(key, value) */ ;
+        return /* this */;
+    }
+}
+/* private static */ class Maps /*  */ {
+    empty() {
+        return new JVMMap();
+    }
+}
 /* private */ class MapCollector {
     constructor() {
     }
+    createInitial() {
+        return /* Maps */ .empty();
+    }
+    fold(current, element) {
+        return current.with(element.left(), element.right());
+    }
 }
-return new /* HashMap */ ();
-fold(current, /* Map */ , V > , element, [K, V]);
-, V > {
-    return: current
-};
 /* private */ class Operator /*  */ {
 }
 /* private */ class Primitive /*  */ {

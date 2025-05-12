@@ -41,9 +41,13 @@
 /* private */interface Head<T>/*   */ {
 	next() : Option<T>;
 }
+/* private */interface Map<K, V>/*   */ {
+	find(key : K) : Option<V>;
+	with(key : K, value : V) : Map<K, V>;
+}
 /* private */interface Type/*  */ {
 	generate() : string;
-	replace(mapping : /* Map */<string, Type>) : Type;
+	replace(mapping : Map<string, Type>) : Type;
 }
 /* private */interface Argument/*  */ {
 }
@@ -62,7 +66,7 @@
 /* private */interface FindableType/*  */ {
 	typeParams() : List<string>;
 	find(name : string) : Option<Type>;
-	replace(mapping : /* Map */<string, Type>) : Type {
+	replace(mapping : Map<string, Type>) : Type {
 		return /* this */;
 	}
 }
@@ -313,7 +317,7 @@
 	generate() : string {
 		return /* this */.name;
 	}
-	replace(mapping : /* Map */<string, Type>) : Type {
+	replace(mapping : Map<string, Type>) : Type {
 		return new ObjectType(/* this */.name, /* this */.typeParams, /* this */.definitions.iterate().map((definition) => definition.mapType((type) => type(mapping))).collect(new /* ListCollector */()));
 	}
 	find(name : string) : Option<Type> {
@@ -327,11 +331,8 @@
 	generate() : string {
 		return /* this */.value;
 	}
-	replace(mapping : /* Map */<string, Type>) : Type {
-		if (mapping.containsKey(/* this */.value)){
-			return mapping.get(/* this */.value);
-		}
-		return /* this */;
+	replace(mapping : Map<string, Type>) : Type {
+		return mapping.find(/* this */.value).orElse(/* this */);
 	}
 }
 /* private */class CompileState/*  */ {
@@ -501,7 +502,7 @@
 	generate() : string {
 		return /* this */.right().generate() + "[]";
 	}
-	replace(mapping : /* Map */<string, Type>) : Type {
+	replace(mapping : Map<string, Type>) : Type {
 		return /* this */;
 	}
 }
@@ -521,7 +522,7 @@
 		let joined = /* this */.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
 		return "(" + joined + ") => " + /* this */.returns.generate();
 	}
-	replace(mapping : /* Map */<string, Type>) : Type {
+	replace(mapping : Map<string, Type>) : Type {
 		return new FunctionType(/* this */.arguments.iterate().map((type) => type(mapping)).collect(new ListCollector()), /* this */.returns);
 	}
 }
@@ -533,7 +534,7 @@
 		let joinedArguments = /* this */.arguments.iterate().map(/* Type */.generate).collect(new Joiner(", ")).orElse("");
 		return "[" + joinedArguments + "]";
 	}
-	replace(mapping : /* Map */<string, Type>) : Type {
+	replace(mapping : Map<string, Type>) : Type {
 		return /* this */;
 	}
 }
@@ -675,16 +676,38 @@
 		return /* this */.stripped + /* createDebugString */(/* this */.type);
 	}
 }
+/* private */class JVMMap<K, V>/*  */ {
+	constructor (map : /* java.util.Map */<K, V>) {
+	}
+
+	JVMMap() : /* public */ {
+		/* this(new HashMap<>()) */;
+	}
+	find(key : K) : Option<V> {
+		if (/* this */.map.containsKey(key)){
+			return new Some(/* this */.map.get(key));
+		}
+		return new None();
+	}
+	with(key : K, value : V) : Map<K, V> {
+		/* this.map.put(key, value) */;
+		return /* this */;
+	}
+}
+/* private static */class Maps/*  */ {
+	empty<VK>() : Map<K, V> {
+		return new JVMMap();
+	}
+}
 /* private */class MapCollector<K, V>/*  */ {
 	constructor () {
 	}
 
-	createInitial() : /* Map */<K, V> {
-		return new /* HashMap */();
+	createInitial() : Map<K, V> {
+		return /* Maps */.empty();
 	}
-	fold(current : /* Map */<K, V>, element : [K, V]) : /* Map */<K, V> {
-		/* current.put(element.left(), element.right()) */;
-		return current;
+	fold(current : Map<K, V>, element : [K, V]) : Map<K, V> {
+		return current.with(element.left(), element.right());
 	}
 }
 /* private */class Operator/*  */ {/* ADD("+", "+"),
@@ -711,7 +734,7 @@
 	generate() : string {
 		return /* this */.value;
 	}
-	replace(mapping : /* Map */<string, Type>) : Type {
+	replace(mapping : Map<string, Type>) : Type {
 		return /* this */;
 	}
 }
