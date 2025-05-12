@@ -1963,6 +1963,7 @@ public class Main {
                 .or(() -> parseSymbolValue(state, input))
                 .or(() -> parseInvokable(state, input, depth))
                 .or(() -> parseDigits(state, input))
+                .or(() -> parseInstanceOf(state, input, depth))
                 .or(() -> parseOperation(state, input, depth, Operator.ADD))
                 .or(() -> parseOperation(state, input, depth, Operator.EQUALS))
                 .or(() -> parseOperation(state, input, depth, Operator.SUBTRACT))
@@ -1972,7 +1973,6 @@ public class Main {
                 .or(() -> parseOperation(state, input, depth, Operator.LESS_THAN))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
-                .or(() -> parseInstanceOf(state, input, depth))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
     }
 

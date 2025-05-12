@@ -231,8 +231,9 @@ enum IncompleteClassSegmentVariant {
 		while (true){
 			let finalCurrent : R = current;
 			let option : Option<R> = this.head.next().map((inner : T) => folder(finalCurrent, inner));
-			if (/* option instanceof Some */ < /* R> some */){
-				current = /* some */.value;
+			if (option._variant === OptionVariant.Some){
+				let some : Some<R> = option as Some<R>;
+				current = some.value;
 			}
 			else {
 				return current;
@@ -1451,7 +1452,7 @@ enum IncompleteClassSegmentVariant {
 		return new Some(new Tuple2Impl(state.define(definition), new Initialization(definition, source)));
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => parseOperation(state, input, depth, /*  Operator.LESS_THAN */)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).or(() => parseInstanceOf(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return parseBoolean(state, input).or(() => parseLambda(state, input, depth)).or(() => parseString(state, input)).or(() => parseDataAccess(state, input, depth)).or(() => parseSymbolValue(state, input)).or(() => parseInvokable(state, input, depth)).or(() => parseDigits(state, input)).or(() => parseInstanceOf(state, input, depth)).or(() => parseOperation(state, input, depth, Operator.ADD)).or(() => parseOperation(state, input, depth, Operator.EQUALS)).or(() => parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => parseOperation(state, input, depth, Operator.AND)).or(() => parseOperation(state, input, depth, Operator.OR)).or(() => parseOperation(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => parseOperation(state, input, depth, /*  Operator.LESS_THAN */)).or(() => parseNot(state, input, depth)).or(() => parseMethodReference(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
 	}
 	parseBoolean(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
@@ -1857,9 +1858,10 @@ enum IncompleteClassSegmentVariant {
 		if (base.equals("Tuple2") && children.size() >= 2){
 			return new Tuple2Impl(state, new TupleType(children));
 		}
-		if (/* state.resolveType(base) instanceof Some */ < /* Type> some */){
-			let baseType = /* some */.value;
-			if (baseType._variant === Variant.FindableType){
+		if (state.resolveType(base)._variant === OptionVariant.Some){
+			let baseType : Type = some.value;
+			if (baseType._variant === TypeVariant.FindableType){
+			let some : Some<Type> = state.resolveType(base) as Some<Type>;
 				let findableType : FindableType = baseType as FindableType;
 				return new Tuple2Impl(state, new Template(findableType, children));
 			}
