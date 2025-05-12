@@ -103,6 +103,7 @@
 	generate() : string;
 }
 /* private sealed */interface IncompleteClassSegment/*  */ {
+	maybeCreateObjectType() : Option</* ObjectType */>;
 	createDefinition() : Option<Definition>;
 }
 /* private static */class None<T>/*  */ {
@@ -226,7 +227,7 @@
 		return this.head.next();
 	}
 	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
-		return new HeadedIterator(new /* FlatMapHead */(this.head, f));
+		return new HeadedIterator(new FlatMapHead(this.head, f));
 	}
 	zip<R>(other : Iterator<R>) : Iterator<[T, R]> {
 		return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
@@ -338,16 +339,16 @@
 		return this.generateWithParams("");
 	}
 	generateType() : string {
-		if (this.type.equals(/* Primitive */.Unknown)){
+		if (this.type.equals(Primitive.Unknown)){
 			return "";
 		}
 		return " : " + this.type.generate();
 	}
 	joinBefore() : string {
-		return !/* isDebug ? "" : this */.maybeBefore.filter((value) => !value.isEmpty()).map(/* Main */.generatePlaceholder).map((inner) => inner + " ").orElse("");
+		return !/* isDebug ? "" : this */.maybeBefore.filter((value) => !value.isEmpty()).map(Main.generatePlaceholder).map((inner) => inner + " ").orElse("");
 	}
 	joinTypeParams() : string {
-		return this.typeParams.iterate().collect(new /* Joiner */()).map((inner) => "<" + inner + ">").orElse("");
+		return this.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
 	}
 	mapType(mapper : (arg0 : Type) => Type) : Definition {
 		return new ImmutableDefinition(this.maybeBefore, this.name, mapper(this.type), this.typeParams);
@@ -362,7 +363,7 @@
 		return before + this.name + joined + joinedParameters + typeString;
 	}
 	createDefinition(paramTypes : List<Type>) : Definition {
-		return ImmutableDefinition.createSimpleDefinition(this.name, new /* FunctionType */(paramTypes, this.type));
+		return ImmutableDefinition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
 	}
 }
 /* private */class ObjectType/*  */ {
@@ -372,7 +373,7 @@
 		return this.name;
 	}
 	replace(mapping : Map<string, Type>) : Type {
-		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition : T) => definition.mapType((type) => type.replace(mapping))).collect(new /* ListCollector */()));
+		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition : T) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()));
 	}
 	find(name : string) : Option<Type> {
 		return this.definitions.iterate().filter((definition : T) => definition.name().equals(name)).map(Definition.type).next();
@@ -578,6 +579,9 @@
 	createDefinition() : Option<Definition> {
 		return new None();
 	}
+	maybeCreateObjectType() : Option<ObjectType> {
+		return new None();
+	}
 }
 /* private static */class Iterators/*  */ {
 	fromOption<T>(option : Option<T>) : Iterator<T> {
@@ -625,7 +629,7 @@
 	}
 	find(name : string) : Option<Type> {
 		return this.base.find(name).map((found : Type) => {
-			let mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new /* MapCollector */());
+			let mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
 			return found.replace(mapping);
 		});
 	}
@@ -646,7 +650,7 @@
 		return /* generatePlaceholder */(this.input);
 	}
 	type() : Type {
-		return /* Primitive */.Unknown;
+		return Primitive.Unknown;
 	}
 	typeParams() : List<string> {
 		return Lists.empty();
@@ -666,6 +670,9 @@
 	createDefinition() : Option<Definition> {
 		return new None();
 	}
+	maybeCreateObjectType() : Option<ObjectType> {
+		return new None();
+	}
 }
 /* private */class StringValue/*  */ {
 	constructor (stripped : string) {
@@ -674,7 +681,7 @@
 		return this.stripped;
 	}
 	type() : Type {
-		return /* Primitive */.Unknown;
+		return Primitive.Unknown;
 	}
 }
 /* private */class DataAccess/*  */ {
@@ -704,7 +711,7 @@
 		return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
 	}
 	type() : Type {
-		return /* Primitive */.Unknown;
+		return Primitive.Unknown;
 	}
 }
 /* private */class Not/*  */ {
@@ -714,7 +721,7 @@
 		return "!" + this.value.generate();
 	}
 	type() : Type {
-		return /* Primitive */.Unknown;
+		return Primitive.Unknown;
 	}
 }
 /* private */class BlockLambdaValue/*  */ {
@@ -735,7 +742,7 @@
 		return "(" + joined + ") => " + this.body.generate();
 	}
 	type() : Type {
-		return /* Primitive */.Unknown;
+		return Primitive.Unknown;
 	}
 }
 /* private */class Invokable/*  */ {
@@ -753,7 +760,7 @@
 		return this.parent.generate() + "[" + this.child.generate() + "]";
 	}
 	type() : Type {
-		return /* Primitive */.Unknown;
+		return Primitive.Unknown;
 	}
 }
 /* private */class SymbolValue/*  */ {
@@ -795,7 +802,7 @@
 }
 /* private static */class ConstructorHeader/*  */ {
 	createDefinition(paramTypes : List<Type>) : Definition {
-		return ImmutableDefinition.createSimpleDefinition("new", /* Primitive */.Unknown);
+		return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
 	}
 	generateWithParams(joinedParameters : string) : string {
 		return "constructor " + joinedParameters;
@@ -882,11 +889,17 @@
 	createDefinition() : Option<Definition> {
 		return new Some(this.header.createDefinition(this.findParamTypes()));
 	}
+	maybeCreateObjectType() : Option<ObjectType> {
+		return new None();
+	}
 }
 /* private */class IncompleteClassSegmentWrapper/*  */ {
 	constructor (segment : ClassSegment) {
 	}
 	createDefinition() : Option<Definition> {
+		return new None();
+	}
+	maybeCreateObjectType() : Option<ObjectType> {
 		return new None();
 	}
 }
@@ -896,12 +909,22 @@
 	createDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
+	maybeCreateObjectType() : Option<ObjectType> {
+		return new None();
+	}
 }
 /* private */class StructurePrototype/*  */ {
 	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>) {
 	}
-	createObjectType(definitions : List<Definition>) : ObjectType {
-		return new ObjectType(this.name, this.typeParams, definitions.addAllLast(this.parameters));
+	createObjectType() : ObjectType {
+		let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.createDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
+	}
+	createDefinition() : Option<Definition> {
+		return new None();
+	}
+	maybeCreateObjectType() : Option<ObjectType> {
+		return new Some(this.createObjectType());
 	}
 }
 /* private */class Primitive/*  */ {
@@ -1068,47 +1091,45 @@
 		if (stripped.startsWith("package ") || stripped.startsWith("import ")){
 			return new Tuple2Impl(state, "");
 		}
-		return /* parseClass */(stripped, state).map((tuple) => {
-			return new Tuple2Impl(tuple.left(), tuple.right().segment.generate());
-		}).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */(stripped)));
+		return /* parseClass */(stripped, state).flatMap((tuple) => /* completeStructure */(tuple.left(), tuple.right())).map((tuple) => new Tuple2Impl(tuple.left(), tuple.right().generate())).orElseGet(() => new Tuple2Impl(state, /* generatePlaceholder */(stripped)));
 	}
-	parseClass(stripped : string, state : CompileState) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	parseClass(stripped : string, state : CompileState) : Option<[CompileState, StructurePrototype]> {
 		return /* parseStructure */(stripped, "class ", "class ", state);
 	}
-	parseStructure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	parseStructure(stripped : string, sourceInfix : string, targetInfix : string, state : CompileState) : Option<[CompileState, StructurePrototype]> {
 		return /* first */(stripped, sourceInfix, (beforeInfix, right) => {
 			return /* first */(right, "{", (beforeContent, withEnd) => {
 				return /* suffix */(withEnd.strip(), "}", (content1) => {
-					return /* getOr */(targetInfix, state, beforeInfix, beforeContent, content1);
+					return /* parseStructureWithMaybeImplements */(targetInfix, state, beforeInfix, beforeContent, content1);
 				});
 			});
 		});
 	}
-	getOr(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	parseStructureWithMaybeImplements(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, StructurePrototype]> {
 		return /* first */(beforeContent, " implements ", (s, s2) => {
-			return /* structureWithMaybeExtends */(targetInfix, state, beforeInfix, s, content1);
+			return /* parseStructureWithMaybeExtends */(targetInfix, state, beforeInfix, s, content1);
 		}).or(() => {
-			return /* structureWithMaybeExtends */(targetInfix, state, beforeInfix, beforeContent, content1);
+			return /* parseStructureWithMaybeExtends */(targetInfix, state, beforeInfix, beforeContent, content1);
 		});
 	}
-	structureWithMaybeExtends(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	parseStructureWithMaybeExtends(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, StructurePrototype]> {
 		return /* first */(beforeContent, " extends ", (s, s2) => {
-			return /* structureWithMaybeParams */(targetInfix, state, beforeInfix, s, content1);
+			return /* parseStructureWithMaybeParams */(targetInfix, state, beforeInfix, s, content1);
 		}).or(() => {
-			return /* structureWithMaybeParams */(targetInfix, state, beforeInfix, beforeContent, content1);
+			return /* parseStructureWithMaybeParams */(targetInfix, state, beforeInfix, beforeContent, content1);
 		});
 	}
-	structureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	parseStructureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string) : Option<[CompileState, StructurePrototype]> {
 		return /* suffix */(beforeContent.strip(), ")", (s) => {
 			return /* first */(s, "(", (s1, s2) => {
 				let parsed = /* parseParameters */(state, s2);
-				return /* getOred */(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right());
+				return /* parseStructureWithMaybeTypeParams */(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right());
 			});
 		}).or(() => {
-			return /* getOred */(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+			return /* parseStructureWithMaybeTypeParams */(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
 		});
 	}
-	getOred(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	parseStructureWithMaybeTypeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>) : Option<[CompileState, StructurePrototype]> {
 		return /* first */(beforeContent, "<", (name, withTypeParams) => {
 			return /* first */(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
 				let mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => new Tuple2Impl(state1, s.strip());
@@ -1119,7 +1140,7 @@
 			return /* assembleStructure */(state, targetInfix, beforeInfix, beforeContent, content1, Lists.empty(), "", params);
 		});
 	}
-	assembleStructure(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
+	assembleStructure(state : CompileState, targetInfix : string, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>) : Option<[CompileState, StructurePrototype]> {
 		let name = rawName.strip();
 		if (!/* isSymbol */(name)){
 			return new None();
@@ -1129,14 +1150,12 @@
 		let segments = segmentsTuple[1]();
 		let parameters = /* retainDefinitions */(rawParameters);
 		let prototype : StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments);
-		let tate = segmentsState.enterDefinitions();
-		return /* completeStructure */(tate, prototype, segments);
+		return new Some(new Tuple2Impl(segmentsState.addType(prototype.createObjectType()), prototype));
 	}
-	completeStructure(state : CompileState, prototype : StructurePrototype, segments : List<IncompleteClassSegment>) : Option<[CompileState, IncompleteClassSegmentWrapper]> {
-		let definitionFromSegments = segments.iterate().map(IncompleteClassSegment.createDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
-		let thisType : ObjectType = prototype.createObjectType(definitionFromSegments);
-		let state2 : CompileState = state.define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-		return mapUsingState(state2.addType(thisType), prototype.segments(), Main.completeClassSegment).map((completedTuple : [CompileState, List<R>]) => {
+	completeStructure(state : CompileState, prototype : StructurePrototype) : Option<[CompileState, ClassSegment]> {
+		let thisType = prototype.createObjectType();
+		let state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
+		return mapUsingState(state2, prototype.segments(), Main.completeClassSegment).map((completedTuple : [CompileState, List<R>]) => {
 			let completedState = completedTuple[0]();
 			let completed = completedTuple[1]();
 			let state1 : CompileState = completedState.exitDefinitions();
@@ -1152,7 +1171,7 @@
 			let joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 			let generated = /* generatePlaceholder */(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + /* generatePlaceholder */(prototype.after()) + " {" + parsed2 + "\n}\n";
 			let definedState = state1.popStructName().addStructure(generated);
-			return new Tuple2Impl(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
+			return new Tuple2Impl(definedState, new Whitespace());
 		});
 	}
 	completeClassSegment(state1 : CompileState, entry : [number, IncompleteClassSegment]) : Option<[CompileState, ClassSegment]> {
@@ -1162,6 +1181,7 @@
 			/* case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace)) */;
 			/* case Placeholder placeholder -> new Some<>(new Tuple2Impl<>(state1, placeholder)) */;
 			/* case ClassDefinition classDefinition -> completeDefinition(state1, classDefinition) */;
+			/* case StructurePrototype structurePrototype -> completeStructure(state1, structurePrototype) */;
 		}
 		/*  */;
 	}

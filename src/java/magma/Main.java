@@ -186,6 +186,8 @@ public class Main {
     }
 
     private sealed interface IncompleteClassSegment {
+        Option<ObjectType> maybeCreateObjectType();
+
         Option<Definition> createDefinition();
     }
 
@@ -873,6 +875,11 @@ public class Main {
         public Option<Definition> createDefinition() {
             return new None<>();
         }
+
+        @Override
+        public Option<ObjectType> maybeCreateObjectType() {
+            return new None<>();
+        }
     }
 
     private static class Iterators {
@@ -1011,6 +1018,11 @@ public class Main {
 
         @Override
         public Option<Definition> createDefinition() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<ObjectType> maybeCreateObjectType() {
             return new None<>();
         }
     }
@@ -1293,11 +1305,21 @@ public class Main {
         public Option<Definition> createDefinition() {
             return new Some<>(this.header.createDefinition(this.findParamTypes()));
         }
+
+        @Override
+        public Option<ObjectType> maybeCreateObjectType() {
+            return new None<>();
+        }
     }
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
         @Override
         public Option<Definition> createDefinition() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<ObjectType> maybeCreateObjectType() {
             return new None<>();
         }
     }
@@ -1306,6 +1328,11 @@ public class Main {
         @Override
         public Option<Definition> createDefinition() {
             return new Some<>(this.definition);
+        }
+
+        @Override
+        public Option<ObjectType> maybeCreateObjectType() {
+            return new None<>();
         }
     }
 
@@ -1317,9 +1344,24 @@ public class Main {
             List<Definition> parameters,
             String after,
             List<IncompleteClassSegment> segments
-    ) {
-        private ObjectType createObjectType(List<Definition> definitions) {
-            return new ObjectType(this.name, this.typeParams, definitions.addAllLast(this.parameters));
+    ) implements IncompleteClassSegment {
+        private ObjectType createObjectType() {
+            var definitionFromSegments = this.segments.iterate()
+                    .map(IncompleteClassSegment::createDefinition)
+                    .flatMap(Iterators::fromOption)
+                    .collect(new ListCollector<>());
+
+            return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
+        }
+
+        @Override
+        public Option<Definition> createDefinition() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<ObjectType> maybeCreateObjectType() {
+            return new Some<>(this.createObjectType());
         }
     }
 
@@ -1485,54 +1527,53 @@ public class Main {
         }
 
         return parseClass(stripped, state)
-                .map(tuple -> {
-                    return new Tuple2Impl<>(tuple.left(), tuple.right().segment.generate());
-                })
+                .flatMap(tuple -> completeStructure(tuple.left(), tuple.right()))
+                .map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right().generate()))
                 .orElseGet(() -> new Tuple2Impl<>(state, generatePlaceholder(stripped)));
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> parseClass(String stripped, CompileState state) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseClass(String stripped, CompileState state) {
         return parseStructure(stripped, "class ", "class ", state);
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
         return first(stripped, sourceInfix, (beforeInfix, right) -> {
             return first(right, "{", (beforeContent, withEnd) -> {
                 return suffix(withEnd.strip(), "}", content1 -> {
-                    return getOr(targetInfix, state, beforeInfix, beforeContent, content1);
+                    return parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1);
                 });
             });
         });
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> getOr(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeImplements(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return first(beforeContent, " implements ", (s, s2) -> {
-            return structureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1);
+            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1);
         }).or(() -> {
-            return structureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1);
+            return parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1);
         });
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> structureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return first(beforeContent, " extends ", (s, s2) -> {
-            return structureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
+            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1);
         }).or(() -> {
-            return structureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
+            return parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1);
         });
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> structureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1) {
         return suffix(beforeContent.strip(), ")", s -> {
             return first(s, "(", (s1, s2) -> {
                 var parsed = parseParameters(state, s2);
-                return getOred(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right());
+                return parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right());
             });
         }).or(() -> {
-            return getOred(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
+            return parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
         });
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> getOred(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
+    private static Option<Tuple2<CompileState, StructurePrototype>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params) {
         return first(beforeContent, "<", (name, withTypeParams) -> {
             return first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
@@ -1544,7 +1585,7 @@ public class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> assembleStructure(
+    private static Option<Tuple2<CompileState, StructurePrototype>> assembleStructure(
             CompileState state, String targetInfix,
             String beforeInfix,
             String rawName,
@@ -1562,23 +1603,16 @@ public class Main {
         var segmentsState = segmentsTuple.left();
         var segments = segmentsTuple.right();
 
-
         var parameters = retainDefinitions(rawParameters);
         var prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments);
-        var tate = segmentsState.enterDefinitions();
-
-        return completeStructure(tate, prototype, segments);
+        return new Some<>(new Tuple2Impl<>(segmentsState.addType(prototype.createObjectType()), prototype));
     }
 
-    private static Option<Tuple2<CompileState, IncompleteClassSegmentWrapper>> completeStructure(CompileState state, StructurePrototype prototype, List<IncompleteClassSegment> segments) {
-        var definitionFromSegments = segments.iterate()
-                .map(IncompleteClassSegment::createDefinition)
-                .flatMap(Iterators::fromOption)
-                .collect(new ListCollector<>());
+    private static Option<Tuple2<CompileState, ClassSegment>> completeStructure(CompileState state, StructurePrototype prototype) {
+        var thisType = prototype.createObjectType();
+        var state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        var thisType = prototype.createObjectType(definitionFromSegments);
-        var state2 = state.define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-        return mapUsingState(state2.addType(thisType), prototype.segments(), Main::completeClassSegment).map(completedTuple -> {
+        return mapUsingState(state2, prototype.segments(), Main::completeClassSegment).map(completedTuple -> {
             var completedState = completedTuple.left();
             var completed = completedTuple.right();
 
@@ -1605,7 +1639,7 @@ public class Main {
 
             var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + " {" + parsed2 + "\n}\n";
             var definedState = state1.popStructName().addStructure(generated);
-            return new Tuple2Impl<>(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
+            return new Tuple2Impl<>(definedState, new Whitespace());
         });
     }
 
@@ -1616,6 +1650,7 @@ public class Main {
             case Whitespace whitespace -> new Some<>(new Tuple2Impl<>(state1, whitespace));
             case Placeholder placeholder -> new Some<>(new Tuple2Impl<>(state1, placeholder));
             case ClassDefinition classDefinition -> completeDefinition(state1, classDefinition);
+            case StructurePrototype structurePrototype -> completeStructure(state1, structurePrototype);
         };
     }
 
