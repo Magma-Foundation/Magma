@@ -1,39 +1,4 @@
 "use strict";
-/* private */ class Some {
-    constructor(value) {
-    }
-    /* @Override
-        public  */ map(mapper) {
-        return new Some(mapper(value));
-    }
-    /* @Override
-        public */ orElse(other) {
-        return /* this */ .value;
-    }
-    /* @Override
-        public */ filter(predicate) {
-        /* if (predicate.test(this.value))  */ {
-            return /* this */;
-        }
-        return new /* None */ ( /*  */);
-    }
-    /* @Override
-        public */ orElseGet(supplier) {
-        return /* this */ .value;
-    }
-    /* @Override
-        public */ or(other) {
-        return /* this */;
-    }
-    /* @Override
-        public  */ flatMap(mapper) {
-        return mapper(value);
-    }
-    /* @Override
-        public  */ and(other) {
-        return other.get( /*  */).map((otherValue) => new /* Tuple */ ( /* this */.value, otherValue));
-    }
-}
 /* private static */ class None {
     /* @Override
         public  */ map(mapper) {
@@ -62,6 +27,41 @@
     /* @Override
         public  */ and(other) {
         return new None( /*  */);
+    }
+}
+/* private */ class Some {
+    constructor(value) {
+    }
+    /* @Override
+        public  */ map(mapper) {
+        return new Some(mapper(value));
+    }
+    /* @Override
+        public */ orElse(other) {
+        return /* this */ .value;
+    }
+    /* @Override
+        public */ filter(predicate) {
+        /* if (predicate.test(this.value))  */ {
+            return /* this */;
+        }
+        return new None( /*  */);
+    }
+    /* @Override
+        public */ orElseGet(supplier) {
+        return /* this */ .value;
+    }
+    /* @Override
+        public */ or(other) {
+        return /* this */;
+    }
+    /* @Override
+        public  */ flatMap(mapper) {
+        return mapper(value);
+    }
+    /* @Override
+        public  */ and(other) {
+        return other.get( /*  */).map((otherValue) => new /* Tuple */ ( /* this */.value, otherValue));
     }
 }
 /* private static */ class SingleHead {

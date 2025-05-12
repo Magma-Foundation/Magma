@@ -47,50 +47,6 @@
 /* private sealed */interface Caller/*  */ {
 	generate() : string;
 }
-/* private */class Some<T>/*  */ {
-	constructor (value : T) {
-	}
-
-	/* @Override
-        public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
-		return new Some(mapper(/* this */.value));
-	}
-	/* @Override
-        public */ isPresent() : /* boolean */ {
-		return /* true */;
-	}
-	/* @Override
-        public */ orElse(other : T) : T {
-		return /* this */.value;
-	}
-	/* @Override
-        public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
-		/* if (predicate.test(this.value))  */{
-			return /* this */;
-		}
-		return new /* None */(/*  */);
-	}
-	/* @Override
-        public */ orElseGet(supplier : () => T) : T {
-		return /* this */.value;
-	}
-	/* @Override
-        public */ or(other : () => Option<T>) : Option<T> {
-		return /* this */;
-	}
-	/* @Override
-        public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
-		return mapper(/* this */.value);
-	}
-	/* @Override
-        public */ isEmpty() : /* boolean */ {
-		return /* false */;
-	}
-	/* @Override
-        public  */ and<R>(other : () => Option<R>) : Option<[T, R]> {
-		return other.get(/*  */).map((otherValue) => new /* Tuple */(/* this */.value, otherValue));
-	}
-}
 /* private static */class None<T>/*  */ {
 	/* @Override
         public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
@@ -127,6 +83,50 @@
 	/* @Override
         public  */ and<R>(other : () => Option<R>) : Option<[T, R]> {
 		return new None(/*  */);
+	}
+}
+/* private */class Some<T>/*  */ {
+	constructor (value : T) {
+	}
+
+	/* @Override
+        public  */ map<R>(mapper : (arg0 : T) => R) : Option<R> {
+		return new Some(mapper(/* this */.value));
+	}
+	/* @Override
+        public */ isPresent() : /* boolean */ {
+		return /* true */;
+	}
+	/* @Override
+        public */ orElse(other : T) : T {
+		return /* this */.value;
+	}
+	/* @Override
+        public */ filter(predicate : (arg0 : T) => boolean) : Option<T> {
+		/* if (predicate.test(this.value))  */{
+			return /* this */;
+		}
+		return new None(/*  */);
+	}
+	/* @Override
+        public */ orElseGet(supplier : () => T) : T {
+		return /* this */.value;
+	}
+	/* @Override
+        public */ or(other : () => Option<T>) : Option<T> {
+		return /* this */;
+	}
+	/* @Override
+        public  */ flatMap<R>(mapper : (arg0 : T) => Option<R>) : Option<R> {
+		return mapper(/* this */.value);
+	}
+	/* @Override
+        public */ isEmpty() : /* boolean */ {
+		return /* false */;
+	}
+	/* @Override
+        public  */ and<R>(other : () => Option<R>) : Option<[T, R]> {
+		return other.get(/*  */).map((otherValue) => new /* Tuple */(/* this */.value, otherValue));
 	}
 }
 /* private static */class SingleHead<T>/*  */ {
