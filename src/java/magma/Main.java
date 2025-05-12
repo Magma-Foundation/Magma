@@ -1590,21 +1590,29 @@ public class Main {
         var rawParameters = parametersTuple.right();
 
         var parameters = retainDefinitions(rawParameters);
+        return completeMethod(parametersTuple.left(), header, parameters, rawContent, depth);
+    }
 
-        var content = rawContent.strip();
+    private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(
+            CompileState state,
+            Header header,
+            List<Definition> parameters,
+            String content,
+            int depth
+    ) {
         var paramTypes = parameters.iterate()
                 .map(Definition::type)
                 .collect(new ListCollector<>());
 
         var toDefine = header.createDefinition(paramTypes);
         if (content.equals(";")) {
-            return new Some<>(new Tuple2Impl<>(parametersTuple.left().withDefinition(toDefine), new Method(depth, header, parameters, new None<>())));
+            return new Some<>(new Tuple2Impl<>(state.withDefinition(toDefine), new Method(depth, header, parameters, new None<>())));
         }
 
         if (content.startsWith("{") && content.endsWith("}")) {
             var substring = content.substring(1, content.length() - 1);
-            CompileState state = parametersTuple.left().withDefinitions(parameters);
-            var statementsTuple = parseStatements(state, substring, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+            var withDefined = state.withDefinitions(parameters);
+            var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
             var statements = statementsTuple.right();
             return new Some<>(new Tuple2Impl<>(statementsTuple.left().withDefinition(toDefine), new Method(depth, header, parameters, new Some<>(statements))));
         }
