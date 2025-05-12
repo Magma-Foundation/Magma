@@ -213,6 +213,40 @@ Option < T > {
         return new JVMList(new /* ArrayList */ ( /* Arrays */.asList(elements)));
     }
 }
+/* private */ class Definition /*  */ {
+    constructor(maybeBefore, name, type, typeParams) {
+    }
+    createSimpleDefinition(name, type) {
+        return new Definition(new None(), name, type, empty());
+    }
+    generate() {
+        return /* this */ .generateWithParams("");
+    }
+    generateWithParams(params) {
+        let joined = /* this */ .joinTypeParams();
+        let before = /* this */ .joinBefore();
+        let typeString = /* this */ .generateType();
+        return /* before */ +.name + /* joined */ +params +  /* typeString */;
+    }
+    generateType() {
+        /* if (this.type.equals(Primitive.Unknown))  */ {
+            return "";
+        }
+        return " : " + /* this */ .type.generate();
+    }
+    joinBefore() {
+        return !.maybeBefore.filter((value) => !value.isEmpty()).map(generatePlaceholder).map((inner) => inner + " ").orElse("");
+    }
+    joinTypeParams() {
+        return /* this */ .typeParams.iterate().collect(new /* Joiner */ ()).map((inner) => "<" + inner + ">").orElse("");
+    }
+    mapType(mapper) {
+        return new Definition(maybeBefore, name, mapper(type), typeParams);
+    }
+    toString() {
+        return "Definition[" + "maybeBefore=" + /* this */ .maybeBefore + ", " + "name=" + /* this */ .name + ", " + "type=" + /* this */ .type + ", " + "typeParams=" + /* this */ .typeParams +  /*  ']' */;
+    }
+}
 /* private */ class ObjectType /*  */ {
     constructor(name, typeParams, definitions) {
     }
@@ -319,34 +353,6 @@ peek();
     }
     fold(current, element) {
         return new Some(current.map((inner) => inner + /* this */ .delimiter + element).orElse(element));
-    }
-}
-/* private */ class Definition /*  */ {
-    constructor(maybeBefore, name, type, typeParams) {
-    }
-    generate() {
-        return /* this */ .generateWithParams("");
-    }
-    generateWithParams(params) {
-        let joined = /* this */ .joinTypeParams();
-        let before = /* this */ .joinBefore();
-        let typeString = /* this */ .generateType();
-        return /* before */ +.name + /* joined */ +params +  /* typeString */;
-    }
-    generateType() {
-        /* if (this.type.equals(Primitive.Unknown))  */ {
-            return "";
-        }
-        return " : " + /* this */ .type.generate();
-    }
-    joinBefore() {
-        return !.maybeBefore.filter((value) => !value.isEmpty()).map(generatePlaceholder).map((inner) => inner + " ").orElse("");
-    }
-    joinTypeParams() {
-        return /* this */ .typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
-    }
-    mapType(mapper) {
-        return new Definition(maybeBefore, name, mapper(type), typeParams);
     }
 }
 /* private static */ class ListCollector {
@@ -524,7 +530,7 @@ Option < R > {
     constructor(parameters, body) {
     }
     generate() {
-        let joined = /* this */ .parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+        let joined = /* this */ .parameters.iterate().map(generate).collect(new Joiner(", ")).orElse("");
         return "(" + /* joined */ +") => " + /* this */ .body.generate();
     }
     type() {
@@ -902,8 +908,8 @@ Option < [/* CompileState */ , string] > {
             let joinedParameters = /* joinValues */ ( /* parameters */);
             let content = rawContent.strip();
             let indent = /* createIndent */ (depth);
-            let paramTypes = /* parameters */ .iterate().map(Definition.type).collect(new ListCollector());
-            let toDefine = new Definition(definition.name, new FunctionType(definition.type));
+            let paramTypes = /* parameters */ .iterate().map(type).collect(new ListCollector());
+            let toDefine = /* Definition */ .createSimpleDefinition(definition.name, new FunctionType(definition.type));
             let generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
             /* if (content.equals(";"))  */ {
                 return new Some(new Tuple2Impl(left().withDefinition( /* toDefine */), /* indent */ + +";"));
@@ -922,7 +928,7 @@ Option < [/* CompileState */ , string] > {
 joinValues(retainParameters, (List));
 string;
 {
-    return retainParameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+    return retainParameters.iterate().map(generate).collect(new Joiner(", ")).orElse("");
 }
 retainDefinitions(right, (List));
 List < Definition > {
@@ -1051,10 +1057,10 @@ Option < [/* CompileState */ , Value] > {
                 let /* type  */ = /* functionType */ .arguments.get(0).orElse( /* null */);
             }
         }
-        return /* assembleLambda */ (state, /* Lists */ .of(new Definition(type)), valueString, depth);
+        return /* assembleLambda */ (state, /* Lists */ .of(createSimpleDefinition(type)), valueString, depth);
     }
     /* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */ {
-        let parameterNames = divideAll(substring(1, length() - 1), foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).map((name) => new Definition(name, Unknown)).collect(new ListCollector());
+        let parameterNames = divideAll(substring(1, length() - 1), foldValueChar).iterate().map(strip).filter((value) => !value.isEmpty()).map((name) => /* Definition */ .createSimpleDefinition(name, Unknown)).collect(new ListCollector());
         return /* assembleLambda */ (state,  /* parameterNames */, valueString, depth);
     }
     return new None();

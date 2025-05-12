@@ -271,8 +271,43 @@
 		return new JVMList(new /* ArrayList */(/* Arrays */.asList(elements)));
 	}
 }
+/* private */class Definition/*  */ {
+	constructor (maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
+	}
+
+	createSimpleDefinition(name : string, type : Type) : Definition {
+		return new Definition(new None(), name, type, /* Lists */.empty());
+	}
+	generate() : string {
+		return /* this */.generateWithParams("");
+	}
+	generateWithParams(params : string) : string {
+		let joined = /* this */.joinTypeParams();
+		let before = /* this */.joinBefore();
+		let typeString = /* this */.generateType();
+		return /* before */ + /* this */.name + /* joined */ + params + /* typeString */;
+	}
+	generateType() : string {
+		/* if (this.type.equals(Primitive.Unknown))  */{
+			return "";
+		}
+		return " : " + /* this */.type.generate();
+	}
+	joinBefore() : string {
+		return !/* isDebug ? "" : this */.maybeBefore.filter((value) => !value.isEmpty()).map(/* Main */.generatePlaceholder).map((inner) => inner + " ").orElse("");
+	}
+	joinTypeParams() : string {
+		return /* this */.typeParams.iterate().collect(new /* Joiner */()).map((inner) => "<" + inner + ">").orElse("");
+	}
+	mapType(mapper : (arg0 : Type) => Type) : Definition {
+		return new Definition(/* this */.maybeBefore, /* this */.name, mapper(/* this */.type), /* this */.typeParams);
+	}
+	toString() : string {
+		return "Definition[" + "maybeBefore=" + /* this */.maybeBefore + ", " + "name=" + /* this */.name + ", " + "type=" + /* this */.type + ", " + "typeParams=" + /* this */.typeParams + /*  ']' */;
+	}
+}
 /* private */class ObjectType/*  */ {
-	constructor (name : string, typeParams : List<string>, definitions : List</* Definition */>) {
+	constructor (name : string, typeParams : List<string>, definitions : List<Definition>) {
 	}
 
 	generate() : string {
@@ -371,38 +406,6 @@
 	}
 	fold(current : Option<string>, element : string) : Option<string> {
 		return new Some(current.map((inner : string) => inner + /* this */.delimiter + element).orElse(element));
-	}
-}
-/* private */class Definition/*  */ {
-	constructor (maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
-	}
-
-	Definition(name : string, type : Type) : /* public */ {
-		/* this(new None<>(), name, type, Lists.empty()) */;
-	}
-	generate() : string {
-		return /* this */.generateWithParams("");
-	}
-	generateWithParams(params : string) : string {
-		let joined = /* this */.joinTypeParams();
-		let before = /* this */.joinBefore();
-		let typeString = /* this */.generateType();
-		return /* before */ + /* this */.name + /* joined */ + params + /* typeString */;
-	}
-	generateType() : string {
-		/* if (this.type.equals(Primitive.Unknown))  */{
-			return "";
-		}
-		return " : " + /* this */.type.generate();
-	}
-	joinBefore() : string {
-		return !/* isDebug ? "" : this */.maybeBefore.filter((value) => !value.isEmpty()).map(/* Main */.generatePlaceholder).map((inner) => inner + " ").orElse("");
-	}
-	joinTypeParams() : string {
-		return /* this */.typeParams.iterate().collect(new Joiner()).map((inner) => "<" + inner + ">").orElse("");
-	}
-	mapType(mapper : (arg0 : Type) => Type) : Definition {
-		return new Definition(/* this */.maybeBefore, /* this */.name, mapper(/* this */.type), /* this */.typeParams);
 	}
 }
 /* private static */class ListCollector<T>/*  */ {
@@ -595,7 +598,7 @@
 	}
 
 	generate() : string {
-		let joined = /* this */.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+		let joined = /* this */.parameters.iterate().map(/* Definition */.generate).collect(new Joiner(", ")).orElse("");
 		return "(" + /* joined */ + ") => " + /* this */.body.generate();
 	}
 	type() : Type {
@@ -657,7 +660,7 @@
 	}
 }
 /* public */class Main/*  */ {
-	CompileState(structures : List<string>, definitions : List</* Definition */>, objectTypes : List<ObjectType>, maybeStructName : Option<string>, typeParams : List<string>, typeRegister : Option<Type>) : /* record */ {
+	CompileState(structures : List<string>, definitions : List<Definition>, objectTypes : List<ObjectType>, maybeStructName : Option<string>, typeParams : List<string>, typeRegister : Option<Type>) : /* record */ {
 		/* public CompileState()  */{
 			/* this(Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty(), new None<>()) */;
 		}
@@ -936,8 +939,8 @@
 					let joinedParameters = /* joinValues */(/* parameters */);
 					let content = rawContent.strip();
 					let indent = /* createIndent */(depth);
-					let paramTypes = /* parameters */.iterate().map(Definition.type).collect(new ListCollector());
-					let toDefine = new Definition(definition.name, new FunctionType(/* paramTypes */, definition.type));
+					let paramTypes = /* parameters */.iterate().map(/* Definition */.type).collect(new ListCollector());
+					let toDefine = /* Definition */.createSimpleDefinition(definition.name, new FunctionType(/* paramTypes */, definition.type));
 					let generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
 					/* if (content.equals(";"))  */{
 						return new Some(new Tuple2Impl(/* parametersTuple */.left().withDefinition(/* toDefine */), /* indent */ + /* generatedHeader */ + ";"));
@@ -954,7 +957,7 @@
 		});
 	}
 	joinValues(retainParameters : List<Definition>) : string {
-		return retainParameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+		return retainParameters.iterate().map(/* Definition */.generate).collect(new Joiner(", ")).orElse("");
 	}
 	retainDefinitions(right : List<Parameter>) : List<Definition> {
 		return right().map(/* Main */.retainDefinition).flatMap(/* Iterators */.fromOption).collect(new ListCollector());
@@ -1057,10 +1060,10 @@
 						let /* type  */ = /* functionType */.arguments.get(0).orElse(/* null */);
 					}
 				}
-				return /* assembleLambda */(state, /* Lists */.of(new Definition(/* strippedBeforeArrow */, type)), valueString, depth);
+				return /* assembleLambda */(state, /* Lists */.of(/* Definition */.createSimpleDefinition(/* strippedBeforeArrow */, type)), valueString, depth);
 			}
 			/* if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")"))  */{
-				let parameterNames = divideAll(/* strippedBeforeArrow */.substring(1, /* strippedBeforeArrow */.length() - 1), /* Main */.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => new Definition(name, /* Primitive */.Unknown)).collect(new ListCollector());
+				let parameterNames = divideAll(/* strippedBeforeArrow */.substring(1, /* strippedBeforeArrow */.length() - 1), /* Main */.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => /* Definition */.createSimpleDefinition(name, /* Primitive */.Unknown)).collect(new ListCollector());
 				return /* assembleLambda */(state, /* parameterNames */, valueString, depth);
 			}
 			return new None();

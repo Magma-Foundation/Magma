@@ -411,6 +411,65 @@ public class Main {
         }
     }
 
+    private record Definition(
+            Option<String> maybeBefore,
+            String name,
+            Type type,
+            List<String> typeParams
+    ) implements Parameter {
+        public static Definition createSimpleDefinition(String name, Type type) {
+            return new Definition(new None<>(), name, type, Lists.empty());
+        }
+
+        private String generate() {
+            return this.generateWithParams("");
+        }
+
+        public String generateWithParams(String params) {
+            var joined = this.joinTypeParams();
+            var before = this.joinBefore();
+            var typeString = this.generateType();
+            return before + this.name + joined + params + typeString;
+        }
+
+        private String generateType() {
+            if (this.type.equals(Primitive.Unknown)) {
+                return "";
+            }
+
+            return " : " + this.type.generate();
+        }
+
+        private String joinBefore() {
+            return !isDebug ? "" : this.maybeBefore
+                    .filter(value -> !value.isEmpty())
+                    .map(Main::generatePlaceholder)
+                    .map(inner -> inner + " ")
+                    .orElse("");
+        }
+
+        private String joinTypeParams() {
+            return this.typeParams.iterate()
+                    .collect(new Joiner())
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+        }
+
+        public Definition mapType(Function<Type, Type> mapper) {
+            return new Definition(this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
+        }
+
+        @Override
+        public String toString() {
+            return "Definition[" +
+                    "maybeBefore=" + this.maybeBefore + ", " +
+                    "name=" + this.name + ", " +
+                    "type=" + this.type + ", " +
+                    "typeParams=" + this.typeParams + ']';
+        }
+
+    }
+
     private record ObjectType(
             String name,
             List<String> typeParams,
@@ -608,55 +667,6 @@ public class Main {
         @Override
         public Option<String> fold(Option<String> current, String element) {
             return new Some<>(current.map(inner -> inner + this.delimiter + element).orElse(element));
-        }
-    }
-
-    private record Definition(
-            Option<String> maybeBefore,
-            String name,
-            Type type,
-            List<String> typeParams
-    ) implements Parameter {
-        public Definition(String name, Type type) {
-            this(new None<>(), name, type, Lists.empty());
-        }
-
-        private String generate() {
-            return this.generateWithParams("");
-        }
-
-        public String generateWithParams(String params) {
-            var joined = this.joinTypeParams();
-            var before = this.joinBefore();
-            var typeString = this.generateType();
-            return before + this.name + joined + params + typeString;
-        }
-
-        private String generateType() {
-            if (this.type.equals(Primitive.Unknown)) {
-                return "";
-            }
-
-            return " : " + this.type.generate();
-        }
-
-        private String joinBefore() {
-            return !isDebug ? "" : this.maybeBefore
-                    .filter(value -> !value.isEmpty())
-                    .map(Main::generatePlaceholder)
-                    .map(inner -> inner + " ")
-                    .orElse("");
-        }
-
-        private String joinTypeParams() {
-            return this.typeParams.iterate()
-                    .collect(new Joiner())
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
-        }
-
-        public Definition mapType(Function<Type, Type> mapper) {
-            return new Definition(this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
         }
     }
 
@@ -1281,7 +1291,7 @@ public class Main {
                             .map(Definition::type)
                             .collect(new ListCollector<>());
 
-                    var toDefine = new Definition(definition.name, new FunctionType(paramTypes, definition.type));
+                    var toDefine = Definition.createSimpleDefinition(definition.name, new FunctionType(paramTypes, definition.type));
                     var generatedHeader = definition.generateWithParams("(" + joinedParameters + ")");
                     if (content.equals(";")) {
                         return new Some<>(new Tuple2Impl<>(parametersTuple.left().withDefinition(toDefine), indent + generatedHeader + ";"));
@@ -1440,7 +1450,7 @@ public class Main {
                         type = functionType.arguments.get(0).orElse(null);
                     }
                 }
-                return assembleLambda(state, Lists.of(new Definition(strippedBeforeArrow, type)), valueString, depth);
+                return assembleLambda(state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
             }
 
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
@@ -1448,7 +1458,7 @@ public class Main {
                         .iterate()
                         .map(String::strip)
                         .filter(value -> !value.isEmpty())
-                        .map(name -> new Definition(name, Primitive.Unknown))
+                        .map(name -> Definition.createSimpleDefinition(name, Primitive.Unknown))
                         .collect(new ListCollector<>());
 
                 return assembleLambda(state, parameterNames, valueString, depth);
