@@ -1762,6 +1762,9 @@ var ResultVariant;
         if (base.equals("Supplier")) {
             return new Tuple2Impl(state, new FunctionType(Lists.empty(), children.get(0).orElse( /* null */)));
         }
+        if (base.equals("Consumer")) {
+            return new Tuple2Impl(state, new FunctionType(Lists.of(children.get(0).orElse( /* null */)), Primitive.Void));
+        }
         if (base.equals("Tuple2") && children.size() >= 2) {
             return new Tuple2Impl(state, new TupleType(children));
         }
