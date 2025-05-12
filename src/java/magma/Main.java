@@ -126,6 +126,34 @@ public class Main {
         Option<Type> find(String name);
     }
 
+    private interface Definition extends Parameter, Header {
+        String generate();
+
+        String generateType();
+
+        String joinBefore();
+
+        String joinTypeParams();
+
+        Definition mapType(Function<Type, Type> mapper);
+
+        @Override
+        String toString();
+
+        @Override
+        String generateWithParams(String joinedParameters);
+
+        @Override
+        Definition createDefinition(List<Type> paramTypes);
+
+        Option<String> maybeBefore();
+
+        String name();
+
+        Type type();
+
+        List<String> typeParams();
+    }
 
     private interface Header {
         Definition createDefinition(List<Type> paramTypes);
@@ -431,21 +459,23 @@ public class Main {
         }
     }
 
-    private record Definition(
+    private record ImmutableDefinition(
             Option<String> maybeBefore,
             String name,
             Type type,
             List<String> typeParams
-    ) implements Parameter, Header {
+    ) implements Definition {
         public static Definition createSimpleDefinition(String name, Type type) {
-            return new Definition(new None<>(), name, type, Lists.empty());
+            return new ImmutableDefinition(new None<>(), name, type, Lists.empty());
         }
 
-        private String generate() {
+        @Override
+        public String generate() {
             return this.generateWithParams("");
         }
 
-        private String generateType() {
+        @Override
+        public String generateType() {
             if (this.type.equals(Primitive.Unknown)) {
                 return "";
             }
@@ -453,7 +483,8 @@ public class Main {
             return " : " + this.type.generate();
         }
 
-        private String joinBefore() {
+        @Override
+        public String joinBefore() {
             return !isDebug ? "" : this.maybeBefore
                     .filter(value -> !value.isEmpty())
                     .map(Main::generatePlaceholder)
@@ -461,15 +492,17 @@ public class Main {
                     .orElse("");
         }
 
-        private String joinTypeParams() {
+        @Override
+        public String joinTypeParams() {
             return this.typeParams.iterate()
                     .collect(new Joiner())
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
         }
 
+        @Override
         public Definition mapType(Function<Type, Type> mapper) {
-            return new Definition(this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
+            return new ImmutableDefinition(this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
         }
 
         @Override
@@ -491,7 +524,7 @@ public class Main {
 
         @Override
         public Definition createDefinition(List<Type> paramTypes) {
-            return Definition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
+            return ImmutableDefinition.createSimpleDefinition(this.name, new FunctionType(paramTypes, this.type));
         }
     }
 
@@ -515,7 +548,7 @@ public class Main {
         @Override
         public Option<Type> find(String name) {
             return this.definitions.iterate()
-                    .filter(definition -> definition.name.equals(name))
+                    .filter(definition -> definition.name().equals(name))
                     .map(Definition::type)
                     .next();
         }
@@ -552,7 +585,7 @@ public class Main {
             }
 
             return this.definitions.iterate()
-                    .filter(definition -> definition.name.equals(name))
+                    .filter(definition -> definition.name().equals(name))
                     .next()
                     .map(Definition::type);
         }
@@ -1020,7 +1053,7 @@ public class Main {
     private static class ConstructorHeader implements Header {
         @Override
         public Definition createDefinition(List<Type> paramTypes) {
-            return Definition.createSimpleDefinition("new", Primitive.Unknown);
+            return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
         }
 
         @Override
@@ -1589,7 +1622,7 @@ public class Main {
                 var definition = definitionTuple.right();
 
                 var variant = new DataAccess(value, "_variant", Primitive.Unknown);
-                var temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate(), Primitive.Unknown);
+                var temp = new SymbolValue(value.type().generate() + "Variant." + definition.type().generate(), Primitive.Unknown);
                 return new Tuple2Impl<>(definitionTuple.left(), new Operation(variant, Operator.EQUALS, temp));
             });
         });
@@ -1624,7 +1657,7 @@ public class Main {
                         type = functionType.arguments.get(0).orElse(null);
                     }
                 }
-                return assembleLambda(state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
+                return assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
             }
 
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
@@ -1632,7 +1665,7 @@ public class Main {
                         .iterate()
                         .map(String::strip)
                         .filter(value -> !value.isEmpty())
-                        .map(name -> Definition.createSimpleDefinition(name, Primitive.Unknown))
+                        .map(name -> ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown))
                         .collect(new ListCollector<>());
 
                 return assembleLambda(state, parameterNames, valueString, depth);
@@ -1984,7 +2017,7 @@ public class Main {
             String type
     ) {
         return parseType(state.withTypeParams(typeParams), type).map(type1 -> {
-            var node = new Definition(beforeTypeParams, name.strip(), type1.right(), typeParams);
+            var node = new ImmutableDefinition(beforeTypeParams, name.strip(), type1.right(), typeParams);
             return new Tuple2Impl<>(type1.left(), node);
         });
     }

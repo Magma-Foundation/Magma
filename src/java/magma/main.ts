@@ -68,8 +68,22 @@
 	typeParams : List<string>;
 	find(name : string) : Option<Type>;
 }
+/* private */interface Definition/*  */ {
+	generate : string;
+	generateType : string;
+	joinBefore : string;
+	joinTypeParams : string;
+	mapType(mapper : (arg0 : Type) => Type) : Definition;
+	toString : string;
+	generateWithParams(joinedParameters : string) : string;
+	createDefinition(paramTypes : List<Type>) : Definition;
+	maybeBefore : Option<string>;
+	name : string;
+	type : Type;
+	typeParams : List<string>;
+}
 /* private */interface Header/*  */ {
-	createDefinition(paramTypes : List<Type>) : /* Definition */;
+	createDefinition(paramTypes : List<Type>) : Definition;
 	generateWithParams(joinedParameters : string) : string;
 }
 /* private static */class None<T>/*  */ {
@@ -288,12 +302,12 @@
 		return new JVMList(new /* ArrayList */(/* Arrays */.asList(elements)));
 	}
 }
-/* private */class Definition/*  */ {
+/* private */class ImmutableDefinition/*  */ {
 	constructor ((maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>)) {
 	}
 
 	createSimpleDefinition(name : string, type : Type) : Definition {
-		return new Definition(new None(), name, type, Lists.empty());
+		return new ImmutableDefinition(new None(), name, type, Lists.empty());
 	}
 	generate : string {
 		return this.generateWithParams("");
@@ -311,7 +325,7 @@
 		return this.typeParams().collect(new /* Joiner */()).map((inner) => "<" + inner + ">").orElse("");
 	}
 	mapType(mapper : (arg0 : Type) => Type) : Definition {
-		return new Definition(this.maybeBefore, this.name, mapper(this.type), this.typeParams);
+		return new ImmutableDefinition(this.maybeBefore, this.name, mapper(this.type), this.typeParams);
 	}
 	toString : string {
 		return "Definition[" + "maybeBefore=" + this.maybeBefore + ", " + "name=" + this.name + ", " + "type=" + this.type + ", " + "typeParams=" + this.typeParams + /*  ']' */;
@@ -323,7 +337,7 @@
 		return before + this.name + joined + joinedParameters + typeString;
 	}
 	createDefinition(paramTypes : List<Type>) : Definition {
-		return Definition.createSimpleDefinition(this.name, new /* FunctionType */(paramTypes, this.type));
+		return ImmutableDefinition.createSimpleDefinition(this.name, new /* FunctionType */(paramTypes, this.type));
 	}
 }
 /* private */class ObjectType/*  */ {
@@ -337,7 +351,7 @@
 		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition) => definition.mapType((type) => type(mapping))).collect(new /* ListCollector */()));
 	}
 	find(name : string) : Option<Type> {
-		return this.definitions.iterate().filter((definition) => definition.name.equals(name)).map(Definition.type).next();
+		return this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next();
 	}
 }
 /* private */class TypeParam/*  */ {
@@ -359,10 +373,10 @@
 		/* this(Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), new None<>()) */;
 	}
 	resolveValue(name : string) : Option<Type> {
-		if (name.equals("this")){
+		if (name("this")){
 			return new Some(new ObjectType(name, this.typeParams, this.definitions));
 		}
-		return this.definitions.iterate().filter((definition) => definition.name.equals(name)).next().map(Definition.type);
+		return this.definitions.iterate().filter((definition) => definition.name().equals(name)).next().map(Definition.type);
 	}
 	addStructure(structure : string) : CompileState {
 		return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
@@ -735,7 +749,7 @@
 }
 /* private static */class ConstructorHeader/*  */ {
 	createDefinition(paramTypes : List<Type>) : Definition {
-		return Definition.createSimpleDefinition("new", /* Primitive */.Unknown);
+		return ImmutableDefinition.createSimpleDefinition("new", /* Primitive */.Unknown);
 	}
 	generateWithParams(joinedParameters : string) : string {
 		return "constructor " + joinedParameters;
@@ -1181,7 +1195,7 @@
 				let value = childTuple.right();
 				let definition = definitionTuple.right();
 				let variant = new DataAccess(value, "_variant", /* Primitive */.Unknown);
-				let temp = new SymbolValue(value.type().generate() + "Variant." + definition.type.generate(), /* Primitive */.Unknown);
+				let temp = new SymbolValue(value.type().generate() + "Variant." + definition.type().generate(), /* Primitive */.Unknown);
 				return new Tuple2Impl(definitionTuple.left(), new Operation(variant, /* Operator */.EQUALS, temp));
 			});
 		});
@@ -1212,10 +1226,10 @@
 						type = /* functionType */.arguments.get(0).orElse(/* null */);
 					}
 				}
-				return /* assembleLambda */(state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
+				return /* assembleLambda */(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
 			}
 			if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")){
-				let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => Definition.createSimpleDefinition(name, /* Primitive */.Unknown)).collect(new ListCollector());
+				let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), Main.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => ImmutableDefinition.createSimpleDefinition(name, /* Primitive */.Unknown)).collect(new ListCollector());
 				return /* assembleLambda */(state, parameterNames, valueString, depth);
 			}
 			return new None();
@@ -1488,7 +1502,7 @@
 	}
 	assembleDefinition(state : CompileState, beforeTypeParams : Option<string>, name : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
 		return /* parseType */(state.withTypeParams(typeParams), type).map((type1) => {
-			let node = new Definition(beforeTypeParams, name.strip(), type1.right(), typeParams);
+			let node = new ImmutableDefinition(beforeTypeParams, name(), type1.right(), typeParams);
 			return new Tuple2Impl(type1.left(), node);
 		});
 	}
