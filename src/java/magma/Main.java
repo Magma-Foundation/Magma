@@ -1238,6 +1238,14 @@ public class Main {
         }
     }
 
+    private record MethodPrototype(int depth, Header header, List<Definition> parameters, String content) {
+        private List<Type> findParamTypes() {
+            return this.parameters().iterate()
+                    .map(Definition::type)
+                    .collect(new ListCollector<>());
+        }
+    }
+
     private static final boolean isDebug = true;
 
     public static void main() {
@@ -1590,31 +1598,22 @@ public class Main {
         var rawParameters = parametersTuple.right();
 
         var parameters = retainDefinitions(rawParameters);
-        return completeMethod(parametersTuple.left(), header, parameters, rawContent, depth);
+        return completeMethod(parametersTuple.left(), new MethodPrototype(depth, header, parameters, rawContent));
     }
 
-    private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(
-            CompileState state,
-            Header header,
-            List<Definition> parameters,
-            String content,
-            int depth
-    ) {
-        var paramTypes = parameters.iterate()
-                .map(Definition::type)
-                .collect(new ListCollector<>());
-
-        var toDefine = header.createDefinition(paramTypes);
-        if (content.equals(";")) {
-            return new Some<>(new Tuple2Impl<>(state.withDefinition(toDefine), new Method(depth, header, parameters, new None<>())));
+    private static Option<Tuple2<CompileState, ClassSegment>> completeMethod(CompileState state, MethodPrototype prototype) {
+        var paramTypes = prototype.findParamTypes();
+        var toDefine = prototype.header().createDefinition(paramTypes);
+        if (prototype.content().equals(";")) {
+            return new Some<>(new Tuple2Impl<>(state.withDefinition(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new None<>())));
         }
 
-        if (content.startsWith("{") && content.endsWith("}")) {
-            var substring = content.substring(1, content.length() - 1);
-            var withDefined = state.withDefinitions(parameters);
-            var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, depth + 1));
+        if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
+            var substring = prototype.content().substring(1, prototype.content().length() - 1);
+            var withDefined = state.withDefinitions(prototype.parameters());
+            var statementsTuple = parseStatements(withDefined, substring, (state1, input1) -> parseFunctionSegment(state1, input1, prototype.depth() + 1));
             var statements = statementsTuple.right();
-            return new Some<>(new Tuple2Impl<>(statementsTuple.left().withDefinition(toDefine), new Method(depth, header, parameters, new Some<>(statements))));
+            return new Some<>(new Tuple2Impl<>(statementsTuple.left().withDefinition(toDefine), new Method(prototype.depth(), prototype.header(), prototype.parameters(), new Some<>(statements))));
         }
 
         return new None<>();
