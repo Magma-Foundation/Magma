@@ -689,7 +689,9 @@
 }
 /* private */class Operator/*  */ {/* ADD("+", "+"),
         SUBTRACT("-", "-"),
-        EQUALS("==", "==="); */
+        EQUALS("==", "==="),
+        AND("&&", "&&"),
+        GREATER_THAN_OR_EQUALS(">=", ">="); */
 	sourceRepresentation : string;
 	targetRepresentation : string;/* 
 
@@ -821,10 +823,10 @@
 	}
 	foldStatementChar(state : DivideState, c : string) : DivideState {
 		let append = state.append(c);
-		if (c === /*  ';' && append */.isLevel()){
+		if (c === /*  ';'  */ && append.isLevel()){
 			return append();
 		}
-		if (c === /*  '}' && append */.isShallow()){
+		if (c === /*  '}'  */ && append.isShallow()){
 			return append().exit();
 		}
 		if (c === /*  '{' || c  */ === /*  '(' */){
@@ -918,7 +920,7 @@
 	isSymbol(input : string) : boolean {
 		/* for (var i = 0; i < input.length(); i++) */{
 			let c = input.charAt(/* i */);
-			if (/* Character.isLetter(c) || */(/* i != 0 && Character */.isDigit(c))){
+			if (/* Character.isLetter(c) || */(/* i != 0  */ && /* Character */.isDigit(c))){
 				/* continue */;
 			}
 			return /* false */;
@@ -966,7 +968,7 @@
 					if (content.equals(";")){
 						return new Some(new Tuple2Impl(parametersTuple.left().withDefinition(toDefine), indent + generatedHeader + ";"));
 					}
-					if (/* content.startsWith("{") && content */.endsWith("}")){
+					if (content.startsWith("{") && content.endsWith("}")){
 						let substring = content.substring(1, content.length() - 1);
 						let statementsTuple = /* compileFunctionSegments */(parametersTuple.left().withDefinitions(parameters), substring, depth);
 						let generated = indent + generatedHeader + " {" + statementsTuple.right() + indent + "}";
@@ -1039,7 +1041,7 @@
 	}
 	foldBlockStart(state : DivideState, c : string) : DivideState {
 		let appended = state.append(c);
-		if (c === /*  '{' && state */.isLevel()){
+		if (c === /*  '{'  */ && state.isLevel()){
 			return appended.advance();
 		}
 		if (c === /*  '{' */){
@@ -1080,7 +1082,7 @@
 		return new Tuple2Impl(tuple.left(), tuple.right().generate());
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+		return /* parseLambda */(state, input, depth).or(() => /* parseString */(state, input)).or(() => /* parseDataAccess */(state, input, depth)).or(() => /* parseSymbolValue */(state, input)).or(() => /* parseInvokable */(state, input, depth)).or(() => /* parseDigits */(state, input)).or(() => /* parseOperation */(state, input, depth, /* Operator */.ADD)).or(() => /* parseOperation */(state, input, depth, /* Operator */.EQUALS)).or(() => /* parseOperation */(state, input, depth, /* Operator */.SUBTRACT)).or(() => /* parseOperation */(state, input, depth, /* Operator */.AND)).or(() => /* parseOperation */(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => /* parseNot */(state, input, depth)).or(() => /* parseMethodReference */(state, input, depth)).orElseGet(() => new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
 	}
 	parseMethodReference(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return last(input, "::", (s, s2) => {
@@ -1110,7 +1112,7 @@
 				}
 				return /* assembleLambda */(state, /* Lists */.of(/* Definition */.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
 			}
-			if (/* strippedBeforeArrow.startsWith("(") && strippedBeforeArrow */.endsWith(")")){
+			if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")){
 				let parameterNames = divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), /* Main */.foldValueChar).iterate().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => /* Definition */.createSimpleDefinition(name, /* Primitive */.Unknown)).collect(new ListCollector());
 				return /* assembleLambda */(state, parameterNames, valueString, depth);
 			}
@@ -1121,7 +1123,7 @@
 		let strippedValueString = valueString.strip();
 		/* Tuple2Impl<CompileState, LambdaValue> value */;
 		let state2 = state.withDefinitions(definitions);
-		if (/* strippedValueString.startsWith("{") && strippedValueString */.endsWith("}")){
+		if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")){
 			let value1 = compileStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => compileFunctionSegment(state1, input1, depth + 1));
 			let right = value1.right();
 			value = new Tuple2Impl(value1.left(), new BlockLambdaValue(right, depth));
@@ -1299,7 +1301,7 @@
 	}
 	parseString(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
-		if (/* stripped.startsWith("\"") && stripped */.endsWith("\"")){
+		if (stripped.startsWith("\"") && stripped.endsWith("\"")){
 			return new Some(new Tuple2Impl(state, new StringValue(stripped)));
 		}
 		return new None();
@@ -1392,7 +1394,7 @@
 		});
 	}
 	foldTypeSeparator(state : DivideState, c : string) : DivideState {
-		if (c === /*  ' ' && state */.isLevel()){
+		if (c === /*  ' '  */ && state.isLevel()){
 			return state.advance();
 		}
 		let appended = state.append(c);
@@ -1411,7 +1413,7 @@
 		});
 	}
 	foldValueChar(state : DivideState, c : string) : DivideState {
-		if (c === /*  ',' && state */.isLevel()){
+		if (c === /*  ','  */ && state.isLevel()){
 			return state.advance();
 		}
 		let appended = state.append(c);
@@ -1492,10 +1494,10 @@
 		if (base.equals("Supplier")){
 			return new Tuple2Impl(state, new FunctionType(/* Lists */.empty(), children.get(0).orElse(/* null */)));
 		}
-		if (/* base.equals("Tuple2") && children.size() >= 2 */){
+		if (base.equals("Tuple2") && children.size() >= 2){
 			return new Tuple2Impl(state, new TupleType(children));
 		}
-		if (/* state.resolveType(base) instanceof Some(var baseType) && baseType instanceof FindableType findableType */){
+		if (/* state.resolveType(base) instanceof Some */(/* var baseType */) && /*  baseType instanceof FindableType findableType */){
 			return new Tuple2Impl(state, new Template(/* findableType */, children));
 		}
 		return new Tuple2Impl(state, new Template(new Placeholder(base), children));

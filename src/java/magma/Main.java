@@ -1457,6 +1457,8 @@ public class Main {
                 .or(() -> parseOperation(state, input, depth, Operator.ADD))
                 .or(() -> parseOperation(state, input, depth, Operator.EQUALS))
                 .or(() -> parseOperation(state, input, depth, Operator.SUBTRACT))
+                .or(() -> parseOperation(state, input, depth, Operator.AND))
+                .or(() -> parseOperation(state, input, depth, Operator.GREATER_THAN_OR_EQUALS))
                 .or(() -> parseNot(state, input, depth))
                 .or(() -> parseMethodReference(state, input, depth))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
@@ -2070,7 +2072,9 @@ public class Main {
     private enum Operator {
         ADD("+", "+"),
         SUBTRACT("-", "-"),
-        EQUALS("==", "===");
+        EQUALS("==", "==="),
+        AND("&&", "&&"),
+        GREATER_THAN_OR_EQUALS(">=", ">=");
 
         private final String sourceRepresentation;
         private final String targetRepresentation;
