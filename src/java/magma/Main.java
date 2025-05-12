@@ -702,6 +702,10 @@ public class Main {
             var removed = this.definitions.removeLast().map(Tuple2::left).orElse(this.definitions);
             return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister);
         }
+
+        public CompileState addType(ObjectType thisType) {
+            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister);
+        }
     }
 
     private static class DivideState {
@@ -1549,8 +1553,8 @@ public class Main {
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
 
-        var objectType = new ObjectType(name, typeParams, definitions);
-        var state2 = segmentsState.enterDefinitions().withDefinition(ImmutableDefinition.createSimpleDefinition("this", objectType));
+        var thisType = new ObjectType(name, typeParams, definitions);
+        var state2 = segmentsState.enterDefinitions().withDefinition(ImmutableDefinition.createSimpleDefinition("this", thisType));
         return mapUsingState(state2, segments, (state1, entry) -> switch (entry.right()) {
             case IncompleteClassSegmentWrapper wrapper -> new Some<>(new Tuple2Impl<>(state1, wrapper.segment));
             case MethodPrototype methodPrototype -> completeMethod(state1, methodPrototype);
@@ -1559,7 +1563,7 @@ public class Main {
         }).map(completedTuple -> {
             var completedState = completedTuple.left();
             var completed = completedTuple.right();
-            return completeStructure(completedState.exitDefinitions(), targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed);
+            return completeStructure(completedState.exitDefinitions(), targetInfix, beforeInfix, name, typeParams, retainDefinitions(rawParameters), after, completed, thisType);
         });
     }
 
@@ -1570,7 +1574,7 @@ public class Main {
             String name, List<String> typeParams,
             List<Definition> parameters,
             String after,
-            List<ClassSegment> segments) {
+            List<ClassSegment> segments, ObjectType thisType) {
         List<ClassSegment> withMaybeConstructor;
         if (parameters.isEmpty()) {
             withMaybeConstructor = segments;
@@ -1591,7 +1595,7 @@ public class Main {
 
         var generated = generatePlaceholder(beforeInfix.strip()) + targetInfix + name + joinedTypeParams + generatePlaceholder(after) + " {" + parsed2 + "\n}\n";
 
-        var definedState = state.popStructName().addStructure(generated);
+        var definedState = state.popStructName().addStructure(generated).addType(thisType);
         return new Tuple2Impl<>(definedState, new IncompleteClassSegmentWrapper(new Whitespace()));
     }
 
