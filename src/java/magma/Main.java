@@ -1435,15 +1435,16 @@ public class Main {
         var strippedValueString = valueString.strip();
 
         Tuple<CompileState, LambdaValue> value;
+        var state2 = state.withDefinitions(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
-            var value1 = compileStatements(state, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) ->
+            var value1 = compileStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) ->
                     compileFunctionSegment(state1, input1, depth + 1));
 
             var right = value1.right;
             value = new Tuple<>(value1.left, new BlockLambdaValue(right, depth));
         }
         else {
-            var value1 = parseValue(state, strippedValueString, depth);
+            var value1 = parseValue(state2, strippedValueString, depth);
             value = new Tuple<>(value1.left, value1.right);
         }
 
