@@ -538,6 +538,10 @@ public class Main {
         }
 
         private Option<Type> resolveValue(String name) {
+            if (name.equals("this")) {
+                return new Some<>(new ObjectType(name, this.typeParams, this.definitions));
+            }
+
             return this.definitions.iterate()
                     .filter(definition -> definition.name.equals(name))
                     .next()
