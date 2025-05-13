@@ -399,7 +399,7 @@ enum ResultVariant {
 		return new ImmutableDefinition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
 	}
 	public toString() : string {
-		return "ImmutableDefinition[" + "annotations=" + this.annotations + ", " + "maybeBefore=" + this.modifiers + ", " + "findName=" + this.name + ", " + "findType=" + this.type + ", " + "typeParams=" + this.typeParams + /*  ']' */;
+		return "ImmutableDefinition[" + "annotations=" + this.annotations + ", " + "maybeBefore=" + this.modifiers + ", " + "findName=" + this.name + ", " + "findType=" + this.type + ", " + "typeParams=" + this.typeParams + "]";
 	}
 }
 /* private */class ObjectType/*  */ implements FindableType, BaseType {
@@ -774,13 +774,13 @@ enum ResultVariant {
 	}
 }
 /* private */class StringValue/*  */ implements Value {
-	stripped : string;
-	constructor (stripped : string) {
-		this.stripped = stripped;
+	value : string;
+	constructor (value : string) {
+		this.value = value;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.StringValue;
 	public generate() : string {
-		return this.stripped;
+		return "\"" + this.value + "\"";
 	}
 	public type() : Type {
 		return Primitive.Unknown;
@@ -1385,7 +1385,7 @@ enum ResultVariant {
 		return current.advance().segments;
 	}
 	foldDoubleQuotes(tuple : [string, DivideState]) : Option<DivideState> {
-		if (tuple[0] === /*  '\"' */){
+		if (tuple[0] === "\""){
 			let current = tuple[1].append(tuple[0]);
 			while (true){
 				let maybePopped = current.popAndAppendToTuple();
@@ -1394,10 +1394,10 @@ enum ResultVariant {
 				}
 				let popped = maybePopped.orElse(/* null */);
 				current = popped.right();
-				if (popped.left() === /*  '\\' */){
+				if (popped.left() === "\\"){
 					current = current.popAndAppendToOption().orElse(current);
 				}
-				if (popped.left() === /*  '\"' */){
+				if (popped.left() === "\""){
 					/* break */;
 				}
 			}
@@ -1413,23 +1413,23 @@ enum ResultVariant {
 		return appended.popAndAppendToTuple().map(this.foldEscaped).flatMap(DivideState.popAndAppendToOption);
 	}
 	foldEscaped(escaped : [string, DivideState]) : DivideState {
-		if (escaped[0] === /*  '\\' */){
+		if (escaped[0] === "\\"){
 			return escaped[1].popAndAppendToOption().orElse(escaped[1]);
 		}
 		return escaped[1];
 	}
 	foldStatementChar(state : DivideState, c : string) : DivideState {
 		let append : DivideState = state.append(c);
-		if (c === /*  ';'  */ && append.isLevel()){
+		if (c === ";" && append.isLevel()){
 			return append.advance();
 		}
-		if (c === /*  '}'  */ && append.isShallow()){
+		if (c === "}" && append.isShallow()){
 			return append.advance().exit();
 		}
-		if (c === /*  '{'  */ || c === /*  '(' */){
+		if (c === "{" || c === "("){
 			return append.enter();
 		}
-		if (c === /*  '}'  */ || c === /*  ')' */){
+		if (c === "}" || c === ")"){
 			return append.exit();
 		}
 		return append;
@@ -1459,7 +1459,7 @@ enum ResultVariant {
 		});
 	}
 	parseAnnotations(annotationsString : string) : List<string> {
-		return this.divideAll(annotationsString.strip(), (state1, c) => this.foldByDelimiter(state1, c, /*  '\n' */)).query().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((value : T) => value.substring(1)).map(/* String */.strip).filter((value : T) => !value.isEmpty()).collect(new ListCollector());
+		return this.divideAll(annotationsString.strip(), (state1, c) => this.foldByDelimiter(state1, c, "\n")).query().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((value : T) => value.substring(1)).map(/* String */.strip).filter((value : T) => !value.isEmpty()).collect(new ListCollector());
 	}
 	foldByDelimiter(state1 : DivideState, c : string, delimiter : string) : DivideState {
 		if (c === delimiter){
@@ -1791,13 +1791,13 @@ enum ResultVariant {
 	}
 	foldBlockStart(state : DivideState, c : string) : DivideState {
 		let appended : DivideState = state.append(c);
-		if (c === /*  '{'  */ && state.isLevel()){
+		if (c === "{" && state.isLevel()){
 			return appended.advance();
 		}
-		if (c === /*  '{' */){
+		if (c === "{"){
 			return appended.enter();
 		}
-		if (c === /*  '}' */){
+		if (c === "}"){
 			return appended.exit();
 		}
 		return appended;
@@ -1837,7 +1837,14 @@ enum ResultVariant {
 		return new Some([state.define(definition), new Initialization(definition, source)]);
 	}
 	parseValue(state : CompileState, input : string, depth : number) : [CompileState, Value] {
-		return this.parseBoolean(state, input).or(() => this.parseLambda(state, input, depth)).or(() => this.parseString(state, input)).or(() => this.parseDataAccess(state, input, depth)).or(() => this.parseSymbolValue(state, input)).or(() => this.parseInvokable(state, input, depth)).or(() => this.parseDigits(state, input)).or(() => this.parseInstanceOf(state, input, depth)).or(() => this.parseOperation(state, input, depth, Operator.ADD)).or(() => this.parseOperation(state, input, depth, Operator.EQUALS)).or(() => this.parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => this.parseOperation(state, input, depth, Operator.AND)).or(() => this.parseOperation(state, input, depth, Operator.OR)).or(() => this.parseOperation(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => this.parseOperation(state, input, depth, /*  Operator.LESS_THAN */)).or(() => this.parseNot(state, input, depth)).or(() => this.parseMethodReference(state, input, depth)).orElseGet(() => [state, new Placeholder(input)]);
+		return this.parseBoolean(state, input).or(() => this.parseLambda(state, input, depth)).or(() => this.parseString(state, input)).or(() => this.parseDataAccess(state, input, depth)).or(() => this.parseSymbolValue(state, input)).or(() => this.parseInvokable(state, input, depth)).or(() => this.parseDigits(state, input)).or(() => this.parseInstanceOf(state, input, depth)).or(() => this.parseOperation(state, input, depth, Operator.ADD)).or(() => this.parseOperation(state, input, depth, Operator.EQUALS)).or(() => this.parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => this.parseOperation(state, input, depth, Operator.AND)).or(() => this.parseOperation(state, input, depth, Operator.OR)).or(() => this.parseOperation(state, input, depth, /*  Operator.GREATER_THAN_OR_EQUALS */)).or(() => this.parseOperation(state, input, depth, /*  Operator.LESS_THAN */)).or(() => this.parseNot(state, input, depth)).or(() => this.parseMethodReference(state, input, depth)).or(() => this.parseChar(state, input)).orElseGet(() => [state, new Placeholder(input)]);
+	}
+	parseChar(state : CompileState, input : string) : Option<[CompileState, Value]> {
+		let stripped = input.strip();
+		if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 2){
+			return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
+		}
+		return new None();
 	}
 	parseBoolean(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
@@ -2065,14 +2072,14 @@ enum ResultVariant {
 	}
 	foldInvocationStart(state : DivideState, c : string) : DivideState {
 		let appended : DivideState = state.append(c);
-		if (c === /*  '(' */){
+		if (c === "("){
 			let enter : DivideState = appended.enter();
 			if (enter.isShallow()){
 				return enter.advance();
 			}
 			return enter;
 		}
-		if (c === /*  ')' */){
+		if (c === ")"){
 			return appended.exit();
 		}
 		return appended;
@@ -2099,7 +2106,7 @@ enum ResultVariant {
 	parseString(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
 		if (stripped.startsWith("\"") && stripped.endsWith("\"")){
-			return new Some([state, new StringValue(stripped)]);
+			return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
 		}
 		return new None();
 	}
@@ -2183,7 +2190,7 @@ enum ResultVariant {
 		});
 	}
 	parseModifiers(modifiers : string) : List<string> {
-		return this.divideAll(modifiers.strip(), (state1, c) => this.foldByDelimiter(state1, c, /*  ' ' */)).query().map(/* String */.strip).filter((value : T) => !value.isEmpty()).collect(new ListCollector());
+		return this.divideAll(modifiers.strip(), (state1, c) => this.foldByDelimiter(state1, c, " ")).query().map(/* String */.strip).filter((value : T) => !value.isEmpty()).collect(new ListCollector());
 	}
 	toLast(input : string, separator : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : Option<[string, string]> {
 		let divisions : List<string> = this.divideAll(input, folder);
@@ -2194,14 +2201,14 @@ enum ResultVariant {
 		});
 	}
 	foldTypeSeparator(state : DivideState, c : string) : DivideState {
-		if (c === /*  ' '  */ && state.isLevel()){
+		if (c === " " && state.isLevel()){
 			return state.advance();
 		}
 		let appended : DivideState = state.append(c);
 		if (c === /*  ' */ < /* ' */){
 			return appended.enter();
 		}
-		if (c === /*  '>' */){
+		if (c === ">"){
 			return appended.exit();
 		}
 		return appended;
@@ -2221,23 +2228,23 @@ enum ResultVariant {
 		return value === "private";
 	}
 	foldValueChar(state : DivideState, c : string) : DivideState {
-		if (c === /*  ','  */ && state.isLevel()){
+		if (c === "," && state.isLevel()){
 			return state.advance();
 		}
 		let appended : DivideState = state.append(c);
 		if (c === /*  ' */ - /* ' */){
 			let peeked : string = appended.peek();
-			if (peeked === /*  '>' */){
+			if (peeked === ">"){
 				return appended.popAndAppendToOption().orElse(appended);
 			}
 			else {
 				return appended;
 			}
 		}
-		if (c === /*  ' */ < /* '  */ || c === /*  '('  */ || c === /*  '{' */){
+		if (c === /*  ' */ < /* '  */ || c === "(" || c === "{"){
 			return appended.enter();
 		}
-		if (c === /*  '>'  */ || c === /*  ')'  */ || c === /*  '}' */){
+		if (c === ">" || c === ")" || c === "}"){
 			return appended.exit();
 		}
 		return appended;
@@ -2312,7 +2319,7 @@ enum ResultVariant {
 		return this.suffix(input.strip(), ">", (withoutEnd : string) => {
 			return this.first(withoutEnd, "<", (base, argumentsString) => {
 				let strippedBase = base.strip();
-				return this.parseValues(state, argumentsString, this.argument).map((argumentsTuple : [CompileState, List<T>]) => {
+				return this.parseValues(state, argumentsString, this.parseArgument).map((argumentsTuple : [CompileState, List<T>]) => {
 					return this.assembleTemplate(strippedBase, argumentsTuple[0], argumentsTuple[1]);
 				});
 			});
@@ -2327,7 +2334,7 @@ enum ResultVariant {
 			return new None<Type>();
 		}
 	}
-	argument(state : CompileState, input : string) : Option<[CompileState, Argument]> {
+	parseArgument(state : CompileState, input : string) : Option<[CompileState, Argument]> {
 		if (input.isBlank()){
 			return new Some([state, new Whitespace()]);
 		}

@@ -1127,10 +1127,10 @@ public class Main {
 
     }
 
-    private record StringValue(String stripped) implements Value {
+    private record StringValue(String value) implements Value {
         @Override
         public String generate() {
-            return this.stripped;
+            return "\"" + this.value + "\"";
         }
 
         @Override
@@ -2386,7 +2386,16 @@ public class Main {
                 .or(() -> this.parseOperation(state, input, depth, Operator.LESS_THAN))
                 .or(() -> this.parseNot(state, input, depth))
                 .or(() -> this.parseMethodReference(state, input, depth))
+                .or(() -> this.parseChar(state, input))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Value>(state, new Placeholder(input)));
+    }
+
+    private Option<Tuple2<CompileState, Value>> parseChar(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 2) {
+            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
+        }
+        return new None<>();
     }
 
     private Option<Tuple2<CompileState, Value>> parseBoolean(CompileState state, String input) {
@@ -2708,7 +2717,7 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseString(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped)));
+            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
         }
         return new None<>();
     }
@@ -2990,7 +2999,7 @@ public class Main {
         return this.suffix(input.strip(), ">", withoutEnd -> {
             return this.first(withoutEnd, "<", (base, argumentsString) -> {
                 var strippedBase = base.strip();
-                return this.parseValues(state, argumentsString, this::argument).map(argumentsTuple -> {
+                return this.parseValues(state, argumentsString, this::parseArgument).map(argumentsTuple -> {
                     return this.assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
                 });
             });
@@ -3006,7 +3015,7 @@ public class Main {
         }
     }
 
-    private Option<Tuple2<CompileState, Argument>> argument(CompileState state, String input) {
+    private Option<Tuple2<CompileState, Argument>> parseArgument(CompileState state, String input) {
         if (input.isBlank()) {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }

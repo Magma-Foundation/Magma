@@ -265,7 +265,7 @@ var ResultVariant;
         return new ImmutableDefinition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
     }
     toString() {
-        return "ImmutableDefinition[" + "annotations=" + this.annotations + ", " + "maybeBefore=" + this.modifiers + ", " + "findName=" + this.name + ", " + "findType=" + this.type + ", " + "typeParams=" + this.typeParams +  /*  ']' */;
+        return "ImmutableDefinition[" + "annotations=" + this.annotations + ", " + "maybeBefore=" + this.modifiers + ", " + "findName=" + this.name + ", " + "findType=" + this.type + ", " + "typeParams=" + this.typeParams + "]";
     }
 }
 /* private */ class ObjectType /*  */ {
@@ -614,12 +614,12 @@ var ResultVariant;
     }
 }
 /* private */ class StringValue /*  */ {
-    constructor(stripped) {
+    constructor(value) {
         this._ValueVariant = ValueVariant.StringValue;
-        this.stripped = stripped;
+        this.value = value;
     }
     generate() {
-        return this.stripped;
+        return "\"" + this.value + "\"";
     }
     type() {
         return Primitive.Unknown;
@@ -1148,7 +1148,7 @@ BooleanValue.False = new BooleanValue("false");
         return current.advance().segments;
     }
     foldDoubleQuotes(tuple) {
-        if (tuple[0] ===  /*  '\"' */) {
+        if (tuple[0] === "\"") {
             let current = tuple[1].append(tuple[0]);
             while (true) {
                 let maybePopped = current.popAndAppendToTuple();
@@ -1157,10 +1157,10 @@ BooleanValue.False = new BooleanValue("false");
                 }
                 let popped = maybePopped.orElse( /* null */);
                 current = popped.right();
-                if (popped.left() ===  /*  '\\' */) {
+                if (popped.left() === "\\") {
                     current = current.popAndAppendToOption().orElse(current);
                 }
-                if (popped.left() ===  /*  '\"' */) {
+                if (popped.left() === "\"") {
                     /* break */ ;
                 }
             }
@@ -1176,23 +1176,23 @@ BooleanValue.False = new BooleanValue("false");
         return appended.popAndAppendToTuple().map(this.foldEscaped).flatMap(DivideState.popAndAppendToOption);
     }
     foldEscaped(escaped) {
-        if (escaped[0] ===  /*  '\\' */) {
+        if (escaped[0] === "\\") {
             return escaped[1].popAndAppendToOption().orElse(escaped[1]);
         }
         return escaped[1];
     }
     foldStatementChar(state, c) {
         let append = state.append(c);
-        if (c ===  /*  ';'  */ && append.isLevel()) {
+        if (c === ";" && append.isLevel()) {
             return append.advance();
         }
-        if (c ===  /*  '}'  */ && append.isShallow()) {
+        if (c === "}" && append.isShallow()) {
             return append.advance().exit();
         }
-        if (c ===  /*  '{'  */ || c ===  /*  '(' */) {
+        if (c === "{" || c === "(") {
             return append.enter();
         }
-        if (c ===  /*  '}'  */ || c ===  /*  ')' */) {
+        if (c === "}" || c === ")") {
             return append.exit();
         }
         return append;
@@ -1222,7 +1222,7 @@ BooleanValue.False = new BooleanValue("false");
         });
     }
     parseAnnotations(annotationsString) {
-        return this.divideAll(annotationsString.strip(), (state1, c) => this.foldByDelimiter(state1, c)).query().map(strip).filter((value) => !value.isEmpty()).map((value) => value.substring(1)).map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
+        return this.divideAll(annotationsString.strip(), (state1, c) => this.foldByDelimiter(state1, c, "\n")).query().map(strip).filter((value) => !value.isEmpty()).map((value) => value.substring(1)).map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
     }
     foldByDelimiter(state1, c, delimiter) {
         if (c === delimiter) {
@@ -1555,13 +1555,13 @@ BooleanValue.False = new BooleanValue("false");
     }
     foldBlockStart(state, c) {
         let appended = state.append(c);
-        if (c ===  /*  '{'  */ && state.isLevel()) {
+        if (c === "{" && state.isLevel()) {
             return appended.advance();
         }
-        if (c ===  /*  '{' */) {
+        if (c === "{") {
             return appended.enter();
         }
-        if (c ===  /*  '}' */) {
+        if (c === "}") {
             return appended.exit();
         }
         return appended;
@@ -1601,7 +1601,14 @@ BooleanValue.False = new BooleanValue("false");
         return new Some([state.define(definition), new Initialization(definition, source)]);
     }
     parseValue(state, input, depth) {
-        return this.parseBoolean(state, input).or(() => this.parseLambda(state, input, depth)).or(() => this.parseString(state, input)).or(() => this.parseDataAccess(state, input, depth)).or(() => this.parseSymbolValue(state, input)).or(() => this.parseInvokable(state, input, depth)).or(() => this.parseDigits(state, input)).or(() => this.parseInstanceOf(state, input, depth)).or(() => this.parseOperation(state, input, depth, Operator.ADD)).or(() => this.parseOperation(state, input, depth, Operator.EQUALS)).or(() => this.parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => this.parseOperation(state, input, depth, Operator.AND)).or(() => this.parseOperation(state, input, depth, Operator.OR)).or(() => this.parseOperation(state, input, depth)).or(() => this.parseOperation(state, input, depth)).or(() => this.parseNot(state, input, depth)).or(() => this.parseMethodReference(state, input, depth)).orElseGet(() => [state, new Placeholder(input)]);
+        return this.parseBoolean(state, input).or(() => this.parseLambda(state, input, depth)).or(() => this.parseString(state, input)).or(() => this.parseDataAccess(state, input, depth)).or(() => this.parseSymbolValue(state, input)).or(() => this.parseInvokable(state, input, depth)).or(() => this.parseDigits(state, input)).or(() => this.parseInstanceOf(state, input, depth)).or(() => this.parseOperation(state, input, depth, Operator.ADD)).or(() => this.parseOperation(state, input, depth, Operator.EQUALS)).or(() => this.parseOperation(state, input, depth, Operator.SUBTRACT)).or(() => this.parseOperation(state, input, depth, Operator.AND)).or(() => this.parseOperation(state, input, depth, Operator.OR)).or(() => this.parseOperation(state, input, depth)).or(() => this.parseOperation(state, input, depth)).or(() => this.parseNot(state, input, depth)).or(() => this.parseMethodReference(state, input, depth)).or(() => this.parseChar(state, input)).orElseGet(() => [state, new Placeholder(input)]);
+    }
+    parseChar(state, input) {
+        let stripped = input.strip();
+        if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 2) {
+            return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
+        }
+        return new None();
     }
     parseBoolean(state, input) {
         let stripped = input.strip();
@@ -1829,14 +1836,14 @@ BooleanValue.False = new BooleanValue("false");
     }
     foldInvocationStart(state, c) {
         let appended = state.append(c);
-        if (c ===  /*  '(' */) {
+        if (c === "(") {
             let enter = appended.enter();
             if (enter.isShallow()) {
                 return enter.advance();
             }
             return enter;
         }
-        if (c ===  /*  ')' */) {
+        if (c === ")") {
             return appended.exit();
         }
         return appended;
@@ -1863,7 +1870,7 @@ BooleanValue.False = new BooleanValue("false");
     parseString(state, input) {
         let stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some([state, new StringValue(stripped)]);
+            return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
         }
         return new None();
     }
@@ -1947,7 +1954,7 @@ BooleanValue.False = new BooleanValue("false");
         });
     }
     parseModifiers(modifiers) {
-        return this.divideAll(modifiers.strip(), (state1, c) => this.foldByDelimiter(state1, c)).query().map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
+        return this.divideAll(modifiers.strip(), (state1, c) => this.foldByDelimiter(state1, c, " ")).query().map(strip).filter((value) => !value.isEmpty()).collect(new ListCollector());
     }
     toLast(input, separator, folder) {
         let divisions = this.divideAll(input, folder);
@@ -1958,14 +1965,14 @@ BooleanValue.False = new BooleanValue("false");
         });
     }
     foldTypeSeparator(state, c) {
-        if (c ===  /*  ' '  */ && state.isLevel()) {
+        if (c === " " && state.isLevel()) {
             return state.advance();
         }
         let appended = state.append(c);
         if (c === /*  ' */  /* ' */) {
             return appended.enter();
         }
-        if (c ===  /*  '>' */) {
+        if (c === ">") {
             return appended.exit();
         }
         return appended;
@@ -1985,23 +1992,23 @@ BooleanValue.False = new BooleanValue("false");
         return value === "private";
     }
     foldValueChar(state, c) {
-        if (c ===  /*  ','  */ && state.isLevel()) {
+        if (c === "," && state.isLevel()) {
             return state.advance();
         }
         let appended = state.append(c);
         if (c === /*  ' */ - /* ' */) {
             let peeked = appended.peek();
-            if (peeked ===  /*  '>' */) {
+            if (peeked === ">") {
                 return appended.popAndAppendToOption().orElse(appended);
             }
             else {
                 return appended;
             }
         }
-        if (c === /*  ' */  /* '  */ || c ===  /*  '('  */ || c ===  /*  '{' */) {
+        if (c === /*  ' */  /* '  */ || c === "(" || c === "{") {
             return appended.enter();
         }
-        if (c ===  /*  '>'  */ || c ===  /*  ')'  */ || c ===  /*  '}' */) {
+        if (c === ">" || c === ")" || c === "}") {
             return appended.exit();
         }
         return appended;
@@ -2076,7 +2083,7 @@ BooleanValue.False = new BooleanValue("false");
         return this.suffix(input.strip(), ">", (withoutEnd) => {
             return this.first(withoutEnd, "<", (base, argumentsString) => {
                 let strippedBase = base.strip();
-                return this.parseValues(state, argumentsString, this.argument).map((argumentsTuple) => {
+                return this.parseValues(state, argumentsString, this.parseArgument).map((argumentsTuple) => {
                     return this.assembleTemplate(strippedBase, argumentsTuple[0], argumentsTuple[1]);
                 });
             });
@@ -2091,7 +2098,7 @@ BooleanValue.False = new BooleanValue("false");
             return new None();
         }
     }
-    argument(state, input) {
+    parseArgument(state, input) {
         if (input.isBlank()) {
             return new Some([state, new Whitespace()]);
         }
