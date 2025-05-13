@@ -315,7 +315,7 @@ var ResultVariant;
         if (maybe._OptionVariant === OptionVariant.Some) {
             let some = maybe;
             let found = some.value;
-            return new Some(new ObjectType(found[0](), this.typeParams, this.definitions.last().orElse(Lists.empty()), found[1]()));
+            return new Some(new ObjectType(found[0], this.typeParams, this.definitions.last().orElse(Lists.empty()), found[1]));
         }
         let maybeTypeParam = this.typeParams.iterate().filter((param) => param.equals(name)).next();
         if (maybeTypeParam._OptionVariant === OptionVariant.Some) {
@@ -402,8 +402,8 @@ var ResultVariant;
     }
     popAndAppendToTuple() {
         return this.pop().map((tuple) => {
-            let c = tuple[0]();
-            let right = tuple[1]();
+            let c = tuple[0];
+            let right = tuple[1];
             return [c, right.append(c)];
         });
     }
@@ -728,7 +728,7 @@ var ResultVariant;
         return Maps.empty();
     }
     fold(current, element) {
-        return current.with(element[0](), element[1]());
+        return current.with(element[0], element[1]);
     }
 }
 /* private static */ class ConstructorHeader /*  */ {
@@ -1043,8 +1043,8 @@ var ResultVariant;
     compile(input) {
         let state = CompileState.createInitial();
         let parsed = this.parseStatements(state, input, this.compileRootSegment);
-        let joined = parsed[0]().structures.iterate().collect(Joiner.empty()).orElse("");
-        return joined + this.generateStatements(parsed[1]());
+        let joined = parsed[0].structures.iterate().collect(Joiner.empty()).orElse("");
+        return joined + this.generateStatements(parsed[1]);
     }
     generateStatements(statements) {
         return this.generateAll(this.mergeStatements, statements);
@@ -1066,7 +1066,7 @@ var ResultVariant;
                 let state1 = inner.left();
                 let right = inner.right();
                 return mapper(state1, element).map((applied) => {
-                    return [applied[0](), right.addLast(applied[1]())];
+                    return [applied[0], right.addLast(applied[1])];
                 });
             });
         });
@@ -1078,7 +1078,7 @@ var ResultVariant;
         let current = DivideState.createInitial(input);
         while (true) {
             let maybePopped = current.pop().map((tuple) => {
-                return this.foldSingleQuotes(tuple).or(() => this.foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple[1](), tuple[0]()));
+                return this.foldSingleQuotes(tuple).or(() => this.foldDoubleQuotes(tuple)).orElseGet(() => folder(tuple[1], tuple[0]));
             });
             if (maybePopped.isPresent()) {
                 current = maybePopped.orElse(current);
@@ -1090,8 +1090,8 @@ var ResultVariant;
         return current.advance().segments;
     }
     foldDoubleQuotes(tuple) {
-        if (tuple[0]() ===  /*  '\"' */) {
-            let current = tuple[1]().append(tuple[0]());
+        if (tuple[0] ===  /*  '\"' */) {
+            let current = tuple[1].append(tuple[0]);
             while (true) {
                 let maybePopped = current.popAndAppendToTuple();
                 if (maybePopped.isEmpty()) {
@@ -1114,14 +1114,14 @@ var ResultVariant;
         if ( /* tuple.left() != '\'' */) {
             return new None();
         }
-        let appended = tuple[1]().append(tuple[0]());
+        let appended = tuple[1].append(tuple[0]);
         return appended.popAndAppendToTuple().map(this.foldEscaped).flatMap(DivideState.popAndAppendToOption);
     }
     foldEscaped(escaped) {
-        if (escaped[0]() ===  /*  '\\' */) {
-            return escaped[1]().popAndAppendToOption().orElse(escaped[1]());
+        if (escaped[0] ===  /*  '\\' */) {
+            return escaped[1].popAndAppendToOption().orElse(escaped[1]);
         }
-        return escaped[1]();
+        return escaped[1];
     }
     foldStatementChar(state, c) {
         let append = state.append(c);
@@ -1144,7 +1144,7 @@ var ResultVariant;
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return [state, ""];
         }
-        return this.parseClass(stripped, state).flatMap((tuple) => this.completeClassSegment(tuple[0](), tuple[1]())).map((tuple0) => [tuple0.left(), tuple0.right().generate()]).orElseGet(() => [state, generatePlaceholder(stripped)]);
+        return this.parseClass(stripped, state).flatMap((tuple) => this.completeClassSegment(tuple[0], tuple[1])).map((tuple0) => [tuple0.left(), tuple0.right().generate()]).orElseGet(() => [state, generatePlaceholder(stripped)]);
     }
     parseClass(stripped, state) {
         return this.parseStructure(stripped, "class ", "class ", state);
@@ -1183,7 +1183,7 @@ var ResultVariant;
     parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations) {
         return this.first(beforeContent, " implements ", (s, s2) => {
             return this.parseValues(state, s2, this.parseType).flatMap((interfaces) => {
-                return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces[1]());
+                return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces[1]);
             });
         }).or(() => {
             return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty());
@@ -1200,7 +1200,7 @@ var ResultVariant;
         return this.suffix(beforeContent.strip(), ")", (s) => {
             return this.first(s, "(", (s1, s2) => {
                 let parsed = this.parseParameters(state, s2);
-                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0](), beforeInfix, s1, content1, parsed[1](), variants, annotations, interfaces);
+                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0], beforeInfix, s1, content1, parsed[1], variants, annotations, interfaces);
             });
         }).or(() => {
             return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces);
@@ -1211,7 +1211,7 @@ var ResultVariant;
             return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
                 let mapper = (state1, s) => [state1, s.strip()];
                 let typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-                return this.assembleStructure(typeParams[0](), targetInfix, annotations, beforeInfix, name, content1, typeParams[1](), afterTypeParams, params, variants, interfaces);
+                return this.assembleStructure(typeParams[0], targetInfix, annotations, beforeInfix, name, content1, typeParams[1], afterTypeParams, params, variants, interfaces);
             });
         }).or(() => {
             return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces);
@@ -1226,8 +1226,8 @@ var ResultVariant;
             return new Some([state, new Whitespace()]);
         }
         let segmentsTuple = this.parseStatements(state.pushStructName([name, variants]).withTypeParams(typeParams), content, (state0, input) => this.parseClassSegment(state0, input, 1));
-        let segmentsState = segmentsTuple[0]();
-        let segments = segmentsTuple[1]();
+        let segmentsState = segmentsTuple[0];
+        let segments = segmentsTuple[1];
         let parameters = this.retainDefinitions(rawParameters);
         let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces);
         return new Some([segmentsState.addType(prototype.createObjectType()), prototype]);
@@ -1238,8 +1238,8 @@ var ResultVariant;
         let bases = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Queries.fromOption).map(FindableType.findBase).flatMap(Queries.fromOption).collect(new ListCollector());
         let variantsSuper = bases.iterate().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
         return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple) => {
-            let oldStatementsState = oldStatementsTuple[0]();
-            let oldStatements = oldStatementsTuple[1]();
+            let oldStatementsState = oldStatementsTuple[0];
+            let oldStatements = oldStatementsTuple[1];
             let exited = oldStatementsState.exitDefinitions();
             let fold = variantsSuper.iterate().fold(oldStatements, (classSegmentList, superType) => {
                 let name = superType + "Variant";
@@ -1344,7 +1344,7 @@ var ResultVariant;
         return this. < /* Whitespace, IncompleteClassSegment>typed */ (() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).orElseGet(() => [state, new Placeholder(input)]);
     }
     typed(action) {
-        return action().map((tuple) => [tuple[0](), tuple[1]()]);
+        return action().map((tuple) => [tuple[0], tuple[1]]);
     }
     parseWhitespace(input, state) {
         if (input.isBlank()) {
@@ -1360,13 +1360,13 @@ var ResultVariant;
         });
     }
     assembleMethod(depth, parametersString, rawContent, definitionTuple) {
-        let definitionState = definitionTuple[0]();
-        let header = definitionTuple[1]();
+        let definitionState = definitionTuple[0];
+        let header = definitionTuple[1];
         let parametersTuple = this.parseParameters(definitionState, parametersString);
-        let rawParameters = parametersTuple[1]();
+        let rawParameters = parametersTuple[1];
         let parameters = this.retainDefinitions(rawParameters);
         let prototype = new MethodPrototype(depth, header, parameters, rawContent.strip());
-        return new Some([parametersTuple[0]().define(prototype.createDefinition()), prototype]);
+        return new Some([parametersTuple[0].define(prototype.createDefinition()), prototype]);
     }
     completeMethod(state, prototype) {
         let definition = prototype.createDefinition();
@@ -1387,8 +1387,8 @@ var ResultVariant;
             let substring = prototype.content().substring(1, prototype.content().length() - 1);
             let withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             let statementsTuple = this.parseStatements(withDefined, substring, (state1, input1) => this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
-            let statements = statementsTuple[1]();
-            return new Some([statementsTuple[0]().exitDefinitions().define(definition), new FunctionNode(prototype.depth()) /* newHeader */, prototype.parameters(), new Some(statements)]);
+            let statements = statementsTuple[1];
+            return new Some([statementsTuple[0].exitDefinitions().define(definition), new FunctionNode(prototype.depth()) /* newHeader */, prototype.parameters(), new Some(statements)]);
             ;
         }
         return new None();
@@ -1419,8 +1419,8 @@ var ResultVariant;
     parseFunctionStatement(state, depth, stripped) {
         return this.suffix(stripped, ";", (s) => {
             let tuple = this.parseStatementValue(state, s, depth);
-            let left = tuple[0]();
-            let right = tuple[1]();
+            let left = tuple[0];
+            let right = tuple[1];
             return new Some([left, new Statement(depth, right)]);
         });
     }
@@ -1429,11 +1429,11 @@ var ResultVariant;
             return this.split(() => this.toFirst(withoutEnd), (beforeContent, content) => {
                 return this.suffix(beforeContent, "{", (headerString) => {
                     let headerTuple = this.parseBlockHeader(state, headerString, depth);
-                    let headerState = headerTuple[0]();
-                    let header = headerTuple[1]();
+                    let headerState = headerTuple[0];
+                    let header = headerTuple[1];
                     let statementsTuple = this.parseFunctionSegments(headerState, content, depth);
-                    let statementsState = statementsTuple[0]();
-                    let statements = statementsTuple[1]().addAllFirst(statementsState.functionSegments);
+                    let statementsState = statementsTuple[0];
+                    let statements = statementsTuple[1].addAllFirst(statementsState.functionSegments);
                     return new Some([statementsState.clearFunctionSegments(), new Block(depth, header, statements)]);
                 });
             });
@@ -1442,8 +1442,8 @@ var ResultVariant;
     toFirst(input) {
         let divisions = this.divideAll(input, this.foldBlockStart);
         return divisions.removeFirst().map((removed) => {
-            let right = removed[0]();
-            let left = removed[1]().iterate().collect(new Joiner("")).orElse("");
+            let right = removed[0];
+            let left = removed[1].iterate().collect(new Joiner("")).orElse("");
             return [right, left];
         });
     }
@@ -1463,8 +1463,8 @@ var ResultVariant;
             return this.prefix(withoutPrefix.strip(), "(", (withoutValueStart) => {
                 return this.suffix(withoutValueStart, ")", (value) => {
                     let valueTuple = this.parseValue(state, value, depth);
-                    let value1 = valueTuple[1]();
-                    return new Some([valueTuple[0](), new Conditional(prefix, value1)]);
+                    let value1 = valueTuple[1];
+                    return new Some([valueTuple[0], new Conditional(prefix, value1)]);
                 });
             });
         });
@@ -1487,8 +1487,8 @@ var ResultVariant;
         if (stripped.startsWith("return ")) {
             let value = stripped.substring("return ".length());
             let tuple = this.parseValue(state, value, depth);
-            let value1 = tuple[1]();
-            return [tuple[0](), new Return(value1)];
+            let value1 = tuple[1];
+            return [tuple[0], new Return(value1)];
         }
         return this.parseAssignment(state, depth, stripped).orElseGet(() => {
             return [state, new Placeholder(stripped)];
@@ -1497,12 +1497,12 @@ var ResultVariant;
     parseAssignment(state, depth, stripped) {
         return this.first(stripped, "=", (beforeEquals, valueString) => {
             let sourceTuple = this.parseValue(state, valueString, depth);
-            let sourceState = sourceTuple[0]();
-            let source = sourceTuple[1]();
+            let sourceState = sourceTuple[0];
+            let source = sourceTuple[1];
             let destinationTuple = this.parseValue(sourceState, beforeEquals, depth);
-            let destinationState = destinationTuple[0]();
-            let destination = destinationTuple[1]();
-            return this.parseDefinition(destinationState, beforeEquals).flatMap((definitionTuple) => this.parseInitialization(definitionTuple[0](), definitionTuple[1](), source)).or(() => new Some([destinationState, new Assignment(destination, source)]));
+            let destinationState = destinationTuple[0];
+            let destination = destinationTuple[1];
+            return this.parseDefinition(destinationState, beforeEquals).flatMap((definitionTuple) => this.parseInitialization(definitionTuple[0], definitionTuple[1], source)).or(() => new Some([destinationState, new Assignment(destination, source)]));
         });
     }
     parseInitialization(state, rawDefinition, source) {
@@ -1532,22 +1532,22 @@ var ResultVariant;
     parseInstanceOf(state, input, depth) {
         return this.last(input, "instanceof", (s, s2) => {
             let childTuple = this.parseValue(state, s, depth);
-            return this.parseDefinition(childTuple[0](), s2).map((definitionTuple) => {
-                let value = childTuple[1]();
-                let definition = definitionTuple[1]();
+            return this.parseDefinition(childTuple[0], s2).map((definitionTuple) => {
+                let value = childTuple[1];
+                let definition = definitionTuple[1];
                 let type = value.type();
                 let variant = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
                 let generate = type.findName().orElse("");
                 let temp = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
                 let functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
-                return [definitionTuple[0]().addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp)];
+                return [definitionTuple[0].addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp)];
             });
         });
     }
     parseMethodReference(state, input, depth) {
         return this.last(input, "::", (s, s2) => {
             let tuple = this.parseValue(state, s, depth);
-            return new Some([tuple[0](), new DataAccess(tuple[1](), s2, Primitive.Unknown)]);
+            return new Some([tuple[0], new DataAccess(tuple[1], s2, Primitive.Unknown)]);
         });
     }
     parseNot(state, input, depth) {
@@ -1555,8 +1555,8 @@ var ResultVariant;
         if (stripped.startsWith("!")) {
             let slice = stripped.substring(1);
             let tuple = this.parseValue(state, slice, depth);
-            let value = tuple[1]();
-            return new Some([tuple[0](), new Not(value)]);
+            let value = tuple[1];
+            return new Some([tuple[0], new Not(value)]);
         }
         return new None();
     }
@@ -1586,12 +1586,12 @@ var ResultVariant;
         let state2 = state.defineAll(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
             let value1 = this.parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
-            let right = value1[1]();
-            [value1[0](), new BlockLambdaValue(depth, right)];
+            let right = value1[1];
+            [value1[0], new BlockLambdaValue(depth, right)];
         }
         else {
             let value1 = this.parseValue(state2, strippedValueString, depth);
-            [value1[0](), value1[1]()];
+            [value1[0], value1[1]];
         }
         let right = /* value */ .right();
         return new Some([/* value */ .left(), new Lambda(definitions, right)]);
@@ -1634,8 +1634,8 @@ var ResultVariant;
     }
     assembleInvokable(state, depth, argumentsString, callerString) {
         let callerTuple = this.invocationHeader(state, depth, callerString);
-        let oldCallerState = callerTuple[0]();
-        let oldCaller = callerTuple[1]();
+        let oldCallerState = callerTuple[0];
+        let oldCaller = callerTuple[1];
         let newCaller = this.modifyCaller(oldCallerState, oldCaller);
         let callerType = this.findCallerType(newCaller);
         let argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) => {
@@ -1644,9 +1644,9 @@ var ResultVariant;
             let expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
             let withExpected = currentState.withExpectedType(expectedType);
             let valueTuple = this.parseArgument(withExpected, element, depth);
-            let valueState = valueTuple[0]();
-            let value = valueTuple[1]();
-            let actualType = valueTuple[0]().typeRegister.orElse(Primitive.Unknown);
+            let valueState = valueTuple[0];
+            let value = valueTuple[1];
+            let actualType = valueTuple[0].typeRegister.orElse(Primitive.Unknown);
             return new Some([valueState, [value, actualType]]);
         }).orElseGet(() => [oldCallerState, Lists.empty()]);
         let argumentsState = argumentsTuple.left();
@@ -1656,6 +1656,23 @@ var ResultVariant;
             if (constructionCaller.type.findName().filter((value) => value.equals("Tuple2Impl")).isPresent()) {
                 let constructionCaller = newCaller;
                 return new Some([argumentsState, new TupleNode(Lists.of(arguments.get(0).orElse( /* null */), arguments.get(1).orElse( /* null */)))]);
+            }
+        }
+        if (newCaller._CallerVariant === CallerVariant.Value) {
+            if (value._Variant === Variant.DataAccess) {
+                let parent = access.parent;
+                let property = access.property;
+                let parentType = parent.type();
+                if ( /* parentType instanceof TupleType */) {
+                    if (property.equals("left")) {
+                        let value = newCaller;
+                        let access = value;
+                        return new Some([state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))]);
+                    }
+                    if (property.equals("right")) {
+                        return new Some([state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))]);
+                    }
+                }
             }
         }
         let invokable = new Invokable(newCaller, arguments, callerType.returns);
@@ -1673,7 +1690,7 @@ var ResultVariant;
             return [state, new Whitespace()];
         }
         let tuple = this.parseValue(state, element, depth);
-        return [tuple[0](), tuple[1]()];
+        return [tuple[0], tuple[1]];
     }
     findCallerType(newCaller) {
         let callerType = new FunctionType(Lists.empty(), Primitive.Unknown);
@@ -1708,15 +1725,15 @@ var ResultVariant;
         if (callerString1.startsWith("new ")) {
             let input1 = callerString1.substring("new ".length());
             let map = this.parseType(state, input1).map((type) => {
-                let right = type[1]();
-                return [type[0](), new ConstructionCaller(right)];
+                let right = type[1];
+                return [type[0], new ConstructionCaller(right)];
             });
             if (map.isPresent()) {
                 return map.orElse( /* null */);
             }
         }
         let tuple = this.parseValue(state, callerString1, depth);
-        return [tuple[0](), tuple[1]()];
+        return [tuple[0], tuple[1]];
     }
     foldInvocationStart(state, c) {
         let appended = state.append(c);
@@ -1739,16 +1756,8 @@ var ResultVariant;
                 return new None();
             }
             let tuple = this.parseValue(state, parentString, depth);
-            let parent = tuple[1]();
+            let parent = tuple[1];
             let parentType = parent.type();
-            if ( /* parentType instanceof TupleType */) {
-                if (property.equals("left")) {
-                    return new Some([state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))]);
-                }
-                if (property.equals("right")) {
-                    return new Some([state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))]);
-                }
-            }
             let type = Primitive.Unknown;
             if (parentType._Variant === Variant.FindableType) {
                 if ( /* objectType.find(property) instanceof Some */( /* var memberType */)) {
@@ -1756,7 +1765,7 @@ var ResultVariant;
                     type =  /* memberType */;
                 }
             }
-            return new Some([tuple[0](), new DataAccess(parent, property, type)]);
+            return new Some([tuple[0], new DataAccess(parent, property, type)]);
         });
     }
     parseString(state, input) {
@@ -1782,10 +1791,10 @@ var ResultVariant;
     parseOperation(state, value, depth, operator) {
         return this.first(value, operator.sourceRepresentation, (leftString, rightString) => {
             let leftTuple = this.parseValue(state, leftString, depth);
-            let rightTuple = this.parseValue(leftTuple[0](), rightString, depth);
-            let left = leftTuple[1]();
-            let right = rightTuple[1]();
-            return new Some([rightTuple[0](), new Operation(left, operator, right)]);
+            let rightTuple = this.parseValue(leftTuple[0], rightString, depth);
+            let left = leftTuple[1];
+            let right = rightTuple[1];
+            return new Some([rightTuple[0], new Operation(left, operator, right)]);
         });
     }
     parseValuesOrEmpty(state, input, mapper) {
@@ -1801,7 +1810,7 @@ var ResultVariant;
         if (input.isBlank()) {
             return [state, new Whitespace()];
         }
-        return this.parseDefinition(state, input).map((tuple) => [tuple[0](), tuple[1]()]).orElseGet(() => [state, new Placeholder(input)]);
+        return this.parseDefinition(state, input).map((tuple) => [tuple[0], tuple[1]]).orElseGet(() => [state, new Placeholder(input)]);
     }
     parseField(input, depth, state) {
         return this.suffix(input.strip(), ";", (withoutEnd) => {
@@ -1812,14 +1821,14 @@ var ResultVariant;
     }
     parseClassDefinition(depth, state, withoutEnd) {
         return this.parseDefinition(state, withoutEnd).map((result) => {
-            return [result[0](), new ClassDefinition(depth, result[1]())];
+            return [result[0], new ClassDefinition(depth, result[1])];
         });
     }
     parseClassInitialization(depth, state, withoutEnd) {
         return this.first(withoutEnd, "=", (s, s2) => {
             return this.parseDefinition(state, s).map((result) => {
-                let valueTuple = this.parseValue(result[0](), s2, depth);
-                return [valueTuple[0](), new ClassInitialization(depth, result[1](), valueTuple[1]())];
+                let valueTuple = this.parseValue(result[0], s2, depth);
+                return [valueTuple[0], new ClassInitialization(depth, result[1], valueTuple[1])];
             });
         });
     }
@@ -1839,7 +1848,7 @@ var ResultVariant;
         return this.suffix(beforeType.strip(), ">", (withoutTypeParamStart) => {
             return this.first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) => {
                 let typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some([state1, s.strip()]));
-                return this.assembleDefinition(typeParams[0](), annotations, new Some(beforeTypeParams), name, typeParams[1](), type);
+                return this.assembleDefinition(typeParams[0], annotations, new Some(beforeTypeParams), name, typeParams[1], type);
             });
         }).or(() => {
             return this.assembleDefinition(state, annotations, new Some(beforeType), name, Lists.empty(), type);
@@ -1848,8 +1857,8 @@ var ResultVariant;
     toLast(input, separator, folder) {
         let divisions = this.divideAll(input, folder);
         return divisions.removeLast().map((removed) => {
-            let left = removed[0]().iterate().collect(new Joiner(separator)).orElse("");
-            let right = removed[1]();
+            let left = removed[0].iterate().collect(new Joiner(separator)).orElse("");
+            let right = removed[1];
             return [left, right];
         });
     }
@@ -1872,8 +1881,8 @@ var ResultVariant;
             if (!this.isSymbol(stripped)) {
                 return new None();
             }
-            let node = new ImmutableDefinition(annotations, beforeTypeParams, stripped, type1[1](), typeParams);
-            return new Some([type1[0](), node]);
+            let node = new ImmutableDefinition(annotations, beforeTypeParams, stripped, type1[1], typeParams);
+            return new Some([type1[0], node]);
         });
     }
     foldValueChar(state, c) {
@@ -1928,8 +1937,8 @@ var ResultVariant;
     varArgs(state, input) {
         return this.suffix(input, "...", (s) => {
             return this.parseType(state, s).map((inner) => {
-                let newState = inner[0]();
-                let child = inner[1]();
+                let newState = inner[0];
+                let child = inner[1];
                 return [newState, new ArrayType(child)];
             });
         });
@@ -1969,7 +1978,7 @@ var ResultVariant;
             return this.first(withoutEnd, "<", (base, argumentsString) => {
                 let strippedBase = base.strip();
                 return this.parseValues(state, argumentsString, this.argument).map((argumentsTuple) => {
-                    return this.assembleTemplate(strippedBase, argumentsTuple[0](), argumentsTuple[1]());
+                    return this.assembleTemplate(strippedBase, argumentsTuple[0], argumentsTuple[1]);
                 });
             });
         });
@@ -1987,7 +1996,7 @@ var ResultVariant;
         if (input.isBlank()) {
             return new Some([state, new Whitespace()]);
         }
-        return this.parseType(state, input).map((tuple) => [tuple[0](), tuple[1]()]);
+        return this.parseType(state, input).map((tuple) => [tuple[0], tuple[1]]);
     }
     last(input, infix, mapper) {
         return this.infix(input, infix, this.findLast, mapper);
@@ -2003,7 +2012,7 @@ var ResultVariant;
         return this.infix(input, infix, this.findFirst, mapper);
     }
     split(splitter, splitMapper) {
-        return splitter().flatMap((splitTuple) => splitMapper(splitTuple[0](), splitTuple[1]()));
+        return splitter().flatMap((splitTuple) => splitMapper(splitTuple[0], splitTuple[1]));
     }
     infix(input, infix, locator, mapper) {
         return this.split(() => locator(input, infix).map((index) => {

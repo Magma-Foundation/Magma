@@ -2514,6 +2514,24 @@ public class Main {
             }
         }
 
+        if (newCaller instanceof Value value) {
+            if(value instanceof DataAccess access) {
+                var parent = access.parent;
+                var property = access.property;
+                var parentType = parent.type();
+
+                if (parentType instanceof TupleType) {
+                    if (property.equals("left")) {
+                        return new Some<>(new Tuple2Impl<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
+                    }
+
+                    if (property.equals("right")) {
+                        return new Some<>(new Tuple2Impl<>(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
+                    }
+                }
+            }
+        }
+
         var invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some<>(new Tuple2Impl<>(argumentsState, invokable));
     }
@@ -2609,16 +2627,6 @@ public class Main {
             var parent = tuple.right();
 
             var parentType = parent.type();
-            if (parentType instanceof TupleType) {
-                if (property.equals("left")) {
-                    return new Some<>(new Tuple2Impl<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
-                }
-
-                if (property.equals("right")) {
-                    return new Some<>(new Tuple2Impl<>(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
-                }
-            }
-
             Type type = Primitive.Unknown;
             if (parentType instanceof FindableType objectType) {
                 if (objectType.find(property) instanceof Some(var memberType)) {
