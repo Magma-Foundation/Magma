@@ -1259,6 +1259,9 @@ enum ResultVariant {
 }
 /* public static */class Strings/*  */ {
 	static length(infix : string) : number;
+	static isBlank(input : string) : boolean {
+		return input.isBlank();
+	}
 }
 /* private */class Primitive/*  */ implements Type {
 	static Int : Primitive = new Primitive("number");
@@ -1667,8 +1670,8 @@ enum ResultVariant {
 	typed<T extends S, S>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
 		return action().map((tuple : [CompileState, T]) => [tuple[0], tuple[1]]);
 	}
-	parseWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
-		if (input.isBlank()){
+	static parseWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
+		if (Strings.isBlank(input)){
 			return new Some([state, new Whitespace()]);
 		}
 		return new None();
@@ -2141,7 +2144,7 @@ enum ResultVariant {
 		return this.parseAllWithIndices(state, input, this.foldValueChar, mapper);
 	}
 	parseParameter(state : CompileState, input : string) : [CompileState, Parameter] {
-		if (input.isBlank()){
+		if (Strings.isBlank(input)){
 			return [state, new Whitespace()];
 		}
 		return this.parseDefinition(state, input).map((tuple : [CompileState, Definition]) => [tuple[0], tuple[1]]).orElseGet(() => [state, new Placeholder(input)]);
@@ -2334,7 +2337,7 @@ enum ResultVariant {
 		}
 	}
 	parseArgument(state : CompileState, input : string) : Option<[CompileState, Argument]> {
-		if (input.isBlank()){
+		if (Strings.isBlank(input)){
 			return new Some([state, new Whitespace()]);
 		}
 		return this.parseType(state, input).map((tuple : [CompileState, Type]) => [tuple[0], tuple[1]]);

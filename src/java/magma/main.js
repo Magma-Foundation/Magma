@@ -1028,6 +1028,9 @@ Operator.SUBTRACT = new Operator("-", "-");
     }
 }
 /* public static */ class Strings /*  */ {
+    static isBlank(input) {
+        return input.isBlank();
+    }
 }
 /* private */ class Primitive /*  */ {
     constructor(value) {
@@ -1429,8 +1432,8 @@ BooleanValue.False = new BooleanValue("false");
     typed(action) {
         return action().map((tuple) => [tuple[0], tuple[1]]);
     }
-    parseWhitespace(input, state) {
-        if (input.isBlank()) {
+    static parseWhitespace(input, state) {
+        if (Strings.isBlank(input)) {
             return new Some([state, new Whitespace()]);
         }
         return new None();
@@ -1905,7 +1908,7 @@ BooleanValue.False = new BooleanValue("false");
         return this.parseAllWithIndices(state, input, this.foldValueChar, mapper);
     }
     parseParameter(state, input) {
-        if (input.isBlank()) {
+        if (Strings.isBlank(input)) {
             return [state, new Whitespace()];
         }
         return this.parseDefinition(state, input).map((tuple) => [tuple[0], tuple[1]]).orElseGet(() => [state, new Placeholder(input)]);
@@ -2098,7 +2101,7 @@ BooleanValue.False = new BooleanValue("false");
         }
     }
     parseArgument(state, input) {
-        if (input.isBlank()) {
+        if (Strings.isBlank(input)) {
             return new Some([state, new Whitespace()]);
         }
         return this.parseType(state, input).map((tuple) => [tuple[0], tuple[1]]);

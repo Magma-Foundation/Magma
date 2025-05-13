@@ -1610,6 +1610,10 @@ public class Main {
         private static int length(String infix) {
             return infix.length();
         }
+
+        private static boolean isBlank(String input) {
+            return input.isBlank();
+        }
     }
 
     private static final boolean isDebugEnabled = false;
@@ -2154,8 +2158,8 @@ public class Main {
         return action.get().map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()));
     }
 
-    private Option<Tuple2<CompileState, Whitespace>> parseWhitespace(String input, CompileState state) {
-        if (input.isBlank()) {
+    private static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(String input, CompileState state) {
+        if (Strings.isBlank(input)) {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
         return new None<>();
@@ -2767,7 +2771,7 @@ public class Main {
     }
 
     private Tuple2<CompileState, Parameter> parseParameter(CompileState state, String input) {
-        if (input.isBlank()) {
+        if (Strings.isBlank(input)) {
             return new Tuple2Impl<>(state, new Whitespace());
         }
 
@@ -3016,7 +3020,7 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Argument>> parseArgument(CompileState state, String input) {
-        if (input.isBlank()) {
+        if (Strings.isBlank(input)) {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
         return this.parseType(state, input).map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()));
