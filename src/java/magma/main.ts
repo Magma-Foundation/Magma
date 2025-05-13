@@ -56,14 +56,26 @@ enum OptionVariant {
 	find(key : K) : Option<V>;
 	with(key : K, value : V) : Map<K, V>;
 }
-/* private */interface Type/*  */ {
+/* private sealed */interface Type/*  */ {
 	generate() : string;
 	replace(mapping : Map<string, Type>) : Type;
 	findName() : Option<string>;
 }
-/* private */interface Argument/*  */ {
+enum ArgumentVariant {
+	Type,
+	Value,
+	Whitespace
 }
-/* private */interface Parameter/*  */ {
+/* private sealed */interface Argument/*  */ {
+	_ArgumentVariant : ArgumentVariant;
+}
+enum ParameterVariant {
+	Definition,
+	Placeholder,
+	Whitespace
+}
+/* private sealed */interface Parameter/*  */ {
+	_ParameterVariant : ParameterVariant;
 }
 enum ValueVariant {
 	BooleanValue,
@@ -99,12 +111,18 @@ enum CallerVariant {
 	variants() : List<string>;
 	name() : string;
 }
-/* private */interface FindableType/*  */ {
+enum FindableTypeVariant {
+	ObjectType,
+	Placeholder,
+	Template
+}
+/* private sealed */interface FindableType/*  */ {
+	_FindableTypeVariant : FindableTypeVariant;
 	find(name : string) : Option<Type>;
 	name() : string;
 	findBase() : Option<BaseType>;
 }
-/* private */interface Definition/*  */ {
+/* private sealed */interface Definition/*  */ {
 	generate() : string;
 	mapType(mapper : (arg0 : Type) => Type) : Definition;
 	generateWithParams(joinedParameters : string) : string;
@@ -390,6 +408,7 @@ enum ResultVariant {
 		this.definitions = definitions;
 		this.variants = variants;
 	}
+	_FindableTypeVariant : FindableTypeVariant = FindableTypeVariant.ObjectType;
 	public generate() : string {
 		return this.name;
 	}
@@ -631,6 +650,8 @@ enum ResultVariant {
 }
 /* private static final */class Whitespace/*  */ implements Argument, Parameter, ClassSegment, FunctionSegment, IncompleteClassSegment {
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Whitespace;
+	_ParameterVariant : ParameterVariant = ParameterVariant.Whitespace;
+	_ArgumentVariant : ArgumentVariant = ArgumentVariant.Whitespace;
 	public generate() : string {
 		return "";
 	}
@@ -688,6 +709,7 @@ enum ResultVariant {
 		this.base = base;
 		this.arguments = arguments;
 	}
+	_FindableTypeVariant : FindableTypeVariant = FindableTypeVariant.Template;
 	public generate() : string {
 		let joinedArguments = this.arguments.query().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 		return this.base.generate() + joinedArguments;
@@ -717,7 +739,9 @@ enum ResultVariant {
 		this.input = input;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder;
+	_FindableTypeVariant : FindableTypeVariant = FindableTypeVariant.Placeholder;
 	_ValueVariant : ValueVariant = ValueVariant.Placeholder;
+	_ParameterVariant : ParameterVariant = ParameterVariant.Placeholder;
 	public generate() : string {
 		return generatePlaceholder(this.input);
 	}

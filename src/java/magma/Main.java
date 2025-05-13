@@ -107,7 +107,7 @@ public class Main {
         Map<K, V> with(K key, V value);
     }
 
-    private interface Type extends Argument {
+    private sealed interface Type extends Argument {
         String generate();
 
         Type replace(Map<String, Type> mapping);
@@ -115,10 +115,10 @@ public class Main {
         Option<String> findName();
     }
 
-    private interface Argument {
+    private sealed interface Argument permits Type, Value, Whitespace {
     }
 
-    private interface Parameter {
+    private sealed interface Parameter permits Definition, Placeholder, Whitespace {
     }
 
     private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue, TupleNode {
@@ -141,7 +141,7 @@ public class Main {
         String name();
     }
 
-    private interface FindableType extends Type {
+    private sealed interface FindableType extends Type permits ObjectType, Placeholder, Template {
         Option<Type> find(String name);
 
         String name();
@@ -149,7 +149,7 @@ public class Main {
         Option<BaseType> findBase();
     }
 
-    private interface Definition extends Parameter, Header, StatementValue {
+    private sealed interface Definition extends Parameter, Header, StatementValue permits ImmutableDefinition {
         String generate();
 
         Definition mapType(Function<Type, Type> mapper);

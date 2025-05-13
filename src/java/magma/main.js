@@ -4,6 +4,18 @@ var OptionVariant;
     OptionVariant[OptionVariant["Some"] = 0] = "Some";
     OptionVariant[OptionVariant["None"] = 1] = "None";
 })(OptionVariant || (OptionVariant = {}));
+var ArgumentVariant;
+(function (ArgumentVariant) {
+    ArgumentVariant[ArgumentVariant["Type"] = 0] = "Type";
+    ArgumentVariant[ArgumentVariant["Value"] = 1] = "Value";
+    ArgumentVariant[ArgumentVariant["Whitespace"] = 2] = "Whitespace";
+})(ArgumentVariant || (ArgumentVariant = {}));
+var ParameterVariant;
+(function (ParameterVariant) {
+    ParameterVariant[ParameterVariant["Definition"] = 0] = "Definition";
+    ParameterVariant[ParameterVariant["Placeholder"] = 1] = "Placeholder";
+    ParameterVariant[ParameterVariant["Whitespace"] = 2] = "Whitespace";
+})(ParameterVariant || (ParameterVariant = {}));
 var ValueVariant;
 (function (ValueVariant) {
     ValueVariant[ValueVariant["BooleanValue"] = 0] = "BooleanValue";
@@ -24,6 +36,12 @@ var CallerVariant;
     CallerVariant[CallerVariant["ConstructionCaller"] = 0] = "ConstructionCaller";
     CallerVariant[CallerVariant["Value"] = 1] = "Value";
 })(CallerVariant || (CallerVariant = {}));
+var FindableTypeVariant;
+(function (FindableTypeVariant) {
+    FindableTypeVariant[FindableTypeVariant["ObjectType"] = 0] = "ObjectType";
+    FindableTypeVariant[FindableTypeVariant["Placeholder"] = 1] = "Placeholder";
+    FindableTypeVariant[FindableTypeVariant["Template"] = 2] = "Template";
+})(FindableTypeVariant || (FindableTypeVariant = {}));
 var IncompleteClassSegmentVariant;
 (function (IncompleteClassSegmentVariant) {
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassDefinition"] = 0] = "ClassDefinition";
@@ -247,6 +265,7 @@ var ResultVariant;
 }
 /* private */ class ObjectType /*  */ {
     constructor(name, typeParams, definitions, variants) {
+        this._FindableTypeVariant = FindableTypeVariant.ObjectType;
         this.name = name;
         this.typeParams = typeParams;
         this.definitions = definitions;
@@ -476,6 +495,8 @@ var ResultVariant;
 /* private static final */ class Whitespace /*  */ {
     constructor() {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Whitespace;
+        this._ParameterVariant = ParameterVariant.Whitespace;
+        this._ArgumentVariant = ArgumentVariant.Whitespace;
     }
     generate() {
         return "";
@@ -526,6 +547,7 @@ var ResultVariant;
 }
 /* private */ class Template /*  */ {
     constructor(base, arguments) {
+        this._FindableTypeVariant = FindableTypeVariant.Template;
         this.base = base;
         this.arguments = arguments;
     }
@@ -555,7 +577,9 @@ var ResultVariant;
 /* private */ class Placeholder /*  */ {
     constructor(input) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder;
+        this._FindableTypeVariant = FindableTypeVariant.Placeholder;
         this._ValueVariant = ValueVariant.Placeholder;
+        this._ParameterVariant = ParameterVariant.Placeholder;
         this.input = input;
     }
     generate() {
