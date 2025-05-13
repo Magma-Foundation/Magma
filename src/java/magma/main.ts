@@ -274,7 +274,7 @@ enum ResultVariant {
 		}
 	}
 	map<R>(mapper : (arg0 : T) => R) : Query<R> {
-		return new HeadedQuery(() => this.head.next().map(mapper));
+		return new HeadedQuery(new MapHead(this.head, mapper));
 	}
 	collect<R>(collector : Collector<T, R>) : R {
 		return this.fold(collector.createInitial(), collector.fold);
@@ -294,7 +294,7 @@ enum ResultVariant {
 		return new HeadedQuery(new FlatMapHead(this.head, f));
 	}
 	zip<R>(other : Query<R>) : Query<[T, R]> {
-		return new HeadedQuery(() => HeadedQuery.this.head.next().and(other.next));
+		return new HeadedQuery(new ZipHead(this.head, other));
 	}
 }
 /* private static */class RangeHead/*  */ implements Head<number> {
@@ -1183,6 +1183,28 @@ enum ResultVariant {
 	}
 	type() : Type {
 		return new TupleType(this.values.iterate().map(Value.type).collect(new ListCollector()));
+	}
+}
+/* private */class MapHead<T, R>/*  */ implements Head<R> {
+	head : Head<T>;
+	mapper : (arg0 : T) => R;
+	constructor (head : Head<T>, mapper : (arg0 : T) => R) {
+		this.head = head;
+		this.mapper = mapper;
+	}
+	next() : Option<R> {
+		return this.head.next().map(this.mapper);
+	}
+}
+/* private */class ZipHead<T, R>/*  */ implements Head<[T, R]> {
+	head : Head<T>;
+	other : Query<R>;
+	constructor (head : Head<T>, other : Query<R>) {
+		this.head = head;
+		this.other = other;
+	}
+	next() : Option<[T, R]> {
+		return this.head.next().and(this.other.next);
 	}
 }
 /* private */class Primitive/*  */ implements Type {/* Int("number"),

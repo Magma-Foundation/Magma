@@ -149,7 +149,7 @@ var ResultVariant;
         }
     }
     map(mapper) {
-        return new HeadedQuery(() => this.head.next().map(mapper));
+        return new HeadedQuery(new MapHead(this.head, mapper));
     }
     collect(collector) {
         return this.fold(collector.createInitial(), collector.fold);
@@ -169,7 +169,7 @@ var ResultVariant;
         return new HeadedQuery(new FlatMapHead(this.head, f));
     }
     zip(other) {
-        return new HeadedQuery(() => HeadedQuery.this.head.next().and(other.next));
+        return new HeadedQuery(new ZipHead(this.head, other));
     }
 }
 /* private static */ class RangeHead /*  */ {
@@ -955,6 +955,24 @@ var ResultVariant;
     }
     type() {
         return new TupleType(this.values.iterate().map(Value.type).collect(new ListCollector()));
+    }
+}
+/* private */ class MapHead {
+    constructor(head, mapper) {
+        this.head = head;
+        this.mapper = mapper;
+    }
+    next() {
+        return this.head.next().map(this.mapper);
+    }
+}
+/* private */ class ZipHead {
+    constructor(head, other) {
+        this.head = head;
+        this.other = other;
+    }
+    next() {
+        return this.head.next().and(this.other.next);
     }
 }
 /* private */ class Primitive /*  */ {

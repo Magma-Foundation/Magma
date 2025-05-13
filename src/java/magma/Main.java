@@ -370,7 +370,7 @@ public class Main {
 
         @Override
         public <R> Query<R> map(Function<T, R> mapper) {
-            return new HeadedQuery<>(() -> this.head.next().map(mapper));
+            return new HeadedQuery<>(new MapHead<>(this.head, mapper));
         }
 
         @Override
@@ -400,7 +400,7 @@ public class Main {
 
         @Override
         public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
-            return new HeadedQuery<>(() -> HeadedQuery.this.head.next().and(other::next));
+            return new HeadedQuery<>(new ZipHead<>(this.head, other));
         }
     }
 
@@ -1571,6 +1571,20 @@ public class Main {
             return new TupleType(this.values.iterate()
                     .map(Value::type)
                     .collect(new ListCollector<>()));
+        }
+    }
+
+    private record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
+        @Override
+        public Option<R> next() {
+            return this.head.next().map(this.mapper);
+        }
+    }
+
+    private record ZipHead<T, R>(Head<T> head, Query<R> other) implements Head<Tuple2<T, R>> {
+        @Override
+        public Option<Tuple2<T, R>> next() {
+            return this.head.next().and(this.other::next);
         }
     }
 
