@@ -1356,6 +1356,13 @@ public class Main {
     private record Initialization(Definition definition, Value source) implements StatementValue {
         @Override
         public String generate() {
+            return "let " + this.definition.generate() + " = " + this.source.generate();
+        }
+    }
+
+    private record FieldInitialization(Definition definition, Value source) implements StatementValue {
+        @Override
+        public String generate() {
             return this.definition.generate() + " = " + this.source.generate();
         }
     }
@@ -1545,7 +1552,7 @@ public class Main {
 
         @Override
         public Type type() {
-            return new TupleType(values.iterate()
+            return new TupleType(this.values.iterate()
                     .map(Value::type)
                     .collect(new ListCollector<>()));
         }
@@ -1917,7 +1924,7 @@ public class Main {
                 var name = superType + "Variant";
                 var type = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
                 var definition = this.createVariantDefinition(type);
-                return classSegmentList.addFirst(new Statement(1, new Initialization(definition, new SymbolValue(name + "." + prototype.name, type))));
+                return classSegmentList.addFirst(new Statement(1, new FieldInitialization(definition, new SymbolValue(name + "." + prototype.name, type))));
             });
 
             CompileState withEnum;
@@ -2252,18 +2259,14 @@ public class Main {
             var sourceState = sourceTuple.left();
             var source = sourceTuple.right();
 
-            return this.parseDefinition(sourceState, beforeEquals)
+            var destinationTuple = this.parseValue(sourceState, beforeEquals, depth);
+            var destinationState = destinationTuple.left();
+            var destination = destinationTuple.right();
+
+            return this.parseDefinition(destinationState, beforeEquals)
                     .flatMap(definitionTuple -> this.parseInitialization(definitionTuple.left(), definitionTuple.right(), source))
-                    .or(() -> this.parseAssignment(depth, beforeEquals, sourceState, source));
+                    .or(() -> new Some<>(new Tuple2Impl<>(destinationState, new Assignment(destination, source))));
         });
-    }
-
-    private Option<Tuple2<CompileState, StatementValue>> parseAssignment(int depth, String beforeEquals, CompileState sourceState, Value source) {
-        var destinationTuple = this.parseValue(sourceState, beforeEquals, depth);
-        var destinationState = destinationTuple.left();
-        var destination = destinationTuple.right();
-
-        return new Some<>(new Tuple2Impl<>(destinationState, new Assignment(destination, source)));
     }
 
     private Option<Tuple2<CompileState, StatementValue>> parseInitialization(CompileState state, Definition rawDefinition, Value source) {
@@ -2320,8 +2323,8 @@ public class Main {
                 var value = childTuple.right();
                 var definition = definitionTuple.right();
 
-                var variant = new DataAccess(value, "_variant", Primitive.Unknown);
                 var type = value.type();
+                var variant = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
 
                 var generate = type.findName().orElse("");
                 var temp = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
