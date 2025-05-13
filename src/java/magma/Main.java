@@ -95,8 +95,6 @@ public class Main {
         List<T> addAllFirst(List<T> others);
 
         boolean contains(T element);
-
-        List<T> sort(BiFunction<T, T, Integer> sorter);
     }
 
     private interface Head<T> {
@@ -534,13 +532,6 @@ public class Main {
             @Override
             public boolean contains(T element) {
                 return this.elements.contains(element);
-            }
-
-            @Override
-            public List<T> sort(BiFunction<T, T, Integer> sorter) {
-                var copy = new ArrayList<T>(this.elements);
-                copy.sort(sorter::apply);
-                return new JVMList<>(copy);
             }
 
             private JVMList<T> set(int index, T element) {
