@@ -112,7 +112,7 @@ public class Main {
 
         Type replace(Map<String, Type> mapping);
 
-        Option<String> findName();
+        String findName();
     }
 
     private sealed interface Argument permits Type, Value, Whitespace {
@@ -136,15 +136,13 @@ public class Main {
     }
 
     private interface BaseType {
-        List<String> variants();
+        boolean hasVariant(String name);
 
-        String name();
+        String findName();
     }
 
     private sealed interface FindableType extends Type permits ObjectType, Placeholder, Template {
         Option<Type> find(String name);
-
-        String name();
 
         Option<BaseType> findBase();
     }
@@ -688,8 +686,13 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new Some<>(this.name);
+        public boolean hasVariant(String name) {
+            return this.variants().contains(name);
+        }
+
+        @Override
+        public String findName() {
+            return this.name;
         }
     }
 
@@ -705,8 +708,8 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new None<>();
+        public String findName() {
+            return "";
         }
     }
 
@@ -960,8 +963,8 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new None<>();
+        public String findName() {
+            return "";
         }
     }
 
@@ -1006,8 +1009,8 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new None<>();
+        public String findName() {
+            return "";
         }
     }
 
@@ -1028,8 +1031,8 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new None<>();
+        public String findName() {
+            return "";
         }
     }
 
@@ -1058,11 +1061,6 @@ public class Main {
         }
 
         @Override
-        public String name() {
-            return this.base.name();
-        }
-
-        @Override
         public Option<BaseType> findBase() {
             return new Some<>(this.base);
         }
@@ -1077,7 +1075,7 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
+        public String findName() {
             return this.base.findName();
         }
     }
@@ -1101,11 +1099,6 @@ public class Main {
         }
 
         @Override
-        public String name() {
-            return this.input;
-        }
-
-        @Override
         public Option<BaseType> findBase() {
             return new None<>();
         }
@@ -1116,8 +1109,8 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new None<>();
+        public String findName() {
+            return "";
         }
 
         @Override
@@ -1964,8 +1957,8 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var variantsSuper = bases.query()
-                .filter(type -> type.variants().contains(prototype.name))
-                .map(BaseType::name)
+                .filter(type -> type.hasVariant(prototype.name))
+                .map(BaseType::findName)
                 .collect(new ListCollector<>());
 
         return this.mapUsingState(state2, prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
@@ -2419,10 +2412,10 @@ public class Main {
                 var definition = definitionTuple.right();
 
                 var type = value.type();
-                var variant = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
+                var variant = new DataAccess(value, "_" + type.findName() + "Variant", Primitive.Unknown);
 
-                var generate = type.findName().orElse("");
-                var temp = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
+                var generate = type.findName();
+                var temp = new SymbolValue(generate + "Variant." + definition.findType().findName(), Primitive.Unknown);
                 var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
                 return new Tuple2Impl<>(definitionTuple.left()
                         .addFunctionSegment(functionSegment)
@@ -2558,7 +2551,7 @@ public class Main {
                 .collect(new ListCollector<>()));
 
         if (newCaller instanceof ConstructionCaller constructionCaller) {
-            if (constructionCaller.type.findName().filter(value -> value.equals("Tuple2Impl")).isPresent()) {
+            if (constructionCaller.type.findName().equals("Tuple2Impl")) {
                 return new Some<>(new Tuple2Impl<>(argumentsState, new TupleNode(Lists.of(arguments.get(0).orElse(null), arguments.get(1).orElse(null)))));
             }
         }
@@ -3087,8 +3080,8 @@ public class Main {
         }
 
         @Override
-        public Option<String> findName() {
-            return new None<>();
+        public String findName() {
+            return this.name();
         }
     }
 

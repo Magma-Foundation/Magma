@@ -59,7 +59,7 @@ enum OptionVariant {
 /* private sealed */interface Type/*  */ {
 	generate() : string;
 	replace(mapping : Map<string, Type>) : Type;
-	findName() : Option<string>;
+	findName() : string;
 }
 enum ArgumentVariant {
 	Type,
@@ -108,8 +108,8 @@ enum CallerVariant {
 	generate() : string;
 }
 /* private */interface BaseType/*  */ {
-	variants() : List<string>;
-	name() : string;
+	hasVariant(name : string) : boolean;
+	findName() : string;
 }
 enum FindableTypeVariant {
 	ObjectType,
@@ -119,7 +119,6 @@ enum FindableTypeVariant {
 /* private sealed */interface FindableType/*  */ {
 	_FindableTypeVariant : FindableTypeVariant;
 	find(name : string) : Option<Type>;
-	name() : string;
 	findBase() : Option<BaseType>;
 }
 enum DefinitionVariant {
@@ -426,8 +425,11 @@ enum ResultVariant {
 	public findBase() : Option<BaseType> {
 		return new Some(this);
 	}
-	public findName() : Option<string> {
-		return new Some(this.name);
+	public hasVariant(name : string) : boolean {
+		return this.variants().contains(name);
+	}
+	public findName() : string {
+		return this.name;
 	}
 }
 /* private */class TypeParam/*  */ implements Type {
@@ -441,8 +443,8 @@ enum ResultVariant {
 	public replace(mapping : Map<string, Type>) : Type {
 		return mapping.find(this.value).orElse(this);
 	}
-	public findName() : Option<string> {
-		return new None();
+	public findName() : string {
+		return "";
 	}
 }
 /* private */class CompileState/*  */ {
@@ -649,8 +651,8 @@ enum ResultVariant {
 	public replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	public findName() : Option<string> {
-		return new None();
+	public findName() : string {
+		return "";
 	}
 }
 /* private static final */class Whitespace/*  */ implements Argument, Parameter, ClassSegment, FunctionSegment, IncompleteClassSegment {
@@ -687,8 +689,8 @@ enum ResultVariant {
 	public replace(mapping : Map<string, Type>) : Type {
 		return new FunctionType(this.arguments.query().map((type : Type) => type.replace(mapping)).collect(new ListCollector()), this.returns.replace(mapping));
 	}
-	public findName() : Option<string> {
-		return new None();
+	public findName() : string {
+		return "";
 	}
 }
 /* private */class TupleType/*  */ implements Type {
@@ -703,8 +705,8 @@ enum ResultVariant {
 	public replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	public findName() : Option<string> {
-		return new None();
+	public findName() : string {
+		return "";
 	}
 }
 /* private */class Template/*  */ implements FindableType {
@@ -725,9 +727,6 @@ enum ResultVariant {
 			return found.replace(mapping);
 		});
 	}
-	public name() : string {
-		return this.base.name();
-	}
 	public findBase() : Option<BaseType> {
 		return new Some(this.base);
 	}
@@ -735,7 +734,7 @@ enum ResultVariant {
 		let collect : R = this.arguments.query().map((argument : Type) => argument.replace(mapping)).collect(new ListCollector());
 		return new Template(this.base, collect);
 	}
-	public findName() : Option<string> {
+	public findName() : string {
 		return this.base.findName();
 	}
 }
@@ -757,17 +756,14 @@ enum ResultVariant {
 	public find(name : string) : Option<Type> {
 		return new None();
 	}
-	public name() : string {
-		return this.input;
-	}
 	public findBase() : Option<BaseType> {
 		return new None();
 	}
 	public replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	public findName() : Option<string> {
-		return new None();
+	public findName() : string {
+		return "";
 	}
 	public maybeCreateDefinition() : Option<Definition> {
 		return new None();
@@ -1277,8 +1273,8 @@ enum ResultVariant {
 	public replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
-	public findName() : Option<string> {
-		return new None();
+	public findName() : string {
+		return this.name();
 	}
 }
 /* private */class BooleanValue/*  */ implements Value {
@@ -1531,7 +1527,7 @@ enum ResultVariant {
 		let thisType : ObjectType = prototype.createObjectType();
 		let state2 : CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 		let bases : R = prototype.interfaces.query().map(Main.retainFindableType).flatMap(Queries.fromOption).map(FindableType.findBase).flatMap(Queries.fromOption).collect(new ListCollector());
-		let variantsSuper = bases.query().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
+		let variantsSuper = bases.query().filter((type) => type.hasVariant(prototype.name)).map(BaseType.findName).collect(new ListCollector());
 		return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple : [CompileState, List<R>]) => {
 			let oldStatementsState = oldStatementsTuple[0];
 			let oldStatements = oldStatementsTuple[1];
@@ -1694,7 +1690,7 @@ enum ResultVariant {
 		let definition : Definition = prototype.createDefinition();
 		let oldHeader = prototype.header();
 		/* Header newHeader */;
-		if (oldHeader._Variant === Variant.Definition){
+		if (oldHeader._UnknownVariant === UnknownVariant.Definition){
 			let maybeDefinition : Definition = oldHeader as Definition;
 			/* newHeader */ = maybeDefinition.removeAnnotations();
 		}
@@ -1863,9 +1859,9 @@ enum ResultVariant {
 				let value = childTuple[1];
 				let definition = definitionTuple[1];
 				let type = value.type();
-				let variant : DataAccess = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
-				let generate = type.findName().orElse("");
-				let temp : SymbolValue = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
+				let variant : DataAccess = new DataAccess(value, "_" + type.findName() + "Variant", Primitive.Unknown);
+				let generate = type.findName();
+				let temp : SymbolValue = new SymbolValue(generate + "Variant." + definition.findType().findName(), Primitive.Unknown);
 				let functionSegment : Statement = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
 				return [definitionTuple[0].addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp)];
 			});
@@ -1893,7 +1889,7 @@ enum ResultVariant {
 			if (this.isSymbol(strippedBeforeArrow)){
 				let type : Type = Primitive.Unknown;
 				if (/* state.typeRegister instanceof Some */(/* var expectedType */)){
-					if (/* expectedType */._Variant === Variant.FunctionType){
+					if (/* expectedType */._UnknownVariant === UnknownVariant.FunctionType){
 						let functionType : FunctionType = /* expectedType */ as FunctionType;
 						type = functionType.arguments.get(0).orElse(/* null */);
 					}
@@ -1970,13 +1966,13 @@ enum ResultVariant {
 		let argumentsWithActualTypes = argumentsTuple[1];
 		let arguments : List<Value> = this.retainValues(argumentsWithActualTypes.query().map(Tuple2.left).collect(new ListCollector()));
 		if (newCaller._CallerVariant === CallerVariant.ConstructionCaller){
-			if (constructionCaller.type.findName().filter((value) => value === "Tuple2Impl").isPresent()){
+			if (constructionCaller.type.findName() === "Tuple2Impl"){
 			let constructionCaller : ConstructionCaller = newCaller as ConstructionCaller;
 				return new Some([argumentsState, new TupleNode(Lists.of(arguments.get(0).orElse(/* null */), arguments.get(1).orElse(/* null */)))]);
 			}
 		}
 		if (newCaller._CallerVariant === CallerVariant.Value){
-			if (value._Variant === Variant.DataAccess){
+			if (value._ValueVariant === ValueVariant.DataAccess){
 				let parent : Value = access.parent;
 				let property : string = access.property;
 				let parentType : Type = parent.type();
@@ -2035,7 +2031,7 @@ enum ResultVariant {
 			}
 			/* case Value value -> */{
 				let type = /* value */.type();
-				if (type._Variant === Variant.FunctionType){
+				if (type._UnknownVariant === UnknownVariant.FunctionType){
 					let functionType : FunctionType = type as FunctionType;
 					callerType = functionType;
 				}
@@ -2094,7 +2090,7 @@ enum ResultVariant {
 			let parent = tuple[1];
 			let parentType = parent.type();
 			let type : Type = Primitive.Unknown;
-			if (parentType._Variant === Variant.FindableType){
+			if (parentType._UnknownVariant === UnknownVariant.FindableType){
 				if (/* objectType.find(property) instanceof Some */(/* var memberType */)){
 				let objectType : FindableType = parentType as FindableType;
 					type = /* memberType */;

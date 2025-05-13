@@ -288,8 +288,11 @@ var ResultVariant;
     findBase() {
         return new Some(this);
     }
+    hasVariant(name) {
+        return this.variants().contains(name);
+    }
     findName() {
-        return new Some(this.name);
+        return this.name;
     }
 }
 /* private */ class TypeParam /*  */ {
@@ -303,7 +306,7 @@ var ResultVariant;
         return mapping.find(this.value).orElse(this);
     }
     findName() {
-        return new None();
+        return "";
     }
 }
 /* private */ class CompileState /*  */ {
@@ -494,7 +497,7 @@ var ResultVariant;
         return this;
     }
     findName() {
-        return new None();
+        return "";
     }
 }
 /* private static final */ class Whitespace /*  */ {
@@ -532,7 +535,7 @@ var ResultVariant;
         return new FunctionType(this.arguments.query().map((type) => type.replace(mapping)).collect(new ListCollector()), this.returns.replace(mapping));
     }
     findName() {
-        return new None();
+        return "";
     }
 }
 /* private */ class TupleType /*  */ {
@@ -547,7 +550,7 @@ var ResultVariant;
         return this;
     }
     findName() {
-        return new None();
+        return "";
     }
 }
 /* private */ class Template /*  */ {
@@ -565,9 +568,6 @@ var ResultVariant;
             let mapping = this.base.typeParams().query().zip(this.arguments.query()).collect(new MapCollector());
             return found.replace(mapping);
         });
-    }
-    name() {
-        return this.base.name();
     }
     findBase() {
         return new Some(this.base);
@@ -597,9 +597,6 @@ var ResultVariant;
     find(name) {
         return new None();
     }
-    name() {
-        return this.input;
-    }
     findBase() {
         return new None();
     }
@@ -607,7 +604,7 @@ var ResultVariant;
         return this;
     }
     findName() {
-        return new None();
+        return "";
     }
     maybeCreateDefinition() {
         return new None();
@@ -1041,7 +1038,7 @@ Operator.SUBTRACT = new Operator("-", "-");
         return this;
     }
     findName() {
-        return new None();
+        return this.name();
     }
 }
 Primitive.Int = new Primitive("number");
@@ -1294,7 +1291,7 @@ BooleanValue.False = new BooleanValue("false");
         let thisType = prototype.createObjectType();
         let state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
         let bases = prototype.interfaces.query().map(Main.retainFindableType).flatMap(Queries.fromOption).map(FindableType.findBase).flatMap(Queries.fromOption).collect(new ListCollector());
-        let variantsSuper = bases.query().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
+        let variantsSuper = bases.query().filter((type) => type.hasVariant(prototype.name)).map(BaseType.findName).collect(new ListCollector());
         return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple) => {
             let oldStatementsState = oldStatementsTuple[0];
             let oldStatements = oldStatementsTuple[1];
@@ -1456,7 +1453,7 @@ BooleanValue.False = new BooleanValue("false");
         let definition = prototype.createDefinition();
         let oldHeader = prototype.header();
         /* Header newHeader */ ;
-        if (oldHeader._Variant === Variant.Definition) {
+        if (oldHeader._UnknownVariant === UnknownVariant.Definition) {
             let maybeDefinition = oldHeader;
             maybeDefinition.removeAnnotations();
         }
@@ -1627,9 +1624,9 @@ BooleanValue.False = new BooleanValue("false");
                 let value = childTuple[1];
                 let definition = definitionTuple[1];
                 let type = value.type();
-                let variant = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
-                let generate = type.findName().orElse("");
-                let temp = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
+                let variant = new DataAccess(value, "_" + type.findName() + "Variant", Primitive.Unknown);
+                let generate = type.findName();
+                let temp = new SymbolValue(generate + "Variant." + definition.findType().findName(), Primitive.Unknown);
                 let functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
                 return [definitionTuple[0].addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp)];
             });
@@ -1657,7 +1654,7 @@ BooleanValue.False = new BooleanValue("false");
             if (this.isSymbol(strippedBeforeArrow)) {
                 let type = Primitive.Unknown;
                 if ( /* state.typeRegister instanceof Some */( /* var expectedType */)) {
-                    if ( /* expectedType */._Variant === Variant.FunctionType) {
+                    if ( /* expectedType */._UnknownVariant === UnknownVariant.FunctionType) {
                         let functionType = /* expectedType */ as, FunctionType;
                         type = functionType.arguments.get(0).orElse( /* null */);
                     }
@@ -1734,13 +1731,13 @@ BooleanValue.False = new BooleanValue("false");
         let argumentsWithActualTypes = argumentsTuple[1];
         let arguments = this.retainValues(argumentsWithActualTypes.query().map(Tuple2.left).collect(new ListCollector()));
         if (newCaller._CallerVariant === CallerVariant.ConstructionCaller) {
-            if (constructionCaller.type.findName().filter((value) => value === "Tuple2Impl").isPresent()) {
+            if (constructionCaller.type.findName() === "Tuple2Impl") {
                 let constructionCaller = newCaller;
                 return new Some([argumentsState, new TupleNode(Lists.of(arguments.get(0).orElse( /* null */), arguments.get(1).orElse( /* null */)))]);
             }
         }
         if (newCaller._CallerVariant === CallerVariant.Value) {
-            if (value._Variant === Variant.DataAccess) {
+            if (value._ValueVariant === ValueVariant.DataAccess) {
                 let parent = access.parent;
                 let property = access.property;
                 let parentType = parent.type();
@@ -1799,7 +1796,7 @@ BooleanValue.False = new BooleanValue("false");
             }
             /* case Value value -> */ {
                 let type = /* value */ .type();
-                if (type._Variant === Variant.FunctionType) {
+                if (type._UnknownVariant === UnknownVariant.FunctionType) {
                     let functionType = type;
                     callerType = functionType;
                 }
@@ -1858,7 +1855,7 @@ BooleanValue.False = new BooleanValue("false");
             let parent = tuple[1];
             let parentType = parent.type();
             let type = Primitive.Unknown;
-            if (parentType._Variant === Variant.FindableType) {
+            if (parentType._UnknownVariant === UnknownVariant.FindableType) {
                 if ( /* objectType.find(property) instanceof Some */( /* var memberType */)) {
                     let objectType = parentType;
                     type =  /* memberType */;
