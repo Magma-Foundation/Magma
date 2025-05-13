@@ -1612,7 +1612,7 @@ public class Main {
         }
     }
 
-    private static final boolean isDebugEnabled = true;
+    private static final boolean isDebugEnabled = false;
 
     private static String generatePlaceholder(String input) {
         var replaced = input
@@ -2862,14 +2862,17 @@ public class Main {
             }
 
             var newModifiers = modifiers.query()
-                    .map(modifier -> {
-                        return modifier.equals("final") ? "readonly" : modifier;
-                    })
+                    .filter(value -> !this.isAccessor(value))
+                    .map(modifier -> modifier.equals("final") ? "readonly" : modifier)
                     .collect(new ListCollector<>());
 
             var node = new ImmutableDefinition(annotations, newModifiers, stripped, type1.right(), typeParams);
             return new Some<>(new Tuple2Impl<>(type1.left(), node));
         });
+    }
+
+    private boolean isAccessor(String value) {
+        return value.equals("private");
     }
 
     private DivideState foldValueChar(DivideState state, char c) {
