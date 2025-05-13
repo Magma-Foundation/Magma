@@ -1582,7 +1582,7 @@ public class Main {
         }
     }
 
-    private static final boolean isDebugEnabled = true;
+    private static final boolean isDebugEnabled = false;
 
     private static String generatePlaceholder(String input) {
         var replaced = input
@@ -2515,12 +2515,17 @@ public class Main {
 
                 if (parentType instanceof TupleType) {
                     if (property.equals("left")) {
-                        return new Some<>(new Tuple2Impl<>(state, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
+                        return new Some<>(new Tuple2Impl<>(argumentsState, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
                     }
 
                     if (property.equals("right")) {
-                        return new Some<>(new Tuple2Impl<>(state, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
+                        return new Some<>(new Tuple2Impl<>(argumentsState, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
                     }
+                }
+
+                if (property.equals("equals")) {
+                    var first = arguments.get(0).orElse(null);
+                    return new Some<>(new Tuple2Impl<>(argumentsState, new Operation(parent, Operator.EQUALS, first)));
                 }
             }
         }
