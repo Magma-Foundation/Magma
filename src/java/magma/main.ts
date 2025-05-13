@@ -7,7 +7,7 @@ enum OptionVariant {
 	None
 }
 /* private sealed */interface Option<T>/*  */ {
-	_variant : OptionVariant;
+	_OptionVariant : OptionVariant;
 	map<R>(mapper : (arg0 : T) => R) : Option<R>;
 	isPresent() : boolean;
 	orElse(other : T) : T;
@@ -79,7 +79,7 @@ enum ValueVariant {
 	SymbolValue
 }
 /* private sealed */interface Value/*  */ {
-	_variant : ValueVariant;
+	_ValueVariant : ValueVariant;
 	generate() : string;
 	type() : Type;
 }
@@ -91,13 +91,14 @@ enum CallerVariant {
 	Value
 }
 /* private sealed */interface Caller/*  */ {
-	_variant : CallerVariant;
+	_CallerVariant : CallerVariant;
 	generate() : string;
 }
 /* private */interface FindableType/*  */ {
 	typeParams() : List<string>;
 	find(name : string) : Option<Type>;
 	name() : string;
+	findBase() : Option</* ObjectType */>;
 }
 /* private */interface Definition/*  */ {
 	generate() : string;
@@ -138,7 +139,7 @@ enum IncompleteClassSegmentVariant {
 	Whitespace
 }
 /* private sealed */interface IncompleteClassSegment/*  */ {
-	_variant : IncompleteClassSegmentVariant;
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant;
 	maybeCreateDefinition() : Option<Definition>;
 }
 /* private @ */interface Actual/*  */ {
@@ -148,7 +149,7 @@ enum ResultVariant {
 	Err
 }
 /* private sealed */interface Result<T, X>/*  */ {
-	_variant : ResultVariant;
+	_ResultVariant : ResultVariant;
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X>;
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R) : R;
 }
@@ -161,6 +162,7 @@ enum ResultVariant {
 	resolve(childName : string) : Path;
 }
 /* private static final */class None<T>/*  */ implements Option<T> {
+	_OptionVariant : OptionVariant = OptionVariant.None;
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None();
 	}
@@ -198,6 +200,7 @@ enum ResultVariant {
 /* private */class Some<T>/*  */ implements Option<T> {
 	constructor (value : T) {
 	}
+	_OptionVariant : OptionVariant = OptionVariant.Some;
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new Some(mapper(this.value));
 	}
@@ -371,6 +374,9 @@ enum ResultVariant {
 	}
 	find(name : string) : Option<Type> {
 		return this.definitions.iterate().filter((definition : T) => definition.name().equals(name)).map(Definition.type).next();
+	}
+	findBase() : Option<ObjectType> {
+		return new Some(this);
 	}
 	findName() : Option<string> {
 		return new Some(this.name);
@@ -578,6 +584,7 @@ enum ResultVariant {
 	}
 }
 /* private static final */class Whitespace/*  */ implements Argument, Parameter, ClassSegment, FunctionSegment, IncompleteClassSegment {
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Whitespace;
 	generate() : string {
 		return "";
 	}
@@ -620,7 +627,7 @@ enum ResultVariant {
 	}
 }
 /* private */class Template/*  */ implements FindableType {
-	constructor (base : FindableType, arguments : List<Type>) {
+	constructor (base : ObjectType, arguments : List<Type>) {
 	}
 	generate() : string {
 		joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
@@ -631,12 +638,15 @@ enum ResultVariant {
 	}
 	find(name : string) : Option<Type> {
 		return this.base.find(name).map((found : Type) => {
-			mapping : R = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
+			mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
 			return found.replace(mapping);
 		});
 	}
 	name() : string {
 		return this.base.name();
+	}
+	findBase() : Option<ObjectType> {
+		return new Some(this.base);
 	}
 	replace(mapping : Map<string, Type>) : Type {
 		return this;
@@ -648,6 +658,8 @@ enum ResultVariant {
 /* private */class Placeholder/*  */ implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment {
 	constructor (input : string) {
 	}
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder;
+	_ValueVariant : ValueVariant = ValueVariant.Placeholder;
 	generate() : string {
 		return generatePlaceholder(this.input);
 	}
@@ -663,6 +675,9 @@ enum ResultVariant {
 	name() : string {
 		return this.input;
 	}
+	findBase() : Option<ObjectType> {
+		return new None();
+	}
 	replace(mapping : Map<string, Type>) : Type {
 		return this;
 	}
@@ -676,6 +691,7 @@ enum ResultVariant {
 /* private */class StringValue/*  */ implements Value {
 	constructor (stripped : string) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.StringValue;
 	generate() : string {
 		return this.stripped;
 	}
@@ -686,6 +702,7 @@ enum ResultVariant {
 /* private */class DataAccess/*  */ implements Value {
 	constructor (parent : Value, property : string, type : Type) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.DataAccess;
 	generate() : string {
 		return this.parent.generate() + "." + this.property + createDebugString(this.type);
 	}
@@ -696,6 +713,7 @@ enum ResultVariant {
 /* private */class ConstructionCaller/*  */ implements Caller {
 	constructor (type : Type) {
 	}
+	_CallerVariant : CallerVariant = CallerVariant.ConstructionCaller;
 	generate() : string {
 		return "new " + this.type.generate();
 	}
@@ -717,6 +735,7 @@ enum ResultVariant {
 /* private */class Operation/*  */ implements Value {
 	constructor (left : Value, operator : Operator, right : Value) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.Operation;
 	generate() : string {
 		return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
 	}
@@ -727,6 +746,7 @@ enum ResultVariant {
 /* private */class Not/*  */ implements Value {
 	constructor (value : Value) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.Not;
 	generate() : string {
 		return "!" + this.value.generate();
 	}
@@ -747,6 +767,7 @@ enum ResultVariant {
 /* private */class Lambda/*  */ implements Value {
 	constructor (parameters : List<Definition>, body : LambdaValue) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.Lambda;
 	generate() : string {
 		joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
 		return "(" + joined + ") => " + this.body.generate();
@@ -758,6 +779,7 @@ enum ResultVariant {
 /* private */class Invokable/*  */ implements Value {
 	constructor (caller : Caller, arguments : List<Value>, type : Type) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.Invokable;
 	generate() : string {
 		joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
 		return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
@@ -766,6 +788,7 @@ enum ResultVariant {
 /* private */class IndexValue/*  */ implements Value {
 	constructor (parent : Value, child : Value) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.IndexValue;
 	generate() : string {
 		return this.parent.generate() + "[" + this.child.generate() + "]";
 	}
@@ -776,6 +799,7 @@ enum ResultVariant {
 /* private */class SymbolValue/*  */ implements Value {
 	constructor (stripped : string, type : Type) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.SymbolValue;
 	generate() : string {
 		return this.stripped + createDebugString(this.type);
 	}
@@ -799,7 +823,7 @@ enum ResultVariant {
 		return "constructor " + joinedParameters;
 	}
 }
-/* private */class Method/*  */ implements ClassSegment {
+/* private */class FunctionNode/*  */ implements ClassSegment {
 	constructor (depth : number, header : Header, parameters : List<Definition>, maybeStatements : Option<List<FunctionSegment>>) {
 	}
 	joinStatements(statements : List<FunctionSegment>) : string {
@@ -808,7 +832,7 @@ enum ResultVariant {
 	generate() : string {
 		indent : string = createIndent(this.depth);
 		generatedHeader : string = this.header.generateWithParams(joinValues(this.parameters));
-		generatedStatements : T = this.maybeStatements.map(Method.joinStatements).map((inner : T) => " {" + inner + indent + "}").orElse(";");
+		generatedStatements : T = this.maybeStatements.map(FunctionNode.joinStatements).map((inner : T) => " {" + inner + indent + "}").orElse(";");
 		return indent + generatedHeader + generatedStatements;
 	}
 }
@@ -864,6 +888,7 @@ enum ResultVariant {
 /* private */class MethodPrototype/*  */ implements IncompleteClassSegment {
 	constructor (depth : number, header : Header, parameters : List<Definition>, content : string) {
 	}
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.MethodPrototype;
 	createDefinition() : Definition {
 		return this.header.createDefinition(this.findParamTypes());
 	}
@@ -877,6 +902,7 @@ enum ResultVariant {
 /* private */class IncompleteClassSegmentWrapper/*  */ implements IncompleteClassSegment {
 	constructor (segment : ClassSegment) {
 	}
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.IncompleteClassSegmentWrapper;
 	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
@@ -884,6 +910,7 @@ enum ResultVariant {
 /* private */class ClassDefinition/*  */ implements IncompleteClassSegment {
 	constructor (depth : number, definition : Definition) {
 	}
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassDefinition;
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
@@ -891,6 +918,7 @@ enum ResultVariant {
 /* private */class ClassInitialization/*  */ implements IncompleteClassSegment {
 	constructor (depth : number, definition : Definition, value : Value) {
 	}
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassInitialization;
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.definition);
 	}
@@ -898,6 +926,7 @@ enum ResultVariant {
 /* private */class StructurePrototype/*  */ implements IncompleteClassSegment {
 	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>, variants : List<string>, interfaces : List<Type>) {
 	}
+	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype;
 	createObjectType() : ObjectType {
 		definitionFromSegments : R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
 		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
@@ -905,10 +934,17 @@ enum ResultVariant {
 	maybeCreateDefinition() : Option<Definition> {
 		return new None();
 	}
+	joinInterfaces() : string {
+		return this.interfaces.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => " implements " + inner).orElse("");
+	}
+	joinTypeParams() : string {
+		return this.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+	}
 }
 /* private */class Cast/*  */ implements Value {
 	constructor (value : Value, type : Type) {
 	}
+	_ValueVariant : ValueVariant = ValueVariant.Cast;
 	generate() : string {
 		return this.value.generate() + " as " + this.type.generate();
 	}
@@ -916,6 +952,7 @@ enum ResultVariant {
 /* private */class Ok<T, X>/*  */ implements Result<T, X> {
 	constructor (value : T) {
 	}
+	_ResultVariant : ResultVariant = ResultVariant.Ok;
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
 		return new Ok(mapper(this.value));
 	}
@@ -926,6 +963,7 @@ enum ResultVariant {
 /* private */class Err<T, X>/*  */ implements Result<T, X> {
 	constructor (error : X) {
 	}
+	_ResultVariant : ResultVariant = ResultVariant.Err;
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
 		return new Err(this.error);
 	}
@@ -961,7 +999,8 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class BooleanValue/*  */ implements Value {/* True("true"), False("false"); */
+/* private */class BooleanValue/*  */ implements Value {
+	_ValueVariant : ValueVariant = ValueVariant.BooleanValue;/* True("true"), False("false"); */
 	value : string;
 	constructor (value : string) {
 		this.value = value;
@@ -992,6 +1031,13 @@ enum ResultVariant {
 			return "";
 		}
 		return generatePlaceholder(": " + type.generate());
+	}
+	retainFindableType(type : Type) : Option<FindableType> {
+		if (type._variant === Variant.FindableType){
+			findableType : FindableType = type as FindableType;
+			return new Some(findableType);
+		}
+		return new None();
 	}
 	main() : void {
 		parent : Path = this.findRoot();
@@ -1200,45 +1246,51 @@ enum ResultVariant {
 	completeStructure(state : CompileState, prototype : StructurePrototype) : Option<[CompileState, ClassSegment]> {
 		thisType : ObjectType = prototype.createObjectType();
 		state2 : CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-		return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((completedTuple : [CompileState, List<R>]) => {
-			completedState = completedTuple[0]();
-			completed = completedTuple[1]();
-			exited = completedState.exitDefinitions();
+		bases : R = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Iterators.fromOption).map(FindableType.findBase).flatMap(Iterators.fromOption).collect(new ListCollector());
+		variantsSuper = bases.iterate().filter((type) => type.variants.contains(prototype.name)).map(ObjectType.name).collect(new ListCollector());
+		return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple : [CompileState, List<R>]) => {
+			oldStatementsState = oldStatementsTuple[0]();
+			oldStatements = oldStatementsTuple[1]();
+			exited = oldStatementsState.exitDefinitions();
+			fold = variantsSuper.iterate().fold(oldStatements, (classSegmentList, superType) => {
+				name = superType + "Variant";
+				type : ObjectType = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
+				definition : Definition = this.createVariantDefinition(type);
+				return classSegmentList.addFirst(new Statement(1, new Initialization(definition, new SymbolValue(name + "." + prototype.name, type))));
+			});
 			/* CompileState withEnum */;
-			/* List<ClassSegment> completed1 */;
+			/* List<ClassSegment> newSegments */;
 			if (prototype.variants.isEmpty()){
 				/* withEnum */ = exited;
-				/* completed1 */ = completed;
+				/* newSegments */ = fold;
 			}
 			else {
 				joined = prototype.variants.iterate().map((inner : T) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
-				enumName = prototype.name + "Variant";
-				/* withEnum */ = exited.addStructure("enum " + enumName + " {" +
+				/* withEnum */ = exited.addStructure("enum " + prototype.name + "Variant" + " {" +
                         joined +
                         "\n}\n");
-				definition : Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty(), prototype.variants));
-				/* completed1 */ = completed.addFirst(new Statement(1, definition));
+				definition : Definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
+				/* newSegments */ = fold.addFirst(new Statement(1, definition));
 			}
-			withMaybeConstructor : List<ClassSegment> = this.attachConstructor(prototype, /* completed1 */);
+			withMaybeConstructor : List<ClassSegment> = this.attachConstructor(prototype, /* newSegments */);
 			parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
-			joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-			interfaces : List<Type> = prototype.interfaces;
-			joined = interfaces.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => " implements " + inner).orElse("");
-			generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + joined + " {" + parsed2 + "\n}\n";
+			joinedTypeParams : string = prototype.joinTypeParams();
+			interfacesJoined : string = prototype.joinInterfaces();
+			generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + parsed2 + "\n}\n";
 			compileState = /* withEnum */.popStructName();
 			definedState = compileState.addStructure(generated);
 			return new Tuple2Impl(definedState, new Whitespace());
 		});
 	}
+	createVariantDefinition(type : ObjectType) : Definition {
+		return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
+	}
 	attachConstructor(prototype : StructurePrototype, segments : List<ClassSegment>) : List<ClassSegment> {
-		/* List<ClassSegment> withMaybeConstructor */;
 		if (prototype.parameters().isEmpty()){
-			/* withMaybeConstructor */ = segments;
+			return segments;
 		}
-		else {
-			/* withMaybeConstructor */ = segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty())));
-		}
-		return /* withMaybeConstructor */;
+		func : FunctionNode = new FunctionNode(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty()));
+		return segments.addFirst(func);
 	}
 	completeClassSegment(state1 : CompileState, segment : IncompleteClassSegment) : Option<[CompileState, ClassSegment]> {
 		/* return switch (segment) */{
@@ -1333,14 +1385,14 @@ enum ResultVariant {
 			/* newHeader */ = oldHeader;
 		}
 		if (prototype.content().equals(";") || definition.containsAnnotation("Actual")){
-			return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), /* newHeader */, prototype.parameters(), new None())));
+			return new Some(new Tuple2Impl(state.define(definition), new FunctionNode(prototype.depth(), /* newHeader */, prototype.parameters(), new None())));
 		}
 		if (prototype.content().startsWith("{") && prototype.content().endsWith("}")){
 			substring = prototype.content().substring(1, prototype.content().length() - 1);
 			withDefined : CompileState = state.enterDefinitions().defineAll(prototype.parameters());
 			statementsTuple : [CompileState, List<T>] = this.parseStatements(withDefined, substring, (state1, input1) => this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
 			statements = statementsTuple[1]();
-			return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), /* newHeader */, prototype.parameters(), new Some(statements))));
+			return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new FunctionNode(prototype.depth(), /* newHeader */, prototype.parameters(), new Some(statements))));
 		}
 		return new None();
 	}
@@ -1904,13 +1956,13 @@ enum ResultVariant {
 		}
 		if (state.resolveType(base)._variant === OptionVariant.Some){
 			baseType : Type = some.value;
-			if (baseType._variant === Variant.FindableType){
+			if (baseType._variant === Variant.ObjectType){
 			some : Some<Type> = state.resolveType(base) as Some<Type>;
-				findableType : FindableType = baseType as FindableType;
+				findableType : ObjectType = baseType as ObjectType;
 				return new Tuple2Impl(state, new Template(findableType, children));
 			}
 		}
-		return new Tuple2Impl(state, new Template(new Placeholder(base), children));
+		return new Tuple2Impl(state, new Template(new ObjectType(base, Lists.empty(), Lists.empty(), Lists.empty()), children));
 	}
 	parseTemplate(state : CompileState, input : string) : Option<[CompileState, Type]> {
 		return this.suffix(input.strip(), ">", (withoutEnd : string) => {

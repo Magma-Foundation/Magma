@@ -141,6 +141,8 @@ public class Main {
         Option<Type> find(String name);
 
         String name();
+
+        Option<ObjectType> findBase();
     }
 
     private interface Definition extends Parameter, Header, StatementValue {
@@ -667,6 +669,11 @@ public class Main {
         }
 
         @Override
+        public Option<ObjectType> findBase() {
+            return new Some<>(this);
+        }
+
+        @Override
         public Option<String> findName() {
             return new Some<>(this.name);
         }
@@ -1007,7 +1014,7 @@ public class Main {
         }
     }
 
-    private record Template(FindableType base, List<Type> arguments) implements FindableType {
+    private record Template(ObjectType base, List<Type> arguments) implements FindableType {
         @Override
         public String generate() {
             var joinedArguments = this.arguments.iterate()
@@ -1039,6 +1046,11 @@ public class Main {
         @Override
         public String name() {
             return this.base.name();
+        }
+
+        @Override
+        public Option<ObjectType> findBase() {
+            return new Some<>(this.base);
         }
 
         @Override
@@ -1078,6 +1090,11 @@ public class Main {
         @Override
         public String name() {
             return this.input;
+        }
+
+        @Override
+        public Option<ObjectType> findBase() {
+            return new None<>();
         }
 
         @Override
@@ -1280,7 +1297,7 @@ public class Main {
         }
     }
 
-    private record Method(
+    private record FunctionNode(
             int depth,
             Header header,
             List<Definition> parameters,
@@ -1298,7 +1315,7 @@ public class Main {
             var indent = createIndent(this.depth);
 
             var generatedHeader = this.header.generateWithParams(joinValues(this.parameters));
-            var generatedStatements = this.maybeStatements.map(Method::joinStatements)
+            var generatedStatements = this.maybeStatements.map(FunctionNode::joinStatements)
                     .map(inner -> " {" + inner + indent + "}")
                     .orElse(";");
 
@@ -1434,6 +1451,21 @@ public class Main {
         public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
+
+        private String joinInterfaces() {
+            return this.interfaces.iterate()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .map(inner -> " implements " + inner)
+                    .orElse("");
+        }
+
+        private String joinTypeParams() {
+            return this.typeParams().iterate()
+                    .collect(new Joiner(", "))
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+        }
     }
 
     private record Cast(Value value, Type type) implements Value {
@@ -1534,6 +1566,13 @@ public class Main {
         }
 
         return generatePlaceholder(": " + type.generate());
+    }
+
+    private static Option<FindableType> retainFindableType(Type type) {
+        if (type instanceof FindableType findableType) {
+            return new Some<>(findableType);
+        }
+        return new None<>();
     }
 
     public void main() {
@@ -1842,16 +1881,36 @@ public class Main {
         var thisType = prototype.createObjectType();
         var state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        return this.mapUsingState(state2, prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(completedTuple -> {
-            var completedState = completedTuple.left();
-            var completed = completedTuple.right();
+        var bases = prototype.interfaces.iterate()
+                .map(Main::retainFindableType)
+                .flatMap(Iterators::fromOption)
+                .map(FindableType::findBase)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
 
-            var exited = completedState.exitDefinitions();
+        var variantsSuper = bases.iterate()
+                .filter(type -> type.variants.contains(prototype.name))
+                .map(ObjectType::name)
+                .collect(new ListCollector<>());
+
+        return this.mapUsingState(state2, prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
+            var oldStatementsState = oldStatementsTuple.left();
+            var oldStatements = oldStatementsTuple.right();
+
+            var exited = oldStatementsState.exitDefinitions();
+
+            var fold = variantsSuper.iterate().fold(oldStatements, (classSegmentList, superType) -> {
+                var name = superType + "Variant";
+                var type = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
+                var definition = this.createVariantDefinition(type);
+                return classSegmentList.addFirst(new Statement(1, new Initialization(definition, new SymbolValue(name + "." + prototype.name, type))));
+            });
+
             CompileState withEnum;
-            List<ClassSegment> completed1;
+            List<ClassSegment> newSegments;
             if (prototype.variants.isEmpty()) {
                 withEnum = exited;
-                completed1 = completed;
+                newSegments = fold;
             }
             else {
                 var joined = prototype.variants.iterate()
@@ -1859,34 +1918,25 @@ public class Main {
                         .collect(new Joiner(","))
                         .orElse("");
 
-                var enumName = prototype.name + "Variant";
-                withEnum = exited.addStructure("enum " + enumName + " {" +
+                withEnum = exited.addStructure("enum " + prototype.name + "Variant" + " {" +
                         joined +
                         "\n}\n");
 
-                var definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty(), prototype.variants));
-                completed1 = completed.addFirst(new Statement(1, definition));
+                var definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
+                newSegments = fold.addFirst(new Statement(1, definition));
             }
 
-            var withMaybeConstructor = this.attachConstructor(prototype, completed1);
+            var withMaybeConstructor = this.attachConstructor(prototype, newSegments);
+
             var parsed2 = withMaybeConstructor.iterate()
                     .map(ClassSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
 
-            var joinedTypeParams = prototype.typeParams().iterate()
-                    .collect(new Joiner(", "))
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
+            var joinedTypeParams = prototype.joinTypeParams();
+            var interfacesJoined = prototype.joinInterfaces();
 
-            var interfaces = prototype.interfaces;
-            var joined = interfaces.iterate()
-                    .map(Type::generate)
-                    .collect(new Joiner(", "))
-                    .map(inner -> " implements " + inner)
-                    .orElse("");
-
-            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + joined + " {" + parsed2 + "\n}\n";
+            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + parsed2 + "\n}\n";
             var compileState = withEnum.popStructName();
 
             var definedState = compileState.addStructure(generated);
@@ -1894,15 +1944,17 @@ public class Main {
         });
     }
 
+    private Definition createVariantDefinition(ObjectType type) {
+        return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
+    }
+
     private List<ClassSegment> attachConstructor(StructurePrototype prototype, List<ClassSegment> segments) {
-        List<ClassSegment> withMaybeConstructor;
         if (prototype.parameters().isEmpty()) {
-            withMaybeConstructor = segments;
+            return segments;
         }
-        else {
-            withMaybeConstructor = segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some<>(Lists.empty())));
-        }
-        return withMaybeConstructor;
+
+        var func = new FunctionNode(1, new ConstructorHeader(), prototype.parameters(), new Some<>(Lists.empty()));
+        return segments.addFirst(func);
     }
 
     private Option<Tuple2<CompileState, ClassSegment>> completeClassSegment(CompileState state1, IncompleteClassSegment segment) {
@@ -2022,7 +2074,7 @@ public class Main {
         }
 
         if (prototype.content().equals(";") || definition.containsAnnotation("Actual")) {
-            return new Some<>(new Tuple2Impl<>(state.define(definition), new Method(prototype.depth(), newHeader, prototype.parameters(), new None<>())));
+            return new Some<>(new Tuple2Impl<>(state.define(definition), new FunctionNode(prototype.depth(), newHeader, prototype.parameters(), new None<>())));
         }
 
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
@@ -2031,7 +2083,7 @@ public class Main {
             var withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             var statementsTuple = this.parseStatements(withDefined, substring, (state1, input1) -> this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
             var statements = statementsTuple.right();
-            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(definition), new Method(prototype.depth(), newHeader, prototype.parameters(), new Some<>(statements))));
+            return new Some<>(new Tuple2Impl<>(statementsTuple.left().exitDefinitions().define(definition), new FunctionNode(prototype.depth(), newHeader, prototype.parameters(), new Some<>(statements))));
         }
 
         return new None<>();
@@ -2764,12 +2816,12 @@ public class Main {
 
         if (state.resolveType(base) instanceof Some<Type> some) {
             var baseType = some.value;
-            if (baseType instanceof FindableType findableType) {
+            if (baseType instanceof ObjectType findableType) {
                 return new Tuple2Impl<>(state, new Template(findableType, children));
             }
         }
 
-        return new Tuple2Impl<>(state, new Template(new Placeholder(base), children));
+        return new Tuple2Impl<>(state, new Template(new ObjectType(base, Lists.empty(), Lists.empty(), Lists.empty()), children));
     }
 
     private Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {

@@ -39,6 +39,9 @@ var ResultVariant;
     ResultVariant[ResultVariant["Err"] = 1] = "Err";
 })(ResultVariant || (ResultVariant = {}));
 /* private static final */ class None {
+    constructor() {
+        this._OptionVariant = OptionVariant.None;
+    }
     map(mapper) {
         return new None();
     }
@@ -75,6 +78,7 @@ var ResultVariant;
 }
 /* private */ class Some {
     constructor(value) {
+        this._OptionVariant = OptionVariant.Some;
     }
     map(mapper) {
         return new Some(mapper(this.value));
@@ -243,6 +247,9 @@ var ResultVariant;
     }
     find(name) {
         return this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next();
+    }
+    findBase() {
+        return new Some(this);
     }
     findName() {
         return new Some(this.name);
@@ -442,6 +449,9 @@ var ResultVariant;
     }
 }
 /* private static final */ class Whitespace /*  */ {
+    constructor() {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Whitespace;
+    }
     generate() {
         return "";
     }
@@ -495,12 +505,15 @@ var ResultVariant;
     }
     find(name) {
         return this.base.find(name).map((found) => {
-            mapping: R = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
+            mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
             return found.replace(mapping);
         });
     }
     name() {
         return this.base.name();
+    }
+    findBase() {
+        return new Some(this.base);
     }
     replace(mapping) {
         return this;
@@ -511,6 +524,8 @@ var ResultVariant;
 }
 /* private */ class Placeholder /*  */ {
     constructor(input) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder;
+        this._ValueVariant = ValueVariant.Placeholder;
     }
     generate() {
         return generatePlaceholder(this.input);
@@ -527,6 +542,9 @@ var ResultVariant;
     name() {
         return this.input;
     }
+    findBase() {
+        return new None();
+    }
     replace(mapping) {
         return this;
     }
@@ -539,6 +557,7 @@ var ResultVariant;
 }
 /* private */ class StringValue /*  */ {
     constructor(stripped) {
+        this._ValueVariant = ValueVariant.StringValue;
     }
     generate() {
         return this.stripped;
@@ -549,6 +568,7 @@ var ResultVariant;
 }
 /* private */ class DataAccess /*  */ {
     constructor(parent, property, type) {
+        this._ValueVariant = ValueVariant.DataAccess;
     }
     generate() {
         return this.parent.generate() + "." + this.property + createDebugString(this.type);
@@ -559,6 +579,7 @@ var ResultVariant;
 }
 /* private */ class ConstructionCaller /*  */ {
     constructor(type) {
+        this._CallerVariant = CallerVariant.ConstructionCaller;
     }
     generate() {
         return "new " + this.type.generate();
@@ -578,6 +599,7 @@ var ResultVariant;
 }
 /* private */ class Operation /*  */ {
     constructor(left, operator, right) {
+        this._ValueVariant = ValueVariant.Operation;
     }
     generate() {
         return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
@@ -588,6 +610,7 @@ var ResultVariant;
 }
 /* private */ class Not /*  */ {
     constructor(value) {
+        this._ValueVariant = ValueVariant.Not;
     }
     generate() {
         return "!" + this.value.generate();
@@ -608,6 +631,7 @@ var ResultVariant;
 }
 /* private */ class Lambda /*  */ {
     constructor(parameters, body) {
+        this._ValueVariant = ValueVariant.Lambda;
     }
     generate() {
         joined = this.parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).orElse("");
@@ -619,6 +643,7 @@ var ResultVariant;
 }
 /* private */ class Invokable /*  */ {
     constructor(caller, arguments, type) {
+        this._ValueVariant = ValueVariant.Invokable;
     }
     generate() {
         joined = this.arguments.iterate().map(Value.generate).collect(new Joiner(", ")).orElse("");
@@ -627,6 +652,7 @@ var ResultVariant;
 }
 /* private */ class IndexValue /*  */ {
     constructor(parent, child) {
+        this._ValueVariant = ValueVariant.IndexValue;
     }
     generate() {
         return this.parent.generate() + "[" + this.child.generate() + "]";
@@ -637,6 +663,7 @@ var ResultVariant;
 }
 /* private */ class SymbolValue /*  */ {
     constructor(stripped, type) {
+        this._ValueVariant = ValueVariant.SymbolValue;
     }
     generate() {
         return this.stripped + createDebugString(this.type);
@@ -660,7 +687,7 @@ var ResultVariant;
         return "constructor " + joinedParameters;
     }
 }
-/* private */ class Method /*  */ {
+/* private */ class FunctionNode /*  */ {
     constructor(depth, header, parameters, maybeStatements) {
     }
     joinStatements(statements) {
@@ -669,7 +696,7 @@ var ResultVariant;
     generate() {
         indent: string = createIndent(this.depth);
         generatedHeader: string = this.header.generateWithParams(joinValues(this.parameters));
-        generatedStatements: T = this.maybeStatements.map(Method.joinStatements).map((inner) => " {" + inner + indent + "}").orElse(";");
+        generatedStatements: T = this.maybeStatements.map(FunctionNode.joinStatements).map((inner) => " {" + inner + indent + "}").orElse(";");
         return indent + generatedHeader + generatedStatements;
     }
 }
@@ -724,6 +751,7 @@ var ResultVariant;
 }
 /* private */ class MethodPrototype /*  */ {
     constructor(depth, header, parameters, content) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.MethodPrototype;
     }
     createDefinition() {
         return this.header.createDefinition(this.findParamTypes());
@@ -737,6 +765,7 @@ var ResultVariant;
 }
 /* private */ class IncompleteClassSegmentWrapper /*  */ {
     constructor(segment) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.IncompleteClassSegmentWrapper;
     }
     maybeCreateDefinition() {
         return new None();
@@ -744,6 +773,7 @@ var ResultVariant;
 }
 /* private */ class ClassDefinition /*  */ {
     constructor(depth, definition) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassDefinition;
     }
     maybeCreateDefinition() {
         return new Some(this.definition);
@@ -751,6 +781,7 @@ var ResultVariant;
 }
 /* private */ class ClassInitialization /*  */ {
     constructor(depth, definition, value) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassInitialization;
     }
     maybeCreateDefinition() {
         return new Some(this.definition);
@@ -758,6 +789,7 @@ var ResultVariant;
 }
 /* private */ class StructurePrototype /*  */ {
     constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype;
     }
     createObjectType() {
         definitionFromSegments: R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
@@ -766,9 +798,16 @@ var ResultVariant;
     maybeCreateDefinition() {
         return new None();
     }
+    joinInterfaces() {
+        return this.interfaces.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => " implements " + inner).orElse("");
+    }
+    joinTypeParams() {
+        return this.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
+    }
 }
 /* private */ class Cast /*  */ {
     constructor(value, type) {
+        this._ValueVariant = ValueVariant.Cast;
     }
     generate() {
         return this.value.generate() + " as " + this.type.generate();
@@ -776,6 +815,7 @@ var ResultVariant;
 }
 /* private */ class Ok {
     constructor(value) {
+        this._ResultVariant = ResultVariant.Ok;
     }
     mapValue(mapper) {
         return new Ok(mapper(this.value));
@@ -786,6 +826,7 @@ var ResultVariant;
 }
 /* private */ class Err {
     constructor(error) {
+        this._ResultVariant = ResultVariant.Err;
     }
     mapValue(mapper) {
         return new Err(this.error);
@@ -819,6 +860,7 @@ var ResultVariant;
 }
 /* private */ class BooleanValue /*  */ {
     constructor(value) {
+        this._ValueVariant = ValueVariant.BooleanValue; /* True("true"), False("false"); */
         this.value = value;
     }
     generate() {
@@ -848,6 +890,13 @@ var ResultVariant;
             return "";
         }
         return generatePlaceholder(": " + type.generate());
+    }
+    retainFindableType(type) {
+        if (type._variant === Variant.FindableType) {
+            findableType: FindableType = type;
+            return new Some(findableType);
+        }
+        return new None();
     }
     main() {
         parent: Path = this.findRoot();
@@ -1054,45 +1103,51 @@ var ResultVariant;
     completeStructure(state, prototype) {
         thisType: ObjectType = prototype.createObjectType();
         state2: CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-        return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((completedTuple) => {
-            completedState = completedTuple[0]();
-            completed = completedTuple[1]();
-            exited = completedState.exitDefinitions();
+        bases: R = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Iterators.fromOption).map(FindableType.findBase).flatMap(Iterators.fromOption).collect(new ListCollector());
+        variantsSuper = bases.iterate().filter((type) => type.variants.contains(prototype.name)).map(ObjectType.name).collect(new ListCollector());
+        return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple) => {
+            oldStatementsState = oldStatementsTuple[0]();
+            oldStatements = oldStatementsTuple[1]();
+            exited = oldStatementsState.exitDefinitions();
+            fold = variantsSuper.iterate().fold(oldStatements, (classSegmentList, superType) => {
+                name = superType + "Variant";
+                type: ObjectType = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
+                definition: Definition = this.createVariantDefinition(type);
+                return classSegmentList.addFirst(new Statement(1, new Initialization(definition, new SymbolValue(name + "." + prototype.name, type))));
+            });
             /* CompileState withEnum */ ;
-            /* List<ClassSegment> completed1 */ ;
+            /* List<ClassSegment> newSegments */ ;
             if (prototype.variants.isEmpty()) {
                 exited;
-                completed;
+                fold;
             }
             else {
                 joined = prototype.variants.iterate().map((inner) => "\n\t" + inner).collect(new Joiner(",")).orElse("");
-                enumName = prototype.name + "Variant";
-                exited.addStructure("enum " + enumName + " {" +
+                exited.addStructure("enum " + prototype.name + "Variant" + " {" +
                     joined +
                     "\n}\n");
-                definition: Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty(), prototype.variants));
-                completed.addFirst(new Statement(1, definition));
+                definition: Definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
+                fold.addFirst(new Statement(1, definition));
             }
             withMaybeConstructor: (List) = this.attachConstructor(prototype);
             parsed2 = withMaybeConstructor.iterate().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
-            joinedTypeParams = prototype.typeParams().iterate().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
-            interfaces: (List) = prototype.interfaces;
-            joined = interfaces.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => " implements " + inner).orElse("");
-            generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + joined + " {" + parsed2 + "\n}\n";
+            joinedTypeParams: string = prototype.joinTypeParams();
+            interfacesJoined: string = prototype.joinInterfaces();
+            generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + parsed2 + "\n}\n";
             compileState = /* withEnum */ .popStructName();
             definedState = compileState.addStructure(generated);
             return new Tuple2Impl(definedState, new Whitespace());
         });
     }
+    createVariantDefinition(type) {
+        return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
+    }
     attachConstructor(prototype, segments) {
-        /* List<ClassSegment> withMaybeConstructor */ ;
         if (prototype.parameters().isEmpty()) {
-            segments;
+            return segments;
         }
-        else {
-            segments.addFirst(new Method(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty())));
-        }
-        return /* withMaybeConstructor */;
+        func: FunctionNode = new FunctionNode(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty()));
+        return segments.addFirst(func);
     }
     completeClassSegment(state1, segment) {
         /* return switch (segment) */ {
@@ -1187,14 +1242,14 @@ var ResultVariant;
             oldHeader;
         }
         if (prototype.content().equals(";") || definition.containsAnnotation("Actual")) {
-            return new Some(new Tuple2Impl(state.define(definition), new Method(prototype.depth(), prototype.parameters(), new None())));
+            return new Some(new Tuple2Impl(state.define(definition), new FunctionNode(prototype.depth(), prototype.parameters(), new None())));
         }
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
             substring = prototype.content().substring(1, prototype.content().length() - 1);
             withDefined: CompileState = state.enterDefinitions().defineAll(prototype.parameters());
             statementsTuple: [CompileState, (List)] = this.parseStatements(withDefined, substring, (state1, input1) => this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
             statements = statementsTuple[1]();
-            return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new Method(prototype.depth(), prototype.parameters(), new Some(statements))));
+            return new Some(new Tuple2Impl(statementsTuple[0]().exitDefinitions().define(definition), new FunctionNode(prototype.depth(), prototype.parameters(), new Some(statements))));
         }
         return new None();
     }
@@ -1759,13 +1814,13 @@ var ResultVariant;
         }
         if (state.resolveType(base)._variant === OptionVariant.Some) {
             baseType: Type = some.value;
-            if (baseType._variant === Variant.FindableType) {
+            if (baseType._variant === Variant.ObjectType) {
                 some: (Some) = state.resolveType(base);
-                findableType: FindableType = baseType;
+                findableType: ObjectType = baseType;
                 return new Tuple2Impl(state, new Template(findableType, children));
             }
         }
-        return new Tuple2Impl(state, new Template(new Placeholder(base), children));
+        return new Tuple2Impl(state, new Template(new ObjectType(base, Lists.empty(), Lists.empty(), Lists.empty()), children));
     }
     parseTemplate(state, input) {
         return this.suffix(input.strip(), ">", (withoutEnd) => {
