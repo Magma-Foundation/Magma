@@ -136,8 +136,6 @@ public class Main {
     }
 
     private interface FindableType extends Type {
-        List<String> typeParams();
-
         Option<Type> find(String name);
 
         String name();
@@ -1027,11 +1025,6 @@ public class Main {
         }
 
         @Override
-        public List<String> typeParams() {
-            return this.base.typeParams();
-        }
-
-        @Override
         public Option<Type> find(String name) {
             return this.base.find(name).map(found -> {
                 var mapping = this.base.typeParams()
@@ -1075,11 +1068,6 @@ public class Main {
         @Override
         public Type type() {
             return Primitive.Unknown;
-        }
-
-        @Override
-        public List<String> typeParams() {
-            return Lists.empty();
         }
 
         @Override
