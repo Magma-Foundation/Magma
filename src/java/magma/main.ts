@@ -566,7 +566,7 @@ enum ResultVariant {
 		return this.depth === 1;
 	}
 	public pop() : Option<[string, DivideState]> {
-		if (this.index < this.input.length()){
+		if (this.index < Strings.length(this.input)){
 			let c = this.input.charAt(this.index);
 			return new Some([c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)]);
 		}
@@ -1257,6 +1257,9 @@ enum ResultVariant {
 		return new None();
 	}
 }
+/* public static */class Strings/*  */ {
+	static length(infix : string) : number;
+}
 /* private */class Primitive/*  */ implements Type {
 	static Int : Primitive = new Primitive("number");
 	static String : Primitive = new Primitive("string");
@@ -1318,6 +1321,16 @@ enum ResultVariant {
 			return new Some(findableType);
 		}
 		return new None();
+	}
+	static isSymbol(input : string) : boolean {
+		/* for (var i = 0; i < Strings.length(input); i++) */{
+			let c = input.charAt(/* i */);
+			if (/* Character */.isLetter(c) || /*  */(/* i != 0  */ && /* Character */.isDigit(c))){
+				/* continue */;
+			}
+			return false;
+		}
+		return true;
 	}
 	public main() : void {
 		let parent : Path = this.findRoot();
@@ -1510,7 +1523,7 @@ enum ResultVariant {
 	}
 	assembleStructure(state : CompileState, targetInfix : string, annotations : List<string>, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>, variants : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		let name = rawName.strip();
-		if (!this.isSymbol(name)){
+		if (!isSymbol(name)){
 			return new None();
 		}
 		if (annotations.contains("Actual")){
@@ -1619,28 +1632,18 @@ enum ResultVariant {
 		}
 		return new None();
 	}
-	isSymbol(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++) */{
-			let c = input.charAt(/* i */);
-			if (/* Character */.isLetter(c) || /*  */(/* i != 0  */ && /* Character */.isDigit(c))){
-				/* continue */;
-			}
-			return false;
-		}
-		return true;
-	}
 	prefix<T>(input : string, prefix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
 		if (!input.startsWith(prefix)){
 			return new None();
 		}
-		let slice = input.substring(prefix.length());
+		let slice = input.substring(Strings.length(prefix));
 		return mapper(slice);
 	}
 	suffix<T>(input : string, suffix : string, mapper : (arg0 : string) => Option<T>) : Option<T> {
 		if (!input.endsWith(suffix)){
 			return new None();
 		}
-		let slice = input.substring(0, input.length() - suffix.length());
+		let slice = input.substring(0, Strings.length(input) - Strings.length(suffix));
 		return mapper(slice);
 	}
 	parseClassSegment(state : CompileState, input : string, depth : number) : [CompileState, IncompleteClassSegment] {
@@ -1701,7 +1704,7 @@ enum ResultVariant {
 			return new Some([state.define(definition), new FunctionNode(prototype.depth(), /* newHeader */, prototype.parameters(), new None())]);
 		}
 		if (prototype.content().startsWith("{") && prototype.content().endsWith("}")){
-			let substring = prototype.content().substring(1, prototype.content().length() - 1);
+			let substring = prototype.content().substring(1, Strings.length(prototype.content()) - 1);
 			let withDefined : CompileState = state.enterDefinitions().defineAll(prototype.parameters());
 			let statementsTuple : [CompileState, List<T>] = this.parseStatements(withDefined, substring, (state1, input1) => this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
 			let statements = statementsTuple[1];
@@ -1801,7 +1804,7 @@ enum ResultVariant {
 	parseStatementValue(state : CompileState, input : string, depth : number) : [CompileState, StatementValue] {
 		let stripped = input.strip();
 		if (stripped.startsWith("return ")){
-			let value = stripped.substring("return ".length());
+			let value = stripped.substring(Strings.length("return "));
 			let tuple : [CompileState, Value] = this.parseValue(state, value, depth);
 			let value1 = tuple[1];
 			return [tuple[0], new Return(value1)];
@@ -1837,8 +1840,8 @@ enum ResultVariant {
 	}
 	parseChar(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
-		if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 2){
-			return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
+		if (stripped.startsWith("'") && stripped.endsWith("'") && Strings.length(stripped) >= 2){
+			return new Some([state, new StringValue(stripped.substring(1, Strings.length(stripped) - 1))]);
 		}
 		return new None();
 	}
@@ -1886,7 +1889,7 @@ enum ResultVariant {
 	parseLambda(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return this.first(input, "->", (beforeArrow, valueString) => {
 			let strippedBeforeArrow = beforeArrow.strip();
-			if (this.isSymbol(strippedBeforeArrow)){
+			if (isSymbol(strippedBeforeArrow)){
 				let type : Type = Primitive.Unknown;
 				if (/* state.typeRegister instanceof Some */(/* var expectedType */)){
 					if (/* expectedType */._UnknownVariant === UnknownVariant.FunctionType){
@@ -1897,7 +1900,7 @@ enum ResultVariant {
 				return this.assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
 			}
 			if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")){
-				let parameterNames : R = this.divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), this.foldValueChar).query().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
+				let parameterNames : R = this.divideAll(strippedBeforeArrow.substring(1, Strings.length(strippedBeforeArrow) - 1), this.foldValueChar).query().map(/* String */.strip).filter((value : T) => !value.isEmpty()).map((name : T) => ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
 				return this.assembleLambda(state, parameterNames, valueString, depth);
 			}
 			return new None();
@@ -1908,7 +1911,7 @@ enum ResultVariant {
 		/* Tuple2Impl<CompileState, LambdaValue> value */;
 		let state2 : CompileState = state.defineAll(definitions);
 		if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")){
-			let value1 : [CompileState, List<T>] = this.parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
+			let value1 : [CompileState, List<T>] = this.parseStatements(state2, strippedValueString.substring(1, Strings.length(strippedValueString) - 1), (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
 			let right = value1[1];
 			/* value */ = [value1[0], new BlockLambdaValue(depth, right)];
 		}
@@ -1937,7 +1940,7 @@ enum ResultVariant {
 		return this.areAllDigits(/* maybeTruncated */);
 	}
 	areAllDigits(input : string) : boolean {
-		/* for (var i = 0; i < input.length(); i++) */{
+		/* for (var i = 0; i < Strings.length(input); i++) */{
 			let c = input.charAt(/* i */);
 			if (/* Character */.isDigit(c)){
 				/* continue */;
@@ -2054,7 +2057,7 @@ enum ResultVariant {
 	}
 	invocationHeader(state : CompileState, depth : number, callerString1 : string) : [CompileState, Caller] {
 		if (callerString1.startsWith("new ")){
-			let input1 : string = callerString1.substring("new ".length());
+			let input1 : string = callerString1.substring(Strings.length("new "));
 			let map : Option<R> = this.parseType(state, input1).map((type : [CompileState, Type]) => {
 				let right = type[1];
 				return [type[0], new ConstructionCaller(right)];
@@ -2083,7 +2086,7 @@ enum ResultVariant {
 	parseDataAccess(state : CompileState, input : string, depth : number) : Option<[CompileState, Value]> {
 		return this.last(input.strip(), ".", (parentString, rawProperty) => {
 			let property = rawProperty.strip();
-			if (!this.isSymbol(property)){
+			if (!isSymbol(property)){
 				return new None();
 			}
 			let tuple : [CompileState, Value] = this.parseValue(state, parentString, depth);
@@ -2102,13 +2105,13 @@ enum ResultVariant {
 	parseString(state : CompileState, input : string) : Option<[CompileState, Value]> {
 		let stripped = input.strip();
 		if (stripped.startsWith("\"") && stripped.endsWith("\"")){
-			return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
+			return new Some([state, new StringValue(stripped.substring(1, Strings.length(stripped) - 1))]);
 		}
 		return new None();
 	}
 	parseSymbolValue(state : CompileState, value : string) : Option<[CompileState, Value]> {
 		let stripped = value.strip();
-		if (this.isSymbol(stripped)){
+		if (isSymbol(stripped)){
 			if (/* state.resolveValue(stripped) instanceof Some */(/* var type */)){
 				return new Some([state, new SymbolValue(stripped, type)]);
 			}
@@ -2212,7 +2215,7 @@ enum ResultVariant {
 	assembleDefinition(state : CompileState, annotations : List<string>, modifiers : List<string>, rawName : string, typeParams : List<string>, type : string) : Option<[CompileState, Definition]> {
 		return this.parseType(state.withTypeParams(typeParams), type).flatMap((type1 : [CompileState, Type]) => {
 			let stripped = rawName.strip();
-			if (!this.isSymbol(stripped)){
+			if (!isSymbol(stripped)){
 				return new None();
 			}
 			let newModifiers : R = modifiers.query().filter((value : string) => !this.isAccessor(value)).map((modifier : T) => /* modifier.equals("final") ? "readonly" : modifier */).collect(new ListCollector());
@@ -2262,7 +2265,7 @@ enum ResultVariant {
 		if (stripped === "void"){
 			return new Some([state, Primitive.Void]);
 		}
-		if (this.isSymbol(stripped)){
+		if (isSymbol(stripped)){
 			if (/* state.resolveType(stripped) instanceof Some */(/* var resolved */)){
 				return new Some([state, /* resolved */]);
 			}
@@ -2355,7 +2358,7 @@ enum ResultVariant {
 	infix<T>(input : string, infix : string, locator : (arg0 : string, arg1 : string) => Option<number>, mapper : (arg0 : string, arg1 : string) => Option<T>) : Option<T> {
 		return this.split(() => locator(input, infix).map((index : number) => {
 			let left = input.substring(0, index);
-			let right = input.substring(index + infix.length());
+			let right = input.substring(index + Strings.length(infix));
 			return [left, right];
 		}), mapper);
 	}

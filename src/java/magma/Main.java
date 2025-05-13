@@ -862,7 +862,7 @@ public class Main {
         }
 
         public Option<Tuple2<Character, DivideState>> pop() {
-            if (this.index < this.input.length()) {
+            if (this.index < Strings.length(this.input)) {
                 var c = this.input.charAt(this.index);
                 return new Some<>(new Tuple2Impl<>(c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)));
             }
@@ -1605,6 +1605,13 @@ public class Main {
         }
     }
 
+    public static class Strings {
+        @Actual
+        private static int length(String infix) {
+            return infix.length();
+        }
+    }
+
     private static final boolean isDebugEnabled = false;
 
     private static String generatePlaceholder(String input) {
@@ -1641,6 +1648,17 @@ public class Main {
             return new Some<>(findableType);
         }
         return new None<>();
+    }
+
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < Strings.length(input); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     public void main() {
@@ -1928,7 +1946,7 @@ public class Main {
             List<Type> interfaces
     ) {
         var name = rawName.strip();
-        if (!this.isSymbol(name)) {
+        if (!isSymbol(name)) {
             return new None<>();
         }
 
@@ -2086,23 +2104,12 @@ public class Main {
         return new None<>();
     }
 
-    private boolean isSymbol(String input) {
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-
     private <T> Option<T> prefix(String input, String prefix, Function<String, Option<T>> mapper) {
         if (!input.startsWith(prefix)) {
             return new None<>();
         }
 
-        var slice = input.substring(prefix.length());
+        var slice = input.substring(Strings.length(prefix));
         return mapper.apply(slice);
     }
 
@@ -2111,7 +2118,7 @@ public class Main {
             return new None<>();
         }
 
-        var slice = input.substring(0, input.length() - suffix.length());
+        var slice = input.substring(0, Strings.length(input) - Strings.length(suffix));
         return mapper.apply(slice);
     }
 
@@ -2193,7 +2200,7 @@ public class Main {
         }
 
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
-            var substring = prototype.content().substring(1, prototype.content().length() - 1);
+            var substring = prototype.content().substring(1, Strings.length(prototype.content()) - 1);
 
             var withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             var statementsTuple = this.parseStatements(withDefined, substring, (state1, input1) -> this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
@@ -2321,7 +2328,7 @@ public class Main {
     private Tuple2<CompileState, StatementValue> parseStatementValue(CompileState state, String input, int depth) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            var value = stripped.substring("return ".length());
+            var value = stripped.substring(Strings.length("return "));
             var tuple = this.parseValue(state, value, depth);
             var value1 = tuple.right();
             return new Tuple2Impl<>(tuple.left(), new Return(value1));
@@ -2385,8 +2392,8 @@ public class Main {
 
     private Option<Tuple2<CompileState, Value>> parseChar(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 2) {
-            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
+        if (stripped.startsWith("'") && stripped.endsWith("'") && Strings.length(stripped) >= 2) {
+            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped.substring(1, Strings.length(stripped) - 1))));
         }
         return new None<>();
     }
@@ -2446,7 +2453,7 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseLambda(CompileState state, String input, int depth) {
         return this.first(input, "->", (beforeArrow, valueString) -> {
             var strippedBeforeArrow = beforeArrow.strip();
-            if (this.isSymbol(strippedBeforeArrow)) {
+            if (isSymbol(strippedBeforeArrow)) {
                 Type type = Primitive.Unknown;
                 if (state.typeRegister instanceof Some(var expectedType)) {
                     if (expectedType instanceof FunctionType functionType) {
@@ -2457,7 +2464,7 @@ public class Main {
             }
 
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
-                var parameterNames = this.divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), this::foldValueChar)
+                var parameterNames = this.divideAll(strippedBeforeArrow.substring(1, Strings.length(strippedBeforeArrow) - 1), this::foldValueChar)
                         .query()
                         .map(String::strip)
                         .filter(value -> !value.isEmpty())
@@ -2477,7 +2484,7 @@ public class Main {
         Tuple2Impl<CompileState, LambdaValue> value;
         var state2 = state.defineAll(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
-            var value1 = this.parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) ->
+            var value1 = this.parseStatements(state2, strippedValueString.substring(1, Strings.length(strippedValueString) - 1), (state1, input1) ->
                     this.parseFunctionSegment(state1, input1, depth + 1));
 
             var right = value1.right();
@@ -2513,7 +2520,7 @@ public class Main {
     }
 
     private boolean areAllDigits(String input) {
-        for (var i = 0; i < input.length(); i++) {
+        for (var i = 0; i < Strings.length(input); i++) {
             var c = input.charAt(i);
             if (Character.isDigit(c)) {
                 continue;
@@ -2655,7 +2662,7 @@ public class Main {
 
     private Tuple2<CompileState, Caller> invocationHeader(CompileState state, int depth, String callerString1) {
         if (callerString1.startsWith("new ")) {
-            String input1 = callerString1.substring("new ".length());
+            String input1 = callerString1.substring(Strings.length("new "));
             var map = this.parseType(state, input1).map(type -> {
                 var right = type.right();
                 return new Tuple2Impl<CompileState, Caller>(type.left(), new ConstructionCaller(right));
@@ -2688,7 +2695,7 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseDataAccess(CompileState state, String input, int depth) {
         return this.last(input.strip(), ".", (parentString, rawProperty) -> {
             var property = rawProperty.strip();
-            if (!this.isSymbol(property)) {
+            if (!isSymbol(property)) {
                 return new None<>();
             }
 
@@ -2710,14 +2717,14 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseString(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped.substring(1, stripped.length() - 1))));
+            return new Some<>(new Tuple2Impl<>(state, new StringValue(stripped.substring(1, Strings.length(stripped) - 1))));
         }
         return new None<>();
     }
 
     private Option<Tuple2<CompileState, Value>> parseSymbolValue(CompileState state, String value) {
         var stripped = value.strip();
-        if (this.isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             if (state.resolveValue(stripped) instanceof Some(var type)) {
                 return new Some<>(new Tuple2Impl<>(state, new SymbolValue(stripped, type)));
             }
@@ -2859,7 +2866,7 @@ public class Main {
     ) {
         return this.parseType(state.withTypeParams(typeParams), type).flatMap(type1 -> {
             var stripped = rawName.strip();
-            if (!this.isSymbol(stripped)) {
+            if (!isSymbol(stripped)) {
                 return new None<>();
             }
 
@@ -2924,7 +2931,7 @@ public class Main {
             return new Some<>(new Tuple2Impl<>(state, Primitive.Void));
         }
 
-        if (this.isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             if (state.resolveType(stripped) instanceof Some(var resolved)) {
                 return new Some<>(new Tuple2Impl<>(state, resolved));
             }
@@ -3043,7 +3050,7 @@ public class Main {
     ) {
         return this.split(() -> locator.apply(input, infix).map(index -> {
             var left = input.substring(0, index);
-            var right = input.substring(index + infix.length());
+            var right = input.substring(index + Strings.length(infix));
             return new Tuple2Impl<>(left, right);
         }), mapper);
     }

@@ -416,7 +416,7 @@ var ResultVariant;
         return this.depth === 1;
     }
     pop() {
-        if (this.index < this.input.length()) {
+        if (this.index < Strings.length(this.input)) {
             let c = this.input.charAt(this.index);
             return new Some([c, new DivideState(this.input, this.index + 1, this.segments, this.buffer, this.depth)]);
         }
@@ -1027,6 +1027,8 @@ Operator.SUBTRACT = new Operator("-", "-");
         return new None();
     }
 }
+/* public static */ class Strings /*  */ {
+}
 /* private */ class Primitive /*  */ {
     constructor(value) {
         this.value = value;
@@ -1084,6 +1086,16 @@ BooleanValue.False = new BooleanValue("false");
             return new Some(findableType);
         }
         return new None();
+    }
+    static isSymbol(input) {
+        /* for (var i = 0; i < Strings.length(input); i++) */ {
+            let c = input.charAt( /* i */);
+            if ( /* Character */.isLetter(c) || /*  */ ( /* i != 0  */ && /* Character */ .isDigit(c))) {
+                /* continue */ ;
+            }
+            return false;
+        }
+        return true;
     }
     main() {
         let parent = this.findRoot();
@@ -1274,7 +1286,7 @@ BooleanValue.False = new BooleanValue("false");
     }
     assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants, interfaces) {
         let name = rawName.strip();
-        if (!this.isSymbol(name)) {
+        if (!isSymbol(name)) {
             return new None();
         }
         if (annotations.contains("Actual")) {
@@ -1382,28 +1394,18 @@ BooleanValue.False = new BooleanValue("false");
         }
         return new None();
     }
-    isSymbol(input) {
-        /* for (var i = 0; i < input.length(); i++) */ {
-            let c = input.charAt( /* i */);
-            if ( /* Character */.isLetter(c) || /*  */ ( /* i != 0  */ && /* Character */ .isDigit(c))) {
-                /* continue */ ;
-            }
-            return false;
-        }
-        return true;
-    }
     prefix(input, prefix, mapper) {
         if (!input.startsWith(prefix)) {
             return new None();
         }
-        let slice = input.substring(prefix.length());
+        let slice = input.substring(Strings.length(prefix));
         return mapper(slice);
     }
     suffix(input, suffix, mapper) {
         if (!input.endsWith(suffix)) {
             return new None();
         }
-        let slice = input.substring(0, input.length() - suffix.length());
+        let slice = input.substring(0, Strings.length(input) - Strings.length(suffix));
         return mapper(slice);
     }
     parseClassSegment(state, input, depth) {
@@ -1465,7 +1467,7 @@ BooleanValue.False = new BooleanValue("false");
             ;
         }
         if (prototype.content().startsWith("{") && prototype.content().endsWith("}")) {
-            let substring = prototype.content().substring(1, prototype.content().length() - 1);
+            let substring = prototype.content().substring(1, Strings.length(prototype.content()) - 1);
             let withDefined = state.enterDefinitions().defineAll(prototype.parameters());
             let statementsTuple = this.parseStatements(withDefined, substring, (state1, input1) => this.parseFunctionSegment(state1, input1, prototype.depth() + 1));
             let statements = statementsTuple[1];
@@ -1566,7 +1568,7 @@ BooleanValue.False = new BooleanValue("false");
     parseStatementValue(state, input, depth) {
         let stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            let value = stripped.substring("return ".length());
+            let value = stripped.substring(Strings.length("return "));
             let tuple = this.parseValue(state, value, depth);
             let value1 = tuple[1];
             return [tuple[0], new Return(value1)];
@@ -1602,8 +1604,8 @@ BooleanValue.False = new BooleanValue("false");
     }
     parseChar(state, input) {
         let stripped = input.strip();
-        if (stripped.startsWith("'") && stripped.endsWith("'") && stripped.length() >= 2) {
-            return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
+        if (stripped.startsWith("'") && stripped.endsWith("'") && Strings.length(stripped) >= 2) {
+            return new Some([state, new StringValue(stripped.substring(1, Strings.length(stripped) - 1))]);
         }
         return new None();
     }
@@ -1651,7 +1653,7 @@ BooleanValue.False = new BooleanValue("false");
     parseLambda(state, input, depth) {
         return this.first(input, "->", (beforeArrow, valueString) => {
             let strippedBeforeArrow = beforeArrow.strip();
-            if (this.isSymbol(strippedBeforeArrow)) {
+            if (isSymbol(strippedBeforeArrow)) {
                 let type = Primitive.Unknown;
                 if ( /* state.typeRegister instanceof Some */( /* var expectedType */)) {
                     if ( /* expectedType */._UnknownVariant === UnknownVariant.FunctionType) {
@@ -1662,7 +1664,7 @@ BooleanValue.False = new BooleanValue("false");
                 return this.assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
             }
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
-                let parameterNames = this.divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), this.foldValueChar).query().map(strip).filter((value) => !value.isEmpty()).map((name) => ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
+                let parameterNames = this.divideAll(strippedBeforeArrow.substring(1, Strings.length(strippedBeforeArrow) - 1), this.foldValueChar).query().map(strip).filter((value) => !value.isEmpty()).map((name) => ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown)).collect(new ListCollector());
                 return this.assembleLambda(state, parameterNames, valueString, depth);
             }
             return new None();
@@ -1673,7 +1675,7 @@ BooleanValue.False = new BooleanValue("false");
         /* Tuple2Impl<CompileState, LambdaValue> value */ ;
         let state2 = state.defineAll(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
-            let value1 = this.parseStatements(state2, strippedValueString.substring(1, strippedValueString.length() - 1), (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
+            let value1 = this.parseStatements(state2, strippedValueString.substring(1, Strings.length(strippedValueString) - 1), (state1, input1) => this.parseFunctionSegment(state1, input1, depth + 1));
             let right = value1[1];
             [value1[0], new BlockLambdaValue(depth, right)];
         }
@@ -1702,7 +1704,7 @@ BooleanValue.False = new BooleanValue("false");
         return this.areAllDigits( /* maybeTruncated */);
     }
     areAllDigits(input) {
-        /* for (var i = 0; i < input.length(); i++) */ {
+        /* for (var i = 0; i < Strings.length(input); i++) */ {
             let c = input.charAt( /* i */);
             if ( /* Character */.isDigit(c)) {
                 /* continue */ ;
@@ -1819,7 +1821,7 @@ BooleanValue.False = new BooleanValue("false");
     }
     invocationHeader(state, depth, callerString1) {
         if (callerString1.startsWith("new ")) {
-            let input1 = callerString1.substring("new ".length());
+            let input1 = callerString1.substring(Strings.length("new "));
             let map = this.parseType(state, input1).map((type) => {
                 let right = type[1];
                 return [type[0], new ConstructionCaller(right)];
@@ -1848,7 +1850,7 @@ BooleanValue.False = new BooleanValue("false");
     parseDataAccess(state, input, depth) {
         return this.last(input.strip(), ".", (parentString, rawProperty) => {
             let property = rawProperty.strip();
-            if (!this.isSymbol(property)) {
+            if (!isSymbol(property)) {
                 return new None();
             }
             let tuple = this.parseValue(state, parentString, depth);
@@ -1867,13 +1869,13 @@ BooleanValue.False = new BooleanValue("false");
     parseString(state, input) {
         let stripped = input.strip();
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new Some([state, new StringValue(stripped.substring(1, stripped.length() - 1))]);
+            return new Some([state, new StringValue(stripped.substring(1, Strings.length(stripped) - 1))]);
         }
         return new None();
     }
     parseSymbolValue(state, value) {
         let stripped = value.strip();
-        if (this.isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             if ( /* state.resolveValue(stripped) instanceof Some */( /* var type */)) {
                 return new Some([state, new SymbolValue(stripped, type)]);
             }
@@ -1977,7 +1979,7 @@ BooleanValue.False = new BooleanValue("false");
     assembleDefinition(state, annotations, modifiers, rawName, typeParams, type) {
         return this.parseType(state.withTypeParams(typeParams), type).flatMap((type1) => {
             let stripped = rawName.strip();
-            if (!this.isSymbol(stripped)) {
+            if (!isSymbol(stripped)) {
                 return new None();
             }
             let newModifiers = modifiers.query().filter((value) => !this.isAccessor(value)).map((modifier) =>  /* modifier.equals("final") ? "readonly" : modifier */).collect(new ListCollector());
@@ -2027,7 +2029,7 @@ BooleanValue.False = new BooleanValue("false");
         if (stripped === "void") {
             return new Some([state, Primitive.Void]);
         }
-        if (this.isSymbol(stripped)) {
+        if (isSymbol(stripped)) {
             if ( /* state.resolveType(stripped) instanceof Some */( /* var resolved */)) {
                 return new Some([state, /* resolved */]);
             }
@@ -2120,7 +2122,7 @@ BooleanValue.False = new BooleanValue("false");
     infix(input, infix, locator, mapper) {
         return this.split(() => locator(input, infix).map((index) => {
             let left = input.substring(0, index);
-            let right = input.substring(index + infix.length());
+            let right = input.substring(index + Strings.length(infix));
             return [left, right];
         }), mapper);
     }
