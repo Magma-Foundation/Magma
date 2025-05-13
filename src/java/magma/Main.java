@@ -440,8 +440,9 @@ public class Main {
 
             @Override
             public List<T> addLast(T element) {
-                this.elements.add(element);
-                return this;
+                var copy = new ArrayList<T>(this.elements);
+                copy.add(element);
+                return new JVMList<>(copy);
             }
 
             @Override
@@ -472,8 +473,9 @@ public class Main {
 
             @Override
             public List<T> addFirst(T element) {
-                this.elements.addFirst(element);
-                return this;
+                var copy = new ArrayList<T>(this.elements);
+                copy.addFirst(element);
+                return new JVMList<>(copy);
             }
 
             @Override
@@ -542,8 +544,9 @@ public class Main {
             }
 
             private JVMList<T> set(int index, T element) {
-                this.elements.set(index, element);
-                return this;
+                var copy = new ArrayList<T>(this.elements);
+                copy.set(index, element);
+                return new JVMList<>(copy);
             }
 
             @Override
