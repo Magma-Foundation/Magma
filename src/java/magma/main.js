@@ -130,7 +130,7 @@ var ResultVariant;
         return new None();
     }
 }
-/* private */ class HeadedIterator {
+/* private */ class HeadedQuery {
     constructor(head) {
         this.head = head;
     }
@@ -149,7 +149,7 @@ var ResultVariant;
         }
     }
     map(mapper) {
-        return new HeadedIterator(() => this.head.next().map(mapper));
+        return new HeadedQuery(() => this.head.next().map(mapper));
     }
     collect(collector) {
         return this.fold(collector.createInitial(), collector.fold);
@@ -157,19 +157,19 @@ var ResultVariant;
     filter(predicate) {
         return this.flatMap((element) => {
             if (predicate(element)) {
-                return new HeadedIterator(new SingleHead(element));
+                return new HeadedQuery(new SingleHead(element));
             }
-            return new HeadedIterator(new EmptyHead());
+            return new HeadedQuery(new EmptyHead());
         });
     }
     next() {
         return this.head.next();
     }
     flatMap(f) {
-        return new HeadedIterator(new FlatMapHead(this.head, f));
+        return new HeadedQuery(new FlatMapHead(this.head, f));
     }
     zip(other) {
-        return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
+        return new HeadedQuery(() => HeadedQuery.this.head.next().and(other.next));
     }
 }
 /* private static */ class RangeHead /*  */ {
@@ -479,10 +479,10 @@ var ResultVariant;
         return new None();
     }
 }
-/* private static */ class Iterators /*  */ {
+/* private static */ class Queries /*  */ {
     fromOption(option) {
         let single = option.map(SingleHead.new);
-        return new HeadedIterator(single.orElseGet(EmptyHead.new));
+        return new HeadedQuery(single.orElseGet(EmptyHead.new));
     }
 }
 /* private */ class FunctionType /*  */ {
@@ -878,7 +878,7 @@ var ResultVariant;
         this.interfaces = interfaces;
     }
     createObjectType() {
-        let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let definitionFromSegments = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Queries.fromOption).collect(new ListCollector());
         return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
     }
     maybeCreateDefinition() {
@@ -1207,7 +1207,7 @@ var ResultVariant;
     completeStructure(state, prototype) {
         let thisType = prototype.createObjectType();
         let state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-        let bases = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Iterators.fromOption).map(FindableType.findBase).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let bases = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Queries.fromOption).map(FindableType.findBase).flatMap(Queries.fromOption).collect(new ListCollector());
         let variantsSuper = bases.iterate().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
         return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple) => {
             let oldStatementsState = oldStatementsTuple[0]();
@@ -1373,7 +1373,7 @@ var ResultVariant;
         return new None();
     }
     retainDefinitions(right) {
-        return right.iterate().map(this.retainDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+        return right.iterate().map(this.retainDefinition).flatMap(Queries.fromOption).collect(new ListCollector());
     }
     parseParameters(state, params) {
         return this.parseValuesOrEmpty(state, params, (state1, s) => new Some(this.parseParameter(state1, s)));
@@ -1623,7 +1623,7 @@ var ResultVariant;
         }).orElseGet(() => [oldCallerState, Lists.empty()]);
         let argumentsState = argumentsTuple.left();
         let argumentsWithActualTypes = argumentsTuple.right();
-        let arguments = argumentsWithActualTypes.iterate().map(Tuple2.left).map(this.retainValue).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let arguments = argumentsWithActualTypes.iterate().map(Tuple2.left).map(this.retainValue).flatMap(Queries.fromOption).collect(new ListCollector());
         if (newCaller._CallerVariant === CallerVariant.ConstructionCaller) {
             if (constructionCaller.type.findName().filter((value) => value.equals("Tuple2Impl")).isPresent()) {
                 let constructionCaller = newCaller;
@@ -1907,7 +1907,7 @@ var ResultVariant;
         });
     }
     assembleTemplate(base, state, arguments) {
-        let children = arguments.iterate().map(this.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
+        let children = arguments.iterate().map(this.retainType).flatMap(Queries.fromOption).collect(new ListCollector());
         if (base.equals("BiFunction")) {
             return [state, new FunctionType(Lists.of(children.get(0).orElse( /* null */), children.get(1).orElse( /* null */)), children.get(2).orElse( /* null */))];
         }

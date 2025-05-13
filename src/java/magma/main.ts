@@ -23,28 +23,28 @@ enum OptionVariant {
 	createInitial() : C;
 	fold(current : C, element : T) : C;
 }
-/* private */interface Iterator<T>/*   */ {
+/* private */interface Query<T>/*   */ {
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R;
-	map<R>(mapper : (arg0 : T) => R) : Iterator<R>;
+	map<R>(mapper : (arg0 : T) => R) : Query<R>;
 	collect<R>(collector : Collector<T, R>) : R;
-	filter(predicate : (arg0 : T) => boolean) : Iterator<T>;
+	filter(predicate : (arg0 : T) => boolean) : Query<T>;
 	next() : Option<T>;
-	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R>;
-	zip<R>(other : Iterator<R>) : Iterator<[T, R]>;
+	flatMap<R>(f : (arg0 : T) => Query<R>) : Query<R>;
+	zip<R>(other : Query<R>) : Query<[T, R]>;
 }
 /* private */interface List<T>/*   */ {
 	addLast(element : T) : List<T>;
-	iterate() : Iterator<T>;
+	iterate() : Query<T>;
 	removeLast() : Option<[List<T>, T]>;
 	get(index : number) : Option<T>;
 	size() : number;
 	isEmpty() : boolean;
 	addFirst(element : T) : List<T>;
-	iterateWithIndices() : Iterator<[number, T]>;
+	iterateWithIndices() : Query<[number, T]>;
 	removeFirst() : Option<[T, List<T>]>;
 	addAllLast(others : List<T>) : List<T>;
 	last() : Option<T>;
-	iterateReversed() : Iterator<T>;
+	iterateReversed() : Query<T>;
 	mapLast(mapper : (arg0 : T) => T) : List<T>;
 	addAllFirst(others : List<T>) : List<T>;
 	contains(element : T) : boolean;
@@ -257,7 +257,7 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private */class HeadedIterator<T>/*  */ implements Iterator<T> {
+/* private */class HeadedQuery<T>/*  */ implements Query<T> {
 	head : Head<T>;
 	constructor (head : Head<T>) {
 		this.head = head;
@@ -276,28 +276,28 @@ enum ResultVariant {
 			}
 		}
 	}
-	map<R>(mapper : (arg0 : T) => R) : Iterator<R> {
-		return new HeadedIterator(() => this.head.next().map(mapper));
+	map<R>(mapper : (arg0 : T) => R) : Query<R> {
+		return new HeadedQuery(() => this.head.next().map(mapper));
 	}
 	collect<R>(collector : Collector<T, R>) : R {
 		return this.fold(collector.createInitial(), collector.fold);
 	}
-	filter(predicate : (arg0 : T) => boolean) : Iterator<T> {
+	filter(predicate : (arg0 : T) => boolean) : Query<T> {
 		return this.flatMap((element : T) => {
 			if (predicate(element)){
-				return new HeadedIterator(new SingleHead(element));
+				return new HeadedQuery(new SingleHead(element));
 			}
-			return new HeadedIterator(new EmptyHead());
+			return new HeadedQuery(new EmptyHead());
 		});
 	}
 	next() : Option<T> {
 		return this.head.next();
 	}
-	flatMap<R>(f : (arg0 : T) => Iterator<R>) : Iterator<R> {
-		return new HeadedIterator(new FlatMapHead(this.head, f));
+	flatMap<R>(f : (arg0 : T) => Query<R>) : Query<R> {
+		return new HeadedQuery(new FlatMapHead(this.head, f));
 	}
-	zip<R>(other : Iterator<R>) : Iterator<[T, R]> {
-		return new HeadedIterator(() => HeadedIterator.this.head.next().and(other.next));
+	zip<R>(other : Query<R>) : Query<[T, R]> {
+		return new HeadedQuery(() => HeadedQuery.this.head.next().and(other.next));
 	}
 }
 /* private static */class RangeHead/*  */ implements Head<number> {
@@ -582,10 +582,10 @@ enum ResultVariant {
 	}
 }
 /* private static */class FlatMapHead<T, R>/*  */ implements Head<R> {
-	mapper : (arg0 : T) => Iterator<R>;
+	mapper : (arg0 : T) => Query<R>;
 	head : Head<T>;
-	current : Option<Iterator<R>>;
-	constructor (head : Head<T>, mapper : (arg0 : T) => Iterator<R>) {
+	current : Option<Query<R>>;
+	constructor (head : Head<T>, mapper : (arg0 : T) => Query<R>) {
 		this.mapper = mapper;
 		this.current = new None();
 		this.head = head;
@@ -593,7 +593,7 @@ enum ResultVariant {
 	next() : Option<R> {
 		while (true){
 			if (this.current.isPresent()){
-				let inner : Iterator<R> = this.current.orElse(/* null */);
+				let inner : Query<R> = this.current.orElse(/* null */);
 				let maybe : Option<R> = inner.next();
 				if (maybe.isPresent()){
 					return maybe;
@@ -636,10 +636,10 @@ enum ResultVariant {
 		return new None();
 	}
 }
-/* private static */class Iterators/*  */ {
-	fromOption<T>(option : Option<T>) : Iterator<T> {
+/* private static */class Queries/*  */ {
+	fromOption<T>(option : Option<T>) : Query<T> {
 		let single : Option<Head<T>> = option.map(SingleHead.new);
-		return new HeadedIterator(single.orElseGet(EmptyHead.new));
+		return new HeadedQuery(single.orElseGet(EmptyHead.new));
 	}
 }
 /* private */class FunctionType/*  */ implements Type {
@@ -1103,7 +1103,7 @@ enum ResultVariant {
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype;
 	createObjectType() : ObjectType {
-		let definitionFromSegments : R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+		let definitionFromSegments : R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Queries.fromOption).collect(new ListCollector());
 		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
 	}
 	maybeCreateDefinition() : Option<Definition> {
@@ -1445,7 +1445,7 @@ enum ResultVariant {
 	completeStructure(state : CompileState, prototype : StructurePrototype) : Option<[CompileState, ClassSegment]> {
 		let thisType : ObjectType = prototype.createObjectType();
 		let state2 : CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
-		let bases : R = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Iterators.fromOption).map(FindableType.findBase).flatMap(Iterators.fromOption).collect(new ListCollector());
+		let bases : R = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Queries.fromOption).map(FindableType.findBase).flatMap(Queries.fromOption).collect(new ListCollector());
 		let variantsSuper = bases.iterate().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
 		return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple : [CompileState, List<R>]) => {
 			let oldStatementsState = oldStatementsTuple[0]();
@@ -1610,7 +1610,7 @@ enum ResultVariant {
 		return new None();
 	}
 	retainDefinitions(right : List<Parameter>) : List<Definition> {
-		return right.iterate().map(this.retainDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
+		return right.iterate().map(this.retainDefinition).flatMap(Queries.fromOption).collect(new ListCollector());
 	}
 	parseParameters(state : CompileState, params : string) : [CompileState, List<Parameter>] {
 		return this.parseValuesOrEmpty(state, params, (state1, s) => new Some(this.parseParameter(state1, s)));
@@ -1860,7 +1860,7 @@ enum ResultVariant {
 		}).orElseGet(() => [oldCallerState, Lists.empty()]);
 		let argumentsState = argumentsTuple.left();
 		let argumentsWithActualTypes = argumentsTuple.right();
-		let arguments = argumentsWithActualTypes.iterate().map(Tuple2.left).map(this.retainValue).flatMap(Iterators.fromOption).collect(new ListCollector());
+		let arguments = argumentsWithActualTypes.iterate().map(Tuple2.left).map(this.retainValue).flatMap(Queries.fromOption).collect(new ListCollector());
 		if (newCaller._CallerVariant === CallerVariant.ConstructionCaller){
 			if (constructionCaller.type.findName().filter((value) => value.equals("Tuple2Impl")).isPresent()){
 			let constructionCaller : ConstructionCaller = newCaller as ConstructionCaller;
@@ -2144,7 +2144,7 @@ enum ResultVariant {
 		});
 	}
 	assembleTemplate(base : string, state : CompileState, arguments : List<Argument>) : [CompileState, Type] {
-		let children : R = arguments.iterate().map(this.retainType).flatMap(Iterators.fromOption).collect(new ListCollector());
+		let children : R = arguments.iterate().map(this.retainType).flatMap(Queries.fromOption).collect(new ListCollector());
 		if (base.equals("BiFunction")){
 			return [state, new FunctionType(Lists.of(children.get(0).orElse(/* null */), children.get(1).orElse(/* null */)), children.get(2).orElse(/* null */))];
 		}

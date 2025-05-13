@@ -49,26 +49,26 @@ public class Main {
         C fold(C current, T element);
     }
 
-    private interface Iterator<T> {
+    private interface Query<T> {
         <R> R fold(R initial, BiFunction<R, T, R> folder);
 
-        <R> Iterator<R> map(Function<T, R> mapper);
+        <R> Query<R> map(Function<T, R> mapper);
 
         <R> R collect(Collector<T, R> collector);
 
-        Iterator<T> filter(Predicate<T> predicate);
+        Query<T> filter(Predicate<T> predicate);
 
         Option<T> next();
 
-        <R> Iterator<R> flatMap(Function<T, Iterator<R>> f);
+        <R> Query<R> flatMap(Function<T, Query<R>> f);
 
-        <R> Iterator<Tuple2<T, R>> zip(Iterator<R> other);
+        <R> Query<Tuple2<T, R>> zip(Query<R> other);
     }
 
     private interface List<T> {
         List<T> addLast(T element);
 
-        Iterator<T> iterate();
+        Query<T> iterate();
 
         Option<Tuple2<List<T>, T>> removeLast();
 
@@ -80,7 +80,7 @@ public class Main {
 
         List<T> addFirst(T element);
 
-        Iterator<Tuple2<Integer, T>> iterateWithIndices();
+        Query<Tuple2<Integer, T>> iterateWithIndices();
 
         Option<Tuple2<T, List<T>>> removeFirst();
 
@@ -88,7 +88,7 @@ public class Main {
 
         Option<T> last();
 
-        Iterator<T> iterateReversed();
+        Query<T> iterateReversed();
 
         List<T> mapLast(Function<T, T> mapper);
 
@@ -359,7 +359,7 @@ public class Main {
         }
     }
 
-    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+    private record HeadedQuery<T>(Head<T> head) implements Query<T> {
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             var current = initial;
@@ -376,8 +376,8 @@ public class Main {
         }
 
         @Override
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new HeadedIterator<>(() -> this.head.next().map(mapper));
+        public <R> Query<R> map(Function<T, R> mapper) {
+            return new HeadedQuery<>(() -> this.head.next().map(mapper));
         }
 
         @Override
@@ -386,12 +386,12 @@ public class Main {
         }
 
         @Override
-        public Iterator<T> filter(Predicate<T> predicate) {
+        public Query<T> filter(Predicate<T> predicate) {
             return this.flatMap(element -> {
                 if (predicate.test(element)) {
-                    return new HeadedIterator<>(new SingleHead<>(element));
+                    return new HeadedQuery<>(new SingleHead<>(element));
                 }
-                return new HeadedIterator<>(new EmptyHead<>());
+                return new HeadedQuery<>(new EmptyHead<>());
             });
         }
 
@@ -401,13 +401,13 @@ public class Main {
         }
 
         @Override
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> f) {
-            return new HeadedIterator<>(new FlatMapHead<>(this.head, f));
+        public <R> Query<R> flatMap(Function<T, Query<R>> f) {
+            return new HeadedQuery<>(new FlatMapHead<>(this.head, f));
         }
 
         @Override
-        public <R> Iterator<Tuple2<T, R>> zip(Iterator<R> other) {
-            return new HeadedIterator<>(() -> HeadedIterator.this.head.next().and(other::next));
+        public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
+            return new HeadedQuery<>(() -> HeadedQuery.this.head.next().and(other::next));
         }
     }
 
@@ -451,7 +451,7 @@ public class Main {
             }
 
             @Override
-            public Iterator<T> iterate() {
+            public Query<T> iterate() {
                 return this.iterateWithIndices().map(Tuple2::right);
             }
 
@@ -483,8 +483,8 @@ public class Main {
             }
 
             @Override
-            public Iterator<Tuple2<Integer, T>> iterateWithIndices() {
-                return new HeadedIterator<>(new RangeHead(this.elements.size()))
+            public Query<Tuple2<Integer, T>> iterateWithIndices() {
+                return new HeadedQuery<>(new RangeHead(this.elements.size()))
                         .map(index -> new Tuple2Impl<>(index, this.elements.get(index)));
             }
 
@@ -514,8 +514,8 @@ public class Main {
             }
 
             @Override
-            public Iterator<T> iterateReversed() {
-                return new HeadedIterator<>(new RangeHead(this.elements.size()))
+            public Query<T> iterateReversed() {
+                return new HeadedQuery<>(new RangeHead(this.elements.size()))
                         .map(index -> this.elements.size() - index - 1)
                         .map(this.elements::get);
             }
@@ -904,11 +904,11 @@ public class Main {
     }
 
     private static class FlatMapHead<T, R> implements Head<R> {
-        private final Function<T, Iterator<R>> mapper;
+        private final Function<T, Query<R>> mapper;
         private final Head<T> head;
-        private Option<Iterator<R>> current;
+        private Option<Query<R>> current;
 
-        FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
+        FlatMapHead(Head<T> head, Function<T, Query<R>> mapper) {
             this.mapper = mapper;
             this.current = new None<>();
             this.head = head;
@@ -918,7 +918,7 @@ public class Main {
         public Option<R> next() {
             while (true) {
                 if (this.current.isPresent()) {
-                    Iterator<R> inner = this.current.orElse(null);
+                    Query<R> inner = this.current.orElse(null);
                     Option<R> maybe = inner.next();
                     if (maybe.isPresent()) {
                         return maybe;
@@ -969,10 +969,10 @@ public class Main {
 
     }
 
-    private static class Iterators {
-        public static <T> Iterator<T> fromOption(Option<T> option) {
+    private static class Queries {
+        public static <T> Query<T> fromOption(Option<T> option) {
             Option<Head<T>> single = option.map(SingleHead::new);
-            return new HeadedIterator<>(single.orElseGet(EmptyHead::new));
+            return new HeadedQuery<>(single.orElseGet(EmptyHead::new));
         }
     }
 
@@ -1444,7 +1444,7 @@ public class Main {
         private ObjectType createObjectType() {
             var definitionFromSegments = this.segments.iterate()
                     .map(IncompleteClassSegment::maybeCreateDefinition)
-                    .flatMap(Iterators::fromOption)
+                    .flatMap(Queries::fromOption)
                     .collect(new ListCollector<>());
 
             return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
@@ -1905,9 +1905,9 @@ public class Main {
 
         var bases = prototype.interfaces.iterate()
                 .map(Main::retainFindableType)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .map(FindableType::findBase)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
 
         var variantsSuper = bases.iterate()
@@ -2138,7 +2138,7 @@ public class Main {
     private List<Definition> retainDefinitions(List<Parameter> right) {
         return right.iterate()
                 .map(this::retainDefinition)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
     }
 
@@ -2475,7 +2475,7 @@ public class Main {
         var arguments = argumentsWithActualTypes.iterate()
                 .map(Tuple2::left)
                 .map(this::retainValue)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
 
         if (newCaller instanceof ConstructionCaller constructionCaller) {
@@ -2826,7 +2826,7 @@ public class Main {
         var children = arguments
                 .iterate()
                 .map(this::retainType)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
 
         if (base.equals("BiFunction")) {
