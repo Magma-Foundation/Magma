@@ -1,6 +1,5 @@
 package magma;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -122,7 +121,7 @@ public class Main {
     private interface Parameter {
     }
 
-    private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue {
+    private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue, TupleNode {
         String generate();
 
         Type type();
@@ -1533,6 +1532,25 @@ public class Main {
         }
     }
 
+    private record TupleNode(List<Value> values) implements Value {
+        @Override
+        public String generate() {
+            var joined = this.values.iterate()
+                    .map(Value::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "[" + joined + "]";
+        }
+
+        @Override
+        public Type type() {
+            return new TupleType(values.iterate()
+                    .map(Value::type)
+                    .collect(new ListCollector<>()));
+        }
+    }
+
     private static final boolean isDebug = false;
 
     private static String generatePlaceholder(String input) {
@@ -2455,6 +2473,12 @@ public class Main {
                 .map(this::retainValue)
                 .flatMap(Iterators::fromOption)
                 .collect(new ListCollector<>());
+
+        if (newCaller instanceof ConstructionCaller constructionCaller) {
+            if (constructionCaller.type.findName().filter(value -> value.equals("Tuple2Impl")).isPresent()) {
+                return new Some<>(new Tuple2Impl<>(argumentsState, new TupleNode(Lists.of(arguments.get(0).orElse(null), arguments.get(1).orElse(null)))));
+            }
+        }
 
         var invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some<>(new Tuple2Impl<>(argumentsState, invokable));
