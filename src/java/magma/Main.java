@@ -783,7 +783,7 @@ public class Main {
             return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
-        public CompileState pushStructName(Tuple2Impl<String, List<String>> definition) {
+        public CompileState pushStructName(Tuple2<String, List<String>> definition) {
             return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(definition), this.typeParams, this.typeRegister, this.functionSegments);
         }
 
@@ -1481,14 +1481,6 @@ public class Main {
             return new None<>();
         }
 
-        private String joinInterfaces() {
-            return this.interfaces.query()
-                    .map(TypeRef::value)
-                    .collect(new Joiner(", "))
-                    .map(inner -> " implements " + inner)
-                    .orElse("");
-        }
-
         private String joinTypeParams() {
             return this.typeParams().query()
                     .collect(new Joiner(", "))
@@ -1877,7 +1869,7 @@ public class Main {
                 return this.suffix(withEnd.strip(), "}", content1 -> {
                     return this.last(beforeInfix.strip(), "\n", (annotationsString, s2) -> {
                         var annotations = this.parseAnnotations(annotationsString);
-                        return this.parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations);
+                        return this.parseStructureWithMaybePermits(targetInfix, state, s2, beforeContent, content1, annotations);
                     }).or(() -> {
                         return this.parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
                     });
@@ -1913,9 +1905,7 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants, annotations);
-        }).or(() -> {
-            return this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations);
-        });
+        }).or(() -> this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations));
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeImplements(
@@ -1929,9 +1919,7 @@ public class Main {
         return this.first(beforeContent, " implements ", (s, s2) -> {
             var stringList = this.parseTypeRefs(s2);
             return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations, stringList);
-        }).or(() -> {
-            return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty());
-        });
+        }).or(() -> this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty()));
     }
 
     private List<TypeRef> parseTypeRefs(String s2) {
@@ -1952,11 +1940,8 @@ public class Main {
             List<String> variants,
             List<String> annotations,
             List<TypeRef> interfaces) {
-        return this.first(beforeContent, " extends ", (s, s2) -> {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, this.parseTypeRefs(s2), interfaces);
-        }).or(() -> {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty(), interfaces);
-        });
+        return this.first(beforeContent, " extends ", (s, s2) -> this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, this.parseTypeRefs(s2), interfaces))
+                .or(() -> this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty(), interfaces));
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeParams(
@@ -2036,7 +2021,7 @@ public class Main {
         var thisType = prototype.createObjectType();
         var withThis = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        return this.mapUsingState(withThis, prototype.interfaces, (state2, tuple) -> parseType(state2, tuple.right().value)).flatMap(interfacesTypes -> {
+        return this.mapUsingState(withThis, prototype.interfaces, (state2, tuple) -> this.parseType(state2, tuple.right().value)).flatMap(interfacesTypes -> {
             var interfaces = interfacesTypes.right();
 
             var bases = interfaces.query()
@@ -2089,17 +2074,10 @@ public class Main {
                         .flatMap(segment -> this.flattenEnumValues(segment, thisType))
                         .collect(new ListCollector<>());
 
-                var generatedSegments = segmentsWithMaybeConstructor.query()
-                        .map(ClassSegment::generate)
-                        .collect(Joiner.empty())
-                        .orElse("");
+                var generatedSegments = joinSegments(segmentsWithMaybeConstructor);
 
                 var joinedTypeParams = prototype.joinTypeParams();
-                var interfacesJoined = interfaces.query()
-                        .map(Type::generate)
-                        .collect(new Joiner(", "))
-                        .map(inner -> " implements " + inner)
-                        .orElse("");
+                var interfacesJoined = this.joinInterfaces(interfaces);
 
                 var generatedSuperType = prototype.superTypes
                         .query()
@@ -2117,6 +2095,21 @@ public class Main {
                 return new Tuple2Impl<>(definedState, new Whitespace());
             });
         });
+    }
+
+    private String joinSegments(List<ClassSegment> segmentsWithMaybeConstructor) {
+        return segmentsWithMaybeConstructor.query()
+                .map(ClassSegment::generate)
+                .collect(Joiner.empty())
+                .orElse("");
+    }
+
+    private String joinInterfaces(List<Type> interfaces) {
+        return interfaces.query()
+                .map(Type::generate)
+                .collect(new Joiner(", "))
+                .map(inner -> " implements " + inner)
+                .orElse("");
     }
 
     private Query<ClassSegment> flattenEnumValues(ClassSegment segment, ObjectType thisType) {
@@ -2560,7 +2553,7 @@ public class Main {
     private Some<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<Definition> definitions, String valueString, int depth) {
         var strippedValueString = valueString.strip();
 
-        Tuple2Impl<CompileState, LambdaValue> value;
+        Tuple2<CompileState, LambdaValue> value;
         var state2 = state.defineAll(definitions);
         if (strippedValueString.startsWith("{") && strippedValueString.endsWith("}")) {
             var value1 = this.parseStatements(state2, strippedValueString.substring(1, Strings.length(strippedValueString) - 1), (state1, input1) ->
@@ -2669,7 +2662,7 @@ public class Main {
         return new Some<>(new Tuple2Impl<>(argumentsState, invokable));
     }
 
-    private Some<Tuple2<CompileState, Tuple2Impl<Argument, Type>>> getTuple2Some(int depth, CompileState currentState, Tuple2<Integer, String> pair, FunctionType callerType) {
+    private Some<Tuple2<CompileState, Tuple2<Argument, Type>>> getTuple2Some(int depth, CompileState currentState, Tuple2<Integer, String> pair, FunctionType callerType) {
         var index = pair.left();
         var element = pair.right();
 
