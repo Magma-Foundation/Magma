@@ -191,7 +191,7 @@ public class Main {
         String generate();
     }
 
-    private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
+    private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, EnumValues, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
         Option<Definition> maybeCreateDefinition();
     }
 
@@ -983,6 +983,10 @@ public class Main {
             Option<Head<T>> single = option.map(SingleHead::new);
             return new HeadedQuery<>(single.orElseGet(EmptyHead::new));
         }
+
+        public static <T> Query<T> from(T... elements) {
+            return new HeadedQuery<>(new RangeHead(elements.length)).map(index -> elements[index]);
+        }
     }
 
     private record FunctionType(List<Type> arguments, Type returns) implements Type {
@@ -1582,6 +1586,28 @@ public class Main {
         }
     }
 
+    private record EnumValue(String value, List<Value> values) {
+        public String generate() {
+            var s = this.values.query().map(Value::generate).collect(new Joiner(", ")).orElse("");
+            return this.value + "(" + s + ")";
+        }
+    }
+
+    private record EnumValues(List<EnumValue> values) implements IncompleteClassSegment, ClassSegment {
+        @Override
+        public String generate() {
+            return this.values.query()
+                    .map(EnumValue::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+        }
+
+        @Override
+        public Option<Definition> maybeCreateDefinition() {
+            return new None<>();
+        }
+    }
+
     private static final boolean isDebugEnabled = false;
 
     private static String generatePlaceholder(String input) {
@@ -1971,9 +1997,12 @@ public class Main {
                 newSegments = fold.addFirst(new Statement(1, definition));
             }
 
-            var withMaybeConstructor = this.attachConstructor(prototype, newSegments);
+            var segmentsWithMaybeConstructor = this.attachConstructor(prototype, newSegments)
+                    .query()
+                    .flatMap(segment -> this.flattenEnumValues(segment, thisType))
+                    .collect(new ListCollector<>());
 
-            var parsed2 = withMaybeConstructor.query()
+            var generatedSegments = segmentsWithMaybeConstructor.query()
                     .map(ClassSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -1981,12 +2010,23 @@ public class Main {
             var joinedTypeParams = prototype.joinTypeParams();
             var interfacesJoined = prototype.joinInterfaces();
 
-            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + parsed2 + "\n}\n";
+            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + generatedSegments + "\n}\n";
             var compileState = withEnum.popStructName();
 
             var definedState = compileState.addStructure(generated);
             return new Tuple2Impl<>(definedState, new Whitespace());
         });
+    }
+
+    private Query<ClassSegment> flattenEnumValues(ClassSegment segment, ObjectType thisType) {
+        if (segment instanceof EnumValues enumValues) {
+            return enumValues.values.query().map(enumValue -> {
+                var definition = new ImmutableDefinition(Lists.empty(), Lists.of("static"), enumValue.value, thisType, Lists.empty());
+                return new Statement(1, new FieldInitialization(definition, new Invokable(new ConstructionCaller(thisType), enumValue.values, thisType)));
+            });
+        }
+
+        return Queries.from(segment);
     }
 
     private Definition createVariantDefinition(ObjectType type) {
@@ -2026,6 +2066,7 @@ public class Main {
             case ClassDefinition classDefinition -> this.completeDefinition(state1, classDefinition);
             case ClassInitialization classInitialization -> this.completeInitialization(state1, classInitialization);
             case StructurePrototype structurePrototype -> this.completeStructure(state1, structurePrototype);
+            case EnumValues enumValues -> new Some<>(new Tuple2Impl<>(state1, enumValues));
         };
     }
 
@@ -2085,7 +2126,24 @@ public class Main {
                 .or(() -> this.typed(() -> this.parseStructure(input, "enum ", "class ", state)))
                 .or(() -> this.typed(() -> this.parseField(input, depth, state)))
                 .or(() -> this.parseMethod(state, input, depth))
+                .or(() -> this.parseEnumValues(state, input))
                 .orElseGet(() -> new Tuple2Impl<>(state, new Placeholder(input)));
+    }
+
+    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseEnumValues(CompileState state, String input) {
+        return this.suffix(input.strip(), ";", withoutEnd -> {
+            return this.parseValues(state, withoutEnd, (state2, enumValue) -> {
+                return this.suffix(enumValue.strip(), ")", withoutValueEnd -> {
+                    return this.first(withoutValueEnd, "(", (s4, s2) -> {
+                        return this.parseValues(state2, s2, (state1, s1) -> new Some<>(Main.this.parseArgument(state1, s1, 1))).map(arguments -> {
+                            return new Tuple2Impl<>(arguments.left(), new EnumValue(s4, Main.this.retainValues(arguments.right())));
+                        });
+                    });
+                });
+            }).map(tuple -> {
+                return new Tuple2Impl<>(tuple.left(), new EnumValues(tuple.right()));
+            });
+        });
     }
 
     private <T extends S, S> Option<Tuple2<CompileState, S>> typed(Supplier<Option<Tuple2<CompileState, T>>> action) {
@@ -2477,29 +2535,14 @@ public class Main {
         var newCaller = this.modifyCaller(oldCallerState, oldCaller);
         var callerType = this.findCallerType(newCaller);
 
-        var argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) -> {
-            var index = pair.left();
-            var element = pair.right();
-
-            var expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
-            var withExpected = currentState.withExpectedType(expectedType);
-
-            var valueTuple = this.parseArgument(withExpected, element, depth);
-            var valueState = valueTuple.left();
-            var value = valueTuple.right();
-
-            var actualType = valueTuple.left().typeRegister.orElse(Primitive.Unknown);
-            return new Some<>(new Tuple2Impl<>(valueState, new Tuple2Impl<>(value, actualType)));
-        }).orElseGet(() -> new Tuple2Impl<>(oldCallerState, Lists.empty()));
+        var argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) -> this.getTuple2Some(depth, currentState, pair, callerType)).orElseGet(() -> new Tuple2Impl<>(oldCallerState, Lists.empty()));
 
         var argumentsState = argumentsTuple.left();
         var argumentsWithActualTypes = argumentsTuple.right();
 
-        var arguments = argumentsWithActualTypes.query()
+        var arguments = this.retainValues(argumentsWithActualTypes.query()
                 .map(Tuple2::left)
-                .map(this::retainValue)
-                .flatMap(Queries::fromOption)
-                .collect(new ListCollector<>());
+                .collect(new ListCollector<>()));
 
         if (newCaller instanceof ConstructionCaller constructionCaller) {
             if (constructionCaller.type.findName().filter(value -> value.equals("Tuple2Impl")).isPresent()) {
@@ -2532,6 +2575,28 @@ public class Main {
 
         var invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some<>(new Tuple2Impl<>(argumentsState, invokable));
+    }
+
+    private Some<Tuple2<CompileState, Tuple2Impl<Argument, Type>>> getTuple2Some(int depth, CompileState currentState, Tuple2<Integer, String> pair, FunctionType callerType) {
+        var index = pair.left();
+        var element = pair.right();
+
+        var expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
+        var withExpected = currentState.withExpectedType(expectedType);
+
+        var valueTuple = this.parseArgument(withExpected, element, depth);
+        var valueState = valueTuple.left();
+        var value = valueTuple.right();
+
+        var actualType = valueTuple.left().typeRegister.orElse(Primitive.Unknown);
+        return new Some<>(new Tuple2Impl<>(valueState, new Tuple2Impl<>(value, actualType)));
+    }
+
+    private List<Value> retainValues(List<Argument> arguments) {
+        return arguments.query()
+                .map(this::retainValue)
+                .flatMap(Queries::fromOption)
+                .collect(new ListCollector<>());
     }
 
     private Option<Value> retainValue(Argument argument) {

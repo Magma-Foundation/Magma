@@ -28,11 +28,12 @@ var IncompleteClassSegmentVariant;
 (function (IncompleteClassSegmentVariant) {
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassDefinition"] = 0] = "ClassDefinition";
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassInitialization"] = 1] = "ClassInitialization";
-    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["IncompleteClassSegmentWrapper"] = 2] = "IncompleteClassSegmentWrapper";
-    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["MethodPrototype"] = 3] = "MethodPrototype";
-    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Placeholder"] = 4] = "Placeholder";
-    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["StructurePrototype"] = 5] = "StructurePrototype";
-    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Whitespace"] = 6] = "Whitespace";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["EnumValues"] = 2] = "EnumValues";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["IncompleteClassSegmentWrapper"] = 3] = "IncompleteClassSegmentWrapper";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["MethodPrototype"] = 4] = "MethodPrototype";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Placeholder"] = 5] = "Placeholder";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["StructurePrototype"] = 6] = "StructurePrototype";
+    IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["Whitespace"] = 7] = "Whitespace";
 })(IncompleteClassSegmentVariant || (IncompleteClassSegmentVariant = {}));
 var ResultVariant;
 (function (ResultVariant) {
@@ -487,6 +488,9 @@ var ResultVariant;
     static fromOption(option) {
         let single = option.map(SingleHead.new);
         return new HeadedQuery(single.orElseGet(EmptyHead.new));
+    }
+    static from(elements) {
+        return new HeadedQuery(new RangeHead(elements.length)).map((index) =>  /* elements[index] */);
     }
 }
 /* private */ class FunctionType /*  */ {
@@ -974,6 +978,28 @@ Operator.SUBTRACT = new Operator("-", "-");
         return this.head.next().and(this.other.next);
     }
 }
+/* private */ class EnumValue /*  */ {
+    constructor(value, values) {
+        this.value = value;
+        this.values = values;
+    }
+    generate() {
+        let s = this.values.query().map(Value.generate).collect(new Joiner(", ")).orElse("");
+        return this.value + "(" + s + ")";
+    }
+}
+/* private */ class EnumValues /*  */ {
+    constructor(values) {
+        this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.EnumValues;
+        this.values = values;
+    }
+    generate() {
+        return this.values.query().map(EnumValue.generate).collect(new Joiner(", ")).orElse("");
+    }
+    maybeCreateDefinition() {
+        return new None();
+    }
+}
 /* private */ class Primitive /*  */ {
     constructor(value) {
         this.value = value;
@@ -988,9 +1014,14 @@ Operator.SUBTRACT = new Operator("-", "-");
         return new None();
     }
 }
+Primitive.Int = new Primitive("number");
+Primitive.String = new Primitive("string");
+Primitive.Boolean = new Primitive("boolean");
+Primitive.Unknown = new Primitive("unknown");
+Primitive.Void = new Primitive("void");
 /* private */ class BooleanValue /*  */ {
     constructor(value) {
-        this._ValueVariant = ValueVariant.BooleanValue; /* True("true"), False("false"); */
+        this._ValueVariant = ValueVariant.BooleanValue;
         this.value = value;
     }
     generate() {
@@ -1000,6 +1031,8 @@ Operator.SUBTRACT = new Operator("-", "-");
         return Primitive.Boolean;
     }
 }
+BooleanValue.True = new BooleanValue("true");
+BooleanValue.False = new BooleanValue("false");
 /* public */ class Main /*  */ {
     static generatePlaceholder(input) {
         let replaced = input.replace("/*", "content-start").replace("*/", "content-end");
@@ -1256,15 +1289,25 @@ Operator.SUBTRACT = new Operator("-", "-");
                 let definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
                 fold.addFirst(new Statement(1, definition));
             }
-            let withMaybeConstructor = this.attachConstructor(prototype);
-            let parsed2 = withMaybeConstructor.query().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
+            let segmentsWithMaybeConstructor = this.attachConstructor(prototype).query().flatMap((segment) => this.flattenEnumValues(segment, thisType)).collect(new ListCollector());
+            let generatedSegments = segmentsWithMaybeConstructor.query().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
             let joinedTypeParams = prototype.joinTypeParams();
             let interfacesJoined = prototype.joinInterfaces();
-            let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + parsed2 + "\n}\n";
+            let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + generatedSegments + "\n}\n";
             let compileState = /* withEnum */ .popStructName();
             let definedState = compileState.addStructure(generated);
             return [definedState, new Whitespace()];
         });
+    }
+    flattenEnumValues(segment, thisType) {
+        if (segment._ClassSegmentVariant === ClassSegmentVariant.EnumValues) {
+            let enumValues = segment;
+            return enumValues.values.query().map((enumValue) => {
+                let definition = new ImmutableDefinition(Lists.empty(), Lists.of("static"), enumValue.value, thisType, Lists.empty());
+                return new Statement(1, new FieldInitialization(definition, new Invokable(new ConstructionCaller(thisType), enumValue.values, thisType)));
+            });
+        }
+        return Queries.from(segment);
     }
     createVariantDefinition(type) {
         return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
@@ -1291,6 +1334,7 @@ Operator.SUBTRACT = new Operator("-", "-");
             /* case ClassDefinition classDefinition -> this.completeDefinition(state1, classDefinition) */ ;
             /* case ClassInitialization classInitialization -> this.completeInitialization(state1, classInitialization) */ ;
             /* case StructurePrototype structurePrototype -> this.completeStructure(state1, structurePrototype) */ ;
+            /* case EnumValues enumValues -> new Some<>(new Tuple2Impl<>(state1, enumValues)) */ ;
         }
         /*  */ ;
     }
@@ -1336,7 +1380,22 @@ Operator.SUBTRACT = new Operator("-", "-");
         return mapper(slice);
     }
     parseClassSegment(state, input, depth) {
-        return this. < /* Whitespace, IncompleteClassSegment>typed */ (() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).orElseGet(() => [state, new Placeholder(input)]);
+        return this. < /* Whitespace, IncompleteClassSegment>typed */ (() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).or(() => this.parseEnumValues(state, input)).orElseGet(() => [state, new Placeholder(input)]);
+    }
+    parseEnumValues(state, input) {
+        return this.suffix(input.strip(), ";", (withoutEnd) => {
+            return this.parseValues(state, withoutEnd, (state2, enumValue) => {
+                return this.suffix(enumValue.strip(), ")", (withoutValueEnd) => {
+                    return this.first(withoutValueEnd, "(", (s4, s2) => {
+                        return this.parseValues(state2, s2, (state1, s1) => new Some(Main.this.parseArgument(state1, s1, 1))).map((arguments) => {
+                            return [arguments[0], new EnumValue(s4, Main.this.retainValues(arguments[1]))];
+                        });
+                    });
+                });
+            }).map((tuple) => {
+                return [tuple[0], new EnumValues(tuple[1])];
+            });
+        });
     }
     typed(action) {
         return action().map((tuple) => [tuple[0], tuple[1]]);
@@ -1633,20 +1692,10 @@ Operator.SUBTRACT = new Operator("-", "-");
         let oldCaller = callerTuple[1];
         let newCaller = this.modifyCaller(oldCallerState, oldCaller);
         let callerType = this.findCallerType(newCaller);
-        let argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) => {
-            let index = pair.left();
-            let element = pair.right();
-            let expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
-            let withExpected = currentState.withExpectedType(expectedType);
-            let valueTuple = this.parseArgument(withExpected, element, depth);
-            let valueState = valueTuple[0];
-            let value = valueTuple[1];
-            let actualType = valueTuple[0].typeRegister.orElse(Primitive.Unknown);
-            return new Some([valueState, [value, actualType]]);
-        }).orElseGet(() => [oldCallerState, Lists.empty()]);
+        let argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) => this.getTuple2Some(depth, currentState, pair, callerType)).orElseGet(() => [oldCallerState, Lists.empty()]);
         let argumentsState = argumentsTuple.left();
         let argumentsWithActualTypes = argumentsTuple.right();
-        let arguments = argumentsWithActualTypes.query().map(Tuple2.left).map(this.retainValue).flatMap(Queries.fromOption).collect(new ListCollector());
+        let arguments = this.retainValues(argumentsWithActualTypes.query().map(Tuple2.left).collect(new ListCollector()));
         if (newCaller._CallerVariant === CallerVariant.ConstructionCaller) {
             if (constructionCaller.type.findName().filter((value) => value === "Tuple2Impl").isPresent()) {
                 let constructionCaller = newCaller;
@@ -1676,6 +1725,20 @@ Operator.SUBTRACT = new Operator("-", "-");
         }
         let invokable = new Invokable(newCaller, arguments, callerType.returns);
         return new Some([argumentsState, invokable]);
+    }
+    getTuple2Some(depth, currentState, pair, callerType) {
+        let index = pair[0];
+        let element = pair[1];
+        let expectedType = callerType.arguments.get(index).orElse(Primitive.Unknown);
+        let withExpected = currentState.withExpectedType(expectedType);
+        let valueTuple = this.parseArgument(withExpected, element, depth);
+        let valueState = valueTuple[0];
+        let value = valueTuple[1];
+        let actualType = valueTuple[0].typeRegister.orElse(Primitive.Unknown);
+        return new Some([valueState, [value, actualType]]);
+    }
+    retainValues(arguments) {
+        return arguments.query().map(this.retainValue).flatMap(Queries.fromOption).collect(new ListCollector());
     }
     retainValue(argument) {
         if (argument._ArgumentVariant === ArgumentVariant.Value) {
