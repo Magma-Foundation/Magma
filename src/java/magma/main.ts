@@ -56,7 +56,7 @@ enum OptionVariant {
 	find(key : K) : Option<V>;
 	with(key : K, value : V) : Map<K, V>;
 }
-/* private sealed */interface Type/*  */ {
+/* private sealed */interface Type/*  */ extends /* Argument */ {
 	generate() : string;
 	replace(mapping : Map<string, Type>) : Type;
 	findName() : string;
@@ -91,7 +91,7 @@ enum ValueVariant {
 	SymbolValue,
 	TupleNode
 }
-/* private sealed */interface Value/*  */ {
+/* private sealed */interface Value/*  */ extends /* LambdaValue */, /* Caller */, Argument {
 	_ValueVariant : ValueVariant;
 	generate() : string;
 	type() : Type;
@@ -116,7 +116,7 @@ enum FindableTypeVariant {
 	Placeholder,
 	Template
 }
-/* private sealed */interface FindableType/*  */ {
+/* private sealed */interface FindableType/*  */ extends Type {
 	_FindableTypeVariant : FindableTypeVariant;
 	find(name : string) : Option<Type>;
 	findBase() : Option<BaseType>;
@@ -124,7 +124,7 @@ enum FindableTypeVariant {
 enum DefinitionVariant {
 	ImmutableDefinition
 }
-/* private sealed */interface Definition/*  */ {
+/* private sealed */interface Definition/*  */ extends Parameter, /* Header */, /* StatementValue */ {
 	_DefinitionVariant : DefinitionVariant;
 	generate() : string;
 	mapType(mapper : (arg0 : Type) => Type) : Definition;
@@ -1121,7 +1121,8 @@ enum ResultVariant {
 	segments : List<IncompleteClassSegment>;
 	variants : List<string>;
 	interfaces : List<Type>;
-	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>, variants : List<string>, interfaces : List<Type>) {
+	superTypes : List<Type>;
+	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>, variants : List<string>, interfaces : List<Type>, superTypes : List<Type>) {
 		this.targetInfix = targetInfix;
 		this.beforeInfix = beforeInfix;
 		this.name = name;
@@ -1131,6 +1132,7 @@ enum ResultVariant {
 		this.segments = segments;
 		this.variants = variants;
 		this.interfaces = interfaces;
+		this.superTypes = superTypes;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype;
 	createObjectType() : ObjectType {
@@ -1335,6 +1337,12 @@ enum ResultVariant {
 		}
 		return true;
 	}
+	static parseWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
+		if (Strings.isBlank(input)){
+			return new Some([state, new Whitespace()]);
+		}
+		return new None();
+	}
 	public main() : void {
 		let parent : Path = this.findRoot();
 		let source : Path = parent.resolve("Main.java");
@@ -1498,33 +1506,35 @@ enum ResultVariant {
 	}
 	parseStructureWithMaybeExtends(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.first(beforeContent, " extends ", (s, s2) => {
-			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces);
+			return this.parseValues(state, s2, this.parseType).flatMap((inner : [CompileState, List<T>]) => {
+				return this.parseStructureWithMaybeParams(targetInfix, inner[0], beforeInfix, s, content1, variants, annotations, inner[1], interfaces);
+			});
 		}).or(() => {
-			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces);
+			return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty(), interfaces);
 		});
 	}
-	parseStructureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
+	parseStructureWithMaybeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>, superTypes : List<Type>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.suffix(beforeContent.strip(), ")", (s : string) => {
 			return this.first(s, "(", (s1, s2) => {
 				let parsed : [CompileState, List<Parameter>] = this.parseParameters(state, s2);
-				return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0], beforeInfix, s1, content1, parsed[1], variants, annotations, interfaces);
+				return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0], beforeInfix, s1, content1, parsed[1], variants, annotations, interfaces, superTypes);
 			});
 		}).or(() => {
-			return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces);
+			return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces, superTypes);
 		});
 	}
-	parseStructureWithMaybeTypeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
+	parseStructureWithMaybeTypeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>, variants : List<string>, annotations : List<string>, interfaces : List<Type>, maybeSuperType : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.first(beforeContent, "<", (name, withTypeParams) => {
 			return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
 				let readonly mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => [state1, s.strip()];
 				let typeParams : [CompileState, List<T>] = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-				return this.assembleStructure(typeParams[0], targetInfix, annotations, beforeInfix, name, content1, typeParams[1], afterTypeParams, params, variants, interfaces);
+				return this.assembleStructure(typeParams[0], targetInfix, annotations, beforeInfix, name, content1, typeParams[1], afterTypeParams, params, variants, interfaces, maybeSuperType);
 			});
 		}).or(() => {
-			return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces);
+			return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces, maybeSuperType);
 		});
 	}
-	assembleStructure(state : CompileState, targetInfix : string, annotations : List<string>, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>, variants : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
+	assembleStructure(state : CompileState, targetInfix : string, annotations : List<string>, beforeInfix : string, rawName : string, content : string, typeParams : List<string>, after : string, rawParameters : List<Parameter>, variants : List<string>, interfaces : List<Type>, maybeSuperType : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		let name = rawName.strip();
 		if (!isSymbol(name)){
 			return new None();
@@ -1536,7 +1546,7 @@ enum ResultVariant {
 		let segmentsState = segmentsTuple[0];
 		let segments = segmentsTuple[1];
 		let parameters : List<Definition> = this.retainDefinitions(rawParameters);
-		let prototype : StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces);
+		let prototype : StructurePrototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, maybeSuperType);
 		return new Some([segmentsState.addType(prototype.createObjectType()), prototype]);
 	}
 	completeStructure(state : CompileState, prototype : StructurePrototype) : Option<[CompileState, ClassSegment]> {
@@ -1572,7 +1582,8 @@ enum ResultVariant {
 			let generatedSegments = segmentsWithMaybeConstructor.query().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
 			let joinedTypeParams : string = prototype.joinTypeParams();
 			let interfacesJoined : string = prototype.joinInterfaces();
-			let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + generatedSegments + "\n}\n";
+			let generatedSuperType = prototype.superTypes.query().map(Type.generate).collect(new Joiner(", ")).map((generated) => " extends " + generated).orElse("");
+			let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
 			let compileState = /* withEnum */.popStructName();
 			let definedState = compileState.addStructure(generated);
 			return [definedState, new Whitespace()];
@@ -1650,7 +1661,7 @@ enum ResultVariant {
 		return mapper(slice);
 	}
 	parseClassSegment(state : CompileState, input : string, depth : number) : [CompileState, IncompleteClassSegment] {
-		return this. < /* Whitespace, IncompleteClassSegment>typed */(() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).or(() => this.parseEnumValues(state, input)).orElseGet(() => [state, new Placeholder(input)]);
+		return this. < /* Whitespace, IncompleteClassSegment>typed */(() => parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).or(() => this.parseEnumValues(state, input)).orElseGet(() => [state, new Placeholder(input)]);
 	}
 	parseEnumValues(state : CompileState, input : string) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.suffix(input.strip(), ";", (withoutEnd : string) => {
@@ -1669,12 +1680,6 @@ enum ResultVariant {
 	}
 	typed<T extends S, S>(action : () => Option<[CompileState, T]>) : Option<[CompileState, S]> {
 		return action().map((tuple : [CompileState, T]) => [tuple[0], tuple[1]]);
-	}
-	static parseWhitespace(input : string, state : CompileState) : Option<[CompileState, Whitespace]> {
-		if (Strings.isBlank(input)){
-			return new Some([state, new Whitespace()]);
-		}
-		return new None();
 	}
 	parseMethod(state : CompileState, input : string, depth : number) : Option<[CompileState, IncompleteClassSegment]> {
 		return this.first(input, "(", (definitionString, withParams) => {

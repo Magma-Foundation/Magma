@@ -1449,8 +1449,8 @@ public class Main {
             String after,
             List<IncompleteClassSegment> segments,
             List<String> variants,
-            List<Type> interfaces
-    ) implements IncompleteClassSegment {
+            List<Type> interfaces,
+            List<Type> superTypes) implements IncompleteClassSegment {
         private ObjectType createObjectType() {
             var definitionFromSegments = this.segments.query()
                     .map(IncompleteClassSegment::maybeCreateDefinition)
@@ -1663,6 +1663,13 @@ public class Main {
             return false;
         }
         return true;
+    }
+
+    private static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(String input, CompileState state) {
+        if (Strings.isBlank(input)) {
+            return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
+        }
+        return new None<>();
     }
 
     public void main() {
@@ -1907,32 +1914,34 @@ public class Main {
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeExtends(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants, List<String> annotations, List<Type> interfaces) {
         return this.first(beforeContent, " extends ", (s, s2) -> {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces);
+            return this.parseValues(state, s2, this::parseType).flatMap(inner -> {
+                return this.parseStructureWithMaybeParams(targetInfix, inner.left(), beforeInfix, s, content1, variants, annotations, inner.right(), interfaces);
+            });
         }).or(() -> {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces);
+            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty(), interfaces);
         });
     }
 
-    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants, List<String> annotations, List<Type> interfaces) {
+    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> variants, List<String> annotations, List<Type> superTypes, List<Type> interfaces) {
         return this.suffix(beforeContent.strip(), ")", s -> {
             return this.first(s, "(", (s1, s2) -> {
                 var parsed = this.parseParameters(state, s2);
-                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants, annotations, interfaces);
+                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants, annotations, interfaces, superTypes);
             });
         }).or(() -> {
-            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces);
+            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces, superTypes);
         });
     }
 
-    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params, List<String> variants, List<String> annotations, List<Type> interfaces) {
+    private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeTypeParams(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<Parameter> params, List<String> variants, List<String> annotations, List<Type> interfaces, List<Type> maybeSuperType) {
         return this.first(beforeContent, "<", (name, withTypeParams) -> {
             return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(mapper.apply(state1, s)));
-                return this.assembleStructure(typeParams.left(), targetInfix, annotations, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants, interfaces);
+                return this.assembleStructure(typeParams.left(), targetInfix, annotations, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants, interfaces, maybeSuperType);
             });
         }).or(() -> {
-            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces);
+            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces, maybeSuperType);
         });
     }
 
@@ -1947,8 +1956,8 @@ public class Main {
             String after,
             List<Parameter> rawParameters,
             List<String> variants,
-            List<Type> interfaces
-    ) {
+            List<Type> interfaces,
+            List<Type> maybeSuperType) {
         var name = rawName.strip();
         if (!isSymbol(name)) {
             return new None<>();
@@ -1963,7 +1972,7 @@ public class Main {
         var segments = segmentsTuple.right();
 
         var parameters = this.retainDefinitions(rawParameters);
-        var prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces);
+        var prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, maybeSuperType);
         return new Some<>(new Tuple2Impl<>(segmentsState.addType(prototype.createObjectType()), prototype));
     }
 
@@ -2029,7 +2038,14 @@ public class Main {
             var joinedTypeParams = prototype.joinTypeParams();
             var interfacesJoined = prototype.joinInterfaces();
 
-            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + generatedSegments + "\n}\n";
+            var generatedSuperType = prototype.superTypes
+                    .query()
+                    .map(Type::generate)
+                    .collect(new Joiner(", "))
+                    .map(generated -> " extends " + generated)
+                    .orElse("");
+
+            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
             var compileState = withEnum.popStructName();
 
             var definedState = compileState.addStructure(generated);
@@ -2127,7 +2143,7 @@ public class Main {
     }
 
     private Tuple2<CompileState, IncompleteClassSegment> parseClassSegment(CompileState state, String input, int depth) {
-        return this.<Whitespace, IncompleteClassSegment>typed(() -> this.parseWhitespace(input, state))
+        return this.<Whitespace, IncompleteClassSegment>typed(() -> parseWhitespace(input, state))
                 .or(() -> this.typed(() -> this.parseClass(input, state)))
                 .or(() -> this.typed(() -> this.parseStructure(input, "interface ", "interface ", state)))
                 .or(() -> this.typed(() -> this.parseStructure(input, "record ", "class ", state)))
@@ -2156,13 +2172,6 @@ public class Main {
 
     private <T extends S, S> Option<Tuple2<CompileState, S>> typed(Supplier<Option<Tuple2<CompileState, T>>> action) {
         return action.get().map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()));
-    }
-
-    private static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(String input, CompileState state) {
-        if (Strings.isBlank(input)) {
-            return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
-        }
-        return new None<>();
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseMethod(CompileState state, String input, int depth) {

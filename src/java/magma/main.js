@@ -904,7 +904,7 @@ Operator.SUBTRACT = new Operator("-", "-");
     }
 }
 /* private */ class StructurePrototype /*  */ {
-    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces) {
+    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, superTypes) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype;
         this.targetInfix = targetInfix;
         this.beforeInfix = beforeInfix;
@@ -915,6 +915,7 @@ Operator.SUBTRACT = new Operator("-", "-");
         this.segments = segments;
         this.variants = variants;
         this.interfaces = interfaces;
+        this.superTypes = superTypes;
     }
     createObjectType() {
         let definitionFromSegments = this.segments.query().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Queries.fromOption).collect(new ListCollector());
@@ -1100,6 +1101,12 @@ BooleanValue.False = new BooleanValue("false");
         }
         return true;
     }
+    static parseWhitespace(input, state) {
+        if (Strings.isBlank(input)) {
+            return new Some([state, new Whitespace()]);
+        }
+        return new None();
+    }
     main() {
         let parent = this.findRoot();
         let source = parent.resolve("Main.java");
@@ -1261,33 +1268,35 @@ BooleanValue.False = new BooleanValue("false");
     }
     parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces) {
         return this.first(beforeContent, " extends ", (s, s2) => {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, interfaces);
+            return this.parseValues(state, s2, this.parseType).flatMap((inner) => {
+                return this.parseStructureWithMaybeParams(targetInfix, inner[0], beforeInfix, s, content1, variants, annotations, inner[1], interfaces);
+            });
         }).or(() => {
-            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces);
+            return this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty(), interfaces);
         });
     }
-    parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces) {
+    parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, superTypes, interfaces) {
         return this.suffix(beforeContent.strip(), ")", (s) => {
             return this.first(s, "(", (s1, s2) => {
                 let parsed = this.parseParameters(state, s2);
-                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0], beforeInfix, s1, content1, parsed[1], variants, annotations, interfaces);
+                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed[0], beforeInfix, s1, content1, parsed[1], variants, annotations, interfaces, superTypes);
             });
         }).or(() => {
-            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces);
+            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces, superTypes);
         });
     }
-    parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations, interfaces) {
+    parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations, interfaces, maybeSuperType) {
         return this.first(beforeContent, "<", (name, withTypeParams) => {
             return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) => {
                 let readonly, mapper = (state1, s) => [state1, s.strip()];
                 let typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) => new Some(mapper(state1, s)));
-                return this.assembleStructure(typeParams[0], targetInfix, annotations, beforeInfix, name, content1, typeParams[1], afterTypeParams, params, variants, interfaces);
+                return this.assembleStructure(typeParams[0], targetInfix, annotations, beforeInfix, name, content1, typeParams[1], afterTypeParams, params, variants, interfaces, maybeSuperType);
             });
         }).or(() => {
-            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces);
+            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces, maybeSuperType);
         });
     }
-    assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants, interfaces) {
+    assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants, interfaces, maybeSuperType) {
         let name = rawName.strip();
         if (!isSymbol(name)) {
             return new None();
@@ -1299,7 +1308,7 @@ BooleanValue.False = new BooleanValue("false");
         let segmentsState = segmentsTuple[0];
         let segments = segmentsTuple[1];
         let parameters = this.retainDefinitions(rawParameters);
-        let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces);
+        let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, maybeSuperType);
         return new Some([segmentsState.addType(prototype.createObjectType()), prototype]);
     }
     completeStructure(state, prototype) {
@@ -1335,7 +1344,8 @@ BooleanValue.False = new BooleanValue("false");
             let generatedSegments = segmentsWithMaybeConstructor.query().map(ClassSegment.generate).collect(Joiner.empty()).orElse("");
             let joinedTypeParams = prototype.joinTypeParams();
             let interfacesJoined = prototype.joinInterfaces();
-            let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + interfacesJoined + " {" + generatedSegments + "\n}\n";
+            let generatedSuperType = prototype.superTypes.query().map(Type.generate).collect(new Joiner(", ")).map((generated) => " extends " + generated).orElse("");
+            let generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
             let compileState = /* withEnum */ .popStructName();
             let definedState = compileState.addStructure(generated);
             return [definedState, new Whitespace()];
@@ -1412,7 +1422,7 @@ BooleanValue.False = new BooleanValue("false");
         return mapper(slice);
     }
     parseClassSegment(state, input, depth) {
-        return this. < /* Whitespace, IncompleteClassSegment>typed */ (() => this.parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).or(() => this.parseEnumValues(state, input)).orElseGet(() => [state, new Placeholder(input)]);
+        return this. < /* Whitespace, IncompleteClassSegment>typed */ (() => parseWhitespace(input, state)).or(() => this.typed(() => this.parseClass(input, state))).or(() => this.typed(() => this.parseStructure(input, "interface ", "interface ", state))).or(() => this.typed(() => this.parseStructure(input, "record ", "class ", state))).or(() => this.typed(() => this.parseStructure(input, "enum ", "class ", state))).or(() => this.typed(() => this.parseField(input, depth, state))).or(() => this.parseMethod(state, input, depth)).or(() => this.parseEnumValues(state, input)).orElseGet(() => [state, new Placeholder(input)]);
     }
     parseEnumValues(state, input) {
         return this.suffix(input.strip(), ";", (withoutEnd) => {
@@ -1431,12 +1441,6 @@ BooleanValue.False = new BooleanValue("false");
     }
     typed(action) {
         return action().map((tuple) => [tuple[0], tuple[1]]);
-    }
-    static parseWhitespace(input, state) {
-        if (Strings.isBlank(input)) {
-            return new Some([state, new Whitespace()]);
-        }
-        return new None();
     }
     parseMethod(state, input, depth) {
         return this.first(input, "(", (definitionString, withParams) => {
