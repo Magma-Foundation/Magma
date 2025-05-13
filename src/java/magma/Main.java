@@ -2095,7 +2095,11 @@ public class Main {
                         .orElse("");
 
                 var joinedTypeParams = prototype.joinTypeParams();
-                var interfacesJoined = prototype.joinInterfaces();
+                var interfacesJoined = interfaces.query()
+                        .map(Type::generate)
+                        .collect(new Joiner(", "))
+                        .map(inner -> " implements " + inner)
+                        .orElse("");
 
                 var generatedSuperType = prototype.superTypes
                         .query()

@@ -320,7 +320,7 @@ enum ResultVariant {
 		return new HeadedQuery(new ZipHead(this/* : HeadedQuery */.head/* : Head<T> */, other/* : Query<R> */)/* : ZipHead */)/* : HeadedQuery */;
 	}
 }
-/* private static */class RangeHead/*  */ implements Head<Integer> {
+/* private static */class RangeHead/*  */ implements Head<number> {
 	readonly length : number;
 	counter : number;
 	constructor (length : number) {
@@ -587,7 +587,7 @@ enum ResultVariant {
 		return this/* : DivideState */.input/* : string */.charAt/* : unknown */(this/* : DivideState */.index/* : number */)/* : unknown */;
 	}
 }
-/* private */class Joiner/*  */ implements Collector<String, Option<String>> {
+/* private */class Joiner/*  */ implements Collector<string, Option<string>> {
 	delimiter : string;
 	constructor (delimiter : string) {
 		this/* : unknown */.delimiter/* : unknown */ = delimiter/* : unknown */;
@@ -933,7 +933,7 @@ enum ResultVariant {
 /* private static */class Maps/*  */ {
 	public static empty<V, K>() : Map<K, V>;
 }
-/* private */class MapCollector<K, V>/*  */ implements Collector<Tuple2<K, V>, Map<K, V>> {
+/* private */class MapCollector<K, V>/*  */ implements Collector<[K, V], Map<K, V>> {
 	public createInitial() : Map<K, V> {
 		return Maps/* : Maps */.empty/* : () => Map<K, V> */()/* : Map<K, V> */;
 	}
@@ -1230,7 +1230,7 @@ enum ResultVariant {
 		return this/* : MapHead */.head/* : Head<T> */.next/* : () => Option<T> */()/* : Option<T> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(this/* : MapHead */.mapper/* : (arg0 : T) => R */)/* : Option<R> */;
 	}
 }
-/* private */class ZipHead<T, R>/*  */ implements Head<Tuple2<T, R>> {
+/* private */class ZipHead<T, R>/*  */ implements Head<[T, R]> {
 	head : Head<T>;
 	other : Query<R>;
 	constructor (head : Head<T>, other : Query<R>) {
@@ -1510,7 +1510,7 @@ enum ResultVariant {
 		})/* : Option<T> */;
 	}
 	parseTypeRefs(s2 : string) : List<TypeRef> {
-		return this/* : Main */.divideAll/* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(s2/* : string */, (state1, c) => this/* : Main */.foldValueChar/* : (arg0 : DivideState, arg1 : string) => DivideState */(state1/* : unknown */, c/* : unknown */)/* : DivideState */)/* : List<string> */.query/* : () => Query<string> */()/* : Query<string> */.map/* : (arg0 : (arg0 : string) => R) => Query<R> */(/* String */.strip/* : unknown */)/* : Query<R> */.filter/* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value : T) => !value/* : T */.isEmpty/* : unknown */()/* : unknown */)/* : Option<T> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(TypeRef/* : TypeRef */.new/* : unknown */)/* : Option<R> */.collect/* : unknown */(new ListCollector()/* : ListCollector */)/* : unknown */;
+		return this/* : Main */.divideAll/* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(s2/* : string */, this/* : Main */.foldValueChar/* : unknown */)/* : List<string> */.query/* : () => Query<string> */()/* : Query<string> */.map/* : (arg0 : (arg0 : string) => R) => Query<R> */(/* String */.strip/* : unknown */)/* : Query<R> */.filter/* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value : T) => !value/* : T */.isEmpty/* : unknown */()/* : unknown */)/* : Option<T> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(TypeRef/* : TypeRef */.new/* : unknown */)/* : Option<R> */.collect/* : unknown */(new ListCollector()/* : ListCollector */)/* : unknown */;
 	}
 	parseStructureWithMaybeExtends(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, variants : List<string>, annotations : List<string>, interfaces : List<TypeRef>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this/* : Main */.first/* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent/* : string */, " extends ", (s, s2) => {
@@ -1589,9 +1589,9 @@ enum ResultVariant {
 				let segmentsWithMaybeConstructor : R = this/* : Main */.attachConstructor/* : (arg0 : StructurePrototype, arg1 : List<ClassSegment>) => List<ClassSegment> */(prototype/* : StructurePrototype */, /* newSegments */)/* : List<ClassSegment> */.query/* : () => Query<ClassSegment> */()/* : Query<ClassSegment> */.flatMap/* : (arg0 : (arg0 : ClassSegment) => Query<R>) => Query<R> */((segment : ClassSegment) => this/* : Main */.flattenEnumValues/* : (arg0 : ClassSegment, arg1 : ObjectType) => Query<ClassSegment> */(segment/* : ClassSegment */, thisType/* : ObjectType */)/* : Query<ClassSegment> */)/* : Query<R> */.collect/* : (arg0 : Collector<T, R>) => R */(new ListCollector()/* : ListCollector */)/* : R */;
 				let generatedSegments = segmentsWithMaybeConstructor/* : R */.query/* : unknown */()/* : unknown */.map/* : unknown */(ClassSegment/* : ClassSegment */.generate/* : unknown */)/* : unknown */.collect/* : unknown */(Joiner/* : Joiner */.empty/* : () => Joiner */()/* : Joiner */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 				let joinedTypeParams : string = prototype/* : StructurePrototype */.joinTypeParams/* : () => string */()/* : string */;
-				let interfacesJoined : string = prototype/* : StructurePrototype */.joinInterfaces/* : () => string */()/* : string */;
+				let interfacesJoined = interfaces/* : unknown */.query/* : unknown */()/* : unknown */.map/* : unknown */(Type/* : Type */.generate/* : unknown */)/* : unknown */.collect/* : unknown */(new Joiner(", ")/* : Joiner */)/* : unknown */.map/* : unknown */((inner) => " implements " + inner/* : string */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
 				let generatedSuperType = prototype/* : StructurePrototype */.superTypes/* : List<TypeRef> */.query/* : () => Query<TypeRef> */()/* : Query<TypeRef> */.map/* : (arg0 : (arg0 : TypeRef) => R) => Query<R> */((value : TypeRef) => state/* : CompileState */.resolveType/* : (arg0 : string) => Option<Type> */(value/* : TypeRef */.value/* : unknown */)/* : Option<Type> */)/* : Query<R> */.flatMap/* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries/* : Queries */.fromOption/* : unknown */)/* : Option<R> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(Type/* : Type */.generate/* : unknown */)/* : Option<R> */.collect/* : unknown */(new Joiner(", ")/* : Joiner */)/* : unknown */.map/* : unknown */((generated) => " extends " + generated/* : unknown */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
-				let generated = generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.beforeInfix/* : string */()/* : unknown */.strip/* : unknown */()/* : unknown */)/* : string */ + prototype/* : StructurePrototype */.targetInfix/* : string */()/* : unknown */ + prototype/* : StructurePrototype */.name/* : string */()/* : unknown */ + joinedTypeParams/* : string */ + generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.after/* : string */()/* : unknown */)/* : string */ + generatedSuperType/* : unknown */ + interfacesJoined/* : string */ + " {" + generatedSegments + "\n}\n";
+				let generated = generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.beforeInfix/* : string */()/* : unknown */.strip/* : unknown */()/* : unknown */)/* : string */ + prototype/* : StructurePrototype */.targetInfix/* : string */()/* : unknown */ + prototype/* : StructurePrototype */.name/* : string */()/* : unknown */ + joinedTypeParams/* : string */ + generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.after/* : string */()/* : unknown */)/* : string */ + generatedSuperType/* : unknown */ + interfacesJoined/* : unknown */ + " {" + generatedSegments + "\n}\n";
 				let compileState = /* withEnum */.popStructName/* : unknown */()/* : unknown */;
 				let definedState = compileState/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */;
 				return [definedState/* : unknown */, new Whitespace()/* : Whitespace */];
