@@ -62,11 +62,11 @@ var ResultVariant;
     ResultVariant[ResultVariant["Ok"] = 0] = "Ok";
     ResultVariant[ResultVariant["Err"] = 1] = "Err";
 })(ResultVariant || (ResultVariant = {}));
-/* private static final */ class None {
+class None {
     constructor() {
         this._OptionVariant = OptionVariant.None /* : OptionVariant */;
     }
-    map(mapper) {
+    map(mapper /* R */) {
         return new None() /* : None */;
     }
     isPresent() {
@@ -96,13 +96,13 @@ var ResultVariant;
     ifPresent(consumer) {
     }
 }
-/* private */ class Some {
+class Some {
     constructor(value) {
         this._OptionVariant = OptionVariant.Some /* : OptionVariant */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
-    map(mapper) {
-        return new Some(mapper /* : (arg0 : T) => R */(this /* : Some */.value /* : T */) /* : R */) /* : Some */;
+    map(mapper /* R */) {
+        return new Some(mapper /* : (arg0 : T) => content-start R content-end */(this /* : Some */.value /* : T */) /* : content-start R content-end */) /* : Some */;
     }
     isPresent() {
         return true;
@@ -123,19 +123,19 @@ var ResultVariant;
         return this /* : Some */;
     }
     flatMap(mapper) {
-        return mapper /* : (arg0 : T) => Option<R> */(this /* : Some */.value /* : T */) /* : Option<R> */;
+        return mapper /* : (arg0 : T) => Option<content-start R content-end> */(this /* : Some */.value /* : T */) /* : Option<content-start R content-end> */;
     }
     isEmpty() {
         return false;
     }
     and(other) {
-        return other /* : () => Option<R> */() /* : Option<R> */.map /* : (arg0 : (arg0 : R) => R) => Option<R> */((otherValue) => [this /* : Some */.value /* : T */, otherValue /* : R */]) /* : Option<R> */;
+        return other /* : () => Option<content-start R content-end> */() /* : Option<content-start R content-end> */.map /* : (arg0 : (arg0 : content-start R content-end) => content-start R content-end) => Option<content-start R content-end> */((otherValue /* R */) => [this /* : Some */.value /* : T */, otherValue /* : content-start R content-end */]) /* : Option<content-start R content-end> */;
     }
     ifPresent(consumer) {
         /* consumer.accept(this.value) */ ;
     }
 }
-/* private static */ class SingleHead {
+class SingleHead {
     constructor(retrievableValue) {
         this /* : SingleHead */.retrievableValue /* : T */ = retrievableValue /* : T */;
         this /* : SingleHead */.retrieved /* : boolean */ = false;
@@ -148,54 +148,58 @@ var ResultVariant;
         return new Some(this /* : SingleHead */.retrievableValue /* : T */) /* : Some */;
     }
 }
-/* private static */ class EmptyHead {
+class EmptyHead {
     next() {
         return new None() /* : None */;
     }
 }
-/* private */ class HeadedQuery {
+class HeadedQuery {
     constructor(head) {
         this /* : unknown */.head /* : unknown */ = head /* : unknown */;
     }
-    fold(initial, folder) {
-        let current = initial /* : R */;
-        while (true) {
-            let finalCurrent = current /* : R */;
-            let option = this /* : HeadedQuery */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((inner) => folder /* : (arg0 : R, arg1 : T) => R */(finalCurrent /* : R */, inner /* : T */) /* : R */) /* : Option<R> */;
-            if (option /* : Option<R> */._OptionVariant /* : unknown */ === OptionVariant.Some /* : unknown */) {
-                let some = option /* : Option<R> */;
-                current /* : R */ = some /* : Some<R> */.value /* : R */;
-            }
-            else {
-                return current /* : R */;
-            }
-        }
+}
+let current = initial /* : content-start R content-end */;
+while (true) {
+    let finalCurrent = current /* : content-start R content-end */;
+    let option = this /* : HeadedQuery */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.map /* : (arg0 : (arg0 : T) => content-start R content-end) => Option<content-start R content-end> */((inner) => folder /* : (arg0 : content-start R content-end, arg1 : T) => content-start R content-end */(finalCurrent /* : content-start R content-end */, inner /* : T */) /* : content-start R content-end */) /* : Option<content-start R content-end> */;
+    if (option /* : Option<content-start R content-end> */._OptionVariant /* : unknown */ === OptionVariant.Some /* : unknown */) {
+        let some = option /* : Option<content-start R content-end> */;
+        current /* : content-start R content-end */ = some /* : Some<R> */.value /* : R */;
     }
-    map(mapper) {
-        return new HeadedQuery(new MapHead(this /* : HeadedQuery */.head /* : Head<T> */, mapper /* : (arg0 : T) => R */) /* : MapHead */) /* : HeadedQuery */;
-    }
-    collect(collector) {
-        return this /* : HeadedQuery */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : T) => R) => R */(collector /* : Collector<T, R> */.createInitial /* : () => R */() /* : R */, collector /* : Collector<T, R> */.fold /* : unknown */) /* : R */;
-    }
-    filter(predicate) {
-        return this /* : HeadedQuery */.flatMap /* : (arg0 : (arg0 : T) => Query<R>) => Query<R> */((element) => {
-            if (predicate /* : (arg0 : T) => boolean */(element /* : T */) /* : boolean */) {
-                return new HeadedQuery(new SingleHead(element /* : T */) /* : SingleHead */) /* : HeadedQuery */;
-            }
-            return new HeadedQuery(new EmptyHead() /* : EmptyHead */) /* : HeadedQuery */;
-        }) /* : Query<R> */;
-    }
-    next() {
-        return this /* : HeadedQuery */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */;
-    }
-    flatMap(f) {
-        return new HeadedQuery(new FlatMapHead(this /* : HeadedQuery */.head /* : Head<T> */, f /* : (arg0 : T) => Query<R> */) /* : FlatMapHead */) /* : HeadedQuery */;
-    }
-    zip(other) {
-        return new HeadedQuery(new ZipHead(this /* : HeadedQuery */.head /* : Head<T> */, other /* : Query<R> */) /* : ZipHead */) /* : HeadedQuery */;
+    else {
+        return current /* : content-start R content-end */;
     }
 }
-/* private static */ class RangeHead /*  */ {
+map(mapper, (arg0) =>  /* R */);
+Query <  /* R */ > {
+    return: new HeadedQuery(new MapHead(this /* : HeadedQuery */.head /* : Head<T> */, mapper /* : (arg0 : T) => content-start R content-end */) /* : MapHead */) /* : HeadedQuery */
+};
+collect(collector, (Collector));
+{
+    return this /* : HeadedQuery */.fold /* : (arg0 : content-start R content-end, arg1 : (arg0 : content-start R content-end, arg1 : T) => content-start R content-end) => content-start R content-end */(collector /* : Collector<T, content-start R content-end> */.createInitial /* : () => content-start R content-end */() /* : content-start R content-end */, collector /* : Collector<T, content-start R content-end> */.fold /* : unknown */) /* : content-start R content-end */;
+}
+filter(predicate, (arg0) => boolean);
+Query < T > {
+    return: this /* : HeadedQuery */.flatMap /* : (arg0 : (arg0 : T) => Query<content-start R content-end>) => Query<content-start R content-end> */((element) => {
+        if (predicate /* : (arg0 : T) => boolean */(element /* : T */) /* : boolean */) {
+            return new HeadedQuery(new SingleHead(element /* : T */) /* : SingleHead */) /* : HeadedQuery */;
+        }
+        return new HeadedQuery(new EmptyHead() /* : EmptyHead */) /* : HeadedQuery */;
+    }) /* : Query<content-start R content-end> */
+};
+next();
+Option < T > {
+    return: this /* : HeadedQuery */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */
+};
+flatMap(f, (arg0) => Query);
+Query <  /* R */ > {
+    return: new HeadedQuery(new FlatMapHead(this /* : HeadedQuery */.head /* : Head<T> */, f /* : (arg0 : T) => Query<content-start R content-end> */) /* : FlatMapHead */) /* : HeadedQuery */
+};
+zip(other, (Query));
+Query < [T, /* R */] > {
+    return: new HeadedQuery(new ZipHead(this /* : HeadedQuery */.head /* : Head<T> */, other /* : Query<content-start R content-end> */) /* : ZipHead */) /* : HeadedQuery */
+};
+class RangeHead {
     constructor(length) {
         this /* : RangeHead */.length /* : number */ = length /* : number */;
         this /* : RangeHead */.counter /* : number */ = 0 /* : number */;
@@ -209,9 +213,9 @@ var ResultVariant;
         return new None() /* : None */;
     }
 }
-/* private static */ class Lists /*  */ {
+class Lists {
 }
-/* private */ class ImmutableDefinition /*  */ {
+class ImmutableDefinition {
     constructor(annotations, modifiers, name, type, typeParams) {
         this._DefinitionVariant = DefinitionVariant.ImmutableDefinition /* : DefinitionVariant */;
         this /* : unknown */.annotations /* : unknown */ = annotations /* : unknown */;
@@ -239,16 +243,16 @@ var ResultVariant;
         return " : " + this /* : ImmutableDefinition */.type /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
     joinModifiers() {
-        return this /* : ImmutableDefinition */.modifiers /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */((value) => value /* : string */ + " ") /* : Query<R> */.collect /* : unknown */(new Joiner("") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return this /* : ImmutableDefinition */.modifiers /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */((value) => value /* : string */ + " ") /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner("") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     joinTypeParams() {
-        return this /* : ImmutableDefinition */.typeParams /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.collect /* : (arg0 : Collector<string, R>) => R */(new Joiner(", ") /* : Joiner */) /* : R */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return this /* : ImmutableDefinition */.typeParams /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.collect /* : (arg0 : Collector<string, content-start R content-end>) => content-start R content-end */(new Joiner(", ") /* : Joiner */) /* : content-start R content-end */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     mapType(mapper) {
         return new ImmutableDefinition(this /* : ImmutableDefinition */.annotations /* : List<string> */, this /* : ImmutableDefinition */.modifiers /* : List<string> */, this /* : ImmutableDefinition */.name /* : string */, mapper /* : (arg0 : Type) => Type */(this /* : ImmutableDefinition */.type /* : Type */) /* : Type */, this /* : ImmutableDefinition */.typeParams /* : List<string> */) /* : ImmutableDefinition */;
     }
     generateWithParams(joinedParameters) {
-        let joinedAnnotations = this /* : ImmutableDefinition */.annotations /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */((value) => "@" + value + " ") /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joinedAnnotations = this /* : ImmutableDefinition */.annotations /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */((value) => "@" + value + " ") /* : Query<content-start R content-end> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         let joined = this /* : ImmutableDefinition */.joinTypeParams /* : () => string */() /* : string */;
         let before = this /* : ImmutableDefinition */.joinModifiers /* : () => string */() /* : string */;
         let typeString = this /* : ImmutableDefinition */.generateType /* : () => string */() /* : string */;
@@ -264,38 +268,36 @@ var ResultVariant;
     removeAnnotations() {
         return new ImmutableDefinition(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, this /* : ImmutableDefinition */.modifiers /* : List<string> */, this /* : ImmutableDefinition */.name /* : string */, this /* : ImmutableDefinition */.type /* : Type */, this /* : ImmutableDefinition */.typeParams /* : List<string> */) /* : ImmutableDefinition */;
     }
-    toString() {
-        return "ImmutableDefinition[" + "annotations=" + this /* : ImmutableDefinition */.annotations /* : List<string> */ + ", " + "maybeBefore=" + this /* : ImmutableDefinition */.modifiers /* : List<string> */ + ", " + "findName=" + this /* : ImmutableDefinition */.name /* : string */ + ", " + "findType=" + this /* : ImmutableDefinition */.type /* : Type */ + ", " + "typeParams=" + this /* : ImmutableDefinition */.typeParams /* : List<string> */ + "]";
-    }
 }
-/* private */ class ObjectType /*  */ {
-    constructor(name, typeParams, definitions, variants) {
+class ObjectType {
+    constructor(definition /* StructureDefinition */, definitions) {
         this._FindableTypeVariant = FindableTypeVariant.ObjectType /* : FindableTypeVariant */;
-        this /* : unknown */.name /* : unknown */ = name /* : unknown */;
-        this /* : unknown */.typeParams /* : unknown */ = typeParams /* : unknown */;
+        this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
         this /* : unknown */.definitions /* : unknown */ = definitions /* : unknown */;
-        this /* : unknown */.variants /* : unknown */ = variants /* : unknown */;
+    }
+    isNamed(name) {
+        return this /* : ObjectType */.definition /* : content-start StructureDefinition content-end */.name /* : unknown */ === name /* : string */;
     }
     generate() {
-        return this /* : ObjectType */.name /* : string */;
+        return this /* : ObjectType */.definition /* : content-start StructureDefinition content-end */.name /* : unknown */;
     }
     replace(mapping) {
-        return new ObjectType(this /* : ObjectType */.name /* : string */, this /* : ObjectType */.typeParams /* : List<string> */, this /* : ObjectType */.definitions /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => R) => Query<R> */((definition) => definition /* : Definition */.mapType /* : (arg0 : (arg0 : Type) => Type) => Definition */((type) => type /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Definition */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */, this /* : ObjectType */.variants /* : List<string> */) /* : ObjectType */;
+        return new ObjectType(this /* : ObjectType */.definition /* : content-start StructureDefinition content-end */, this /* : ObjectType */.definitions /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => content-start R content-end) => Query<content-start R content-end> */((definition) => definition /* : Definition */.mapType /* : (arg0 : (arg0 : Type) => Type) => Definition */((type) => type /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Definition */) /* : Query<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : ObjectType */;
     }
     find(name) {
-        return this /* : ObjectType */.definitions /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.filter /* : (arg0 : (arg0 : Definition) => boolean) => Query<Definition> */((definition) => definition /* : Definition */.findName /* : () => string */() /* : string */ === name /* : string */) /* : Query<Definition> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(Definition /* : Definition */.findType /* : unknown */) /* : Option<R> */.next /* : unknown */() /* : unknown */;
+        return this /* : ObjectType */.definitions /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.filter /* : (arg0 : (arg0 : Definition) => boolean) => Query<Definition> */((definition) => definition /* : Definition */.findName /* : () => string */() /* : string */ === name /* : string */) /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => content-start R content-end) => Option<content-start R content-end> */(Definition /* : Definition */.findType /* : unknown */) /* : Option<content-start R content-end> */.next /* : unknown */() /* : unknown */;
     }
     findBase() {
         return new Some(this /* : ObjectType */) /* : Some */;
     }
     hasVariant(name) {
-        return this /* : ObjectType */.variants /* : List<string> */() /* : unknown */.contains /* : unknown */(name /* : string */) /* : unknown */;
+        return this /* : ObjectType */.definition /* : content-start StructureDefinition content-end */.variants /* : unknown */.contains /* : unknown */(name /* : string */) /* : unknown */;
     }
     findName() {
-        return this /* : ObjectType */.name /* : string */;
+        return this /* : ObjectType */.definition /* : content-start StructureDefinition content-end */.name /* : unknown */;
     }
 }
-/* private */ class TypeParam /*  */ {
+class TypeParam {
     constructor(value) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
@@ -309,79 +311,81 @@ var ResultVariant;
         return "";
     }
 }
-/* private */ class CompileState /*  */ {
-    constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister, functionSegments) {
-        this /* : unknown */.structures /* : unknown */ = structures /* : unknown */;
+class CompileState {
+    constructor(generated, definedObjects, typeCache, functionCache, definitions, structDefinitions) {
+        this /* : unknown */.generated /* : unknown */ = generated /* : unknown */;
+        this /* : unknown */.definedObjects /* : unknown */ = definedObjects /* : unknown */;
+        this /* : unknown */.typeCache /* : unknown */ = typeCache /* : unknown */;
+        this /* : unknown */.functionCache /* : unknown */ = functionCache /* : unknown */;
         this /* : unknown */.definitions /* : unknown */ = definitions /* : unknown */;
-        this /* : unknown */.objectTypes /* : unknown */ = objectTypes /* : unknown */;
-        this /* : unknown */.structNames /* : unknown */ = structNames /* : unknown */;
-        this /* : unknown */.typeParams /* : unknown */ = typeParams /* : unknown */;
-        this /* : unknown */.typeRegister /* : unknown */ = typeRegister /* : unknown */;
-        this /* : unknown */.functionSegments /* : unknown */ = functionSegments /* : unknown */;
+        this /* : unknown */.structDefinitions /* : unknown */ = structDefinitions /* : unknown */;
     }
     static createInitial() {
-        return new CompileState(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, new None() /* : None */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : CompileState */;
+        return new CompileState(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, new None() /* : None */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : CompileState */;
     }
     resolveValue(name) {
-        return this /* : CompileState */.definitions /* : List<List<Definition>> */.iterateReversed /* : () => Query<List<Definition>> */() /* : Query<List<Definition>> */.flatMap /* : (arg0 : (arg0 : List<Definition>) => Query<R>) => Query<R> */(List /* : List */.query /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((definition) => definition /* : T */.findName /* : unknown */() /* : unknown */ === name /* : string */) /* : Option<T> */.next /* : unknown */() /* : unknown */.map /* : unknown */(Definition /* : Definition */.findType /* : unknown */) /* : unknown */;
+        return this /* : CompileState */.definitions /* : List<List<Definition>> */.queryReversed /* : () => Query<List<Definition>> */() /* : Query<List<Definition>> */.flatMap /* : (arg0 : (arg0 : List<Definition>) => Query<content-start R content-end>) => Query<content-start R content-end> */(List /* : List */.query /* : unknown */) /* : Query<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((definition /* R */) => definition /* : content-start R content-end */.findName /* : unknown */() /* : unknown */ === name /* : string */) /* : Option<content-start R content-end> */.next /* : unknown */() /* : unknown */.map /* : unknown */(Definition /* : Definition */.findType /* : unknown */) /* : unknown */;
     }
     addStructure(structure) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */.addLast /* : (arg0 : string) => List<string> */(structure /* : string */) /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */.addLast /* : (arg0 : string) => List<string> */(structure /* : string */) /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     defineAll(definitions) {
         let defined = this /* : CompileState */.definitions /* : List<List<Definition>> */.mapLast /* : (arg0 : (arg0 : List<Definition>) => List<Definition>) => List<List<Definition>> */((frame) => frame /* : List<Definition> */.addAllLast /* : (arg0 : List<Definition>) => List<Definition> */(definitions /* : List<Definition> */) /* : List<Definition> */) /* : List<List<Definition>> */;
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, defined /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, defined /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     resolveType(name) {
-        let maybe = this /* : CompileState */.structNames /* : List<[string, List<string>]> */.last /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.filter /* : (arg0 : (arg0 : [string, List<string>]) => boolean) => Option<[string, List<string>]> */((inner) => inner /* : [string, List<string>] */[0 /* : number */] === name /* : string */) /* : Option<[string, List<string>]> */;
-        if (maybe /* : Option<[string, List<string>]> */._OptionVariant /* : unknown */ === OptionVariant.Some /* : unknown */) {
-            let some = maybe /* : Option<[string, List<string>]> */;
-            let found = some /* : Some<[string, List<string>]> */.value /* : [string, List<string>] */;
-            return new Some(new ObjectType(found /* : [string, List<string>] */[0 /* : number */], this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.last /* : () => Option<List<Definition>> */() /* : Option<List<Definition>> */.orElse /* : (arg0 : List<Definition>) => List<Definition> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<Definition> */, found /* : [string, List<string>] */[1 /* : number */]) /* : ObjectType */) /* : Some */;
+        let maybe = this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */.last /* : () => Option<content-start StructureDefinition content-end> */() /* : Option<content-start StructureDefinition content-end> */.filter /* : (arg0 : (arg0 : content-start StructureDefinition content-end) => boolean) => Option<content-start StructureDefinition content-end> */((inner /* StructureDefinition */) => inner /* : content-start StructureDefinition content-end */.name /* : unknown */ === name /* : string */) /* : Option<content-start StructureDefinition content-end> */;
+        if (maybe /* : Option<StructureDefinition> */._OptionVariant /* : unknown */ === OptionVariant.Some /* : unknown */) {
+            let some = maybe /* : Option<StructureDefinition> */;
+            let foundDefinition = some /* : Some<StructureDefinition> */.value /* : StructureDefinition */;
+            return new Some(new ObjectType(foundDefinition /* : StructureDefinition */, this /* : CompileState */.definitions /* : List<List<Definition>> */.last /* : () => Option<List<Definition>> */() /* : Option<List<Definition>> */.orElse /* : (arg0 : List<Definition>) => List<Definition> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<Definition> */) /* : ObjectType */) /* : Some */;
         }
-        let maybeTypeParam = this /* : CompileState */.typeParams /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.filter /* : (arg0 : (arg0 : string) => boolean) => Query<string> */((param) => param /* : string */ === name /* : string */) /* : Query<string> */.next /* : unknown */() /* : unknown */;
+        let maybeTypeParam = this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */.queryReversed /* : () => Query<content-start StructureDefinition content-end> */() /* : Query<content-start StructureDefinition content-end> */.map /* : (arg0 : (arg0 : content-start StructureDefinition content-end) => content-start R content-end) => Query<content-start R content-end> */(StructureDefinition /* : (arg0 : string, arg1 : string) => content-start public content-end */.typeParams /* : unknown */) /* : Query<content-start R content-end> */.flatMap /* : (arg0 : (arg0 : content-start R content-end) => Option<content-start R content-end>) => Option<content-start R content-end> */(List /* : List */.query /* : unknown */) /* : Option<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((value /* R */) => value /* : content-start R content-end */ === name /* : string */) /* : Option<content-start R content-end> */.next /* : unknown */() /* : unknown */;
         if (maybeTypeParam /* : unknown */._UnknownVariant /* : unknown */ === UnknownVariant.Some /* : unknown */) {
             let some = maybeTypeParam /* : unknown */;
-            return new Some(new TypeParam(some /* : Some<[string, List<string>]> */.value /* : [string, List<string>] */) /* : TypeParam */) /* : Some */;
+            return new Some(new TypeParam(some /* : Some<StructureDefinition> */.value /* : StructureDefinition */) /* : TypeParam */) /* : Some */;
         }
-        return this /* : CompileState */.objectTypes /* : List<ObjectType> */.query /* : () => Query<ObjectType> */() /* : Query<ObjectType> */.filter /* : (arg0 : (arg0 : ObjectType) => boolean) => Query<ObjectType> */((type) => type /* : ObjectType */.name /* : string */ === name /* : string */) /* : Query<ObjectType> */.next /* : unknown */() /* : unknown */.map /* : unknown */((type) => type /* : ObjectType */) /* : unknown */;
+        return this /* : CompileState */.definedObjects /* : List<ObjectType> */.query /* : () => Query<ObjectType> */() /* : Query<ObjectType> */.filter /* : (arg0 : (arg0 : ObjectType) => boolean) => Query<ObjectType> */((type) => type /* : ObjectType */.isNamed /* : (arg0 : string) => boolean */(name /* : string */) /* : boolean */) /* : Query<ObjectType> */.next /* : unknown */() /* : unknown */.map /* : unknown */((type) => type /* : ObjectType */) /* : unknown */;
     }
     define(definition) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.mapLast /* : (arg0 : (arg0 : List<Definition>) => List<Definition>) => List<List<Definition>> */((frame) => frame /* : List<Definition> */.addLast /* : (arg0 : Definition) => List<Definition> */(definition /* : Definition */) /* : List<Definition> */) /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.mapLast /* : (arg0 : (arg0 : List<Definition>) => List<Definition>) => List<List<Definition>> */((frame) => frame /* : List<Definition> */.addLast /* : (arg0 : Definition) => List<Definition> */(definition /* : Definition */) /* : List<Definition> */) /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
-    pushStructName(definition) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.addLast /* : (arg0 : [string, List<string>]) => List<[string, List<string>]> */(definition /* : [string, List<string>] */) /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+    pushStructDefinition(definition /* StructureDefinition */) {
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */.addLast /* : (arg0 : content-start StructureDefinition content-end) => List<content-start StructureDefinition content-end> */(definition /* : content-start StructureDefinition content-end */) /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     withTypeParams(typeParams) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */.addAllLast /* : (arg0 : List<string>) => List<string> */(typeParams /* : List<string> */) /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     withExpectedType(type) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, new Some(type /* : Type */) /* : Some */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, new Some(type /* : Type */) /* : Some */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     popStructName() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.removeLast /* : () => Option<[List<[string, List<string>]>, [string, List<string>]]> */() /* : Option<[List<[string, List<string>]>, [string, List<string>]]> */.map /* : (arg0 : (arg0 : [List<[string, List<string>]>, [string, List<string>]]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.structNames /* : List<[string, List<string>]> */) /* : unknown */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */.removeLast /* : () => Option<[List<content-start StructureDefinition content-end>, content-start StructureDefinition content-end]> */() /* : Option<[List<content-start StructureDefinition content-end>, content-start StructureDefinition content-end]> */.map /* : (arg0 : (arg0 : [List<content-start StructureDefinition content-end>, content-start StructureDefinition content-end]) => content-start R content-end) => Option<content-start R content-end> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<content-start R content-end> */.orElse /* : unknown */(this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : unknown */) /* : CompileState */;
     }
     enterDefinitions() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.addLast /* : (arg0 : List<Definition>) => List<List<Definition>> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.addLast /* : (arg0 : List<Definition>) => List<List<Definition>> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     exitDefinitions() {
-        let removed = this /* : CompileState */.definitions /* : List<List<Definition>> */.removeLast /* : () => Option<[List<List<Definition>>, List<Definition>]> */() /* : Option<[List<List<Definition>>, List<Definition>]> */.map /* : (arg0 : (arg0 : [List<List<Definition>>, List<Definition>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.definitions /* : List<List<Definition>> */) /* : unknown */;
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, removed /* : unknown */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        let removed = this /* : CompileState */.definitions /* : List<List<Definition>> */.removeLast /* : () => Option<[List<List<Definition>>, List<Definition>]> */() /* : Option<[List<List<Definition>>, List<Definition>]> */.map /* : (arg0 : (arg0 : [List<List<Definition>>, List<Definition>]) => content-start R content-end) => Option<content-start R content-end> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<content-start R content-end> */.orElse /* : unknown */(this /* : CompileState */.definitions /* : List<List<Definition>> */) /* : unknown */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, removed /* : unknown */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     addType(thisType) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */.addLast /* : (arg0 : ObjectType) => List<ObjectType> */(thisType /* : ObjectType */) /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */.addLast /* : (arg0 : ObjectType) => List<ObjectType> */(thisType /* : ObjectType */) /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     addFunctionSegment(segment) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */.addLast /* : (arg0 : FunctionSegment) => List<FunctionSegment> */(segment /* : FunctionSegment */) /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, this /* : CompileState */.functionCache /* : List<FunctionSegment> */.addLast /* : (arg0 : FunctionSegment) => List<FunctionSegment> */(segment /* : FunctionSegment */) /* : List<FunctionSegment> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     clearFunctionSegments() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.generated /* : List<string> */, this /* : CompileState */.definedObjects /* : List<ObjectType> */, this /* : CompileState */.typeCache /* : Option<Type> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */) /* : CompileState */;
     }
     isCurrentStructName(stripped) {
-        return stripped /* : string */ === this /* : CompileState */.structNames /* : List<[string, List<string>]> */.last /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.map /* : (arg0 : (arg0 : [string, List<string>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */("") /* : unknown */;
+        return stripped /* : string */ === this /* : CompileState */.structDefinitions /* : List<content-start StructureDefinition content-end> */.last /* : () => Option<content-start StructureDefinition content-end> */() /* : Option<content-start StructureDefinition content-end> */.map /* : (arg0 : (arg0 : content-start StructureDefinition content-end) => content-start R content-end) => Option<content-start R content-end> */(StructureDefinition /* : (arg0 : string, arg1 : string) => content-start public content-end */.name /* : unknown */) /* : Option<content-start R content-end> */.orElse /* : unknown */("") /* : unknown */;
+    }
+    generate() {
+        return this /* : CompileState */.generated /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.collect /* : (arg0 : Collector<string, content-start R content-end>) => content-start R content-end */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : content-start R content-end */.orElse /* : unknown */("") /* : unknown */;
     }
 }
-/* private static */ class DivideState /*  */ {
+class DivideState {
     constructor(input, index, segments, buffer, depth) {
         this /* : DivideState */.segments /* : List<string> */ = segments /* : List<string> */;
         this /* : DivideState */.buffer /* : string */ = buffer /* : string */;
@@ -423,20 +427,20 @@ var ResultVariant;
         return new None() /* : None */;
     }
     popAndAppendToTuple() {
-        return this /* : DivideState */.pop /* : () => Option<[string, DivideState]> */() /* : Option<[string, DivideState]> */.map /* : (arg0 : (arg0 : [string, DivideState]) => R) => Option<R> */((tuple) => {
+        return this /* : DivideState */.pop /* : () => Option<[string, DivideState]> */() /* : Option<[string, DivideState]> */.map /* : (arg0 : (arg0 : [string, DivideState]) => content-start R content-end) => Option<content-start R content-end> */((tuple) => {
             let c = tuple /* : [string, DivideState] */[0 /* : number */];
             let right = tuple /* : [string, DivideState] */[1 /* : number */];
             return [c /* : unknown */, right /* : unknown */.append /* : unknown */(c /* : unknown */) /* : unknown */];
-        }) /* : Option<R> */;
+        }) /* : Option<content-start R content-end> */;
     }
     popAndAppendToOption() {
-        return this /* : DivideState */.popAndAppendToTuple /* : () => Option<[string, DivideState]> */() /* : Option<[string, DivideState]> */.map /* : (arg0 : (arg0 : [string, DivideState]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.right /* : unknown */) /* : Option<R> */;
+        return this /* : DivideState */.popAndAppendToTuple /* : () => Option<[string, DivideState]> */() /* : Option<[string, DivideState]> */.map /* : (arg0 : (arg0 : [string, DivideState]) => content-start R content-end) => Option<content-start R content-end> */(Tuple2 /* : Tuple2 */.right /* : unknown */) /* : Option<content-start R content-end> */;
     }
     peek() {
         return this /* : DivideState */.input /* : string */.charAt /* : unknown */(this /* : DivideState */.index /* : number */) /* : unknown */;
     }
 }
-/* private */ class Joiner /*  */ {
+class Joiner {
     constructor(delimiter) {
         this /* : unknown */.delimiter /* : unknown */ = delimiter /* : unknown */;
     }
@@ -447,10 +451,10 @@ var ResultVariant;
         return new None() /* : None */;
     }
     fold(current, element) {
-        return new Some(current /* : Option<string> */.map /* : (arg0 : (arg0 : string) => R) => Option<R> */((inner) => inner /* : string */ + this /* : Joiner */.delimiter /* : string */ + element /* : string */) /* : Option<R> */.orElse /* : unknown */(element /* : string */) /* : unknown */) /* : Some */;
+        return new Some(current /* : Option<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Option<content-start R content-end> */((inner) => inner /* : string */ + this /* : Joiner */.delimiter /* : string */ + element /* : string */) /* : Option<content-start R content-end> */.orElse /* : unknown */(element /* : string */) /* : unknown */) /* : Some */;
     }
 }
-/* private static */ class ListCollector {
+class ListCollector {
     createInitial() {
         return Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */;
     }
@@ -458,7 +462,7 @@ var ResultVariant;
         return current /* : List<T> */.addLast /* : (arg0 : T) => List<T> */(element /* : T */) /* : List<T> */;
     }
 }
-/* private static */ class FlatMapHead {
+class FlatMapHead {
     constructor(head, mapper) {
         this /* : FlatMapHead */.mapper /* : (arg0 : T) => Query<R> */ = mapper /* : (arg0 : T) => Query<R> */;
         this /* : FlatMapHead */.current /* : Option<Query<R>> */ = new None() /* : None */;
@@ -478,7 +482,7 @@ var ResultVariant;
             }
             let outer = this /* : FlatMapHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */;
             if (outer /* : Option<T> */.isPresent /* : () => boolean */() /* : boolean */) {
-                this /* : FlatMapHead */.current /* : Option<Query<R>> */ = outer /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(this /* : FlatMapHead */.mapper /* : (arg0 : T) => Query<R> */) /* : Option<R> */;
+                this /* : FlatMapHead */.current /* : Option<Query<R>> */ = outer /* : Option<T> */.map /* : (arg0 : (arg0 : T) => content-start R content-end) => Option<content-start R content-end> */(this /* : FlatMapHead */.mapper /* : (arg0 : T) => Query<R> */) /* : Option<content-start R content-end> */;
             }
             else {
                 return new None() /* : None */;
@@ -486,7 +490,7 @@ var ResultVariant;
         }
     }
 }
-/* private */ class ArrayType /*  */ {
+class ArrayType {
     constructor(right) {
         this /* : unknown */.right /* : unknown */ = right /* : unknown */;
     }
@@ -500,7 +504,7 @@ var ResultVariant;
         return "";
     }
 }
-/* private static final */ class Whitespace /*  */ {
+class Whitespace {
     constructor() {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Whitespace /* : IncompleteClassSegmentVariant */;
         this._ParameterVariant = ParameterVariant.Whitespace /* : ParameterVariant */;
@@ -509,20 +513,20 @@ var ResultVariant;
     generate() {
         return "";
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new None() /* : None */;
     }
 }
-/* private static */ class Queries /*  */ {
+class Queries {
     static fromOption(option) {
-        let single = option /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(SingleHead /* : SingleHead */.new /* : unknown */) /* : Option<R> */;
+        let single = option /* : Option<T> */.map /* : (arg0 : (arg0 : T) => content-start R content-end) => Option<content-start R content-end> */(SingleHead /* : SingleHead */.new /* : unknown */) /* : Option<content-start R content-end> */;
         return new HeadedQuery(single /* : Option<Head<T>> */.orElseGet /* : (arg0 : () => Head<T>) => Head<T> */(EmptyHead /* : EmptyHead */.new /* : unknown */) /* : Head<T> */) /* : HeadedQuery */;
     }
     static from(elements) {
-        return new HeadedQuery(new RangeHead(elements /* : T[] */.length /* : unknown */) /* : RangeHead */) /* : HeadedQuery */.map /* : (arg0 : (arg0 : T) => R) => Query<R> */((index) =>  /* elements[index] */) /* : Query<R> */;
+        return new HeadedQuery(new RangeHead(elements /* : T[] */.length /* : unknown */) /* : RangeHead */) /* : HeadedQuery */.map /* : (arg0 : (arg0 : T) => content-start R content-end) => Query<content-start R content-end> */((index) =>  /* elements[index] */) /* : Query<content-start R content-end> */;
     }
 }
-/* private */ class FunctionType /*  */ {
+class FunctionType {
     constructor(arguments, returns) {
         this /* : unknown */.arguments /* : unknown */ = arguments /* : unknown */;
         this /* : unknown */.returns /* : unknown */ = returns /* : unknown */;
@@ -532,55 +536,55 @@ var ResultVariant;
         return "(" + joined /* : unknown */ + ") => " + this /* : FunctionType */.returns /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
     replace(mapping) {
-        return new FunctionType(this /* : FunctionType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */((type) => type /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */, this /* : FunctionType */.returns /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : FunctionType */;
+        return new FunctionType(this /* : FunctionType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */((type) => type /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */, this /* : FunctionType */.returns /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : FunctionType */;
     }
     findName() {
         return "";
     }
 }
-/* private */ class TupleType /*  */ {
+class TupleType {
     constructor(arguments) {
         this /* : unknown */.arguments /* : unknown */ = arguments /* : unknown */;
     }
     generate() {
-        let joinedArguments = this /* : TupleType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */(Type /* : Type */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joinedArguments = this /* : TupleType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */(Type /* : Type */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "[" + joinedArguments + "]";
     }
     replace(mapping) {
-        return new TupleType(this /* : TupleType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */((child) => child /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : TupleType */;
+        return new TupleType(this /* : TupleType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */((child) => child /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : TupleType */;
     }
     findName() {
         return "";
     }
 }
-/* private */ class Template /*  */ {
+class Template {
     constructor(base, arguments) {
         this._FindableTypeVariant = FindableTypeVariant.Template /* : FindableTypeVariant */;
         this /* : unknown */.base /* : unknown */ = base /* : unknown */;
         this /* : unknown */.arguments /* : unknown */ = arguments /* : unknown */;
     }
     generate() {
-        let joinedArguments = this /* : Template */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */(Type /* : Type */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joinedArguments = this /* : Template */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */(Type /* : Type */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return this /* : Template */.base /* : ObjectType */.generate /* : () => string */() /* : string */ + joinedArguments /* : unknown */;
     }
     find(name) {
-        return this /* : Template */.base /* : ObjectType */.find /* : (arg0 : string) => Option<Type> */(name /* : string */) /* : Option<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Option<R> */((found) => {
-            let mapping = this /* : Template */.base /* : ObjectType */.typeParams /* : List<string> */() /* : unknown */.query /* : unknown */() /* : unknown */.zip /* : unknown */(this /* : Template */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */) /* : unknown */.collect /* : unknown */(new MapCollector() /* : MapCollector */) /* : unknown */;
+        return this /* : Template */.base /* : ObjectType */.find /* : (arg0 : string) => Option<Type> */(name /* : string */) /* : Option<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Option<content-start R content-end> */((found) => {
+            let mapping = this /* : Template */.base /* : ObjectType */.definition /* : content-start StructureDefinition content-end */.typeParams /* : unknown */.query /* : unknown */() /* : unknown */.zip /* : unknown */(this /* : Template */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */) /* : unknown */.collect /* : unknown */(new MapCollector() /* : MapCollector */) /* : unknown */;
             return found /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : unknown */) /* : Type */;
-        }) /* : Option<R> */;
+        }) /* : Option<content-start R content-end> */;
     }
     findBase() {
         return new Some(this /* : Template */.base /* : ObjectType */) /* : Some */;
     }
     replace(mapping) {
-        let collect = this /* : Template */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */((argument) => argument /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        let collect = this /* : Template */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */((argument) => argument /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
         return new Template(this /* : Template */.base /* : ObjectType */, collect /* : unknown */) /* : Template */;
     }
     findName() {
         return this /* : Template */.base /* : ObjectType */.findName /* : () => string */() /* : string */;
     }
 }
-/* private */ class Placeholder /*  */ {
+class Placeholder {
     constructor(input) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder /* : IncompleteClassSegmentVariant */;
         this._FindableTypeVariant = FindableTypeVariant.Placeholder /* : FindableTypeVariant */;
@@ -606,11 +610,11 @@ var ResultVariant;
     findName() {
         return "";
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new None() /* : None */;
     }
 }
-/* private */ class StringValue /*  */ {
+class StringValue {
     constructor(value) {
         this._ValueVariant = ValueVariant.StringValue /* : ValueVariant */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -622,7 +626,7 @@ var ResultVariant;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
-/* private */ class DataAccess /*  */ {
+class DataAccess {
     constructor(parent, property, type) {
         this._ValueVariant = ValueVariant.DataAccess /* : ValueVariant */;
         this /* : unknown */.parent /* : unknown */ = parent /* : unknown */;
@@ -636,7 +640,7 @@ var ResultVariant;
         return this /* : DataAccess */.type /* : () => Type */;
     }
 }
-/* private */ class ConstructionCaller /*  */ {
+class ConstructionCaller {
     constructor(type) {
         this._CallerVariant = CallerVariant.ConstructionCaller /* : CallerVariant */;
         this /* : unknown */.type /* : unknown */ = type /* : unknown */;
@@ -648,7 +652,7 @@ var ResultVariant;
         return new FunctionType(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, this /* : ConstructionCaller */.type /* : Type */) /* : FunctionType */;
     }
 }
-/* private */ class Operator /*  */ {
+class Operator {
     constructor(sourceRepresentation, targetRepresentation) {
         this.GREATER_THAN_OR_EQUALS = Operator();
         this.LESS_THAN = Operator();
@@ -663,7 +667,7 @@ Operator.AND = new Operator("&&", "&&") /* : Operator */;
 Operator.EQUALS = new Operator("==", "===") /* : Operator */;
 Operator.OR = new Operator("||", "||") /* : Operator */;
 Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
-/* private */ class Operation /*  */ {
+class Operation {
     constructor(left, operator, right) {
         this._ValueVariant = ValueVariant.Operation /* : ValueVariant */;
         this /* : unknown */.left /* : unknown */ = left /* : unknown */;
@@ -677,7 +681,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
-/* private */ class Not /*  */ {
+class Not {
     constructor(value) {
         this._ValueVariant = ValueVariant.Not /* : ValueVariant */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -689,7 +693,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
-/* private */ class BlockLambdaValue /*  */ {
+class BlockLambdaValue {
     constructor(depth, statements) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
         this /* : unknown */.statements /* : unknown */ = statements /* : unknown */;
@@ -698,24 +702,24 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "{" + this.joinStatements() + createIndent(this.depth) + "}";
     }
     joinStatements() {
-        return this /* : BlockLambdaValue */.statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => R) => Query<R> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return this /* : BlockLambdaValue */.statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => content-start R content-end) => Query<content-start R content-end> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
 }
-/* private */ class Lambda /*  */ {
+class Lambda {
     constructor(parameters, body) {
         this._ValueVariant = ValueVariant.Lambda /* : ValueVariant */;
         this /* : unknown */.parameters /* : unknown */ = parameters /* : unknown */;
         this /* : unknown */.body /* : unknown */ = body /* : unknown */;
     }
     generate() {
-        let joined = this /* : Lambda */.parameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => R) => Query<R> */(Definition /* : Definition */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joined = this /* : Lambda */.parameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => content-start R content-end) => Query<content-start R content-end> */(Definition /* : Definition */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "(" + joined /* : unknown */ + ") => " + this /* : Lambda */.body /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
     type() {
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
-/* private */ class Invokable /*  */ {
+class Invokable {
     constructor(caller, arguments, type) {
         this._ValueVariant = ValueVariant.Invokable /* : ValueVariant */;
         this /* : unknown */.caller /* : unknown */ = caller /* : unknown */;
@@ -723,11 +727,11 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.type /* : unknown */ = type /* : unknown */;
     }
     generate() {
-        let joined = this /* : Invokable */.arguments /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => R) => Query<R> */(Value /* : Value */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joined = this /* : Invokable */.arguments /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => content-start R content-end) => Query<content-start R content-end> */(Value /* : Value */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return this /* : Invokable */.caller /* : Caller */.generate /* : () => string */() /* : string */ + "(" + joined /* : unknown */ + ")" + createDebugString /* : (arg0 : Type) => string */(this /* : Invokable */.type /* : Type */) /* : unknown */;
     }
 }
-/* private */ class IndexValue /*  */ {
+class IndexValue {
     constructor(parent, child) {
         this._ValueVariant = ValueVariant.IndexValue /* : ValueVariant */;
         this /* : unknown */.parent /* : unknown */ = parent /* : unknown */;
@@ -740,7 +744,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
-/* private */ class SymbolValue /*  */ {
+class SymbolValue {
     constructor(stripped, type) {
         this._ValueVariant = ValueVariant.SymbolValue /* : ValueVariant */;
         this /* : unknown */.stripped /* : unknown */ = stripped /* : unknown */;
@@ -750,9 +754,9 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : SymbolValue */.stripped /* : string */ + createDebugString /* : (arg0 : Type) => string */(this /* : SymbolValue */.type /* : Type */) /* : unknown */;
     }
 }
-/* private static */ class Maps /*  */ {
+class Maps {
 }
-/* private */ class MapCollector {
+class MapCollector {
     createInitial() {
         return Maps /* : Maps */.empty /* : () => Map<K, V> */() /* : Map<K, V> */;
     }
@@ -760,7 +764,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return current /* : Map<K, V> */.with /* : (arg0 : K, arg1 : V) => Map<K, V> */(element /* : [K, V] */[0 /* : number */], element /* : [K, V] */[1 /* : number */]) /* : Map<K, V> */;
     }
 }
-/* private static */ class ConstructorHeader /*  */ {
+class ConstructorHeader {
     createDefinition(paramTypes) {
         return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("new", Primitive /* : Primitive */.Unknown /* : unknown */) /* : Definition */;
     }
@@ -768,7 +772,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "constructor " + joinedParameters /* : string */;
     }
 }
-/* private */ class FunctionNode /*  */ {
+class FunctionNode {
     constructor(depth, header, parameters, maybeStatements) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
         this /* : unknown */.header /* : unknown */ = header /* : unknown */;
@@ -776,16 +780,16 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.maybeStatements /* : unknown */ = maybeStatements /* : unknown */;
     }
     static joinStatements(statements) {
-        return statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => R) => Query<R> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => content-start R content-end) => Query<content-start R content-end> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     generate() {
         let indent = createIndent /* : (arg0 : number) => string */(this /* : FunctionNode */.depth /* : number */) /* : string */;
         let generatedHeader = this /* : FunctionNode */.header /* : Header */.generateWithParams /* : (arg0 : string) => string */(joinValues /* : (arg0 : List<Definition>) => string */(this /* : FunctionNode */.parameters /* : List<Definition> */) /* : string */) /* : string */;
-        let generatedStatements = this /* : FunctionNode */.maybeStatements /* : Option<List<FunctionSegment>> */.map /* : (arg0 : (arg0 : List<FunctionSegment>) => R) => Option<R> */(FunctionNode /* : FunctionNode */.joinStatements /* : unknown */) /* : Option<R> */.map /* : unknown */((inner) => " {" + inner + indent + "}") /* : unknown */.orElse /* : unknown */(";") /* : unknown */;
+        let generatedStatements = this /* : FunctionNode */.maybeStatements /* : Option<List<FunctionSegment>> */.map /* : (arg0 : (arg0 : List<FunctionSegment>) => content-start R content-end) => Option<content-start R content-end> */(FunctionNode /* : FunctionNode */.joinStatements /* : unknown */) /* : Option<content-start R content-end> */.map /* : unknown */((inner) => " {" + inner + indent + "}") /* : unknown */.orElse /* : unknown */(";") /* : unknown */;
         return indent /* : string */ + generatedHeader /* : string */ + generatedStatements /* : unknown */;
     }
 }
-/* private */ class Block /*  */ {
+class Block {
     constructor(depth, header, statements) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
         this /* : unknown */.header /* : unknown */ = header /* : unknown */;
@@ -793,11 +797,11 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     }
     generate() {
         let indent = createIndent /* : (arg0 : number) => string */(this /* : Block */.depth /* : number */) /* : string */;
-        let collect = this /* : Block */.statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => R) => Query<R> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let collect = this /* : Block */.statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => content-start R content-end) => Query<content-start R content-end> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return indent /* : string */ + this /* : Block */.header /* : BlockHeader */.generate /* : () => string */() /* : string */ + "{" + collect + indent + "}";
     }
 }
-/* private */ class Conditional /*  */ {
+class Conditional {
     constructor(prefix, value1) {
         this /* : unknown */.prefix /* : unknown */ = prefix /* : unknown */;
         this /* : unknown */.value1 /* : unknown */ = value1 /* : unknown */;
@@ -806,12 +810,12 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Conditional */.prefix /* : string */ + " (" + this.value1.generate() + ")";
     }
 }
-/* private static */ class Else /*  */ {
+class Else {
     generate() {
         return "else ";
     }
 }
-/* private */ class Return /*  */ {
+class Return {
     constructor(value) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
@@ -819,7 +823,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "return " + this /* : Return */.value /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class Initialization /*  */ {
+class Initialization {
     constructor(definition, source) {
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
         this /* : unknown */.source /* : unknown */ = source /* : unknown */;
@@ -828,7 +832,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "let " + this /* : Initialization */.definition /* : Definition */.generate /* : () => string */() /* : string */ + " = " + this /* : Initialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class FieldInitialization /*  */ {
+class FieldInitialization {
     constructor(definition, source) {
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
         this /* : unknown */.source /* : unknown */ = source /* : unknown */;
@@ -837,7 +841,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : FieldInitialization */.definition /* : Definition */.generate /* : () => string */() /* : string */ + " = " + this /* : FieldInitialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class Assignment /*  */ {
+class Assignment {
     constructor(destination, source) {
         this /* : unknown */.destination /* : unknown */ = destination /* : unknown */;
         this /* : unknown */.source /* : unknown */ = source /* : unknown */;
@@ -846,7 +850,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Assignment */.destination /* : Value */.generate /* : () => string */() /* : string */ + " = " + this /* : Assignment */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class Statement /*  */ {
+class Statement {
     constructor(depth, value) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -855,7 +859,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return createIndent /* : (arg0 : number) => string */(this /* : Statement */.depth /* : number */) /* : string */ + this /* : Statement */.value /* : StatementValue */.generate /* : () => string */() /* : string */ + ";";
     }
 }
-/* private */ class MethodPrototype /*  */ {
+class MethodPrototype {
     constructor(depth, header, parameters, content) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.MethodPrototype /* : IncompleteClassSegmentVariant */;
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
@@ -869,79 +873,64 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     findParamTypes() {
         return this /* : MethodPrototype */.parameters /* : List<Definition> */() /* : unknown */.query /* : unknown */() /* : unknown */.map /* : unknown */(Definition /* : Definition */.findType /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new Some(this /* : MethodPrototype */.header /* : Header */.createDefinition /* : (arg0 : List<Type>) => Definition */(this /* : MethodPrototype */.findParamTypes /* : () => List<Type> */() /* : List<Type> */) /* : Definition */) /* : Some */;
     }
 }
-/* private */ class IncompleteClassSegmentWrapper /*  */ {
+class IncompleteClassSegmentWrapper {
     constructor(segment) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.IncompleteClassSegmentWrapper /* : IncompleteClassSegmentVariant */;
         this /* : unknown */.segment /* : unknown */ = segment /* : unknown */;
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new None() /* : None */;
     }
 }
-/* private */ class ClassDefinition /*  */ {
+class ClassDefinition {
     constructor(depth, definition) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassDefinition /* : IncompleteClassSegmentVariant */;
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new Some(this /* : ClassDefinition */.definition /* : Definition */) /* : Some */;
     }
 }
-/* private */ class ClassInitialization /*  */ {
+class ClassInitialization {
     constructor(depth, definition, value) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassInitialization /* : IncompleteClassSegmentVariant */;
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new Some(this /* : ClassInitialization */.definition /* : Definition */) /* : Some */;
     }
 }
-/* private */ class TypeRef /*  */ {
+class TypeRef {
     constructor(value) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
 }
-/* private */ class StructurePrototype /*  */ {
-    constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, superTypes) {
+class StructurePrototype {
+    constructor(definition /* StructureDefinition */, parameters, segments) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype /* : IncompleteClassSegmentVariant */;
-        this /* : unknown */.targetInfix /* : unknown */ = targetInfix /* : unknown */;
-        this /* : unknown */.beforeInfix /* : unknown */ = beforeInfix /* : unknown */;
-        this /* : unknown */.name /* : unknown */ = name /* : unknown */;
-        this /* : unknown */.typeParams /* : unknown */ = typeParams /* : unknown */;
+        this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
         this /* : unknown */.parameters /* : unknown */ = parameters /* : unknown */;
-        this /* : unknown */.after /* : unknown */ = after /* : unknown */;
         this /* : unknown */.segments /* : unknown */ = segments /* : unknown */;
-        this /* : unknown */.variants /* : unknown */ = variants /* : unknown */;
-        this /* : unknown */.interfaces /* : unknown */ = interfaces /* : unknown */;
-        this /* : unknown */.superTypes /* : unknown */ = superTypes /* : unknown */;
-    }
-    static generateEnumEntries(variants) {
-        return variants /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */((inner) => "\n\t" + inner /* : string */) /* : Query<R> */.collect /* : unknown */(new Joiner(",") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     createObjectType() {
-        let definitionFromSegments = this /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */.query /* : () => Query<IncompleteClassSegment> */() /* : Query<IncompleteClassSegment> */.map /* : (arg0 : (arg0 : IncompleteClassSegment) => R) => Query<R> */(IncompleteClassSegment /* : IncompleteClassSegment */.maybeCreateDefinition /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
-        return new ObjectType(this /* : StructurePrototype */.name /* : string */, this /* : StructurePrototype */.typeParams /* : List<string> */, definitionFromSegments /* : unknown */.addAllLast /* : unknown */(this /* : StructurePrototype */.parameters /* : List<Definition> */) /* : unknown */, this /* : StructurePrototype */.variants /* : List<string> */) /* : ObjectType */;
+        let definitionFromSegments = this /* : StructurePrototype */.findDefinitionsFromSegments /* : () => List<Definition> */() /* : List<Definition> */;
+        return new ObjectType(this /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */, definitionFromSegments /* : List<Definition> */.addAllLast /* : (arg0 : List<Definition>) => List<Definition> */(this /* : StructurePrototype */.parameters /* : List<Definition> */) /* : List<Definition> */) /* : ObjectType */;
     }
-    maybeCreateDefinition() {
+    findDefinitionsFromSegments() {
+        return this /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */.query /* : () => Query<IncompleteClassSegment> */() /* : Query<IncompleteClassSegment> */.map /* : (arg0 : (arg0 : IncompleteClassSegment) => content-start R content-end) => Query<content-start R content-end> */(IncompleteClassSegment /* : IncompleteClassSegment */.findDefinition /* : unknown */) /* : Query<content-start R content-end> */.flatMap /* : (arg0 : (arg0 : content-start R content-end) => Option<content-start R content-end>) => Option<content-start R content-end> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+    }
+    findDefinition() {
         return new None() /* : None */;
     }
-    joinTypeParams() {
-        return this /* : StructurePrototype */.typeParams /* : List<string> */() /* : unknown */.query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-    }
-    generateToEnum() {
-        let variants = this /* : StructurePrototype */.variants /* : List<string> */;
-        let joined = generateEnumEntries /* : (arg0 : List<string>) => string */(variants /* : List<string> */) /* : string */;
-        return "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
-    }
 }
-/* private */ class Cast /*  */ {
+class Cast {
     constructor(value, type) {
         this._ValueVariant = ValueVariant.Cast /* : ValueVariant */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -951,7 +940,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Cast */.value /* : Value */.generate /* : () => string */() /* : string */ + " as " + this /* : Cast */.type /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class Ok {
+class Ok {
     constructor(value) {
         this._ResultVariant = ResultVariant.Ok /* : ResultVariant */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -963,7 +952,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return whenOk /* : (arg0 : T) => R */(this /* : Ok */.value /* : T */) /* : R */;
     }
 }
-/* private */ class Err {
+class Err {
     constructor(error) {
         this._ResultVariant = ResultVariant.Err /* : ResultVariant */;
         this /* : unknown */.error /* : unknown */ = error /* : unknown */;
@@ -975,7 +964,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return whenErr /* : (arg0 : X) => R */(this /* : Err */.error /* : X */) /* : R */;
     }
 }
-/* private */ class JVMIOError /*  */ {
+class JVMIOError {
     constructor(error /* IOException */) {
         this /* : unknown */.error /* : unknown */ = error /* : unknown */;
     }
@@ -985,65 +974,86 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return writer /* : content-start StringWriter content-end */.toString /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class TupleNode /*  */ {
+class TupleNode {
     constructor(values) {
         this._ValueVariant = ValueVariant.TupleNode /* : ValueVariant */;
         this /* : unknown */.values /* : unknown */ = values /* : unknown */;
     }
     generate() {
-        let joined = this /* : TupleNode */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => R) => Query<R> */(Value /* : Value */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joined = this /* : TupleNode */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => content-start R content-end) => Query<content-start R content-end> */(Value /* : Value */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "[" + joined + "]";
     }
     type() {
-        return new TupleType(this /* : TupleNode */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => R) => Query<R> */(Value /* : Value */.type /* : unknown */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : TupleType */;
+        return new TupleType(this /* : TupleNode */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => content-start R content-end) => Query<content-start R content-end> */(Value /* : Value */.type /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : TupleType */;
     }
 }
-/* private */ class MapHead {
+class MapHead {
     constructor(head, mapper) {
         this /* : unknown */.head /* : unknown */ = head /* : unknown */;
         this /* : unknown */.mapper /* : unknown */ = mapper /* : unknown */;
     }
     next() {
-        return this /* : MapHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(this /* : MapHead */.mapper /* : (arg0 : T) => R */) /* : Option<R> */;
+        return this /* : MapHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.map /* : (arg0 : (arg0 : T) => content-start R content-end) => Option<content-start R content-end> */(this /* : MapHead */.mapper /* : (arg0 : T) => R */) /* : Option<content-start R content-end> */;
     }
 }
-/* private */ class ZipHead {
+class ZipHead {
     constructor(head, other) {
         this /* : unknown */.head /* : unknown */ = head /* : unknown */;
         this /* : unknown */.other /* : unknown */ = other /* : unknown */;
     }
     next() {
-        return this /* : ZipHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.and /* : (arg0 : () => Option<R>) => Option<[T, R]> */(this /* : ZipHead */.other /* : Query<R> */.next /* : unknown */) /* : Option<[T, R]> */;
+        return this /* : ZipHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.and /* : (arg0 : () => Option<content-start R content-end>) => Option<[T, content-start R content-end]> */(this /* : ZipHead */.other /* : Query<R> */.next /* : unknown */) /* : Option<[T, content-start R content-end]> */;
     }
 }
-/* private */ class EnumValue /*  */ {
+class EnumValue {
     constructor(value, values) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
         this /* : unknown */.values /* : unknown */ = values /* : unknown */;
     }
     generate() {
-        let s = this /* : EnumValue */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => R) => Query<R> */(Value /* : Value */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let s = this /* : EnumValue */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => content-start R content-end) => Query<content-start R content-end> */(Value /* : Value */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return this /* : EnumValue */.value /* : string */ + "(" + s + ")";
     }
 }
-/* private */ class EnumValues /*  */ {
+class EnumValues {
     constructor(values) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.EnumValues /* : IncompleteClassSegmentVariant */;
         this /* : unknown */.values /* : unknown */ = values /* : unknown */;
     }
     generate() {
-        return this /* : EnumValues */.values /* : List<EnumValue> */.query /* : () => Query<EnumValue> */() /* : Query<EnumValue> */.map /* : (arg0 : (arg0 : EnumValue) => R) => Query<R> */(EnumValue /* : EnumValue */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return this /* : EnumValues */.values /* : List<EnumValue> */.query /* : () => Query<EnumValue> */() /* : Query<EnumValue> */.map /* : (arg0 : (arg0 : EnumValue) => content-start R content-end) => Query<content-start R content-end> */(EnumValue /* : EnumValue */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
-    maybeCreateDefinition() {
+    findDefinition() {
         return new None() /* : None */;
     }
 }
-/* public static */ class Strings /*  */ {
+class Strings {
     static isBlank(input) {
         return input /* : string */.isBlank /* : unknown */() /* : unknown */;
     }
 }
-/* private */ class Primitive /*  */ {
+class StructureDefinition {
+    constructor(name, type, typeParams, variants, interfaces, superTypes, annotations) {
+        this /* : unknown */.name /* : unknown */ = name /* : unknown */;
+        this /* : unknown */.type /* : unknown */ = type /* : unknown */;
+        this /* : unknown */.typeParams /* : unknown */ = typeParams /* : unknown */;
+        this /* : unknown */.variants /* : unknown */ = variants /* : unknown */;
+        this /* : unknown */.interfaces /* : unknown */ = interfaces /* : unknown */;
+        this /* : unknown */.superTypes /* : unknown */ = superTypes /* : unknown */;
+        this /* : unknown */.annotations /* : unknown */ = annotations /* : unknown */;
+    }
+    generateToEnum() {
+        let joined = this /* : StructureDefinition */.variants /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */((inner) => "\n\t" + inner /* : string */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(",") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
+    }
+    joinTypeParams() {
+        return this /* : StructureDefinition */.typeParams /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.collect /* : (arg0 : Collector<string, content-start R content-end>) => content-start R content-end */(new Joiner(", ") /* : Joiner */) /* : content-start R content-end */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+    }
+    isActual() {
+        return this /* : StructureDefinition */.annotations /* : List<string> */.contains /* : (arg0 : string) => boolean */("Actual") /* : boolean */;
+    }
+}
+class Primitive {
     constructor(value) {
         this /* : Primitive */.value /* : string */ = value /* : string */;
     }
@@ -1062,7 +1072,7 @@ Primitive.String = new Primitive("string") /* : Primitive */;
 Primitive.Boolean = new Primitive("boolean") /* : Primitive */;
 Primitive.Unknown = new Primitive("unknown") /* : Primitive */;
 Primitive.Void = new Primitive("void") /* : Primitive */;
-/* private */ class BooleanValue /*  */ {
+class BooleanValue {
     constructor(value) {
         this._ValueVariant = ValueVariant.BooleanValue /* : ValueVariant */;
         this /* : BooleanValue */.value /* : string */ = value /* : string */;
@@ -1076,13 +1086,13 @@ Primitive.Void = new Primitive("void") /* : Primitive */;
 }
 BooleanValue.True = new BooleanValue("true") /* : BooleanValue */;
 BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
-/* public */ class Main /*  */ {
+class Main {
     static generatePlaceholder(input) {
         let replaced = input /* : string */.replace /* : unknown */("/*", "content-start") /* : unknown */.replace /* : unknown */("*/", "content-end") /* : unknown */;
         return "/* " + replaced + " */";
     }
     static joinValues(retainParameters) {
-        let inner = retainParameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => R) => Query<R> */(Definition /* : Definition */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let inner = retainParameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => content-start R content-end) => Query<content-start R content-end> */(Definition /* : Definition */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "(" + inner + ")";
     }
     static createIndent(depth) {
@@ -1130,7 +1140,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     compile(input) {
         let state = CompileState /* : CompileState */.createInitial /* : () => CompileState */() /* : CompileState */;
         let parsed = this /* : Main */.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state /* : CompileState */, input /* : string */, this /* : Main */.compileRootSegment /* : unknown */) /* : [CompileState, List<T>] */;
-        let joined = parsed /* : [CompileState, List<T>] */[0 /* : number */].structures /* : unknown */.query /* : unknown */() /* : unknown */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joined = parsed /* : [CompileState, List<T>] */[0 /* : number */].generate /* : unknown */() /* : unknown */;
         return joined /* : unknown */ + this /* : Main */.generateStatements /* : unknown */(parsed /* : [CompileState, List<T>] */[1 /* : number */]) /* : unknown */;
     }
     generateStatements(statements) {
@@ -1140,7 +1150,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return this /* : Main */.parseAllWithIndices /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : DivideState, arg1 : string) => DivideState, arg3 : (arg0 : CompileState, arg1 : [number, string]) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state /* : CompileState */, input /* : string */, this /* : Main */.foldStatementChar /* : unknown */, (state3, tuple) => new Some(mapper /* : (arg0 : CompileState, arg1 : string) => [CompileState, T] */(state3 /* : unknown */, tuple /* : unknown */.right /* : unknown */() /* : unknown */) /* : [CompileState, T] */) /* : Some */) /* : Option<[CompileState, List<T>]> */.orElseGet /* : (arg0 : () => [CompileState, List<T>]) => [CompileState, List<T>] */(() => [state /* : CompileState */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */]) /* : [CompileState, List<T>] */;
     }
     generateAll(merger, elements) {
-        return elements /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : string) => R) => R */("", merger /* : (arg0 : string, arg1 : string) => string */) /* : R */;
+        return elements /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.fold /* : (arg0 : content-start R content-end, arg1 : (arg0 : content-start R content-end, arg1 : string) => content-start R content-end) => content-start R content-end */("", merger /* : (arg0 : string, arg1 : string) => string */) /* : content-start R content-end */;
     }
     parseAllWithIndices(state, input, folder, mapper) {
         let stringList = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(input /* : string */, folder /* : (arg0 : DivideState, arg1 : string) => DivideState */) /* : List<string> */;
@@ -1148,15 +1158,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     mapUsingState(state, elements, mapper) {
         let initial = new Some([state /* : CompileState */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */]) /* : Some */;
-        return elements /* : List<T> */.iterateWithIndices /* : () => Query<[number, T]> */() /* : Query<[number, T]> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : [number, T]) => R) => R */(initial /* : Option<[CompileState, List<R>]> */, (tuple, element) => {
+        return elements /* : List<T> */.iterateWithIndices /* : () => Query<[number, T]> */() /* : Query<[number, T]> */.fold /* : (arg0 : content-start R content-end, arg1 : (arg0 : content-start R content-end, arg1 : [number, T]) => content-start R content-end) => content-start R content-end */(initial /* : Option<[CompileState, List<content-start R content-end>]> */, (tuple, element) => {
             return tuple /* : unknown */.flatMap /* : unknown */((inner) => {
                 let state1 = inner /* : unknown */.left /* : unknown */() /* : unknown */;
                 let right = inner /* : unknown */.right /* : unknown */() /* : unknown */;
-                return mapper /* : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]> */(state1 /* : unknown */, element /* : unknown */) /* : Option<[CompileState, R]> */.map /* : (arg0 : (arg0 : [CompileState, R]) => R) => Option<R> */((applied) => {
+                return mapper /* : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]> */(state1 /* : unknown */, element /* : unknown */) /* : Option<[CompileState, R]> */.map /* : (arg0 : (arg0 : [CompileState, R]) => content-start R content-end) => Option<content-start R content-end> */((applied) => {
                     return [applied /* : [CompileState, R] */[0 /* : number */], right /* : unknown */.addLast /* : unknown */(applied /* : [CompileState, R] */[1 /* : number */]) /* : unknown */];
-                }) /* : Option<R> */;
+                }) /* : Option<content-start R content-end> */;
             }) /* : unknown */;
-        }) /* : R */;
+        }) /* : content-start R content-end */;
     }
     mergeStatements(cache, statement) {
         return cache /* : string */ + statement /* : string */;
@@ -1165,7 +1175,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let current = DivideState /* : DivideState */.createInitial /* : (arg0 : string) => DivideState */(input /* : string */) /* : DivideState */;
         while (true) {
             let maybePopped = current /* : DivideState */.pop /* : unknown */() /* : unknown */.map /* : unknown */((tuple) => {
-                return this /* : Main */.foldSingleQuotes /* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple /* : unknown */) /* : Option<DivideState> */.or /* : (arg0 : () => Option<DivideState>) => Option<DivideState> */(() => this /* : Main */.foldDoubleQuotes /* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple /* : unknown */) /* : Option<DivideState> */) /* : Option<DivideState> */.orElseGet /* : (arg0 : () => T) => T */(() => folder /* : (arg0 : DivideState, arg1 : string) => DivideState */(tuple /* : unknown */.right /* : unknown */() /* : unknown */, tuple /* : unknown */.left /* : unknown */() /* : unknown */) /* : DivideState */) /* : T */;
+                return this /* : Main */.foldSingleQuotes /* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple /* : unknown */) /* : Option<DivideState> */.or /* : (arg0 : () => Option<DivideState>) => Option<DivideState> */(() => this /* : Main */.foldDoubleQuotes /* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple /* : unknown */) /* : Option<DivideState> */) /* : Option<DivideState> */.orElseGet /* : (arg0 : () => DivideState) => DivideState */(() => folder /* : (arg0 : DivideState, arg1 : string) => DivideState */(tuple /* : unknown */.right /* : unknown */() /* : unknown */, tuple /* : unknown */.left /* : unknown */() /* : unknown */) /* : DivideState */) /* : DivideState */;
             }) /* : unknown */;
             if (maybePopped /* : unknown */.isPresent /* : unknown */() /* : unknown */) {
                 current /* : DivideState */ = maybePopped /* : unknown */.orElse /* : unknown */(current /* : DivideState */) /* : unknown */;
@@ -1231,7 +1241,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (stripped /* : unknown */.startsWith /* : unknown */("package ") /* : unknown */ || stripped /* : unknown */.startsWith /* : unknown */("import ") /* : unknown */) {
             return [state /* : CompileState */, ""];
         }
-        return this /* : Main */.parseClass /* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(stripped /* : unknown */, state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */.flatMap /* : (arg0 : (arg0 : [CompileState, IncompleteClassSegment]) => Option<R>) => Option<R> */((tuple) => this /* : Main */.completeClassSegment /* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(tuple /* : [CompileState, IncompleteClassSegment] */[0 /* : number */], tuple /* : [CompileState, IncompleteClassSegment] */[1 /* : number */]) /* : Option<[CompileState, ClassSegment]> */) /* : Option<R> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((tuple0) => [tuple0 /* : T */.left /* : unknown */() /* : unknown */, tuple0 /* : T */.right /* : unknown */() /* : unknown */.generate /* : unknown */() /* : unknown */]) /* : Option<R> */.orElseGet /* : unknown */(() => [state /* : CompileState */, generatePlaceholder /* : (arg0 : string) => string */(stripped /* : unknown */) /* : string */]) /* : unknown */;
+        return this /* : Main */.parseClass /* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(stripped /* : unknown */, state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */.flatMap /* : (arg0 : (arg0 : [CompileState, IncompleteClassSegment]) => Option<content-start R content-end>) => Option<content-start R content-end> */((tuple) => this /* : Main */.completeClassSegment /* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(tuple /* : [CompileState, IncompleteClassSegment] */[0 /* : number */], tuple /* : [CompileState, IncompleteClassSegment] */[1 /* : number */]) /* : Option<[CompileState, ClassSegment]> */) /* : Option<content-start R content-end> */.map /* : (arg0 : (arg0 : content-start R content-end) => content-start R content-end) => Option<content-start R content-end> */((tuple0 /* R */) => [tuple0 /* : content-start R content-end */.left /* : unknown */() /* : unknown */, tuple0 /* : content-start R content-end */.right /* : unknown */() /* : unknown */.generate /* : unknown */() /* : unknown */]) /* : Option<content-start R content-end> */.orElseGet /* : unknown */(() => [state /* : CompileState */, generatePlaceholder /* : (arg0 : string) => string */(stripped /* : unknown */) /* : string */]) /* : unknown */;
     }
     parseClass(stripped, state) {
         return this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(stripped /* : string */, "class ", "class ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */;
@@ -1251,7 +1261,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     parseAnnotations(annotationsString) {
-        return this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(annotationsString /* : string */.strip /* : unknown */() /* : unknown */, (state1, c) => this /* : Main */.foldByDelimiter /* : (arg0 : DivideState, arg1 : string, arg2 : string) => DivideState */(state1 /* : unknown */, c /* : unknown */, "\n") /* : DivideState */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((value) => value /* : T */.substring /* : unknown */(1 /* : number */) /* : unknown */) /* : Option<R> */.map /* : unknown */(strip /* : unknown */) /* : unknown */.filter /* : unknown */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(annotationsString /* : string */.strip /* : unknown */() /* : unknown */, (state1, c) => this /* : Main */.foldByDelimiter /* : (arg0 : DivideState, arg1 : string, arg2 : string) => DivideState */(state1 /* : unknown */, c /* : unknown */, "\n") /* : DivideState */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */(strip /* : unknown */) /* : Query<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((value /* R */) => !value /* : content-start R content-end */.isEmpty /* : unknown */() /* : unknown */) /* : Option<content-start R content-end> */.map /* : (arg0 : (arg0 : content-start R content-end) => content-start R content-end) => Option<content-start R content-end> */((value /* R */) => value /* : content-start R content-end */.substring /* : unknown */(1 /* : number */) /* : unknown */) /* : Option<content-start R content-end> */.map /* : unknown */(strip /* : unknown */) /* : unknown */.filter /* : unknown */((value) => !value /* : content-start R content-end */.isEmpty /* : unknown */() /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     foldByDelimiter(state1, c, delimiter) {
         if (c /* : string */ === delimiter /* : string */) {
@@ -1261,7 +1271,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations) {
         return this /* : Main */.last /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent /* : string */, " permits ", (s, s2) => {
-            let variants = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(s2 /* : unknown */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+            let variants = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(s2 /* : unknown */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */(strip /* : unknown */) /* : Query<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((value /* R */) => !value /* : content-start R content-end */.isEmpty /* : unknown */() /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
             return this /* : Main */.parseStructureWithMaybeImplements /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<string>, arg6 : List<string>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, state /* : CompileState */, beforeInfix /* : string */, s /* : unknown */, content1 /* : string */, variants /* : unknown */, annotations /* : List<string> */) /* : Option<[CompileState, IncompleteClassSegment]> */;
         }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => this /* : Main */.parseStructureWithMaybeImplements /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<string>, arg6 : List<string>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, state /* : CompileState */, beforeInfix /* : string */, beforeContent /* : string */, content1 /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, annotations /* : List<string> */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<T> */;
     }
@@ -1272,7 +1282,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => this /* : Main */.parseStructureWithMaybeExtends /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<string>, arg6 : List<string>, arg7 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, state /* : CompileState */, beforeInfix /* : string */, beforeContent /* : string */, content1 /* : string */, variants /* : List<string> */, annotations /* : List<string> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<T> */;
     }
     parseTypeRefs(s2) {
-        return this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(s2 /* : string */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(TypeRef /* : TypeRef */.new /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(s2 /* : string */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */(strip /* : unknown */) /* : Query<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((value /* R */) => !value /* : content-start R content-end */.isEmpty /* : unknown */() /* : unknown */) /* : Option<content-start R content-end> */.map /* : (arg0 : (arg0 : content-start R content-end) => content-start R content-end) => Option<content-start R content-end> */(TypeRef /* : TypeRef */.new /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, interfaces) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent /* : string */, " extends ", (s, s2) => this /* : Main */.parseStructureWithMaybeParams /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<string>, arg6 : List<string>, arg7 : List<TypeRef>, arg8 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, state /* : CompileState */, beforeInfix /* : string */, s /* : unknown */, content1 /* : string */, variants /* : List<string> */, annotations /* : List<string> */, this /* : Main */.parseTypeRefs /* : (arg0 : string) => List<TypeRef> */(s2 /* : unknown */) /* : List<TypeRef> */, interfaces /* : List<TypeRef> */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => this /* : Main */.parseStructureWithMaybeParams /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<string>, arg6 : List<string>, arg7 : List<TypeRef>, arg8 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, state /* : CompileState */, beforeInfix /* : string */, beforeContent /* : string */, content1 /* : string */, variants /* : List<string> */, annotations /* : List<string> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, interfaces /* : List<TypeRef> */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<T> */;
@@ -1281,112 +1291,117 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(beforeContent /* : string */.strip /* : unknown */() /* : unknown */, ")", (s) => {
             return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(s /* : string */, "(", (s1, s2) => {
                 let parsed = this /* : Main */.parseParameters /* : (arg0 : CompileState, arg1 : string) => [CompileState, List<Parameter>] */(state /* : CompileState */, s2 /* : unknown */) /* : [CompileState, List<Parameter>] */;
-                return this /* : Main */.parseStructureWithMaybeTypeParams /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<Parameter>, arg6 : List<string>, arg7 : List<string>, arg8 : List<TypeRef>, arg9 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, parsed /* : [CompileState, List<Parameter>] */[0 /* : number */], beforeInfix /* : string */, s1 /* : unknown */, content1 /* : string */, parsed /* : [CompileState, List<Parameter>] */[1 /* : number */], variants /* : List<string> */, annotations /* : List<string> */, interfaces /* : List<TypeRef> */, superTypes /* : List<TypeRef> */) /* : Option<[CompileState, IncompleteClassSegment]> */;
+                return this /* : Main */.parseStructureWithMaybeTypeParams /* : (arg0 : CompileState, arg1 : string, arg2 : string, arg3 : string, arg4 : List<Parameter>, arg5 : List<string>, arg6 : List<string>, arg7 : List<TypeRef>, arg8 : List<TypeRef>, arg9 : string) => Option<[CompileState, IncompleteClassSegment]> */(parsed /* : [CompileState, List<Parameter>] */[0 /* : number */], beforeInfix /* : string */, s1 /* : unknown */, content1 /* : string */, parsed /* : [CompileState, List<Parameter>] */[1 /* : number */], variants /* : List<string> */, annotations /* : List<string> */, interfaces /* : List<TypeRef> */, superTypes /* : List<TypeRef> */, targetInfix /* : string */.strip /* : unknown */() /* : unknown */) /* : Option<[CompileState, IncompleteClassSegment]> */;
             }) /* : Option<T> */;
         }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => {
-            return this /* : Main */.parseStructureWithMaybeTypeParams /* : (arg0 : string, arg1 : CompileState, arg2 : string, arg3 : string, arg4 : string, arg5 : List<Parameter>, arg6 : List<string>, arg7 : List<string>, arg8 : List<TypeRef>, arg9 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(targetInfix /* : string */, state /* : CompileState */, beforeInfix /* : string */, beforeContent /* : string */, content1 /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, variants /* : List<string> */, annotations /* : List<string> */, interfaces /* : List<TypeRef> */, superTypes /* : List<TypeRef> */) /* : Option<[CompileState, IncompleteClassSegment]> */;
+            return this /* : Main */.parseStructureWithMaybeTypeParams /* : (arg0 : CompileState, arg1 : string, arg2 : string, arg3 : string, arg4 : List<Parameter>, arg5 : List<string>, arg6 : List<string>, arg7 : List<TypeRef>, arg8 : List<TypeRef>, arg9 : string) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, beforeInfix /* : string */, beforeContent /* : string */, content1 /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, variants /* : List<string> */, annotations /* : List<string> */, interfaces /* : List<TypeRef> */, superTypes /* : List<TypeRef> */, targetInfix /* : string */.strip /* : unknown */() /* : unknown */) /* : Option<[CompileState, IncompleteClassSegment]> */;
         }) /* : Option<T> */;
     }
-    parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations, interfaces, maybeSuperType) {
+    parseStructureWithMaybeTypeParams(state, beforeInfix, beforeContent, content1, params, variants, annotations, interfaces, maybeSuperType, type) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent /* : string */, "<", (name, withTypeParams) => {
             return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withTypeParams /* : unknown */, ">", (typeParamsString, afterTypeParams) => {
                 let readonly, mapper = (state1, s) => [state1 /* : unknown */, s /* : unknown */.strip /* : unknown */() /* : unknown */];
                 let typeParams = this /* : Main */.parseValuesOrEmpty /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state /* : CompileState */, typeParamsString /* : unknown */, (state1, s) => new Some(mapper /* : (arg0 : CompileState, arg1 : string) => [CompileState, string] */(state1 /* : unknown */, s /* : unknown */) /* : [CompileState, string] */) /* : Some */) /* : [CompileState, List<T>] */;
-                return this /* : Main */.assembleStructure /* : (arg0 : CompileState, arg1 : string, arg2 : List<string>, arg3 : string, arg4 : string, arg5 : string, arg6 : List<string>, arg7 : string, arg8 : List<Parameter>, arg9 : List<string>, arg10 : List<TypeRef>, arg11 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(typeParams /* : [CompileState, List<T>] */[0 /* : number */], targetInfix /* : string */, annotations /* : List<string> */, beforeInfix /* : string */, name /* : unknown */, content1 /* : string */, typeParams /* : [CompileState, List<T>] */[1 /* : number */], afterTypeParams /* : unknown */, params /* : List<Parameter> */, variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */) /* : Option<[CompileState, IncompleteClassSegment]> */;
+                return this /* : Main */.assembleStructure /* : (arg0 : CompileState, arg1 : StructureDefinition, arg2 : List<Parameter>, arg3 : string) => Option<[CompileState, IncompleteClassSegment]> */(typeParams /* : [CompileState, List<T>] */[0 /* : number */], new StructureDefinition(name /* : unknown */.strip /* : unknown */() /* : unknown */, type /* : string */, typeParams /* : [CompileState, List<T>] */[1 /* : number */], variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */, annotations /* : List<string> */) /* : StructureDefinition */, params /* : List<Parameter> */, content1 /* : string */) /* : Option<[CompileState, IncompleteClassSegment]> */;
             }) /* : Option<T> */;
         }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => {
-            return this /* : Main */.assembleStructure /* : (arg0 : CompileState, arg1 : string, arg2 : List<string>, arg3 : string, arg4 : string, arg5 : string, arg6 : List<string>, arg7 : string, arg8 : List<Parameter>, arg9 : List<string>, arg10 : List<TypeRef>, arg11 : List<TypeRef>) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, targetInfix /* : string */, annotations /* : List<string> */, beforeInfix /* : string */, beforeContent /* : string */, content1 /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, "", params /* : List<Parameter> */, variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */) /* : Option<[CompileState, IncompleteClassSegment]> */;
+            return this /* : Main */.assembleStructure /* : (arg0 : CompileState, arg1 : StructureDefinition, arg2 : List<Parameter>, arg3 : string) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, new StructureDefinition(beforeContent /* : string */.strip /* : unknown */() /* : unknown */, type /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */, annotations /* : List<string> */) /* : StructureDefinition */, params /* : List<Parameter> */, content1 /* : string */) /* : Option<[CompileState, IncompleteClassSegment]> */;
         }) /* : Option<T> */;
     }
-    assembleStructure(state, targetInfix, annotations, beforeInfix, rawName, content, typeParams, after, rawParameters, variants, interfaces, maybeSuperType) {
-        let name = rawName /* : string */.strip /* : unknown */() /* : unknown */;
-        if (!isSymbol /* : (arg0 : string) => boolean */(name /* : unknown */) /* : unknown */) {
+    assembleStructure(state, definition, rawParameters, content) {
+        if (!isSymbol /* : (arg0 : string) => boolean */(definition /* : StructureDefinition */.name /* : unknown */) /* : unknown */) {
             return new None() /* : None */;
         }
-        if (annotations /* : List<string> */.contains /* : (arg0 : string) => boolean */("Actual") /* : boolean */) {
+        if (definition /* : StructureDefinition */.isActual /* : () => boolean */() /* : boolean */) {
             return new Some([state /* : CompileState */, new Whitespace() /* : Whitespace */]) /* : Some */;
         }
-        let segmentsTuple = this /* : Main */.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state /* : CompileState */.pushStructName /* : (arg0 : [string, List<string>]) => CompileState */([name /* : unknown */, variants /* : List<string> */]) /* : CompileState */.withTypeParams /* : unknown */(typeParams /* : List<string> */) /* : unknown */, content /* : string */, (state0, input) => this /* : Main */.parseClassSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, IncompleteClassSegment] */(state0 /* : unknown */, input /* : unknown */, 1 /* : number */) /* : [CompileState, IncompleteClassSegment] */) /* : [CompileState, List<T>] */;
+        let segmentsTuple = this /* : Main */.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state /* : CompileState */.pushStructDefinition /* : (arg0 : content-start StructureDefinition content-end) => CompileState */(definition /* : StructureDefinition */) /* : CompileState */, content /* : string */, (state0, input) => this /* : Main */.parseClassSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, IncompleteClassSegment] */(state0 /* : unknown */, input /* : unknown */, 1 /* : number */) /* : [CompileState, IncompleteClassSegment] */) /* : [CompileState, List<T>] */;
         let segmentsState = segmentsTuple /* : [CompileState, List<T>] */[0 /* : number */];
         let segments = segmentsTuple /* : [CompileState, List<T>] */[1 /* : number */];
         let parameters = this /* : Main */.retainDefinitions /* : (arg0 : List<Parameter>) => List<Definition> */(rawParameters /* : List<Parameter> */) /* : List<Definition> */;
-        let prototype = new StructurePrototype(targetInfix /* : string */, beforeInfix /* : string */, name /* : unknown */, typeParams /* : List<string> */, parameters /* : List<Definition> */, after /* : string */, segments /* : unknown */, variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */) /* : StructurePrototype */;
+        let prototype = new StructurePrototype(definition /* : StructureDefinition */, parameters /* : List<Definition> */, segments /* : unknown */) /* : StructurePrototype */;
         return new Some([segmentsState /* : unknown */.addType /* : unknown */(prototype /* : StructurePrototype */.createObjectType /* : () => ObjectType */() /* : ObjectType */) /* : unknown */, prototype /* : StructurePrototype */]) /* : Some */;
     }
     completeStructure(state, prototype) {
         let thisType = prototype /* : StructurePrototype */.createObjectType /* : () => ObjectType */() /* : ObjectType */;
         let withThis = state /* : CompileState */.enterDefinitions /* : () => CompileState */() /* : CompileState */.define /* : (arg0 : Definition) => CompileState */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("this", thisType /* : ObjectType */) /* : Definition */) /* : CompileState */;
-        return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(withThis /* : CompileState */, prototype /* : StructurePrototype */.interfaces /* : List<TypeRef> */, (state2, tuple) => this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2 /* : unknown */, tuple /* : unknown */.right /* : unknown */() /* : unknown */.value /* : unknown */) /* : Option<[CompileState, Type]> */) /* : Option<[CompileState, List<R>]> */.flatMap /* : (arg0 : (arg0 : [CompileState, List<R>]) => Option<R>) => Option<R> */((interfacesTypes) => {
-            let interfaces = interfacesTypes /* : [CompileState, List<R>] */[1 /* : number */];
-            let bases = this /* : Main */.resolveBaseTypes /* : (arg0 : List<Type>) => List<BaseType> */(interfaces /* : unknown */) /* : List<BaseType> */;
-            let variantsSuper = this /* : Main */.findSuperTypesOfVariants /* : (arg0 : List<BaseType>, arg1 : string) => List<string> */(bases /* : List<BaseType> */, prototype /* : StructurePrototype */.name /* : string */) /* : List<string> */;
-            return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(interfacesTypes /* : [CompileState, List<R>] */[0 /* : number */], prototype /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */() /* : unknown */, (state1, entry) => this /* : Main */.completeClassSegment /* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1 /* : unknown */, entry /* : unknown */.right /* : unknown */() /* : unknown */) /* : Option<[CompileState, ClassSegment]> */) /* : Option<[CompileState, List<R>]> */.map /* : (arg0 : (arg0 : [CompileState, List<R>]) => R) => Option<R> */((oldStatementsTuple) => {
-                let exited = oldStatementsTuple /* : [CompileState, List<R>] */[0 /* : number */].exitDefinitions /* : unknown */() /* : unknown */;
-                let oldStatements = oldStatementsTuple /* : [CompileState, List<R>] */[1 /* : number */];
-                let withEnumCategoriesDefined = this /* : Main */.defineEnumCategories /* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited /* : unknown */, oldStatements /* : unknown */, prototype /* : StructurePrototype */.name /* : string */, prototype /* : StructurePrototype */.variants /* : List<string> */, prototype /* : StructurePrototype */.generateToEnum /* : () => string */() /* : string */) /* : [CompileState, List<ClassSegment>] */;
-                let withEnumCategoriesImplemented = this /* : Main */.implementEnumCategories /* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype /* : StructurePrototype */.name /* : string */, variantsSuper /* : List<string> */, withEnumCategoriesDefined /* : [CompileState, List<ClassSegment>] */[1 /* : number */]) /* : List<ClassSegment> */;
-                let withEnumValues = this /* : Main */.implementEnumValues /* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented /* : List<ClassSegment> */, thisType /* : ObjectType */) /* : List<ClassSegment> */;
-                let withConstructor = this /* : Main */.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues /* : List<ClassSegment> */, prototype /* : StructurePrototype */.parameters /* : List<Definition> */() /* : unknown */) /* : List<ClassSegment> */;
-                let generatedSegments = this /* : Main */.joinSegments /* : (arg0 : List<ClassSegment>) => string */(withConstructor /* : List<ClassSegment> */) /* : string */;
-                let joinedTypeParams = prototype /* : StructurePrototype */.joinTypeParams /* : () => string */() /* : string */;
-                let interfacesJoined = this /* : Main */.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces /* : unknown */) /* : string */;
-                let generatedSuperType = this /* : Main */.joinSuperTypes /* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(state /* : CompileState */, prototype /* : StructurePrototype */) /* : string */;
-                let generated = generatePlaceholder /* : (arg0 : string) => string */(prototype /* : StructurePrototype */.beforeInfix /* : string */() /* : unknown */.strip /* : unknown */() /* : unknown */) /* : string */ + prototype /* : StructurePrototype */.targetInfix /* : string */() /* : unknown */ + prototype /* : StructurePrototype */.name /* : string */() /* : unknown */ + joinedTypeParams /* : string */ + generatePlaceholder /* : (arg0 : string) => string */(prototype /* : StructurePrototype */.after /* : string */() /* : unknown */) /* : string */ + generatedSuperType /* : string */ + interfacesJoined /* : string */ + " {" + generatedSegments + "\n}\n";
-                let compileState = withEnumCategoriesDefined /* : [CompileState, List<ClassSegment>] */[0 /* : number */].popStructName /* : unknown */() /* : unknown */;
-                let definedState = compileState /* : unknown */.addStructure /* : unknown */(generated /* : unknown */) /* : unknown */;
-                return [definedState /* : unknown */, new Whitespace() /* : Whitespace */];
-            }) /* : Option<R> */;
-        }) /* : Option<R> */;
+        return this /* : Main */.resolveTypeRefs /* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(withThis /* : CompileState */, prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.interfaces /* : unknown */) /* : Option<[CompileState, List<Type>]> */.flatMap /* : (arg0 : (arg0 : [CompileState, List<Type>]) => Option<content-start R content-end>) => Option<content-start R content-end> */((interfacesTuple) => {
+            return this /* : Main */.resolveTypeRefs /* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(interfacesTuple /* : [CompileState, List<Type>] */[0 /* : number */], prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.superTypes /* : unknown */) /* : Option<[CompileState, List<Type>]> */.flatMap /* : (arg0 : (arg0 : [CompileState, List<Type>]) => Option<content-start R content-end>) => Option<content-start R content-end> */((superTypesTuple) => {
+                let interfaces = interfacesTuple /* : [CompileState, List<Type>] */[1 /* : number */];
+                let superTypes = superTypesTuple /* : [CompileState, List<Type>] */[1 /* : number */];
+                let bases = this /* : Main */.resolveBaseTypes /* : (arg0 : List<Type>) => List<BaseType> */(interfaces /* : unknown */) /* : List<BaseType> */.addAllLast /* : (arg0 : List<BaseType>) => List<BaseType> */(this /* : Main */.resolveBaseTypes /* : (arg0 : List<Type>) => List<BaseType> */(superTypes /* : unknown */) /* : List<BaseType> */) /* : List<BaseType> */;
+                let variantsSuper = this /* : Main */.findSuperTypesOfVariants /* : (arg0 : List<BaseType>, arg1 : string) => List<string> */(bases /* : List<BaseType> */, prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.name /* : unknown */) /* : List<string> */;
+                return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(superTypesTuple /* : [CompileState, List<Type>] */[0 /* : number */], prototype /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */, (state1, entry) => this /* : Main */.completeClassSegment /* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1 /* : unknown */, entry /* : unknown */.right /* : unknown */() /* : unknown */) /* : Option<[CompileState, ClassSegment]> */) /* : Option<[CompileState, List<R>]> */.map /* : (arg0 : (arg0 : [CompileState, List<R>]) => content-start R content-end) => Option<content-start R content-end> */((oldStatementsTuple) => {
+                    let exited = oldStatementsTuple /* : [CompileState, List<R>] */[0 /* : number */].exitDefinitions /* : unknown */() /* : unknown */;
+                    let oldStatements = oldStatementsTuple /* : [CompileState, List<R>] */[1 /* : number */];
+                    let withEnumCategoriesDefined = this /* : Main */.defineEnumCategories /* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited /* : unknown */, oldStatements /* : unknown */, prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.name /* : unknown */, prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.variants /* : unknown */, prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.generateToEnum /* : unknown */() /* : unknown */) /* : [CompileState, List<ClassSegment>] */;
+                    let withEnumCategoriesImplemented = this /* : Main */.implementEnumCategories /* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.name /* : unknown */, variantsSuper /* : List<string> */, withEnumCategoriesDefined /* : [CompileState, List<ClassSegment>] */[1 /* : number */]) /* : List<ClassSegment> */;
+                    let withEnumValues = this /* : Main */.implementEnumValues /* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented /* : List<ClassSegment> */, thisType /* : ObjectType */) /* : List<ClassSegment> */;
+                    let withConstructor = this /* : Main */.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues /* : List<ClassSegment> */, prototype /* : StructurePrototype */.parameters /* : List<Definition> */) /* : List<ClassSegment> */;
+                    let generatedSegments = this /* : Main */.joinSegments /* : (arg0 : List<ClassSegment>) => string */(withConstructor /* : List<ClassSegment> */) /* : string */;
+                    let joinedTypeParams = prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.joinTypeParams /* : unknown */() /* : unknown */;
+                    let interfacesJoined = this /* : Main */.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces /* : unknown */) /* : string */;
+                    let generatedSuperType = this /* : Main */.joinSuperTypes /* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(state /* : CompileState */, prototype /* : StructurePrototype */) /* : string */;
+                    let generated = prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.type /* : unknown */ + " " + prototype.definition.name + joinedTypeParams + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+                    let compileState = withEnumCategoriesDefined /* : [CompileState, List<ClassSegment>] */[0 /* : number */].popStructName /* : unknown */() /* : unknown */;
+                    let definedState = compileState /* : unknown */.addStructure /* : unknown */(generated /* : unknown */) /* : unknown */;
+                    return [definedState /* : unknown */, new Whitespace() /* : Whitespace */];
+                }) /* : Option<content-start R content-end> */;
+            }) /* : Option<content-start R content-end> */;
+        }) /* : Option<content-start R content-end> */;
+    }
+    resolveTypeRefs(state, refs) {
+        return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(state /* : CompileState */, refs /* : List<TypeRef> */, (state2, tuple) => this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2 /* : unknown */, tuple /* : unknown */.right /* : unknown */() /* : unknown */.value /* : unknown */) /* : Option<[CompileState, Type]> */) /* : Option<[CompileState, List<R>]> */;
     }
     joinSuperTypes(state, prototype) {
-        return prototype /* : StructurePrototype */.superTypes /* : List<TypeRef> */.query /* : () => Query<TypeRef> */() /* : Query<TypeRef> */.map /* : (arg0 : (arg0 : TypeRef) => R) => Query<R> */((value) => state /* : CompileState */.resolveType /* : (arg0 : string) => Option<Type> */(value /* : TypeRef */.value /* : unknown */) /* : Option<Type> */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(Type /* : Type */.generate /* : unknown */) /* : Option<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((generated) => " extends " + generated /* : unknown */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return prototype /* : StructurePrototype */.definition /* : content-start StructureDefinition content-end */.superTypes /* : unknown */.query /* : unknown */() /* : unknown */.map /* : unknown */((value) => state /* : CompileState */.resolveType /* : (arg0 : string) => Option<Type> */(value /* : unknown */.value /* : unknown */) /* : Option<Type> */) /* : unknown */.flatMap /* : unknown */(Queries /* : Queries */.fromOption /* : unknown */) /* : unknown */.map /* : unknown */(Type /* : Type */.generate /* : unknown */) /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((generated) => " extends " + generated /* : unknown */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     implementEnumValues(withConstructor, thisType) {
-        return withConstructor /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.flatMap /* : (arg0 : (arg0 : ClassSegment) => Query<R>) => Query<R> */((segment) => this /* : Main */.flattenEnumValues /* : (arg0 : ClassSegment, arg1 : ObjectType) => Query<ClassSegment> */(segment /* : ClassSegment */, thisType /* : ObjectType */) /* : Query<ClassSegment> */) /* : Query<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new ListCollector() /* : ListCollector */) /* : R */;
+        return withConstructor /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.flatMap /* : (arg0 : (arg0 : ClassSegment) => Query<content-start R content-end>) => Query<content-start R content-end> */((segment) => this /* : Main */.flattenEnumValues /* : (arg0 : ClassSegment, arg1 : ObjectType) => Query<ClassSegment> */(segment /* : ClassSegment */, thisType /* : ObjectType */) /* : Query<ClassSegment> */) /* : Query<content-start R content-end> */.collect /* : (arg0 : Collector<content-start R content-end, content-start R content-end>) => content-start R content-end */(new ListCollector() /* : ListCollector */) /* : content-start R content-end */;
     }
     defineEnumCategories(state, segments, name, variants, enumGenerated) {
         if (variants /* : List<string> */.isEmpty /* : () => boolean */() /* : boolean */) {
             return [state /* : CompileState */, segments /* : List<ClassSegment> */];
         }
         let enumState = state /* : CompileState */.addStructure /* : (arg0 : string) => CompileState */(enumGenerated /* : string */) /* : CompileState */;
-        let enumType = new ObjectType(name /* : string */ + "Variant", Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, variants /* : List<string> */) /* : ObjectType */;
+        let enumType = new ObjectType(new StructureDefinition(name /* : string */ + "Variant", "class") /* : StructureDefinition */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
         let enumDefinition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(enumType /* : ObjectType */) /* : Definition */;
         return [enumState /* : CompileState */, segments /* : List<ClassSegment> */.addFirst /* : (arg0 : ClassSegment) => List<ClassSegment> */(new Statement(1 /* : number */, enumDefinition /* : Definition */) /* : Statement */) /* : List<ClassSegment> */];
     }
     implementEnumCategories(name, variantsBases, oldStatements) {
-        return variantsBases /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : string) => R) => R */(oldStatements /* : List<ClassSegment> */, (classSegmentList, superType) => {
+        return variantsBases /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.fold /* : (arg0 : content-start R content-end, arg1 : (arg0 : content-start R content-end, arg1 : string) => content-start R content-end) => content-start R content-end */(oldStatements /* : List<ClassSegment> */, (classSegmentList, superType) => {
             let variantTypeName = superType /* : unknown */ + "Variant";
-            let variantType = new ObjectType(variantTypeName /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
+            let variantType = new ObjectType(new StructureDefinition(variantTypeName /* : unknown */, "class") /* : StructureDefinition */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
             let definition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(variantType /* : ObjectType */) /* : Definition */;
             let source = new SymbolValue(variantTypeName /* : unknown */ + "." + name /* : string */, variantType /* : ObjectType */) /* : SymbolValue */;
             let initialization = new FieldInitialization(definition /* : Definition */, source /* : SymbolValue */) /* : FieldInitialization */;
             return classSegmentList /* : unknown */.addFirst /* : unknown */(new Statement(1 /* : number */, initialization /* : FieldInitialization */) /* : Statement */) /* : unknown */;
-        }) /* : R */;
+        }) /* : content-start R content-end */;
     }
     findSuperTypesOfVariants(bases, name) {
-        return bases /* : List<BaseType> */.query /* : () => Query<BaseType> */() /* : Query<BaseType> */.filter /* : (arg0 : (arg0 : BaseType) => boolean) => Query<BaseType> */((type) => type /* : BaseType */.hasVariant /* : (arg0 : string) => boolean */(name /* : string */) /* : boolean */) /* : Query<BaseType> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(BaseType /* : BaseType */.findName /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return bases /* : List<BaseType> */.query /* : () => Query<BaseType> */() /* : Query<BaseType> */.filter /* : (arg0 : (arg0 : BaseType) => boolean) => Query<BaseType> */((type) => type /* : BaseType */.hasVariant /* : (arg0 : string) => boolean */(name /* : string */) /* : boolean */) /* : Query<BaseType> */.map /* : (arg0 : (arg0 : BaseType) => content-start R content-end) => Option<content-start R content-end> */(BaseType /* : BaseType */.findName /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     resolveBaseTypes(interfaces) {
-        return interfaces /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */(Main /* : Main */.retainFindableType /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(FindableType /* : FindableType */.findBase /* : unknown */) /* : Option<R> */.flatMap /* : unknown */(Queries /* : Queries */.fromOption /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return interfaces /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */(Main /* : Main */.retainFindableType /* : unknown */) /* : Query<content-start R content-end> */.flatMap /* : (arg0 : (arg0 : content-start R content-end) => Option<content-start R content-end>) => Option<content-start R content-end> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<content-start R content-end> */.map /* : (arg0 : (arg0 : content-start R content-end) => content-start R content-end) => Option<content-start R content-end> */(FindableType /* : FindableType */.findBase /* : unknown */) /* : Option<content-start R content-end> */.flatMap /* : unknown */(Queries /* : Queries */.fromOption /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     joinSegments(segmentsWithMaybeConstructor) {
-        return segmentsWithMaybeConstructor /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.map /* : (arg0 : (arg0 : ClassSegment) => R) => Query<R> */(ClassSegment /* : ClassSegment */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return segmentsWithMaybeConstructor /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.map /* : (arg0 : (arg0 : ClassSegment) => content-start R content-end) => Query<content-start R content-end> */(ClassSegment /* : ClassSegment */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     joinInterfaces(interfaces) {
-        return interfaces /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */(Type /* : Type */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => " implements " + inner /* : unknown */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return interfaces /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => content-start R content-end) => Query<content-start R content-end> */(Type /* : Type */.generate /* : unknown */) /* : Query<content-start R content-end> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => " implements " + inner /* : unknown */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     flattenEnumValues(segment, thisType) {
         if (segment /* : ClassSegment */._ClassSegmentVariant /* : unknown */ === ClassSegmentVariant.EnumValues /* : unknown */) {
             let enumValues = segment /* : ClassSegment */;
-            return enumValues /* : EnumValues */.values /* : List<EnumValue> */.query /* : () => Query<EnumValue> */() /* : Query<EnumValue> */.map /* : (arg0 : (arg0 : EnumValue) => R) => Query<R> */((enumValue) => {
+            return enumValues /* : EnumValues */.values /* : List<EnumValue> */.query /* : () => Query<EnumValue> */() /* : Query<EnumValue> */.map /* : (arg0 : (arg0 : EnumValue) => content-start R content-end) => Query<content-start R content-end> */((enumValue) => {
                 let definition = new ImmutableDefinition(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */("static") /* : List<T> */, enumValue /* : EnumValue */.value /* : unknown */, thisType /* : ObjectType */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ImmutableDefinition */;
                 return new Statement(1 /* : number */, new FieldInitialization(definition /* : ImmutableDefinition */, new Invokable(new ConstructionCaller(thisType /* : ObjectType */) /* : ConstructionCaller */, enumValue /* : EnumValue */.values /* : unknown */, thisType /* : ObjectType */) /* : Invokable */) /* : FieldInitialization */) /* : Statement */;
-            }) /* : Query<R> */;
+            }) /* : Query<content-start R content-end> */;
         }
         return Queries /* : Queries */.from /* : (arg0 : T[]) => Query<T> */(segment /* : ClassSegment */) /* : Query<T> */;
     }
     createVariantDefinition(type) {
-        return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("_" + type /* : ObjectType */.name /* : unknown */, type /* : ObjectType */) /* : Definition */;
+        return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("_" + type /* : ObjectType */.definition /* : unknown */.name /* : unknown */, type /* : ObjectType */) /* : Definition */;
     }
     defineConstructor(segments, parameters) {
         if (parameters /* : List<Definition> */.isEmpty /* : () => boolean */() /* : boolean */) {
@@ -1445,25 +1460,25 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return mapper /* : (arg0 : string) => Option<T> */(slice /* : unknown */) /* : Option<T> */;
     }
     parseClassSegment(state, input, depth) {
-        return this /* : Main */. /* : unknown */ < /* Whitespace, IncompleteClassSegment>typed */ (() => parseWhitespace /* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, Whitespace]> */(input /* : string */, state /* : CompileState */) /* : Option<[CompileState, Whitespace]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, S]> */(() => this /* : Main */.parseClass /* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, S]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, S]> */(() => this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, "interface ", "interface ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, S]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, S]> */(() => this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, "record ", "class ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, S]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, S]> */(() => this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, "enum ", "class ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, S]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, S]> */(() => this /* : Main */.parseField /* : (arg0 : string, arg1 : number, arg2 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, depth /* : number */, state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, S]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseMethod /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseEnumValues /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : unknown */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
+        return this /* : Main */. /* : unknown */ < /* Whitespace, IncompleteClassSegment>typed */ (() => parseWhitespace /* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, Whitespace]> */(input /* : string */, state /* : CompileState */) /* : Option<[CompileState, Whitespace]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, content-start S content-end]> */(() => this /* : Main */.parseClass /* : (arg0 : string, arg1 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, content-start S content-end]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, content-start S content-end]> */(() => this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, "interface ", "interface ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, content-start S content-end]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, content-start S content-end]> */(() => this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, "record ", "class ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, content-start S content-end]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, content-start S content-end]> */(() => this /* : Main */.parseStructure /* : (arg0 : string, arg1 : string, arg2 : string, arg3 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, "enum ", "class ", state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, content-start S content-end]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.typed /* : (arg0 : () => Option<[CompileState, T]>) => Option<[CompileState, content-start S content-end]> */(() => this /* : Main */.parseField /* : (arg0 : string, arg1 : number, arg2 : CompileState) => Option<[CompileState, IncompleteClassSegment]> */(input /* : string */, depth /* : number */, state /* : CompileState */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : Option<[CompileState, content-start S content-end]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseMethod /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseEnumValues /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, IncompleteClassSegment]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : unknown */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
     }
     parseEnumValues(state, input) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(input /* : string */.strip /* : unknown */() /* : unknown */, ";", (withoutEnd) => {
             return this /* : Main */.parseValues /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state /* : CompileState */, withoutEnd /* : string */, (state2, enumValue) => {
                 return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(enumValue /* : unknown */.strip /* : unknown */() /* : unknown */, ")", (withoutValueEnd) => {
                     return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withoutValueEnd /* : string */, "(", (s4, s2) => {
-                        return this /* : Main */.parseValues /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state2 /* : unknown */, s2 /* : unknown */, (state1, s1) => new Some(Main /* : Main */.this /* : unknown */.parseArgument /* : unknown */(state1 /* : unknown */, s1 /* : unknown */, 1 /* : number */) /* : unknown */) /* : Some */) /* : Option<[CompileState, List<T>]> */.map /* : (arg0 : (arg0 : [CompileState, List<T>]) => R) => Option<R> */((arguments) => {
+                        return this /* : Main */.parseValues /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state2 /* : unknown */, s2 /* : unknown */, (state1, s1) => new Some(Main /* : Main */.this /* : unknown */.parseArgument /* : unknown */(state1 /* : unknown */, s1 /* : unknown */, 1 /* : number */) /* : unknown */) /* : Some */) /* : Option<[CompileState, List<T>]> */.map /* : (arg0 : (arg0 : [CompileState, List<T>]) => content-start R content-end) => Option<content-start R content-end> */((arguments) => {
                             return [arguments /* : [CompileState, List<T>] */[0 /* : number */], new EnumValue(s4 /* : unknown */, Main /* : Main */.this /* : unknown */.retainValues /* : unknown */(arguments /* : [CompileState, List<T>] */[1 /* : number */]) /* : unknown */) /* : EnumValue */];
-                        }) /* : Option<R> */;
+                        }) /* : Option<content-start R content-end> */;
                     }) /* : Option<T> */;
                 }) /* : Option<T> */;
-            }) /* : Option<[CompileState, List<T>]> */.map /* : (arg0 : (arg0 : [CompileState, List<T>]) => R) => Option<R> */((tuple) => {
+            }) /* : Option<[CompileState, List<T>]> */.map /* : (arg0 : (arg0 : [CompileState, List<T>]) => content-start R content-end) => Option<content-start R content-end> */((tuple) => {
                 return [tuple /* : [CompileState, List<T>] */[0 /* : number */], new EnumValues(tuple /* : [CompileState, List<T>] */[1 /* : number */]) /* : EnumValues */];
-            }) /* : Option<R> */;
+            }) /* : Option<content-start R content-end> */;
         }) /* : Option<T> */;
     }
     typed(action) {
-        return action /* : () => Option<[CompileState, T]> */() /* : Option<[CompileState, T]> */.map /* : (arg0 : (arg0 : [CompileState, T]) => R) => Option<R> */((tuple) => [tuple /* : [CompileState, T] */[0 /* : number */], tuple /* : [CompileState, T] */[1 /* : number */]]) /* : Option<R> */;
+        return action /* : () => Option<[CompileState, T]> */() /* : Option<[CompileState, T]> */.map /* : (arg0 : (arg0 : [CompileState, T]) => content-start R content-end) => Option<content-start R content-end> */((tuple) => [tuple /* : [CompileState, T] */[0 /* : number */], tuple /* : [CompileState, T] */[1 /* : number */]]) /* : Option<content-start R content-end> */;
     }
     parseMethod(state, input, depth) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(input /* : string */, "(", (definitionString, withParams) => {
@@ -1514,7 +1529,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return new None() /* : None */;
     }
     retainDefinitions(right) {
-        return right /* : List<Parameter> */.query /* : () => Query<Parameter> */() /* : Query<Parameter> */.map /* : (arg0 : (arg0 : Parameter) => R) => Query<R> */(this /* : Main */.retainDefinition /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return right /* : List<Parameter> */.query /* : () => Query<Parameter> */() /* : Query<Parameter> */.map /* : (arg0 : (arg0 : Parameter) => content-start R content-end) => Query<content-start R content-end> */(this /* : Main */.retainDefinition /* : unknown */) /* : Query<content-start R content-end> */.flatMap /* : (arg0 : (arg0 : content-start R content-end) => Option<content-start R content-end>) => Option<content-start R content-end> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     parseParameters(state, params) {
         return this /* : Main */.parseValuesOrEmpty /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state /* : CompileState */, params /* : string */, (state1, s) => new Some(this /* : Main */.parseParameter /* : (arg0 : CompileState, arg1 : string) => [CompileState, Parameter] */(state1 /* : unknown */, s /* : unknown */) /* : [CompileState, Parameter] */) /* : Some */) /* : [CompileState, List<T>] */;
@@ -1527,7 +1542,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (stripped /* : unknown */.isEmpty /* : unknown */() /* : unknown */) {
             return [state /* : CompileState */, new Whitespace() /* : Whitespace */];
         }
-        return this /* : Main */.parseFunctionStatement /* : (arg0 : CompileState, arg1 : number, arg2 : string) => Option<[CompileState, FunctionSegment]> */(state /* : CompileState */, depth /* : number */, stripped /* : unknown */) /* : Option<[CompileState, FunctionSegment]> */.or /* : (arg0 : () => Option<[CompileState, FunctionSegment]>) => Option<[CompileState, FunctionSegment]> */(() => this /* : Main */.parseBlock /* : (arg0 : CompileState, arg1 : number, arg2 : string) => Option<[CompileState, FunctionSegment]> */(state /* : CompileState */, depth /* : number */, stripped /* : unknown */) /* : Option<[CompileState, FunctionSegment]> */) /* : Option<[CompileState, FunctionSegment]> */.orElseGet /* : (arg0 : () => T) => T */(() => [state /* : CompileState */, new Placeholder(stripped /* : unknown */) /* : Placeholder */]) /* : T */;
+        return this /* : Main */.parseFunctionStatement /* : (arg0 : CompileState, arg1 : number, arg2 : string) => Option<[CompileState, FunctionSegment]> */(state /* : CompileState */, depth /* : number */, stripped /* : unknown */) /* : Option<[CompileState, FunctionSegment]> */.or /* : (arg0 : () => Option<[CompileState, FunctionSegment]>) => Option<[CompileState, FunctionSegment]> */(() => this /* : Main */.parseBlock /* : (arg0 : CompileState, arg1 : number, arg2 : string) => Option<[CompileState, FunctionSegment]> */(state /* : CompileState */, depth /* : number */, stripped /* : unknown */) /* : Option<[CompileState, FunctionSegment]> */) /* : Option<[CompileState, FunctionSegment]> */.orElseGet /* : (arg0 : () => [CompileState, FunctionSegment]) => [CompileState, FunctionSegment] */(() => [state /* : CompileState */, new Placeholder(stripped /* : unknown */) /* : Placeholder */]) /* : [CompileState, FunctionSegment] */;
     }
     parseFunctionStatement(state, depth, stripped) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(stripped /* : string */, ";", (s) => {
@@ -1546,7 +1561,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                     let header = headerTuple /* : [CompileState, BlockHeader] */[1 /* : number */];
                     let statementsTuple = this /* : Main */.parseFunctionSegments /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, List<FunctionSegment>] */(headerState /* : unknown */, content /* : unknown */, depth /* : number */) /* : [CompileState, List<FunctionSegment>] */;
                     let statementsState = statementsTuple /* : [CompileState, List<FunctionSegment>] */[0 /* : number */];
-                    let statements = statementsTuple /* : [CompileState, List<FunctionSegment>] */[1 /* : number */].addAllFirst /* : unknown */(statementsState /* : unknown */.functionSegments /* : unknown */) /* : unknown */;
+                    let statements = statementsTuple /* : [CompileState, List<FunctionSegment>] */[1 /* : number */].addAllFirst /* : unknown */(statementsState /* : unknown */.functionCache /* : unknown */) /* : unknown */;
                     return new Some([statementsState /* : unknown */.clearFunctionSegments /* : unknown */() /* : unknown */, new Block(depth /* : number */, header /* : unknown */, statements /* : unknown */) /* : Block */]) /* : Some */;
                 }) /* : Option<T> */;
             }) /* : Option<T> */;
@@ -1554,11 +1569,11 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     toFirst(input) {
         let divisions = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(input /* : string */, this /* : Main */.foldBlockStart /* : unknown */) /* : List<string> */;
-        return divisions /* : List<string> */.removeFirst /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.map /* : (arg0 : (arg0 : [string, List<string>]) => R) => Option<R> */((removed) => {
+        return divisions /* : List<string> */.removeFirst /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.map /* : (arg0 : (arg0 : [string, List<string>]) => content-start R content-end) => Option<content-start R content-end> */((removed) => {
             let right = removed /* : [string, List<string>] */[0 /* : number */];
             let left = removed /* : [string, List<string>] */[1 /* : number */].query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner("") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
             return [right /* : unknown */, left /* : unknown */];
-        }) /* : Option<R> */;
+        }) /* : Option<content-start R content-end> */;
     }
     parseBlockHeader(state, input, depth) {
         let stripped = input /* : string */.strip /* : unknown */() /* : unknown */;
@@ -1615,7 +1630,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let destinationTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(sourceState /* : unknown */, beforeEquals /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
             let destinationState = destinationTuple /* : [CompileState, Value] */[0 /* : number */];
             let destination = destinationTuple /* : [CompileState, Value] */[1 /* : number */];
-            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(destinationState /* : unknown */, beforeEquals /* : unknown */) /* : Option<[CompileState, Definition]> */.flatMap /* : (arg0 : (arg0 : [CompileState, Definition]) => Option<R>) => Option<R> */((definitionTuple) => this /* : Main */.parseInitialization /* : (arg0 : CompileState, arg1 : Definition, arg2 : Value) => Option<[CompileState, StatementValue]> */(definitionTuple /* : [CompileState, Definition] */[0 /* : number */], definitionTuple /* : [CompileState, Definition] */[1 /* : number */], source /* : unknown */) /* : Option<[CompileState, StatementValue]> */) /* : Option<R> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => new Some([destinationState /* : unknown */, new Assignment(destination /* : unknown */, source /* : unknown */) /* : Assignment */]) /* : Some */) /* : Option<T> */;
+            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(destinationState /* : unknown */, beforeEquals /* : unknown */) /* : Option<[CompileState, Definition]> */.flatMap /* : (arg0 : (arg0 : [CompileState, Definition]) => Option<content-start R content-end>) => Option<content-start R content-end> */((definitionTuple) => this /* : Main */.parseInitialization /* : (arg0 : CompileState, arg1 : Definition, arg2 : Value) => Option<[CompileState, StatementValue]> */(definitionTuple /* : [CompileState, Definition] */[0 /* : number */], definitionTuple /* : [CompileState, Definition] */[1 /* : number */], source /* : unknown */) /* : Option<[CompileState, StatementValue]> */) /* : Option<content-start R content-end> */.or /* : (arg0 : () => Option<content-start R content-end>) => Option<content-start R content-end> */(() => new Some([destinationState /* : unknown */, new Assignment(destination /* : unknown */, source /* : unknown */) /* : Assignment */]) /* : Some */) /* : Option<content-start R content-end> */;
         }) /* : Option<T> */;
     }
     parseInitialization(state, rawDefinition, source) {
@@ -1652,7 +1667,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     parseInstanceOf(state, input, depth) {
         return this /* : Main */.last /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(input /* : string */, "instanceof", (s, s2) => {
             let childTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state /* : CompileState */, s /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
-            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(childTuple /* : [CompileState, Value] */[0 /* : number */], s2 /* : unknown */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((definitionTuple) => {
+            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(childTuple /* : [CompileState, Value] */[0 /* : number */], s2 /* : unknown */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => content-start R content-end) => Option<content-start R content-end> */((definitionTuple) => {
                 let value = childTuple /* : [CompileState, Value] */[1 /* : number */];
                 let definition = definitionTuple /* : [CompileState, Definition] */[1 /* : number */];
                 let type = value /* : unknown */.type /* : unknown */() /* : unknown */;
@@ -1661,7 +1676,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                 let temp = new SymbolValue(generate /* : unknown */ + "Variant." + definition /* : unknown */.findType /* : unknown */() /* : unknown */.findName /* : unknown */() /* : unknown */, Primitive /* : Primitive */.Unknown /* : unknown */) /* : SymbolValue */;
                 let functionSegment = new Statement(depth /* : number */ + 1 /* : number */, new Initialization(definition /* : unknown */, new Cast(value /* : unknown */, definition /* : unknown */.findType /* : unknown */() /* : unknown */) /* : Cast */) /* : Initialization */) /* : Statement */;
                 return [definitionTuple /* : [CompileState, Definition] */[0 /* : number */].addFunctionSegment /* : unknown */(functionSegment /* : Statement */) /* : unknown */.define /* : unknown */(definition /* : unknown */) /* : unknown */, new Operation(variant /* : DataAccess */, Operator /* : () => content-start new content-end */.EQUALS /* : unknown */, temp /* : SymbolValue */) /* : Operation */];
-            }) /* : Option<R> */;
+            }) /* : Option<content-start R content-end> */;
         }) /* : Option<T> */;
     }
     parseMethodReference(state, input, depth) {
@@ -1685,7 +1700,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let strippedBeforeArrow = beforeArrow /* : unknown */.strip /* : unknown */() /* : unknown */;
             if (isSymbol /* : (arg0 : string) => boolean */(strippedBeforeArrow /* : unknown */) /* : boolean */) {
                 let type = Primitive /* : Primitive */.Unknown /* : unknown */;
-                if ( /* state.typeRegister instanceof Some */( /* var expectedType */) /* : unknown */) {
+                if ( /* state.typeCache instanceof Some */( /* var expectedType */) /* : unknown */) {
                     if ( /* expectedType */._UnknownVariant /* : unknown */ === UnknownVariant.FunctionType /* : unknown */) {
                         let functionType = /* expectedType */ as, FunctionType;
                         type /* : Type */ = functionType /* : FunctionType */.arguments /* : List<Type> */.get /* : (arg0 : number) => Option<Type> */(0 /* : number */) /* : Option<Type> */.orElse /* : (arg0 : Type) => Type */( /* null */) /* : Type */;
@@ -1694,7 +1709,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                 return this /* : Main */.assembleLambda /* : (arg0 : CompileState, arg1 : List<Definition>, arg2 : string, arg3 : number) => Some<[CompileState, Value]> */(state /* : CompileState */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */(strippedBeforeArrow /* : unknown */, type /* : Type */) /* : Definition */) /* : List<T> */, valueString /* : unknown */, depth /* : number */) /* : Some<[CompileState, Value]> */;
             }
             if (strippedBeforeArrow /* : unknown */.startsWith /* : unknown */("(") /* : unknown */ && strippedBeforeArrow /* : unknown */.endsWith /* : unknown */(")") /* : unknown */) {
-                let parameterNames = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(strippedBeforeArrow /* : unknown */.substring /* : unknown */(1 /* : number */, Strings /* : Strings */.length /* : (arg0 : string) => number */(strippedBeforeArrow /* : unknown */) /* : number */ - 1 /* : number */) /* : unknown */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((name) => ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */(name /* : T */, Primitive /* : Primitive */.Unknown /* : unknown */) /* : Definition */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+                let parameterNames = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(strippedBeforeArrow /* : unknown */.substring /* : unknown */(1 /* : number */, Strings /* : Strings */.length /* : (arg0 : string) => number */(strippedBeforeArrow /* : unknown */) /* : number */ - 1 /* : number */) /* : unknown */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */(strip /* : unknown */) /* : Query<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((value /* R */) => !value /* : content-start R content-end */.isEmpty /* : unknown */() /* : unknown */) /* : Option<content-start R content-end> */.map /* : (arg0 : (arg0 : content-start R content-end) => content-start R content-end) => Option<content-start R content-end> */((name /* R */) => ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */(name /* : content-start R content-end */, Primitive /* : Primitive */.Unknown /* : unknown */) /* : Definition */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
                 return this /* : Main */.assembleLambda /* : (arg0 : CompileState, arg1 : List<Definition>, arg2 : string, arg3 : number) => Some<[CompileState, Value]> */(state /* : CompileState */, parameterNames /* : unknown */, valueString /* : unknown */, depth /* : number */) /* : Some<[CompileState, Value]> */;
             }
             return new None() /* : None */;
@@ -1800,11 +1815,11 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let valueTuple = this /* : Main */.parseArgument /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Argument] */(withExpected /* : CompileState */, element /* : unknown */, depth /* : number */) /* : [CompileState, Argument] */;
         let valueState = valueTuple /* : [CompileState, Argument] */[0 /* : number */];
         let value = valueTuple /* : [CompileState, Argument] */[1 /* : number */];
-        let actualType = valueTuple /* : [CompileState, Argument] */[0 /* : number */].typeRegister /* : unknown */.orElse /* : unknown */(Primitive /* : Primitive */.Unknown /* : unknown */) /* : unknown */;
+        let actualType = valueTuple /* : [CompileState, Argument] */[0 /* : number */].typeCache /* : unknown */.orElse /* : unknown */(Primitive /* : Primitive */.Unknown /* : unknown */) /* : unknown */;
         return new Some([valueState /* : unknown */, [value /* : unknown */, actualType /* : unknown */]]) /* : Some */;
     }
     retainValues(arguments) {
-        return arguments /* : List<Argument> */.query /* : () => Query<Argument> */() /* : Query<Argument> */.map /* : (arg0 : (arg0 : Argument) => R) => Query<R> */(this /* : Main */.retainValue /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return arguments /* : List<Argument> */.query /* : () => Query<Argument> */() /* : Query<Argument> */.map /* : (arg0 : (arg0 : Argument) => content-start R content-end) => Query<content-start R content-end> */(this /* : Main */.retainValue /* : unknown */) /* : Query<content-start R content-end> */.flatMap /* : (arg0 : (arg0 : content-start R content-end) => Option<content-start R content-end>) => Option<content-start R content-end> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     retainValue(argument) {
         if (argument /* : Argument */._ArgumentVariant /* : unknown */ === ArgumentVariant.Value /* : unknown */) {
@@ -1852,12 +1867,12 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     invocationHeader(state, depth, callerString1) {
         if (callerString1 /* : string */.startsWith /* : unknown */("new ") /* : unknown */) {
             let input1 = callerString1 /* : string */.substring /* : unknown */(Strings /* : Strings */.length /* : (arg0 : string) => number */("new ") /* : number */) /* : unknown */;
-            let map = this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */, input1 /* : string */) /* : Option<[CompileState, Type]> */.map /* : (arg0 : (arg0 : [CompileState, Type]) => R) => Option<R> */((type) => {
+            let map = this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */, input1 /* : string */) /* : Option<[CompileState, Type]> */.map /* : (arg0 : (arg0 : [CompileState, Type]) => content-start R content-end) => Option<content-start R content-end> */((type) => {
                 let right = type /* : [CompileState, Type] */[1 /* : number */];
                 return [type /* : [CompileState, Type] */[0 /* : number */], new ConstructionCaller(right /* : unknown */) /* : ConstructionCaller */];
-            }) /* : Option<R> */;
-            if (map /* : Option<R> */.isPresent /* : unknown */() /* : unknown */) {
-                return map /* : Option<R> */.orElse /* : unknown */( /* null */) /* : unknown */;
+            }) /* : Option<content-start R content-end> */;
+            if (map /* : Option<content-start R content-end> */.isPresent /* : unknown */() /* : unknown */) {
+                return map /* : Option<content-start R content-end> */.orElse /* : unknown */( /* null */) /* : unknown */;
             }
         }
         let tuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state /* : CompileState */, callerString1 /* : string */, depth /* : number */) /* : [CompileState, Value] */;
@@ -1938,7 +1953,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (Strings /* : Strings */.isBlank /* : (arg0 : string) => boolean */(input /* : string */) /* : boolean */) {
             return [state /* : CompileState */, new Whitespace() /* : Whitespace */];
         }
-        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((tuple) => [tuple /* : [CompileState, Definition] */[0 /* : number */], tuple /* : [CompileState, Definition] */[1 /* : number */]]) /* : Option<R> */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
+        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => content-start R content-end) => Option<content-start R content-end> */((tuple) => [tuple /* : [CompileState, Definition] */[0 /* : number */], tuple /* : [CompileState, Definition] */[1 /* : number */]]) /* : Option<content-start R content-end> */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
     }
     parseField(input, depth, state) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(input /* : string */.strip /* : unknown */() /* : unknown */, ";", (withoutEnd) => {
@@ -1948,16 +1963,16 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     parseClassDefinition(depth, state, withoutEnd) {
-        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, withoutEnd /* : string */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((result) => {
+        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, withoutEnd /* : string */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => content-start R content-end) => Option<content-start R content-end> */((result) => {
             return [result /* : [CompileState, Definition] */[0 /* : number */], new ClassDefinition(depth /* : number */, result /* : [CompileState, Definition] */[1 /* : number */]) /* : ClassDefinition */];
-        }) /* : Option<R> */;
+        }) /* : Option<content-start R content-end> */;
     }
     parseClassInitialization(depth, state, withoutEnd) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withoutEnd /* : string */, "=", (s, s2) => {
-            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, s /* : unknown */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((result) => {
+            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, s /* : unknown */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => content-start R content-end) => Option<content-start R content-end> */((result) => {
                 let valueTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(result /* : [CompileState, Definition] */[0 /* : number */], s2 /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
                 return [valueTuple /* : [CompileState, Value] */[0 /* : number */], new ClassInitialization(depth /* : number */, result /* : [CompileState, Definition] */[1 /* : number */], valueTuple /* : [CompileState, Value] */[1 /* : number */]) /* : ClassInitialization */];
-            }) /* : Option<R> */;
+            }) /* : Option<content-start R content-end> */;
         }) /* : Option<T> */;
     }
     parseDefinition(state, input) {
@@ -1983,15 +1998,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     parseModifiers(modifiers) {
-        return this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(modifiers /* : string */.strip /* : unknown */() /* : unknown */, (state1, c) => this /* : Main */.foldByDelimiter /* : (arg0 : DivideState, arg1 : string, arg2 : string) => DivideState */(state1 /* : unknown */, c /* : unknown */, " ") /* : DivideState */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(modifiers /* : string */.strip /* : unknown */() /* : unknown */, (state1, c) => this /* : Main */.foldByDelimiter /* : (arg0 : DivideState, arg1 : string, arg2 : string) => DivideState */(state1 /* : unknown */, c /* : unknown */, " ") /* : DivideState */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Query<content-start R content-end> */(strip /* : unknown */) /* : Query<content-start R content-end> */.filter /* : (arg0 : (arg0 : content-start R content-end) => boolean) => Option<content-start R content-end> */((value /* R */) => !value /* : content-start R content-end */.isEmpty /* : unknown */() /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     toLast(input, separator, folder) {
         let divisions = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(input /* : string */, folder /* : (arg0 : DivideState, arg1 : string) => DivideState */) /* : List<string> */;
-        return divisions /* : List<string> */.removeLast /* : () => Option<[List<string>, string]> */() /* : Option<[List<string>, string]> */.map /* : (arg0 : (arg0 : [List<string>, string]) => R) => Option<R> */((removed) => {
+        return divisions /* : List<string> */.removeLast /* : () => Option<[List<string>, string]> */() /* : Option<[List<string>, string]> */.map /* : (arg0 : (arg0 : [List<string>, string]) => content-start R content-end) => Option<content-start R content-end> */((removed) => {
             let left = removed /* : [List<string>, string] */[0 /* : number */].query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner(separator /* : string */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
             let right = removed /* : [List<string>, string] */[1 /* : number */];
             return [left /* : unknown */, right /* : unknown */];
-        }) /* : Option<R> */;
+        }) /* : Option<content-start R content-end> */;
     }
     foldTypeSeparator(state, c) {
         if (c /* : string */ === " " && state /* : DivideState */.isLevel /* : unknown */() /* : unknown */) {
@@ -2007,15 +2022,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return appended /* : DivideState */;
     }
     assembleDefinition(state, annotations, modifiers, rawName, typeParams, type) {
-        return this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */.withTypeParams /* : (arg0 : List<string>) => CompileState */(typeParams /* : List<string> */) /* : CompileState */, type /* : string */) /* : Option<[CompileState, Type]> */.flatMap /* : (arg0 : (arg0 : [CompileState, Type]) => Option<R>) => Option<R> */((type1) => {
+        return this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */.withTypeParams /* : (arg0 : List<string>) => CompileState */(typeParams /* : List<string> */) /* : CompileState */, type /* : string */) /* : Option<[CompileState, Type]> */.flatMap /* : (arg0 : (arg0 : [CompileState, Type]) => Option<content-start R content-end>) => Option<content-start R content-end> */((type1) => {
             let stripped = rawName /* : string */.strip /* : unknown */() /* : unknown */;
             if (!isSymbol /* : (arg0 : string) => boolean */(stripped /* : unknown */) /* : unknown */) {
                 return new None() /* : None */;
             }
-            let newModifiers = modifiers /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.filter /* : (arg0 : (arg0 : string) => boolean) => Query<string> */((value) => !this /* : Main */.isAccessor /* : unknown */(value /* : string */) /* : unknown */) /* : Query<string> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((modifier) =>  /* modifier.equals("final") ? "readonly" : modifier */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+            let newModifiers = modifiers /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.filter /* : (arg0 : (arg0 : string) => boolean) => Query<string> */((value) => !this /* : Main */.isAccessor /* : unknown */(value /* : string */) /* : unknown */) /* : Query<string> */.map /* : (arg0 : (arg0 : string) => content-start R content-end) => Option<content-start R content-end> */((modifier) =>  /* modifier.equals("final") ? "readonly" : modifier */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
             let node = new ImmutableDefinition(annotations /* : List<string> */, newModifiers /* : unknown */, stripped /* : unknown */, type1 /* : [CompileState, Type] */[1 /* : number */], typeParams /* : List<string> */) /* : ImmutableDefinition */;
             return new Some([type1 /* : [CompileState, Type] */[0 /* : number */], node /* : ImmutableDefinition */]) /* : Some */;
-        }) /* : Option<R> */;
+        }) /* : Option<content-start R content-end> */;
     }
     isAccessor(value) {
         return value /* : string */ === "private";
@@ -2071,15 +2086,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     varArgs(state, input) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(input /* : string */, "...", (s) => {
-            return this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */, s /* : string */) /* : Option<[CompileState, Type]> */.map /* : (arg0 : (arg0 : [CompileState, Type]) => R) => Option<R> */((inner) => {
+            return this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */, s /* : string */) /* : Option<[CompileState, Type]> */.map /* : (arg0 : (arg0 : [CompileState, Type]) => content-start R content-end) => Option<content-start R content-end> */((inner) => {
                 let newState = inner /* : [CompileState, Type] */[0 /* : number */];
                 let child = inner /* : [CompileState, Type] */[1 /* : number */];
                 return [newState /* : unknown */, new ArrayType(child /* : unknown */) /* : ArrayType */];
-            }) /* : Option<R> */;
+            }) /* : Option<content-start R content-end> */;
         }) /* : Option<T> */;
     }
     assembleTemplate(base, state, arguments) {
-        let children = arguments /* : List<Argument> */.query /* : () => Query<Argument> */() /* : Query<Argument> */.map /* : (arg0 : (arg0 : Argument) => R) => Query<R> */(this /* : Main */.retainType /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        let children = arguments /* : List<Argument> */.query /* : () => Query<Argument> */() /* : Query<Argument> */.map /* : (arg0 : (arg0 : Argument) => content-start R content-end) => Query<content-start R content-end> */(this /* : Main */.retainType /* : unknown */) /* : Query<content-start R content-end> */.flatMap /* : (arg0 : (arg0 : content-start R content-end) => Option<content-start R content-end>) => Option<content-start R content-end> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<content-start R content-end> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
         if (base /* : string */ === "BiFunction") {
             return [state /* : CompileState */, new FunctionType(Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(children /* : unknown */.get /* : unknown */(0 /* : number */) /* : unknown */.orElse /* : unknown */( /* null */) /* : unknown */, children /* : unknown */.get /* : unknown */(1 /* : number */) /* : unknown */.orElse /* : unknown */( /* null */) /* : unknown */) /* : List<T> */, children /* : unknown */.get /* : unknown */(2 /* : number */) /* : unknown */.orElse /* : unknown */( /* null */) /* : unknown */) /* : FunctionType */];
         }
@@ -2106,15 +2121,17 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                 return [state /* : CompileState */, new Template(findableType /* : ObjectType */, children /* : unknown */) /* : Template */];
             }
         }
-        return [state /* : CompileState */, new Template(new ObjectType(base /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */, children /* : unknown */) /* : Template */];
+        let definition = new StructureDefinition(base /* : string */, "class") /* : StructureDefinition */;
+        let base1 = new ObjectType(definition /* : StructureDefinition */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
+        return [state /* : CompileState */, new Template(base1 /* : ObjectType */, children /* : unknown */) /* : Template */];
     }
     parseTemplate(state, input) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(input /* : string */.strip /* : unknown */() /* : unknown */, ">", (withoutEnd) => {
             return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withoutEnd /* : string */, "<", (base, argumentsString) => {
                 let strippedBase = base /* : unknown */.strip /* : unknown */() /* : unknown */;
-                return this /* : Main */.parseValues /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state /* : CompileState */, argumentsString /* : unknown */, this /* : Main */.parseArgument /* : unknown */) /* : Option<[CompileState, List<T>]> */.map /* : (arg0 : (arg0 : [CompileState, List<T>]) => R) => Option<R> */((argumentsTuple) => {
+                return this /* : Main */.parseValues /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => Option<[CompileState, List<T>]> */(state /* : CompileState */, argumentsString /* : unknown */, this /* : Main */.parseArgument /* : unknown */) /* : Option<[CompileState, List<T>]> */.map /* : (arg0 : (arg0 : [CompileState, List<T>]) => content-start R content-end) => Option<content-start R content-end> */((argumentsTuple) => {
                     return this /* : Main */.assembleTemplate /* : (arg0 : string, arg1 : CompileState, arg2 : List<Argument>) => [CompileState, Type] */(strippedBase /* : unknown */, argumentsTuple /* : [CompileState, List<T>] */[0 /* : number */], argumentsTuple /* : [CompileState, List<T>] */[1 /* : number */]) /* : [CompileState, Type] */;
-                }) /* : Option<R> */;
+                }) /* : Option<content-start R content-end> */;
             }) /* : Option<T> */;
         }) /* : Option<T> */;
     }
@@ -2131,7 +2148,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (Strings /* : Strings */.isBlank /* : (arg0 : string) => boolean */(input /* : string */) /* : boolean */) {
             return new Some([state /* : CompileState */, new Whitespace() /* : Whitespace */]) /* : Some */;
         }
-        return this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Type]> */.map /* : (arg0 : (arg0 : [CompileState, Type]) => R) => Option<R> */((tuple) => [tuple /* : [CompileState, Type] */[0 /* : number */], tuple /* : [CompileState, Type] */[1 /* : number */]]) /* : Option<R> */;
+        return this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Type]> */.map /* : (arg0 : (arg0 : [CompileState, Type]) => content-start R content-end) => Option<content-start R content-end> */((tuple) => [tuple /* : [CompileState, Type] */[0 /* : number */], tuple /* : [CompileState, Type] */[1 /* : number */]]) /* : Option<content-start R content-end> */;
     }
     last(input, infix, mapper) {
         return this /* : Main */.infix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<number>, arg3 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(input /* : string */, infix /* : string */, this /* : Main */.findLast /* : unknown */, mapper /* : (arg0 : string, arg1 : string) => Option<T> */) /* : Option<T> */;
@@ -2147,14 +2164,14 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return this /* : Main */.infix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<number>, arg3 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(input /* : string */, infix /* : string */, this /* : Main */.findFirst /* : unknown */, mapper /* : (arg0 : string, arg1 : string) => Option<T> */) /* : Option<T> */;
     }
     split(splitter, splitMapper) {
-        return splitter /* : () => Option<[string, string]> */() /* : Option<[string, string]> */.flatMap /* : (arg0 : (arg0 : [string, string]) => Option<R>) => Option<R> */((splitTuple) => splitMapper /* : (arg0 : string, arg1 : string) => Option<T> */(splitTuple /* : [string, string] */[0 /* : number */], splitTuple /* : [string, string] */[1 /* : number */]) /* : Option<T> */) /* : Option<R> */;
+        return splitter /* : () => Option<[string, string]> */() /* : Option<[string, string]> */.flatMap /* : (arg0 : (arg0 : [string, string]) => Option<content-start R content-end>) => Option<content-start R content-end> */((splitTuple) => splitMapper /* : (arg0 : string, arg1 : string) => Option<T> */(splitTuple /* : [string, string] */[0 /* : number */], splitTuple /* : [string, string] */[1 /* : number */]) /* : Option<T> */) /* : Option<content-start R content-end> */;
     }
     infix(input, infix, locator, mapper) {
-        return this /* : Main */.split /* : (arg0 : () => Option<[string, string]>, arg1 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(() => locator /* : (arg0 : string, arg1 : string) => Option<number> */(input /* : string */, infix /* : string */) /* : Option<number> */.map /* : (arg0 : (arg0 : number) => R) => Option<R> */((index) => {
+        return this /* : Main */.split /* : (arg0 : () => Option<[string, string]>, arg1 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(() => locator /* : (arg0 : string, arg1 : string) => Option<number> */(input /* : string */, infix /* : string */) /* : Option<number> */.map /* : (arg0 : (arg0 : number) => content-start R content-end) => Option<content-start R content-end> */((index) => {
             let left = input /* : string */.substring /* : unknown */(0 /* : number */, index /* : number */) /* : unknown */;
             let right = input /* : string */.substring /* : unknown */(index /* : number */ + Strings /* : Strings */.length /* : unknown */(infix /* : string */) /* : unknown */) /* : unknown */;
             return [left /* : unknown */, right /* : unknown */];
-        }) /* : Option<R> */, mapper /* : (arg0 : string, arg1 : string) => Option<T> */) /* : Option<T> */;
+        }) /* : Option<content-start R content-end> */, mapper /* : (arg0 : string, arg1 : string) => Option<T> */) /* : Option<T> */;
     }
     findFirst(input, infix) {
         let index = input /* : string */.indexOf /* : unknown */(infix /* : string */) /* : unknown */;

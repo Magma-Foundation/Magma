@@ -88,7 +88,7 @@ public class Main {
 
         Option<T> last();
 
-        Query<T> iterateReversed();
+        Query<T> queryReversed();
 
         List<T> mapLast(Function<T, T> mapper);
 
@@ -508,7 +508,7 @@ public class Main {
             }
 
             @Override
-            public Query<T> iterateReversed() {
+            public Query<T> queryReversed() {
                 return new HeadedQuery<>(new RangeHead(this.elements.size()))
                         .map(index -> this.elements.size() - index - 1)
                         .map(this.elements::get);
@@ -647,21 +647,23 @@ public class Main {
     }
 
     private record ObjectType(
-            String name,
-            List<String> typeParams,
-            List<Definition> definitions,
-            List<String> variants
+            StructureDefinition definition,
+            List<Definition> definitions
     ) implements FindableType, BaseType {
+        private boolean isNamed(String name) {
+            return this.definition.name.equals(name);
+        }
+
         @Override
         public String generate() {
-            return this.name;
+            return this.definition.name;
         }
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new ObjectType(this.name, this.typeParams, this.definitions.query()
+            return new ObjectType(this.definition, this.definitions.query()
                     .map(definition -> definition.mapType(type -> type.replace(mapping)))
-                    .collect(new ListCollector<>()), this.variants);
+                    .collect(new ListCollector<>()));
         }
 
         @Override
@@ -679,12 +681,12 @@ public class Main {
 
         @Override
         public boolean hasVariant(String name) {
-            return this.variants().contains(name);
+            return this.definition.variants.contains(name);
         }
 
         @Override
         public String findName() {
-            return this.name;
+            return this.definition.name;
         }
     }
 
@@ -706,20 +708,19 @@ public class Main {
     }
 
     private record CompileState(
-            List<String> structures,
+            List<String> generated,
+            List<ObjectType> definedObjects,
+            Option<Type> typeCache,
+            List<FunctionSegment> functionCache,
             List<List<Definition>> definitions,
-            List<ObjectType> objectTypes,
-            List<Tuple2<String, List<String>>> structNames,
-            List<String> typeParams,
-            Option<Type> typeRegister,
-            List<FunctionSegment> functionSegments
+            List<StructureDefinition> structDefinitions
     ) {
         public static CompileState createInitial() {
-            return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None<>(), Lists.empty());
+            return new CompileState(Lists.empty(), Lists.empty(), new None<>(), Lists.empty(), Lists.of(Lists.empty()), Lists.empty());
         }
 
         private Option<Type> resolveValue(String name) {
-            return this.definitions.iterateReversed()
+            return this.definitions.queryReversed()
                     .flatMap(List::query)
                     .filter(definition -> definition.findName().equals(name))
                     .next()
@@ -727,81 +728,89 @@ public class Main {
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated.addLast(structure), this.definedObjects, this.typeCache, this.functionCache, this.definitions, this.structDefinitions);
         }
 
         public CompileState defineAll(List<Definition> definitions) {
             var defined = this.definitions.mapLast(frame -> frame.addAllLast(definitions));
-            return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, defined, this.structDefinitions);
         }
 
         public Option<Type> resolveType(String name) {
-            Option<Tuple2<String, List<String>>> maybe = this.structNames
+            Option<StructureDefinition> maybe = this.structDefinitions
                     .last()
-                    .filter(inner -> inner.left().equals(name));
+                    .filter(inner -> inner.name.equals(name));
 
-            if (maybe instanceof Some<Tuple2<String, List<String>>> some) {
-                var found = some.value;
-                return new Some<>(new ObjectType(found.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), found.right()));
+            if (maybe instanceof Some<StructureDefinition> some) {
+                var foundDefinition = some.value;
+                return new Some<>(new ObjectType(foundDefinition, this.definitions.last().orElse(Lists.empty())));
             }
 
-            var maybeTypeParam = this.typeParams.query()
-                    .filter(param -> param.equals(name))
+            var maybeTypeParam = this.structDefinitions.queryReversed()
+                    .map(StructureDefinition::typeParams)
+                    .flatMap(List::query)
+                    .filter(value -> value.equals(name))
                     .next();
 
             if (maybeTypeParam instanceof Some<String> some) {
                 return new Some<>(new TypeParam(some.value));
             }
 
-            return this.objectTypes.query()
-                    .filter(type -> type.name.equals(name))
+            return this.definedObjects.query()
+                    .filter(type -> type.isNamed(name))
                     .next()
                     .map(type -> type);
         }
 
         public CompileState define(Definition definition) {
-            return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, this.definitions.mapLast(frame -> frame.addLast(definition)), this.structDefinitions);
         }
 
-        public CompileState pushStructName(Tuple2<String, List<String>> definition) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(definition), this.typeParams, this.typeRegister, this.functionSegments);
+        public CompileState pushStructDefinition(StructureDefinition definition) {
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, this.definitions, this.structDefinitions.addLast(definition));
         }
 
         public CompileState withTypeParams(List<String> typeParams) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, this.definitions, this.structDefinitions);
         }
 
         public CompileState withExpectedType(Type type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some<>(type), this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, new Some<>(type), this.functionCache, this.definitions, this.structDefinitions);
         }
 
         public CompileState popStructName() {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, this.definitions, this.structDefinitions.removeLast().map(Tuple2::left).orElse(this.structDefinitions));
         }
 
         public CompileState enterDefinitions() {
-            return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, this.definitions.addLast(Lists.empty()), this.structDefinitions);
         }
 
         public CompileState exitDefinitions() {
             var removed = this.definitions.removeLast().map(Tuple2::left).orElse(this.definitions);
-            return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache, removed, this.structDefinitions);
         }
 
         public CompileState addType(ObjectType thisType) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.generated, this.definedObjects.addLast(thisType), this.typeCache, this.functionCache, this.definitions, this.structDefinitions);
         }
 
         public CompileState addFunctionSegment(FunctionSegment segment) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments.addLast(segment));
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, this.functionCache.addLast(segment), this.definitions, this.structDefinitions);
         }
 
         public CompileState clearFunctionSegments() {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
+            return new CompileState(this.generated, this.definedObjects, this.typeCache, Lists.empty(), this.definitions, this.structDefinitions);
         }
 
         private boolean isCurrentStructName(String stripped) {
-            return stripped.equals(this.structNames.last().map(Tuple2::left).orElse(""));
+            return stripped.equals(this.structDefinitions.last()
+                    .map(StructureDefinition::name)
+                    .orElse(""));
+        }
+
+        private String generate() {
+            return this.generated.query().collect(Joiner.empty()).orElse("");
         }
     }
 
@@ -1045,7 +1054,8 @@ public class Main {
         @Override
         public Option<Type> find(String name) {
             return this.base.find(name).map(found -> {
-                var mapping = this.base.typeParams()
+                var mapping = this.base.definition
+                        .typeParams
                         .query()
                         .zip(this.arguments.query())
                         .collect(new MapCollector<>());
@@ -1444,7 +1454,7 @@ public class Main {
     ) implements IncompleteClassSegment {
         private ObjectType createObjectType() {
             var definitionFromSegments = this.findDefinitionsFromSegments();
-            return new ObjectType(this.definition.name, this.definition.typeParams, definitionFromSegments.addAllLast(this.parameters), this.definition.variants);
+            return new ObjectType(this.definition, definitionFromSegments.addAllLast(this.parameters));
         }
 
         private List<Definition> findDefinitionsFromSegments() {
@@ -1596,15 +1606,17 @@ public class Main {
     }
 
     public record StructureDefinition(
-            String targetInfix,
-            String beforeInfix,
             String name,
+            String type,
             List<String> typeParams,
-            String after,
             List<String> variants,
             List<TypeRef> interfaces,
-            List<TypeRef> superTypes
-    ) {
+            List<TypeRef> superTypes,
+            List<String> annotations) {
+        public StructureDefinition(String name, String type) {
+            this(name, type, Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty(), Lists.empty());
+        }
+
         private String generateToEnum() {
             var joined = this.variants.query()
                     .map(inner -> "\n\t" + inner)
@@ -1619,6 +1631,10 @@ public class Main {
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
+        }
+
+        private boolean isActual() {
+            return this.annotations.contains("Actual");
         }
     }
 
@@ -1713,7 +1729,7 @@ public class Main {
     private String compile(String input) {
         var state = CompileState.createInitial();
         var parsed = this.parseStatements(state, input, this::compileRootSegment);
-        var joined = parsed.left().structures.query().collect(Joiner.empty()).orElse("");
+        var joined = parsed.left().generate();
         return joined + this.generateStatements(parsed.right());
     }
 
@@ -1955,15 +1971,14 @@ public class Main {
         return this.suffix(beforeContent.strip(), ")", s -> {
             return this.first(s, "(", (s1, s2) -> {
                 var parsed = this.parseParameters(state, s2);
-                return this.parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants, annotations, interfaces, superTypes);
+                return this.parseStructureWithMaybeTypeParams(parsed.left(), beforeInfix, s1, content1, parsed.right(), variants, annotations, interfaces, superTypes, targetInfix.strip());
             });
         }).or(() -> {
-            return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces, superTypes);
+            return this.parseStructureWithMaybeTypeParams(state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces, superTypes, targetInfix.strip());
         });
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeTypeParams(
-            String targetInfix,
             CompileState state,
             String beforeInfix,
             String beforeContent,
@@ -1972,46 +1987,47 @@ public class Main {
             List<String> variants,
             List<String> annotations,
             List<TypeRef> interfaces,
-            List<TypeRef> maybeSuperType) {
+            List<TypeRef> maybeSuperType, String type) {
         return this.first(beforeContent, "<", (name, withTypeParams) -> {
             return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(mapper.apply(state1, s)));
-                return this.assembleStructure(typeParams.left(), targetInfix, annotations, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants, interfaces, maybeSuperType);
+                return this.assembleStructure(typeParams.left(), new StructureDefinition(
+                        name.strip(), type,
+                        typeParams.right(),
+                        variants,
+                        interfaces,
+                        maybeSuperType,
+                        annotations), params, content1);
             });
         }).or(() -> {
-            return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces, maybeSuperType);
+            return this.assembleStructure(state, new StructureDefinition(
+                    beforeContent.strip(), type,
+                    Lists.empty(),
+                    variants,
+                    interfaces,
+                    maybeSuperType,
+                    annotations), params, content1);
         });
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> assembleStructure(
-            CompileState state,
-            String targetInfix,
-            List<String> annotations,
-            String beforeInfix,
-            String rawName,
-            String content,
-            List<String> typeParams,
-            String after,
-            List<Parameter> rawParameters,
-            List<String> variants,
-            List<TypeRef> interfaces,
-            List<TypeRef> maybeSuperType) {
-        var name = rawName.strip();
-        if (!isSymbol(name)) {
+            CompileState state, StructureDefinition definition, List<Parameter> rawParameters, String content
+    ) {
+        if (!isSymbol(definition.name)) {
             return new None<>();
         }
 
-        if (annotations.contains("Actual")) {
+        if (definition.isActual()) {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
 
-        var segmentsTuple = this.parseStatements(state.pushStructName(new Tuple2Impl<>(name, variants)).withTypeParams(typeParams), content, (state0, input) -> this.parseClassSegment(state0, input, 1));
+        var segmentsTuple = this.parseStatements(state.pushStructDefinition(definition), content, (state0, input) -> this.parseClassSegment(state0, input, 1));
         var segmentsState = segmentsTuple.left();
         var segments = segmentsTuple.right();
 
         var parameters = this.retainDefinitions(rawParameters);
-        var prototype = new StructurePrototype(new StructureDefinition(targetInfix, beforeInfix, name, typeParams, after, variants, interfaces, maybeSuperType), parameters, segments);
+        var prototype = new StructurePrototype(definition, parameters, segments);
         return new Some<>(new Tuple2Impl<>(segmentsState.addType(prototype.createObjectType()), prototype));
     }
 
@@ -2042,7 +2058,7 @@ public class Main {
 
                     var generatedSuperType = this.joinSuperTypes(state, prototype);
 
-                    var generated = generatePlaceholder(prototype.definition.beforeInfix.strip()) + prototype.definition.targetInfix + prototype.definition.name + joinedTypeParams + generatePlaceholder(prototype.definition.after) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+                    var generated = prototype.definition.type + " " + prototype.definition.name + joinedTypeParams + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
                     var compileState = withEnumCategoriesDefined.left().popStructName();
 
                     var definedState = compileState.addStructure(generated);
@@ -2085,7 +2101,7 @@ public class Main {
 
         var enumState = state.addStructure(enumGenerated);
 
-        var enumType = new ObjectType(name + "Variant", Lists.empty(), Lists.empty(), variants);
+        var enumType = new ObjectType(new StructureDefinition(name + "Variant", "class"), Lists.empty());
         var enumDefinition = this.createVariantDefinition(enumType);
 
         return new Tuple2Impl<>(enumState, segments.addFirst(new Statement(1, enumDefinition)));
@@ -2097,7 +2113,7 @@ public class Main {
             List<ClassSegment> oldStatements) {
         return variantsBases.query().fold(oldStatements, (classSegmentList, superType) -> {
             var variantTypeName = superType + "Variant";
-            var variantType = new ObjectType(variantTypeName, Lists.empty(), Lists.empty(), Lists.empty());
+            var variantType = new ObjectType(new StructureDefinition(variantTypeName, "class"), Lists.empty());
 
             var definition = this.createVariantDefinition(variantType);
             var source = new SymbolValue(variantTypeName + "." + name, variantType);
@@ -2150,7 +2166,7 @@ public class Main {
     }
 
     private Definition createVariantDefinition(ObjectType type) {
-        return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
+        return ImmutableDefinition.createSimpleDefinition("_" + type.definition.name, type);
     }
 
     private List<ClassSegment> defineConstructor(List<ClassSegment> segments, List<Definition> parameters) {
@@ -2362,7 +2378,7 @@ public class Main {
 
                     var statementsTuple = this.parseFunctionSegments(headerState, content, depth);
                     var statementsState = statementsTuple.left();
-                    var statements = statementsTuple.right().addAllFirst(statementsState.functionSegments);
+                    var statements = statementsTuple.right().addAllFirst(statementsState.functionCache);
                     return new Some<>(new Tuple2Impl<>(statementsState.clearFunctionSegments(), new Block(depth, header, statements)));
                 });
             });
@@ -2552,7 +2568,7 @@ public class Main {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
                 Type type = Primitive.Unknown;
-                if (state.typeRegister instanceof Some(var expectedType)) {
+                if (state.typeCache instanceof Some(var expectedType)) {
                     if (expectedType instanceof FunctionType functionType) {
                         type = functionType.arguments.get(0).orElse(null);
                     }
@@ -2698,7 +2714,7 @@ public class Main {
         var valueState = valueTuple.left();
         var value = valueTuple.right();
 
-        var actualType = valueTuple.left().typeRegister.orElse(Primitive.Unknown);
+        var actualType = valueTuple.left().typeCache.orElse(Primitive.Unknown);
         return new Some<>(new Tuple2Impl<>(valueState, new Tuple2Impl<>(value, actualType)));
     }
 
@@ -3089,7 +3105,9 @@ public class Main {
             }
         }
 
-        return new Tuple2Impl<>(state, new Template(new ObjectType(base, Lists.empty(), Lists.empty(), Lists.empty()), children));
+        var definition = new StructureDefinition(base, "class");
+        var base1 = new ObjectType(definition, Lists.empty());
+        return new Tuple2Impl<>(state, new Template(base1, children));
     }
 
     private Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
