@@ -922,6 +922,9 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.interfaces /* : unknown */ = interfaces /* : unknown */;
         this /* : unknown */.superTypes /* : unknown */ = superTypes /* : unknown */;
     }
+    static generateEnumEntries(variants) {
+        return variants /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */((inner) => "\n\t" + inner /* : string */) /* : Query<R> */.collect /* : unknown */(new Joiner(",") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+    }
     createObjectType() {
         let definitionFromSegments = this /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */.query /* : () => Query<IncompleteClassSegment> */() /* : Query<IncompleteClassSegment> */.map /* : (arg0 : (arg0 : IncompleteClassSegment) => R) => Query<R> */(IncompleteClassSegment /* : IncompleteClassSegment */.maybeCreateDefinition /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
         return new ObjectType(this /* : StructurePrototype */.name /* : string */, this /* : StructurePrototype */.typeParams /* : List<string> */, definitionFromSegments /* : unknown */.addAllLast /* : unknown */(this /* : StructurePrototype */.parameters /* : List<Definition> */) /* : unknown */, this /* : StructurePrototype */.variants /* : List<string> */) /* : ObjectType */;
@@ -931,6 +934,12 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     }
     joinTypeParams() {
         return this /* : StructurePrototype */.typeParams /* : List<string> */() /* : unknown */.query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => "<" + inner + ">") /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+    }
+    generateToEnum() {
+        let variants = this /* : StructurePrototype */.variants /* : List<string> */;
+        let joined = generateEnumEntries /* : (arg0 : List<string>) => string */(variants /* : List<string> */) /* : string */;
+        let structure = "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
+        return structure /* : unknown */;
     }
 }
 /* private */ class Cast /*  */ {
@@ -1310,31 +1319,24 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let withThis = state /* : CompileState */.enterDefinitions /* : () => CompileState */() /* : CompileState */.define /* : (arg0 : Definition) => CompileState */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("this", thisType /* : ObjectType */) /* : Definition */) /* : CompileState */;
         return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(withThis /* : CompileState */, prototype /* : StructurePrototype */.interfaces /* : List<TypeRef> */, (state2, tuple) => this /* : Main */.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2 /* : unknown */, tuple /* : unknown */.right /* : unknown */() /* : unknown */.value /* : unknown */) /* : Option<[CompileState, Type]> */) /* : Option<[CompileState, List<R>]> */.flatMap /* : (arg0 : (arg0 : [CompileState, List<R>]) => Option<R>) => Option<R> */((interfacesTypes) => {
             let interfaces = interfacesTypes /* : [CompileState, List<R>] */[1 /* : number */];
-            let bases = interfaces /* : unknown */.query /* : unknown */() /* : unknown */.map /* : unknown */(Main /* : Main */.retainFindableType /* : unknown */) /* : unknown */.flatMap /* : unknown */(Queries /* : Queries */.fromOption /* : unknown */) /* : unknown */.map /* : unknown */(FindableType /* : FindableType */.findBase /* : unknown */) /* : unknown */.flatMap /* : unknown */(Queries /* : Queries */.fromOption /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
-            let variantsSuper = bases /* : unknown */.query /* : unknown */() /* : unknown */.filter /* : unknown */((type) => type /* : unknown */.hasVariant /* : unknown */(prototype /* : StructurePrototype */.name /* : string */) /* : unknown */) /* : unknown */.map /* : unknown */(BaseType /* : BaseType */.findName /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+            let bases = this /* : Main */.resolveBaseTypes /* : (arg0 : List<Type>) => List<BaseType> */(interfaces /* : unknown */) /* : List<BaseType> */;
+            let variantsSuper = this /* : Main */.findSuperTypesOfVariants /* : (arg0 : List<BaseType>, arg1 : string) => List<string> */(bases /* : List<BaseType> */, prototype /* : StructurePrototype */.name /* : string */) /* : List<string> */;
             return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(interfacesTypes /* : [CompileState, List<R>] */[0 /* : number */], prototype /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */() /* : unknown */, (state1, entry) => this /* : Main */.completeClassSegment /* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1 /* : unknown */, entry /* : unknown */.right /* : unknown */() /* : unknown */) /* : Option<[CompileState, ClassSegment]> */) /* : Option<[CompileState, List<R>]> */.map /* : (arg0 : (arg0 : [CompileState, List<R>]) => R) => Option<R> */((oldStatementsTuple) => {
                 let oldStatementsState = oldStatementsTuple /* : [CompileState, List<R>] */[0 /* : number */];
                 let oldStatements = oldStatementsTuple /* : [CompileState, List<R>] */[1 /* : number */];
                 let exited = oldStatementsState /* : unknown */.exitDefinitions /* : unknown */() /* : unknown */;
-                let fold = variantsSuper /* : unknown */.query /* : unknown */() /* : unknown */.fold /* : unknown */(oldStatements /* : unknown */, (classSegmentList, superType) => {
-                    let name = superType /* : unknown */ + "Variant";
-                    let type = new ObjectType(name /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
-                    let definition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(type /* : unknown */) /* : Definition */;
-                    return classSegmentList /* : unknown */.addFirst /* : unknown */(new Statement(1 /* : number */, new FieldInitialization(definition /* : Definition */, new SymbolValue(name /* : unknown */ + "." + prototype /* : StructurePrototype */.name /* : unknown */, type /* : unknown */) /* : SymbolValue */) /* : FieldInitialization */) /* : Statement */) /* : unknown */;
-                }) /* : unknown */;
+                let fold = getFold /* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype /* : StructurePrototype */.name /* : string */, variantsSuper /* : List<string> */, oldStatements /* : unknown */) /* : List<ClassSegment> */;
                 /* CompileState withEnum */ ;
                 /* List<ClassSegment> newSegments */ ;
                 if (prototype /* : StructurePrototype */.variants /* : List<string> */.isEmpty /* : () => boolean */() /* : boolean */) {
                     exited /* : unknown */;
-                    fold /* : unknown */;
+                    fold /* : List<ClassSegment> */;
                 }
                 else {
-                    let joined = prototype /* : StructurePrototype */.variants /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */((inner) => "\n\t" + inner /* : string */) /* : Query<R> */.collect /* : unknown */(new Joiner(",") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-                    exited /* : unknown */.addStructure /* : unknown */("enum " + prototype.name + "Variant" + " {" +
-                        joined +
-                        "\n}\n") /* : unknown */;
+                    let structure = prototype /* : StructurePrototype */.generateToEnum /* : () => string */() /* : string */;
+                    exited /* : unknown */.addStructure /* : unknown */(structure /* : string */) /* : unknown */;
                     let definition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(new ObjectType(prototype /* : StructurePrototype */.name /* : string */ + "Variant", Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, prototype /* : StructurePrototype */.variants /* : List<string> */) /* : ObjectType */) /* : Definition */;
-                    fold /* : unknown */.addFirst /* : unknown */(new Statement(1 /* : number */, definition /* : Definition */) /* : Statement */) /* : unknown */;
+                    fold /* : List<ClassSegment> */.addFirst /* : (arg0 : ClassSegment) => List<ClassSegment> */(new Statement(1 /* : number */, definition /* : Definition */) /* : Statement */) /* : List<ClassSegment> */;
                 }
                 let segmentsWithMaybeConstructor = this /* : Main */.attachConstructor /* : (arg0 : StructurePrototype, arg1 : List<ClassSegment>) => List<ClassSegment> */(prototype /* : StructurePrototype */) /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.flatMap /* : (arg0 : (arg0 : ClassSegment) => Query<R>) => Query<R> */((segment) => this /* : Main */.flattenEnumValues /* : (arg0 : ClassSegment, arg1 : ObjectType) => Query<ClassSegment> */(segment /* : ClassSegment */, thisType /* : ObjectType */) /* : Query<ClassSegment> */) /* : Query<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new ListCollector() /* : ListCollector */) /* : R */;
                 let generatedSegments = this /* : Main */.joinSegments /* : (arg0 : List<ClassSegment>) => string */(segmentsWithMaybeConstructor /* : R */) /* : string */;
@@ -1347,6 +1349,20 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                 return [definedState /* : unknown */, new Whitespace() /* : Whitespace */];
             }) /* : Option<R> */;
         }) /* : Option<R> */;
+    }
+    getFold(name, variantsBases, oldStatements) {
+        return variantsBases /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : string) => R) => R */(oldStatements /* : List<ClassSegment> */, (classSegmentList, superType) => {
+            let variantType = superType /* : unknown */ + "Variant";
+            let type = new ObjectType(variantType /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
+            let definition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(type /* : ObjectType */) /* : Definition */;
+            return classSegmentList /* : unknown */.addFirst /* : unknown */(new Statement(1 /* : number */, new FieldInitialization(definition /* : Definition */, new SymbolValue(variantType /* : unknown */ + "." + name /* : string */, type /* : ObjectType */) /* : SymbolValue */) /* : FieldInitialization */) /* : Statement */) /* : unknown */;
+        }) /* : R */;
+    }
+    findSuperTypesOfVariants(bases, name) {
+        return bases /* : List<BaseType> */.query /* : () => Query<BaseType> */() /* : Query<BaseType> */.filter /* : (arg0 : (arg0 : BaseType) => boolean) => Query<BaseType> */((type) => type /* : BaseType */.hasVariant /* : (arg0 : string) => boolean */(name /* : string */) /* : boolean */) /* : Query<BaseType> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(BaseType /* : BaseType */.findName /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+    }
+    resolveBaseTypes(interfaces) {
+        return interfaces /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */(Main /* : Main */.retainFindableType /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(FindableType /* : FindableType */.findBase /* : unknown */) /* : Option<R> */.flatMap /* : unknown */(Queries /* : Queries */.fromOption /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     joinSegments(segmentsWithMaybeConstructor) {
         return segmentsWithMaybeConstructor /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.map /* : (arg0 : (arg0 : ClassSegment) => R) => Query<R> */(ClassSegment /* : ClassSegment */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;

@@ -1460,6 +1460,13 @@ public class Main {
             List<TypeRef> interfaces,
             List<TypeRef> superTypes
     ) implements IncompleteClassSegment {
+        private static String generateEnumEntries(List<String> variants) {
+            return variants.query()
+                    .map(inner -> "\n\t" + inner)
+                    .collect(new Joiner(","))
+                    .orElse("");
+        }
+
         private ObjectType createObjectType() {
             var definitionFromSegments = this.segments.query()
                     .map(IncompleteClassSegment::maybeCreateDefinition)
@@ -1479,6 +1486,12 @@ public class Main {
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
+        }
+
+        private String generateToEnum() {
+            var variants = this.variants;
+            var joined = generateEnumEntries(variants);
+            return "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
         }
     }
 
@@ -2017,77 +2030,98 @@ public class Main {
         return this.mapUsingState(withThis, prototype.interfaces, (state2, tuple) -> this.parseType(state2, tuple.right().value)).flatMap(interfacesTypes -> {
             var interfaces = interfacesTypes.right();
 
-            var bases = interfaces.query()
-                    .map(Main::retainFindableType)
-                    .flatMap(Queries::fromOption)
-                    .map(FindableType::findBase)
-                    .flatMap(Queries::fromOption)
-                    .collect(new ListCollector<>());
-
-            var variantsSuper = bases.query()
-                    .filter(type -> type.hasVariant(prototype.name))
-                    .map(BaseType::findName)
-                    .collect(new ListCollector<>());
+            var bases = this.resolveBaseTypes(interfaces);
+            var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.name);
 
             return this.mapUsingState(interfacesTypes.left(), prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
-                var oldStatementsState = oldStatementsTuple.left();
+                var exited = oldStatementsTuple.left().exitDefinitions();
                 var oldStatements = oldStatementsTuple.right();
 
-                var exited = oldStatementsState.exitDefinitions();
+                var withEnumCategoriesDefined = this.defineEnumCategories(exited, oldStatements, prototype.name, prototype.variants, prototype.generateToEnum());
+                var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined.right());
+                var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
+                var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
 
-                var fold = variantsSuper.query().fold(oldStatements, (classSegmentList, superType) -> {
-                    var name = superType + "Variant";
-                    var type = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
-                    var definition = this.createVariantDefinition(type);
-                    return classSegmentList.addFirst(new Statement(1, new FieldInitialization(definition, new SymbolValue(name + "." + prototype.name, type))));
-                });
-
-                CompileState withEnum;
-                List<ClassSegment> newSegments;
-                if (prototype.variants.isEmpty()) {
-                    withEnum = exited;
-                    newSegments = fold;
-                }
-                else {
-                    var joined = prototype.variants.query()
-                            .map(inner -> "\n\t" + inner)
-                            .collect(new Joiner(","))
-                            .orElse("");
-
-                    withEnum = exited.addStructure("enum " + prototype.name + "Variant" + " {" +
-                            joined +
-                            "\n}\n");
-
-                    var definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
-                    newSegments = fold.addFirst(new Statement(1, definition));
-                }
-
-                var segmentsWithMaybeConstructor = this.attachConstructor(prototype, newSegments)
-                        .query()
-                        .flatMap(segment -> this.flattenEnumValues(segment, thisType))
-                        .collect(new ListCollector<>());
-
-                var generatedSegments = this.joinSegments(segmentsWithMaybeConstructor);
-
+                var generatedSegments = this.joinSegments(withConstructor);
                 var joinedTypeParams = prototype.joinTypeParams();
                 var interfacesJoined = this.joinInterfaces(interfaces);
 
-                var generatedSuperType = prototype.superTypes
-                        .query()
-                        .map(value -> state.resolveType(value.value))
-                        .flatMap(Queries::fromOption)
-                        .map(Type::generate)
-                        .collect(new Joiner(", "))
-                        .map(generated -> " extends " + generated)
-                        .orElse("");
+                var generatedSuperType = this.joinSuperTypes(state, prototype);
 
                 var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
-                var compileState = withEnum.popStructName();
+                var compileState = withEnumCategoriesDefined.left().popStructName();
 
                 var definedState = compileState.addStructure(generated);
                 return new Tuple2Impl<>(definedState, new Whitespace());
             });
         });
+    }
+
+    private String joinSuperTypes(CompileState state, StructurePrototype prototype) {
+        return prototype.superTypes
+                .query()
+                .map(value -> state.resolveType(value.value))
+                .flatMap(Queries::fromOption)
+                .map(Type::generate)
+                .collect(new Joiner(", "))
+                .map(generated -> " extends " + generated)
+                .orElse("");
+    }
+
+    private List<ClassSegment> implementEnumValues(List<ClassSegment> withConstructor, ObjectType thisType) {
+        return withConstructor.query()
+                .flatMap(segment -> this.flattenEnumValues(segment, thisType))
+                .collect(new ListCollector<>());
+    }
+
+    private Tuple2<CompileState, List<ClassSegment>> defineEnumCategories(
+            CompileState state,
+            List<ClassSegment> segments, String name,
+            List<String> variants,
+            String enumGenerated
+    ) {
+        if (variants.isEmpty()) {
+            return new Tuple2Impl<>(state, segments);
+        }
+
+        var enumState = state.addStructure(enumGenerated);
+
+        var enumType = new ObjectType(name + "Variant", Lists.empty(), Lists.empty(), variants);
+        var enumDefinition = this.createVariantDefinition(enumType);
+
+        return new Tuple2Impl<>(enumState, segments.addFirst(new Statement(1, enumDefinition)));
+    }
+
+    private List<ClassSegment> implementEnumCategories(
+            String name,
+            List<String> variantsBases,
+            List<ClassSegment> oldStatements) {
+        return variantsBases.query().fold(oldStatements, (classSegmentList, superType) -> {
+            var variantTypeName = superType + "Variant";
+            var variantType = new ObjectType(variantTypeName, Lists.empty(), Lists.empty(), Lists.empty());
+
+            var definition = this.createVariantDefinition(variantType);
+            var source = new SymbolValue(variantTypeName + "." + name, variantType);
+            var initialization = new FieldInitialization(definition, source);
+
+            return classSegmentList.addFirst(new Statement(1, initialization));
+        });
+    }
+
+    private List<String> findSuperTypesOfVariants(List<BaseType> bases, String name) {
+        return bases.query()
+                .filter(type -> type.hasVariant(name))
+                .map(BaseType::findName)
+                .collect(new ListCollector<>());
+    }
+
+    private List<BaseType> resolveBaseTypes(List<Type> interfaces) {
+        return interfaces.query()
+                .map(Main::retainFindableType)
+                .flatMap(Queries::fromOption)
+                .map(FindableType::findBase)
+                .flatMap(Queries::fromOption)
+                .collect(new ListCollector<>());
     }
 
     private String joinSegments(List<ClassSegment> segmentsWithMaybeConstructor) {
@@ -2120,8 +2154,7 @@ public class Main {
         return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
     }
 
-    private List<ClassSegment> attachConstructor(StructurePrototype prototype, List<ClassSegment> segments) {
-        var parameters = prototype.parameters();
+    private List<ClassSegment> defineConstructor(List<ClassSegment> segments, List<Definition> parameters) {
         if (parameters.isEmpty()) {
             return segments;
         }
