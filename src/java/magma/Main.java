@@ -1039,7 +1039,9 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return this;
+            return new TupleType(this.arguments.query()
+                    .map(child -> child.replace(mapping))
+                    .collect(new ListCollector<>()));
         }
 
         @Override
@@ -2074,7 +2076,7 @@ public class Main {
                         .flatMap(segment -> this.flattenEnumValues(segment, thisType))
                         .collect(new ListCollector<>());
 
-                var generatedSegments = joinSegments(segmentsWithMaybeConstructor);
+                var generatedSegments = this.joinSegments(segmentsWithMaybeConstructor);
 
                 var joinedTypeParams = prototype.joinTypeParams();
                 var interfacesJoined = this.joinInterfaces(interfaces);

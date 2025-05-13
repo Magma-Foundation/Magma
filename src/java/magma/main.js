@@ -359,13 +359,13 @@ var ResultVariant;
         return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, new Some(type /* : Type */) /* : Some */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     popStructName() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.removeLast /* : () => Option<[List<T>, T]> */() /* : Option<[List<T>, T]> */.map /* : (arg0 : (arg0 : [List<T>, T]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.structNames /* : List<[string, List<string>]> */) /* : unknown */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.removeLast /* : () => Option<[List<[string, List<string>]>, [string, List<string>]]> */() /* : Option<[List<[string, List<string>]>, [string, List<string>]]> */.map /* : (arg0 : (arg0 : [List<[string, List<string>]>, [string, List<string>]]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.structNames /* : List<[string, List<string>]> */) /* : unknown */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     enterDefinitions() {
         return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.addLast /* : (arg0 : List<Definition>) => List<List<Definition>> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     exitDefinitions() {
-        let removed = this /* : CompileState */.definitions /* : List<List<Definition>> */.removeLast /* : () => Option<[List<T>, T]> */() /* : Option<[List<T>, T]> */.map /* : (arg0 : (arg0 : [List<T>, T]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.definitions /* : List<List<Definition>> */) /* : unknown */;
+        let removed = this /* : CompileState */.definitions /* : List<List<Definition>> */.removeLast /* : () => Option<[List<List<Definition>>, List<Definition>]> */() /* : Option<[List<List<Definition>>, List<Definition>]> */.map /* : (arg0 : (arg0 : [List<List<Definition>>, List<Definition>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.definitions /* : List<List<Definition>> */) /* : unknown */;
         return new CompileState(this /* : CompileState */.structures /* : List<string> */, removed /* : unknown */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     addType(thisType) {
@@ -547,7 +547,7 @@ var ResultVariant;
         return "[" + joinedArguments + "]";
     }
     replace(mapping) {
-        return this /* : TupleType */;
+        return new TupleType(this /* : TupleType */.arguments /* : List<Type> */.query /* : () => Query<Type> */() /* : Query<Type> */.map /* : (arg0 : (arg0 : Type) => R) => Query<R> */((child) => child /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : TupleType */;
     }
     findName() {
         return "";
@@ -1337,7 +1337,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                     fold /* : unknown */.addFirst /* : unknown */(new Statement(1 /* : number */, definition /* : Definition */) /* : Statement */) /* : unknown */;
                 }
                 let segmentsWithMaybeConstructor = this /* : Main */.attachConstructor /* : (arg0 : StructurePrototype, arg1 : List<ClassSegment>) => List<ClassSegment> */(prototype /* : StructurePrototype */) /* : List<ClassSegment> */.query /* : () => Query<ClassSegment> */() /* : Query<ClassSegment> */.flatMap /* : (arg0 : (arg0 : ClassSegment) => Query<R>) => Query<R> */((segment) => this /* : Main */.flattenEnumValues /* : (arg0 : ClassSegment, arg1 : ObjectType) => Query<ClassSegment> */(segment /* : ClassSegment */, thisType /* : ObjectType */) /* : Query<ClassSegment> */) /* : Query<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new ListCollector() /* : ListCollector */) /* : R */;
-                let generatedSegments = joinSegments /* : (arg0 : List<ClassSegment>) => string */(segmentsWithMaybeConstructor /* : R */) /* : string */;
+                let generatedSegments = this /* : Main */.joinSegments /* : (arg0 : List<ClassSegment>) => string */(segmentsWithMaybeConstructor /* : R */) /* : string */;
                 let joinedTypeParams = prototype /* : StructurePrototype */.joinTypeParams /* : () => string */() /* : string */;
                 let interfacesJoined = this /* : Main */.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces /* : unknown */) /* : string */;
                 let generatedSuperType = prototype /* : StructurePrototype */.superTypes /* : List<TypeRef> */.query /* : () => Query<TypeRef> */() /* : Query<TypeRef> */.map /* : (arg0 : (arg0 : TypeRef) => R) => Query<R> */((value) => state /* : CompileState */.resolveType /* : (arg0 : string) => Option<Type> */(value /* : TypeRef */.value /* : unknown */) /* : Option<Type> */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(Type /* : Type */.generate /* : unknown */) /* : Option<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((generated) => " extends " + generated /* : unknown */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
@@ -1534,9 +1534,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     toFirst(input) {
         let divisions = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(input /* : string */, this /* : Main */.foldBlockStart /* : unknown */) /* : List<string> */;
-        return divisions /* : List<string> */.removeFirst /* : () => Option<[T, List<T>]> */() /* : Option<[T, List<T>]> */.map /* : (arg0 : (arg0 : [T, List<T>]) => R) => Option<R> */((removed) => {
-            let right = removed /* : [T, List<T>] */[0 /* : number */];
-            let left = removed /* : [T, List<T>] */[1 /* : number */].query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner("") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return divisions /* : List<string> */.removeFirst /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.map /* : (arg0 : (arg0 : [string, List<string>]) => R) => Option<R> */((removed) => {
+            let right = removed /* : [string, List<string>] */[0 /* : number */];
+            let left = removed /* : [string, List<string>] */[1 /* : number */].query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner("") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
             return [right /* : unknown */, left /* : unknown */];
         }) /* : Option<R> */;
     }
@@ -1967,9 +1967,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     toLast(input, separator, folder) {
         let divisions = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(input /* : string */, folder /* : (arg0 : DivideState, arg1 : string) => DivideState */) /* : List<string> */;
-        return divisions /* : List<string> */.removeLast /* : () => Option<[List<T>, T]> */() /* : Option<[List<T>, T]> */.map /* : (arg0 : (arg0 : [List<T>, T]) => R) => Option<R> */((removed) => {
-            let left = removed /* : [List<T>, T] */[0 /* : number */].query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner(separator /* : string */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
-            let right = removed /* : [List<T>, T] */[1 /* : number */];
+        return divisions /* : List<string> */.removeLast /* : () => Option<[List<string>, string]> */() /* : Option<[List<string>, string]> */.map /* : (arg0 : (arg0 : [List<string>, string]) => R) => Option<R> */((removed) => {
+            let left = removed /* : [List<string>, string] */[0 /* : number */].query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner(separator /* : string */) /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+            let right = removed /* : [List<string>, string] */[1 /* : number */];
             return [left /* : unknown */, right /* : unknown */];
         }) /* : Option<R> */;
     }
