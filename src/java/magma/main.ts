@@ -94,11 +94,14 @@ enum CallerVariant {
 	_CallerVariant : CallerVariant;
 	generate() : string;
 }
+/* private */interface BaseType/*  */ {
+	variants() : List<string>;
+	name() : string;
+}
 /* private */interface FindableType/*  */ {
-	typeParams() : List<string>;
 	find(name : string) : Option<Type>;
 	name() : string;
-	findBase() : Option</* ObjectType */>;
+	findBase() : Option<BaseType>;
 }
 /* private */interface Definition/*  */ {
 	generate() : string;
@@ -363,7 +366,7 @@ enum ResultVariant {
 		return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
 	}
 }
-/* private */class ObjectType/*  */ implements FindableType {
+/* private */class ObjectType/*  */ implements FindableType, BaseType {
 	constructor (name : string, typeParams : List<string>, definitions : List<Definition>, variants : List<string>) {
 	}
 	generate() : string {
@@ -375,7 +378,7 @@ enum ResultVariant {
 	find(name : string) : Option<Type> {
 		return this.definitions.iterate().filter((definition : T) => definition.name().equals(name)).map(Definition.type).next();
 	}
-	findBase() : Option<ObjectType> {
+	findBase() : Option<BaseType> {
 		return new Some(this);
 	}
 	findName() : Option<string> {
@@ -633,9 +636,6 @@ enum ResultVariant {
 		joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 		return this.base.generate() + joinedArguments;
 	}
-	typeParams() : List<string> {
-		return this.base.typeParams();
-	}
 	find(name : string) : Option<Type> {
 		return this.base.find(name).map((found : Type) => {
 			mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
@@ -645,7 +645,7 @@ enum ResultVariant {
 	name() : string {
 		return this.base.name();
 	}
-	findBase() : Option<ObjectType> {
+	findBase() : Option<BaseType> {
 		return new Some(this.base);
 	}
 	replace(mapping : Map<string, Type>) : Type {
@@ -666,16 +666,13 @@ enum ResultVariant {
 	type() : Type {
 		return Primitive.Unknown;
 	}
-	typeParams() : List<string> {
-		return Lists.empty();
-	}
 	find(name : string) : Option<Type> {
 		return new None();
 	}
 	name() : string {
 		return this.input;
 	}
-	findBase() : Option<ObjectType> {
+	findBase() : Option<BaseType> {
 		return new None();
 	}
 	replace(mapping : Map<string, Type>) : Type {
@@ -1247,7 +1244,7 @@ enum ResultVariant {
 		thisType : ObjectType = prototype.createObjectType();
 		state2 : CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 		bases : R = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Iterators.fromOption).map(FindableType.findBase).flatMap(Iterators.fromOption).collect(new ListCollector());
-		variantsSuper = bases.iterate().filter((type) => type.variants.contains(prototype.name)).map(ObjectType.name).collect(new ListCollector());
+		variantsSuper = bases.iterate().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
 		return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple : [CompileState, List<R>]) => {
 			oldStatementsState = oldStatementsTuple[0]();
 			oldStatements = oldStatementsTuple[1]();

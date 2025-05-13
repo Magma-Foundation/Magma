@@ -135,12 +135,18 @@ public class Main {
         String generate();
     }
 
+    private interface BaseType {
+        List<String> variants();
+
+        String name();
+    }
+
     private interface FindableType extends Type {
         Option<Type> find(String name);
 
         String name();
 
-        Option<ObjectType> findBase();
+        Option<BaseType> findBase();
     }
 
     private interface Definition extends Parameter, Header, StatementValue {
@@ -645,7 +651,7 @@ public class Main {
             List<String> typeParams,
             List<Definition> definitions,
             List<String> variants
-    ) implements FindableType {
+    ) implements FindableType, BaseType {
         @Override
         public String generate() {
             return this.name;
@@ -667,7 +673,7 @@ public class Main {
         }
 
         @Override
-        public Option<ObjectType> findBase() {
+        public Option<BaseType> findBase() {
             return new Some<>(this);
         }
 
@@ -1042,7 +1048,7 @@ public class Main {
         }
 
         @Override
-        public Option<ObjectType> findBase() {
+        public Option<BaseType> findBase() {
             return new Some<>(this.base);
         }
 
@@ -1081,7 +1087,7 @@ public class Main {
         }
 
         @Override
-        public Option<ObjectType> findBase() {
+        public Option<BaseType> findBase() {
             return new None<>();
         }
 
@@ -1877,8 +1883,8 @@ public class Main {
                 .collect(new ListCollector<>());
 
         var variantsSuper = bases.iterate()
-                .filter(type -> type.variants.contains(prototype.name))
-                .map(ObjectType::name)
+                .filter(type -> type.variants().contains(prototype.name))
+                .map(BaseType::name)
                 .collect(new ListCollector<>());
 
         return this.mapUsingState(state2, prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {

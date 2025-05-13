@@ -500,9 +500,6 @@ var ResultVariant;
         joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
         return this.base.generate() + joinedArguments;
     }
-    typeParams() {
-        return this.base.typeParams();
-    }
     find(name) {
         return this.base.find(name).map((found) => {
             mapping = this.base.typeParams().iterate().zip(this.arguments.iterate()).collect(new MapCollector());
@@ -532,9 +529,6 @@ var ResultVariant;
     }
     type() {
         return Primitive.Unknown;
-    }
-    typeParams() {
-        return Lists.empty();
     }
     find(name) {
         return new None();
@@ -1104,7 +1098,7 @@ var ResultVariant;
         thisType: ObjectType = prototype.createObjectType();
         state2: CompileState = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
         bases: R = prototype.interfaces.iterate().map(Main.retainFindableType).flatMap(Iterators.fromOption).map(FindableType.findBase).flatMap(Iterators.fromOption).collect(new ListCollector());
-        variantsSuper = bases.iterate().filter((type) => type.variants.contains(prototype.name)).map(ObjectType.name).collect(new ListCollector());
+        variantsSuper = bases.iterate().filter((type) => type.variants().contains(prototype.name)).map(BaseType.name).collect(new ListCollector());
         return this.mapUsingState(state2, prototype.segments(), (state1, entry) => this.completeClassSegment(state1, entry.right())).map((oldStatementsTuple) => {
             oldStatementsState = oldStatementsTuple[0]();
             oldStatements = oldStatementsTuple[1]();
