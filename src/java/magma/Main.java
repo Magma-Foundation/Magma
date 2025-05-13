@@ -155,21 +155,14 @@ public class Main {
         Definition mapType(Function<Type, Type> mapper);
 
         @Override
-        String toString();
-
-        @Override
         String generateWithParams(String joinedParameters);
 
         @Override
         Definition createDefinition(List<Type> paramTypes);
 
-        Option<String> maybeBefore();
+        String findName();
 
-        String name();
-
-        Type type();
-
-        List<String> typeParams();
+        Type findType();
 
         boolean containsAnnotation(String annotation);
 
@@ -568,13 +561,24 @@ public class Main {
     }
 
     private record ImmutableDefinition(
-            List<String> annotations, Option<String> maybeBefore,
+            List<String> annotations,
+            Option<String> maybeBefore,
             String name,
             Type type,
             List<String> typeParams
     ) implements Definition {
         public static Definition createSimpleDefinition(String name, Type type) {
             return new ImmutableDefinition(Lists.empty(), new None<>(), name, type, Lists.empty());
+        }
+
+        @Override
+        public String findName() {
+            return this.name;
+        }
+
+        @Override
+        public Type findType() {
+            return this.type;
         }
 
         @Override
@@ -645,6 +649,17 @@ public class Main {
         public Definition removeAnnotations() {
             return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
         }
+
+        @Override
+        public String toString() {
+            return "ImmutableDefinition[" +
+                    "annotations=" + this.annotations + ", " +
+                    "maybeBefore=" + this.maybeBefore + ", " +
+                    "findName=" + this.name + ", " +
+                    "findType=" + this.type + ", " +
+                    "typeParams=" + this.typeParams + ']';
+        }
+
     }
 
     private record ObjectType(
@@ -668,8 +683,8 @@ public class Main {
         @Override
         public Option<Type> find(String name) {
             return this.definitions.iterate()
-                    .filter(definition -> definition.name().equals(name))
-                    .map(Definition::type)
+                    .filter(definition -> definition.findName().equals(name))
+                    .map(Definition::findType)
                     .next();
         }
 
@@ -717,9 +732,9 @@ public class Main {
         private Option<Type> resolveValue(String name) {
             return this.definitions.iterateReversed()
                     .flatMap(List::iterate)
-                    .filter(definition -> definition.name().equals(name))
+                    .filter(definition -> definition.findName().equals(name))
                     .next()
-                    .map(Definition::type);
+                    .map(Definition::findType);
         }
 
         public CompileState addStructure(String structure) {
@@ -1394,7 +1409,7 @@ public class Main {
 
         private List<Type> findParamTypes() {
             return this.parameters().iterate()
-                    .map(Definition::type)
+                    .map(Definition::findType)
                     .collect(new ListCollector<>());
         }
 
@@ -1982,8 +1997,8 @@ public class Main {
 
         var collect = parameters.iterate()
                 .map(definition -> {
-                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.name(), Primitive.Unknown);
-                    return new Assignment(destination, new SymbolValue(definition.name(), Primitive.Unknown));
+                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.findName(), Primitive.Unknown);
+                    return new Assignment(destination, new SymbolValue(definition.findName(), Primitive.Unknown));
                 })
                 .<FunctionSegment>map(assignment -> new Statement(2, assignment))
                 .collect(new ListCollector<>());
@@ -2328,8 +2343,8 @@ public class Main {
                 var variant = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
 
                 var generate = type.findName().orElse("");
-                var temp = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
-                var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.type())));
+                var temp = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
+                var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
                 return new Tuple2Impl<>(definitionTuple.left()
                         .addFunctionSegment(functionSegment)
                         .define(definition), new Operation(variant, Operator.EQUALS, temp));

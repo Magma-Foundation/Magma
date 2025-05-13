@@ -198,6 +198,12 @@ var ResultVariant;
     createSimpleDefinition(name, type) {
         return new ImmutableDefinition(Lists.empty(), new None(), name, type, Lists.empty());
     }
+    findName() {
+        return this.name;
+    }
+    findType() {
+        return this.type;
+    }
     generate() {
         return this.generateWithParams("");
     }
@@ -239,6 +245,9 @@ var ResultVariant;
     removeAnnotations() {
         return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
     }
+    toString() {
+        return "ImmutableDefinition[" + "annotations=" + this.annotations + ", " + "maybeBefore=" + this.maybeBefore + ", " + "findName=" + this.name + ", " + "findType=" + this.type + ", " + "typeParams=" + this.typeParams +  /*  ']' */;
+    }
 }
 /* private */ class ObjectType /*  */ {
     constructor(name, typeParams, definitions, variants) {
@@ -254,7 +263,7 @@ var ResultVariant;
         return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()), this.variants);
     }
     find(name) {
-        return this.definitions.iterate().filter((definition) => definition.name().equals(name)).map(Definition.type).next();
+        return this.definitions.iterate().filter((definition) => definition.findName().equals(name)).map(Definition.findType).next();
     }
     findBase() {
         return new Some(this);
@@ -291,7 +300,7 @@ var ResultVariant;
         return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None(), Lists.empty());
     }
     resolveValue(name) {
-        return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition) => definition.name().equals(name)).next().map(Definition.type);
+        return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition) => definition.findName().equals(name)).next().map(Definition.findType);
     }
     addStructure(structure) {
         return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
@@ -828,7 +837,7 @@ var ResultVariant;
         return this.header.createDefinition(this.findParamTypes());
     }
     findParamTypes() {
-        return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
+        return this.parameters().iterate().map(Definition.findType).collect(new ListCollector());
     }
     maybeCreateDefinition() {
         return new Some(this.header.createDefinition(this.findParamTypes()));
@@ -1254,7 +1263,7 @@ var ResultVariant;
         let definitions = parameters.iterate(). < /* ClassSegment>map */ ((definition) => new Statement(1, definition)).collect(new ListCollector());
         let collect = /* parameters.iterate()
                 .map(definition  */ -( /* destination */,
-        /*  new SymbolValue(definition.name(), Primitive.Unknown));
+        /*  new SymbolValue(definition.findName(), Primitive.Unknown));
     } */). < /* FunctionSegment>map */ ((assignment) => new Statement(2, assignment)).collect(new ListCollector());
         let func = new FunctionNode(1, new ConstructorHeader(), parameters, new Some(collect));
         return segments.addFirst(func).addAllFirst(definitions);
@@ -1510,8 +1519,8 @@ var ResultVariant;
                 let type = value.type();
                 let variant = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
                 let generate = type.findName().orElse("");
-                let temp = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
-                let functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.type())));
+                let temp = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
+                let functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
                 return [definitionTuple[0]().addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp)];
             });
         });

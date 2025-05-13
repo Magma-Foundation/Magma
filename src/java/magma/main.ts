@@ -107,13 +107,10 @@ enum CallerVariant {
 /* private */interface Definition/*  */ {
 	generate() : string;
 	mapType(mapper : (arg0 : Type) => Type) : Definition;
-	toString() : string;
 	generateWithParams(joinedParameters : string) : string;
 	createDefinition(paramTypes : List<Type>) : Definition;
-	maybeBefore() : Option<string>;
-	name() : string;
-	type() : Type;
-	typeParams() : List<string>;
+	findName() : string;
+	findType() : Type;
 	containsAnnotation(annotation : string) : boolean;
 	removeAnnotations() : Definition;
 }
@@ -335,6 +332,12 @@ enum ResultVariant {
 	createSimpleDefinition(name : string, type : Type) : Definition {
 		return new ImmutableDefinition(Lists.empty(), new None(), name, type, Lists.empty());
 	}
+	findName() : string {
+		return this.name;
+	}
+	findType() : Type {
+		return this.type;
+	}
 	generate() : string {
 		return this.generateWithParams("");
 	}
@@ -376,6 +379,9 @@ enum ResultVariant {
 	removeAnnotations() : Definition {
 		return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
 	}
+	toString() : string {
+		return "ImmutableDefinition[" + "annotations=" + this.annotations + ", " + "maybeBefore=" + this.maybeBefore + ", " + "findName=" + this.name + ", " + "findType=" + this.type + ", " + "typeParams=" + this.typeParams + /*  ']' */;
+	}
 }
 /* private */class ObjectType/*  */ implements FindableType, BaseType {
 	name : string;
@@ -395,7 +401,7 @@ enum ResultVariant {
 		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition : T) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()), this.variants);
 	}
 	find(name : string) : Option<Type> {
-		return this.definitions.iterate().filter((definition : T) => definition.name().equals(name)).map(Definition.type).next();
+		return this.definitions.iterate().filter((definition : T) => definition.findName().equals(name)).map(Definition.findType).next();
 	}
 	findBase() : Option<BaseType> {
 		return new Some(this);
@@ -440,7 +446,7 @@ enum ResultVariant {
 		return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None(), Lists.empty());
 	}
 	resolveValue(name : string) : Option<Type> {
-		return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition : T) => definition.name().equals(name)).next().map(Definition.type);
+		return this.definitions.iterateReversed().flatMap(List.iterate).filter((definition : T) => definition.findName().equals(name)).next().map(Definition.findType);
 	}
 	addStructure(structure : string) : CompileState {
 		return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
@@ -1038,7 +1044,7 @@ enum ResultVariant {
 		return this.header.createDefinition(this.findParamTypes());
 	}
 	findParamTypes() : List<Type> {
-		return this.parameters().iterate().map(Definition.type).collect(new ListCollector());
+		return this.parameters().iterate().map(Definition.findType).collect(new ListCollector());
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new Some(this.header.createDefinition(this.findParamTypes()));
@@ -1492,8 +1498,8 @@ enum ResultVariant {
 		let definitions : List<ClassSegment> = parameters.iterate(). < /* ClassSegment>map */((definition) => new Statement(1, definition)).collect(new ListCollector());
 		let collect = /* parameters.iterate()
                 .map(definition  */ - /* > {
-                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.name(), Primitive.Unknown);
-                    return new Assignment */(/* destination */, /*  new SymbolValue(definition.name(), Primitive.Unknown));
+                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.findName(), Primitive.Unknown);
+                    return new Assignment */(/* destination */, /*  new SymbolValue(definition.findName(), Primitive.Unknown));
                 } */). < /* FunctionSegment>map */((assignment) => new Statement(2, assignment)).collect(new ListCollector());
 		let func : FunctionNode = new FunctionNode(1, new ConstructorHeader(), parameters, new Some(collect));
 		return segments.addFirst(func).addAllFirst(definitions);
@@ -1747,8 +1753,8 @@ enum ResultVariant {
 				let type = value.type();
 				let variant : DataAccess = new DataAccess(value, "_" + type.findName().orElse("") + "Variant", Primitive.Unknown);
 				let generate = type.findName().orElse("");
-				let temp : SymbolValue = new SymbolValue(generate + "Variant." + definition.type().findName().orElse(""), Primitive.Unknown);
-				let functionSegment : Statement = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.type())));
+				let temp : SymbolValue = new SymbolValue(generate + "Variant." + definition.findType().findName().orElse(""), Primitive.Unknown);
+				let functionSegment : Statement = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
 				return [definitionTuple[0]().addFunctionSegment(functionSegment).define(definition), new Operation(variant, Operator.EQUALS, temp)];
 			});
 		});
