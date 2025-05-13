@@ -643,7 +643,8 @@ public class Main {
     private record ObjectType(
             String name,
             List<String> typeParams,
-            List<Definition> definitions
+            List<Definition> definitions,
+            List<String> variants
     ) implements FindableType {
         @Override
         public String generate() {
@@ -654,7 +655,7 @@ public class Main {
         public Type replace(Map<String, Type> mapping) {
             return new ObjectType(this.name, this.typeParams, this.definitions.iterate()
                     .map(definition -> definition.mapType(type -> type.replace(mapping)))
-                    .collect(new ListCollector<>()));
+                    .collect(new ListCollector<>()), this.variants);
         }
 
         @Override
@@ -692,7 +693,7 @@ public class Main {
             List<String> structures,
             List<List<Definition>> definitions,
             List<ObjectType> objectTypes,
-            List<String> structNames,
+            List<Tuple2<String, List<String>>> structNames,
             List<String> typeParams,
             Option<Type> typeRegister,
             List<FunctionSegment> functionSegments
@@ -719,8 +720,12 @@ public class Main {
         }
 
         public Option<Type> resolveType(String name) {
-            if (this.structNames.last().filter(inner -> inner.equals(name)).isPresent()) {
-                return new Some<>(new ObjectType(name, this.typeParams, this.definitions.last().orElse(Lists.empty())));
+            var maybe = this.structNames
+                    .last()
+                    .filter(inner -> inner.left().equals(name));
+
+            if (maybe instanceof Some(var found)) {
+                return new Some<>(new ObjectType(found.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), found.right()));
             }
 
             var maybeTypeParam = this.typeParams.iterate()
@@ -741,8 +746,8 @@ public class Main {
             return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
-        public CompileState pushStructName(String name) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister, this.functionSegments);
+        public CompileState pushStructName(Tuple2Impl<String, List<String>> definition) {
+            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(definition), this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState withTypeParams(List<String> typeParams) {
@@ -776,6 +781,10 @@ public class Main {
 
         public CompileState clearFunctionSegments() {
             return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
+        }
+
+        private boolean isCurrentStructName(String stripped) {
+            return stripped.equals(this.structNames.last().map(Tuple2::left).orElse(""));
         }
     }
 
@@ -1418,7 +1427,7 @@ public class Main {
                     .flatMap(Iterators::fromOption)
                     .collect(new ListCollector<>());
 
-            return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
+            return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
         }
 
         @Override
@@ -1820,7 +1829,7 @@ public class Main {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
 
-        var segmentsTuple = this.parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) -> this.parseClassSegment(state0, input, 1));
+        var segmentsTuple = this.parseStatements(state.pushStructName(new Tuple2Impl<>(name, variants)).withTypeParams(typeParams), content, (state0, input) -> this.parseClassSegment(state0, input, 1));
         var segmentsState = segmentsTuple.left();
         var segments = segmentsTuple.right();
 
@@ -1855,7 +1864,7 @@ public class Main {
                         joined +
                         "\n}\n");
 
-                var definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
+                var definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty(), prototype.variants));
                 completed1 = completed.addFirst(new Statement(1, definition));
             }
 
@@ -2030,7 +2039,7 @@ public class Main {
 
     private Option<Tuple2<CompileState, Header>> parseConstructor(CompileState state, String input) {
         var stripped = input.strip();
-        if (stripped.equals(state.structNames.last().orElse(""))) {
+        if (state.isCurrentStructName(stripped)) {
             return new Some<>(new Tuple2Impl<>(state, new ConstructorHeader()));
         }
 

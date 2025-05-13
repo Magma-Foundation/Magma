@@ -361,13 +361,13 @@ enum ResultVariant {
 	}
 }
 /* private */class ObjectType/*  */ implements FindableType {
-	constructor (name : string, typeParams : List<string>, definitions : List<Definition>) {
+	constructor (name : string, typeParams : List<string>, definitions : List<Definition>, variants : List<string>) {
 	}
 	generate() : string {
 		return this.name;
 	}
 	replace(mapping : Map<string, Type>) : Type {
-		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition : T) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()));
+		return new ObjectType(this.name, this.typeParams, this.definitions.iterate().map((definition : T) => definition.mapType((type) => type.replace(mapping))).collect(new ListCollector()), this.variants);
 	}
 	find(name : string) : Option<Type> {
 		return this.definitions.iterate().filter((definition : T) => definition.name().equals(name)).map(Definition.type).next();
@@ -390,7 +390,7 @@ enum ResultVariant {
 	}
 }
 /* private */class CompileState/*  */ {
-	constructor (structures : List<string>, definitions : List<List<Definition>>, objectTypes : List<ObjectType>, structNames : List<string>, typeParams : List<string>, typeRegister : Option<Type>, functionSegments : List<FunctionSegment>) {
+	constructor (structures : List<string>, definitions : List<List<Definition>>, objectTypes : List<ObjectType>, structNames : List<[string, List<string>]>, typeParams : List<string>, typeRegister : Option<Type>, functionSegments : List<FunctionSegment>) {
 	}
 	createInitial() : CompileState {
 		return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None(), Lists.empty());
@@ -406,8 +406,9 @@ enum ResultVariant {
 		return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	resolveType(name : string) : Option<Type> {
-		if (this.structNames.last().filter((inner : T) => inner.equals(name)).isPresent()){
-			return new Some(new ObjectType(name, this.typeParams, this.definitions.last().orElse(Lists.empty())));
+		maybe : Option<T> = this.structNames.last().filter((inner : T) => inner.left().equals(name));
+		if (/* maybe instanceof Some */(/* var found */)){
+			return new Some(new ObjectType(/* found */.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), /* found */.right()));
 		}
 		maybeTypeParam : Option<T> = this.typeParams.iterate().filter((param : T) => param.equals(name)).next();
 		if (maybeTypeParam._variant === OptionVariant.Some){
@@ -419,8 +420,8 @@ enum ResultVariant {
 	define(definition : Definition) : CompileState {
 		return new CompileState(this.structures, this.definitions.mapLast((frame : List<Definition>) => frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
-	pushStructName(name : string) : CompileState {
-		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(name), this.typeParams, this.typeRegister, this.functionSegments);
+	pushStructName(definition : Tuple2Impl<string, List<string>>) : CompileState {
+		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(definition), this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	withTypeParams(typeParams : List<string>) : CompileState {
 		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
@@ -446,6 +447,9 @@ enum ResultVariant {
 	}
 	clearFunctionSegments() : CompileState {
 		return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
+	}
+	isCurrentStructName(stripped : string) : boolean {
+		return stripped.equals(this.structNames.last().map(Tuple2.left).orElse(""));
 	}
 }
 /* private static */class DivideState/*  */ {
@@ -896,7 +900,7 @@ enum ResultVariant {
 	}
 	createObjectType() : ObjectType {
 		definitionFromSegments : R = this.segments.iterate().map(IncompleteClassSegment.maybeCreateDefinition).flatMap(Iterators.fromOption).collect(new ListCollector());
-		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters));
+		return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
 	}
 	maybeCreateDefinition() : Option<Definition> {
 		return new None();
@@ -1186,7 +1190,7 @@ enum ResultVariant {
 		if (annotations.contains("Actual")){
 			return new Some(new Tuple2Impl(state, new Whitespace()));
 		}
-		segmentsTuple : [CompileState, List<T>] = this.parseStatements(state.pushStructName(name).withTypeParams(typeParams), content, (state0, input) => this.parseClassSegment(state0, input, 1));
+		segmentsTuple : [CompileState, List<T>] = this.parseStatements(state.pushStructName(new Tuple2Impl(name, variants)).withTypeParams(typeParams), content, (state0, input) => this.parseClassSegment(state0, input, 1));
 		segmentsState = segmentsTuple[0]();
 		segments = segmentsTuple[1]();
 		parameters : List<Definition> = this.retainDefinitions(rawParameters);
@@ -1212,7 +1216,7 @@ enum ResultVariant {
 				/* withEnum */ = exited.addStructure("enum " + enumName + " {" +
                         joined +
                         "\n}\n");
-				definition : Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty()));
+				definition : Definition = ImmutableDefinition.createSimpleDefinition("_variant", new ObjectType(enumName, Lists.empty(), Lists.empty(), prototype.variants));
 				/* completed1 */ = completed.addFirst(new Statement(1, definition));
 			}
 			withMaybeConstructor : List<ClassSegment> = this.attachConstructor(prototype, /* completed1 */);
@@ -1342,7 +1346,7 @@ enum ResultVariant {
 	}
 	parseConstructor(state : CompileState, input : string) : Option<[CompileState, Header]> {
 		stripped = input.strip();
-		if (stripped.equals(state.structNames.last().orElse(""))){
+		if (state.isCurrentStructName(stripped)){
 			return new Some(new Tuple2Impl(state, new ConstructorHeader()));
 		}
 		return new None();
