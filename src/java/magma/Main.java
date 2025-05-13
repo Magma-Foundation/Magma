@@ -2027,34 +2027,41 @@ public class Main {
         var thisType = prototype.createObjectType();
         var withThis = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        return this.mapUsingState(withThis, prototype.interfaces, (state2, tuple) -> this.parseType(state2, tuple.right().value)).flatMap(interfacesTypes -> {
-            var interfaces = interfacesTypes.right();
+        return this.resolveTypeRefs(withThis, prototype.interfaces).flatMap(interfacesTuple -> {
+            return this.resolveTypeRefs(interfacesTuple.left(), prototype.superTypes).flatMap(superTypesTuple -> {
+                var interfaces = interfacesTuple.right();
+                var superTypes = superTypesTuple.right();
 
-            var bases = this.resolveBaseTypes(interfaces);
-            var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.name);
+                var bases = this.resolveBaseTypes(interfaces).addAllLast(this.resolveBaseTypes(superTypes));
+                var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.name);
 
-            return this.mapUsingState(interfacesTypes.left(), prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
-                var exited = oldStatementsTuple.left().exitDefinitions();
-                var oldStatements = oldStatementsTuple.right();
+                return this.mapUsingState(superTypesTuple.left(), prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
+                    var exited = oldStatementsTuple.left().exitDefinitions();
+                    var oldStatements = oldStatementsTuple.right();
 
-                var withEnumCategoriesDefined = this.defineEnumCategories(exited, oldStatements, prototype.name, prototype.variants, prototype.generateToEnum());
-                var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined.right());
-                var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
-                var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
+                    var withEnumCategoriesDefined = this.defineEnumCategories(exited, oldStatements, prototype.name, prototype.variants, prototype.generateToEnum());
+                    var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined.right());
+                    var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
+                    var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
 
-                var generatedSegments = this.joinSegments(withConstructor);
-                var joinedTypeParams = prototype.joinTypeParams();
-                var interfacesJoined = this.joinInterfaces(interfaces);
+                    var generatedSegments = this.joinSegments(withConstructor);
+                    var joinedTypeParams = prototype.joinTypeParams();
+                    var interfacesJoined = this.joinInterfaces(interfaces);
 
-                var generatedSuperType = this.joinSuperTypes(state, prototype);
+                    var generatedSuperType = this.joinSuperTypes(state, prototype);
 
-                var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
-                var compileState = withEnumCategoriesDefined.left().popStructName();
+                    var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+                    var compileState = withEnumCategoriesDefined.left().popStructName();
 
-                var definedState = compileState.addStructure(generated);
-                return new Tuple2Impl<>(definedState, new Whitespace());
+                    var definedState = compileState.addStructure(generated);
+                    return new Tuple2Impl<>(definedState, new Whitespace());
+                });
             });
         });
+    }
+
+    private Option<Tuple2<CompileState, List<Type>>> resolveTypeRefs(CompileState state, List<TypeRef> refs) {
+        return this.mapUsingState(state, refs, (state2, tuple) -> this.parseType(state2, tuple.right().value));
     }
 
     private String joinSuperTypes(CompileState state, StructurePrototype prototype) {
