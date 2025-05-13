@@ -68,7 +68,7 @@ public class Main {
     private interface List<T> {
         List<T> addLast(T element);
 
-        Query<T> iterate();
+        Query<T> query();
 
         Option<Tuple2<List<T>, T>> removeLast();
 
@@ -445,7 +445,7 @@ public class Main {
             }
 
             @Override
-            public Query<T> iterate() {
+            public Query<T> query() {
                 return this.iterateWithIndices().map(Tuple2::right);
             }
 
@@ -496,7 +496,7 @@ public class Main {
             @Override
             public List<T> addAllLast(List<T> others) {
                 List<T> initial = this;
-                return others.iterate().fold(initial, List::addLast);
+                return others.query().fold(initial, List::addLast);
             }
 
             @Override
@@ -563,13 +563,13 @@ public class Main {
 
     private record ImmutableDefinition(
             List<String> annotations,
-            Option<String> maybeBefore,
+            List<String> modifiers,
             String name,
             Type type,
             List<String> typeParams
     ) implements Definition {
         public static Definition createSimpleDefinition(String name, Type type) {
-            return new ImmutableDefinition(Lists.empty(), new None<>(), name, type, Lists.empty());
+            return new ImmutableDefinition(Lists.empty(), Lists.empty(), name, type, Lists.empty());
         }
 
         @Override
@@ -595,23 +595,16 @@ public class Main {
             return " : " + this.type.generate();
         }
 
-        private String joinBefore() {
-            if (Main.isDebug) {
-                return this.generateBefore();
-            }
-            return "";
-        }
-
-        private String generateBefore() {
-            return this.maybeBefore
-                    .filter(value -> !value.isEmpty())
-                    .map(Main::generatePlaceholder)
-                    .map(inner -> inner + " ")
+        private String joinModifiers() {
+            return this.modifiers
+                    .query()
+                    .map(value -> value + " ")
+                    .collect(new Joiner(""))
                     .orElse("");
         }
 
         private String joinTypeParams() {
-            return this.typeParams.iterate()
+            return this.typeParams.query()
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
@@ -619,18 +612,18 @@ public class Main {
 
         @Override
         public Definition mapType(Function<Type, Type> mapper) {
-            return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, mapper.apply(this.type), this.typeParams);
+            return new ImmutableDefinition(this.annotations, this.modifiers, this.name, mapper.apply(this.type), this.typeParams);
         }
 
         @Override
         public String generateWithParams(String joinedParameters) {
-            var joinedAnnotations = this.annotations.iterate()
+            var joinedAnnotations = this.annotations.query()
                     .map(value -> "@" + value + " ")
                     .collect(Joiner.empty())
                     .orElse("");
 
             var joined = this.joinTypeParams();
-            var before = this.joinBefore();
+            var before = this.joinModifiers();
             var typeString = this.generateType();
             return joinedAnnotations + before + this.name + joined + joinedParameters + typeString;
         }
@@ -638,7 +631,7 @@ public class Main {
         @Override
         public Definition createDefinition(List<Type> paramTypes) {
             Type type1 = new FunctionType(paramTypes, this.type);
-            return new ImmutableDefinition(this.annotations, this.maybeBefore, this.name, type1, this.typeParams);
+            return new ImmutableDefinition(this.annotations, this.modifiers, this.name, type1, this.typeParams);
         }
 
         @Override
@@ -648,14 +641,14 @@ public class Main {
 
         @Override
         public Definition removeAnnotations() {
-            return new ImmutableDefinition(Lists.empty(), this.maybeBefore, this.name, this.type, this.typeParams);
+            return new ImmutableDefinition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
         }
 
         @Override
         public String toString() {
             return "ImmutableDefinition[" +
                     "annotations=" + this.annotations + ", " +
-                    "maybeBefore=" + this.maybeBefore + ", " +
+                    "maybeBefore=" + this.modifiers + ", " +
                     "findName=" + this.name + ", " +
                     "findType=" + this.type + ", " +
                     "typeParams=" + this.typeParams + ']';
@@ -676,14 +669,14 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new ObjectType(this.name, this.typeParams, this.definitions.iterate()
+            return new ObjectType(this.name, this.typeParams, this.definitions.query()
                     .map(definition -> definition.mapType(type -> type.replace(mapping)))
                     .collect(new ListCollector<>()), this.variants);
         }
 
         @Override
         public Option<Type> find(String name) {
-            return this.definitions.iterate()
+            return this.definitions.query()
                     .filter(definition -> definition.findName().equals(name))
                     .map(Definition::findType)
                     .next();
@@ -732,7 +725,7 @@ public class Main {
 
         private Option<Type> resolveValue(String name) {
             return this.definitions.iterateReversed()
-                    .flatMap(List::iterate)
+                    .flatMap(List::query)
                     .filter(definition -> definition.findName().equals(name))
                     .next()
                     .map(Definition::findType);
@@ -757,7 +750,7 @@ public class Main {
                 return new Some<>(new ObjectType(found.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), found.right()));
             }
 
-            var maybeTypeParam = this.typeParams.iterate()
+            var maybeTypeParam = this.typeParams.query()
                     .filter(param -> param.equals(name))
                     .next();
 
@@ -765,7 +758,7 @@ public class Main {
                 return new Some<>(new TypeParam(some.value));
             }
 
-            return this.objectTypes.iterate()
+            return this.objectTypes.query()
                     .filter(type -> type.name.equals(name))
                     .next()
                     .map(type -> type);
@@ -1005,7 +998,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new FunctionType(this.arguments.iterate().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns);
+            return new FunctionType(this.arguments.query().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns);
         }
 
         @Override
@@ -1017,7 +1010,7 @@ public class Main {
     private record TupleType(List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments.iterate()
+            var joinedArguments = this.arguments.query()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1039,7 +1032,7 @@ public class Main {
     private record Template(ObjectType base, List<Type> arguments) implements FindableType {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments.iterate()
+            var joinedArguments = this.arguments.query()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
@@ -1052,8 +1045,8 @@ public class Main {
         public Option<Type> find(String name) {
             return this.base.find(name).map(found -> {
                 var mapping = this.base.typeParams()
-                        .iterate()
-                        .zip(this.arguments.iterate())
+                        .query()
+                        .zip(this.arguments.query())
                         .collect(new MapCollector<>());
 
                 return found.replace(mapping);
@@ -1202,7 +1195,7 @@ public class Main {
         }
 
         private String joinStatements() {
-            return this.statements.iterate()
+            return this.statements.query()
                     .map(FunctionSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -1212,7 +1205,7 @@ public class Main {
     private record Lambda(List<Definition> parameters, LambdaValue body) implements Value {
         @Override
         public String generate() {
-            var joined = this.parameters.iterate()
+            var joined = this.parameters.query()
                     .map(Definition::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1229,7 +1222,7 @@ public class Main {
     private record Invokable(Caller caller, List<Value> arguments, Type type) implements Value {
         @Override
         public String generate() {
-            var joined = this.arguments.iterate()
+            var joined = this.arguments.query()
                     .map(Value::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1316,7 +1309,7 @@ public class Main {
             Option<List<FunctionSegment>> maybeStatements
     ) implements ClassSegment {
         private static String joinStatements(List<FunctionSegment> statements) {
-            return statements.iterate()
+            return statements.query()
                     .map(FunctionSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -1340,7 +1333,7 @@ public class Main {
         public String generate() {
             var indent = createIndent(this.depth);
             var collect = this.statements
-                    .iterate()
+                    .query()
                     .map(FunctionSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -1409,7 +1402,7 @@ public class Main {
         }
 
         private List<Type> findParamTypes() {
-            return this.parameters().iterate()
+            return this.parameters().query()
                     .map(Definition::findType)
                     .collect(new ListCollector<>());
         }
@@ -1458,7 +1451,7 @@ public class Main {
             List<Type> interfaces
     ) implements IncompleteClassSegment {
         private ObjectType createObjectType() {
-            var definitionFromSegments = this.segments.iterate()
+            var definitionFromSegments = this.segments.query()
                     .map(IncompleteClassSegment::maybeCreateDefinition)
                     .flatMap(Queries::fromOption)
                     .collect(new ListCollector<>());
@@ -1472,7 +1465,7 @@ public class Main {
         }
 
         private String joinInterfaces() {
-            return this.interfaces.iterate()
+            return this.interfaces.query()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .map(inner -> " implements " + inner)
@@ -1480,7 +1473,7 @@ public class Main {
         }
 
         private String joinTypeParams() {
-            return this.typeParams().iterate()
+            return this.typeParams().query()
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
@@ -1559,7 +1552,7 @@ public class Main {
     private record TupleNode(List<Value> values) implements Value {
         @Override
         public String generate() {
-            var joined = this.values.iterate()
+            var joined = this.values.query()
                     .map(Value::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1569,7 +1562,7 @@ public class Main {
 
         @Override
         public Type type() {
-            return new TupleType(this.values.iterate()
+            return new TupleType(this.values.query()
                     .map(Value::type)
                     .collect(new ListCollector<>()));
         }
@@ -1589,7 +1582,7 @@ public class Main {
         }
     }
 
-    private static final boolean isDebug = false;
+    private static final boolean isDebugEnabled = true;
 
     private static String generatePlaceholder(String input) {
         var replaced = input
@@ -1600,7 +1593,7 @@ public class Main {
     }
 
     private static String joinValues(List<Definition> retainParameters) {
-        var inner = retainParameters.iterate()
+        var inner = retainParameters.query()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
@@ -1613,7 +1606,7 @@ public class Main {
     }
 
     private static String createDebugString(Type type) {
-        if (!Main.isDebug) {
+        if (!Main.isDebugEnabled) {
             return "";
         }
 
@@ -1662,7 +1655,7 @@ public class Main {
     private String compile(String input) {
         var state = CompileState.createInitial();
         var parsed = this.parseStatements(state, input, this::compileRootSegment);
-        var joined = parsed.left().structures.iterate().collect(Joiner.empty()).orElse("");
+        var joined = parsed.left().structures.query().collect(Joiner.empty()).orElse("");
         return joined + this.generateStatements(parsed.right());
     }
 
@@ -1678,7 +1671,7 @@ public class Main {
 
     private String generateAll(BiFunction<String, String, String> merger, List<String> elements) {
         return elements
-                .iterate()
+                .query()
                 .fold("", merger);
     }
 
@@ -1826,8 +1819,8 @@ public class Main {
     }
 
     private List<String> parseAnnotations(String annotationsString) {
-        return this.divideAll(annotationsString.strip(), this::foldByDelimiter)
-                .iterate()
+        return this.divideAll(annotationsString.strip(), (state1, c) -> this.foldByDelimiter(state1, c, '\n'))
+                .query()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(value -> value.substring(1))
@@ -1836,8 +1829,8 @@ public class Main {
                 .collect(new ListCollector<>());
     }
 
-    private DivideState foldByDelimiter(DivideState state1, Character c) {
-        if (c == '\n') {
+    private DivideState foldByDelimiter(DivideState state1, Character c, char delimiter) {
+        if (c == delimiter) {
             return state1.advance();
         }
         return state1.append(c);
@@ -1846,7 +1839,7 @@ public class Main {
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> annotations) {
         return this.last(beforeContent, " permits ", (s, s2) -> {
             var variants = this.divideAll(s2, this::foldValueChar)
-                    .iterate()
+                    .query()
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .collect(new ListCollector<>());
@@ -1933,14 +1926,14 @@ public class Main {
         var thisType = prototype.createObjectType();
         var state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        var bases = prototype.interfaces.iterate()
+        var bases = prototype.interfaces.query()
                 .map(Main::retainFindableType)
                 .flatMap(Queries::fromOption)
                 .map(FindableType::findBase)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
 
-        var variantsSuper = bases.iterate()
+        var variantsSuper = bases.query()
                 .filter(type -> type.variants().contains(prototype.name))
                 .map(BaseType::name)
                 .collect(new ListCollector<>());
@@ -1951,7 +1944,7 @@ public class Main {
 
             var exited = oldStatementsState.exitDefinitions();
 
-            var fold = variantsSuper.iterate().fold(oldStatements, (classSegmentList, superType) -> {
+            var fold = variantsSuper.query().fold(oldStatements, (classSegmentList, superType) -> {
                 var name = superType + "Variant";
                 var type = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
                 var definition = this.createVariantDefinition(type);
@@ -1965,7 +1958,7 @@ public class Main {
                 newSegments = fold;
             }
             else {
-                var joined = prototype.variants.iterate()
+                var joined = prototype.variants.query()
                         .map(inner -> "\n\t" + inner)
                         .collect(new Joiner(","))
                         .orElse("");
@@ -1980,7 +1973,7 @@ public class Main {
 
             var withMaybeConstructor = this.attachConstructor(prototype, newSegments);
 
-            var parsed2 = withMaybeConstructor.iterate()
+            var parsed2 = withMaybeConstructor.query()
                     .map(ClassSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -2006,11 +1999,11 @@ public class Main {
             return segments;
         }
 
-        List<ClassSegment> definitions = parameters.iterate()
+        List<ClassSegment> definitions = parameters.query()
                 .<ClassSegment>map(definition -> new Statement(1, definition))
                 .collect(new ListCollector<>());
 
-        var collect = parameters.iterate()
+        var collect = parameters.query()
                 .map(definition -> {
                     var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.findName(), Primitive.Unknown);
                     return new Assignment(destination, new SymbolValue(definition.findName(), Primitive.Unknown));
@@ -2166,7 +2159,7 @@ public class Main {
     }
 
     private List<Definition> retainDefinitions(List<Parameter> right) {
-        return right.iterate()
+        return right.query()
                 .map(this::retainDefinition)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
@@ -2221,7 +2214,7 @@ public class Main {
         var divisions = this.divideAll(input, this::foldBlockStart);
         return divisions.removeFirst().map(removed -> {
             var right = removed.left();
-            var left = removed.right().iterate().collect(new Joiner("")).orElse("");
+            var left = removed.right().query().collect(new Joiner("")).orElse("");
 
             return new Tuple2Impl<>(right, left);
         });
@@ -2401,7 +2394,7 @@ public class Main {
 
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
                 var parameterNames = this.divideAll(strippedBeforeArrow.substring(1, strippedBeforeArrow.length() - 1), this::foldValueChar)
-                        .iterate()
+                        .query()
                         .map(String::strip)
                         .filter(value -> !value.isEmpty())
                         .map(name -> ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown))
@@ -2502,7 +2495,7 @@ public class Main {
         var argumentsState = argumentsTuple.left();
         var argumentsWithActualTypes = argumentsTuple.right();
 
-        var arguments = argumentsWithActualTypes.iterate()
+        var arguments = argumentsWithActualTypes.query()
                 .map(Tuple2::left)
                 .map(this::retainValue)
                 .flatMap(Queries::fromOption)
@@ -2515,7 +2508,7 @@ public class Main {
         }
 
         if (newCaller instanceof Value value) {
-            if(value instanceof DataAccess access) {
+            if (value instanceof DataAccess access) {
                 var parent = access.parent;
                 var property = access.property;
                 var parentType = parent.type();
@@ -2732,7 +2725,7 @@ public class Main {
                 }).or(() -> {
                     return this.getOr(state, name, beforeType, type, Lists.empty());
                 });
-            }).or(() -> this.assembleDefinition(state, Lists.empty(), new None<String>(), name, Lists.empty(), beforeName));
+            }).or(() -> this.assembleDefinition(state, Lists.empty(), Lists.empty(), name, Lists.empty(), beforeName));
         });
     }
 
@@ -2740,17 +2733,25 @@ public class Main {
         return this.suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
             return this.first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(new Tuple2Impl<>(state1, s.strip())));
-                return this.assembleDefinition(typeParams.left(), annotations, new Some<String>(beforeTypeParams), name, typeParams.right(), type);
+                return this.assembleDefinition(typeParams.left(), annotations, this.parseModifiers(beforeTypeParams), name, typeParams.right(), type);
             });
         }).or(() -> {
-            return this.assembleDefinition(state, annotations, new Some<String>(beforeType), name, Lists.empty(), type);
+            return this.assembleDefinition(state, annotations, this.parseModifiers(beforeType), name, Lists.empty(), type);
         });
+    }
+
+    private List<String> parseModifiers(String modifiers) {
+        return this.divideAll(modifiers.strip(), (state1, c) -> this.foldByDelimiter(state1, c, '\n'))
+                .query()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
     }
 
     private Option<Tuple2<String, String>> toLast(String input, String separator, BiFunction<DivideState, Character, DivideState> folder) {
         var divisions = this.divideAll(input, folder);
         return divisions.removeLast().map(removed -> {
-            var left = removed.left().iterate().collect(new Joiner(separator)).orElse("");
+            var left = removed.left().query().collect(new Joiner(separator)).orElse("");
             var right = removed.right();
 
             return new Tuple2Impl<>(left, right);
@@ -2774,7 +2775,8 @@ public class Main {
 
     private Option<Tuple2<CompileState, Definition>> assembleDefinition(
             CompileState state,
-            List<String> annotations, Option<String> beforeTypeParams,
+            List<String> annotations,
+            List<String> modifiers,
             String rawName,
             List<String> typeParams,
             String type
@@ -2785,7 +2787,7 @@ public class Main {
                 return new None<>();
             }
 
-            var node = new ImmutableDefinition(annotations, beforeTypeParams, stripped, type1.right(), typeParams);
+            var node = new ImmutableDefinition(annotations, modifiers, stripped, type1.right(), typeParams);
             return new Some<>(new Tuple2Impl<>(type1.left(), node));
         });
     }
@@ -2862,7 +2864,7 @@ public class Main {
 
     private Tuple2<CompileState, Type> assembleTemplate(String base, CompileState state, List<Argument> arguments) {
         var children = arguments
-                .iterate()
+                .query()
                 .map(this::retainType)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
