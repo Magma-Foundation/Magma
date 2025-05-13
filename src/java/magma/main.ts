@@ -788,13 +788,13 @@ enum ResultVariant {
 		this.sourceRepresentation = sourceRepresentation;
 		this.targetRepresentation = targetRepresentation;
 	}
-	let ADD : Operator = new Operator("+", "+");
-	let AND : Operator = new Operator("&&", "&&");
-	let EQUALS : Operator = new Operator("==", "===");
+	ADD : Operator = new Operator("+", "+");
+	AND : Operator = new Operator("&&", "&&");
+	EQUALS : Operator = new Operator("==", "===");
 	Operator() : /* new */;
 	Operator() : /* new */;
-	let OR : Operator = new Operator("||", "||");
-	let SUBTRACT : Operator = new Operator("-", "-");
+	OR : Operator = new Operator("||", "||");
+	SUBTRACT : Operator = new Operator("-", "-");
 }
 /* private */class Operation/*  */ implements Value {
 	left : Value;
@@ -1213,7 +1213,7 @@ enum ResultVariant {
 }
 /* public */class Main/*  */ {
 	JVMPath() : /* record */;
-	let isDebug : boolean = false;
+	isDebug : boolean = false;
 	generatePlaceholder(input : string) : string {
 		let replaced = input.replace("/*", "content-start").replace("*/", "content-end");
 		return "/* " + replaced + " */";
@@ -1512,7 +1512,7 @@ enum ResultVariant {
 	}
 	completeInitialization(state1 : CompileState, classInitialization : ClassInitialization) : Option<[CompileState, ClassSegment]> {
 		let definition : Definition = classInitialization.definition;
-		let statement : Statement = new Statement(classInitialization.depth, new Initialization(definition, classInitialization.value));
+		let statement : Statement = new Statement(classInitialization.depth, new FieldInitialization(definition, classInitialization.value));
 		return new Some([state1, statement]);
 	}
 	completeDefinition(state1 : CompileState, classDefinition : ClassDefinition) : Option<[CompileState, ClassSegment]> {

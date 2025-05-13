@@ -2008,7 +2008,7 @@ public class Main {
 
     private Option<Tuple2<CompileState, ClassSegment>> completeInitialization(CompileState state1, ClassInitialization classInitialization) {
         var definition = classInitialization.definition;
-        var statement = new Statement(classInitialization.depth, new Initialization(definition, classInitialization.value));
+        var statement = new Statement(classInitialization.depth, new FieldInitialization(definition, classInitialization.value));
         return new Some<>(new Tuple2Impl<>(state1, statement));
     }
 
