@@ -302,8 +302,10 @@ var ResultVariant;
     }
     resolveType(name) {
         let maybe = this.structNames.last().filter((inner) => inner.left().equals(name));
-        if ( /* maybe instanceof Some */( /* var found */)) {
-            return new Some(new ObjectType(left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), right()));
+        if (maybe._OptionVariant === OptionVariant.Some) {
+            let some = maybe;
+            let found = some.value;
+            return new Some(new ObjectType(found[0](), this.typeParams, this.definitions.last().orElse(Lists.empty()), found[1]()));
         }
         let maybeTypeParam = this.typeParams.iterate().filter((param) => param.equals(name)).next();
         if (maybeTypeParam._OptionVariant === OptionVariant.Some) {

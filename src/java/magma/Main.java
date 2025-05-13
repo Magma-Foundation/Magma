@@ -732,11 +732,12 @@ public class Main {
         }
 
         public Option<Type> resolveType(String name) {
-            var maybe = this.structNames
+            Option<Tuple2<String, List<String>>> maybe = this.structNames
                     .last()
                     .filter(inner -> inner.left().equals(name));
 
-            if (maybe instanceof Some(var found)) {
+            if (maybe instanceof Some<Tuple2<String, List<String>>> some) {
+                var found = some.value;
                 return new Some<>(new ObjectType(found.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), found.right()));
             }
 

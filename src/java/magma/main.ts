@@ -450,9 +450,11 @@ enum ResultVariant {
 		return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
 	}
 	resolveType(name : string) : Option<Type> {
-		let maybe : Option<T> = this.structNames.last().filter((inner : T) => inner.left().equals(name));
-		if (/* maybe instanceof Some */(/* var found */)){
-			return new Some(new ObjectType(/* found */.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), /* found */.right()));
+		let maybe : Option<[string, List<string>]> = this.structNames.last().filter((inner : T) => inner.left().equals(name));
+		if (maybe._OptionVariant === OptionVariant.Some){
+			let some : Some<[string, List<string>]> = maybe as Some<[string, List<string>]>;
+			let found : [string, List<string>] = some.value;
+			return new Some(new ObjectType(found[0](), this.typeParams, this.definitions.last().orElse(Lists.empty()), found[1]()));
 		}
 		let maybeTypeParam : Option<T> = this.typeParams.iterate().filter((param : T) => param.equals(name)).next();
 		if (maybeTypeParam._OptionVariant === OptionVariant.Some){
