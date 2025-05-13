@@ -327,11 +327,11 @@ public class Main {
     }
 
     private static class SingleHead<T> implements Head<T> {
-        private final T value;
+        private final T retrievableValue;
         private boolean retrieved;
 
-        SingleHead(T value) {
-            this.value = value;
+        SingleHead(T retrievableValue) {
+            this.retrievableValue = retrievableValue;
             this.retrieved = false;
         }
 
@@ -341,7 +341,7 @@ public class Main {
                 return new None<>();
             }
             this.retrieved = true;
-            return new Some<>(this.value);
+            return new Some<>(this.retrievableValue);
         }
     }
 
@@ -2741,7 +2741,7 @@ public class Main {
     }
 
     private List<String> parseModifiers(String modifiers) {
-        return this.divideAll(modifiers.strip(), (state1, c) -> this.foldByDelimiter(state1, c, '\n'))
+        return this.divideAll(modifiers.strip(), (state1, c) -> this.foldByDelimiter(state1, c, ' '))
                 .query()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
@@ -2787,7 +2787,13 @@ public class Main {
                 return new None<>();
             }
 
-            var node = new ImmutableDefinition(annotations, modifiers, stripped, type1.right(), typeParams);
+            var newModifiers = modifiers.query()
+                    .map(modifier -> {
+                        return modifier.equals("final") ? "readonly" : modifier;
+                    })
+                    .collect(new ListCollector<>());
+
+            var node = new ImmutableDefinition(annotations, newModifiers, stripped, type1.right(), typeParams);
             return new Some<>(new Tuple2Impl<>(type1.left(), node));
         });
     }

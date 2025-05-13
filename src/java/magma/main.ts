@@ -235,10 +235,10 @@ enum ResultVariant {
 	}
 }
 /* private static */class SingleHead<T>/*  */ implements Head<T> {
-	private final value : T;
+	private readonly retrievableValue : T;
 	private retrieved : boolean;
-	constructor (value : T) {
-		this/* : SingleHead */.value/* : T */ = value/* : T */;
+	constructor (retrievableValue : T) {
+		this/* : SingleHead */.retrievableValue/* : T */ = retrievableValue/* : T */;
 		this/* : SingleHead */.retrieved/* : boolean */ = false;
 	}
 	public next() : Option<T> {
@@ -246,7 +246,7 @@ enum ResultVariant {
 			return new None()/* : None */;
 		}
 		this/* : SingleHead */.retrieved/* : boolean */ = true;
-		return new Some(this/* : SingleHead */.value/* : T */)/* : Some */;
+		return new Some(this/* : SingleHead */.retrievableValue/* : T */)/* : Some */;
 	}
 }
 /* private static */class EmptyHead<T>/*  */ implements Head<T> {
@@ -298,7 +298,7 @@ enum ResultVariant {
 	}
 }
 /* private static */class RangeHead/*  */ implements Head<number> {
-	private final length : number;
+	private readonly length : number;
 	private counter : number;
 	constructor (length : number) {
 		this/* : RangeHead */.length/* : number */ = length/* : number */;
@@ -500,8 +500,8 @@ enum ResultVariant {
 	}
 }
 /* private static */class DivideState/*  */ {
-	private final input : string;
-	private final index : number;
+	private readonly input : string;
+	private readonly index : number;
 	private depth : number;
 	private segments : List<string>;
 	private buffer : string;
@@ -583,8 +583,8 @@ enum ResultVariant {
 	}
 }
 /* private static */class FlatMapHead<T, R>/*  */ implements Head<R> {
-	private final mapper : (arg0 : T) => Query<R>;
-	private final head : Head<T>;
+	private readonly mapper : (arg0 : T) => Query<R>;
+	private readonly head : Head<T>;
 	private current : Option<Query<R>>;
 	constructor (head : Head<T>, mapper : (arg0 : T) => Query<R>) {
 		this/* : FlatMapHead */.mapper/* : (arg0 : T) => Query<R> */ = mapper/* : (arg0 : T) => Query<R> */;
@@ -1207,7 +1207,7 @@ enum ResultVariant {
         Boolean("boolean"),
         Unknown("unknown"),
         Void("void"); */
-	private final value : string;
+	private readonly value : string;
 	constructor (value : string) {
 		this/* : Primitive */.value/* : string */ = value/* : string */;
 	}
@@ -1223,7 +1223,7 @@ enum ResultVariant {
 }
 /* private */class BooleanValue/*  */ implements Value {
 	_ValueVariant : ValueVariant = ValueVariant.BooleanValue/* : ValueVariant */;/* True("true"), False("false"); */
-	private final value : string;
+	private readonly value : string;
 	constructor (value : string) {
 		this/* : BooleanValue */.value/* : string */ = value/* : string */;
 	}
@@ -1236,7 +1236,7 @@ enum ResultVariant {
 }
 /* public */class Main/*  */ {
 	private JVMPath() : /* record */;
-	private static final isDebugEnabled : boolean = true;
+	private static readonly isDebugEnabled : boolean = true;
 	private static generatePlaceholder(input : string) : string {
 		let replaced = input/* : string */.replace/* : unknown */("/*", "content-start")/* : unknown */.replace/* : unknown */("*/", "content-end")/* : unknown */;
 		return "/* " + replaced + " */";
@@ -1442,7 +1442,7 @@ enum ResultVariant {
 	private parseStructureWithMaybeTypeParams(targetInfix : string, state : CompileState, beforeInfix : string, beforeContent : string, content1 : string, params : List<Parameter>, variants : List<string>, annotations : List<string>, interfaces : List<Type>) : Option<[CompileState, IncompleteClassSegment]> {
 		return this/* : Main */.first/* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent/* : string */, "<", (name, withTypeParams) => {
 			return this/* : Main */.first/* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withTypeParams/* : unknown */, ">", (typeParamsString, afterTypeParams) => {
-				let final mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => [state1/* : unknown */, s/* : unknown */.strip/* : unknown */()/* : unknown */];
+				let readonly mapper : (arg0 : CompileState, arg1 : string) => [CompileState, string] = (state1, s) => [state1/* : unknown */, s/* : unknown */.strip/* : unknown */()/* : unknown */];
 				let typeParams : [CompileState, List<T>] = this/* : Main */.parseValuesOrEmpty/* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state/* : CompileState */, typeParamsString/* : unknown */, (state1, s) => new Some(mapper/* : (arg0 : CompileState, arg1 : string) => [CompileState, string] */(state1/* : unknown */, s/* : unknown */)/* : [CompileState, string] */)/* : Some */)/* : [CompileState, List<T>] */;
 				return this/* : Main */.assembleStructure/* : (arg0 : CompileState, arg1 : string, arg2 : List<string>, arg3 : string, arg4 : string, arg5 : string, arg6 : List<string>, arg7 : string, arg8 : List<Parameter>, arg9 : List<string>, arg10 : List<Type>) => Option<[CompileState, IncompleteClassSegment]> */(typeParams/* : [CompileState, List<T>] */[0/* : number */], targetInfix/* : string */, annotations/* : List<string> */, beforeInfix/* : string */, name/* : unknown */, content1/* : string */, typeParams/* : [CompileState, List<T>] */[1/* : number */], afterTypeParams/* : unknown */, params/* : List<Parameter> */, variants/* : List<string> */, interfaces/* : List<Type> */)/* : Option<[CompileState, IncompleteClassSegment]> */;
 			})/* : Option<T> */;
@@ -2087,7 +2087,7 @@ enum ResultVariant {
 		})/* : Option<T> */;
 	}
 	private parseModifiers(modifiers : string) : List<string> {
-		return this/* : Main */.divideAll/* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(modifiers/* : string */.strip/* : unknown */()/* : unknown */, (state1, c) => this/* : Main */.foldByDelimiter/* : (arg0 : DivideState, arg1 : string, arg2 : string) => DivideState */(state1/* : unknown */, c/* : unknown */, /*  '\n' */)/* : DivideState */)/* : List<string> */.query/* : () => Query<T> */()/* : Query<T> */.map/* : (arg0 : (arg0 : T) => R) => Query<R> */(/* String */.strip/* : unknown */)/* : Query<R> */.filter/* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value : T) => !value/* : T */.isEmpty/* : unknown */()/* : unknown */)/* : Option<T> */.collect/* : (arg0 : Collector<T, R>) => R */(new ListCollector()/* : ListCollector */)/* : R */;
+		return this/* : Main */.divideAll/* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(modifiers/* : string */.strip/* : unknown */()/* : unknown */, (state1, c) => this/* : Main */.foldByDelimiter/* : (arg0 : DivideState, arg1 : string, arg2 : string) => DivideState */(state1/* : unknown */, c/* : unknown */, /*  ' ' */)/* : DivideState */)/* : List<string> */.query/* : () => Query<T> */()/* : Query<T> */.map/* : (arg0 : (arg0 : T) => R) => Query<R> */(/* String */.strip/* : unknown */)/* : Query<R> */.filter/* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value : T) => !value/* : T */.isEmpty/* : unknown */()/* : unknown */)/* : Option<T> */.collect/* : (arg0 : Collector<T, R>) => R */(new ListCollector()/* : ListCollector */)/* : R */;
 	}
 	private toLast(input : string, separator : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : Option<[string, string]> {
 		let divisions : List<string> = this/* : Main */.divideAll/* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(input/* : string */, folder/* : (arg0 : DivideState, arg1 : string) => DivideState */)/* : List<string> */;
@@ -2116,7 +2116,10 @@ enum ResultVariant {
 			if (!this/* : Main */.isSymbol/* : unknown */(stripped/* : unknown */)/* : unknown */){
 				return new None()/* : None */;
 			}
-			let node : ImmutableDefinition = new ImmutableDefinition(annotations/* : List<string> */, modifiers/* : List<string> */, stripped/* : unknown */, type1/* : [CompileState, Type] */[1/* : number */], typeParams/* : List<string> */)/* : ImmutableDefinition */;
+			let newModifiers : R = modifiers/* : List<string> */.query/* : () => Query<T> */()/* : Query<T> */.map/* : (arg0 : (arg0 : T) => R) => Query<R> */((modifier : T) => {
+				return /* modifier.equals("final") ? "readonly" : modifier */;
+			})/* : Query<R> */.collect/* : (arg0 : Collector<T, R>) => R */(new ListCollector()/* : ListCollector */)/* : R */;
+			let node : ImmutableDefinition = new ImmutableDefinition(annotations/* : List<string> */, newModifiers/* : R */, stripped/* : unknown */, type1/* : [CompileState, Type] */[1/* : number */], typeParams/* : List<string> */)/* : ImmutableDefinition */;
 			return new Some([type1/* : [CompileState, Type] */[0/* : number */], node/* : ImmutableDefinition */])/* : Some */;
 		})/* : Option<R> */;
 	}

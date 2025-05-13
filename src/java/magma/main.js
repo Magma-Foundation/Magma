@@ -113,8 +113,8 @@ var ResultVariant;
     }
 }
 /* private static */ class SingleHead {
-    constructor(value) {
-        this /* : SingleHead */.value /* : T */ = value /* : T */;
+    constructor(retrievableValue) {
+        this /* : SingleHead */.retrievableValue /* : T */ = retrievableValue /* : T */;
         this /* : SingleHead */.retrieved /* : boolean */ = false;
     }
     next() {
@@ -122,7 +122,7 @@ var ResultVariant;
             return new None() /* : None */;
         }
         this /* : SingleHead */.retrieved /* : boolean */ = true;
-        return new Some(this /* : SingleHead */.value /* : T */) /* : Some */;
+        return new Some(this /* : SingleHead */.retrievableValue /* : T */) /* : Some */;
     }
 }
 /* private static */ class EmptyHead {
@@ -1001,9 +1001,6 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     }
 }
 /* public */ class Main /*  */ {
-    constructor() {
-        this.isDebugEnabled = true;
-    }
     static generatePlaceholder(input) {
         let replaced = input /* : string */.replace /* : unknown */("/*", "content-start") /* : unknown */.replace /* : unknown */("*/", "content-end") /* : unknown */;
         return "/* " + replaced + " */";
@@ -1207,7 +1204,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, params, variants, annotations, interfaces) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent /* : string */, "<", (name, withTypeParams) => {
             return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withTypeParams /* : unknown */, ">", (typeParamsString, afterTypeParams) => {
-                let final, mapper = (state1, s) => [state1 /* : unknown */, s /* : unknown */.strip /* : unknown */() /* : unknown */];
+                let readonly, mapper = (state1, s) => [state1 /* : unknown */, s /* : unknown */.strip /* : unknown */() /* : unknown */];
                 let typeParams = this /* : Main */.parseValuesOrEmpty /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state /* : CompileState */, typeParamsString /* : unknown */, (state1, s) => new Some(mapper /* : (arg0 : CompileState, arg1 : string) => [CompileState, string] */(state1 /* : unknown */, s /* : unknown */) /* : [CompileState, string] */) /* : Some */) /* : [CompileState, List<T>] */;
                 return this /* : Main */.assembleStructure /* : (arg0 : CompileState, arg1 : string, arg2 : List<string>, arg3 : string, arg4 : string, arg5 : string, arg6 : List<string>, arg7 : string, arg8 : List<Parameter>, arg9 : List<string>, arg10 : List<Type>) => Option<[CompileState, IncompleteClassSegment]> */(typeParams /* : [CompileState, List<T>] */[0 /* : number */], targetInfix /* : string */, annotations /* : List<string> */, beforeInfix /* : string */, name /* : unknown */, content1 /* : string */, typeParams /* : [CompileState, List<T>] */[1 /* : number */], afterTypeParams /* : unknown */, params /* : List<Parameter> */, variants /* : List<string> */, interfaces /* : List<Type> */) /* : Option<[CompileState, IncompleteClassSegment]> */;
             }) /* : Option<T> */;
@@ -1882,7 +1879,10 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
             if (!this /* : Main */.isSymbol /* : unknown */(stripped /* : unknown */) /* : unknown */) {
                 return new None() /* : None */;
             }
-            let node = new ImmutableDefinition(annotations /* : List<string> */, modifiers /* : List<string> */, stripped /* : unknown */, type1 /* : [CompileState, Type] */[1 /* : number */], typeParams /* : List<string> */) /* : ImmutableDefinition */;
+            let newModifiers = modifiers /* : List<string> */.query /* : () => Query<T> */() /* : Query<T> */.map /* : (arg0 : (arg0 : T) => R) => Query<R> */((modifier) => {
+                return /* modifier.equals("final") ? "readonly" : modifier */;
+            }) /* : Query<R> */.collect /* : (arg0 : Collector<T, R>) => R */(new ListCollector() /* : ListCollector */) /* : R */;
+            let node = new ImmutableDefinition(annotations /* : List<string> */, newModifiers /* : R */, stripped /* : unknown */, type1 /* : [CompileState, Type] */[1 /* : number */], typeParams /* : List<string> */) /* : ImmutableDefinition */;
             return new Some([type1 /* : [CompileState, Type] */[0 /* : number */], node /* : ImmutableDefinition */]) /* : Some */;
         }) /* : Option<R> */;
     }
@@ -2030,4 +2030,5 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new Some(index /* : unknown */) /* : Some */;
     }
 }
+Main.isDebugEnabled = true;
 /*  */ 
