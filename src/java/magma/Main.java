@@ -95,6 +95,8 @@ public class Main {
         List<T> addAllFirst(List<T> others);
 
         boolean contains(T element);
+
+        List<T> sort(BiFunction<T, T, Integer> sorter);
     }
 
     private interface Head<T> {
@@ -530,6 +532,13 @@ public class Main {
             @Override
             public boolean contains(T element) {
                 return this.elements.contains(element);
+            }
+
+            @Override
+            public List<T> sort(BiFunction<T, T, Integer> sorter) {
+                var copy = new ArrayList<T>(this.elements);
+                copy.sort(sorter::apply);
+                return new JVMList<>(copy);
             }
 
             private JVMList<T> set(int index, T element) {
@@ -1616,7 +1625,7 @@ public class Main {
         }
     }
 
-    private static final boolean isDebugEnabled = false;
+    private static final boolean isDebugEnabled = true;
 
     private static String generatePlaceholder(String input) {
         var replaced = input
@@ -2045,12 +2054,26 @@ public class Main {
                     .map(generated -> " extends " + generated)
                     .orElse("");
 
-            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+            var currentTypesDebugged = isDebugEnabled ? this.formatCurrentTypesDebugged(withEnum) : "";
+            var generated = currentTypesDebugged + generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
             var compileState = withEnum.popStructName();
 
             var definedState = compileState.addStructure(generated);
             return new Tuple2Impl<>(definedState, new Whitespace());
         });
+    }
+
+    private String formatCurrentTypesDebugged(CompileState withEnum) {
+        return withEnum.objectTypes.query()
+                .map(ObjectType::name)
+                .collect(new ListCollector<>())
+                .sort(String::compareTo)
+                .query()
+                .collect(new Joiner(",\n\t"))
+                .map(inner -> "[" + inner + "\n]")
+                .map(Main::generatePlaceholder)
+                .map(inner -> inner + "\n")
+                .orElse("");
     }
 
     private Query<ClassSegment> flattenEnumValues(ClassSegment segment, ObjectType thisType) {
