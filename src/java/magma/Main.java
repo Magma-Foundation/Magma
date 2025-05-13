@@ -1935,7 +1935,7 @@ public class Main {
     }
 
     private List<TypeRef> parseTypeRefs(String s2) {
-        return this.divideAll(s2, (state1, c) -> this.foldByDelimiter(state1, c, ','))
+        return this.divideAll(s2, this::foldValueChar)
                 .query()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
@@ -2034,82 +2034,84 @@ public class Main {
 
     private Option<Tuple2<CompileState, ClassSegment>> completeStructure(CompileState state, StructurePrototype prototype) {
         var thisType = prototype.createObjectType();
-        var state2 = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
+        var withThis = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        var bases = prototype.interfaces.query()
-                .map(query -> state2.resolveType(query.value))
-                .flatMap(Queries::fromOption)
-                .map(Main::retainFindableType)
-                .flatMap(Queries::fromOption)
-                .map(FindableType::findBase)
-                .flatMap(Queries::fromOption)
-                .collect(new ListCollector<>());
+        return this.mapUsingState(withThis, prototype.interfaces, (state2, tuple) -> parseType(state2, tuple.right().value)).flatMap(interfacesTypes -> {
+            var interfaces = interfacesTypes.right();
 
-        var variantsSuper = bases.query()
-                .filter(type -> type.hasVariant(prototype.name))
-                .map(BaseType::findName)
-                .collect(new ListCollector<>());
-
-        return this.mapUsingState(state2, prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
-            var oldStatementsState = oldStatementsTuple.left();
-            var oldStatements = oldStatementsTuple.right();
-
-            var exited = oldStatementsState.exitDefinitions();
-
-            var fold = variantsSuper.query().fold(oldStatements, (classSegmentList, superType) -> {
-                var name = superType + "Variant";
-                var type = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
-                var definition = this.createVariantDefinition(type);
-                return classSegmentList.addFirst(new Statement(1, new FieldInitialization(definition, new SymbolValue(name + "." + prototype.name, type))));
-            });
-
-            CompileState withEnum;
-            List<ClassSegment> newSegments;
-            if (prototype.variants.isEmpty()) {
-                withEnum = exited;
-                newSegments = fold;
-            }
-            else {
-                var joined = prototype.variants.query()
-                        .map(inner -> "\n\t" + inner)
-                        .collect(new Joiner(","))
-                        .orElse("");
-
-                withEnum = exited.addStructure("enum " + prototype.name + "Variant" + " {" +
-                        joined +
-                        "\n}\n");
-
-                var definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
-                newSegments = fold.addFirst(new Statement(1, definition));
-            }
-
-            var segmentsWithMaybeConstructor = this.attachConstructor(prototype, newSegments)
-                    .query()
-                    .flatMap(segment -> this.flattenEnumValues(segment, thisType))
+            var bases = interfaces.query()
+                    .map(Main::retainFindableType)
+                    .flatMap(Queries::fromOption)
+                    .map(FindableType::findBase)
+                    .flatMap(Queries::fromOption)
                     .collect(new ListCollector<>());
 
-            var generatedSegments = segmentsWithMaybeConstructor.query()
-                    .map(ClassSegment::generate)
-                    .collect(Joiner.empty())
-                    .orElse("");
+            var variantsSuper = bases.query()
+                    .filter(type -> type.hasVariant(prototype.name))
+                    .map(BaseType::findName)
+                    .collect(new ListCollector<>());
 
-            var joinedTypeParams = prototype.joinTypeParams();
-            var interfacesJoined = prototype.joinInterfaces();
+            return this.mapUsingState(interfacesTypes.left(), prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
+                var oldStatementsState = oldStatementsTuple.left();
+                var oldStatements = oldStatementsTuple.right();
 
-            var generatedSuperType = prototype.superTypes
-                    .query()
-                    .map(value -> state.resolveType(value.value))
-                    .flatMap(Queries::fromOption)
-                    .map(Type::generate)
-                    .collect(new Joiner(", "))
-                    .map(generated -> " extends " + generated)
-                    .orElse("");
+                var exited = oldStatementsState.exitDefinitions();
 
-            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
-            var compileState = withEnum.popStructName();
+                var fold = variantsSuper.query().fold(oldStatements, (classSegmentList, superType) -> {
+                    var name = superType + "Variant";
+                    var type = new ObjectType(name, Lists.empty(), Lists.empty(), Lists.empty());
+                    var definition = this.createVariantDefinition(type);
+                    return classSegmentList.addFirst(new Statement(1, new FieldInitialization(definition, new SymbolValue(name + "." + prototype.name, type))));
+                });
 
-            var definedState = compileState.addStructure(generated);
-            return new Tuple2Impl<>(definedState, new Whitespace());
+                CompileState withEnum;
+                List<ClassSegment> newSegments;
+                if (prototype.variants.isEmpty()) {
+                    withEnum = exited;
+                    newSegments = fold;
+                }
+                else {
+                    var joined = prototype.variants.query()
+                            .map(inner -> "\n\t" + inner)
+                            .collect(new Joiner(","))
+                            .orElse("");
+
+                    withEnum = exited.addStructure("enum " + prototype.name + "Variant" + " {" +
+                            joined +
+                            "\n}\n");
+
+                    var definition = this.createVariantDefinition(new ObjectType(prototype.name + "Variant", Lists.empty(), Lists.empty(), prototype.variants));
+                    newSegments = fold.addFirst(new Statement(1, definition));
+                }
+
+                var segmentsWithMaybeConstructor = this.attachConstructor(prototype, newSegments)
+                        .query()
+                        .flatMap(segment -> this.flattenEnumValues(segment, thisType))
+                        .collect(new ListCollector<>());
+
+                var generatedSegments = segmentsWithMaybeConstructor.query()
+                        .map(ClassSegment::generate)
+                        .collect(Joiner.empty())
+                        .orElse("");
+
+                var joinedTypeParams = prototype.joinTypeParams();
+                var interfacesJoined = prototype.joinInterfaces();
+
+                var generatedSuperType = prototype.superTypes
+                        .query()
+                        .map(value -> state.resolveType(value.value))
+                        .flatMap(Queries::fromOption)
+                        .map(Type::generate)
+                        .collect(new Joiner(", "))
+                        .map(generated -> " extends " + generated)
+                        .orElse("");
+
+                var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+                var compileState = withEnum.popStructName();
+
+                var definedState = compileState.addStructure(generated);
+                return new Tuple2Impl<>(definedState, new Whitespace());
+            });
         });
     }
 
