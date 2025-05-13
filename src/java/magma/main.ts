@@ -302,6 +302,7 @@ enum ResultVariant {
 	counter : number;
 	constructor (length : number) {
 		this.length = length;
+		this.counter = 0;
 	}
 	next() : Option<number> {
 		if (this.counter < this.length){

@@ -175,6 +175,7 @@ var ResultVariant;
 /* private static */ class RangeHead /*  */ {
     constructor(length) {
         this.length = length;
+        this.counter = 0;
     }
     next() {
         if (this.counter < this.length) {

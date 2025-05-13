@@ -410,6 +410,7 @@ public class Main {
 
         RangeHead(int length) {
             this.length = length;
+            this.counter = 0;
         }
 
         @Override
