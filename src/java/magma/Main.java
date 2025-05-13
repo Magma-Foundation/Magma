@@ -1002,7 +1002,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new FunctionType(this.arguments.query().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns);
+            return new FunctionType(this.arguments.query().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns.replace(mapping));
         }
 
         @Override
@@ -1069,7 +1069,11 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return this;
+            var collect = this.arguments.query()
+                    .map(argument -> argument.replace(mapping))
+                    .collect(new ListCollector<>());
+
+            return new Template(this.base, collect);
         }
 
         @Override
@@ -1608,7 +1612,7 @@ public class Main {
         }
     }
 
-    private static final boolean isDebugEnabled = false;
+    private static final boolean isDebugEnabled = true;
 
     private static String generatePlaceholder(String input) {
         var replaced = input
