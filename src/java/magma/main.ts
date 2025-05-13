@@ -196,14 +196,6 @@ enum ResultVariant {
 	ifPresent(consumer : (arg0 : T) => void) : void {
 	}
 }
-/* private */class Tuple2Impl<A, B>/*  */ implements [A, B] {
-	left : A;
-	right : B;
-	constructor (left : A, right : B) {
-		this.left = left;
-		this.right = right;
-	}
-}
 /* private */class Some<T>/*  */ implements Option<T> {
 	value : T;
 	constructor (value : T) {

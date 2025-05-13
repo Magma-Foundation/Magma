@@ -275,6 +275,7 @@ public class Main {
         }
     }
 
+    @Actual
     private record Tuple2Impl<A, B>(A left, B right) implements Tuple2<A, B> {
     }
 

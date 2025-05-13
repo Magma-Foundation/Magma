@@ -72,12 +72,6 @@ var ResultVariant;
     ifPresent(consumer) {
     }
 }
-/* private */ class Tuple2Impl {
-    constructor(left, right) {
-        this.left = left;
-        this.right = right;
-    }
-}
 /* private */ class Some {
     constructor(value) {
         this._OptionVariant = OptionVariant.Some;
