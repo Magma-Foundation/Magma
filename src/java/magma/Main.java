@@ -1,5 +1,6 @@
 package magma;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -1943,12 +1944,27 @@ public class Main {
     }
 
     private List<ClassSegment> attachConstructor(StructurePrototype prototype, List<ClassSegment> segments) {
-        if (prototype.parameters().isEmpty()) {
+        var parameters = prototype.parameters();
+        if (parameters.isEmpty()) {
             return segments;
         }
 
-        var func = new FunctionNode(1, new ConstructorHeader(), prototype.parameters(), new Some<>(Lists.empty()));
-        return segments.addFirst(func);
+        List<ClassSegment> definitions = parameters.iterate()
+                .<ClassSegment>map(definition -> new Statement(1, definition))
+                .collect(new ListCollector<>());
+
+        var collect = parameters.iterate()
+                .map(definition -> {
+                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.name(), Primitive.Unknown);
+                    return new Assignment(destination, new SymbolValue(definition.name(), Primitive.Unknown));
+                })
+                .<FunctionSegment>map(assignment -> new Statement(2, assignment))
+                .collect(new ListCollector<>());
+
+        var func = new FunctionNode(1, new ConstructorHeader(), parameters, new Some<>(collect));
+        return segments
+                .addFirst(func)
+                .addAllFirst(definitions);
     }
 
     private Option<Tuple2<CompileState, ClassSegment>> completeClassSegment(CompileState state1, IncompleteClassSegment segment) {

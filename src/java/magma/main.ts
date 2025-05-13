@@ -197,11 +197,17 @@ enum ResultVariant {
 	}
 }
 /* private */class Tuple2Impl<A, B>/*  */ implements [A, B] {
+	left : A;
+	right : B;
 	constructor (left : A, right : B) {
+		this.left = left;
+		this.right = right;
 	}
 }
 /* private */class Some<T>/*  */ implements Option<T> {
+	value : T;
 	constructor (value : T) {
+		this.value = value;
 	}
 	_OptionVariant : OptionVariant = OptionVariant.Some;
 	map<R>(mapper : (arg0 : T) => R) : Option<R> {
@@ -259,7 +265,9 @@ enum ResultVariant {
 	}
 }
 /* private */class HeadedIterator<T>/*  */ implements Iterator<T> {
+	head : Head<T>;
 	constructor (head : Head<T>) {
+		this.head = head;
 	}
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R) : R {
 		current : R = initial;
@@ -319,7 +327,17 @@ enum ResultVariant {
 	of<T>(elements : T[]) : List<T>;
 }
 /* private */class ImmutableDefinition/*  */ implements Definition {
+	annotations : List<string>;
+	maybeBefore : Option<string>;
+	name : string;
+	type : Type;
+	typeParams : List<string>;
 	constructor (annotations : List<string>, maybeBefore : Option<string>, name : string, type : Type, typeParams : List<string>) {
+		this.annotations = annotations;
+		this.maybeBefore = maybeBefore;
+		this.name = name;
+		this.type = type;
+		this.typeParams = typeParams;
 	}
 	createSimpleDefinition(name : string, type : Type) : Definition {
 		return new ImmutableDefinition(Lists.empty(), new None(), name, type, Lists.empty());
@@ -367,7 +385,15 @@ enum ResultVariant {
 	}
 }
 /* private */class ObjectType/*  */ implements FindableType, BaseType {
+	name : string;
+	typeParams : List<string>;
+	definitions : List<Definition>;
+	variants : List<string>;
 	constructor (name : string, typeParams : List<string>, definitions : List<Definition>, variants : List<string>) {
+		this.name = name;
+		this.typeParams = typeParams;
+		this.definitions = definitions;
+		this.variants = variants;
 	}
 	generate() : string {
 		return this.name;
@@ -386,7 +412,9 @@ enum ResultVariant {
 	}
 }
 /* private */class TypeParam/*  */ implements Type {
+	value : string;
 	constructor (value : string) {
+		this.value = value;
 	}
 	generate() : string {
 		return this.value;
@@ -399,7 +427,21 @@ enum ResultVariant {
 	}
 }
 /* private */class CompileState/*  */ {
+	structures : List<string>;
+	definitions : List<List<Definition>>;
+	objectTypes : List<ObjectType>;
+	structNames : List<[string, List<string>]>;
+	typeParams : List<string>;
+	typeRegister : Option<Type>;
+	functionSegments : List<FunctionSegment>;
 	constructor (structures : List<string>, definitions : List<List<Definition>>, objectTypes : List<ObjectType>, structNames : List<[string, List<string>]>, typeParams : List<string>, typeRegister : Option<Type>, functionSegments : List<FunctionSegment>) {
+		this.structures = structures;
+		this.definitions = definitions;
+		this.objectTypes = objectTypes;
+		this.structNames = structNames;
+		this.typeParams = typeParams;
+		this.typeRegister = typeRegister;
+		this.functionSegments = functionSegments;
 	}
 	createInitial() : CompileState {
 		return new CompileState(Lists.empty(), Lists.of(Lists.empty()), Lists.empty(), Lists.empty(), Lists.empty(), new None(), Lists.empty());
@@ -522,7 +564,9 @@ enum ResultVariant {
 	}
 }
 /* private */class Joiner/*  */ implements Collector<string, Option<string>> {
+	delimiter : string;
 	constructor (delimiter : string) {
+		this.delimiter = delimiter;
 	}
 	empty() : Joiner {
 		return new Joiner("");
@@ -574,7 +618,9 @@ enum ResultVariant {
 	}
 }
 /* private */class ArrayType/*  */ implements Type {
+	right : Type;
 	constructor (right : Type) {
+		this.right = right;
 	}
 	generate() : string {
 		return this.right.generate() + "[]";
@@ -602,7 +648,11 @@ enum ResultVariant {
 	}
 }
 /* private */class FunctionType/*  */ implements Type {
+	arguments : List<Type>;
+	returns : Type;
 	constructor (arguments : List<Type>, returns : Type) {
+		this.arguments = arguments;
+		this.returns = returns;
 	}
 	generate() : string {
 		joined = this.arguments().iterateWithIndices().map((pair) => "arg" + pair.left() + " : " + pair.right().generate()).collect(new Joiner(", ")).orElse("");
@@ -616,7 +666,9 @@ enum ResultVariant {
 	}
 }
 /* private */class TupleType/*  */ implements Type {
+	arguments : List<Type>;
 	constructor (arguments : List<Type>) {
+		this.arguments = arguments;
 	}
 	generate() : string {
 		joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).orElse("");
@@ -630,7 +682,11 @@ enum ResultVariant {
 	}
 }
 /* private */class Template/*  */ implements FindableType {
+	base : ObjectType;
+	arguments : List<Type>;
 	constructor (base : ObjectType, arguments : List<Type>) {
+		this.base = base;
+		this.arguments = arguments;
 	}
 	generate() : string {
 		joinedArguments = this.arguments.iterate().map(Type.generate).collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
@@ -656,7 +712,9 @@ enum ResultVariant {
 	}
 }
 /* private */class Placeholder/*  */ implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment {
+	input : string;
 	constructor (input : string) {
+		this.input = input;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder;
 	_ValueVariant : ValueVariant = ValueVariant.Placeholder;
@@ -686,7 +744,9 @@ enum ResultVariant {
 	}
 }
 /* private */class StringValue/*  */ implements Value {
+	stripped : string;
 	constructor (stripped : string) {
+		this.stripped = stripped;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.StringValue;
 	generate() : string {
@@ -697,7 +757,13 @@ enum ResultVariant {
 	}
 }
 /* private */class DataAccess/*  */ implements Value {
+	parent : Value;
+	property : string;
+	type : Type;
 	constructor (parent : Value, property : string, type : Type) {
+		this.parent = parent;
+		this.property = property;
+		this.type = type;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.DataAccess;
 	generate() : string {
@@ -708,7 +774,9 @@ enum ResultVariant {
 	}
 }
 /* private */class ConstructionCaller/*  */ implements Caller {
+	type : Type;
 	constructor (type : Type) {
+		this.type = type;
 	}
 	_CallerVariant : CallerVariant = CallerVariant.ConstructionCaller;
 	generate() : string {
@@ -719,7 +787,11 @@ enum ResultVariant {
 	}
 }
 /* private */class Operator/*  */ {
+	sourceRepresentation : string;
+	targetRepresentation : string;
 	constructor (sourceRepresentation : string, targetRepresentation : string) {
+		this.sourceRepresentation = sourceRepresentation;
+		this.targetRepresentation = targetRepresentation;
 	}
 	ADD : Operator = new Operator("+", "+");
 	AND : Operator = new Operator("&&", "&&");
@@ -730,7 +802,13 @@ enum ResultVariant {
 	SUBTRACT : Operator = new Operator("-", "-");
 }
 /* private */class Operation/*  */ implements Value {
+	left : Value;
+	operator : Operator;
+	right : Value;
 	constructor (left : Value, operator : Operator, right : Value) {
+		this.left = left;
+		this.operator = operator;
+		this.right = right;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.Operation;
 	generate() : string {
@@ -741,7 +819,9 @@ enum ResultVariant {
 	}
 }
 /* private */class Not/*  */ implements Value {
+	value : Value;
 	constructor (value : Value) {
+		this.value = value;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.Not;
 	generate() : string {
@@ -752,7 +832,11 @@ enum ResultVariant {
 	}
 }
 /* private */class BlockLambdaValue/*  */ implements LambdaValue {
+	depth : number;
+	statements : List<FunctionSegment>;
 	constructor (depth : number, statements : List<FunctionSegment>) {
+		this.depth = depth;
+		this.statements = statements;
 	}
 	generate() : string {
 		return "{" + this.joinStatements() + createIndent(this.depth) + "}";
@@ -762,7 +846,11 @@ enum ResultVariant {
 	}
 }
 /* private */class Lambda/*  */ implements Value {
+	parameters : List<Definition>;
+	body : LambdaValue;
 	constructor (parameters : List<Definition>, body : LambdaValue) {
+		this.parameters = parameters;
+		this.body = body;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.Lambda;
 	generate() : string {
@@ -774,7 +862,13 @@ enum ResultVariant {
 	}
 }
 /* private */class Invokable/*  */ implements Value {
+	caller : Caller;
+	arguments : List<Value>;
+	type : Type;
 	constructor (caller : Caller, arguments : List<Value>, type : Type) {
+		this.caller = caller;
+		this.arguments = arguments;
+		this.type = type;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.Invokable;
 	generate() : string {
@@ -783,7 +877,11 @@ enum ResultVariant {
 	}
 }
 /* private */class IndexValue/*  */ implements Value {
+	parent : Value;
+	child : Value;
 	constructor (parent : Value, child : Value) {
+		this.parent = parent;
+		this.child = child;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.IndexValue;
 	generate() : string {
@@ -794,7 +892,11 @@ enum ResultVariant {
 	}
 }
 /* private */class SymbolValue/*  */ implements Value {
+	stripped : string;
+	type : Type;
 	constructor (stripped : string, type : Type) {
+		this.stripped = stripped;
+		this.type = type;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.SymbolValue;
 	generate() : string {
@@ -821,7 +923,15 @@ enum ResultVariant {
 	}
 }
 /* private */class FunctionNode/*  */ implements ClassSegment {
+	depth : number;
+	header : Header;
+	parameters : List<Definition>;
+	maybeStatements : Option<List<FunctionSegment>>;
 	constructor (depth : number, header : Header, parameters : List<Definition>, maybeStatements : Option<List<FunctionSegment>>) {
+		this.depth = depth;
+		this.header = header;
+		this.parameters = parameters;
+		this.maybeStatements = maybeStatements;
 	}
 	joinStatements(statements : List<FunctionSegment>) : string {
 		return statements.iterate().map(FunctionSegment.generate).collect(Joiner.empty()).orElse("");
@@ -834,7 +944,13 @@ enum ResultVariant {
 	}
 }
 /* private */class Block/*  */ implements FunctionSegment {
+	depth : number;
+	header : BlockHeader;
+	statements : List<FunctionSegment>;
 	constructor (depth : number, header : BlockHeader, statements : List<FunctionSegment>) {
+		this.depth = depth;
+		this.header = header;
+		this.statements = statements;
 	}
 	generate() : string {
 		indent : string = createIndent(this.depth);
@@ -843,7 +959,11 @@ enum ResultVariant {
 	}
 }
 /* private */class Conditional/*  */ implements BlockHeader {
+	prefix : string;
+	value1 : Value;
 	constructor (prefix : string, value1 : Value) {
+		this.prefix = prefix;
+		this.value1 = value1;
 	}
 	generate() : string {
 		return this.prefix + " (" + this.value1.generate() + ")";
@@ -855,35 +975,57 @@ enum ResultVariant {
 	}
 }
 /* private */class Return/*  */ implements StatementValue {
+	value : Value;
 	constructor (value : Value) {
+		this.value = value;
 	}
 	generate() : string {
 		return "return " + this.value.generate();
 	}
 }
 /* private */class Initialization/*  */ implements StatementValue {
+	definition : Definition;
+	source : Value;
 	constructor (definition : Definition, source : Value) {
+		this.definition = definition;
+		this.source = source;
 	}
 	generate() : string {
 		return this.definition.generate() + " = " + this.source.generate();
 	}
 }
 /* private */class Assignment/*  */ implements StatementValue {
+	destination : Value;
+	source : Value;
 	constructor (destination : Value, source : Value) {
+		this.destination = destination;
+		this.source = source;
 	}
 	generate() : string {
 		return this.destination.generate() + " = " + this.source.generate();
 	}
 }
 /* private */class Statement/*  */ implements FunctionSegment, ClassSegment {
+	depth : number;
+	value : StatementValue;
 	constructor (depth : number, value : StatementValue) {
+		this.depth = depth;
+		this.value = value;
 	}
 	generate() : string {
 		return createIndent(this.depth) + this.value.generate() + ";";
 	}
 }
 /* private */class MethodPrototype/*  */ implements IncompleteClassSegment {
+	depth : number;
+	header : Header;
+	parameters : List<Definition>;
+	content : string;
 	constructor (depth : number, header : Header, parameters : List<Definition>, content : string) {
+		this.depth = depth;
+		this.header = header;
+		this.parameters = parameters;
+		this.content = content;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.MethodPrototype;
 	createDefinition() : Definition {
@@ -897,7 +1039,9 @@ enum ResultVariant {
 	}
 }
 /* private */class IncompleteClassSegmentWrapper/*  */ implements IncompleteClassSegment {
+	segment : ClassSegment;
 	constructor (segment : ClassSegment) {
+		this.segment = segment;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.IncompleteClassSegmentWrapper;
 	maybeCreateDefinition() : Option<Definition> {
@@ -905,7 +1049,11 @@ enum ResultVariant {
 	}
 }
 /* private */class ClassDefinition/*  */ implements IncompleteClassSegment {
+	depth : number;
+	definition : Definition;
 	constructor (depth : number, definition : Definition) {
+		this.depth = depth;
+		this.definition = definition;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassDefinition;
 	maybeCreateDefinition() : Option<Definition> {
@@ -913,7 +1061,13 @@ enum ResultVariant {
 	}
 }
 /* private */class ClassInitialization/*  */ implements IncompleteClassSegment {
+	depth : number;
+	definition : Definition;
+	value : Value;
 	constructor (depth : number, definition : Definition, value : Value) {
+		this.depth = depth;
+		this.definition = definition;
+		this.value = value;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassInitialization;
 	maybeCreateDefinition() : Option<Definition> {
@@ -921,7 +1075,25 @@ enum ResultVariant {
 	}
 }
 /* private */class StructurePrototype/*  */ implements IncompleteClassSegment {
+	targetInfix : string;
+	beforeInfix : string;
+	name : string;
+	typeParams : List<string>;
+	parameters : List<Definition>;
+	after : string;
+	segments : List<IncompleteClassSegment>;
+	variants : List<string>;
+	interfaces : List<Type>;
 	constructor (targetInfix : string, beforeInfix : string, name : string, typeParams : List<string>, parameters : List<Definition>, after : string, segments : List<IncompleteClassSegment>, variants : List<string>, interfaces : List<Type>) {
+		this.targetInfix = targetInfix;
+		this.beforeInfix = beforeInfix;
+		this.name = name;
+		this.typeParams = typeParams;
+		this.parameters = parameters;
+		this.after = after;
+		this.segments = segments;
+		this.variants = variants;
+		this.interfaces = interfaces;
 	}
 	_IncompleteClassSegmentVariant : IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype;
 	createObjectType() : ObjectType {
@@ -939,7 +1111,11 @@ enum ResultVariant {
 	}
 }
 /* private */class Cast/*  */ implements Value {
+	value : Value;
+	type : Type;
 	constructor (value : Value, type : Type) {
+		this.value = value;
+		this.type = type;
 	}
 	_ValueVariant : ValueVariant = ValueVariant.Cast;
 	generate() : string {
@@ -947,7 +1123,9 @@ enum ResultVariant {
 	}
 }
 /* private */class Ok<T, X>/*  */ implements Result<T, X> {
+	value : T;
 	constructor (value : T) {
+		this.value = value;
 	}
 	_ResultVariant : ResultVariant = ResultVariant.Ok;
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
@@ -958,7 +1136,9 @@ enum ResultVariant {
 	}
 }
 /* private */class Err<T, X>/*  */ implements Result<T, X> {
+	error : X;
 	constructor (error : X) {
+		this.error = error;
 	}
 	_ResultVariant : ResultVariant = ResultVariant.Err;
 	mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
@@ -969,7 +1149,9 @@ enum ResultVariant {
 	}
 }
 /* private */class JVMIOError/*  */ implements IOError {
+	error : /* IOException */;
 	constructor (error : /* IOException */) {
+		this.error = error;
 	}
 	display() : string {
 		writer : /* StringWriter */ = new /* StringWriter */();
@@ -1283,11 +1465,18 @@ enum ResultVariant {
 		return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
 	}
 	attachConstructor(prototype : StructurePrototype, segments : List<ClassSegment>) : List<ClassSegment> {
-		if (prototype.parameters().isEmpty()){
+		parameters = prototype.parameters();
+		if (parameters.isEmpty()){
 			return segments;
 		}
-		func : FunctionNode = new FunctionNode(1, new ConstructorHeader(), prototype.parameters(), new Some(Lists.empty()));
-		return segments.addFirst(func);
+		definitions : List<ClassSegment> = parameters.iterate(). < /* ClassSegment>map */((definition) => new Statement(1, definition)).collect(new ListCollector());
+		collect = /* parameters.iterate()
+                .map(definition  */ - /* > {
+                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.name(), Primitive.Unknown);
+                    return new Assignment */(/* destination */, /*  new SymbolValue(definition.name(), Primitive.Unknown));
+                } */). < /* FunctionSegment>map */((assignment) => new Statement(2, assignment)).collect(new ListCollector());
+		func : FunctionNode = new FunctionNode(1, new ConstructorHeader(), parameters, new Some(collect));
+		return segments.addFirst(func).addAllFirst(definitions);
 	}
 	completeClassSegment(state1 : CompileState, segment : IncompleteClassSegment) : Option<[CompileState, ClassSegment]> {
 		/* return switch (segment) */{
