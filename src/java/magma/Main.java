@@ -182,9 +182,15 @@ public class Main {
 
     private static String compileDefinition(String input) {
         var stripped = input.strip();
-        return compileInfix(stripped, " ", Main::findLast, (beforeName, name) -> {
-            return Optional.of(placeholder(beforeName) + " " + placeholder(name));
+        return compileLast(stripped, " ", (beforeName, name) -> {
+            return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
+                return Optional.of(placeholder(beforeType) + " " + placeholder(type) + " " + placeholder(name));
+            });
         }).orElseGet(() -> placeholder(input));
+    }
+
+    private static Optional<String> compileLast(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        return compileInfix(input, infix, Main::findLast, mapper);
     }
 
     private static int findLast(String input, String infix) {
