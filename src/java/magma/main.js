@@ -12,7 +12,7 @@ var ArgumentVariant;
 })(ArgumentVariant || (ArgumentVariant = {}));
 var ParameterVariant;
 (function (ParameterVariant) {
-    ParameterVariant[ParameterVariant["Definition"] = 0] = "Definition";
+    ParameterVariant[ParameterVariant["ImmutableDefinition"] = 0] = "ImmutableDefinition";
     ParameterVariant[ParameterVariant["Placeholder"] = 1] = "Placeholder";
     ParameterVariant[ParameterVariant["Whitespace"] = 2] = "Whitespace";
 })(ParameterVariant || (ParameterVariant = {}));
@@ -42,10 +42,6 @@ var FindableTypeVariant;
     FindableTypeVariant[FindableTypeVariant["Placeholder"] = 1] = "Placeholder";
     FindableTypeVariant[FindableTypeVariant["Template"] = 2] = "Template";
 })(FindableTypeVariant || (FindableTypeVariant = {}));
-var DefinitionVariant;
-(function (DefinitionVariant) {
-    DefinitionVariant[DefinitionVariant["ImmutableDefinition"] = 0] = "ImmutableDefinition";
-})(DefinitionVariant || (DefinitionVariant = {}));
 var IncompleteClassSegmentVariant;
 (function (IncompleteClassSegmentVariant) {
     IncompleteClassSegmentVariant[IncompleteClassSegmentVariant["ClassDefinition"] = 0] = "ClassDefinition";
@@ -213,7 +209,7 @@ var ResultVariant;
 }
 /* private */ class ImmutableDefinition /*  */ {
     constructor(annotations, modifiers, name, type, typeParams) {
-        this._DefinitionVariant = DefinitionVariant.ImmutableDefinition /* : DefinitionVariant */;
+        this._ParameterVariant = ParameterVariant.ImmutableDefinition /* : ParameterVariant */;
         this /* : unknown */.annotations /* : unknown */ = annotations /* : unknown */;
         this /* : unknown */.modifiers /* : unknown */ = modifiers /* : unknown */;
         this /* : unknown */.name /* : unknown */ = name /* : unknown */;
@@ -280,10 +276,10 @@ var ResultVariant;
         return this /* : ObjectType */.name /* : string */;
     }
     replace(mapping) {
-        return new ObjectType(this /* : ObjectType */.name /* : string */, this /* : ObjectType */.typeParams /* : List<string> */, this /* : ObjectType */.definitions /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => R) => Query<R> */((definition) => definition /* : Definition */.mapType /* : (arg0 : (arg0 : Type) => Type) => Definition */((type) => type /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : Definition */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */, this /* : ObjectType */.variants /* : List<string> */) /* : ObjectType */;
+        return new ObjectType(this /* : ObjectType */.name /* : string */, this /* : ObjectType */.typeParams /* : List<string> */, this /* : ObjectType */.definitions /* : List<ImmutableDefinition> */.query /* : () => Query<ImmutableDefinition> */() /* : Query<ImmutableDefinition> */.map /* : (arg0 : (arg0 : ImmutableDefinition) => R) => Query<R> */((definition) => definition /* : ImmutableDefinition */.mapType /* : (arg0 : (arg0 : Type) => Type) => ImmutableDefinition */((type) => type /* : Type */.replace /* : (arg0 : Map<string, Type>) => Type */(mapping /* : Map<string, Type> */) /* : Type */) /* : ImmutableDefinition */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */, this /* : ObjectType */.variants /* : List<string> */) /* : ObjectType */;
     }
     find(name) {
-        return this /* : ObjectType */.definitions /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.filter /* : (arg0 : (arg0 : Definition) => boolean) => Query<Definition> */((definition) => definition /* : Definition */.findName /* : () => string */() /* : string */ === name /* : string */) /* : Query<Definition> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(Definition /* : Definition */.findType /* : unknown */) /* : Option<R> */.next /* : unknown */() /* : unknown */;
+        return this /* : ObjectType */.definitions /* : List<ImmutableDefinition> */.query /* : () => Query<ImmutableDefinition> */() /* : Query<ImmutableDefinition> */.filter /* : (arg0 : (arg0 : ImmutableDefinition) => boolean) => Query<ImmutableDefinition> */((definition) => definition /* : ImmutableDefinition */.findName /* : () => string */() /* : string */ === name /* : string */) /* : Query<ImmutableDefinition> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(ImmutableDefinition /* : ImmutableDefinition */.findType /* : unknown */) /* : Option<R> */.next /* : unknown */() /* : unknown */;
     }
     findBase() {
         return new Some(this /* : ObjectType */) /* : Some */;
@@ -323,21 +319,21 @@ var ResultVariant;
         return new CompileState(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, new None() /* : None */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : CompileState */;
     }
     resolveValue(name) {
-        return this /* : CompileState */.definitions /* : List<List<Definition>> */.iterateReversed /* : () => Query<List<Definition>> */() /* : Query<List<Definition>> */.flatMap /* : (arg0 : (arg0 : List<Definition>) => Query<R>) => Query<R> */(List /* : List */.query /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((definition) => definition /* : T */.findName /* : unknown */() /* : unknown */ === name /* : string */) /* : Option<T> */.next /* : unknown */() /* : unknown */.map /* : unknown */(Definition /* : Definition */.findType /* : unknown */) /* : unknown */;
+        return this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */.iterateReversed /* : () => Query<List<ImmutableDefinition>> */() /* : Query<List<ImmutableDefinition>> */.flatMap /* : (arg0 : (arg0 : List<ImmutableDefinition>) => Query<R>) => Query<R> */(List /* : List */.query /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((definition) => definition /* : T */.findName /* : unknown */() /* : unknown */ === name /* : string */) /* : Option<T> */.next /* : unknown */() /* : unknown */.map /* : unknown */(ImmutableDefinition /* : ImmutableDefinition */.findType /* : unknown */) /* : unknown */;
     }
     addStructure(structure) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */.addLast /* : (arg0 : string) => List<string> */(structure /* : string */) /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */.addLast /* : (arg0 : string) => List<string> */(structure /* : string */) /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     defineAll(definitions) {
-        let defined = this /* : CompileState */.definitions /* : List<List<Definition>> */.mapLast /* : (arg0 : (arg0 : List<Definition>) => List<Definition>) => List<List<Definition>> */((frame) => frame /* : List<Definition> */.addAllLast /* : (arg0 : List<Definition>) => List<Definition> */(definitions /* : List<Definition> */) /* : List<Definition> */) /* : List<List<Definition>> */;
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, defined /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        let defined = this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */.mapLast /* : (arg0 : (arg0 : List<ImmutableDefinition>) => List<ImmutableDefinition>) => List<List<ImmutableDefinition>> */((frame) => frame /* : List<ImmutableDefinition> */.addAllLast /* : (arg0 : List<ImmutableDefinition>) => List<ImmutableDefinition> */(definitions /* : List<ImmutableDefinition> */) /* : List<ImmutableDefinition> */) /* : List<List<ImmutableDefinition>> */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, defined /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     resolveType(name) {
         let maybe = this /* : CompileState */.structNames /* : List<[string, List<string>]> */.last /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.filter /* : (arg0 : (arg0 : [string, List<string>]) => boolean) => Option<[string, List<string>]> */((inner) => inner /* : [string, List<string>] */[0 /* : number */] === name /* : string */) /* : Option<[string, List<string>]> */;
         if (maybe /* : Option<[string, List<string>]> */._OptionVariant /* : unknown */ === OptionVariant.Some /* : unknown */) {
             let some = maybe /* : Option<[string, List<string>]> */;
             let found = some /* : Some<[string, List<string>]> */.value /* : [string, List<string>] */;
-            return new Some(new ObjectType(found /* : [string, List<string>] */[0 /* : number */], this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.last /* : () => Option<List<Definition>> */() /* : Option<List<Definition>> */.orElse /* : (arg0 : List<Definition>) => List<Definition> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<Definition> */, found /* : [string, List<string>] */[1 /* : number */]) /* : ObjectType */) /* : Some */;
+            return new Some(new ObjectType(found /* : [string, List<string>] */[0 /* : number */], this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */.last /* : () => Option<List<ImmutableDefinition>> */() /* : Option<List<ImmutableDefinition>> */.orElse /* : (arg0 : List<ImmutableDefinition>) => List<ImmutableDefinition> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<ImmutableDefinition> */, found /* : [string, List<string>] */[1 /* : number */]) /* : ObjectType */) /* : Some */;
         }
         let maybeTypeParam = this /* : CompileState */.typeParams /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.filter /* : (arg0 : (arg0 : string) => boolean) => Query<string> */((param) => param /* : string */ === name /* : string */) /* : Query<string> */.next /* : unknown */() /* : unknown */;
         if (maybeTypeParam /* : unknown */._UnknownVariant /* : unknown */ === UnknownVariant.Some /* : unknown */) {
@@ -347,35 +343,35 @@ var ResultVariant;
         return this /* : CompileState */.objectTypes /* : List<ObjectType> */.query /* : () => Query<ObjectType> */() /* : Query<ObjectType> */.filter /* : (arg0 : (arg0 : ObjectType) => boolean) => Query<ObjectType> */((type) => type /* : ObjectType */.name /* : string */ === name /* : string */) /* : Query<ObjectType> */.next /* : unknown */() /* : unknown */.map /* : unknown */((type) => type /* : ObjectType */) /* : unknown */;
     }
     define(definition) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.mapLast /* : (arg0 : (arg0 : List<Definition>) => List<Definition>) => List<List<Definition>> */((frame) => frame /* : List<Definition> */.addLast /* : (arg0 : Definition) => List<Definition> */(definition /* : Definition */) /* : List<Definition> */) /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */.mapLast /* : (arg0 : (arg0 : List<ImmutableDefinition>) => List<ImmutableDefinition>) => List<List<ImmutableDefinition>> */((frame) => frame /* : List<ImmutableDefinition> */.addLast /* : (arg0 : ImmutableDefinition) => List<ImmutableDefinition> */(definition /* : ImmutableDefinition */) /* : List<ImmutableDefinition> */) /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     pushStructName(definition) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.addLast /* : (arg0 : [string, List<string>]) => List<[string, List<string>]> */(definition /* : [string, List<string>] */) /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.addLast /* : (arg0 : [string, List<string>]) => List<[string, List<string>]> */(definition /* : [string, List<string>] */) /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     withTypeParams(typeParams) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */.addAllLast /* : (arg0 : List<string>) => List<string> */(typeParams /* : List<string> */) /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */.addAllLast /* : (arg0 : List<string>) => List<string> */(typeParams /* : List<string> */) /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     withExpectedType(type) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, new Some(type /* : Type */) /* : Some */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, new Some(type /* : Type */) /* : Some */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     popStructName() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.removeLast /* : () => Option<[List<[string, List<string>]>, [string, List<string>]]> */() /* : Option<[List<[string, List<string>]>, [string, List<string>]]> */.map /* : (arg0 : (arg0 : [List<[string, List<string>]>, [string, List<string>]]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.structNames /* : List<[string, List<string>]> */) /* : unknown */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */.removeLast /* : () => Option<[List<[string, List<string>]>, [string, List<string>]]> */() /* : Option<[List<[string, List<string>]>, [string, List<string>]]> */.map /* : (arg0 : (arg0 : [List<[string, List<string>]>, [string, List<string>]]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.structNames /* : List<[string, List<string>]> */) /* : unknown */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     enterDefinitions() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */.addLast /* : (arg0 : List<Definition>) => List<List<Definition>> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */.addLast /* : (arg0 : List<ImmutableDefinition>) => List<List<ImmutableDefinition>> */(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     exitDefinitions() {
-        let removed = this /* : CompileState */.definitions /* : List<List<Definition>> */.removeLast /* : () => Option<[List<List<Definition>>, List<Definition>]> */() /* : Option<[List<List<Definition>>, List<Definition>]> */.map /* : (arg0 : (arg0 : [List<List<Definition>>, List<Definition>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.definitions /* : List<List<Definition>> */) /* : unknown */;
+        let removed = this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */.removeLast /* : () => Option<[List<List<ImmutableDefinition>>, List<ImmutableDefinition>]> */() /* : Option<[List<List<ImmutableDefinition>>, List<ImmutableDefinition>]> */.map /* : (arg0 : (arg0 : [List<List<ImmutableDefinition>>, List<ImmutableDefinition>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */(this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */) /* : unknown */;
         return new CompileState(this /* : CompileState */.structures /* : List<string> */, removed /* : unknown */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     addType(thisType) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */.addLast /* : (arg0 : ObjectType) => List<ObjectType> */(thisType /* : ObjectType */) /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */.addLast /* : (arg0 : ObjectType) => List<ObjectType> */(thisType /* : ObjectType */) /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */) /* : CompileState */;
     }
     addFunctionSegment(segment) {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */.addLast /* : (arg0 : FunctionSegment) => List<FunctionSegment> */(segment /* : FunctionSegment */) /* : List<FunctionSegment> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, this /* : CompileState */.functionSegments /* : List<FunctionSegment> */.addLast /* : (arg0 : FunctionSegment) => List<FunctionSegment> */(segment /* : FunctionSegment */) /* : List<FunctionSegment> */) /* : CompileState */;
     }
     clearFunctionSegments() {
-        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<Definition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : CompileState */;
+        return new CompileState(this /* : CompileState */.structures /* : List<string> */, this /* : CompileState */.definitions /* : List<List<ImmutableDefinition>> */, this /* : CompileState */.objectTypes /* : List<ObjectType> */, this /* : CompileState */.structNames /* : List<[string, List<string>]> */, this /* : CompileState */.typeParams /* : List<string> */, this /* : CompileState */.typeRegister /* : Option<Type> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : CompileState */;
     }
     isCurrentStructName(stripped) {
         return stripped /* : string */ === this /* : CompileState */.structNames /* : List<[string, List<string>]> */.last /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.map /* : (arg0 : (arg0 : [string, List<string>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */("") /* : unknown */;
@@ -708,7 +704,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.body /* : unknown */ = body /* : unknown */;
     }
     generate() {
-        let joined = this /* : Lambda */.parameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => R) => Query<R> */(Definition /* : Definition */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let joined = this /* : Lambda */.parameters /* : List<ImmutableDefinition> */.query /* : () => Query<ImmutableDefinition> */() /* : Query<ImmutableDefinition> */.map /* : (arg0 : (arg0 : ImmutableDefinition) => R) => Query<R> */(ImmutableDefinition /* : ImmutableDefinition */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "(" + joined /* : unknown */ + ") => " + this /* : Lambda */.body /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
     type() {
@@ -762,7 +758,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
 }
 /* private static */ class ConstructorHeader /*  */ {
     createDefinition(paramTypes) {
-        return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("new", Primitive /* : Primitive */.Unknown /* : unknown */) /* : Definition */;
+        return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => ImmutableDefinition */("new", Primitive /* : Primitive */.Unknown /* : unknown */) /* : ImmutableDefinition */;
     }
     generateWithParams(joinedParameters) {
         return "constructor " + joinedParameters /* : string */;
@@ -780,7 +776,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     }
     generate() {
         let indent = createIndent /* : (arg0 : number) => string */(this /* : FunctionNode */.depth /* : number */) /* : string */;
-        let generatedHeader = this /* : FunctionNode */.header /* : Header */.generateWithParams /* : (arg0 : string) => string */(joinValues /* : (arg0 : List<Definition>) => string */(this /* : FunctionNode */.parameters /* : List<Definition> */) /* : string */) /* : string */;
+        let generatedHeader = this /* : FunctionNode */.header /* : Header */.generateWithParams /* : (arg0 : string) => string */(joinValues /* : (arg0 : List<ImmutableDefinition>) => string */(this /* : FunctionNode */.parameters /* : List<ImmutableDefinition> */) /* : string */) /* : string */;
         let generatedStatements = this /* : FunctionNode */.maybeStatements /* : Option<List<FunctionSegment>> */.map /* : (arg0 : (arg0 : List<FunctionSegment>) => R) => Option<R> */(FunctionNode /* : FunctionNode */.joinStatements /* : unknown */) /* : Option<R> */.map /* : unknown */((inner) => " {" + inner + indent + "}") /* : unknown */.orElse /* : unknown */(";") /* : unknown */;
         return indent /* : string */ + generatedHeader /* : string */ + generatedStatements /* : unknown */;
     }
@@ -825,7 +821,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.source /* : unknown */ = source /* : unknown */;
     }
     generate() {
-        return "let " + this /* : Initialization */.definition /* : Definition */.generate /* : () => string */() /* : string */ + " = " + this /* : Initialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
+        return "let " + this /* : Initialization */.definition /* : ImmutableDefinition */.generate /* : () => string */() /* : string */ + " = " + this /* : Initialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
 /* private */ class FieldInitialization /*  */ {
@@ -834,7 +830,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.source /* : unknown */ = source /* : unknown */;
     }
     generate() {
-        return this /* : FieldInitialization */.definition /* : Definition */.generate /* : () => string */() /* : string */ + " = " + this /* : FieldInitialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
+        return this /* : FieldInitialization */.definition /* : ImmutableDefinition */.generate /* : () => string */() /* : string */ + " = " + this /* : FieldInitialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
 /* private */ class Assignment /*  */ {
@@ -864,13 +860,13 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.content /* : unknown */ = content /* : unknown */;
     }
     createDefinition() {
-        return this /* : MethodPrototype */.header /* : Header */.createDefinition /* : (arg0 : List<Type>) => Definition */(this /* : MethodPrototype */.findParamTypes /* : () => List<Type> */() /* : List<Type> */) /* : Definition */;
+        return this /* : MethodPrototype */.header /* : Header */.createDefinition /* : (arg0 : List<Type>) => content-start ImmutableDefinition content-end */(this /* : MethodPrototype */.findParamTypes /* : () => List<Type> */() /* : List<Type> */) /* : content-start ImmutableDefinition content-end */;
     }
     findParamTypes() {
-        return this /* : MethodPrototype */.parameters /* : List<Definition> */() /* : unknown */.query /* : unknown */() /* : unknown */.map /* : unknown */(Definition /* : Definition */.findType /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return this /* : MethodPrototype */.parameters /* : List<ImmutableDefinition> */() /* : unknown */.query /* : unknown */() /* : unknown */.map /* : unknown */(ImmutableDefinition /* : ImmutableDefinition */.findType /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     maybeCreateDefinition() {
-        return new Some(this /* : MethodPrototype */.header /* : Header */.createDefinition /* : (arg0 : List<Type>) => Definition */(this /* : MethodPrototype */.findParamTypes /* : () => List<Type> */() /* : List<Type> */) /* : Definition */) /* : Some */;
+        return new Some(this /* : MethodPrototype */.header /* : Header */.createDefinition /* : (arg0 : List<Type>) => content-start ImmutableDefinition content-end */(this /* : MethodPrototype */.findParamTypes /* : () => List<Type> */() /* : List<Type> */) /* : content-start ImmutableDefinition content-end */) /* : Some */;
     }
 }
 /* private */ class IncompleteClassSegmentWrapper /*  */ {
@@ -889,7 +885,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
     }
     maybeCreateDefinition() {
-        return new Some(this /* : ClassDefinition */.definition /* : Definition */) /* : Some */;
+        return new Some(this /* : ClassDefinition */.definition /* : ImmutableDefinition */) /* : Some */;
     }
 }
 /* private */ class ClassInitialization /*  */ {
@@ -900,7 +896,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
     maybeCreateDefinition() {
-        return new Some(this /* : ClassInitialization */.definition /* : Definition */) /* : Some */;
+        return new Some(this /* : ClassInitialization */.definition /* : ImmutableDefinition */) /* : Some */;
     }
 }
 /* private */ class TypeRef /*  */ {
@@ -927,7 +923,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     }
     createObjectType() {
         let definitionFromSegments = this /* : StructurePrototype */.segments /* : List<IncompleteClassSegment> */.query /* : () => Query<IncompleteClassSegment> */() /* : Query<IncompleteClassSegment> */.map /* : (arg0 : (arg0 : IncompleteClassSegment) => R) => Query<R> */(IncompleteClassSegment /* : IncompleteClassSegment */.maybeCreateDefinition /* : unknown */) /* : Query<R> */.flatMap /* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries /* : Queries */.fromOption /* : unknown */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
-        return new ObjectType(this /* : StructurePrototype */.name /* : string */, this /* : StructurePrototype */.typeParams /* : List<string> */, definitionFromSegments /* : unknown */.addAllLast /* : unknown */(this /* : StructurePrototype */.parameters /* : List<Definition> */) /* : unknown */, this /* : StructurePrototype */.variants /* : List<string> */) /* : ObjectType */;
+        return new ObjectType(this /* : StructurePrototype */.name /* : string */, this /* : StructurePrototype */.typeParams /* : List<string> */, definitionFromSegments /* : unknown */.addAllLast /* : unknown */(this /* : StructurePrototype */.parameters /* : List<ImmutableDefinition> */) /* : unknown */, this /* : StructurePrototype */.variants /* : List<string> */) /* : ObjectType */;
     }
     maybeCreateDefinition() {
         return new None() /* : None */;
@@ -1082,7 +1078,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return "/* " + replaced + " */";
     }
     static joinValues(retainParameters) {
-        let inner = retainParameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */.map /* : (arg0 : (arg0 : Definition) => R) => Query<R> */(Definition /* : Definition */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        let inner = retainParameters /* : List<ImmutableDefinition> */.query /* : () => Query<ImmutableDefinition> */() /* : Query<ImmutableDefinition> */.map /* : (arg0 : (arg0 : ImmutableDefinition) => R) => Query<R> */(ImmutableDefinition /* : ImmutableDefinition */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
         return "(" + inner + ")";
     }
     static createIndent(depth) {
@@ -1309,13 +1305,13 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let segmentsTuple = this /* : Main */.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state /* : CompileState */.pushStructName /* : (arg0 : [string, List<string>]) => CompileState */([name /* : unknown */, variants /* : List<string> */]) /* : CompileState */.withTypeParams /* : unknown */(typeParams /* : List<string> */) /* : unknown */, content /* : string */, (state0, input) => this /* : Main */.parseClassSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, IncompleteClassSegment] */(state0 /* : unknown */, input /* : unknown */, 1 /* : number */) /* : [CompileState, IncompleteClassSegment] */) /* : [CompileState, List<T>] */;
         let segmentsState = segmentsTuple /* : [CompileState, List<T>] */[0 /* : number */];
         let segments = segmentsTuple /* : [CompileState, List<T>] */[1 /* : number */];
-        let parameters = this /* : Main */.retainDefinitions /* : (arg0 : List<Parameter>) => List<Definition> */(rawParameters /* : List<Parameter> */) /* : List<Definition> */;
-        let prototype = new StructurePrototype(targetInfix /* : string */, beforeInfix /* : string */, name /* : unknown */, typeParams /* : List<string> */, parameters /* : List<Definition> */, after /* : string */, segments /* : unknown */, variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */) /* : StructurePrototype */;
+        let parameters = this /* : Main */.retainDefinitions /* : (arg0 : List<Parameter>) => List<ImmutableDefinition> */(rawParameters /* : List<Parameter> */) /* : List<ImmutableDefinition> */;
+        let prototype = new StructurePrototype(targetInfix /* : string */, beforeInfix /* : string */, name /* : unknown */, typeParams /* : List<string> */, parameters /* : List<ImmutableDefinition> */, after /* : string */, segments /* : unknown */, variants /* : List<string> */, interfaces /* : List<TypeRef> */, maybeSuperType /* : List<TypeRef> */) /* : StructurePrototype */;
         return new Some([segmentsState /* : unknown */.addType /* : unknown */(prototype /* : StructurePrototype */.createObjectType /* : () => ObjectType */() /* : ObjectType */) /* : unknown */, prototype /* : StructurePrototype */]) /* : Some */;
     }
     completeStructure(state, prototype) {
         let thisType = prototype /* : StructurePrototype */.createObjectType /* : () => ObjectType */() /* : ObjectType */;
-        let withThis = state /* : CompileState */.enterDefinitions /* : () => CompileState */() /* : CompileState */.define /* : (arg0 : Definition) => CompileState */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("this", thisType /* : ObjectType */) /* : Definition */) /* : CompileState */;
+        let withThis = state /* : CompileState */.enterDefinitions /* : () => CompileState */() /* : CompileState */.define /* : (arg0 : ImmutableDefinition) => CompileState */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => ImmutableDefinition */("this", thisType /* : ObjectType */) /* : ImmutableDefinition */) /* : CompileState */;
         return this /* : Main */.resolveTypeRefs /* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(withThis /* : CompileState */, prototype /* : StructurePrototype */.interfaces /* : List<TypeRef> */) /* : Option<[CompileState, List<Type>]> */.flatMap /* : (arg0 : (arg0 : [CompileState, List<Type>]) => Option<R>) => Option<R> */((interfacesTuple) => {
             return this /* : Main */.resolveTypeRefs /* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(interfacesTuple /* : [CompileState, List<Type>] */[0 /* : number */], prototype /* : StructurePrototype */.superTypes /* : List<TypeRef> */) /* : Option<[CompileState, List<Type>]> */.flatMap /* : (arg0 : (arg0 : [CompileState, List<Type>]) => Option<R>) => Option<R> */((superTypesTuple) => {
                 let interfaces = interfacesTuple /* : [CompileState, List<Type>] */[1 /* : number */];
@@ -1328,7 +1324,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                     let withEnumCategoriesDefined = this /* : Main */.defineEnumCategories /* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited /* : unknown */, oldStatements /* : unknown */, prototype /* : StructurePrototype */.name /* : string */, prototype /* : StructurePrototype */.variants /* : List<string> */, prototype /* : StructurePrototype */.generateToEnum /* : () => string */() /* : string */) /* : [CompileState, List<ClassSegment>] */;
                     let withEnumCategoriesImplemented = this /* : Main */.implementEnumCategories /* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype /* : StructurePrototype */.name /* : string */, variantsSuper /* : List<string> */, withEnumCategoriesDefined /* : [CompileState, List<ClassSegment>] */[1 /* : number */]) /* : List<ClassSegment> */;
                     let withEnumValues = this /* : Main */.implementEnumValues /* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented /* : List<ClassSegment> */, thisType /* : ObjectType */) /* : List<ClassSegment> */;
-                    let withConstructor = this /* : Main */.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues /* : List<ClassSegment> */, prototype /* : StructurePrototype */.parameters /* : List<Definition> */() /* : unknown */) /* : List<ClassSegment> */;
+                    let withConstructor = this /* : Main */.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<ImmutableDefinition>) => List<ClassSegment> */(withEnumValues /* : List<ClassSegment> */, prototype /* : StructurePrototype */.parameters /* : List<ImmutableDefinition> */() /* : unknown */) /* : List<ClassSegment> */;
                     let generatedSegments = this /* : Main */.joinSegments /* : (arg0 : List<ClassSegment>) => string */(withConstructor /* : List<ClassSegment> */) /* : string */;
                     let joinedTypeParams = prototype /* : StructurePrototype */.joinTypeParams /* : () => string */() /* : string */;
                     let interfacesJoined = this /* : Main */.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces /* : unknown */) /* : string */;
@@ -1356,16 +1352,16 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }
         let enumState = state /* : CompileState */.addStructure /* : (arg0 : string) => CompileState */(enumGenerated /* : string */) /* : CompileState */;
         let enumType = new ObjectType(name /* : string */ + "Variant", Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, variants /* : List<string> */) /* : ObjectType */;
-        let enumDefinition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(enumType /* : ObjectType */) /* : Definition */;
-        return [enumState /* : CompileState */, segments /* : List<ClassSegment> */.addFirst /* : (arg0 : ClassSegment) => List<ClassSegment> */(new Statement(1 /* : number */, enumDefinition /* : Definition */) /* : Statement */) /* : List<ClassSegment> */];
+        let enumDefinition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => ImmutableDefinition */(enumType /* : ObjectType */) /* : ImmutableDefinition */;
+        return [enumState /* : CompileState */, segments /* : List<ClassSegment> */.addFirst /* : (arg0 : ClassSegment) => List<ClassSegment> */(new Statement(1 /* : number */, enumDefinition /* : ImmutableDefinition */) /* : Statement */) /* : List<ClassSegment> */];
     }
     implementEnumCategories(name, variantsBases, oldStatements) {
         return variantsBases /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : string) => R) => R */(oldStatements /* : List<ClassSegment> */, (classSegmentList, superType) => {
             let variantTypeName = superType /* : unknown */ + "Variant";
             let variantType = new ObjectType(variantTypeName /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : ObjectType */;
-            let definition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => Definition */(variantType /* : ObjectType */) /* : Definition */;
+            let definition = this /* : Main */.createVariantDefinition /* : (arg0 : ObjectType) => ImmutableDefinition */(variantType /* : ObjectType */) /* : ImmutableDefinition */;
             let source = new SymbolValue(variantTypeName /* : unknown */ + "." + name /* : string */, variantType /* : ObjectType */) /* : SymbolValue */;
-            let initialization = new FieldInitialization(definition /* : Definition */, source /* : SymbolValue */) /* : FieldInitialization */;
+            let initialization = new FieldInitialization(definition /* : ImmutableDefinition */, source /* : SymbolValue */) /* : FieldInitialization */;
             return classSegmentList /* : unknown */.addFirst /* : unknown */(new Statement(1 /* : number */, initialization /* : FieldInitialization */) /* : Statement */) /* : unknown */;
         }) /* : R */;
     }
@@ -1392,18 +1388,18 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return Queries /* : Queries */.from /* : (arg0 : T[]) => Query<T> */(segment /* : ClassSegment */) /* : Query<T> */;
     }
     createVariantDefinition(type) {
-        return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */("_" + type /* : ObjectType */.name /* : unknown */, type /* : ObjectType */) /* : Definition */;
+        return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => ImmutableDefinition */("_" + type /* : ObjectType */.name /* : unknown */, type /* : ObjectType */) /* : ImmutableDefinition */;
     }
     defineConstructor(segments, parameters) {
-        if (parameters /* : List<Definition> */.isEmpty /* : () => boolean */() /* : boolean */) {
+        if (parameters /* : List<ImmutableDefinition> */.isEmpty /* : () => boolean */() /* : boolean */) {
             return segments /* : List<ClassSegment> */;
         }
-        let definitions = parameters /* : List<Definition> */.query /* : () => Query<Definition> */() /* : Query<Definition> */. /* : unknown */ < /* ClassSegment>map */ ((definition) => new Statement(1 /* : number */, definition /* : unknown */) /* : Statement */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        let definitions = parameters /* : List<ImmutableDefinition> */.query /* : () => Query<ImmutableDefinition> */() /* : Query<ImmutableDefinition> */. /* : unknown */ < /* ClassSegment>map */ ((definition) => new Statement(1 /* : number */, definition /* : unknown */) /* : Statement */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
         let collect = /* parameters.query()
                 .map(definition  */ -( /* destination */,
         /*  new SymbolValue(definition.findName(), Primitive.Unknown));
     } */) /* : unknown */. /* : unknown */ < /* FunctionSegment>map */ ((assignment) => new Statement(2 /* : number */, assignment /* : unknown */) /* : Statement */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
-        let func = new FunctionNode(1 /* : number */, new ConstructorHeader() /* : ConstructorHeader */, parameters /* : List<Definition> */, new Some(collect /* : unknown */) /* : Some */) /* : FunctionNode */;
+        let func = new FunctionNode(1 /* : number */, new ConstructorHeader() /* : ConstructorHeader */, parameters /* : List<ImmutableDefinition> */, new Some(collect /* : unknown */) /* : Some */) /* : FunctionNode */;
         return segments /* : List<ClassSegment> */.addFirst /* : (arg0 : ClassSegment) => List<ClassSegment> */(func /* : FunctionNode */) /* : List<ClassSegment> */.addAllFirst /* : unknown */(definitions /* : List<ClassSegment> */) /* : unknown */;
     }
     completeClassSegment(state1, segment) {
@@ -1420,19 +1416,19 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         /*  */ ;
     }
     completeInitialization(state1, classInitialization) {
-        let definition = classInitialization /* : ClassInitialization */.definition /* : Definition */;
-        let statement = new Statement(classInitialization /* : ClassInitialization */.depth /* : number */, new FieldInitialization(definition /* : Definition */, classInitialization /* : ClassInitialization */.value /* : Value */) /* : FieldInitialization */) /* : Statement */;
+        let definition = classInitialization /* : ClassInitialization */.definition /* : ImmutableDefinition */;
+        let statement = new Statement(classInitialization /* : ClassInitialization */.depth /* : number */, new FieldInitialization(definition /* : ImmutableDefinition */, classInitialization /* : ClassInitialization */.value /* : Value */) /* : FieldInitialization */) /* : Statement */;
         return new Some([state1 /* : CompileState */, statement /* : Statement */]) /* : Some */;
     }
     completeDefinition(state1, classDefinition) {
-        let definition = classDefinition /* : ClassDefinition */.definition /* : Definition */;
-        let statement = new Statement(classDefinition /* : ClassDefinition */.depth /* : number */, definition /* : Definition */) /* : Statement */;
+        let definition = classDefinition /* : ClassDefinition */.definition /* : ImmutableDefinition */;
+        let statement = new Statement(classDefinition /* : ClassDefinition */.depth /* : number */, definition /* : ImmutableDefinition */) /* : Statement */;
         return new Some([state1 /* : CompileState */, statement /* : Statement */]) /* : Some */;
     }
     retainDefinition(parameter) {
-        if (parameter /* : Parameter */._ParameterVariant /* : unknown */ === ParameterVariant.Definition /* : unknown */) {
+        if (parameter /* : Parameter */._ParameterVariant /* : unknown */ === ParameterVariant.ImmutableDefinition /* : unknown */) {
             let definition = parameter /* : Parameter */;
-            return new Some(definition /* : Definition */) /* : Some */;
+            return new Some(definition /* : ImmutableDefinition */) /* : Some */;
         }
         return new None() /* : None */;
     }
@@ -1474,7 +1470,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     parseMethod(state, input, depth) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(input /* : string */, "(", (definitionString, withParams) => {
             return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withParams /* : unknown */, ")", (parametersString, rawContent) => {
-                return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, definitionString /* : unknown */) /* : Option<[CompileState, Definition]> */. /* : unknown */ < Tuple2 /* : Tuple2 */ < /* CompileState, Header>>map */ ((tuple) => [tuple /* : unknown */.left /* : unknown */() /* : unknown */, tuple /* : unknown */.right /* : unknown */() /* : unknown */]) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseConstructor /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Header]> */(state /* : CompileState */, definitionString /* : unknown */) /* : Option<[CompileState, Header]> */) /* : unknown */.flatMap /* : unknown */((definitionTuple) => this /* : Main */.assembleMethod /* : (arg0 : number, arg1 : string, arg2 : string, arg3 : [CompileState, Header]) => Option<[CompileState, IncompleteClassSegment]> */(depth /* : number */, parametersString /* : unknown */, rawContent /* : unknown */, definitionTuple /* : unknown */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : unknown */;
+                return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, definitionString /* : unknown */) /* : Option<[CompileState, ImmutableDefinition]> */. /* : unknown */ < Tuple2 /* : Tuple2 */ < /* CompileState, Header>>map */ ((tuple) => [tuple /* : unknown */.left /* : unknown */() /* : unknown */, tuple /* : unknown */.right /* : unknown */() /* : unknown */]) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseConstructor /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Header]> */(state /* : CompileState */, definitionString /* : unknown */) /* : Option<[CompileState, Header]> */) /* : unknown */.flatMap /* : unknown */((definitionTuple) => this /* : Main */.assembleMethod /* : (arg0 : number, arg1 : string, arg2 : string, arg3 : [CompileState, Header]) => Option<[CompileState, IncompleteClassSegment]> */(depth /* : number */, parametersString /* : unknown */, rawContent /* : unknown */, definitionTuple /* : unknown */) /* : Option<[CompileState, IncompleteClassSegment]> */) /* : unknown */;
             }) /* : Option<T> */;
         }) /* : Option<T> */;
     }
@@ -1483,31 +1479,31 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let header = definitionTuple /* : [CompileState, Header] */[1 /* : number */];
         let parametersTuple = this /* : Main */.parseParameters /* : (arg0 : CompileState, arg1 : string) => [CompileState, List<Parameter>] */(definitionState /* : unknown */, parametersString /* : string */) /* : [CompileState, List<Parameter>] */;
         let rawParameters = parametersTuple /* : [CompileState, List<Parameter>] */[1 /* : number */];
-        let parameters = this /* : Main */.retainDefinitions /* : (arg0 : List<Parameter>) => List<Definition> */(rawParameters /* : unknown */) /* : List<Definition> */;
-        let prototype = new MethodPrototype(depth /* : number */, header /* : unknown */, parameters /* : List<Definition> */, rawContent /* : string */.strip /* : unknown */() /* : unknown */) /* : MethodPrototype */;
-        return new Some([parametersTuple /* : [CompileState, List<Parameter>] */[0 /* : number */].define /* : unknown */(prototype /* : MethodPrototype */.createDefinition /* : () => Definition */() /* : Definition */) /* : unknown */, prototype /* : MethodPrototype */]) /* : Some */;
+        let parameters = this /* : Main */.retainDefinitions /* : (arg0 : List<Parameter>) => List<ImmutableDefinition> */(rawParameters /* : unknown */) /* : List<ImmutableDefinition> */;
+        let prototype = new MethodPrototype(depth /* : number */, header /* : unknown */, parameters /* : List<ImmutableDefinition> */, rawContent /* : string */.strip /* : unknown */() /* : unknown */) /* : MethodPrototype */;
+        return new Some([parametersTuple /* : [CompileState, List<Parameter>] */[0 /* : number */].define /* : unknown */(prototype /* : MethodPrototype */.createDefinition /* : () => ImmutableDefinition */() /* : ImmutableDefinition */) /* : unknown */, prototype /* : MethodPrototype */]) /* : Some */;
     }
     completeMethod(state, prototype) {
-        let definition = prototype /* : MethodPrototype */.createDefinition /* : () => Definition */() /* : Definition */;
+        let definition = prototype /* : MethodPrototype */.createDefinition /* : () => ImmutableDefinition */() /* : ImmutableDefinition */;
         let oldHeader = prototype /* : MethodPrototype */.header /* : Header */() /* : unknown */;
         /* Header newHeader */ ;
-        if (oldHeader /* : unknown */._UnknownVariant /* : unknown */ === UnknownVariant.Definition /* : unknown */) {
+        if (oldHeader /* : unknown */._UnknownVariant /* : unknown */ === UnknownVariant.ImmutableDefinition /* : unknown */) {
             let maybeDefinition = oldHeader /* : unknown */;
-            maybeDefinition /* : Definition */.removeAnnotations /* : () => Definition */() /* : Definition */;
+            maybeDefinition /* : ImmutableDefinition */.removeAnnotations /* : () => ImmutableDefinition */() /* : ImmutableDefinition */;
         }
         else {
             oldHeader /* : unknown */;
         }
-        if (prototype /* : MethodPrototype */.content /* : string */() /* : unknown */ === ";" || definition /* : Definition */.containsAnnotation /* : unknown */("Actual") /* : unknown */) {
-            return new Some([state /* : CompileState */.define /* : (arg0 : Definition) => CompileState */(definition /* : Definition */) /* : CompileState */, new FunctionNode(prototype /* : MethodPrototype */.depth /* : number */() /* : unknown */) /* newHeader */, prototype /* : MethodPrototype */.parameters /* : List<Definition> */() /* : unknown */, new None()] /* : None */); /* : FunctionNode */
+        if (prototype /* : MethodPrototype */.content /* : string */() /* : unknown */ === ";" || definition /* : ImmutableDefinition */.containsAnnotation /* : unknown */("Actual") /* : unknown */) {
+            return new Some([state /* : CompileState */.define /* : (arg0 : ImmutableDefinition) => CompileState */(definition /* : ImmutableDefinition */) /* : CompileState */, new FunctionNode(prototype /* : MethodPrototype */.depth /* : number */() /* : unknown */) /* newHeader */, prototype /* : MethodPrototype */.parameters /* : List<ImmutableDefinition> */() /* : unknown */, new None()] /* : None */); /* : FunctionNode */
             ;
         }
         if (prototype /* : MethodPrototype */.content /* : string */() /* : unknown */.startsWith /* : unknown */("{") /* : unknown */ && prototype /* : MethodPrototype */.content /* : unknown */() /* : unknown */.endsWith /* : unknown */("}") /* : unknown */) {
             let substring = prototype /* : MethodPrototype */.content /* : string */() /* : unknown */.substring /* : unknown */(1 /* : number */, Strings /* : Strings */.length /* : (arg0 : string) => number */(prototype /* : MethodPrototype */.content /* : string */() /* : unknown */) /* : number */ - 1 /* : number */) /* : unknown */;
-            let withDefined = state /* : CompileState */.enterDefinitions /* : () => CompileState */() /* : CompileState */.defineAll /* : (arg0 : List<Definition>) => CompileState */(prototype /* : MethodPrototype */.parameters /* : List<Definition> */() /* : unknown */) /* : CompileState */;
+            let withDefined = state /* : CompileState */.enterDefinitions /* : () => CompileState */() /* : CompileState */.defineAll /* : (arg0 : List<ImmutableDefinition>) => CompileState */(prototype /* : MethodPrototype */.parameters /* : List<ImmutableDefinition> */() /* : unknown */) /* : CompileState */;
             let statementsTuple = this /* : Main */.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(withDefined /* : CompileState */, substring /* : unknown */, (state1, input1) => this /* : Main */.parseFunctionSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, FunctionSegment] */(state1 /* : unknown */, input1 /* : unknown */, prototype /* : MethodPrototype */.depth /* : number */() /* : unknown */ + 1 /* : number */) /* : [CompileState, FunctionSegment] */) /* : [CompileState, List<T>] */;
             let statements = statementsTuple /* : [CompileState, List<T>] */[1 /* : number */];
-            return new Some([statementsTuple /* : [CompileState, List<T>] */[0 /* : number */].exitDefinitions /* : unknown */() /* : unknown */.define /* : unknown */(definition /* : Definition */) /* : unknown */, new FunctionNode(prototype /* : MethodPrototype */.depth /* : number */() /* : unknown */) /* newHeader */, prototype /* : MethodPrototype */.parameters /* : List<Definition> */() /* : unknown */, new Some(statements /* : unknown */)] /* : Some */); /* : FunctionNode */
+            return new Some([statementsTuple /* : [CompileState, List<T>] */[0 /* : number */].exitDefinitions /* : unknown */() /* : unknown */.define /* : unknown */(definition /* : ImmutableDefinition */) /* : unknown */, new FunctionNode(prototype /* : MethodPrototype */.depth /* : number */() /* : unknown */) /* newHeader */, prototype /* : MethodPrototype */.parameters /* : List<ImmutableDefinition> */() /* : unknown */, new Some(statements /* : unknown */)] /* : Some */); /* : FunctionNode */
             ;
         }
         return new None() /* : None */;
@@ -1621,19 +1617,19 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let destinationTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(sourceState /* : unknown */, beforeEquals /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
             let destinationState = destinationTuple /* : [CompileState, Value] */[0 /* : number */];
             let destination = destinationTuple /* : [CompileState, Value] */[1 /* : number */];
-            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(destinationState /* : unknown */, beforeEquals /* : unknown */) /* : Option<[CompileState, Definition]> */.flatMap /* : (arg0 : (arg0 : [CompileState, Definition]) => Option<R>) => Option<R> */((definitionTuple) => this /* : Main */.parseInitialization /* : (arg0 : CompileState, arg1 : Definition, arg2 : Value) => Option<[CompileState, StatementValue]> */(definitionTuple /* : [CompileState, Definition] */[0 /* : number */], definitionTuple /* : [CompileState, Definition] */[1 /* : number */], source /* : unknown */) /* : Option<[CompileState, StatementValue]> */) /* : Option<R> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => new Some([destinationState /* : unknown */, new Assignment(destination /* : unknown */, source /* : unknown */) /* : Assignment */]) /* : Some */) /* : Option<T> */;
+            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, ImmutableDefinition]> */(destinationState /* : unknown */, beforeEquals /* : unknown */) /* : Option<[CompileState, ImmutableDefinition]> */.flatMap /* : (arg0 : (arg0 : [CompileState, ImmutableDefinition]) => Option<R>) => Option<R> */((definitionTuple) => this /* : Main */.parseInitialization /* : (arg0 : CompileState, arg1 : ImmutableDefinition, arg2 : Value) => Option<[CompileState, StatementValue]> */(definitionTuple /* : [CompileState, ImmutableDefinition] */[0 /* : number */], definitionTuple /* : [CompileState, ImmutableDefinition] */[1 /* : number */], source /* : unknown */) /* : Option<[CompileState, StatementValue]> */) /* : Option<R> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => new Some([destinationState /* : unknown */, new Assignment(destination /* : unknown */, source /* : unknown */) /* : Assignment */]) /* : Some */) /* : Option<T> */;
         }) /* : Option<T> */;
     }
     parseInitialization(state, rawDefinition, source) {
-        let definition = rawDefinition /* : Definition */.mapType /* : (arg0 : (arg0 : Type) => Type) => Definition */((type) => {
+        let definition = rawDefinition /* : ImmutableDefinition */.mapType /* : (arg0 : (arg0 : Type) => Type) => ImmutableDefinition */((type) => {
             if (type /* : Type */ === Primitive /* : Primitive */.Unknown /* : unknown */) {
                 return source /* : Value */.type /* : () => Type */() /* : Type */;
             }
             else {
                 return type /* : Type */;
             }
-        }) /* : Definition */;
-        return new Some([state /* : CompileState */.define /* : (arg0 : Definition) => CompileState */(definition /* : Definition */) /* : CompileState */, new Initialization(definition /* : Definition */, source /* : Value */) /* : Initialization */]) /* : Some */;
+        }) /* : ImmutableDefinition */;
+        return new Some([state /* : CompileState */.define /* : (arg0 : ImmutableDefinition) => CompileState */(definition /* : ImmutableDefinition */) /* : CompileState */, new Initialization(definition /* : ImmutableDefinition */, source /* : Value */) /* : Initialization */]) /* : Some */;
     }
     parseValue(state, input, depth) {
         return this /* : Main */.parseBoolean /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Value]> */.or /* : (arg0 : () => Option<[CompileState, Value]>) => Option<[CompileState, Value]> */(() => this /* : Main */.parseLambda /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : Option<[CompileState, Value]> */.or /* : unknown */(() => this /* : Main */.parseString /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseDataAccess /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseSymbolValue /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseInvokable /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseDigits /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseInstanceOf /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */, Operator /* : () => content-start new content-end */.ADD /* : unknown */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */, Operator /* : () => content-start new content-end */.EQUALS /* : unknown */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */, Operator /* : () => content-start new content-end */.SUBTRACT /* : unknown */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */, Operator /* : () => content-start new content-end */.AND /* : unknown */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */, Operator /* : () => content-start new content-end */.OR /* : unknown */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseOperation /* : (arg0 : CompileState, arg1 : string, arg2 : number, arg3 : Operator) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseNot /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseMethodReference /* : (arg0 : CompileState, arg1 : string, arg2 : number) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */, depth /* : number */) /* : Option<[CompileState, Value]> */) /* : unknown */.or /* : unknown */(() => this /* : Main */.parseChar /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Value]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Value]> */) /* : unknown */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
@@ -1658,15 +1654,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     parseInstanceOf(state, input, depth) {
         return this /* : Main */.last /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(input /* : string */, "instanceof", (s, s2) => {
             let childTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(state /* : CompileState */, s /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
-            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(childTuple /* : [CompileState, Value] */[0 /* : number */], s2 /* : unknown */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((definitionTuple) => {
+            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, ImmutableDefinition]> */(childTuple /* : [CompileState, Value] */[0 /* : number */], s2 /* : unknown */) /* : Option<[CompileState, ImmutableDefinition]> */.map /* : (arg0 : (arg0 : [CompileState, ImmutableDefinition]) => R) => Option<R> */((definitionTuple) => {
                 let value = childTuple /* : [CompileState, Value] */[1 /* : number */];
-                let definition = definitionTuple /* : [CompileState, Definition] */[1 /* : number */];
+                let definition = definitionTuple /* : [CompileState, ImmutableDefinition] */[1 /* : number */];
                 let type = value /* : unknown */.type /* : unknown */() /* : unknown */;
                 let variant = new DataAccess(value /* : unknown */, "_" + type.findName() + "Variant", Primitive /* : Primitive */.Unknown /* : unknown */) /* : DataAccess */;
                 let generate = type /* : unknown */.findName /* : unknown */() /* : unknown */;
                 let temp = new SymbolValue(generate /* : unknown */ + "Variant." + definition /* : unknown */.findType /* : unknown */() /* : unknown */.findName /* : unknown */() /* : unknown */, Primitive /* : Primitive */.Unknown /* : unknown */) /* : SymbolValue */;
                 let functionSegment = new Statement(depth /* : number */ + 1 /* : number */, new Initialization(definition /* : unknown */, new Cast(value /* : unknown */, definition /* : unknown */.findType /* : unknown */() /* : unknown */) /* : Cast */) /* : Initialization */) /* : Statement */;
-                return [definitionTuple /* : [CompileState, Definition] */[0 /* : number */].addFunctionSegment /* : unknown */(functionSegment /* : Statement */) /* : unknown */.define /* : unknown */(definition /* : unknown */) /* : unknown */, new Operation(variant /* : DataAccess */, Operator /* : () => content-start new content-end */.EQUALS /* : unknown */, temp /* : SymbolValue */) /* : Operation */];
+                return [definitionTuple /* : [CompileState, ImmutableDefinition] */[0 /* : number */].addFunctionSegment /* : unknown */(functionSegment /* : Statement */) /* : unknown */.define /* : unknown */(definition /* : unknown */) /* : unknown */, new Operation(variant /* : DataAccess */, Operator /* : () => content-start new content-end */.EQUALS /* : unknown */, temp /* : SymbolValue */) /* : Operation */];
             }) /* : Option<R> */;
         }) /* : Option<T> */;
     }
@@ -1697,11 +1693,11 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
                         type /* : Type */ = functionType /* : FunctionType */.arguments /* : List<Type> */.get /* : (arg0 : number) => Option<Type> */(0 /* : number */) /* : Option<Type> */.orElse /* : (arg0 : Type) => Type */( /* null */) /* : Type */;
                     }
                 }
-                return this /* : Main */.assembleLambda /* : (arg0 : CompileState, arg1 : List<Definition>, arg2 : string, arg3 : number) => Some<[CompileState, Value]> */(state /* : CompileState */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */(strippedBeforeArrow /* : unknown */, type /* : Type */) /* : Definition */) /* : List<T> */, valueString /* : unknown */, depth /* : number */) /* : Some<[CompileState, Value]> */;
+                return this /* : Main */.assembleLambda /* : (arg0 : CompileState, arg1 : List<ImmutableDefinition>, arg2 : string, arg3 : number) => Some<[CompileState, Value]> */(state /* : CompileState */, Lists /* : Lists */.of /* : (arg0 : T[]) => List<T> */(ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => ImmutableDefinition */(strippedBeforeArrow /* : unknown */, type /* : Type */) /* : ImmutableDefinition */) /* : List<T> */, valueString /* : unknown */, depth /* : number */) /* : Some<[CompileState, Value]> */;
             }
             if (strippedBeforeArrow /* : unknown */.startsWith /* : unknown */("(") /* : unknown */ && strippedBeforeArrow /* : unknown */.endsWith /* : unknown */(")") /* : unknown */) {
-                let parameterNames = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(strippedBeforeArrow /* : unknown */.substring /* : unknown */(1 /* : number */, Strings /* : Strings */.length /* : (arg0 : string) => number */(strippedBeforeArrow /* : unknown */) /* : number */ - 1 /* : number */) /* : unknown */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((name) => ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => Definition */(name /* : T */, Primitive /* : Primitive */.Unknown /* : unknown */) /* : Definition */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
-                return this /* : Main */.assembleLambda /* : (arg0 : CompileState, arg1 : List<Definition>, arg2 : string, arg3 : number) => Some<[CompileState, Value]> */(state /* : CompileState */, parameterNames /* : unknown */, valueString /* : unknown */, depth /* : number */) /* : Some<[CompileState, Value]> */;
+                let parameterNames = this /* : Main */.divideAll /* : (arg0 : string, arg1 : (arg0 : DivideState, arg1 : string) => DivideState) => List<string> */(strippedBeforeArrow /* : unknown */.substring /* : unknown */(1 /* : number */, Strings /* : Strings */.length /* : (arg0 : string) => number */(strippedBeforeArrow /* : unknown */) /* : number */ - 1 /* : number */) /* : unknown */, this /* : Main */.foldValueChar /* : unknown */) /* : List<string> */.query /* : () => Query<string> */() /* : Query<string> */.map /* : (arg0 : (arg0 : string) => R) => Query<R> */(strip /* : unknown */) /* : Query<R> */.filter /* : (arg0 : (arg0 : T) => boolean) => Option<T> */((value) => !value /* : T */.isEmpty /* : unknown */() /* : unknown */) /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */((name) => ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => ImmutableDefinition */(name /* : T */, Primitive /* : Primitive */.Unknown /* : unknown */) /* : ImmutableDefinition */) /* : Option<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+                return this /* : Main */.assembleLambda /* : (arg0 : CompileState, arg1 : List<ImmutableDefinition>, arg2 : string, arg3 : number) => Some<[CompileState, Value]> */(state /* : CompileState */, parameterNames /* : unknown */, valueString /* : unknown */, depth /* : number */) /* : Some<[CompileState, Value]> */;
             }
             return new None() /* : None */;
         }) /* : Option<T> */;
@@ -1709,7 +1705,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     assembleLambda(state, definitions, valueString, depth) {
         let strippedValueString = valueString /* : string */.strip /* : unknown */() /* : unknown */;
         /* Tuple2<CompileState, LambdaValue> value */ ;
-        let state2 = state /* : CompileState */.defineAll /* : (arg0 : List<Definition>) => CompileState */(definitions /* : List<Definition> */) /* : CompileState */;
+        let state2 = state /* : CompileState */.defineAll /* : (arg0 : List<ImmutableDefinition>) => CompileState */(definitions /* : List<ImmutableDefinition> */) /* : CompileState */;
         if (strippedValueString /* : unknown */.startsWith /* : unknown */("{") /* : unknown */ && strippedValueString /* : unknown */.endsWith /* : unknown */("}") /* : unknown */) {
             let value1 = this /* : Main */.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state2 /* : CompileState */, strippedValueString /* : unknown */.substring /* : unknown */(1 /* : number */, Strings /* : Strings */.length /* : (arg0 : string) => number */(strippedValueString /* : unknown */) /* : number */ - 1 /* : number */) /* : unknown */, (state1, input1) => this /* : Main */.parseFunctionSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, FunctionSegment] */(state1 /* : unknown */, input1 /* : unknown */, depth /* : number */ + 1 /* : number */) /* : [CompileState, FunctionSegment] */) /* : [CompileState, List<T>] */;
             let right = value1 /* : [CompileState, List<T>] */[1 /* : number */];
@@ -1720,7 +1716,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             [value1 /* : [CompileState, List<T>] */[0 /* : number */], value1 /* : [CompileState, List<T>] */[1 /* : number */]];
         }
         let right = /* value */ .right /* : unknown */() /* : unknown */;
-        return new Some([/* value */ .left /* : unknown */() /* : unknown */, new Lambda(definitions /* : List<Definition> */, right /* : unknown */) /* : Lambda */]) /* : Some */;
+        return new Some([/* value */ .left /* : unknown */() /* : unknown */, new Lambda(definitions /* : List<ImmutableDefinition> */, right /* : unknown */) /* : Lambda */]) /* : Some */;
     }
     parseDigits(state, input) {
         let stripped = input /* : string */.strip /* : unknown */() /* : unknown */;
@@ -1944,7 +1940,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (Strings /* : Strings */.isBlank /* : (arg0 : string) => boolean */(input /* : string */) /* : boolean */) {
             return [state /* : CompileState */, new Whitespace() /* : Whitespace */];
         }
-        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((tuple) => [tuple /* : [CompileState, Definition] */[0 /* : number */], tuple /* : [CompileState, Definition] */[1 /* : number */]]) /* : Option<R> */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
+        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, input /* : string */) /* : Option<[CompileState, ImmutableDefinition]> */.map /* : (arg0 : (arg0 : [CompileState, ImmutableDefinition]) => R) => Option<R> */((tuple) => [tuple /* : [CompileState, ImmutableDefinition] */[0 /* : number */], tuple /* : [CompileState, ImmutableDefinition] */[1 /* : number */]]) /* : Option<R> */.orElseGet /* : unknown */(() => [state /* : CompileState */, new Placeholder(input /* : string */) /* : Placeholder */]) /* : unknown */;
     }
     parseField(input, depth, state) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(input /* : string */.strip /* : unknown */() /* : unknown */, ";", (withoutEnd) => {
@@ -1954,15 +1950,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     parseClassDefinition(depth, state, withoutEnd) {
-        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, withoutEnd /* : string */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((result) => {
-            return [result /* : [CompileState, Definition] */[0 /* : number */], new ClassDefinition(depth /* : number */, result /* : [CompileState, Definition] */[1 /* : number */]) /* : ClassDefinition */];
+        return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, withoutEnd /* : string */) /* : Option<[CompileState, ImmutableDefinition]> */.map /* : (arg0 : (arg0 : [CompileState, ImmutableDefinition]) => R) => Option<R> */((result) => {
+            return [result /* : [CompileState, ImmutableDefinition] */[0 /* : number */], new ClassDefinition(depth /* : number */, result /* : [CompileState, ImmutableDefinition] */[1 /* : number */]) /* : ClassDefinition */];
         }) /* : Option<R> */;
     }
     parseClassInitialization(depth, state, withoutEnd) {
         return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withoutEnd /* : string */, "=", (s, s2) => {
-            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, s /* : unknown */) /* : Option<[CompileState, Definition]> */.map /* : (arg0 : (arg0 : [CompileState, Definition]) => R) => Option<R> */((result) => {
-                let valueTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(result /* : [CompileState, Definition] */[0 /* : number */], s2 /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
-                return [valueTuple /* : [CompileState, Value] */[0 /* : number */], new ClassInitialization(depth /* : number */, result /* : [CompileState, Definition] */[1 /* : number */], valueTuple /* : [CompileState, Value] */[1 /* : number */]) /* : ClassInitialization */];
+            return this /* : Main */.parseDefinition /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, s /* : unknown */) /* : Option<[CompileState, ImmutableDefinition]> */.map /* : (arg0 : (arg0 : [CompileState, ImmutableDefinition]) => R) => Option<R> */((result) => {
+                let valueTuple = this /* : Main */.parseValue /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Value] */(result /* : [CompileState, ImmutableDefinition] */[0 /* : number */], s2 /* : unknown */, depth /* : number */) /* : [CompileState, Value] */;
+                return [valueTuple /* : [CompileState, Value] */[0 /* : number */], new ClassInitialization(depth /* : number */, result /* : [CompileState, ImmutableDefinition] */[1 /* : number */], valueTuple /* : [CompileState, Value] */[1 /* : number */]) /* : ClassInitialization */];
             }) /* : Option<R> */;
         }) /* : Option<T> */;
     }
@@ -1971,21 +1967,21 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             return this /* : Main */.split /* : (arg0 : () => Option<[string, string]>, arg1 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(() => this /* : Main */.toLast /* : (arg0 : string, arg1 : string, arg2 : (arg0 : DivideState, arg1 : string) => DivideState) => Option<[string, string]> */(beforeName /* : unknown */, " ", this /* : Main */.foldTypeSeparator /* : unknown */) /* : Option<[string, string]> */, (beforeType, type) => {
                 return this /* : Main */.last /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeType /* : unknown */, "\n", (s, s2) => {
                     let annotations = this /* : Main */.parseAnnotations /* : (arg0 : string) => List<string> */(s /* : unknown */) /* : List<string> */;
-                    return this /* : Main */.getOr /* : (arg0 : CompileState, arg1 : string, arg2 : string, arg3 : string, arg4 : List<string>) => Option<[CompileState, Definition]> */(state /* : CompileState */, name /* : unknown */, s2 /* : unknown */, type /* : unknown */, annotations /* : List<string> */) /* : Option<[CompileState, Definition]> */;
+                    return this /* : Main */.getOr /* : (arg0 : CompileState, arg1 : string, arg2 : string, arg3 : string, arg4 : List<string>) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, name /* : unknown */, s2 /* : unknown */, type /* : unknown */, annotations /* : List<string> */) /* : Option<[CompileState, ImmutableDefinition]> */;
                 }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => {
-                    return this /* : Main */.getOr /* : (arg0 : CompileState, arg1 : string, arg2 : string, arg3 : string, arg4 : List<string>) => Option<[CompileState, Definition]> */(state /* : CompileState */, name /* : unknown */, beforeType /* : unknown */, type /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : Option<[CompileState, Definition]> */;
+                    return this /* : Main */.getOr /* : (arg0 : CompileState, arg1 : string, arg2 : string, arg3 : string, arg4 : List<string>) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, name /* : unknown */, beforeType /* : unknown */, type /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */) /* : Option<[CompileState, ImmutableDefinition]> */;
                 }) /* : Option<T> */;
-            }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => this /* : Main */.assembleDefinition /* : (arg0 : CompileState, arg1 : List<string>, arg2 : List<string>, arg3 : string, arg4 : List<string>, arg5 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, name /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, beforeName /* : unknown */) /* : Option<[CompileState, Definition]> */) /* : Option<T> */;
+            }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => this /* : Main */.assembleDefinition /* : (arg0 : CompileState, arg1 : List<string>, arg2 : List<string>, arg3 : string, arg4 : List<string>, arg5 : string) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, name /* : unknown */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, beforeName /* : unknown */) /* : Option<[CompileState, ImmutableDefinition]> */) /* : Option<T> */;
         }) /* : Option<T> */;
     }
     getOr(state, name, beforeType, type, annotations) {
         return this /* : Main */.suffix /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string) => Option<T>) => Option<T> */(beforeType /* : string */.strip /* : unknown */() /* : unknown */, ">", (withoutTypeParamStart) => {
             return this /* : Main */.first /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(withoutTypeParamStart /* : string */, "<", (beforeTypeParams, typeParamsString) => {
                 let typeParams = this /* : Main */.parseValuesOrEmpty /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => Option<[CompileState, T]>) => [CompileState, List<T>] */(state /* : CompileState */, typeParamsString /* : unknown */, (state1, s) => new Some([state1 /* : unknown */, s /* : unknown */.strip /* : unknown */() /* : unknown */]) /* : Some */) /* : [CompileState, List<T>] */;
-                return this /* : Main */.assembleDefinition /* : (arg0 : CompileState, arg1 : List<string>, arg2 : List<string>, arg3 : string, arg4 : List<string>, arg5 : string) => Option<[CompileState, Definition]> */(typeParams /* : [CompileState, List<T>] */[0 /* : number */], annotations /* : List<string> */, this /* : Main */.parseModifiers /* : (arg0 : string) => List<string> */(beforeTypeParams /* : unknown */) /* : List<string> */, name /* : string */, typeParams /* : [CompileState, List<T>] */[1 /* : number */], type /* : string */) /* : Option<[CompileState, Definition]> */;
+                return this /* : Main */.assembleDefinition /* : (arg0 : CompileState, arg1 : List<string>, arg2 : List<string>, arg3 : string, arg4 : List<string>, arg5 : string) => Option<[CompileState, ImmutableDefinition]> */(typeParams /* : [CompileState, List<T>] */[0 /* : number */], annotations /* : List<string> */, this /* : Main */.parseModifiers /* : (arg0 : string) => List<string> */(beforeTypeParams /* : unknown */) /* : List<string> */, name /* : string */, typeParams /* : [CompileState, List<T>] */[1 /* : number */], type /* : string */) /* : Option<[CompileState, ImmutableDefinition]> */;
             }) /* : Option<T> */;
         }) /* : Option<T> */.or /* : (arg0 : () => Option<T>) => Option<T> */(() => {
-            return this /* : Main */.assembleDefinition /* : (arg0 : CompileState, arg1 : List<string>, arg2 : List<string>, arg3 : string, arg4 : List<string>, arg5 : string) => Option<[CompileState, Definition]> */(state /* : CompileState */, annotations /* : List<string> */, this /* : Main */.parseModifiers /* : (arg0 : string) => List<string> */(beforeType /* : string */) /* : List<string> */, name /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, type /* : string */) /* : Option<[CompileState, Definition]> */;
+            return this /* : Main */.assembleDefinition /* : (arg0 : CompileState, arg1 : List<string>, arg2 : List<string>, arg3 : string, arg4 : List<string>, arg5 : string) => Option<[CompileState, ImmutableDefinition]> */(state /* : CompileState */, annotations /* : List<string> */, this /* : Main */.parseModifiers /* : (arg0 : string) => List<string> */(beforeType /* : string */) /* : List<string> */, name /* : string */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, type /* : string */) /* : Option<[CompileState, ImmutableDefinition]> */;
         }) /* : Option<T> */;
     }
     parseModifiers(modifiers) {

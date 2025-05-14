@@ -118,7 +118,7 @@ public class Main {
     private sealed interface Argument permits Type, Value, Whitespace {
     }
 
-    private sealed interface Parameter permits Definition, Placeholder, Whitespace {
+    private sealed interface Parameter permits ImmutableDefinition, Placeholder, Whitespace {
     }
 
     private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue, TupleNode {
@@ -147,28 +147,8 @@ public class Main {
         Option<BaseType> findBase();
     }
 
-    private sealed interface Definition extends Parameter, Header, StatementValue permits ImmutableDefinition {
-        String generate();
-
-        Definition mapType(Function<Type, Type> mapper);
-
-        @Override
-        String generateWithParams(String joinedParameters);
-
-        @Override
-        Definition createDefinition(List<Type> paramTypes);
-
-        String findName();
-
-        Type findType();
-
-        boolean containsAnnotation(String annotation);
-
-        Definition removeAnnotations();
-    }
-
     private interface Header {
-        Definition createDefinition(List<Type> paramTypes);
+        ImmutableDefinition createDefinition(List<Type> paramTypes);
 
         String generateWithParams(String joinedParameters);
     }
@@ -190,7 +170,7 @@ public class Main {
     }
 
     private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, EnumValues, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
-        Option<Definition> maybeCreateDefinition();
+        Option<ImmutableDefinition> maybeCreateDefinition();
     }
 
     private @interface Actual {
@@ -568,17 +548,15 @@ public class Main {
             String name,
             Type type,
             List<String> typeParams
-    ) implements Definition {
-        public static Definition createSimpleDefinition(String name, Type type) {
+    ) implements Parameter, Header, StatementValue {
+        public static ImmutableDefinition createSimpleDefinition(String name, Type type) {
             return new ImmutableDefinition(Lists.empty(), Lists.empty(), name, type, Lists.empty());
         }
 
-        @Override
         public String findName() {
             return this.name;
         }
 
-        @Override
         public Type findType() {
             return this.type;
         }
@@ -611,8 +589,7 @@ public class Main {
                     .orElse("");
         }
 
-        @Override
-        public Definition mapType(Function<Type, Type> mapper) {
+        public ImmutableDefinition mapType(Function<Type, Type> mapper) {
             return new ImmutableDefinition(this.annotations, this.modifiers, this.name, mapper.apply(this.type), this.typeParams);
         }
 
@@ -630,18 +607,16 @@ public class Main {
         }
 
         @Override
-        public Definition createDefinition(List<Type> paramTypes) {
+        public ImmutableDefinition createDefinition(List<Type> paramTypes) {
             Type type1 = new FunctionType(paramTypes, this.type);
             return new ImmutableDefinition(this.annotations, this.modifiers, this.name, type1, this.typeParams);
         }
 
-        @Override
         public boolean containsAnnotation(String annotation) {
             return this.annotations.contains(annotation);
         }
 
-        @Override
-        public Definition removeAnnotations() {
+        public ImmutableDefinition removeAnnotations() {
             return new ImmutableDefinition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
         }
 
@@ -660,7 +635,7 @@ public class Main {
     private record ObjectType(
             String name,
             List<String> typeParams,
-            List<Definition> definitions,
+            List<ImmutableDefinition> definitions,
             List<String> variants
     ) implements FindableType, BaseType {
         @Override
@@ -679,7 +654,7 @@ public class Main {
         public Option<Type> find(String name) {
             return this.definitions.query()
                     .filter(definition -> definition.findName().equals(name))
-                    .map(Definition::findType)
+                    .map(ImmutableDefinition::findType)
                     .next();
         }
 
@@ -718,7 +693,7 @@ public class Main {
 
     private record CompileState(
             List<String> structures,
-            List<List<Definition>> definitions,
+            List<List<ImmutableDefinition>> definitions,
             List<ObjectType> objectTypes,
             List<Tuple2<String, List<String>>> structNames,
             List<String> typeParams,
@@ -734,14 +709,14 @@ public class Main {
                     .flatMap(List::query)
                     .filter(definition -> definition.findName().equals(name))
                     .next()
-                    .map(Definition::findType);
+                    .map(ImmutableDefinition::findType);
         }
 
         public CompileState addStructure(String structure) {
             return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
-        public CompileState defineAll(List<Definition> definitions) {
+        public CompileState defineAll(List<ImmutableDefinition> definitions) {
             var defined = this.definitions.mapLast(frame -> frame.addAllLast(definitions));
             return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
@@ -770,7 +745,7 @@ public class Main {
                     .map(type -> type);
         }
 
-        public CompileState define(Definition definition) {
+        public CompileState define(ImmutableDefinition definition) {
             return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
@@ -978,7 +953,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1119,7 +1094,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1208,11 +1183,11 @@ public class Main {
         }
     }
 
-    private record Lambda(List<Definition> parameters, LambdaValue body) implements Value {
+    private record Lambda(List<ImmutableDefinition> parameters, LambdaValue body) implements Value {
         @Override
         public String generate() {
             var joined = this.parameters.query()
-                    .map(Definition::generate)
+                    .map(ImmutableDefinition::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
 
@@ -1298,7 +1273,7 @@ public class Main {
 
     private static class ConstructorHeader implements Header {
         @Override
-        public Definition createDefinition(List<Type> paramTypes) {
+        public ImmutableDefinition createDefinition(List<Type> paramTypes) {
             return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
         }
 
@@ -1311,7 +1286,7 @@ public class Main {
     private record FunctionNode(
             int depth,
             Header header,
-            List<Definition> parameters,
+            List<ImmutableDefinition> parameters,
             Option<List<FunctionSegment>> maybeStatements
     ) implements ClassSegment {
         private static String joinStatements(List<FunctionSegment> statements) {
@@ -1369,14 +1344,14 @@ public class Main {
         }
     }
 
-    private record Initialization(Definition definition, Value source) implements StatementValue {
+    private record Initialization(ImmutableDefinition definition, Value source) implements StatementValue {
         @Override
         public String generate() {
             return "let " + this.definition.generate() + " = " + this.source.generate();
         }
     }
 
-    private record FieldInitialization(Definition definition, Value source) implements StatementValue {
+    private record FieldInitialization(ImmutableDefinition definition, Value source) implements StatementValue {
         @Override
         public String generate() {
             return this.definition.generate() + " = " + this.source.generate();
@@ -1400,21 +1375,21 @@ public class Main {
     private record MethodPrototype(
             int depth,
             Header header,
-            List<Definition> parameters,
+            List<ImmutableDefinition> parameters,
             String content
     ) implements IncompleteClassSegment {
-        private Definition createDefinition() {
+        private ImmutableDefinition createDefinition() {
             return this.header.createDefinition(this.findParamTypes());
         }
 
         private List<Type> findParamTypes() {
             return this.parameters().query()
-                    .map(Definition::findType)
+                    .map(ImmutableDefinition::findType)
                     .collect(new ListCollector<>());
         }
 
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new Some<>(this.header.createDefinition(this.findParamTypes()));
         }
 
@@ -1422,25 +1397,25 @@ public class Main {
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new None<>();
         }
     }
 
-    private record ClassDefinition(int depth, Definition definition) implements IncompleteClassSegment {
+    private record ClassDefinition(int depth, ImmutableDefinition definition) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
     }
 
     private record ClassInitialization(
             int depth,
-            Definition definition,
+            ImmutableDefinition definition,
             Value value
     ) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
     }
@@ -1453,7 +1428,7 @@ public class Main {
             String beforeInfix,
             String name,
             List<String> typeParams,
-            List<Definition> parameters,
+            List<ImmutableDefinition> parameters,
             String after,
             List<IncompleteClassSegment> segments,
             List<String> variants,
@@ -1477,7 +1452,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1614,7 +1589,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> maybeCreateDefinition() {
+        public Option<ImmutableDefinition> maybeCreateDefinition() {
             return new None<>();
         }
     }
@@ -1640,9 +1615,9 @@ public class Main {
         return "/* " + replaced + " */";
     }
 
-    private static String joinValues(List<Definition> retainParameters) {
+    private static String joinValues(List<ImmutableDefinition> retainParameters) {
         var inner = retainParameters.query()
-                .map(Definition::generate)
+                .map(ImmutableDefinition::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
 
@@ -1776,12 +1751,7 @@ public class Main {
     private List<String> divideAll(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = DivideState.createInitial(input);
         while (true) {
-            var maybePopped = current.pop().map(tuple -> {
-                return this.foldSingleQuotes(tuple)
-                        .or(() -> this.foldDoubleQuotes(tuple))
-                        .orElseGet(() -> folder.apply(tuple.right(), tuple.left()));
-            });
-
+            var maybePopped = current.pop().map(tuple -> this.foldDecorated(folder, tuple));
             if (maybePopped.isPresent()) {
                 current = maybePopped.orElse(current);
             }
@@ -1791,6 +1761,12 @@ public class Main {
         }
 
         return current.advance().segments;
+    }
+
+    private DivideState foldDecorated(BiFunction<DivideState, Character, DivideState> folder, Tuple2<Character, DivideState> tuple) {
+        return this.foldSingleQuotes(tuple)
+                .or(() -> this.foldDoubleQuotes(tuple))
+                .orElseGet(() -> folder.apply(tuple.right(), tuple.left()));
     }
 
     private Option<DivideState> foldDoubleQuotes(Tuple2<Character, DivideState> tuple) {
@@ -2158,11 +2134,11 @@ public class Main {
         return Queries.from(segment);
     }
 
-    private Definition createVariantDefinition(ObjectType type) {
+    private ImmutableDefinition createVariantDefinition(ObjectType type) {
         return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
     }
 
-    private List<ClassSegment> defineConstructor(List<ClassSegment> segments, List<Definition> parameters) {
+    private List<ClassSegment> defineConstructor(List<ClassSegment> segments, List<ImmutableDefinition> parameters) {
         if (parameters.isEmpty()) {
             return segments;
         }
@@ -2210,8 +2186,8 @@ public class Main {
         return new Some<>(new Tuple2Impl<>(state1, statement));
     }
 
-    private Option<Definition> retainDefinition(Parameter parameter) {
-        if (parameter instanceof Definition definition) {
+    private Option<ImmutableDefinition> retainDefinition(Parameter parameter) {
+        if (parameter instanceof ImmutableDefinition definition) {
             return new Some<>(definition);
         }
         return new None<>();
@@ -2294,7 +2270,7 @@ public class Main {
 
         var oldHeader = prototype.header();
         Header newHeader;
-        if (oldHeader instanceof Definition maybeDefinition) {
+        if (oldHeader instanceof ImmutableDefinition maybeDefinition) {
             newHeader = maybeDefinition.removeAnnotations();
         }
         else {
@@ -2326,7 +2302,7 @@ public class Main {
         return new None<>();
     }
 
-    private List<Definition> retainDefinitions(List<Parameter> right) {
+    private List<ImmutableDefinition> retainDefinitions(List<Parameter> right) {
         return right.query()
                 .map(this::retainDefinition)
                 .flatMap(Queries::fromOption)
@@ -2461,7 +2437,7 @@ public class Main {
         });
     }
 
-    private Option<Tuple2<CompileState, StatementValue>> parseInitialization(CompileState state, Definition rawDefinition, Value source) {
+    private Option<Tuple2<CompileState, StatementValue>> parseInitialization(CompileState state, ImmutableDefinition rawDefinition, Value source) {
         var definition = rawDefinition.mapType(type -> {
             if (type.equals(Primitive.Unknown)) {
                 return source.type();
@@ -2584,7 +2560,7 @@ public class Main {
         });
     }
 
-    private Some<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<Definition> definitions, String valueString, int depth) {
+    private Some<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<ImmutableDefinition> definitions, String valueString, int depth) {
         var strippedValueString = valueString.strip();
 
         Tuple2<CompileState, LambdaValue> value;
@@ -2905,7 +2881,7 @@ public class Main {
         });
     }
 
-    private Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
+    private Option<Tuple2<CompileState, ImmutableDefinition>> parseDefinition(CompileState state, String input) {
         return this.last(input.strip(), " ", (beforeName, name) -> {
             return this.split(() -> this.toLast(beforeName, " ", this::foldTypeSeparator), (beforeType, type) -> {
                 return this.last(beforeType, "\n", (s, s2) -> {
@@ -2918,7 +2894,7 @@ public class Main {
         });
     }
 
-    private Option<Tuple2<CompileState, Definition>> getOr(CompileState state, String name, String beforeType, String type, List<String> annotations) {
+    private Option<Tuple2<CompileState, ImmutableDefinition>> getOr(CompileState state, String name, String beforeType, String type, List<String> annotations) {
         return this.suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
             return this.first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(new Tuple2Impl<>(state1, s.strip())));
@@ -2962,7 +2938,7 @@ public class Main {
         return appended;
     }
 
-    private Option<Tuple2<CompileState, Definition>> assembleDefinition(
+    private Option<Tuple2<CompileState, ImmutableDefinition>> assembleDefinition(
             CompileState state,
             List<String> annotations,
             List<String> modifiers,
