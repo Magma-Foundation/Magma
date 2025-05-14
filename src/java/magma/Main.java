@@ -56,17 +56,21 @@ public class Main {
         var target = source.resolveSibling("main.ts");
         try {
             var input = Files.readString(source);
-            Files.writeString(target, compile(input));
+            Files.writeString(target, compileRoot(input));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static String compile(String input) {
+    private static String compileRoot(String input) {
+        return compileSegments(input, Main::compileRootSegment);
+    }
+
+    private static String compileSegments(String input, Function<String, String> mapper) {
         var divisions = divide(input);
         var output = new StringBuilder();
         for (var segment : divisions) {
-            output.append(compileRootSegment(segment));
+            output.append(mapper.apply(segment));
         }
 
         return output.toString();
@@ -103,13 +107,18 @@ public class Main {
             return "";
         }
 
-        return compileInfix(stripped, "class ", (left1, right1) -> {
+        return compileClassSegment(stripped);
+    }
+
+    private static String compileClassSegment(String input) {
+        return compileInfix(input, "class ", (beforeKeyword, right1) -> {
             return compileInfix(right1, "{", (name, withEnd) -> {
-                return compileSuffix(withEnd.strip(), "}", content -> {
-                    return Optional.of(placeholder(left1) + "class " + name.strip() + " {" + placeholder(content) + "}");
+                return compileSuffix(withEnd.strip(), "}", inputContent -> {
+                    var outputContent = compileSegments(inputContent, Main::compileClassSegment);
+                    return Optional.of(placeholder(beforeKeyword) + "class " + name.strip() + " {" + outputContent + "}");
                 });
             });
-        }).orElseGet(() -> placeholder(stripped));
+        }).orElseGet(() -> placeholder(input));
     }
 
     private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
