@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -61,8 +60,6 @@ public class Main {
         Option<T> next();
 
         <R> Query<R> flatMap(Function<T, Query<R>> f);
-
-        <R> Query<Tuple2<T, R>> zip(Query<R> other);
     }
 
     private interface List<T> {
@@ -103,8 +100,6 @@ public class Main {
 
     private interface Map<K, V> {
         Option<V> find(K key);
-
-        Map<K, V> with(K key, V value);
     }
 
     private sealed interface Type extends Argument, Node {
@@ -173,6 +168,13 @@ public class Main {
         Option<IOError> writeString(String output);
 
         Path resolve(String childName);
+    }
+
+    private interface Composable2<T> extends BiFunction<String, String, Option<T>> {
+    }
+
+    private interface Composable<T> {
+        Option<T> apply(String input);
     }
 
     private static final class None<T> implements Option<T> {
@@ -357,10 +359,6 @@ public class Main {
             return new HeadedQuery<>(new FlatMapHead<>(this.head, f));
         }
 
-        @Override
-        public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
-            return new HeadedQuery<>(new ZipHead<>(this.head, other));
-        }
     }
 
     private static class RangeHead implements Head<Integer> {
@@ -1160,34 +1158,6 @@ public class Main {
         }
     }
 
-    private static class Maps {
-        @Actual
-        private record JVMMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
-            public JVMMap() {
-                this(new HashMap<>());
-            }
-
-            @Override
-            public Option<V> find(K key) {
-                if (this.map.containsKey(key)) {
-                    return new Some<>(this.map.get(key));
-                }
-                return new None<>();
-            }
-
-            @Override
-            public Map<K, V> with(K key, V value) {
-                this.map.put(key, value);
-                return this;
-            }
-        }
-
-        @Actual
-        public static <V, K> Map<K, V> empty() {
-            return new JVMMap<>();
-        }
-    }
-
     private static class ConstructorHeader implements Header {
         @Override
         public Definition createDefinition(List<Type> paramTypes) {
@@ -1476,13 +1446,6 @@ public class Main {
         }
     }
 
-    private record ZipHead<T, R>(Head<T> head, Query<R> other) implements Head<Tuple2<T, R>> {
-        @Override
-        public Option<Tuple2<T, R>> next() {
-            return this.head.next().and(this.other::next);
-        }
-    }
-
     private record EnumValue(String value, List<Value> values) {
         public String generate() {
             var s = this.values.iterate().map(Value::generate).collect(new Joiner(", ")).orElse("");
@@ -1533,7 +1496,40 @@ public class Main {
         }
     }
 
-    private static final boolean isDebugEnabled = true;
+    private record Infix<T>(
+            String apply,
+            BiFunction<String, String, Option<Integer>> locator,
+            Composable2<T> mapper
+    ) implements Composable<T> {
+        private static <T> Infix<T> Last(String infix, Composable2<T> mapper) {
+            return new Infix<T>(infix, Main::findLast, mapper);
+        }
+
+        private static <T> Infix<T> First(String infix, Composable2<T> mapper) {
+            return new Infix<>(infix, Main::findFirst, mapper);
+        }
+
+        @Override
+        public Option<T> apply(String input) {
+            return Main.split(this.mapper(), () -> this.locator().apply(input, this.apply()).map(index -> {
+                var left = input.substring(0, index);
+                var right = input.substring(index + Strings.length(this.apply()));
+                return new Tuple2Impl<>(left, right);
+            }));
+        }
+    }
+
+    private record Suffix<T>(String apply, Composable<T> mapper) implements Composable<T> {
+        @Override
+        public Option<T> apply(String input) {
+            if (!input.endsWith(this.apply())) {
+                return new None<>();
+            }
+
+            var slice = input.substring(0, Strings.length(input) - Strings.length(this.apply()));
+            return this.mapper().apply(slice);
+        }
+    }
 
     private static String generatePlaceholder(String input) {
         var replaced = input
@@ -1554,14 +1550,6 @@ public class Main {
 
     private static String createIndent(int depth) {
         return "\n" + "\t".repeat(depth);
-    }
-
-    private static String createDebugString(Type type) {
-        if (!Main.isDebugEnabled) {
-            return "";
-        }
-
-        return generatePlaceholder(": " + type.generate());
     }
 
     private static boolean isSymbol(String input) {
@@ -1592,6 +1580,26 @@ public class Main {
         }
 
         return new None<>();
+    }
+
+    private static <T> Option<T> split(Composable2<T> mapper, Supplier<Option<Tuple2<String, String>>> splitter) {
+        return splitter.get().flatMap(splitTuple -> mapper.apply(splitTuple.left(), splitTuple.right()));
+    }
+
+    private static Option<Integer> findLast(String input, String infix) {
+        var index = input.lastIndexOf(infix);
+        if (index == -1) {
+            return new None<Integer>();
+        }
+        return new Some<>(index);
+    }
+
+    private static Option<Integer> findFirst(String input, String infix) {
+        var index = input.indexOf(infix);
+        if (index == -1) {
+            return new None<Integer>();
+        }
+        return new Some<>(index);
     }
 
     public void main() {
@@ -1780,18 +1788,18 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructure(String stripped, String sourceInfix, String targetInfix, CompileState state) {
-        return this.first(stripped, sourceInfix, (beforeInfix, right) -> {
-            return this.first(right, "{", (beforeContent, withEnd) -> {
-                return this.suffix(withEnd.strip(), "}", content1 -> {
-                    return this.last(beforeInfix.strip(), "\n", (annotationsString, s2) -> {
+        return Infix.First(sourceInfix, (beforeInfix, right) -> {
+            return Infix.First("{", (beforeContent, withEnd) -> {
+                return new Suffix<>("}", content1 -> {
+                    return Infix.Last("\n", (annotationsString, s2) -> {
                         var annotations = this.parseAnnotations(annotationsString);
                         return this.parseStructureWithMaybePermits(targetInfix, state, s2, beforeContent, content1, annotations);
-                    }).or(() -> {
+                    }).apply(beforeInfix.strip()).or(() -> {
                         return this.parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty());
                     });
-                });
-            });
-        });
+                }).apply(withEnd.strip());
+            }).apply(right);
+        }).apply(stripped);
     }
 
     private List<String> parseAnnotations(String annotationsString) {
@@ -1813,7 +1821,7 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> annotations) {
-        return this.last(beforeContent, " permits ", (s, s2) -> {
+        return Infix.Last(" permits ", (s, s2) -> {
             var variants = this.divideAll(s2, this::foldValueChar)
                     .iterate()
                     .map(String::strip)
@@ -1821,7 +1829,7 @@ public class Main {
                     .collect(new ListCollector<>());
 
             return this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, s, content1, variants, annotations);
-        }).or(() -> this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations));
+        }).apply(beforeContent).or(() -> this.parseStructureWithMaybeImplements(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), annotations));
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybeImplements(
@@ -1832,10 +1840,10 @@ public class Main {
             String content1,
             List<String> variants,
             List<String> annotations) {
-        return this.first(beforeContent, " implements ", (s, s2) -> {
+        return Infix.First(" implements ", (s, s2) -> {
             var stringList = this.parseTypeRefs(s2);
             return this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, s, content1, variants, annotations, stringList);
-        }).or(() -> this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty()));
+        }).apply(beforeContent).or(() -> this.parseStructureWithMaybeExtends(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty()));
     }
 
     private List<TypeRef> parseTypeRefs(String s2) {
@@ -1856,7 +1864,7 @@ public class Main {
             List<String> variants,
             List<String> annotations,
             List<TypeRef> interfaces) {
-        return this.first(beforeContent, " extends ", (s, s2) -> this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, this.parseTypeRefs(s2), interfaces))
+        return Infix.First(" extends ", (s, s2) -> this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, s, content1, variants, annotations, this.parseTypeRefs(s2), interfaces)).apply(beforeContent)
                 .or(() -> this.parseStructureWithMaybeParams(targetInfix, state, beforeInfix, beforeContent, content1, variants, annotations, Lists.empty(), interfaces));
     }
 
@@ -1870,12 +1878,12 @@ public class Main {
             List<String> annotations,
             List<TypeRef> superTypes,
             List<TypeRef> interfaces) {
-        return this.suffix(beforeContent.strip(), ")", s -> {
-            return this.first(s, "(", (s1, s2) -> {
+        return new Suffix<>(")", s -> {
+            return Infix.First("(", (s1, s2) -> {
                 var parsed = this.parseParameters(state, s2);
                 return this.parseStructureWithMaybeTypeParams(targetInfix, parsed.left(), beforeInfix, s1, content1, parsed.right(), variants, annotations, interfaces, superTypes);
-            });
-        }).or(() -> {
+            }).apply(s);
+        }).apply(beforeContent.strip()).or(() -> {
             return this.parseStructureWithMaybeTypeParams(targetInfix, state, beforeInfix, beforeContent, content1, Lists.empty(), variants, annotations, interfaces, superTypes);
         });
     }
@@ -1891,13 +1899,13 @@ public class Main {
             List<String> annotations,
             List<TypeRef> interfaces,
             List<TypeRef> maybeSuperType) {
-        return this.first(beforeContent, "<", (name, withTypeParams) -> {
-            return this.first(withTypeParams, ">", (typeParamsString, afterTypeParams) -> {
+        return Infix.First("<", (name, withTypeParams) -> {
+            return Infix.First(">", (typeParamsString, afterTypeParams) -> {
                 final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper = (state1, s) -> new Tuple2Impl<>(state1, s.strip());
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(mapper.apply(state1, s)));
                 return this.assembleStructure(typeParams.left(), targetInfix, annotations, beforeInfix, name, content1, typeParams.right(), afterTypeParams, params, variants, interfaces, maybeSuperType);
-            });
-        }).or(() -> {
+            }).apply(withTypeParams);
+        }).apply(beforeContent).or(() -> {
             return this.assembleStructure(state, targetInfix, annotations, beforeInfix, beforeContent, content1, Lists.empty(), "", params, variants, interfaces, maybeSuperType);
         });
     }
@@ -2155,15 +2163,6 @@ public class Main {
         return mapper.apply(slice);
     }
 
-    private <T> Option<T> suffix(String input, String suffix, Function<String, Option<T>> mapper) {
-        if (!input.endsWith(suffix)) {
-            return new None<>();
-        }
-
-        var slice = input.substring(0, Strings.length(input) - Strings.length(suffix));
-        return mapper.apply(slice);
-    }
-
     private Tuple2<CompileState, IncompleteClassSegment> parseClassSegment(CompileState state, String input, int depth) {
         return this.<Whitespace, IncompleteClassSegment>typed(() -> parseWhitespace(input, state))
                 .or(() -> this.typed(() -> this.parseClass(input, state)))
@@ -2177,19 +2176,19 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseEnumValues(CompileState state, String input) {
-        return this.suffix(input.strip(), ";", withoutEnd -> {
+        return new Suffix<Tuple2<CompileState, IncompleteClassSegment>>(";", withoutEnd -> {
             return this.parseValues(state, withoutEnd, (state2, enumValue) -> {
-                return this.suffix(enumValue.strip(), ")", withoutValueEnd -> {
-                    return this.first(withoutValueEnd, "(", (s4, s2) -> {
-                        return this.parseValues(state2, s2, (state1, s1) -> new Some<>(Main.this.parseArgument(state1, s1, 1))).map(arguments -> {
-                            return new Tuple2Impl<>(arguments.left(), new EnumValue(s4, Main.this.retainValues(arguments.right())));
+                return new Suffix<Tuple2<CompileState, EnumValue>>(")", withoutValueEnd -> {
+                    return Infix.First("(", (Composable2<Tuple2<CompileState, EnumValue>>) (s4, s2) -> {
+                        return this.parseValues(state2, s2, (state1, s1) -> new Some<>(this.parseArgument(state1, s1, 1))).map(arguments -> {
+                            return new Tuple2Impl<>(arguments.left(), new EnumValue(s4, this.retainValues(arguments.right())));
                         });
-                    });
-                });
+                    }).apply(withoutValueEnd);
+                }).apply(enumValue.strip());
             }).map(tuple -> {
                 return new Tuple2Impl<>(tuple.left(), new EnumValues(tuple.right()));
             });
-        });
+        }).apply(input.strip());
     }
 
     private <T extends S, S> Option<Tuple2<CompileState, S>> typed(Supplier<Option<Tuple2<CompileState, T>>> action) {
@@ -2197,13 +2196,13 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseMethod(CompileState state, String input, int depth) {
-        return this.first(input, "(", (definitionString, withParams) -> {
-            return this.first(withParams, ")", (parametersString, rawContent) -> {
+        return Infix.First("(", (definitionString, withParams) -> {
+            return Infix.First(")", (parametersString, rawContent) -> {
                 return this.parseDefinition(state, definitionString).<Tuple2<CompileState, Header>>map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()))
                         .or(() -> this.parseConstructor(state, definitionString))
                         .flatMap(definitionTuple -> this.assembleMethod(depth, parametersString, rawContent, definitionTuple));
-            });
-        });
+            }).apply(withParams);
+        }).apply(input);
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> assembleMethod(int depth, String parametersString, String rawContent, Tuple2<CompileState, Header> definitionTuple) {
@@ -2282,18 +2281,18 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, FunctionSegment>> parseFunctionStatement(CompileState state, int depth, String stripped) {
-        return this.suffix(stripped, ";", s -> {
+        return new Suffix<Tuple2<CompileState, FunctionSegment>>(";", s -> {
             var tuple = this.parseStatementValue(state, s, depth);
             var left = tuple.left();
             var right = tuple.right();
             return new Some<>(new Tuple2Impl<>(left, new Statement(depth, right)));
-        });
+        }).apply(stripped);
     }
 
     private Option<Tuple2<CompileState, FunctionSegment>> parseBlock(CompileState state, int depth, String stripped) {
-        return this.suffix(stripped, "}", withoutEnd -> {
-            return this.split(() -> this.toFirst(withoutEnd), (beforeContent, content) -> {
-                return this.suffix(beforeContent, "{", headerString -> {
+        return new Suffix<>("}", withoutEnd -> {
+            return Main.split((beforeContent, content) -> {
+                return new Suffix<Tuple2<CompileState, FunctionSegment>>("{", headerString -> {
                     var headerTuple = this.parseBlockHeader(state, headerString, depth);
                     var headerState = headerTuple.left();
                     var header = headerTuple.right();
@@ -2302,9 +2301,9 @@ public class Main {
                     var statementsState = statementsTuple.left();
                     var statements = statementsTuple.right().addAllFirst(statementsState.functionSegments);
                     return new Some<>(new Tuple2Impl<>(statementsState.clearFunctionSegments(), new Block(depth, header, statements)));
-                });
-            });
-        });
+                }).apply(beforeContent);
+            }, () -> this.toFirst(withoutEnd));
+        }).apply(stripped);
     }
 
     private Option<Tuple2<String, String>> toFirst(String input) {
@@ -2337,11 +2336,11 @@ public class Main {
     private Option<Tuple2<CompileState, BlockHeader>> parseConditional(CompileState state, String input, String prefix, int depth) {
         return this.prefix(input, prefix, withoutPrefix -> {
             return this.prefix(withoutPrefix.strip(), "(", withoutValueStart -> {
-                return this.suffix(withoutValueStart, ")", value -> {
+                return new Suffix<Tuple2<CompileState, BlockHeader>>(")", value -> {
                     var valueTuple = this.parseValue(state, value, depth);
                     var value1 = valueTuple.right();
                     return new Some<>(new Tuple2Impl<>(valueTuple.left(), new Conditional(prefix, value1)));
-                });
+                }).apply(withoutValueStart);
             });
         });
     }
@@ -2375,7 +2374,7 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, StatementValue>> parseAssignment(CompileState state, int depth, String stripped) {
-        return this.first(stripped, "=", (beforeEquals, valueString) -> {
+        return Infix.First("=", (beforeEquals, valueString) -> {
             var sourceTuple = this.parseValue(state, valueString, depth);
             var sourceState = sourceTuple.left();
             var source = sourceTuple.right();
@@ -2387,7 +2386,7 @@ public class Main {
             return this.parseDefinition(destinationState, beforeEquals)
                     .flatMap(definitionTuple -> this.parseInitialization(definitionTuple.left(), definitionTuple.right(), source))
                     .or(() -> new Some<>(new Tuple2Impl<>(destinationState, new Assignment(destination, source))));
-        });
+        }).apply(stripped);
     }
 
     private Option<Tuple2<CompileState, StatementValue>> parseInitialization(CompileState state, Definition destination, Value source) {
@@ -2494,10 +2493,10 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseInstanceOf(CompileState state, String input, int depth) {
-        return this.last(input, "instanceof", (beforeKeyword, afterKeyword) -> {
+        return Infix.Last("instanceof", (beforeKeyword, afterKeyword) -> {
             var childTuple = this.parseValue(state, beforeKeyword, depth);
             return this.parseDefinition(childTuple.left(), afterKeyword).map(this.parseInstanceOfWithValue(depth, childTuple.right()));
-        });
+        }).apply(input);
     }
 
     private Function<Tuple2<CompileState, Definition>, Tuple2<CompileState, Value>> parseInstanceOfWithValue(int depth, Value child) {
@@ -2518,10 +2517,10 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseMethodReference(CompileState state, String input, int depth) {
-        return this.last(input, "::", (s, s2) -> {
-            var tuple = this.parseValue(state, s, depth);
+        return Infix.Last("::", (Composable2<Tuple2<CompileState, Value>>) (s, s2) -> {
+            var tuple = Main.this.parseValue(state, s, depth);
             return new Some<>(new Tuple2Impl<>(tuple.left(), new DataAccess(tuple.right(), s2)));
-        });
+        }).apply(input);
     }
 
     private Option<Tuple2<CompileState, Value>> parseNot(CompileState state, String input, int depth) {
@@ -2537,7 +2536,7 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseLambda(CompileState state, String input, int depth) {
-        return this.first(input, "->", (beforeArrow, valueString) -> {
+        return Infix.First("->", (beforeArrow, valueString) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
                 Type type = Primitive.Unknown;
@@ -2561,7 +2560,7 @@ public class Main {
             }
 
             return new None<>();
-        });
+        }).apply(input);
     }
 
     private Some<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<Definition> definitions, String valueString, int depth) {
@@ -2617,13 +2616,13 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseInvokable(CompileState state, String input, int depth) {
-        return this.suffix(input.strip(), ")", withoutEnd -> {
-            return this.split(() -> this.toLast(withoutEnd, "", this::foldInvocationStart), (callerWithEnd, argumentsString) -> {
-                return this.suffix(callerWithEnd, "(", callerString -> {
+        return new Suffix<>(")", withoutEnd -> {
+            return Main.split((callerWithEnd, argumentsString) -> {
+                return new Suffix<>("(", callerString -> {
                     return this.assembleInvokable(state, depth, argumentsString, callerString.strip());
-                });
-            });
-        });
+                }).apply(callerWithEnd);
+            }, () -> this.toLast(withoutEnd, "", this::foldInvocationStart));
+        }).apply(input.strip());
     }
 
     private Some<Tuple2<CompileState, Value>> assembleInvokable(CompileState state, int depth, String argumentsString, String callerString) {
@@ -2775,7 +2774,7 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseDataAccess(CompileState state, String input, int depth) {
-        return this.last(input.strip(), ".", (parentString, rawProperty) -> {
+        return Infix.Last(".", (Composable2<Tuple2<CompileState, Value>>) (parentString, rawProperty) -> {
             var property = rawProperty.strip();
             if (!isSymbol(property)) {
                 return new None<>();
@@ -2793,7 +2792,7 @@ public class Main {
             }
 
             return new Some<>(new Tuple2Impl<>(tuple.left(), new DataAccess(parent, property)));
-        });
+        }).apply(input.strip());
     }
 
     private Option<Tuple2<CompileState, Value>> parseString(CompileState state, String input) {
@@ -2813,7 +2812,7 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseOperation(CompileState state, String value, int depth, Operator operator) {
-        return this.first(value, operator.sourceRepresentation, (leftString, rightString) -> {
+        return Infix.First(operator.sourceRepresentation, (Composable2<Tuple2<CompileState, Value>>) (leftString, rightString) -> {
             var leftTuple = this.parseValue(state, leftString, depth);
             var rightTuple = this.parseValue(leftTuple.left(), rightString, depth);
 
@@ -2821,7 +2820,7 @@ public class Main {
             var right = rightTuple.right();
 
             return new Some<>(new Tuple2Impl<>(rightTuple.left(), new Operation(left, operator, right)));
-        });
+        }).apply(value);
     }
 
     private <T> Tuple2<CompileState, List<T>> parseValuesOrEmpty(
@@ -2851,11 +2850,11 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseField(String input, int depth, CompileState state) {
-        return this.suffix(input.strip(), ";", withoutEnd -> {
+        return new Suffix<>(";", withoutEnd -> {
             return this.parseClassInitialization(depth, state, withoutEnd).or(() -> {
                 return this.parseClassDefinition(depth, state, withoutEnd);
             });
-        });
+        }).apply(input.strip());
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseClassDefinition(int depth, CompileState state, String withoutEnd) {
@@ -2865,34 +2864,34 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseClassInitialization(int depth, CompileState state, String withoutEnd) {
-        return this.first(withoutEnd, "=", (s, s2) -> {
+        return Infix.First("=", (Composable2<Tuple2<CompileState, IncompleteClassSegment>>) (s, s2) -> {
             return this.parseDefinition(state, s).map(result -> {
                 var valueTuple = this.parseValue(result.left(), s2, depth);
                 return new Tuple2Impl<>(valueTuple.left(), new ClassInitialization(depth, result.right(), valueTuple.right()));
             });
-        });
+        }).apply(withoutEnd);
     }
 
     private Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
-        return this.last(input.strip(), " ", (beforeName, name) -> {
-            return this.split(() -> this.toLast(beforeName, " ", this::foldTypeSeparator), (beforeType, type) -> {
-                return this.last(beforeType, "\n", (s, s2) -> {
+        return Infix.Last(" ", (beforeName, name) -> {
+            return Main.split((beforeType, type) -> {
+                return Infix.Last("\n", (s, s2) -> {
                     var annotations = this.parseAnnotations(s);
                     return this.getOr(state, name, s2, type, annotations);
-                }).or(() -> {
+                }).apply(beforeType).or(() -> {
                     return this.getOr(state, name, beforeType, type, Lists.empty());
                 });
-            }).or(() -> this.assembleDefinition(state, Lists.empty(), Lists.empty(), name, Lists.empty(), beforeName));
-        });
+            }, () -> this.toLast(beforeName, " ", this::foldTypeSeparator)).or(() -> this.assembleDefinition(state, Lists.empty(), Lists.empty(), name, Lists.empty(), beforeName));
+        }).apply(input.strip());
     }
 
     private Option<Tuple2<CompileState, Definition>> getOr(CompileState state, String name, String beforeType, String type, List<String> annotations) {
-        return this.suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
-            return this.first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
+        return new Suffix<>(">", withoutTypeParamStart -> {
+            return Infix.First("<", (beforeTypeParams, typeParamsString) -> {
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(new Tuple2Impl<>(state1, s.strip())));
                 return this.assembleDefinition(typeParams.left(), annotations, this.parseModifiers(beforeTypeParams), name, typeParams.right(), type);
-            });
-        }).or(() -> {
+            }).apply(withoutTypeParamStart);
+        }).apply(beforeType.strip()).or(() -> {
             return this.assembleDefinition(state, annotations, this.parseModifiers(beforeType), name, Lists.empty(), type);
         });
     }
@@ -3014,13 +3013,13 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Type>> varArgs(CompileState state, String input) {
-        return this.suffix(input, "...", s -> {
+        return new Suffix<Tuple2<CompileState, Type>>("...", s -> {
             return this.parseType(state, s).map(inner -> {
                 var newState = inner.left();
                 var child = inner.right();
                 return new Tuple2Impl<>(newState, new ArrayType(child));
             });
-        });
+        }).apply(input);
     }
 
     private Tuple2<CompileState, Type> assembleTemplate(String base, CompileState state, List<Argument> arguments) {
@@ -3065,14 +3064,14 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
-        return this.suffix(input.strip(), ">", withoutEnd -> {
-            return this.first(withoutEnd, "<", (base, argumentsString) -> {
+        return new Suffix<>(">", withoutEnd -> {
+            return Infix.First("<", (base, argumentsString) -> {
                 var strippedBase = base.strip();
                 return this.parseValues(state, argumentsString, this::parseArgument).map(argumentsTuple -> {
                     return this.assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
                 });
-            });
-        });
+            }).apply(withoutEnd);
+        }).apply(input.strip());
     }
 
     private Option<Type> retainType(Argument argument) {
@@ -3089,47 +3088,6 @@ public class Main {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
         return this.parseType(state, input).map(tuple -> new Tuple2Impl<>(tuple.left(), tuple.right()));
-    }
-
-    private <T> Option<T> last(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return this.infix(input, infix, this::findLast, mapper);
-    }
-
-    private Option<Integer> findLast(String input, String infix) {
-        var index = input.lastIndexOf(infix);
-        if (index == -1) {
-            return new None<Integer>();
-        }
-        return new Some<>(index);
-    }
-
-    private <T> Option<T> first(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return this.infix(input, infix, this::findFirst, mapper);
-    }
-
-    private <T> Option<T> split(Supplier<Option<Tuple2<String, String>>> splitter, BiFunction<String, String, Option<T>> splitMapper) {
-        return splitter.get().flatMap(splitTuple -> splitMapper.apply(splitTuple.left(), splitTuple.right()));
-    }
-
-    private <T> Option<T> infix(
-            String input,
-            String infix,
-            BiFunction<String, String, Option<Integer>> locator,
-            BiFunction<String, String, Option<T>> mapper
-    ) {
-        return this.split(() -> locator.apply(input, infix).map(index -> {
-            var left = input.substring(0, index);
-            var right = input.substring(index + Strings.length(infix));
-            return new Tuple2Impl<>(left, right);
-        }), mapper);
-    }
-
-    private Option<Integer> findFirst(String input, String infix) {
-        var index = input.indexOf(infix);
-        if (index == -1) {
-            return new None<Integer>();
-        }
-        return new Some<>(index);
     }
 
     private enum Primitive implements Type {
