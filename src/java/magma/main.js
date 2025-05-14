@@ -58,6 +58,7 @@ var ResultVariant;
     ResultVariant[ResultVariant["Ok"] = 0] = "Ok";
     ResultVariant[ResultVariant["Err"] = 1] = "Err";
 })(ResultVariant || (ResultVariant = {}));
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static final */ class None {
     constructor() {
         this._OptionVariant = OptionVariant.None /* : OptionVariant */;
@@ -92,6 +93,7 @@ var ResultVariant;
     ifPresent(consumer) {
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Some {
     constructor(value) {
         this._OptionVariant = OptionVariant.Some /* : OptionVariant */;
@@ -131,6 +133,7 @@ var ResultVariant;
         /* consumer.accept(this.value) */ ;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class SingleHead {
     constructor(retrievableValue) {
         this /* : SingleHead */.retrievableValue /* : T */ = retrievableValue /* : T */;
@@ -144,11 +147,13 @@ var ResultVariant;
         return new Some(this /* : SingleHead */.retrievableValue /* : T */) /* : Some */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class EmptyHead {
     next() {
         return new None() /* : None */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class HeadedQuery {
     constructor(head) {
         this /* : unknown */.head /* : unknown */ = head /* : unknown */;
@@ -191,6 +196,7 @@ var ResultVariant;
         return new HeadedQuery(new ZipHead(this /* : HeadedQuery */.head /* : Head<T> */, other /* : Query<R> */) /* : ZipHead */) /* : HeadedQuery */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class RangeHead /*  */ {
     constructor(length) {
         this /* : RangeHead */.length /* : number */ = length /* : number */;
@@ -205,8 +211,10 @@ var ResultVariant;
         return new None() /* : None */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class Lists /*  */ {
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ImmutableDefinition /*  */ {
     constructor(annotations, modifiers, name, type, typeParams) {
         this._ParameterVariant = ParameterVariant.ImmutableDefinition /* : ParameterVariant */;
@@ -264,6 +272,7 @@ var ResultVariant;
         return "ImmutableDefinition[" + "annotations=" + this /* : ImmutableDefinition */.annotations /* : List<string> */ + ", " + "maybeBefore=" + this /* : ImmutableDefinition */.modifiers /* : List<string> */ + ", " + "findName=" + this /* : ImmutableDefinition */.name /* : string */ + ", " + "findType=" + this /* : ImmutableDefinition */.type /* : Type */ + ", " + "typeParams=" + this /* : ImmutableDefinition */.typeParams /* : List<string> */ + "]";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ObjectType /*  */ {
     constructor(name, typeParams, definitions, variants) {
         this._FindableTypeVariant = FindableTypeVariant.ObjectType /* : FindableTypeVariant */;
@@ -291,6 +300,7 @@ var ResultVariant;
         return this /* : ObjectType */.name /* : string */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class TypeParam /*  */ {
     constructor(value) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -305,6 +315,7 @@ var ResultVariant;
         return "";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class CompileState /*  */ {
     constructor(structures, definitions, objectTypes, structNames, typeParams, typeRegister, functionSegments) {
         this /* : unknown */.structures /* : unknown */ = structures /* : unknown */;
@@ -377,6 +388,7 @@ var ResultVariant;
         return stripped /* : string */ === this /* : CompileState */.structNames /* : List<[string, List<string>]> */.last /* : () => Option<[string, List<string>]> */() /* : Option<[string, List<string>]> */.map /* : (arg0 : (arg0 : [string, List<string>]) => R) => Option<R> */(Tuple2 /* : Tuple2 */.left /* : unknown */) /* : Option<R> */.orElse /* : unknown */("") /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class DivideState /*  */ {
     constructor(input, index, segments, buffer, depth) {
         this /* : DivideState */.segments /* : List<string> */ = segments /* : List<string> */;
@@ -432,6 +444,7 @@ var ResultVariant;
         return this /* : DivideState */.input /* : string */.charAt /* : unknown */(this /* : DivideState */.index /* : number */) /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Joiner /*  */ {
     constructor(delimiter) {
         this /* : unknown */.delimiter /* : unknown */ = delimiter /* : unknown */;
@@ -446,6 +459,7 @@ var ResultVariant;
         return new Some(current /* : Option<string> */.map /* : (arg0 : (arg0 : string) => R) => Option<R> */((inner) => inner /* : string */ + this /* : Joiner */.delimiter /* : string */ + element /* : string */) /* : Option<R> */.orElse /* : unknown */(element /* : string */) /* : unknown */) /* : Some */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class ListCollector {
     createInitial() {
         return Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */;
@@ -454,6 +468,7 @@ var ResultVariant;
         return current /* : List<T> */.addLast /* : (arg0 : T) => List<T> */(element /* : T */) /* : List<T> */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class FlatMapHead {
     constructor(head, mapper) {
         this /* : FlatMapHead */.mapper /* : (arg0 : T) => Query<R> */ = mapper /* : (arg0 : T) => Query<R> */;
@@ -482,6 +497,7 @@ var ResultVariant;
         }
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ArrayType /*  */ {
     constructor(right) {
         this /* : unknown */.right /* : unknown */ = right /* : unknown */;
@@ -496,6 +512,7 @@ var ResultVariant;
         return "";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static final */ class Whitespace /*  */ {
     constructor() {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Whitespace /* : IncompleteClassSegmentVariant */;
@@ -509,6 +526,7 @@ var ResultVariant;
         return new None() /* : None */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class Queries /*  */ {
     static fromOption(option) {
         let single = option /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(SingleHead /* : SingleHead */.new /* : unknown */) /* : Option<R> */;
@@ -518,6 +536,7 @@ var ResultVariant;
         return new HeadedQuery(new RangeHead(elements /* : T[] */.length /* : unknown */) /* : RangeHead */) /* : HeadedQuery */.map /* : (arg0 : (arg0 : T) => R) => Query<R> */((index) =>  /* elements[index] */) /* : Query<R> */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class FunctionType /*  */ {
     constructor(arguments, returns) {
         this /* : unknown */.arguments /* : unknown */ = arguments /* : unknown */;
@@ -534,6 +553,7 @@ var ResultVariant;
         return "";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class TupleType /*  */ {
     constructor(arguments) {
         this /* : unknown */.arguments /* : unknown */ = arguments /* : unknown */;
@@ -549,6 +569,7 @@ var ResultVariant;
         return "";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Template /*  */ {
     constructor(base, arguments) {
         this._FindableTypeVariant = FindableTypeVariant.Template /* : FindableTypeVariant */;
@@ -576,6 +597,7 @@ var ResultVariant;
         return this /* : Template */.base /* : ObjectType */.findName /* : () => string */() /* : string */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Placeholder /*  */ {
     constructor(input) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.Placeholder /* : IncompleteClassSegmentVariant */;
@@ -606,6 +628,7 @@ var ResultVariant;
         return new None() /* : None */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class StringValue /*  */ {
     constructor(value) {
         this._ValueVariant = ValueVariant.StringValue /* : ValueVariant */;
@@ -618,6 +641,7 @@ var ResultVariant;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class DataAccess /*  */ {
     constructor(parent, property, type) {
         this._ValueVariant = ValueVariant.DataAccess /* : ValueVariant */;
@@ -632,6 +656,7 @@ var ResultVariant;
         return this /* : DataAccess */.type /* : () => Type */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ConstructionCaller /*  */ {
     constructor(type) {
         this._CallerVariant = CallerVariant.ConstructionCaller /* : CallerVariant */;
@@ -644,6 +669,7 @@ var ResultVariant;
         return new FunctionType(Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */, this /* : ConstructionCaller */.type /* : Type */) /* : FunctionType */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Operator /*  */ {
     constructor(sourceRepresentation, targetRepresentation) {
         this.GREATER_THAN_OR_EQUALS = Operator();
@@ -659,6 +685,7 @@ Operator.AND = new Operator("&&", "&&") /* : Operator */;
 Operator.EQUALS = new Operator("==", "===") /* : Operator */;
 Operator.OR = new Operator("||", "||") /* : Operator */;
 Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Operation /*  */ {
     constructor(left, operator, right) {
         this._ValueVariant = ValueVariant.Operation /* : ValueVariant */;
@@ -673,6 +700,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Not /*  */ {
     constructor(value) {
         this._ValueVariant = ValueVariant.Not /* : ValueVariant */;
@@ -685,6 +713,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class BlockLambdaValue /*  */ {
     constructor(depth, statements) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
@@ -697,6 +726,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : BlockLambdaValue */.statements /* : List<FunctionSegment> */.query /* : () => Query<FunctionSegment> */() /* : Query<FunctionSegment> */.map /* : (arg0 : (arg0 : FunctionSegment) => R) => Query<R> */(FunctionSegment /* : FunctionSegment */.generate /* : unknown */) /* : Query<R> */.collect /* : unknown */(Joiner /* : Joiner */.empty /* : () => Joiner */() /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Lambda /*  */ {
     constructor(parameters, body) {
         this._ValueVariant = ValueVariant.Lambda /* : ValueVariant */;
@@ -711,6 +741,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Invokable /*  */ {
     constructor(caller, arguments, type) {
         this._ValueVariant = ValueVariant.Invokable /* : ValueVariant */;
@@ -723,6 +754,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Invokable */.caller /* : Caller */.generate /* : () => string */() /* : string */ + "(" + joined /* : unknown */ + ")" + createDebugString /* : (arg0 : Type) => string */(this /* : Invokable */.type /* : Type */) /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class IndexValue /*  */ {
     constructor(parent, child) {
         this._ValueVariant = ValueVariant.IndexValue /* : ValueVariant */;
@@ -736,6 +768,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return Primitive /* : Primitive */.Unknown /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class SymbolValue /*  */ {
     constructor(stripped, type) {
         this._ValueVariant = ValueVariant.SymbolValue /* : ValueVariant */;
@@ -746,8 +779,10 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : SymbolValue */.stripped /* : string */ + createDebugString /* : (arg0 : Type) => string */(this /* : SymbolValue */.type /* : Type */) /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class Maps /*  */ {
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class MapCollector {
     createInitial() {
         return Maps /* : Maps */.empty /* : () => Map<K, V> */() /* : Map<K, V> */;
@@ -756,6 +791,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return current /* : Map<K, V> */.with /* : (arg0 : K, arg1 : V) => Map<K, V> */(element /* : [K, V] */[0 /* : number */], element /* : [K, V] */[1 /* : number */]) /* : Map<K, V> */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class ConstructorHeader /*  */ {
     createDefinition(paramTypes) {
         return ImmutableDefinition /* : ImmutableDefinition */.createSimpleDefinition /* : (arg0 : string, arg1 : Type) => ImmutableDefinition */("new", Primitive /* : Primitive */.Unknown /* : unknown */) /* : ImmutableDefinition */;
@@ -764,6 +800,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "constructor " + joinedParameters /* : string */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class FunctionNode /*  */ {
     constructor(depth, header, parameters, maybeStatements) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
@@ -781,6 +818,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return indent /* : string */ + generatedHeader /* : string */ + generatedStatements /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Block /*  */ {
     constructor(depth, header, statements) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
@@ -793,6 +831,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return indent /* : string */ + this /* : Block */.header /* : BlockHeader */.generate /* : () => string */() /* : string */ + "{" + collect + indent + "}";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Conditional /*  */ {
     constructor(prefix, value1) {
         this /* : unknown */.prefix /* : unknown */ = prefix /* : unknown */;
@@ -802,11 +841,13 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Conditional */.prefix /* : string */ + " (" + this.value1.generate() + ")";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private static */ class Else /*  */ {
     generate() {
         return "else ";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Return /*  */ {
     constructor(value) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -815,6 +856,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "return " + this /* : Return */.value /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Initialization /*  */ {
     constructor(definition, source) {
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
@@ -824,6 +866,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "let " + this /* : Initialization */.definition /* : ImmutableDefinition */.generate /* : () => string */() /* : string */ + " = " + this /* : Initialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class FieldInitialization /*  */ {
     constructor(definition, source) {
         this /* : unknown */.definition /* : unknown */ = definition /* : unknown */;
@@ -833,6 +876,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : FieldInitialization */.definition /* : ImmutableDefinition */.generate /* : () => string */() /* : string */ + " = " + this /* : FieldInitialization */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Assignment /*  */ {
     constructor(destination, source) {
         this /* : unknown */.destination /* : unknown */ = destination /* : unknown */;
@@ -842,6 +886,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Assignment */.destination /* : Value */.generate /* : () => string */() /* : string */ + " = " + this /* : Assignment */.source /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Statement /*  */ {
     constructor(depth, value) {
         this /* : unknown */.depth /* : unknown */ = depth /* : unknown */;
@@ -851,6 +896,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return createIndent /* : (arg0 : number) => string */(this /* : Statement */.depth /* : number */) /* : string */ + this /* : Statement */.value /* : StatementValue */.generate /* : () => string */() /* : string */ + ";";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class MethodPrototype /*  */ {
     constructor(depth, header, parameters, content) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.MethodPrototype /* : IncompleteClassSegmentVariant */;
@@ -869,6 +915,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new Some(this /* : MethodPrototype */.header /* : Header */.createDefinition /* : (arg0 : List<Type>) => content-start ImmutableDefinition content-end */(this /* : MethodPrototype */.findParamTypes /* : () => List<Type> */() /* : List<Type> */) /* : content-start ImmutableDefinition content-end */) /* : Some */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class IncompleteClassSegmentWrapper /*  */ {
     constructor(segment) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.IncompleteClassSegmentWrapper /* : IncompleteClassSegmentVariant */;
@@ -878,6 +925,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new None() /* : None */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ClassDefinition /*  */ {
     constructor(depth, definition) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassDefinition /* : IncompleteClassSegmentVariant */;
@@ -888,6 +936,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new Some(this /* : ClassDefinition */.definition /* : ImmutableDefinition */) /* : Some */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ClassInitialization /*  */ {
     constructor(depth, definition, value) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.ClassInitialization /* : IncompleteClassSegmentVariant */;
@@ -899,11 +948,13 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new Some(this /* : ClassInitialization */.definition /* : ImmutableDefinition */) /* : Some */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class TypeRef /*  */ {
     constructor(value) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class StructurePrototype /*  */ {
     constructor(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, superTypes) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.StructurePrototype /* : IncompleteClassSegmentVariant */;
@@ -937,6 +988,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Cast /*  */ {
     constructor(value, type) {
         this._ValueVariant = ValueVariant.Cast /* : ValueVariant */;
@@ -947,6 +999,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : Cast */.value /* : Value */.generate /* : () => string */() /* : string */ + " as " + this /* : Cast */.type /* : unknown */.generate /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Ok {
     constructor(value) {
         this._ResultVariant = ResultVariant.Ok /* : ResultVariant */;
@@ -959,6 +1012,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return whenOk /* : (arg0 : T) => R */(this /* : Ok */.value /* : T */) /* : R */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Err {
     constructor(error) {
         this._ResultVariant = ResultVariant.Err /* : ResultVariant */;
@@ -971,6 +1025,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return whenErr /* : (arg0 : X) => R */(this /* : Err */.error /* : X */) /* : R */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class JVMIOError /*  */ {
     constructor(error /* IOException */) {
         this /* : unknown */.error /* : unknown */ = error /* : unknown */;
@@ -981,6 +1036,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return writer /* : content-start StringWriter content-end */.toString /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class TupleNode /*  */ {
     constructor(values) {
         this._ValueVariant = ValueVariant.TupleNode /* : ValueVariant */;
@@ -994,6 +1050,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new TupleType(this /* : TupleNode */.values /* : List<Value> */.query /* : () => Query<Value> */() /* : Query<Value> */.map /* : (arg0 : (arg0 : Value) => R) => Query<R> */(Value /* : Value */.type /* : unknown */) /* : Query<R> */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : TupleType */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class MapHead {
     constructor(head, mapper) {
         this /* : unknown */.head /* : unknown */ = head /* : unknown */;
@@ -1003,6 +1060,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : MapHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.map /* : (arg0 : (arg0 : T) => R) => Option<R> */(this /* : MapHead */.mapper /* : (arg0 : T) => R */) /* : Option<R> */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class ZipHead {
     constructor(head, other) {
         this /* : unknown */.head /* : unknown */ = head /* : unknown */;
@@ -1012,6 +1070,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : ZipHead */.head /* : Head<T> */.next /* : () => Option<T> */() /* : Option<T> */.and /* : (arg0 : () => Option<R>) => Option<[T, R]> */(this /* : ZipHead */.other /* : Query<R> */.next /* : unknown */) /* : Option<[T, R]> */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class EnumValue /*  */ {
     constructor(value, values) {
         this /* : unknown */.value /* : unknown */ = value /* : unknown */;
@@ -1022,6 +1081,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return this /* : EnumValue */.value /* : string */ + "(" + s + ")";
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class EnumValues /*  */ {
     constructor(values) {
         this._IncompleteClassSegmentVariant = IncompleteClassSegmentVariant.EnumValues /* : IncompleteClassSegmentVariant */;
@@ -1034,11 +1094,13 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
         return new None() /* : None */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* public static */ class Strings /*  */ {
     static isBlank(input) {
         return input /* : string */.isBlank /* : unknown */() /* : unknown */;
     }
 }
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class Primitive /*  */ {
     constructor(value) {
         this /* : Primitive */.value /* : string */ = value /* : string */;
@@ -1058,6 +1120,7 @@ Primitive.String = new Primitive("string") /* : Primitive */;
 Primitive.Boolean = new Primitive("boolean") /* : Primitive */;
 Primitive.Unknown = new Primitive("unknown") /* : Primitive */;
 Primitive.Void = new Primitive("void") /* : Primitive */;
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* private */ class BooleanValue /*  */ {
     constructor(value) {
         this._ValueVariant = ValueVariant.BooleanValue /* : ValueVariant */;
@@ -1072,6 +1135,7 @@ Primitive.Void = new Primitive("void") /* : Primitive */;
 }
 BooleanValue.True = new BooleanValue("true") /* : BooleanValue */;
 BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
+/* Actual, Argument, ArrayType, Assignment, BaseType, Block, BlockHeader, BlockLambdaValue, BooleanValue, Caller, Cast, ClassDefinition, ClassInitialization, ClassSegment, Collector, CompileState, Conditional, ConstructionCaller, ConstructorHeader, DataAccess, DivideState, Else, EmptyHead, EnumValue, EnumValues, Err, FieldInitialization, FindableType, FlatMapHead, FunctionNode, FunctionSegment, FunctionType, Head, HeadedQuery, Header, IOError, ImmutableDefinition, IncompleteClassSegment, IncompleteClassSegmentWrapper, IndexValue, Initialization, Invokable, JVMIOError, Joiner, Lambda, LambdaValue, List, ListCollector, Lists, Main, Map, MapCollector, MapHead, Maps, MethodPrototype, None, Not, ObjectType, Ok, Operation, Operator, Option, Parameter, Path, Placeholder, Primitive, Queries, Query, RangeHead, Result, Return, SingleHead, Some, Statement, StatementValue, StringValue, Strings, StructurePrototype, SymbolValue, Template, Tuple2, TupleNode, TupleType, Type, TypeParam, TypeRef, Value, Whitespace, ZipHead */
 /* public */ class Main /*  */ {
     static generatePlaceholder(input) {
         let replaced = input /* : string */.replace /* : unknown */("/*", "content-start") /* : unknown */.replace /* : unknown */("*/", "content-end") /* : unknown */;
@@ -1337,7 +1401,8 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let joinedTypeParams = prototype /* : StructurePrototype */.joinTypeParams /* : () => string */() /* : string */;
             let interfacesJoined = this /* : Main */.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces /* : List<Type> */) /* : string */;
             let generatedSuperType = this /* : Main */.joinSuperTypes /* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(withEnumCategoriesDefinedState /* : unknown */, prototype /* : StructurePrototype */) /* : string */;
-            let generated = generatePlaceholder /* : (arg0 : string) => string */(prototype /* : StructurePrototype */.beforeInfix /* : string */() /* : unknown */.strip /* : unknown */() /* : unknown */) /* : string */ + prototype /* : StructurePrototype */.targetInfix /* : string */() /* : unknown */ + prototype /* : StructurePrototype */.name /* : string */() /* : unknown */ + joinedTypeParams /* : string */ + generatePlaceholder /* : (arg0 : string) => string */(prototype /* : StructurePrototype */.after /* : string */() /* : unknown */) /* : string */ + generatedSuperType /* : string */ + interfacesJoined /* : string */ + " {" + generatedSegments + "\n}\n";
+            let joined = withEnumCategoriesDefinedState /* : unknown */.objectTypes /* : unknown */.query /* : unknown */() /* : unknown */.map /* : unknown */(ObjectType /* : ObjectType */.name /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */.sort /* : unknown */(compareTo /* : unknown */) /* : unknown */.query /* : unknown */() /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+            let generated = generatePlaceholder /* : (arg0 : string) => string */(joined /* : unknown */) /* : string */ + "\n" + generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
             let compileState = withEnumCategoriesDefinedState /* : unknown */.popStructName /* : unknown */() /* : unknown */;
             let definedState = compileState /* : unknown */.addStructure /* : unknown */(generated /* : unknown */) /* : unknown */;
             return [definedState /* : unknown */, new Whitespace() /* : Whitespace */];
