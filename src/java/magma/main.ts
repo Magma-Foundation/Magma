@@ -57,6 +57,7 @@ enum OptionVariant {
 	with(key : K, value : V) : Map<K, V>;
 }
 /* private sealed */interface Type/*  */ extends Argument {
+	_ArgumentVariant : ArgumentVariant = ArgumentVariant.Type/* : ArgumentVariant */;
 	generate() : string;
 	replace(mapping : Map<string, Type>) : Type;
 	findName() : string;
@@ -92,6 +93,8 @@ enum ValueVariant {
 	TupleNode
 }
 /* private sealed */interface Value/*  */ extends LambdaValue, Caller, Argument {
+	_ArgumentVariant : ArgumentVariant = ArgumentVariant.Value/* : ArgumentVariant */;
+	_CallerVariant : CallerVariant = CallerVariant.Value/* : CallerVariant */;
 	_ValueVariant : ValueVariant;
 	generate() : string;
 	type() : Type;
@@ -125,6 +128,7 @@ enum DefinitionVariant {
 	ImmutableDefinition
 }
 /* private sealed */interface Definition/*  */ extends Parameter, Header, StatementValue {
+	_ParameterVariant : ParameterVariant = ParameterVariant.Definition/* : ParameterVariant */;
 	_DefinitionVariant : DefinitionVariant;
 	generate() : string;
 	mapType(mapper : (arg0 : Type) => Type) : Definition;
@@ -1554,27 +1558,33 @@ enum ResultVariant {
 	completeStructure(state : CompileState, prototype : StructurePrototype) : Option<[CompileState, ClassSegment]> {
 		let thisType : ObjectType = prototype/* : StructurePrototype */.createObjectType/* : () => ObjectType */()/* : ObjectType */;
 		let withThis : CompileState = state/* : CompileState */.enterDefinitions/* : () => CompileState */()/* : CompileState */.define/* : (arg0 : Definition) => CompileState */(ImmutableDefinition/* : ImmutableDefinition */.createSimpleDefinition/* : (arg0 : string, arg1 : Type) => Definition */("this", thisType/* : ObjectType */)/* : Definition */)/* : CompileState */;
-		return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(withThis/* : CompileState */, prototype/* : StructurePrototype */.interfaces/* : List<TypeRef> */, (state2, tuple) => this/* : Main */.parseType/* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.value/* : unknown */)/* : Option<[CompileState, Type]> */)/* : Option<[CompileState, List<R>]> */.flatMap/* : (arg0 : (arg0 : [CompileState, List<R>]) => Option<R>) => Option<R> */((interfacesTypes : [CompileState, List<R>]) => {
-			let interfaces = interfacesTypes/* : [CompileState, List<R>] */[1/* : number */];
-			let bases : List<BaseType> = this/* : Main */.resolveBaseTypes/* : (arg0 : List<Type>) => List<BaseType> */(interfaces/* : unknown */)/* : List<BaseType> */;
-			let variantsSuper : List<string> = this/* : Main */.findSuperTypesOfVariants/* : (arg0 : List<BaseType>, arg1 : string) => List<string> */(bases/* : List<BaseType> */, prototype/* : StructurePrototype */.name/* : string */)/* : List<string> */;
-			return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(interfacesTypes/* : [CompileState, List<R>] */[0/* : number */], prototype/* : StructurePrototype */.segments/* : List<IncompleteClassSegment> */()/* : unknown */, (state1, entry) => this/* : Main */.completeClassSegment/* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1/* : unknown */, entry/* : unknown */.right/* : unknown */()/* : unknown */)/* : Option<[CompileState, ClassSegment]> */)/* : Option<[CompileState, List<R>]> */.map/* : (arg0 : (arg0 : [CompileState, List<R>]) => R) => Option<R> */((oldStatementsTuple : [CompileState, List<R>]) => {
-				let exited = oldStatementsTuple/* : [CompileState, List<R>] */[0/* : number */].exitDefinitions/* : unknown */()/* : unknown */;
-				let oldStatements = oldStatementsTuple/* : [CompileState, List<R>] */[1/* : number */];
-				let withEnumCategoriesDefined : [CompileState, List<ClassSegment>] = this/* : Main */.defineEnumCategories/* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited/* : unknown */, oldStatements/* : unknown */, prototype/* : StructurePrototype */.name/* : string */, prototype/* : StructurePrototype */.variants/* : List<string> */, prototype/* : StructurePrototype */.generateToEnum/* : () => string */()/* : string */)/* : [CompileState, List<ClassSegment>] */;
-				let withEnumCategoriesImplemented : List<ClassSegment> = this/* : Main */.implementEnumCategories/* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype/* : StructurePrototype */.name/* : string */, variantsSuper/* : List<string> */, withEnumCategoriesDefined/* : [CompileState, List<ClassSegment>] */[1/* : number */])/* : List<ClassSegment> */;
-				let withEnumValues : List<ClassSegment> = this/* : Main */.implementEnumValues/* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented/* : List<ClassSegment> */, thisType/* : ObjectType */)/* : List<ClassSegment> */;
-				let withConstructor : List<ClassSegment> = this/* : Main */.defineConstructor/* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues/* : List<ClassSegment> */, prototype/* : StructurePrototype */.parameters/* : List<Definition> */()/* : unknown */)/* : List<ClassSegment> */;
-				let generatedSegments : string = this/* : Main */.joinSegments/* : (arg0 : List<ClassSegment>) => string */(withConstructor/* : List<ClassSegment> */)/* : string */;
-				let joinedTypeParams : string = prototype/* : StructurePrototype */.joinTypeParams/* : () => string */()/* : string */;
-				let interfacesJoined : string = this/* : Main */.joinInterfaces/* : (arg0 : List<Type>) => string */(interfaces/* : unknown */)/* : string */;
-				let generatedSuperType : string = this/* : Main */.joinSuperTypes/* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(state/* : CompileState */, prototype/* : StructurePrototype */)/* : string */;
-				let generated = generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.beforeInfix/* : string */()/* : unknown */.strip/* : unknown */()/* : unknown */)/* : string */ + prototype/* : StructurePrototype */.targetInfix/* : string */()/* : unknown */ + prototype/* : StructurePrototype */.name/* : string */()/* : unknown */ + joinedTypeParams/* : string */ + generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.after/* : string */()/* : unknown */)/* : string */ + generatedSuperType/* : string */ + interfacesJoined/* : string */ + " {" + generatedSegments + "\n}\n";
-				let compileState = withEnumCategoriesDefined/* : [CompileState, List<ClassSegment>] */[0/* : number */].popStructName/* : unknown */()/* : unknown */;
-				let definedState = compileState/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */;
-				return [definedState/* : unknown */, new Whitespace()/* : Whitespace */];
+		return this/* : Main */.resolveTypeRefs/* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(withThis/* : CompileState */, prototype/* : StructurePrototype */.interfaces/* : List<TypeRef> */)/* : Option<[CompileState, List<Type>]> */.flatMap/* : (arg0 : (arg0 : [CompileState, List<Type>]) => Option<R>) => Option<R> */((interfacesTuple : [CompileState, List<Type>]) => {
+			return this/* : Main */.resolveTypeRefs/* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(interfacesTuple/* : [CompileState, List<Type>] */[0/* : number */], prototype/* : StructurePrototype */.superTypes/* : List<TypeRef> */)/* : Option<[CompileState, List<Type>]> */.flatMap/* : (arg0 : (arg0 : [CompileState, List<Type>]) => Option<R>) => Option<R> */((superTypesTuple : [CompileState, List<Type>]) => {
+				let interfaces = interfacesTuple/* : [CompileState, List<Type>] */[1/* : number */];
+				let superTypes = superTypesTuple/* : [CompileState, List<Type>] */[1/* : number */];
+				let bases : List<BaseType> = this/* : Main */.resolveBaseTypes/* : (arg0 : List<Type>) => List<BaseType> */(interfaces/* : unknown */)/* : List<BaseType> */.addAllLast/* : (arg0 : List<BaseType>) => List<BaseType> */(this/* : Main */.resolveBaseTypes/* : (arg0 : List<Type>) => List<BaseType> */(superTypes/* : unknown */)/* : List<BaseType> */)/* : List<BaseType> */;
+				let variantsSuper : List<string> = this/* : Main */.findSuperTypesOfVariants/* : (arg0 : List<BaseType>, arg1 : string) => List<string> */(bases/* : List<BaseType> */, prototype/* : StructurePrototype */.name/* : string */)/* : List<string> */;
+				return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(superTypesTuple/* : [CompileState, List<Type>] */[0/* : number */], prototype/* : StructurePrototype */.segments/* : List<IncompleteClassSegment> */()/* : unknown */, (state1, entry) => this/* : Main */.completeClassSegment/* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1/* : unknown */, entry/* : unknown */.right/* : unknown */()/* : unknown */)/* : Option<[CompileState, ClassSegment]> */)/* : Option<[CompileState, List<R>]> */.map/* : (arg0 : (arg0 : [CompileState, List<R>]) => R) => Option<R> */((oldStatementsTuple : [CompileState, List<R>]) => {
+					let exited = oldStatementsTuple/* : [CompileState, List<R>] */[0/* : number */].exitDefinitions/* : unknown */()/* : unknown */;
+					let oldStatements = oldStatementsTuple/* : [CompileState, List<R>] */[1/* : number */];
+					let withEnumCategoriesDefined : [CompileState, List<ClassSegment>] = this/* : Main */.defineEnumCategories/* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited/* : unknown */, oldStatements/* : unknown */, prototype/* : StructurePrototype */.name/* : string */, prototype/* : StructurePrototype */.variants/* : List<string> */, prototype/* : StructurePrototype */.generateToEnum/* : () => string */()/* : string */)/* : [CompileState, List<ClassSegment>] */;
+					let withEnumCategoriesImplemented : List<ClassSegment> = this/* : Main */.implementEnumCategories/* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype/* : StructurePrototype */.name/* : string */, variantsSuper/* : List<string> */, withEnumCategoriesDefined/* : [CompileState, List<ClassSegment>] */[1/* : number */])/* : List<ClassSegment> */;
+					let withEnumValues : List<ClassSegment> = this/* : Main */.implementEnumValues/* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented/* : List<ClassSegment> */, thisType/* : ObjectType */)/* : List<ClassSegment> */;
+					let withConstructor : List<ClassSegment> = this/* : Main */.defineConstructor/* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues/* : List<ClassSegment> */, prototype/* : StructurePrototype */.parameters/* : List<Definition> */()/* : unknown */)/* : List<ClassSegment> */;
+					let generatedSegments : string = this/* : Main */.joinSegments/* : (arg0 : List<ClassSegment>) => string */(withConstructor/* : List<ClassSegment> */)/* : string */;
+					let joinedTypeParams : string = prototype/* : StructurePrototype */.joinTypeParams/* : () => string */()/* : string */;
+					let interfacesJoined : string = this/* : Main */.joinInterfaces/* : (arg0 : List<Type>) => string */(interfaces/* : unknown */)/* : string */;
+					let generatedSuperType : string = this/* : Main */.joinSuperTypes/* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(state/* : CompileState */, prototype/* : StructurePrototype */)/* : string */;
+					let generated = generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.beforeInfix/* : string */()/* : unknown */.strip/* : unknown */()/* : unknown */)/* : string */ + prototype/* : StructurePrototype */.targetInfix/* : string */()/* : unknown */ + prototype/* : StructurePrototype */.name/* : string */()/* : unknown */ + joinedTypeParams/* : string */ + generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.after/* : string */()/* : unknown */)/* : string */ + generatedSuperType/* : string */ + interfacesJoined/* : string */ + " {" + generatedSegments + "\n}\n";
+					let compileState = withEnumCategoriesDefined/* : [CompileState, List<ClassSegment>] */[0/* : number */].popStructName/* : unknown */()/* : unknown */;
+					let definedState = compileState/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */;
+					return [definedState/* : unknown */, new Whitespace()/* : Whitespace */];
+				})/* : Option<R> */;
 			})/* : Option<R> */;
 		})/* : Option<R> */;
+	}
+	resolveTypeRefs(state : CompileState, refs : List<TypeRef>) : Option<[CompileState, List<Type>]> {
+		return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(state/* : CompileState */, refs/* : List<TypeRef> */, (state2, tuple) => this/* : Main */.parseType/* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.value/* : unknown */)/* : Option<[CompileState, Type]> */)/* : Option<[CompileState, List<R>]> */;
 	}
 	joinSuperTypes(state : CompileState, prototype : StructurePrototype) : string {
 		return prototype/* : StructurePrototype */.superTypes/* : List<TypeRef> */.query/* : () => Query<TypeRef> */()/* : Query<TypeRef> */.map/* : (arg0 : (arg0 : TypeRef) => R) => Query<R> */((value : TypeRef) => state/* : CompileState */.resolveType/* : (arg0 : string) => Option<Type> */(value/* : TypeRef */.value/* : unknown */)/* : Option<Type> */)/* : Query<R> */.flatMap/* : (arg0 : (arg0 : T) => Option<R>) => Option<R> */(Queries/* : Queries */.fromOption/* : unknown */)/* : Option<R> */.map/* : (arg0 : (arg0 : T) => R) => Option<R> */(Type/* : Type */.generate/* : unknown */)/* : Option<R> */.collect/* : unknown */(new Joiner(", ")/* : Joiner */)/* : unknown */.map/* : unknown */((generated) => " extends " + generated/* : unknown */)/* : unknown */.orElse/* : unknown */("")/* : unknown */;
