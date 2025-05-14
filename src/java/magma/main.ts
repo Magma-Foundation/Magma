@@ -1,24 +1,24 @@
-/*public */class Main {/*private static */class State {/*private final List<String> segments;*//*
+/*private static */class DivideState {/*private final List<String> segments;*//*
         private StringBuilder buffer;*//*
         private int depth;*//*
 
-        private State(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }
 
-        public State() {
+        public DivideState() {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }
 
-        private State advance() {
+        private DivideState advance() {
             this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
 
-        private State append(char c) {
+        private DivideState append(char c) {
             this.buffer.append(c);
             return this;
         }
@@ -27,14 +27,27 @@
             return this.depth == 0;
         }
 
-        public State enter() {
+        public DivideState enter() {
             this.depth++;
             return this;
         }
 
-        public State exit() {
+        public DivideState exit() {
             this.depth--;
             return this;
+        }
+    }
+
+    private record Tuple<A, B>(A left, B right) {
+    }
+
+    private record CompileState(String output) {
+        public CompileState() {
+            this("");
+        }
+
+        public CompileState append(String element) {
+            return new CompileState(this.output + element);
         }
     }
 
@@ -50,21 +63,24 @@
     }
 
     private static String compileRoot(String input) {
-        return compileSegments(input, Main::compileRootSegment);*//*
+        var compiled = compileSegments(new CompileState(), input, Main::compileRootSegment);*//*
+        return compiled.left.output + compiled.right;*//*
     }
 
-    private static String compileSegments(String input, Function<String, String> mapper) {
+    private static Tuple<CompileState, String> compileSegments(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         var divisions = divide(input);*//*
-        var output = new StringBuilder();*//*
+
+        var current = new Tuple<>(state, new StringBuilder());*//*
         for (var segment : divisions) {
-            output.append(mapper.apply(segment));
+            var mapped = mapper.apply(current.left, segment);
+            current = new Tuple<>(mapped.left, current.right.append(mapped.right));
         }
 
-        return output.toString();*//*
+        return new Tuple<>(current.left, current.right.toString());*//*
     }
 
     private static List<String> divide(String input) {
-        var current = new State();*//*
+        var current = new DivideState();*//*
 
         for (var i = 0;*//* i < input.length();*//* i++) {
             var c = input.charAt(i);
@@ -74,59 +90,65 @@
         return current.advance().segments;*//*
     }
 
-    private static State fold(State state, char c) {
+    private static DivideState fold(DivideState state, char c) {
         var appended = state.append(c);*//*
         if (c == ';*//*' && appended.isLevel()) {
             return appended.advance();
         }
+
         if (c == '{') {
             return appended.enter();
         }
+
         if (c == '}') {
             return appended.exit();
         }
+
         return appended;*//*
     }
 
-    private static String compileRootSegment(String input) {
+    private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         var stripped = input.strip();*//*
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return "";
+            return new Tuple<>(state, "");
         }
 
-        return compileClassSegment(stripped);*//*
+        return compileClassSegment(state, stripped);*//*
     }
 
-    private static String compileClassSegment(String input) {
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
         return compileInfix(input, "class ", (beforeKeyword, right1) -> {
             return compileInfix(right1, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
-                    var outputContent = compileSegments(inputContent, Main::compileClassSegment);
-                    return Optional.of(placeholder(beforeKeyword) + "class " + name.strip() + " {" + outputContent + "}");
+                    var outputContentTuple = compileSegments(state, inputContent, Main::compileClassSegment);
+                    var outputContentState = outputContentTuple.left;
+                    var outputContent = outputContentTuple.right;
+
+                    var generated = placeholder(beforeKeyword) + "class " + name.strip() + " {" + outputContent + "}";
+                    return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });
-        }).orElseGet(() -> placeholder(input));*//*
+        }).orElseGet(() -> new Tuple<>(state, placeholder(input)));*//*
     }
 
-    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
-        if (input.endsWith(suffix)) {
-            var content = input.substring(0, input.length() - suffix.length());
-            return mapper.apply(content);
-        }
-        else {
+    private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
+        if (!input.endsWith(suffix)) {
             return Optional.empty();
         }
+
+        var content = input.substring(0, input.length() - suffix.length());*//*
+        return mapper.apply(content);*//*
     }
 
-    private static Optional<String> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
-        var index = stripped.indexOf(infix);*//*
-        if (index >= 0) {
-            var left = stripped.substring(0, index);
-            var right = stripped.substring(index + infix.length());
-            return mapper.apply(left, right);
+    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+        var index = input.indexOf(infix);*//*
+        if (index < 0) {
+            return Optional.empty();
         }
 
-        return Optional.empty();*//*
+        var left = input.substring(0, index);*//*
+        var right = input.substring(index + infix.length());*//*
+        return mapper.apply(left, right);*//*
     }
 
     private static String placeholder(String input) {
@@ -135,4 +157,4 @@
                 .replace("end", "end");*//*
 
         return "start" + replaced + "end";*//*
-    */}}
+    */}/*public */class Main {}
