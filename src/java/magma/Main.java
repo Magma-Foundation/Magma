@@ -190,7 +190,7 @@ public class Main {
     }
 
     private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, EnumValues, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
-        Option<Definition> findDefinition();
+        Option<Definition> maybeCreateDefinition();
     }
 
     private @interface Actual {
@@ -644,6 +644,17 @@ public class Main {
         public Definition removeAnnotations() {
             return new ImmutableDefinition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
         }
+
+        @Override
+        public String toString() {
+            return "ImmutableDefinition[" +
+                    "annotations=" + this.annotations + ", " +
+                    "maybeBefore=" + this.modifiers + ", " +
+                    "findName=" + this.name + ", " +
+                    "findType=" + this.type + ", " +
+                    "typeParams=" + this.typeParams + ']';
+        }
+
     }
 
     private record ObjectType(
@@ -967,7 +978,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1108,7 +1119,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1403,7 +1414,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.header.createDefinition(this.findParamTypes()));
         }
 
@@ -1411,14 +1422,14 @@ public class Main {
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
     }
 
     private record ClassDefinition(int depth, Definition definition) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
     }
@@ -1429,7 +1440,7 @@ public class Main {
             Value value
     ) implements IncompleteClassSegment {
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
     }
@@ -1438,25 +1449,49 @@ public class Main {
     }
 
     private record StructurePrototype(
-            StructureDefinition definition,
+            String targetInfix,
+            String beforeInfix,
+            String name,
+            List<String> typeParams,
             List<Definition> parameters,
-            List<IncompleteClassSegment> segments
+            String after,
+            List<IncompleteClassSegment> segments,
+            List<String> variants,
+            List<TypeRef> interfaces,
+            List<TypeRef> superTypes
     ) implements IncompleteClassSegment {
-        private ObjectType createObjectType() {
-            var definitionFromSegments = this.findDefinitionsFromSegments();
-            return new ObjectType(this.definition.name, this.definition.typeParams, definitionFromSegments.addAllLast(this.parameters), this.definition.variants);
+        private static String generateEnumEntries(List<String> variants) {
+            return variants.query()
+                    .map(inner -> "\n\t" + inner)
+                    .collect(new Joiner(","))
+                    .orElse("");
         }
 
-        private List<Definition> findDefinitionsFromSegments() {
-            return this.segments.query()
-                    .map(IncompleteClassSegment::findDefinition)
+        private ObjectType createObjectType() {
+            var definitionFromSegments = this.segments.query()
+                    .map(IncompleteClassSegment::maybeCreateDefinition)
                     .flatMap(Queries::fromOption)
                     .collect(new ListCollector<>());
+
+            return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
         }
 
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
+        }
+
+        private String joinTypeParams() {
+            return this.typeParams().query()
+                    .collect(new Joiner(", "))
+                    .map(inner -> "<" + inner + ">")
+                    .orElse("");
+        }
+
+        private String generateToEnum() {
+            var variants = this.variants;
+            var joined = generateEnumEntries(variants);
+            return "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
         }
     }
 
@@ -1579,7 +1614,7 @@ public class Main {
         }
 
         @Override
-        public Option<Definition> findDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
     }
@@ -1592,33 +1627,6 @@ public class Main {
 
         private static boolean isBlank(String input) {
             return input.isBlank();
-        }
-    }
-
-    public record StructureDefinition(
-            String targetInfix,
-            String beforeInfix,
-            String name,
-            List<String> typeParams,
-            String after,
-            List<String> variants,
-            List<TypeRef> interfaces,
-            List<TypeRef> superTypes
-    ) {
-        private String generateToEnum() {
-            var joined = this.variants.query()
-                    .map(inner -> "\n\t" + inner)
-                    .collect(new Joiner(","))
-                    .orElse("");
-
-            return "enum " + this.name + "Variant" + " {" + joined + "\n}\n";
-        }
-
-        private String joinTypeParams() {
-            return this.typeParams.query()
-                    .collect(new Joiner(", "))
-                    .map(inner -> "<" + inner + ">")
-                    .orElse("");
         }
     }
 
@@ -2011,7 +2019,7 @@ public class Main {
         var segments = segmentsTuple.right();
 
         var parameters = this.retainDefinitions(rawParameters);
-        var prototype = new StructurePrototype(new StructureDefinition(targetInfix, beforeInfix, name, typeParams, after, variants, interfaces, maybeSuperType), parameters, segments);
+        var prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, maybeSuperType);
         return new Some<>(new Tuple2Impl<>(segmentsState.addType(prototype.createObjectType()), prototype));
     }
 
@@ -2019,30 +2027,30 @@ public class Main {
         var thisType = prototype.createObjectType();
         var withThis = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
 
-        return this.resolveTypeRefs(withThis, prototype.definition.interfaces).flatMap(interfacesTuple -> {
-            return this.resolveTypeRefs(interfacesTuple.left(), prototype.definition.superTypes).flatMap(superTypesTuple -> {
+        return this.resolveTypeRefs(withThis, prototype.interfaces).flatMap(interfacesTuple -> {
+            return this.resolveTypeRefs(interfacesTuple.left(), prototype.superTypes).flatMap(superTypesTuple -> {
                 var interfaces = interfacesTuple.right();
                 var superTypes = superTypesTuple.right();
 
                 var bases = this.resolveBaseTypes(interfaces).addAllLast(this.resolveBaseTypes(superTypes));
-                var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.definition.name);
+                var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.name);
 
-                return this.mapUsingState(superTypesTuple.left(), prototype.segments, (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
+                return this.mapUsingState(superTypesTuple.left(), prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
                     var exited = oldStatementsTuple.left().exitDefinitions();
                     var oldStatements = oldStatementsTuple.right();
 
-                    var withEnumCategoriesDefined = this.defineEnumCategories(exited, oldStatements, prototype.definition.name, prototype.definition.variants, prototype.definition.generateToEnum());
-                    var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.definition.name, variantsSuper, withEnumCategoriesDefined.right());
+                    var withEnumCategoriesDefined = this.defineEnumCategories(exited, oldStatements, prototype.name, prototype.variants, prototype.generateToEnum());
+                    var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined.right());
                     var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
-                    var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters);
+                    var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
 
                     var generatedSegments = this.joinSegments(withConstructor);
-                    var joinedTypeParams = prototype.definition.joinTypeParams();
+                    var joinedTypeParams = prototype.joinTypeParams();
                     var interfacesJoined = this.joinInterfaces(interfaces);
 
                     var generatedSuperType = this.joinSuperTypes(state, prototype);
 
-                    var generated = generatePlaceholder(prototype.definition.beforeInfix.strip()) + prototype.definition.targetInfix + prototype.definition.name + joinedTypeParams + generatePlaceholder(prototype.definition.after) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+                    var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
                     var compileState = withEnumCategoriesDefined.left().popStructName();
 
                     var definedState = compileState.addStructure(generated);
@@ -2057,7 +2065,7 @@ public class Main {
     }
 
     private String joinSuperTypes(CompileState state, StructurePrototype prototype) {
-        return prototype.definition.superTypes
+        return prototype.superTypes
                 .query()
                 .map(value -> state.resolveType(value.value))
                 .flatMap(Queries::fromOption)
