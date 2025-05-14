@@ -107,9 +107,7 @@ public class Main {
         Map<K, V> with(K key, V value);
     }
 
-    private sealed interface Type extends Argument {
-        String generate();
-
+    private sealed interface Type extends Argument, Node {
         Type replace(Map<String, Type> mapping);
 
         String findName();
@@ -121,16 +119,17 @@ public class Main {
     private sealed interface Parameter permits Definition, Placeholder, Whitespace {
     }
 
-    private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue, TupleNode {
+    private interface Node {
         String generate();
     }
 
-    private interface LambdaValue {
-        String generate();
+    private sealed interface Value extends LambdaValue, Caller, Argument, Node permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue, TupleNode {
     }
 
-    private sealed interface Caller permits ConstructionCaller, Value {
-        String generate();
+    private interface LambdaValue extends Node {
+    }
+
+    private sealed interface Caller extends Node permits ConstructionCaller, Value {
     }
 
     private interface Header {
@@ -139,20 +138,16 @@ public class Main {
         String generateWithParams(String joinedParameters);
     }
 
-    private interface ClassSegment {
-        String generate();
+    private interface ClassSegment extends Node {
     }
 
-    private interface FunctionSegment {
-        String generate();
+    private interface FunctionSegment extends Node {
     }
 
-    private interface BlockHeader {
-        String generate();
+    private interface BlockHeader extends Node {
     }
 
-    private interface StatementValue {
-        String generate();
+    private interface StatementValue extends Node {
     }
 
     private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, EnumValues, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
@@ -618,7 +613,7 @@ public class Main {
 
     }
 
-    private record ObjectRefType(String name) implements Type {
+    private record StructureRefType(String name) implements Type {
         @Override
         public String generate() {
             return this.name;
@@ -626,7 +621,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new ObjectRefType(this.name);
+            return new StructureRefType(this.name);
         }
 
         @Override
@@ -689,7 +684,7 @@ public class Main {
 
             if (maybe instanceof Some<Tuple2<String, List<String>>> some) {
                 var found = some.value;
-                return new Some<>(new ObjectRefType(found.left()));
+                return new Some<>(new StructureRefType(found.left()));
             }
 
             var maybeTypeParam = this.typeParams.iterate()
@@ -1008,7 +1003,7 @@ public class Main {
         }
     }
 
-    private record Template(ObjectRefType base, List<Type> arguments) implements Type {
+    private record Template(StructureRefType base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
             var joinedArguments = this.arguments.iterate()
@@ -1067,12 +1062,11 @@ public class Main {
 
     }
 
-    private record DataAccess(Value parent, String property, Type type) implements Value {
+    private record DataAccess(Value parent, String property) implements Value {
         @Override
         public String generate() {
-            return this.parent.generate() + "." + this.property + createDebugString(this.type);
+            return this.parent.generate() + "." + this.property;
         }
-
     }
 
     private record ConstructionCaller(Type type) implements Caller {
@@ -1147,7 +1141,7 @@ public class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            return this.caller.generate() + "(" + joined + ")" + createDebugString(this.type);
+            return this.caller.generate() + "(" + joined + ")";
         }
     }
 
@@ -1588,13 +1582,13 @@ public class Main {
         return new None<>();
     }
 
-    private static Option<ObjectRefType> retainObjectRefType(Type type) {
-        if(type instanceof Template template) {
+    private static Option<StructureRefType> retainObjectRefType(Type type) {
+        if (type instanceof Template template) {
             return new Some<>(template.base);
         }
 
-        if (type instanceof ObjectRefType objectRefType) {
-            return new Some<>(objectRefType);
+        if (type instanceof StructureRefType structureRefType) {
+            return new Some<>(structureRefType);
         }
 
         return new None<>();
@@ -2029,7 +2023,7 @@ public class Main {
 
         var enumState = state.addStructure(enumGenerated);
 
-        var enumType = new ObjectRefType(name + "Variant");
+        var enumType = new StructureRefType(name + "Variant");
         var enumDefinition = this.createVariantDefinition(enumType);
 
         return new Tuple2Impl<>(enumState, segments.addFirst(new Statement(1, enumDefinition)));
@@ -2041,7 +2035,7 @@ public class Main {
             List<ClassSegment> oldStatements) {
         return variantsBases.iterate().fold(oldStatements, (classSegmentList, superType) -> {
             var variantTypeName = superType + "Variant";
-            var variantType = new ObjectRefType(variantTypeName);
+            var variantType = new StructureRefType(variantTypeName);
 
             var definition = this.createVariantDefinition(variantType);
             var source = new SymbolValue(variantTypeName + "." + name);
@@ -2051,7 +2045,7 @@ public class Main {
         });
     }
 
-    private List<String> findBaseNamesOfVariants(CompileState state, List<ObjectRefType> refs, String name) {
+    private List<String> findBaseNamesOfVariants(CompileState state, List<StructureRefType> refs, String name) {
         return refs.iterate()
                 .map(base -> state.findStructure(base.name))
                 .flatMap(Queries::fromOption)
@@ -2060,7 +2054,7 @@ public class Main {
                 .collect(new ListCollector<>());
     }
 
-    private List<ObjectRefType> resolveBaseTypes(List<Type> interfaces) {
+    private List<StructureRefType> resolveBaseTypes(List<Type> interfaces) {
         return interfaces.iterate()
                 .map(Main::retainObjectRefType)
                 .flatMap(Queries::fromOption)
@@ -2093,7 +2087,7 @@ public class Main {
         return Queries.from(segment);
     }
 
-    private Definition createVariantDefinition(ObjectRefType type) {
+    private Definition createVariantDefinition(StructureRefType type) {
         return Definition.createSimpleDefinition("_" + type.name, type);
     }
 
@@ -2108,7 +2102,7 @@ public class Main {
 
         var collect = parameters.iterate()
                 .map(definition -> {
-                    var destination = new DataAccess(new SymbolValue("this"), definition.findName(), Primitive.Unknown);
+                    var destination = new DataAccess(new SymbolValue("this"), definition.findName());
                     return new Assignment(destination, new SymbolValue(definition.findName()));
                 })
                 .<FunctionSegment>map(assignment -> new Statement(2, assignment))
@@ -2512,7 +2506,7 @@ public class Main {
             var definition = definitionTuple.right();
 
             var type = this.resolveValue(definitionSTate, child);
-            var variant = new DataAccess(child, "_" + type.findName() + "Variant", Primitive.Unknown);
+            var variant = new DataAccess(child, "_" + type.findName() + "Variant");
 
             var generate = type.findName();
             var temp = new SymbolValue(generate + "Variant." + definition.findType().findName());
@@ -2526,7 +2520,7 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseMethodReference(CompileState state, String input, int depth) {
         return this.last(input, "::", (s, s2) -> {
             var tuple = this.parseValue(state, s, depth);
-            return new Some<>(new Tuple2Impl<>(tuple.left(), new DataAccess(tuple.right(), s2, Primitive.Unknown)));
+            return new Some<>(new Tuple2Impl<>(tuple.left(), new DataAccess(tuple.right(), s2)));
         });
     }
 
@@ -2798,7 +2792,7 @@ public class Main {
                 }
             }
 
-            return new Some<>(new Tuple2Impl<>(tuple.left(), new DataAccess(parent, property, type)));
+            return new Some<>(new Tuple2Impl<>(tuple.left(), new DataAccess(parent, property)));
         });
     }
 
@@ -3062,12 +3056,12 @@ public class Main {
 
         if (state.resolveType(base) instanceof Some<Type> some) {
             var baseType = some.value;
-            if (baseType instanceof ObjectRefType findableType) {
+            if (baseType instanceof StructureRefType findableType) {
                 return new Tuple2Impl<>(state, new Template(findableType, children));
             }
         }
 
-        return new Tuple2Impl<>(state, new Template(new ObjectRefType(base), children));
+        return new Tuple2Impl<>(state, new Template(new StructureRefType(base), children));
     }
 
     private Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
