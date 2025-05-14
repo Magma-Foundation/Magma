@@ -68,29 +68,43 @@
 	/*}
 
     private static Tuple<CompileState, String> compileSegments(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        var divisions*/ /*=*/ /*divide(input)*/;
+        return compileAll(state, input, Main::foldStatements,*/ /*mapper,*/ /*Main::mergeStatements)*/;
+	/*}
+
+    private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var divisions =*/ /*divide(input,*/ /*folder)*/;
 	/*var current = new Tuple<>(state,*/ /*new*/ /*StringBuilder())*/;
 	/*for (var segment : divisions) {
-            var mapped = mapper.apply(current.left, segment);
-            current = new Tuple<>(mapped.left, current.right.append(mapped.right));
+            var currentState = current.left;
+            var currentElement = current.right;
+
+            var mappedTuple = mapper.apply(currentState, segment);
+            var mappedState = mappedTuple.left;
+            var mappedElement = mappedTuple.right;
+
+            current = new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
         }
 
         return new*/ /*Tuple<>(current.left,*/ /*current.right.toString())*/;
 	/*}
 
-    private static List<String> divide(String input) {
+    private static StringBuilder mergeStatements(StringBuilder cache, String element) {
+       */ /*return*/ /*cache.append(element)*/;
+	/*}
+
+    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current =*/ /*new*/ /*DivideState()*/;
 	/*for (var i*/ /*=*/ /*0*/;
 	/*i*/ /*<*/ /*input.length()*/;
 	/*i++) {
             var c = input.charAt(i);
-            current = fold(current, c);
+            current = folder.apply(current, c);
         }
 
        */ /*return*/ /*current.advance().segments*/;
 	/*}
 
-    private static DivideState fold(DivideState state, char c) {
+    private static DivideState foldStatements(DivideState state, char c) {
         var appended*/ /*=*/ /*state.append(c)*/;
 	/*if (c*/ /*==*/ /*'*/;
 	/*' && appended.isLevel()) {
@@ -170,14 +184,14 @@
         var stripped*/ /*=*/ /*input.strip()*/;
 	/*return compileLast(stripped, " ", (beforeName, name) -> {
             return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
-                var typeTuple = compileType(type, state);
+                var typeTuple = compileType(state, type);
                 var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + generatePlaceholder(name);
                 return Optional.of(new Tuple<>(typeTuple.left, generated));
             });
         }).orElseGet(() -> new*/ /*Tuple<>(state,*/ /*generatePlaceholder(input)))*/;
 	/*}
 
-    private static Tuple<CompileState, String> compileType(String type, CompileState state) {
+    private static Tuple<CompileState, String> compileType(CompileState state, String type) {
         return compileOr(state, type, List.of(
                */ /*Main::compileGeneric*/ /*))*/;
 	/*}
@@ -185,8 +199,23 @@
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
-                return Optional.of(new Tuple<>(state, generatePlaceholder(baseString) + "<" + generatePlaceholder(argumentsString) + ">"));
+                var argumentsTuple = compileAll(state, argumentsString, Main::foldValues, Main::compileType, Main::mergeValues);
+                return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(baseString) + "<" + argumentsTuple.right + ">"));
            */ /*});*/ /*})*/;
+	/*}
+
+    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+        if (cache.isEmpty()) {
+            return cache.append(element);
+        }
+        return*/ /*cache.append(",*/ /*").append(element)*/;
+	/*}
+
+    private static DivideState foldValues(DivideState state, char c) {
+        if (c == ',') {
+            return state.advance();
+        }
+       */ /*return*/ /*state.append(c)*/;
 	/*}
 
     private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
