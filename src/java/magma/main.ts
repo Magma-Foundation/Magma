@@ -1,4 +1,4 @@
-/*public class Main {
+/*public */class /*Main {
     private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
@@ -91,7 +91,20 @@
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
-        return placeholder(stripped);
+        return compileClass(stripped, "class ", (left1, right1) -> {
+            return Optional.of(placeholder(left1) + "class " + placeholder(right1));
+        }).orElseGet(() -> placeholder(stripped));
+    }
+
+    private static Optional<String> compileClass(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
+        var index = stripped.indexOf(infix);
+        if (index >= 0) {
+            var left = stripped.substring(0, index);
+            var right = stripped.substring(index + infix.length());
+            return mapper.apply(left, right);
+        }
+
+        return Optional.empty();
     }
 
     private static String placeholder(String input) {
