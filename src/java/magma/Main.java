@@ -74,10 +74,11 @@ public class Main {
     }
 
     private static String compileRootSegment(String input) {
-        if (input.startsWith("package ")) {
+        var stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
-        return placeholder(input);
+        return placeholder(stripped);
     }
 
     private static String placeholder(String input) {
