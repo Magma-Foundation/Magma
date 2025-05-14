@@ -1,5 +1,4 @@
-/*public */class /*Main {
-    private static class State {
+/*public */class Main {/*private static class State {
         private final List<String> segments;
         private StringBuilder buffer;
         private int depth;
@@ -91,12 +90,27 @@
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return "";
         }
-        return compileClass(stripped, "class ", (left1, right1) -> {
-            return Optional.of(placeholder(left1) + "class " + placeholder(right1));
+
+        return compileInfix(stripped, "class ", (left1, right1) -> {
+            return compileInfix(right1, "{", (name, withEnd) -> {
+                return compileSuffix(withEnd.strip(), "}", content -> {
+                    return Optional.of(placeholder(left1) + "class " + name.strip() + " {" + placeholder(content) + "}");
+                });
+            });
         }).orElseGet(() -> placeholder(stripped));
     }
 
-    private static Optional<String> compileClass(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    private static Optional<String> compileSuffix(String input, String suffix, Function<String, Optional<String>> mapper) {
+        if (input.endsWith(suffix)) {
+            var content = input.substring(0, input.length() - suffix.length());
+            return mapper.apply(content);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> compileInfix(String stripped, String infix, BiFunction<String, String, Optional<String>> mapper) {
         var index = stripped.indexOf(infix);
         if (index >= 0) {
             var left = stripped.substring(0, index);
@@ -114,4 +128,4 @@
 
         return "start" + replaced + "end";
     }
-}*/
+*/}
