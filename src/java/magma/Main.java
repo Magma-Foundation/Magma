@@ -1036,8 +1036,7 @@ public class Main {
     }
 
     private record Placeholder(
-            String input
-    ) implements Parameter, Value, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment, Type {
+            String input) implements Parameter, Value, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment, Type {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -1520,6 +1519,23 @@ public class Main {
 
         private static boolean isBlank(String input) {
             return input.isBlank();
+        }
+    }
+
+    private record SymbolType(String value) implements Type {
+        @Override
+        public String generate() {
+            return this.value;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
+        }
+
+        @Override
+        public String findName() {
+            return "";
         }
     }
 
@@ -2993,12 +3009,7 @@ public class Main {
         }
 
         if (isSymbol(stripped)) {
-            if (state.resolveType(stripped) instanceof Some(var resolved)) {
-                return new Some<>(new Tuple2Impl<>(state, resolved));
-            }
-            else {
-                return new Some<>(new Tuple2Impl<>(state, new Placeholder(stripped)));
-            }
+            return new Some<>(new Tuple2Impl<>(state, new SymbolType(stripped)));
         }
 
         return this.parseTemplate(state, input)

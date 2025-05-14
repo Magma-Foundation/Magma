@@ -316,7 +316,7 @@ var ResultVariant;
             let some = maybeTypeParam;
             return new Some(new TypeParam(some.value /* : unknown */) /* : TypeParam */) /* : Some */;
         }
-        return this.findStructure /* : (arg0 : string) => Option<content-start StructureType content-end> */(name) /* : Option<content-start StructureType content-end> */.map /* : unknown */((type) => type) /* : unknown */;
+        return this.findStructure /* : (arg0 : string) => Option<StructureType> */(name) /* : Option<StructureType> */.map /* : unknown */((type) => type) /* : unknown */;
     }
     define(definition) {
         return new CompileState(this.structures /* : unknown */, this.definitions /* : unknown */.mapLast /* : unknown */((frame) => frame.addLast /* : unknown */(definition) /* : unknown */) /* : unknown */, this.structureTypes /* : unknown */, this.structNames /* : unknown */, this.typeParams /* : unknown */, this.typeRegister /* : unknown */, this.functionSegments /* : unknown */) /* : CompileState */;
@@ -340,7 +340,7 @@ var ResultVariant;
         let removed = this.definitions /* : unknown */.removeLast /* : unknown */() /* : unknown */.map /* : unknown */(Tuple2.left /* : unknown */) /* : unknown */.orElse /* : unknown */(this.definitions /* : unknown */) /* : unknown */;
         return new CompileState(this.structures /* : unknown */, removed, this.structureTypes /* : unknown */, this.structNames /* : unknown */, this.typeParams /* : unknown */, this.typeRegister /* : unknown */, this.functionSegments /* : unknown */) /* : CompileState */;
     }
-    addType(thisType /* StructureType */) {
+    addType(thisType) {
         return new CompileState(this.structures /* : unknown */, this.definitions /* : unknown */, this.structureTypes /* : unknown */.addLast /* : unknown */(thisType) /* : unknown */, this.structNames /* : unknown */, this.typeParams /* : unknown */, this.typeRegister /* : unknown */, this.functionSegments /* : unknown */) /* : CompileState */;
     }
     addFunctionSegment(segment) {
@@ -615,8 +615,6 @@ var ResultVariant;
         this.sourceRepresentation /* : unknown */ = sourceRepresentation;
         this.targetRepresentation /* : unknown */ = targetRepresentation;
     }
-    ;
-    ;
 }
 Operator.ADD = new Operator("+", "+") /* : Operator */;
 Operator.AND = new Operator("&&", "&&") /* : Operator */;
@@ -901,11 +899,11 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
     }
 }
 /* private */ class JVMIOError /*  */ {
-    constructor(error /* IOException */) {
+    constructor(error) {
         this.error /* : unknown */ = error;
     }
     display() {
-        let writer = new /* StringWriter */ () /* : content-start StringWriter content-end */;
+        let writer = new StringWriter() /* : StringWriter */;
         /* this.error.printStackTrace(new PrintWriter(writer)) */ ;
         return writer.toString /* : unknown */() /* : unknown */;
     }
@@ -961,6 +959,20 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
 /* public static */ class Strings /*  */ {
     static isBlank(input) {
         return input.isBlank /* : unknown */() /* : unknown */;
+    }
+}
+/* private */ class SymbolType /*  */ {
+    constructor(value) {
+        this.value /* : unknown */ = value;
+    }
+    generate() {
+        return this.value /* : unknown */;
+    }
+    replace(mapping) {
+        return this;
+    }
+    findName() {
+        return "";
     }
 }
 /* private */ class Primitive /*  */ {
@@ -1027,7 +1039,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return new None() /* : None */;
     }
     static retainObjectRefType(type) {
-        if (type._TypeVariant /* : unknown */ === TypeVariant.ObjectRefType) {
+        if (type._Variant /* : unknown */ === Variant.) {
             let objectRefType = type;
             return new Some(objectRefType) /* : Some */;
         }
@@ -1037,8 +1049,8 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     main() {
         let parent = this.findRoot /* : () => Path */() /* : Path */;
-        let source = parent.resolve /* : (arg0 : string) => Path */("Main.java") /* : Path */;
-        let target = parent.resolve /* : (arg0 : string) => Path */("main.ts") /* : Path */;
+        let source = parent.resolve /* : unknown */("Main.java") /* : unknown */;
+        let target = parent.resolve /* : unknown */("main.ts") /* : unknown */;
         /* source.readString()
                 .mapValue(this::compile)
                 .match(target::writeString, Some::new)
@@ -1130,7 +1142,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return escaped[1];
     }
     foldStatementChar(state, c) {
-        let append = state.append /* : (arg0 : string) => DivideState */(c) /* : DivideState */;
+        let append = state.append /* : unknown */(c) /* : unknown */;
         if (c === ";" && append.isLevel /* : unknown */() /* : unknown */) {
             return append.advance /* : unknown */() /* : unknown */;
         }
@@ -1174,9 +1186,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     foldByDelimiter(state1, c, delimiter) {
         if (c === delimiter) {
-            return state1.advance /* : () => DivideState */() /* : DivideState */;
+            return state1.advance /* : unknown */() /* : unknown */;
         }
-        return state1.append /* : (arg0 : string) => DivideState */(c) /* : DivideState */;
+        return state1.append /* : unknown */(c) /* : unknown */;
     }
     parseStructureWithMaybePermits(targetInfix, state, beforeInfix, beforeContent, content1, annotations) {
         return this.last /* : (arg0 : string, arg1 : string, arg2 : (arg0 : string, arg1 : string) => Option<T>) => Option<T> */(beforeContent, " permits ", (s, s2) => {
@@ -1225,16 +1237,16 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (annotations.contains /* : unknown */("Actual") /* : unknown */) {
             return new Some([state, new Whitespace() /* : Whitespace */]) /* : Some */;
         }
-        let segmentsTuple = this.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state.pushStructName /* : (arg0 : [string, List<string>]) => CompileState */([name, variants]) /* : CompileState */.withTypeParams /* : unknown */(typeParams) /* : unknown */, content, (state0, input) => this.parseClassSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, IncompleteClassSegment] */(state0, input, 1) /* : [CompileState, IncompleteClassSegment] */) /* : [CompileState, List<T>] */;
+        let segmentsTuple = this.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state.pushStructName /* : unknown */([name, variants]) /* : unknown */.withTypeParams /* : unknown */(typeParams) /* : unknown */, content, (state0, input) => this.parseClassSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, IncompleteClassSegment] */(state0, input, 1) /* : [CompileState, IncompleteClassSegment] */) /* : [CompileState, List<T>] */;
         let segmentsState = segmentsTuple[0];
         let segments = segmentsTuple[1];
         let parameters = this.retainDefinitions /* : (arg0 : List<Parameter>) => List<Definition> */(rawParameters) /* : List<Definition> */;
         let prototype = new StructurePrototype(targetInfix, beforeInfix, name, typeParams, parameters, after, segments, variants, interfaces, maybeSuperType) /* : StructurePrototype */;
-        return new Some([segmentsState.addType /* : unknown */(prototype.createObjectType /* : () => StructureType */() /* : StructureType */) /* : unknown */, prototype]) /* : Some */;
+        return new Some([segmentsState.addType /* : unknown */(prototype.createObjectType /* : unknown */() /* : unknown */) /* : unknown */, prototype]) /* : Some */;
     }
     completeStructure(state, prototype) {
-        let thisType = prototype.createObjectType /* : () => StructureType */() /* : StructureType */;
-        let withThis = state.enterDefinitions /* : () => CompileState */() /* : CompileState */.define /* : unknown */(Definition.createSimpleDefinition /* : unknown */("this", thisType) /* : unknown */) /* : unknown */;
+        let thisType = prototype.createObjectType /* : unknown */() /* : unknown */;
+        let withThis = state.enterDefinitions /* : unknown */() /* : unknown */.define /* : unknown */(Definition.createSimpleDefinition /* : unknown */("this", thisType) /* : unknown */) /* : unknown */;
         return this.resolveTypeRefs /* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(withThis, prototype.interfaces /* : unknown */) /* : Option<[CompileState, List<Type>]> */.flatMap /* : unknown */((interfacesTuple) => {
             return this.resolveTypeRefs /* : (arg0 : CompileState, arg1 : List<TypeRef>) => Option<[CompileState, List<Type>]> */(interfacesTuple.left /* : unknown */() /* : unknown */, prototype.superTypes /* : unknown */) /* : Option<[CompileState, List<Type>]> */.flatMap /* : unknown */((superTypesTuple) => {
                 let interfaces = interfacesTuple.right /* : unknown */() /* : unknown */;
@@ -1250,14 +1262,14 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         /* return oldStatementsTuple -> */ {
             let exited = oldStatementsTuple.left /* : unknown */() /* : unknown */.exitDefinitions /* : unknown */() /* : unknown */;
             let oldStatements = oldStatementsTuple.right /* : unknown */() /* : unknown */;
-            let withEnumCategoriesDefinedTuple = this.defineEnumCategories /* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited, oldStatements, prototype.name /* : unknown */, prototype.variants /* : unknown */, prototype.generateToEnum /* : () => string */() /* : string */) /* : [CompileState, List<ClassSegment>] */;
+            let withEnumCategoriesDefinedTuple = this.defineEnumCategories /* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited, oldStatements, prototype.name /* : unknown */, prototype.variants /* : unknown */, prototype.generateToEnum /* : unknown */() /* : unknown */) /* : [CompileState, List<ClassSegment>] */;
             let withEnumCategoriesDefinedState = withEnumCategoriesDefinedTuple[0];
             let withEnumCategoriesDefined = withEnumCategoriesDefinedTuple[1];
             let withEnumCategoriesImplemented = this.implementEnumCategories /* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype.name /* : unknown */, variantsSuper, withEnumCategoriesDefined) /* : List<ClassSegment> */;
             let withEnumValues = this.implementEnumValues /* : (arg0 : List<ClassSegment>, arg1 : StructureType) => List<ClassSegment> */(withEnumCategoriesImplemented, thisType) /* : List<ClassSegment> */;
             let withConstructor = this.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues, prototype.parameters /* : unknown */() /* : unknown */) /* : List<ClassSegment> */;
             let generatedSegments = this.joinSegments /* : (arg0 : List<ClassSegment>) => string */(withConstructor) /* : string */;
-            let joinedTypeParams = prototype.joinTypeParams /* : () => string */() /* : string */;
+            let joinedTypeParams = prototype.joinTypeParams /* : unknown */() /* : unknown */;
             let interfacesJoined = this.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces) /* : string */;
             let generatedSuperType = this.joinSuperTypes /* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(withEnumCategoriesDefinedState, prototype) /* : string */;
             let generated = generatePlaceholder(prototype.beforeInfix /* : unknown */() /* : unknown */.strip /* : unknown */() /* : unknown */) /* : string */ + prototype.targetInfix /* : unknown */() /* : unknown */ + prototype.name /* : unknown */() /* : unknown */ + joinedTypeParams + generatePlaceholder(prototype.after /* : unknown */() /* : unknown */) /* : string */ + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
@@ -1274,7 +1286,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return this.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(state, refs, (state2, tuple) => this.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2, tuple.right /* : unknown */() /* : unknown */.value /* : unknown */) /* : Option<[CompileState, Type]> */) /* : Option<[CompileState, List<R>]> */;
     }
     joinSuperTypes(state, prototype) {
-        return prototype.superTypes /* : unknown */.iterate /* : unknown */() /* : unknown */.map /* : unknown */((value) => state.resolveType /* : (arg0 : string) => Option<Type> */(value.value /* : unknown */) /* : Option<Type> */) /* : unknown */.flatMap /* : unknown */(Queries.fromOption /* : unknown */) /* : unknown */.map /* : unknown */(Type.generate /* : unknown */) /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((generated) => " extends " + generated) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
+        return prototype.superTypes /* : unknown */.iterate /* : unknown */() /* : unknown */.map /* : unknown */((value) => state.resolveType /* : unknown */(value.value /* : unknown */) /* : unknown */) /* : unknown */.flatMap /* : unknown */(Queries.fromOption /* : unknown */) /* : unknown */.map /* : unknown */(Type.generate /* : unknown */) /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((generated) => " extends " + generated) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     implementEnumValues(withConstructor, thisType) {
         return withConstructor.iterate /* : unknown */() /* : unknown */.flatMap /* : unknown */((segment) => this.flattenEnumValues /* : (arg0 : ClassSegment, arg1 : StructureType) => Query<ClassSegment> */(segment, thisType) /* : Query<ClassSegment> */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
@@ -1283,7 +1295,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (variants.isEmpty /* : unknown */() /* : unknown */) {
             return [state, segments];
         }
-        let enumState = state.addStructure /* : (arg0 : string) => CompileState */(enumGenerated) /* : CompileState */;
+        let enumState = state.addStructure /* : unknown */(enumGenerated) /* : unknown */;
         let enumType = new ObjectRefType(name + "Variant") /* : ObjectRefType */;
         let enumDefinition = this.createVariantDefinition /* : (arg0 : ObjectRefType) => Definition */(enumType) /* : Definition */;
         return [enumState, segments.addFirst /* : unknown */(new Statement(1, enumDefinition) /* : Statement */) /* : unknown */];
@@ -1299,7 +1311,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : unknown */;
     }
     findBaseNamesOfVariants(state, refs, name) {
-        return refs.iterate /* : unknown */() /* : unknown */.map /* : unknown */((base) => state.findStructure /* : (arg0 : string) => Option<content-start StructureType content-end> */(base.name /* : unknown */) /* : Option<content-start StructureType content-end> */) /* : unknown */.flatMap /* : unknown */(Queries.fromOption /* : unknown */) /* : unknown */.filter /* : unknown */((type) => type.hasVariant /* : unknown */(name) /* : unknown */) /* : unknown */.map /* : unknown */(StructureType.name /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
+        return refs.iterate /* : unknown */() /* : unknown */.map /* : unknown */((base) => state.findStructure /* : unknown */(base.name /* : unknown */) /* : unknown */) /* : unknown */.flatMap /* : unknown */(Queries.fromOption /* : unknown */) /* : unknown */.filter /* : unknown */((type) => type.hasVariant /* : unknown */(name) /* : unknown */) /* : unknown */.map /* : unknown */(StructureType.name /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     resolveBaseTypes(interfaces) {
         return interfaces.iterate /* : unknown */() /* : unknown */.map /* : unknown */(Main.retainObjectRefType /* : unknown */) /* : unknown */.flatMap /* : unknown */(Queries.fromOption /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
@@ -1311,7 +1323,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return interfaces.iterate /* : unknown */() /* : unknown */.map /* : unknown */(Type.generate /* : unknown */) /* : unknown */.collect /* : unknown */(new Joiner(", ") /* : Joiner */) /* : unknown */.map /* : unknown */((inner) => " implements " + inner) /* : unknown */.orElse /* : unknown */("") /* : unknown */;
     }
     flattenEnumValues(segment, thisType) {
-        if (segment._ClassSegmentVariant /* : unknown */ === ClassSegmentVariant.EnumValues) {
+        if (segment._Variant /* : unknown */ === Variant.) {
             let enumValues = segment;
             return enumValues.values /* : unknown */.iterate /* : unknown */() /* : unknown */.map /* : unknown */((enumValue) => {
                 let definition = new Definition(Lists.empty /* : unknown */() /* : unknown */, Lists.of /* : unknown */("static") /* : unknown */, enumValue.value /* : unknown */, thisType, Lists.empty /* : unknown */() /* : unknown */) /* : Definition */;
@@ -1359,7 +1371,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return new Some([state1, statement]) /* : Some */;
     }
     retainDefinition(parameter) {
-        if (parameter._ParameterVariant /* : unknown */ === ParameterVariant.Definition) {
+        if (parameter._Variant /* : unknown */ === Variant.) {
             let definition = parameter;
             return new Some(definition) /* : Some */;
         }
@@ -1414,25 +1426,25 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let rawParameters = parametersTuple[1];
         let parameters = this.retainDefinitions /* : (arg0 : List<Parameter>) => List<Definition> */(rawParameters) /* : List<Definition> */;
         let prototype = new MethodPrototype(depth, header, parameters, rawContent.strip /* : unknown */() /* : unknown */) /* : MethodPrototype */;
-        return new Some([parametersTuple[0].define /* : unknown */(prototype.createDefinition /* : () => Definition */() /* : Definition */) /* : unknown */, prototype]) /* : Some */;
+        return new Some([parametersTuple[0].define /* : unknown */(prototype.createDefinition /* : unknown */() /* : unknown */) /* : unknown */, prototype]) /* : Some */;
     }
     completeMethod(state, prototype) {
-        let definition = prototype.createDefinition /* : () => Definition */() /* : Definition */;
+        let definition = prototype.createDefinition /* : unknown */() /* : unknown */;
         let oldHeader = prototype.header /* : unknown */() /* : unknown */;
         /* Header newHeader */ ;
-        if (oldHeader._UnknownVariant /* : unknown */ === UnknownVariant.Definition) {
+        if (oldHeader._UnknownVariant /* : unknown */ === UnknownVariant.) {
             let maybeDefinition = oldHeader;
-            newHeader = maybeDefinition.removeAnnotations /* : () => Definition */() /* : Definition */;
+            newHeader = maybeDefinition.removeAnnotations /* : unknown */() /* : unknown */;
         }
         else {
             newHeader = oldHeader;
         }
         if (prototype.content /* : unknown */() /* : unknown */ === ";" || definition.containsAnnotation /* : unknown */("Actual") /* : unknown */) {
-            return new Some([state.define /* : (arg0 : Definition) => CompileState */(definition) /* : CompileState */, new FunctionNode(prototype.depth /* : unknown */() /* : unknown */, newHeader, prototype.parameters /* : unknown */() /* : unknown */, new None() /* : None */) /* : FunctionNode */]) /* : Some */;
+            return new Some([state.define /* : unknown */(definition) /* : unknown */, new FunctionNode(prototype.depth /* : unknown */() /* : unknown */, newHeader, prototype.parameters /* : unknown */() /* : unknown */, new None() /* : None */) /* : FunctionNode */]) /* : Some */;
         }
         if (prototype.content /* : unknown */() /* : unknown */.startsWith /* : unknown */("{") /* : unknown */ && prototype.content /* : unknown */() /* : unknown */.endsWith /* : unknown */("}") /* : unknown */) {
             let substring = prototype.content /* : unknown */() /* : unknown */.substring /* : unknown */(1, Strings.length /* : unknown */(prototype.content /* : unknown */() /* : unknown */) /* : unknown */ - 1) /* : unknown */;
-            let withDefined = state.enterDefinitions /* : () => CompileState */() /* : CompileState */.defineAll /* : unknown */(prototype.parameters /* : unknown */() /* : unknown */) /* : unknown */;
+            let withDefined = state.enterDefinitions /* : unknown */() /* : unknown */.defineAll /* : unknown */(prototype.parameters /* : unknown */() /* : unknown */) /* : unknown */;
             let statementsTuple = this.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(withDefined, substring, (state1, input1) => this.parseFunctionSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, FunctionSegment] */(state1, input1, prototype.depth /* : unknown */() /* : unknown */ + 1) /* : [CompileState, FunctionSegment] */) /* : [CompileState, List<T>] */;
             let statements = statementsTuple[1];
             return new Some([statementsTuple[0].exitDefinitions /* : unknown */() /* : unknown */.define /* : unknown */(definition) /* : unknown */, new FunctionNode(prototype.depth /* : unknown */() /* : unknown */, newHeader, prototype.parameters /* : unknown */() /* : unknown */, new Some(statements) /* : Some */) /* : FunctionNode */]) /* : Some */;
@@ -1441,7 +1453,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     parseConstructor(state, input) {
         let stripped = input.strip /* : unknown */() /* : unknown */;
-        if (state.isCurrentStructName /* : (arg0 : string) => boolean */(stripped) /* : boolean */) {
+        if (state.isCurrentStructName /* : unknown */(stripped) /* : unknown */) {
             return new Some([state, new ConstructorHeader() /* : ConstructorHeader */]) /* : Some */;
         }
         return new None() /* : None */;
@@ -1516,7 +1528,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     foldBlockStart(state, c) {
-        let appended = state.append /* : (arg0 : string) => DivideState */(c) /* : DivideState */;
+        let appended = state.append /* : unknown */(c) /* : unknown */;
         if (c === "{" && state.isLevel /* : unknown */() /* : unknown */) {
             return appended.advance /* : unknown */() /* : unknown */;
         }
@@ -1552,15 +1564,15 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     parseInitialization(state, destination, source) {
-        let definition = destination.mapType /* : (arg0 : (arg0 : Type) => Type) => Definition */((type) => {
+        let definition = destination.mapType /* : unknown */((type) => {
             if (type === Primitive.Unknown /* : unknown */) {
                 return this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(state, source) /* : Type */;
             }
             else {
                 return type;
             }
-        }) /* : Definition */;
-        return new Some([state.define /* : (arg0 : Definition) => CompileState */(definition) /* : CompileState */, new Initialization(definition, source) /* : Initialization */]) /* : Some */;
+        }) /* : unknown */;
+        return new Some([state.define /* : unknown */(definition) /* : unknown */, new Initialization(definition, source) /* : Initialization */]) /* : Some */;
     }
     resolveValue(state, value) {
         /* return switch (value) */ {
@@ -1587,7 +1599,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             /* case ConstructionCaller constructionCaller -> constructionCaller.type */ ;
             /* case Value value1 -> */ {
                 let type = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(state, value1) /* : Type */;
-                if (type._TypeVariant /* : unknown */ === TypeVariant.FunctionType) {
+                if (type._Variant /* : unknown */ === Variant.) {
                     let functionType = type;
                     /* yield functionType.returns */ ;
                 }
@@ -1600,9 +1612,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     resolveDataAccess(state, dataAccess) {
         let parentType = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(state, dataAccess.parent /* : unknown */) /* : Type */;
-        if (parentType._TypeVariant /* : unknown */ === TypeVariant.StructureType) {
+        if (parentType._Variant /* : unknown */ === Variant.) {
             let structureType = parentType;
-            return structureType.find /* : (arg0 : string) => Option<Type> */(dataAccess.property /* : unknown */) /* : Option<Type> */.orElse /* : unknown */(Primitive.Unknown /* : unknown */) /* : unknown */;
+            return structureType.find /* : unknown */(dataAccess.property /* : unknown */) /* : unknown */.orElse /* : unknown */(Primitive.Unknown /* : unknown */) /* : unknown */;
         }
         return Primitive.Unknown /* : unknown */;
     }
@@ -1638,7 +1650,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let definition = definitionTuple.right /* : unknown */() /* : unknown */;
             let type = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(definitionSTate, child) /* : Type */;
             let variant = new DataAccess(child, "_" + type.findName() + "Variant", Primitive.Unknown /* : unknown */) /* : DataAccess */;
-            let generate = type.findName /* : () => string */() /* : string */;
+            let generate = type.findName /* : unknown */() /* : unknown */;
             let temp = new SymbolValue(generate + "Variant." + definition.findType /* : unknown */() /* : unknown */.findName /* : unknown */() /* : unknown */) /* : SymbolValue */;
             let functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(child, definition.findType /* : unknown */() /* : unknown */) /* : Cast */) /* : Initialization */) /* : Statement */;
             return [definitionSTate.addFunctionSegment /* : unknown */(functionSegment) /* : unknown */.define /* : unknown */(definition) /* : unknown */, new Operation(variant, Operator.EQUALS /* : unknown */, temp) /* : Operation */];
@@ -1667,7 +1679,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             if (isSymbol(strippedBeforeArrow) /* : boolean */) {
                 let type = Primitive.Unknown /* : unknown */;
                 if ( /* state.typeRegister instanceof Some */( /* var expectedType */) /* : unknown */) {
-                    if (expectedType._UnknownVariant /* : unknown */ === UnknownVariant.FunctionType) {
+                    if (expectedType._UnknownVariant /* : unknown */ === UnknownVariant.) {
                         let functionType = expectedType;
                         type = functionType.arguments /* : unknown */.get /* : unknown */(0) /* : unknown */.orElse /* : unknown */(null) /* : unknown */;
                     }
@@ -1684,7 +1696,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     assembleLambda(state, definitions, valueString, depth) {
         let strippedValueString = valueString.strip /* : unknown */() /* : unknown */;
         /* Tuple2<CompileState, LambdaValue> value */ ;
-        let state2 = state.defineAll /* : (arg0 : List<Definition>) => CompileState */(definitions) /* : CompileState */;
+        let state2 = state.defineAll /* : unknown */(definitions) /* : unknown */;
         if (strippedValueString.startsWith /* : unknown */("{") /* : unknown */ && strippedValueString.endsWith /* : unknown */("}") /* : unknown */) {
             let value1 = this.parseStatements /* : (arg0 : CompileState, arg1 : string, arg2 : (arg0 : CompileState, arg1 : string) => [CompileState, T]) => [CompileState, List<T>] */(state2, strippedValueString.substring /* : unknown */(1, Strings.length /* : unknown */(strippedValueString) /* : unknown */ - 1) /* : unknown */, (state1, input1) => this.parseFunctionSegment /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, FunctionSegment] */(state1, input1, depth + 1) /* : [CompileState, FunctionSegment] */) /* : [CompileState, List<T>] */;
             let right = value1[1];
@@ -1743,14 +1755,14 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let argumentsState = argumentsTuple.left /* : unknown */() /* : unknown */;
         let argumentsWithActualTypes = argumentsTuple.right /* : unknown */() /* : unknown */;
         let arguments = this.retainValues /* : (arg0 : List<Argument>) => List<Value> */(argumentsWithActualTypes.iterate /* : unknown */() /* : unknown */.map /* : unknown */(Tuple2.left /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */) /* : List<Value> */;
-        if (newCaller._CallerVariant /* : unknown */ === CallerVariant.ConstructionCaller) {
+        if (newCaller._Variant /* : unknown */ === Variant.) {
             if (constructionCaller.type /* : unknown */.findName /* : unknown */() /* : unknown */ === "Tuple2Impl") {
                 let constructionCaller = newCaller;
                 return new Some([argumentsState, new TupleNode(Lists.of /* : unknown */(arguments.get /* : unknown */(0) /* : unknown */.orElse /* : unknown */(null) /* : unknown */, arguments.get /* : unknown */(1) /* : unknown */.orElse /* : unknown */(null) /* : unknown */) /* : unknown */) /* : TupleNode */]) /* : Some */;
             }
         }
-        if (newCaller._CallerVariant /* : unknown */ === CallerVariant.Value) {
-            if (value._ValueVariant /* : unknown */ === ValueVariant.DataAccess) {
+        if (newCaller._Variant /* : unknown */ === Variant.) {
+            if (value._Variant /* : unknown */ === Variant.) {
                 let parent = access.parent /* : unknown */;
                 let property = access.property /* : unknown */;
                 let parentType = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(argumentsState, parent) /* : Type */;
@@ -1777,7 +1789,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         let index = pair[0];
         let element = pair[1];
         let expectedType = callerType.arguments /* : unknown */.get /* : unknown */(index) /* : unknown */.orElse /* : unknown */(Primitive.Unknown /* : unknown */) /* : unknown */;
-        let withExpected = currentState.withExpectedType /* : (arg0 : Type) => CompileState */(expectedType) /* : CompileState */;
+        let withExpected = currentState.withExpectedType /* : unknown */(expectedType) /* : unknown */;
         let valueTuple = this.parseArgument /* : (arg0 : CompileState, arg1 : string, arg2 : number) => [CompileState, Argument] */(withExpected, element, depth) /* : [CompileState, Argument] */;
         let valueState = valueTuple[0];
         let value = valueTuple[1];
@@ -1788,7 +1800,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return arguments.iterate /* : unknown */() /* : unknown */.map /* : unknown */(this.retainValue /* : unknown */) /* : unknown */.flatMap /* : unknown */(Queries.fromOption /* : unknown */) /* : unknown */.collect /* : unknown */(new ListCollector() /* : ListCollector */) /* : unknown */;
     }
     retainValue(argument) {
-        if (argument._ArgumentVariant /* : unknown */ === ArgumentVariant.Value) {
+        if (argument._Variant /* : unknown */ === Variant.) {
             let value = argument;
             return new Some(value) /* : Some */;
         }
@@ -1809,7 +1821,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             }
             /* case Value value -> */ {
                 let type = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(state, value) /* : Type */;
-                if (type._TypeVariant /* : unknown */ === TypeVariant.FunctionType) {
+                if (type._Variant /* : unknown */ === Variant.) {
                     let functionType = type;
                     callerType = functionType;
                 }
@@ -1818,7 +1830,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return callerType;
     }
     modifyCaller(state, oldCaller) {
-        if (oldCaller._CallerVariant /* : unknown */ === CallerVariant.DataAccess) {
+        if (oldCaller._Variant /* : unknown */ === Variant.) {
             let type = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(state, access.parent /* : unknown */) /* : Type */;
             if ( /* type instanceof FunctionType */) {
                 let access = oldCaller;
@@ -1842,7 +1854,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return [tuple[0], tuple[1]];
     }
     foldInvocationStart(state, c) {
-        let appended = state.append /* : (arg0 : string) => DivideState */(c) /* : DivideState */;
+        let appended = state.append /* : unknown */(c) /* : unknown */;
         if (c === "(") {
             let enter = appended.enter /* : unknown */() /* : unknown */;
             if (enter.isShallow /* : unknown */() /* : unknown */) {
@@ -1865,7 +1877,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let parent = tuple[1];
             let parentType = this.resolveValue /* : (arg0 : CompileState, arg1 : Value) => Type */(tuple[0], parent) /* : Type */;
             let type = Primitive.Unknown /* : unknown */;
-            if (parentType._TypeVariant /* : unknown */ === TypeVariant.StructureType) {
+            if (parentType._Variant /* : unknown */ === Variant.) {
                 if ( /* structureType.find(property) instanceof Some */( /* var memberType */) /* : unknown */) {
                     let structureType = parentType;
                     type = memberType;
@@ -1967,9 +1979,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     foldTypeSeparator(state, c) {
         if (c === " " && state.isLevel /* : unknown */() /* : unknown */) {
-            return state.advance /* : () => DivideState */() /* : DivideState */;
+            return state.advance /* : unknown */() /* : unknown */;
         }
-        let appended = state.append /* : (arg0 : string) => DivideState */(c) /* : DivideState */;
+        let appended = state.append /* : unknown */(c) /* : unknown */;
         if (c === /*  ' */  /* ' */) {
             return appended.enter /* : unknown */() /* : unknown */;
         }
@@ -1979,7 +1991,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return appended;
     }
     assembleDefinition(state, annotations, modifiers, rawName, typeParams, type) {
-        return this.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state.withTypeParams /* : (arg0 : List<string>) => CompileState */(typeParams) /* : CompileState */, type) /* : Option<[CompileState, Type]> */.flatMap /* : unknown */((type1) => {
+        return this.parseType /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state.withTypeParams /* : unknown */(typeParams) /* : unknown */, type) /* : Option<[CompileState, Type]> */.flatMap /* : unknown */((type1) => {
             let stripped = rawName.strip /* : unknown */() /* : unknown */;
             if (!isSymbol(stripped) /* : unknown */) {
                 return new None() /* : None */;
@@ -1994,9 +2006,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     foldValueChar(state, c) {
         if (c === "," && state.isLevel /* : unknown */() /* : unknown */) {
-            return state.advance /* : () => DivideState */() /* : DivideState */;
+            return state.advance /* : unknown */() /* : unknown */;
         }
-        let appended = state.append /* : (arg0 : string) => DivideState */(c) /* : DivideState */;
+        let appended = state.append /* : unknown */(c) /* : unknown */;
         if (c === /*  ' */ - /* ' */) {
             let peeked = appended.peek /* : unknown */() /* : unknown */;
             if (peeked === ">") {
@@ -2032,12 +2044,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             return new Some([state, Primitive.Void /* : unknown */]) /* : Some */;
         }
         if (isSymbol(stripped) /* : boolean */) {
-            if ( /* state.resolveType(stripped) instanceof Some */( /* var resolved */) /* : unknown */) {
-                return new Some([state, resolved]) /* : Some */;
-            }
-            else {
-                return new Some([state, new Placeholder(stripped) /* : Placeholder */]) /* : Some */;
-            }
+            return new Some([state, new SymbolType(stripped) /* : SymbolType */]) /* : Some */;
         }
         return this.parseTemplate /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state, input) /* : Option<[CompileState, Type]> */.or /* : unknown */(() => this.varArgs /* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state, input) /* : Option<[CompileState, Type]> */) /* : unknown */;
     }
@@ -2070,10 +2077,10 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         if (base === "Tuple2" && children.size /* : unknown */() /* : unknown */ >= 2) {
             return [state, new TupleType(children) /* : TupleType */];
         }
-        if (state.resolveType /* : (arg0 : string) => Option<Type> */(base) /* : Option<Type> */._OptionVariant /* : unknown */ === OptionVariant.Some) {
+        if (state.resolveType /* : unknown */(base) /* : unknown */._UnknownVariant /* : unknown */ === UnknownVariant.Some) {
             let baseType = some.value /* : unknown */;
-            if (baseType._UnknownVariant /* : unknown */ === UnknownVariant.ObjectRefType) {
-                let some = state.resolveType /* : (arg0 : string) => Option<Type> */(base) /* : Option<Type> */;
+            if (baseType._UnknownVariant /* : unknown */ === UnknownVariant.) {
+                let some = state.resolveType /* : unknown */(base) /* : unknown */;
                 let findableType = baseType;
                 return [state, new Template(findableType, children) /* : Template */];
             }
@@ -2091,7 +2098,7 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         }) /* : Option<T> */;
     }
     retainType(argument) {
-        if (argument._ArgumentVariant /* : unknown */ === ArgumentVariant.Type) {
+        if (argument._Variant /* : unknown */ === Variant.) {
             let type = argument;
             return new Some(type) /* : Some */;
         }
