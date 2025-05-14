@@ -121,15 +121,38 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return new Tuple<>(state, "");
-        }
-
-        return compileClassSegment(state, stripped);
+        return compileOr(state, input, List.of(
+                Main::compileNamespaced,
+                Main::compileClass
+        ));
     }
 
-    private static Tuple<CompileState, String> compileClassSegment(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static Tuple<CompileState, String> compileOr(
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
+    ) {
+        for (var rule : rules) {
+            var maybeTuple = rule.apply(state, input);
+            if (maybeTuple.isPresent()) {
+                return maybeTuple.get();
+            }
+        }
+
+        return new Tuple<>(state, placeholder(input));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         return compileInfix(input, "class ", (beforeKeyword, right1) -> {
             return compileInfix(right1, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
@@ -141,7 +164,20 @@ public class Main {
                     return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });
-        }).orElseGet(() -> new Tuple<>(state, placeholder(input)));
+        });
+    }
+
+    private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
+        return compileOr(state1, input1, List.of(
+                Main::compileClass,
+                Main::compileFieldDefinition
+        ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
+        return compileSuffix(input.strip(), ";", withoutEnd -> {
+            return Optional.of(new Tuple<>(state, "\n\t" + placeholder(withoutEnd) + ";"));
+        });
     }
 
     private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
