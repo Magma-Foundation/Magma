@@ -73,8 +73,11 @@ public class Main {
         return appended;
     }
 
-    private static String compileRootSegment(String segment) {
-        return placeholder(segment);
+    private static String compileRootSegment(String input) {
+        if (input.startsWith("package ")) {
+            return "";
+        }
+        return placeholder(input);
     }
 
     private static String placeholder(String input) {
