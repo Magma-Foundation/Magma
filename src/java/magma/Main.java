@@ -1755,15 +1755,16 @@ public class Main {
             CompileState state,
             List<T> elements, BiFunction<CompileState, Tuple2<Integer, T>, Option<Tuple2<CompileState, R>>> mapper
     ) {
-        Option<Tuple2<CompileState, List<R>>> initial = new Some<>(new Tuple2Impl<>(state, Lists.empty()));
-        return elements.iterateWithIndices().fold(initial, (tuple, element) -> {
-            return tuple.flatMap(inner -> {
-                var state1 = inner.left();
-                var right = inner.right();
+        return elements.iterateWithIndices().fold(new Some<>(new Tuple2Impl<>(state, Lists.empty())), this.getOptionTuple2OptionBiFunction(mapper));
+    }
 
-                return mapper.apply(state1, element).map(applied -> {
-                    return new Tuple2Impl<>(applied.left(), right.addLast(applied.right()));
-                });
+    private <T, R> BiFunction<Option<Tuple2<CompileState, List<R>>>, Tuple2<Integer, T>, Option<Tuple2<CompileState, List<R>>>> getOptionTuple2OptionBiFunction(BiFunction<CompileState, Tuple2<Integer, T>, Option<Tuple2<CompileState, R>>> mapper) {
+        return (maybeCurrent, entry) -> maybeCurrent.flatMap(current -> {
+            var currentState = current.left();
+            var currentList = current.right();
+
+            return mapper.apply(currentState, entry).map(applied -> {
+                return new Tuple2Impl<>(applied.left(), currentList.addLast(applied.right()));
             });
         });
     }

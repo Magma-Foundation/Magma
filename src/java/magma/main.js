@@ -1147,16 +1147,16 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
         return this /* : Main */.mapUsingState /* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(state /* : CompileState */, stringList /* : List<string> */, mapper /* : (arg0 : CompileState, arg1 : [number, string]) => Option<[CompileState, T]> */) /* : Option<[CompileState, List<R>]> */;
     }
     mapUsingState(state, elements, mapper) {
-        let initial = new Some([state /* : CompileState */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */]) /* : Some */;
-        return elements /* : List<T> */.iterateWithIndices /* : () => Query<[number, T]> */() /* : Query<[number, T]> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : [number, T]) => R) => R */(initial /* : Option<[CompileState, List<R>]> */, (tuple, element) => {
-            return tuple /* : unknown */.flatMap /* : unknown */((inner) => {
-                let state1 = inner /* : unknown */.left /* : unknown */() /* : unknown */;
-                let right = inner /* : unknown */.right /* : unknown */() /* : unknown */;
-                return mapper /* : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]> */(state1 /* : unknown */, element /* : unknown */) /* : Option<[CompileState, R]> */.map /* : (arg0 : (arg0 : [CompileState, R]) => R) => Option<R> */((applied) => {
-                    return [applied /* : [CompileState, R] */[0 /* : number */], right /* : unknown */.addLast /* : unknown */(applied /* : [CompileState, R] */[1 /* : number */]) /* : unknown */];
-                }) /* : Option<R> */;
-            }) /* : unknown */;
-        }) /* : R */;
+        return elements /* : List<T> */.iterateWithIndices /* : () => Query<[number, T]> */() /* : Query<[number, T]> */.fold /* : (arg0 : R, arg1 : (arg0 : R, arg1 : [number, T]) => R) => R */(new Some([state /* : CompileState */, Lists /* : Lists */.empty /* : () => List<T> */() /* : List<T> */]) /* : Some */, this /* : Main */.getOptionTuple2OptionBiFunction /* : (arg0 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => (arg0 : Option<[CompileState, List<R>]>, arg1 : [number, T]) => Option<[CompileState, List<R>]> */(mapper /* : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]> */) /* : (arg0 : Option<[CompileState, List<R>]>, arg1 : [number, T]) => Option<[CompileState, List<R>]> */) /* : R */;
+    }
+    getOptionTuple2OptionBiFunction(mapper) {
+        return (maybeCurrent, entry) => maybeCurrent /* : unknown */.flatMap /* : unknown */((current) => {
+            let currentState = current /* : unknown */.left /* : unknown */() /* : unknown */;
+            let currentList = current /* : unknown */.right /* : unknown */() /* : unknown */;
+            return mapper /* : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]> */(currentState /* : unknown */, entry /* : unknown */) /* : Option<[CompileState, R]> */.map /* : (arg0 : (arg0 : [CompileState, R]) => R) => Option<R> */((applied) => {
+                return [applied /* : [CompileState, R] */[0 /* : number */], currentList /* : unknown */.addLast /* : unknown */(applied /* : [CompileState, R] */[1 /* : number */]) /* : unknown */];
+            }) /* : Option<R> */;
+        }) /* : unknown */;
     }
     mergeStatements(cache, statement) {
         return cache /* : string */ + statement /* : string */;
