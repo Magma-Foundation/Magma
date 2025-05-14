@@ -200,7 +200,7 @@ public class Main {
         return compileLast(stripped, " ", (beforeName, name) -> {
             return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
                 var typeTuple = compileType(state, type);
-                var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + generatePlaceholder(name);
+                var generated = generatePlaceholder(beforeType) + name + " : " + typeTuple.right;
                 return Optional.of(new Tuple<>(typeTuple.left, generated));
             });
         }).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
@@ -208,8 +208,25 @@ public class Main {
 
     private static Tuple<CompileState, String> compileType(CompileState state, String type) {
         return compileOr(state, type, List.of(
-                Main::compileGeneric
+                Main::compileGeneric,
+                Main::compilePrimitive
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compilePrimitive(CompileState state, String input) {
+        return findPrimitiveValue(input.strip()).map(result -> new Tuple<>(state, result));
+    }
+
+    private static Optional<String> findPrimitiveValue(String input) {
+        if (input.equals("String")) {
+            return Optional.of("string");
+        }
+
+        if (input.equals("int")) {
+            return Optional.of("number");
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
