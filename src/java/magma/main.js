@@ -53,6 +53,9 @@ var ResultVariant;
     ResultVariant[ResultVariant["Err"] = 1] = "Err";
 })(ResultVariant || (ResultVariant = {}));
 /* private static final */ class None {
+    constructor() {
+        this._OptionVariant = OptionVariant.None;
+    }
     map(mapper) {
         return new None() /* : None */;
     }
@@ -85,6 +88,7 @@ var ResultVariant;
 }
 /* private */ class Some {
     constructor(value) {
+        this._OptionVariant = OptionVariant.Some;
         this.value /* : unknown */ = value;
     }
     map(mapper) {
@@ -878,6 +882,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
 }
 /* private */ class Ok {
     constructor(value) {
+        this._ResultVariant = ResultVariant.Ok;
         this.value /* : unknown */ = value;
     }
     mapValue(mapper) {
@@ -889,6 +894,7 @@ Operator.SUBTRACT = new Operator("-", "-") /* : Operator */;
 }
 /* private */ class Err {
     constructor(error) {
+        this._ResultVariant = ResultVariant.Err;
         this.error /* : unknown */ = error;
     }
     mapValue(mapper) {
@@ -1040,12 +1046,14 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
     }
     static retainObjectRefType(type) {
         if (type._Variant /* : unknown */ === Variant.) {
+            let template = type;
+            return new Some(template.base /* : unknown */) /* : Some */;
+        }
+        if (type._Variant /* : unknown */ === Variant.) {
             let objectRefType = type;
             return new Some(objectRefType) /* : Some */;
         }
-        else {
-            return new None() /* : None */;
-        }
+        return new None() /* : None */;
     }
     main() {
         let parent = this.findRoot /* : () => Path */() /* : Path */;
@@ -1266,9 +1274,9 @@ BooleanValue.False = new BooleanValue("false") /* : BooleanValue */;
             let withEnumCategoriesDefinedState = withEnumCategoriesDefinedTuple[0];
             let withEnumCategoriesDefined = withEnumCategoriesDefinedTuple[1];
             let withEnumCategoriesImplemented = this.implementEnumCategories /* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype.name /* : unknown */, variantsSuper, withEnumCategoriesDefined) /* : List<ClassSegment> */;
-            let withEnumValues = this.implementEnumValues /* : (arg0 : List<ClassSegment>, arg1 : StructureType) => List<ClassSegment> */(withEnumCategoriesImplemented, thisType) /* : List<ClassSegment> */;
-            let withConstructor = this.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues, prototype.parameters /* : unknown */() /* : unknown */) /* : List<ClassSegment> */;
-            let generatedSegments = this.joinSegments /* : (arg0 : List<ClassSegment>) => string */(withConstructor) /* : string */;
+            let withConstructor = this.defineConstructor /* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumCategoriesImplemented, prototype.parameters /* : unknown */() /* : unknown */) /* : List<ClassSegment> */;
+            let withEnumValues = this.implementEnumValues /* : (arg0 : List<ClassSegment>, arg1 : StructureType) => List<ClassSegment> */(withConstructor, thisType) /* : List<ClassSegment> */;
+            let generatedSegments = this.joinSegments /* : (arg0 : List<ClassSegment>) => string */(withEnumValues) /* : string */;
             let joinedTypeParams = prototype.joinTypeParams /* : unknown */() /* : unknown */;
             let interfacesJoined = this.joinInterfaces /* : (arg0 : List<Type>) => string */(interfaces) /* : string */;
             let generatedSuperType = this.joinSuperTypes /* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(withEnumCategoriesDefinedState, prototype) /* : string */;

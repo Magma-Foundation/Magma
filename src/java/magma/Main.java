@@ -1589,12 +1589,15 @@ public class Main {
     }
 
     private static Option<ObjectRefType> retainObjectRefType(Type type) {
+        if(type instanceof Template template) {
+            return new Some<>(template.base);
+        }
+
         if (type instanceof ObjectRefType objectRefType) {
             return new Some<>(objectRefType);
         }
-        else {
-            return new None<>();
-        }
+
+        return new None<>();
     }
 
     public void main() {
@@ -1972,10 +1975,10 @@ public class Main {
             var withEnumCategoriesDefined = withEnumCategoriesDefinedTuple.right();
 
             var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined);
-            var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
-            var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
+            var withConstructor = this.defineConstructor(withEnumCategoriesImplemented, prototype.parameters());
+            var withEnumValues = this.implementEnumValues(withConstructor, thisType);
 
-            var generatedSegments = this.joinSegments(withConstructor);
+            var generatedSegments = this.joinSegments(withEnumValues);
             var joinedTypeParams = prototype.joinTypeParams();
             var interfacesJoined = this.joinInterfaces(interfaces);
 

@@ -156,6 +156,7 @@ enum ResultVariant {
 	resolve(childName : string) : Path;
 }
 /* private static final */class None<T>/*  */ implements Option<T> {
+	_OptionVariant : OptionVariant = OptionVariant.None;
 	public map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new None()/* : None */;
 	}
@@ -191,6 +192,7 @@ enum ResultVariant {
 	constructor (value : T) {
 		this.value/* : unknown */ = value;
 	}
+	_OptionVariant : OptionVariant = OptionVariant.Some;
 	public map<R>(mapper : (arg0 : T) => R) : Option<R> {
 		return new Some(mapper(this.value/* : unknown */)/* : R */)/* : Some */;
 	}
@@ -1088,6 +1090,7 @@ enum ResultVariant {
 	constructor (value : T) {
 		this.value/* : unknown */ = value;
 	}
+	_ResultVariant : ResultVariant = ResultVariant.Ok;
 	public mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
 		return new Ok(mapper(this.value/* : unknown */)/* : R */)/* : Ok */;
 	}
@@ -1100,6 +1103,7 @@ enum ResultVariant {
 	constructor (error : X) {
 		this.error/* : unknown */ = error;
 	}
+	_ResultVariant : ResultVariant = ResultVariant.Err;
 	public mapValue<R>(mapper : (arg0 : T) => R) : Result<R, X> {
 		return new Err(this.error/* : unknown */)/* : Err */;
 	}
@@ -1263,12 +1267,14 @@ enum ResultVariant {
 	}
 	static retainObjectRefType(type : Type) : Option<ObjectRefType> {
 		if (type._Variant/* : unknown */ === Variant.){
+			let template : Template = type as Template;
+			return new Some(template.base/* : unknown */)/* : Some */;
+		}
+		if (type._Variant/* : unknown */ === Variant.){
 			let objectRefType : ObjectRefType = type as ObjectRefType;
 			return new Some(objectRefType)/* : Some */;
 		}
-		else {
-			return new None()/* : None */;
-		}
+		return new None()/* : None */;
 	}
 	public main() : void {
 		let parent : Path = this.findRoot/* : () => Path */()/* : Path */;
@@ -1491,9 +1497,9 @@ enum ResultVariant {
 			let withEnumCategoriesDefinedState = withEnumCategoriesDefinedTuple[0];
 			let withEnumCategoriesDefined = withEnumCategoriesDefinedTuple[1];
 			let withEnumCategoriesImplemented : List<ClassSegment> = this.implementEnumCategories/* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype.name/* : unknown */, variantsSuper, withEnumCategoriesDefined)/* : List<ClassSegment> */;
-			let withEnumValues : List<ClassSegment> = this.implementEnumValues/* : (arg0 : List<ClassSegment>, arg1 : StructureType) => List<ClassSegment> */(withEnumCategoriesImplemented, thisType)/* : List<ClassSegment> */;
-			let withConstructor : List<ClassSegment> = this.defineConstructor/* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumValues, prototype.parameters/* : unknown */()/* : unknown */)/* : List<ClassSegment> */;
-			let generatedSegments : string = this.joinSegments/* : (arg0 : List<ClassSegment>) => string */(withConstructor)/* : string */;
+			let withConstructor : List<ClassSegment> = this.defineConstructor/* : (arg0 : List<ClassSegment>, arg1 : List<Definition>) => List<ClassSegment> */(withEnumCategoriesImplemented, prototype.parameters/* : unknown */()/* : unknown */)/* : List<ClassSegment> */;
+			let withEnumValues : List<ClassSegment> = this.implementEnumValues/* : (arg0 : List<ClassSegment>, arg1 : StructureType) => List<ClassSegment> */(withConstructor, thisType)/* : List<ClassSegment> */;
+			let generatedSegments : string = this.joinSegments/* : (arg0 : List<ClassSegment>) => string */(withEnumValues)/* : string */;
 			let joinedTypeParams = prototype.joinTypeParams/* : unknown */()/* : unknown */;
 			let interfacesJoined : string = this.joinInterfaces/* : (arg0 : List<Type>) => string */(interfaces)/* : string */;
 			let generatedSuperType : string = this.joinSuperTypes/* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(withEnumCategoriesDefinedState, prototype)/* : string */;
