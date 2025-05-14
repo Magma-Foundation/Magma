@@ -49,6 +49,10 @@ public class Main {
             this.depth--;
             return this;
         }
+
+        public boolean isShallow() {
+            return this.depth == 1;
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -121,6 +125,10 @@ public class Main {
         var appended = state.append(c);
         if (c == ';' && appended.isLevel()) {
             return appended.advance();
+        }
+
+        if (c == '}' && appended.isShallow()) {
+            return appended.advance().exit();
         }
 
         if (c == '{') {
