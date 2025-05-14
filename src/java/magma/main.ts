@@ -1391,9 +1391,7 @@ enum ResultVariant {
 	divideAll(input : string, folder : (arg0 : DivideState, arg1 : string) => DivideState) : List<string> {
 		let current : DivideState = DivideState/* : DivideState */.createInitial/* : (arg0 : string) => DivideState */(input/* : string */)/* : DivideState */;
 		while (true){
-			let maybePopped = current/* : DivideState */.pop/* : unknown */()/* : unknown */.map/* : unknown */((tuple) => {
-				return this/* : Main */.foldSingleQuotes/* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple/* : unknown */)/* : Option<DivideState> */.or/* : (arg0 : () => Option<DivideState>) => Option<DivideState> */(() => this/* : Main */.foldDoubleQuotes/* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple/* : unknown */)/* : Option<DivideState> */)/* : Option<DivideState> */.orElseGet/* : (arg0 : () => T) => T */(() => folder/* : (arg0 : DivideState, arg1 : string) => DivideState */(tuple/* : unknown */.right/* : unknown */()/* : unknown */, tuple/* : unknown */.left/* : unknown */()/* : unknown */)/* : DivideState */)/* : T */;
-			})/* : unknown */;
+			let maybePopped = current/* : DivideState */.pop/* : unknown */()/* : unknown */.map/* : unknown */((tuple) => this/* : Main */.foldDecorated/* : (arg0 : (arg0 : DivideState, arg1 : string) => DivideState, arg1 : [string, DivideState]) => DivideState */(folder/* : (arg0 : DivideState, arg1 : string) => DivideState */, tuple/* : unknown */)/* : DivideState */)/* : unknown */;
 			if (maybePopped/* : unknown */.isPresent/* : unknown */()/* : unknown */){
 				current/* : DivideState */ = maybePopped/* : unknown */.orElse/* : unknown */(current/* : DivideState */)/* : unknown */;
 			}
@@ -1402,6 +1400,9 @@ enum ResultVariant {
 			}
 		}
 		return current/* : DivideState */.advance/* : unknown */()/* : unknown */.segments/* : unknown */;
+	}
+	foldDecorated(folder : (arg0 : DivideState, arg1 : string) => DivideState, tuple : [string, DivideState]) : DivideState {
+		return this/* : Main */.foldSingleQuotes/* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple/* : [string, DivideState] */)/* : Option<DivideState> */.or/* : (arg0 : () => Option<DivideState>) => Option<DivideState> */(() => this/* : Main */.foldDoubleQuotes/* : (arg0 : [string, DivideState]) => Option<DivideState> */(tuple/* : [string, DivideState] */)/* : Option<DivideState> */)/* : Option<DivideState> */.orElseGet/* : (arg0 : () => T) => T */(() => folder/* : (arg0 : DivideState, arg1 : string) => DivideState */(tuple/* : [string, DivideState] */[1/* : number */], tuple/* : [string, DivideState] */[0/* : number */])/* : DivideState */)/* : T */;
 	}
 	foldDoubleQuotes(tuple : [string, DivideState]) : Option<DivideState> {
 		if (tuple/* : [string, DivideState] */[0/* : number */] === "\""){
@@ -1549,24 +1550,33 @@ enum ResultVariant {
 				let superTypes = superTypesTuple/* : [CompileState, List<Type>] */[1/* : number */];
 				let bases : List<BaseType> = this/* : Main */.resolveBaseTypes/* : (arg0 : List<Type>) => List<BaseType> */(interfaces/* : unknown */)/* : List<BaseType> */.addAllLast/* : (arg0 : List<BaseType>) => List<BaseType> */(this/* : Main */.resolveBaseTypes/* : (arg0 : List<Type>) => List<BaseType> */(superTypes/* : unknown */)/* : List<BaseType> */)/* : List<BaseType> */;
 				let variantsSuper : List<string> = this/* : Main */.findSuperTypesOfVariants/* : (arg0 : List<BaseType>, arg1 : string) => List<string> */(bases/* : List<BaseType> */, prototype/* : StructurePrototype */.name/* : string */)/* : List<string> */;
-				return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(superTypesTuple/* : [CompileState, List<Type>] */[0/* : number */], prototype/* : StructurePrototype */.segments/* : List<IncompleteClassSegment> */()/* : unknown */, (state1, entry) => this/* : Main */.completeClassSegment/* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1/* : unknown */, entry/* : unknown */.right/* : unknown */()/* : unknown */)/* : Option<[CompileState, ClassSegment]> */)/* : Option<[CompileState, List<R>]> */.map/* : (arg0 : (arg0 : [CompileState, List<R>]) => R) => Option<R> */((oldStatementsTuple : [CompileState, List<R>]) => {
-					let exited = oldStatementsTuple/* : [CompileState, List<R>] */[0/* : number */].exitDefinitions/* : unknown */()/* : unknown */;
-					let oldStatements = oldStatementsTuple/* : [CompileState, List<R>] */[1/* : number */];
-					let withEnumCategoriesDefined : [CompileState, List<ClassSegment>] = this/* : Main */.defineEnumCategories/* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited/* : unknown */, oldStatements/* : unknown */, prototype/* : StructurePrototype */.name/* : string */, prototype/* : StructurePrototype */.variants/* : List<string> */, prototype/* : StructurePrototype */.generateToEnum/* : () => string */()/* : string */)/* : [CompileState, List<ClassSegment>] */;
-					let withEnumCategoriesImplemented : List<ClassSegment> = this/* : Main */.implementEnumCategories/* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype/* : StructurePrototype */.name/* : string */, variantsSuper/* : List<string> */, withEnumCategoriesDefined/* : [CompileState, List<ClassSegment>] */[1/* : number */])/* : List<ClassSegment> */;
-					let withEnumValues : List<ClassSegment> = this/* : Main */.implementEnumValues/* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented/* : List<ClassSegment> */, thisType/* : ObjectType */)/* : List<ClassSegment> */;
-					let withConstructor : List<ClassSegment> = this/* : Main */.defineConstructor/* : (arg0 : List<ClassSegment>, arg1 : List<ImmutableDefinition>) => List<ClassSegment> */(withEnumValues/* : List<ClassSegment> */, prototype/* : StructurePrototype */.parameters/* : List<ImmutableDefinition> */()/* : unknown */)/* : List<ClassSegment> */;
-					let generatedSegments : string = this/* : Main */.joinSegments/* : (arg0 : List<ClassSegment>) => string */(withConstructor/* : List<ClassSegment> */)/* : string */;
-					let joinedTypeParams : string = prototype/* : StructurePrototype */.joinTypeParams/* : () => string */()/* : string */;
-					let interfacesJoined : string = this/* : Main */.joinInterfaces/* : (arg0 : List<Type>) => string */(interfaces/* : unknown */)/* : string */;
-					let generatedSuperType : string = this/* : Main */.joinSuperTypes/* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(state/* : CompileState */, prototype/* : StructurePrototype */)/* : string */;
-					let generated = generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.beforeInfix/* : string */()/* : unknown */.strip/* : unknown */()/* : unknown */)/* : string */ + prototype/* : StructurePrototype */.targetInfix/* : string */()/* : unknown */ + prototype/* : StructurePrototype */.name/* : string */()/* : unknown */ + joinedTypeParams/* : string */ + generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.after/* : string */()/* : unknown */)/* : string */ + generatedSuperType/* : string */ + interfacesJoined/* : string */ + " {" + generatedSegments + "\n}\n";
-					let compileState = withEnumCategoriesDefined/* : [CompileState, List<ClassSegment>] */[0/* : number */].popStructName/* : unknown */()/* : unknown */;
-					let definedState = compileState/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */;
-					return [definedState/* : unknown */, new Whitespace()/* : Whitespace */];
-				})/* : Option<R> */;
+				return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(superTypesTuple/* : [CompileState, List<Type>] */[0/* : number */], prototype/* : StructurePrototype */.segments/* : List<IncompleteClassSegment> */()/* : unknown */, this/* : Main */.createClassSegmentRule/* : () => (arg0 : CompileState, arg1 : [number, IncompleteClassSegment]) => Option<[CompileState, ClassSegment]> */()/* : (arg0 : CompileState, arg1 : [number, IncompleteClassSegment]) => Option<[CompileState, ClassSegment]> */)/* : Option<[CompileState, List<R>]> */.map/* : (arg0 : (arg0 : [CompileState, List<R>]) => R) => Option<R> */(this/* : Main */.completeStructureWithStatements/* : (arg0 : StructurePrototype, arg1 : List<string>, arg2 : ObjectType, arg3 : List<Type>) => (arg0 : [CompileState, List<ClassSegment>]) => [CompileState, ClassSegment] */(prototype/* : StructurePrototype */, variantsSuper/* : List<string> */, thisType/* : ObjectType */, interfaces/* : unknown */)/* : (arg0 : [CompileState, List<ClassSegment>]) => [CompileState, ClassSegment] */)/* : Option<R> */;
 			})/* : Option<R> */;
 		})/* : Option<R> */;
+	}
+	completeStructureWithStatements(prototype : StructurePrototype, variantsSuper : List<string>, thisType : ObjectType, interfaces : List<Type>) : (arg0 : [CompileState, List<ClassSegment>]) => [CompileState, ClassSegment] {
+		/* return oldStatementsTuple -> */{
+			let exited = /* oldStatementsTuple */.left/* : unknown */()/* : unknown */.exitDefinitions/* : unknown */()/* : unknown */;
+			let oldStatements = /* oldStatementsTuple */.right/* : unknown */()/* : unknown */;
+			let withEnumCategoriesDefinedTuple : [CompileState, List<ClassSegment>] = this/* : Main */.defineEnumCategories/* : (arg0 : CompileState, arg1 : List<ClassSegment>, arg2 : string, arg3 : List<string>, arg4 : string) => [CompileState, List<ClassSegment>] */(exited/* : unknown */, oldStatements/* : unknown */, prototype/* : StructurePrototype */.name/* : string */, prototype/* : StructurePrototype */.variants/* : List<string> */, prototype/* : StructurePrototype */.generateToEnum/* : () => string */()/* : string */)/* : [CompileState, List<ClassSegment>] */;
+			let withEnumCategoriesDefinedState = withEnumCategoriesDefinedTuple/* : [CompileState, List<ClassSegment>] */[0/* : number */];
+			let withEnumCategoriesDefined = withEnumCategoriesDefinedTuple/* : [CompileState, List<ClassSegment>] */[1/* : number */];
+			let withEnumCategoriesImplemented : List<ClassSegment> = this/* : Main */.implementEnumCategories/* : (arg0 : string, arg1 : List<string>, arg2 : List<ClassSegment>) => List<ClassSegment> */(prototype/* : StructurePrototype */.name/* : string */, variantsSuper/* : List<string> */, withEnumCategoriesDefined/* : unknown */)/* : List<ClassSegment> */;
+			let withEnumValues : List<ClassSegment> = this/* : Main */.implementEnumValues/* : (arg0 : List<ClassSegment>, arg1 : ObjectType) => List<ClassSegment> */(withEnumCategoriesImplemented/* : List<ClassSegment> */, thisType/* : ObjectType */)/* : List<ClassSegment> */;
+			let withConstructor : List<ClassSegment> = this/* : Main */.defineConstructor/* : (arg0 : List<ClassSegment>, arg1 : List<ImmutableDefinition>) => List<ClassSegment> */(withEnumValues/* : List<ClassSegment> */, prototype/* : StructurePrototype */.parameters/* : List<ImmutableDefinition> */()/* : unknown */)/* : List<ClassSegment> */;
+			let generatedSegments : string = this/* : Main */.joinSegments/* : (arg0 : List<ClassSegment>) => string */(withConstructor/* : List<ClassSegment> */)/* : string */;
+			let joinedTypeParams : string = prototype/* : StructurePrototype */.joinTypeParams/* : () => string */()/* : string */;
+			let interfacesJoined : string = this/* : Main */.joinInterfaces/* : (arg0 : List<Type>) => string */(interfaces/* : List<Type> */)/* : string */;
+			let generatedSuperType : string = this/* : Main */.joinSuperTypes/* : (arg0 : CompileState, arg1 : StructurePrototype) => string */(withEnumCategoriesDefinedState/* : unknown */, prototype/* : StructurePrototype */)/* : string */;
+			let generated = generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.beforeInfix/* : string */()/* : unknown */.strip/* : unknown */()/* : unknown */)/* : string */ + prototype/* : StructurePrototype */.targetInfix/* : string */()/* : unknown */ + prototype/* : StructurePrototype */.name/* : string */()/* : unknown */ + joinedTypeParams/* : string */ + generatePlaceholder/* : (arg0 : string) => string */(prototype/* : StructurePrototype */.after/* : string */()/* : unknown */)/* : string */ + generatedSuperType/* : string */ + interfacesJoined/* : string */ + " {" + generatedSegments + "\n}\n";
+			let compileState = withEnumCategoriesDefinedState/* : unknown */.popStructName/* : unknown */()/* : unknown */;
+			let definedState = compileState/* : unknown */.addStructure/* : unknown */(generated/* : unknown */)/* : unknown */;
+			return [definedState/* : unknown */, new Whitespace()/* : Whitespace */];
+		}
+		/*  */;
+	}
+	createClassSegmentRule() : (arg0 : CompileState, arg1 : [number, IncompleteClassSegment]) => Option<[CompileState, ClassSegment]> {
+		return (state1, entry) => this/* : Main */.completeClassSegment/* : (arg0 : CompileState, arg1 : IncompleteClassSegment) => Option<[CompileState, ClassSegment]> */(state1/* : unknown */, entry/* : unknown */.right/* : unknown */()/* : unknown */)/* : Option<[CompileState, ClassSegment]> */;
 	}
 	resolveTypeRefs(state : CompileState, refs : List<TypeRef>) : Option<[CompileState, List<Type>]> {
 		return this/* : Main */.mapUsingState/* : (arg0 : CompileState, arg1 : List<T>, arg2 : (arg0 : CompileState, arg1 : [number, T]) => Option<[CompileState, R]>) => Option<[CompileState, List<R>]> */(state/* : CompileState */, refs/* : List<TypeRef> */, (state2, tuple) => this/* : Main */.parseType/* : (arg0 : CompileState, arg1 : string) => Option<[CompileState, Type]> */(state2/* : unknown */, tuple/* : unknown */.right/* : unknown */()/* : unknown */.value/* : unknown */)/* : Option<[CompileState, Type]> */)/* : Option<[CompileState, List<R>]> */;

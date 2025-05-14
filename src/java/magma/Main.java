@@ -2012,29 +2012,46 @@ public class Main {
                 var bases = this.resolveBaseTypes(interfaces).addAllLast(this.resolveBaseTypes(superTypes));
                 var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.name);
 
-                return this.mapUsingState(superTypesTuple.left(), prototype.segments(), (state1, entry) -> this.completeClassSegment(state1, entry.right())).map(oldStatementsTuple -> {
-                    var exited = oldStatementsTuple.left().exitDefinitions();
-                    var oldStatements = oldStatementsTuple.right();
-
-                    var withEnumCategoriesDefined = this.defineEnumCategories(exited, oldStatements, prototype.name, prototype.variants, prototype.generateToEnum());
-                    var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined.right());
-                    var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
-                    var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
-
-                    var generatedSegments = this.joinSegments(withConstructor);
-                    var joinedTypeParams = prototype.joinTypeParams();
-                    var interfacesJoined = this.joinInterfaces(interfaces);
-
-                    var generatedSuperType = this.joinSuperTypes(state, prototype);
-
-                    var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
-                    var compileState = withEnumCategoriesDefined.left().popStructName();
-
-                    var definedState = compileState.addStructure(generated);
-                    return new Tuple2Impl<>(definedState, new Whitespace());
-                });
+                return this.mapUsingState(superTypesTuple.left(), prototype.segments(), this.createClassSegmentRule())
+                        .map(this.completeStructureWithStatements(prototype, variantsSuper, thisType, interfaces));
             });
         });
+    }
+
+    private Function<Tuple2<CompileState, List<ClassSegment>>, Tuple2<CompileState, ClassSegment>> completeStructureWithStatements(
+            StructurePrototype prototype,
+            List<String> variantsSuper,
+            ObjectType thisType,
+            List<Type> interfaces
+    ) {
+        return oldStatementsTuple -> {
+            var exited = oldStatementsTuple.left().exitDefinitions();
+            var oldStatements = oldStatementsTuple.right();
+
+            var withEnumCategoriesDefinedTuple = this.defineEnumCategories(exited, oldStatements, prototype.name, prototype.variants, prototype.generateToEnum());
+            var withEnumCategoriesDefinedState = withEnumCategoriesDefinedTuple.left();
+            var withEnumCategoriesDefined = withEnumCategoriesDefinedTuple.right();
+
+            var withEnumCategoriesImplemented = this.implementEnumCategories(prototype.name, variantsSuper, withEnumCategoriesDefined);
+            var withEnumValues = this.implementEnumValues(withEnumCategoriesImplemented, thisType);
+            var withConstructor = this.defineConstructor(withEnumValues, prototype.parameters());
+
+            var generatedSegments = this.joinSegments(withConstructor);
+            var joinedTypeParams = prototype.joinTypeParams();
+            var interfacesJoined = this.joinInterfaces(interfaces);
+
+            var generatedSuperType = this.joinSuperTypes(withEnumCategoriesDefinedState, prototype);
+
+            var generated = generatePlaceholder(prototype.beforeInfix().strip()) + prototype.targetInfix() + prototype.name() + joinedTypeParams + generatePlaceholder(prototype.after()) + generatedSuperType + interfacesJoined + " {" + generatedSegments + "\n}\n";
+            var compileState = withEnumCategoriesDefinedState.popStructName();
+
+            var definedState = compileState.addStructure(generated);
+            return new Tuple2Impl<>(definedState, new Whitespace());
+        };
+    }
+
+    private BiFunction<CompileState, Tuple2<Integer, IncompleteClassSegment>, Option<Tuple2<CompileState, ClassSegment>>> createClassSegmentRule() {
+        return (state1, entry) -> this.completeClassSegment(state1, entry.right());
     }
 
     private Option<Tuple2<CompileState, List<Type>>> resolveTypeRefs(CompileState state, List<TypeRef> refs) {
