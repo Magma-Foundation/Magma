@@ -3064,14 +3064,12 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
-        return new Suffix<>(">", withoutEnd -> {
-            return Infix.First("<", (base, argumentsString) -> {
-                var strippedBase = base.strip();
-                return this.parseValues(state, argumentsString, this::parseArgument).map(argumentsTuple -> {
-                    return this.assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
-                });
-            }).apply(withoutEnd);
-        }).apply(input.strip());
+        return new Suffix<>(">", Infix.First("<", (base, argumentsString) -> {
+            var strippedBase = base.strip();
+            return this.parseValues(state, argumentsString, this::parseArgument).map(argumentsTuple -> {
+                return this.assembleTemplate(strippedBase, argumentsTuple.left(), argumentsTuple.right());
+            });
+        })).apply(input.strip());
     }
 
     private Option<Type> retainType(Argument argument) {
