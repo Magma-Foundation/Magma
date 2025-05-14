@@ -153,8 +153,8 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
-        return compileInfix(input, "class ", (beforeKeyword, right1) -> {
-            return compileInfix(right1, "{", (name, withEnd) -> {
+        return compileFirst(input, "class ", (beforeKeyword, right1) -> {
+            return compileFirst(right1, "{", (name, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var outputContentTuple = compileSegments(state, inputContent, Main::compileClassSegment);
                     var outputContentState = outputContentTuple.left;
@@ -176,8 +176,19 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return Optional.of(new Tuple<>(state, "\n\t" + placeholder(withoutEnd) + ";"));
+            return Optional.of(new Tuple<>(state, "\n\t" + compileDefinition(withoutEnd) + ";"));
         });
+    }
+
+    private static String compileDefinition(String input) {
+        var stripped = input.strip();
+        return compileInfix(stripped, " ", Main::findLast, (beforeName, name) -> {
+            return Optional.of(placeholder(beforeName) + " " + placeholder(name));
+        }).orElseGet(() -> placeholder(input));
+    }
+
+    private static int findLast(String input, String infix) {
+        return input.lastIndexOf(infix);
     }
 
     private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
@@ -189,8 +200,12 @@ public class Main {
         return mapper.apply(content);
     }
 
-    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
-        var index = input.indexOf(infix);
+    private static <T> Optional<T> compileFirst(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+        return compileInfix(input, infix, Main::findFirst, mapper);
+    }
+
+    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Optional<T>> mapper) {
+        var index = locator.apply(input, infix);
         if (index < 0) {
             return Optional.empty();
         }
@@ -198,6 +213,10 @@ public class Main {
         var left = input.substring(0, index);
         var right = input.substring(index + infix.length());
         return mapper.apply(left, right);
+    }
+
+    private static int findFirst(String input, String infix) {
+        return input.indexOf(infix);
     }
 
     private static String placeholder(String input) {
