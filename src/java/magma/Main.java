@@ -1160,10 +1160,10 @@ public class Main {
 
     }
 
-    private record SymbolValue(String stripped, Type type) implements Value {
+    private record SymbolValue(String value) implements Value {
         @Override
         public String generate() {
-            return this.stripped + createDebugString(this.type);
+            return this.value;
         }
     }
 
@@ -1192,18 +1192,6 @@ public class Main {
         @Actual
         public static <V, K> Map<K, V> empty() {
             return new JVMMap<>();
-        }
-    }
-
-    private record MapCollector<K, V>() implements Collector<Tuple2<K, V>, Map<K, V>> {
-        @Override
-        public Map<K, V> createInitial() {
-            return Maps.empty();
-        }
-
-        @Override
-        public Map<K, V> fold(Map<K, V> current, Tuple2<K, V> element) {
-            return current.with(element.left(), element.right());
         }
     }
 
@@ -2037,7 +2025,7 @@ public class Main {
             var variantType = new ObjectRefType(variantTypeName);
 
             var definition = this.createVariantDefinition(variantType);
-            var source = new SymbolValue(variantTypeName + "." + name, variantType);
+            var source = new SymbolValue(variantTypeName + "." + name);
             var initialization = new FieldInitialization(definition, source);
 
             return classSegmentList.addFirst(new Statement(1, initialization));
@@ -2101,8 +2089,8 @@ public class Main {
 
         var collect = parameters.iterate()
                 .map(definition -> {
-                    var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.findName(), Primitive.Unknown);
-                    return new Assignment(destination, new SymbolValue(definition.findName(), Primitive.Unknown));
+                    var destination = new DataAccess(new SymbolValue("this"), definition.findName(), Primitive.Unknown);
+                    return new Assignment(destination, new SymbolValue(definition.findName()));
                 })
                 .<FunctionSegment>map(assignment -> new Statement(2, assignment))
                 .collect(new ListCollector<>());
@@ -2404,19 +2392,49 @@ public class Main {
 
     private Type resolveValue(CompileState state, Value value) {
         return switch (value) {
-            case BooleanValue booleanValue -> Primitive.Unknown;
-            case Cast cast -> Primitive.Unknown;
-            case DataAccess dataAccess -> Primitive.Unknown;
+            case BooleanValue _, Not _ -> Primitive.Boolean;
+            case StringValue _ -> Primitive.String;
+            case Cast cast -> cast.type;
+            case DataAccess dataAccess -> this.resolveDataAccess(state, dataAccess);
             case IndexValue indexValue -> Primitive.Unknown;
-            case Invokable invokable -> Primitive.Unknown;
+            case Invokable invokable -> this.resolveInvokable(state, invokable);
             case Lambda lambda -> Primitive.Unknown;
-            case Not not -> Primitive.Unknown;
             case Operation operation -> Primitive.Unknown;
-            case Placeholder placeholder -> Primitive.Unknown;
-            case StringValue stringValue -> Primitive.Unknown;
-            case SymbolValue symbolValue -> Primitive.Unknown;
-            case TupleNode tupleNode -> Primitive.Unknown;
+            case SymbolValue symbolValue -> state.resolveValue(symbolValue.value).orElse(Primitive.Unknown);
+            case TupleNode tupleNode -> this.resolveTuple(state, tupleNode);
+            case Placeholder _ -> Primitive.Unknown;
         };
+    }
+
+    private TupleType resolveTuple(CompileState state, TupleNode tupleNode) {
+        return new TupleType(tupleNode.values
+                .iterate()
+                .map(value -> this.resolveValue(state, value))
+                .collect(new ListCollector<>()));
+    }
+
+    private Type resolveInvokable(CompileState state, Invokable invokable) {
+        var caller = invokable.caller;
+        return switch (caller) {
+            case ConstructionCaller constructionCaller -> constructionCaller.type;
+            case Value value1 -> {
+                var type = this.resolveValue(state, value1);
+                if (type instanceof FunctionType functionType) {
+                    yield functionType.returns;
+                }
+                else {
+                    yield Primitive.Unknown;
+                }
+            }
+        };
+    }
+
+    private Type resolveDataAccess(CompileState state, DataAccess dataAccess) {
+        var parentType = this.resolveValue(state, dataAccess.parent);
+        if (parentType instanceof StructureType structureType) {
+            return structureType.find(dataAccess.property).orElse(Primitive.Unknown);
+        }
+        return Primitive.Unknown;
     }
 
     private Tuple2<CompileState, Value> parseValue(CompileState state, String input, int depth) {
@@ -2478,7 +2496,7 @@ public class Main {
             var variant = new DataAccess(child, "_" + type.findName() + "Variant", Primitive.Unknown);
 
             var generate = type.findName();
-            var temp = new SymbolValue(generate + "Variant." + definition.findType().findName(), Primitive.Unknown);
+            var temp = new SymbolValue(generate + "Variant." + definition.findType().findName());
             var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(child, definition.findType())));
             return new Tuple2Impl<>(definitionSTate
                     .addFunctionSegment(functionSegment)
@@ -2557,7 +2575,7 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseDigits(CompileState state, String input) {
         var stripped = input.strip();
         if (this.isNumber(stripped)) {
-            return new Some<>(new Tuple2Impl<CompileState, Value>(state, new SymbolValue(stripped, Primitive.Int)));
+            return new Some<>(new Tuple2Impl<CompileState, Value>(state, new SymbolValue(stripped)));
         }
 
         return new None<>();
@@ -2626,11 +2644,11 @@ public class Main {
 
                 if (parentType instanceof TupleType) {
                     if (property.equals("left")) {
-                        return new Some<>(new Tuple2Impl<>(argumentsState, new IndexValue(parent, new SymbolValue("0", Primitive.Int))));
+                        return new Some<>(new Tuple2Impl<>(argumentsState, new IndexValue(parent, new SymbolValue("0"))));
                     }
 
                     if (property.equals("right")) {
-                        return new Some<>(new Tuple2Impl<>(argumentsState, new IndexValue(parent, new SymbolValue("1", Primitive.Int))));
+                        return new Some<>(new Tuple2Impl<>(argumentsState, new IndexValue(parent, new SymbolValue("1"))));
                     }
                 }
 
@@ -2776,15 +2794,7 @@ public class Main {
     private Option<Tuple2<CompileState, Value>> parseSymbolValue(CompileState state, String value) {
         var stripped = value.strip();
         if (isSymbol(stripped)) {
-            if (state.resolveValue(stripped) instanceof Some(var type)) {
-                return new Some<>(new Tuple2Impl<>(state, new SymbolValue(stripped, type)));
-            }
-
-            if (state.resolveType(stripped) instanceof Some(var type)) {
-                return new Some<>(new Tuple2Impl<>(state, new SymbolValue(stripped, type)));
-            }
-
-            return new Some<>(new Tuple2Impl<>(state, new Placeholder(stripped)));
+            return new Some<>(new Tuple2Impl<>(state, new SymbolValue(stripped)));
         }
         return new None<>();
     }
