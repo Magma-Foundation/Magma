@@ -1,5 +1,5 @@
 /*private static */class DivideState {
-	/*private final*/ /*List<String>*/ /*segments*/;
+	/*private final*/ /*List*/</*String*/> /*segments*/;
 	/*private*/ /*StringBuilder*/ /*buffer*/;
 	/*private*/ /*int*/ /*depth*/;
 	/*private DivideState(List<String> segments, StringBuilder buffer, int depth) {
@@ -178,7 +178,15 @@
 	/*}
 
     private static Tuple<CompileState, String> compileType(String type, CompileState state) {
-        return compileOr(state, type,*/ /*List.of(*/ /*))*/;
+        return compileOr(state, type, List.of(
+               */ /*Main::compileGeneric*/ /*))*/;
+	/*}
+
+    private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
+        return compileSuffix(input.strip(), ">", withoutEnd -> {
+            return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
+                return Optional.of(new Tuple<>(state, generatePlaceholder(baseString) + "<" + generatePlaceholder(argumentsString) + ">"));
+           */ /*});*/ /*})*/;
 	/*}
 
     private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
