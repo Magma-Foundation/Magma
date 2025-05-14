@@ -68,7 +68,7 @@ public class Main {
     private interface List<T> {
         List<T> addLast(T element);
 
-        Query<T> query();
+        Query<T> iterate();
 
         Option<Tuple2<List<T>, T>> removeLast();
 
@@ -118,13 +118,11 @@ public class Main {
     private sealed interface Argument permits Type, Value, Whitespace {
     }
 
-    private sealed interface Parameter permits ImmutableDefinition, Placeholder, Whitespace {
+    private sealed interface Parameter permits Definition, Placeholder, Whitespace {
     }
 
     private sealed interface Value extends LambdaValue, Caller, Argument permits BooleanValue, Cast, DataAccess, IndexValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, SymbolValue, TupleNode {
         String generate();
-
-        Type type();
     }
 
     private interface LambdaValue {
@@ -135,20 +133,8 @@ public class Main {
         String generate();
     }
 
-    private interface BaseType {
-        boolean hasVariant(String name);
-
-        String findName();
-    }
-
-    private sealed interface FindableType extends Type permits ObjectType, Placeholder, Template {
-        Option<Type> find(String name);
-
-        Option<BaseType> findBase();
-    }
-
     private interface Header {
-        ImmutableDefinition createDefinition(List<Type> paramTypes);
+        Definition createDefinition(List<Type> paramTypes);
 
         String generateWithParams(String joinedParameters);
     }
@@ -170,7 +156,7 @@ public class Main {
     }
 
     private sealed interface IncompleteClassSegment permits ClassDefinition, ClassInitialization, EnumValues, IncompleteClassSegmentWrapper, MethodPrototype, Placeholder, StructurePrototype, Whitespace {
-        Option<ImmutableDefinition> maybeCreateDefinition();
+        Option<Definition> maybeCreateDefinition();
     }
 
     private @interface Actual {
@@ -424,7 +410,7 @@ public class Main {
             }
 
             @Override
-            public Query<T> query() {
+            public Query<T> iterate() {
                 return this.iterateWithIndices().map(Tuple2::right);
             }
 
@@ -476,7 +462,7 @@ public class Main {
             @Override
             public List<T> addAllLast(List<T> others) {
                 List<T> initial = this;
-                return others.query().fold(initial, List::addLast);
+                return others.iterate().fold(initial, List::addLast);
             }
 
             @Override
@@ -542,15 +528,15 @@ public class Main {
         }
     }
 
-    private record ImmutableDefinition(
+    private record Definition(
             List<String> annotations,
             List<String> modifiers,
             String name,
             Type type,
             List<String> typeParams
     ) implements Parameter, Header, StatementValue {
-        public static ImmutableDefinition createSimpleDefinition(String name, Type type) {
-            return new ImmutableDefinition(Lists.empty(), Lists.empty(), name, type, Lists.empty());
+        public static Definition createSimpleDefinition(String name, Type type) {
+            return new Definition(Lists.empty(), Lists.empty(), name, type, Lists.empty());
         }
 
         public String findName() {
@@ -576,26 +562,26 @@ public class Main {
 
         private String joinModifiers() {
             return this.modifiers
-                    .query()
+                    .iterate()
                     .map(value -> value + " ")
                     .collect(new Joiner(""))
                     .orElse("");
         }
 
         private String joinTypeParams() {
-            return this.typeParams.query()
+            return this.typeParams.iterate()
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
         }
 
-        public ImmutableDefinition mapType(Function<Type, Type> mapper) {
-            return new ImmutableDefinition(this.annotations, this.modifiers, this.name, mapper.apply(this.type), this.typeParams);
+        public Definition mapType(Function<Type, Type> mapper) {
+            return new Definition(this.annotations, this.modifiers, this.name, mapper.apply(this.type), this.typeParams);
         }
 
         @Override
         public String generateWithParams(String joinedParameters) {
-            var joinedAnnotations = this.annotations.query()
+            var joinedAnnotations = this.annotations.iterate()
                     .map(value -> "@" + value + " ")
                     .collect(Joiner.empty())
                     .orElse("");
@@ -607,17 +593,17 @@ public class Main {
         }
 
         @Override
-        public ImmutableDefinition createDefinition(List<Type> paramTypes) {
+        public Definition createDefinition(List<Type> paramTypes) {
             Type type1 = new FunctionType(paramTypes, this.type);
-            return new ImmutableDefinition(this.annotations, this.modifiers, this.name, type1, this.typeParams);
+            return new Definition(this.annotations, this.modifiers, this.name, type1, this.typeParams);
         }
 
         public boolean containsAnnotation(String annotation) {
             return this.annotations.contains(annotation);
         }
 
-        public ImmutableDefinition removeAnnotations() {
-            return new ImmutableDefinition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
+        public Definition removeAnnotations() {
+            return new Definition(Lists.empty(), this.modifiers, this.name, this.type, this.typeParams);
         }
 
         @Override
@@ -632,12 +618,7 @@ public class Main {
 
     }
 
-    private record ObjectType(
-            String name,
-            List<String> typeParams,
-            List<ImmutableDefinition> definitions,
-            List<String> variants
-    ) implements FindableType, BaseType {
+    private record ObjectRefType(String name) implements Type {
         @Override
         public String generate() {
             return this.name;
@@ -645,27 +626,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new ObjectType(this.name, this.typeParams, this.definitions.query()
-                    .map(definition -> definition.mapType(type -> type.replace(mapping)))
-                    .collect(new ListCollector<>()), this.variants);
-        }
-
-        @Override
-        public Option<Type> find(String name) {
-            return this.definitions.query()
-                    .filter(definition -> definition.findName().equals(name))
-                    .map(ImmutableDefinition::findType)
-                    .next();
-        }
-
-        @Override
-        public Option<BaseType> findBase() {
-            return new Some<>(this);
-        }
-
-        @Override
-        public boolean hasVariant(String name) {
-            return this.variants().contains(name);
+            return new ObjectRefType(this.name);
         }
 
         @Override
@@ -693,8 +654,8 @@ public class Main {
 
     private record CompileState(
             List<String> structures,
-            List<List<ImmutableDefinition>> definitions,
-            List<ObjectType> objectTypes,
+            List<List<Definition>> definitions,
+            List<StructureType> structureTypes,
             List<Tuple2<String, List<String>>> structNames,
             List<String> typeParams,
             Option<Type> typeRegister,
@@ -706,19 +667,19 @@ public class Main {
 
         private Option<Type> resolveValue(String name) {
             return this.definitions.iterateReversed()
-                    .flatMap(List::query)
+                    .flatMap(List::iterate)
                     .filter(definition -> definition.findName().equals(name))
                     .next()
-                    .map(ImmutableDefinition::findType);
+                    .map(Definition::findType);
         }
 
         public CompileState addStructure(String structure) {
-            return new CompileState(this.structures.addLast(structure), this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures.addLast(structure), this.definitions, this.structureTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
-        public CompileState defineAll(List<ImmutableDefinition> definitions) {
+        public CompileState defineAll(List<Definition> definitions) {
             var defined = this.definitions.mapLast(frame -> frame.addAllLast(definitions));
-            return new CompileState(this.structures, defined, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures, defined, this.structureTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public Option<Type> resolveType(String name) {
@@ -728,10 +689,10 @@ public class Main {
 
             if (maybe instanceof Some<Tuple2<String, List<String>>> some) {
                 var found = some.value;
-                return new Some<>(new ObjectType(found.left(), this.typeParams, this.definitions.last().orElse(Lists.empty()), found.right()));
+                return new Some<>(new ObjectRefType(found.left()));
             }
 
-            var maybeTypeParam = this.typeParams.query()
+            var maybeTypeParam = this.typeParams.iterate()
                     .filter(param -> param.equals(name))
                     .next();
 
@@ -739,55 +700,86 @@ public class Main {
                 return new Some<>(new TypeParam(some.value));
             }
 
-            return this.objectTypes.query()
-                    .filter(type -> type.name.equals(name))
-                    .next()
-                    .map(type -> type);
+            return this.findStructure(name).map(type -> type);
         }
 
-        public CompileState define(ImmutableDefinition definition) {
-            return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+        public CompileState define(Definition definition) {
+            return new CompileState(this.structures, this.definitions.mapLast(frame -> frame.addLast(definition)), this.structureTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState pushStructName(Tuple2<String, List<String>> definition) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.addLast(definition), this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures, this.definitions, this.structureTypes, this.structNames.addLast(definition), this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState withTypeParams(List<String> typeParams) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures, this.definitions, this.structureTypes, this.structNames, this.typeParams.addAllLast(typeParams), this.typeRegister, this.functionSegments);
         }
 
         public CompileState withExpectedType(Type type) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, new Some<>(type), this.functionSegments);
+            return new CompileState(this.structures, this.definitions, this.structureTypes, this.structNames, this.typeParams, new Some<>(type), this.functionSegments);
         }
 
         public CompileState popStructName() {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures, this.definitions, this.structureTypes, this.structNames.removeLast().map(Tuple2::left).orElse(this.structNames), this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState enterDefinitions() {
-            return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures, this.definitions.addLast(Lists.empty()), this.structureTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState exitDefinitions() {
             var removed = this.definitions.removeLast().map(Tuple2::left).orElse(this.definitions);
-            return new CompileState(this.structures, removed, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+            return new CompileState(this.structures, removed, this.structureTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
-        public CompileState addType(ObjectType thisType) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
+        public CompileState addType(StructureType thisType) {
+            return new CompileState(this.structures, this.definitions, this.structureTypes.addLast(thisType), this.structNames, this.typeParams, this.typeRegister, this.functionSegments);
         }
 
         public CompileState addFunctionSegment(FunctionSegment segment) {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments.addLast(segment));
+            return new CompileState(this.structures, this.definitions, this.structureTypes, this.structNames, this.typeParams, this.typeRegister, this.functionSegments.addLast(segment));
         }
 
         public CompileState clearFunctionSegments() {
-            return new CompileState(this.structures, this.definitions, this.objectTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
+            return new CompileState(this.structures, this.definitions, this.structureTypes, this.structNames, this.typeParams, this.typeRegister, Lists.empty());
         }
 
         private boolean isCurrentStructName(String stripped) {
             return stripped.equals(this.structNames.last().map(Tuple2::left).orElse(""));
+        }
+
+        public Option<StructureType> findStructure(String name) {
+            return this.structureTypes.iterate()
+                    .filter(structureType -> structureType.name.equals(name))
+                    .next();
+        }
+    }
+
+    private record StructureType(String name, List<String> variants, List<Definition> definitions) implements Type {
+        public boolean hasVariant(String name) {
+            return this.variants.contains(name);
+        }
+
+        @Override
+        public String generate() {
+            return this.name;
+        }
+
+        @Override
+        public Type replace(Map<String, Type> mapping) {
+            return this;
+        }
+
+        @Override
+        public String findName() {
+            return this.name;
+        }
+
+        public Option<Type> find(String property) {
+            return this.definitions.iterate()
+                    .filter(definition -> definition.name.equals(property))
+                    .map(Definition::type)
+                    .next();
         }
     }
 
@@ -953,7 +945,7 @@ public class Main {
         }
 
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -983,7 +975,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new FunctionType(this.arguments.query().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns.replace(mapping));
+            return new FunctionType(this.arguments.iterate().map(type -> type.replace(mapping)).collect(new ListCollector<>()), this.returns.replace(mapping));
         }
 
         @Override
@@ -995,7 +987,7 @@ public class Main {
     private record TupleType(List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments.query()
+            var joinedArguments = this.arguments.iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1005,7 +997,7 @@ public class Main {
 
         @Override
         public Type replace(Map<String, Type> mapping) {
-            return new TupleType(this.arguments.query()
+            return new TupleType(this.arguments.iterate()
                     .map(child -> child.replace(mapping))
                     .collect(new ListCollector<>()));
         }
@@ -1016,10 +1008,10 @@ public class Main {
         }
     }
 
-    private record Template(ObjectType base, List<Type> arguments) implements FindableType {
+    private record Template(ObjectRefType base, List<Type> arguments) implements Type {
         @Override
         public String generate() {
-            var joinedArguments = this.arguments.query()
+            var joinedArguments = this.arguments.iterate()
                     .map(Type::generate)
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
@@ -1029,25 +1021,8 @@ public class Main {
         }
 
         @Override
-        public Option<Type> find(String name) {
-            return this.base.find(name).map(found -> {
-                var mapping = this.base.typeParams()
-                        .query()
-                        .zip(this.arguments.query())
-                        .collect(new MapCollector<>());
-
-                return found.replace(mapping);
-            });
-        }
-
-        @Override
-        public Option<BaseType> findBase() {
-            return new Some<>(this.base);
-        }
-
-        @Override
         public Type replace(Map<String, Type> mapping) {
-            var collect = this.arguments.query()
+            var collect = this.arguments.iterate()
                     .map(argument -> argument.replace(mapping))
                     .collect(new ListCollector<>());
 
@@ -1062,25 +1037,10 @@ public class Main {
 
     private record Placeholder(
             String input
-    ) implements Parameter, Value, FindableType, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment {
+    ) implements Parameter, Value, ClassSegment, FunctionSegment, BlockHeader, StatementValue, IncompleteClassSegment, Type {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
-        }
-
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<Type> find(String name) {
-            return new None<>();
-        }
-
-        @Override
-        public Option<BaseType> findBase() {
-            return new None<>();
         }
 
         @Override
@@ -1094,7 +1054,7 @@ public class Main {
         }
 
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
@@ -1106,10 +1066,6 @@ public class Main {
             return "\"" + this.value + "\"";
         }
 
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
-        }
     }
 
     private record DataAccess(Value parent, String property, Type type) implements Value {
@@ -1118,10 +1074,6 @@ public class Main {
             return this.parent.generate() + "." + this.property + createDebugString(this.type);
         }
 
-        @Override
-        public Type type() {
-            return this.type;
-        }
     }
 
     private record ConstructionCaller(Type type) implements Caller {
@@ -1151,10 +1103,6 @@ public class Main {
             return this.left().generate() + " " + this.operator.targetRepresentation + " " + this.right().generate();
         }
 
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
-        }
     }
 
     private record Not(Value value) implements Value {
@@ -1163,10 +1111,6 @@ public class Main {
             return "!" + this.value.generate();
         }
 
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
-        }
     }
 
     private record BlockLambdaValue(int depth, List<FunctionSegment> statements) implements LambdaValue {
@@ -1176,34 +1120,30 @@ public class Main {
         }
 
         private String joinStatements() {
-            return this.statements.query()
+            return this.statements.iterate()
                     .map(FunctionSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
         }
     }
 
-    private record Lambda(List<ImmutableDefinition> parameters, LambdaValue body) implements Value {
+    private record Lambda(List<Definition> parameters, LambdaValue body) implements Value {
         @Override
         public String generate() {
-            var joined = this.parameters.query()
-                    .map(ImmutableDefinition::generate)
+            var joined = this.parameters.iterate()
+                    .map(Definition::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
 
             return "(" + joined + ") => " + this.body.generate();
         }
 
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
-        }
     }
 
     private record Invokable(Caller caller, List<Value> arguments, Type type) implements Value {
         @Override
         public String generate() {
-            var joined = this.arguments.query()
+            var joined = this.arguments.iterate()
                     .map(Value::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1218,10 +1158,6 @@ public class Main {
             return this.parent.generate() + "[" + this.child.generate() + "]";
         }
 
-        @Override
-        public Type type() {
-            return Primitive.Unknown;
-        }
     }
 
     private record SymbolValue(String stripped, Type type) implements Value {
@@ -1273,8 +1209,8 @@ public class Main {
 
     private static class ConstructorHeader implements Header {
         @Override
-        public ImmutableDefinition createDefinition(List<Type> paramTypes) {
-            return ImmutableDefinition.createSimpleDefinition("new", Primitive.Unknown);
+        public Definition createDefinition(List<Type> paramTypes) {
+            return Definition.createSimpleDefinition("new", Primitive.Unknown);
         }
 
         @Override
@@ -1286,11 +1222,11 @@ public class Main {
     private record FunctionNode(
             int depth,
             Header header,
-            List<ImmutableDefinition> parameters,
+            List<Definition> parameters,
             Option<List<FunctionSegment>> maybeStatements
     ) implements ClassSegment {
         private static String joinStatements(List<FunctionSegment> statements) {
-            return statements.query()
+            return statements.iterate()
                     .map(FunctionSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -1314,7 +1250,7 @@ public class Main {
         public String generate() {
             var indent = createIndent(this.depth);
             var collect = this.statements
-                    .query()
+                    .iterate()
                     .map(FunctionSegment::generate)
                     .collect(Joiner.empty())
                     .orElse("");
@@ -1344,14 +1280,14 @@ public class Main {
         }
     }
 
-    private record Initialization(ImmutableDefinition definition, Value source) implements StatementValue {
+    private record Initialization(Definition definition, Value source) implements StatementValue {
         @Override
         public String generate() {
             return "let " + this.definition.generate() + " = " + this.source.generate();
         }
     }
 
-    private record FieldInitialization(ImmutableDefinition definition, Value source) implements StatementValue {
+    private record FieldInitialization(Definition definition, Value source) implements StatementValue {
         @Override
         public String generate() {
             return this.definition.generate() + " = " + this.source.generate();
@@ -1375,21 +1311,21 @@ public class Main {
     private record MethodPrototype(
             int depth,
             Header header,
-            List<ImmutableDefinition> parameters,
+            List<Definition> parameters,
             String content
     ) implements IncompleteClassSegment {
-        private ImmutableDefinition createDefinition() {
+        private Definition createDefinition() {
             return this.header.createDefinition(this.findParamTypes());
         }
 
         private List<Type> findParamTypes() {
-            return this.parameters().query()
-                    .map(ImmutableDefinition::findType)
+            return this.parameters().iterate()
+                    .map(Definition::findType)
                     .collect(new ListCollector<>());
         }
 
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.header.createDefinition(this.findParamTypes()));
         }
 
@@ -1397,25 +1333,25 @@ public class Main {
 
     private record IncompleteClassSegmentWrapper(ClassSegment segment) implements IncompleteClassSegment {
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
     }
 
-    private record ClassDefinition(int depth, ImmutableDefinition definition) implements IncompleteClassSegment {
+    private record ClassDefinition(int depth, Definition definition) implements IncompleteClassSegment {
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
     }
 
     private record ClassInitialization(
             int depth,
-            ImmutableDefinition definition,
+            Definition definition,
             Value value
     ) implements IncompleteClassSegment {
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new Some<>(this.definition);
         }
     }
@@ -1428,7 +1364,7 @@ public class Main {
             String beforeInfix,
             String name,
             List<String> typeParams,
-            List<ImmutableDefinition> parameters,
+            List<Definition> parameters,
             String after,
             List<IncompleteClassSegment> segments,
             List<String> variants,
@@ -1436,28 +1372,28 @@ public class Main {
             List<TypeRef> superTypes
     ) implements IncompleteClassSegment {
         private static String generateEnumEntries(List<String> variants) {
-            return variants.query()
+            return variants.iterate()
                     .map(inner -> "\n\t" + inner)
                     .collect(new Joiner(","))
                     .orElse("");
         }
 
-        private ObjectType createObjectType() {
-            var definitionFromSegments = this.segments.query()
+        private StructureType createObjectType() {
+            var definitionFromSegments = this.segments.iterate()
                     .map(IncompleteClassSegment::maybeCreateDefinition)
                     .flatMap(Queries::fromOption)
                     .collect(new ListCollector<>());
 
-            return new ObjectType(this.name, this.typeParams, definitionFromSegments.addAllLast(this.parameters), this.variants);
+            return new StructureType(this.name, this.variants, definitionFromSegments);
         }
 
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
 
         private String joinTypeParams() {
-            return this.typeParams().query()
+            return this.typeParams().iterate()
                     .collect(new Joiner(", "))
                     .map(inner -> "<" + inner + ">")
                     .orElse("");
@@ -1542,7 +1478,7 @@ public class Main {
     private record TupleNode(List<Value> values) implements Value {
         @Override
         public String generate() {
-            var joined = this.values.query()
+            var joined = this.values.iterate()
                     .map(Value::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -1550,12 +1486,6 @@ public class Main {
             return "[" + joined + "]";
         }
 
-        @Override
-        public Type type() {
-            return new TupleType(this.values.query()
-                    .map(Value::type)
-                    .collect(new ListCollector<>()));
-        }
     }
 
     private record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
@@ -1574,7 +1504,7 @@ public class Main {
 
     private record EnumValue(String value, List<Value> values) {
         public String generate() {
-            var s = this.values.query().map(Value::generate).collect(new Joiner(", ")).orElse("");
+            var s = this.values.iterate().map(Value::generate).collect(new Joiner(", ")).orElse("");
             return this.value + "(" + s + ")";
         }
     }
@@ -1582,14 +1512,14 @@ public class Main {
     private record EnumValues(List<EnumValue> values) implements IncompleteClassSegment, ClassSegment {
         @Override
         public String generate() {
-            return this.values.query()
+            return this.values.iterate()
                     .map(EnumValue::generate)
                     .collect(new Joiner(", "))
                     .orElse("");
         }
 
         @Override
-        public Option<ImmutableDefinition> maybeCreateDefinition() {
+        public Option<Definition> maybeCreateDefinition() {
             return new None<>();
         }
     }
@@ -1615,9 +1545,9 @@ public class Main {
         return "/* " + replaced + " */";
     }
 
-    private static String joinValues(List<ImmutableDefinition> retainParameters) {
-        var inner = retainParameters.query()
-                .map(ImmutableDefinition::generate)
+    private static String joinValues(List<Definition> retainParameters) {
+        var inner = retainParameters.iterate()
+                .map(Definition::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
 
@@ -1636,13 +1566,6 @@ public class Main {
         return generatePlaceholder(": " + type.generate());
     }
 
-    private static Option<FindableType> retainFindableType(Type type) {
-        if (type instanceof FindableType findableType) {
-            return new Some<>(findableType);
-        }
-        return new None<>();
-    }
-
     private static boolean isSymbol(String input) {
         for (var i = 0; i < Strings.length(input); i++) {
             var c = input.charAt(i);
@@ -1659,6 +1582,15 @@ public class Main {
             return new Some<>(new Tuple2Impl<>(state, new Whitespace()));
         }
         return new None<>();
+    }
+
+    private static Option<ObjectRefType> retainObjectRefType(Type type) {
+        if (type instanceof ObjectRefType objectRefType) {
+            return new Some<>(objectRefType);
+        }
+        else {
+            return new None<>();
+        }
     }
 
     public void main() {
@@ -1696,7 +1628,7 @@ public class Main {
     private String compile(String input) {
         var state = CompileState.createInitial();
         var parsed = this.parseStatements(state, input, this::compileRootSegment);
-        var joined = parsed.left().structures.query().collect(Joiner.empty()).orElse("");
+        var joined = parsed.left().structures.iterate().collect(Joiner.empty()).orElse("");
         return joined + this.generateStatements(parsed.right());
     }
 
@@ -1712,7 +1644,7 @@ public class Main {
 
     private String generateAll(BiFunction<String, String, String> merger, List<String> elements) {
         return elements
-                .query()
+                .iterate()
                 .fold("", merger);
     }
 
@@ -1863,7 +1795,7 @@ public class Main {
 
     private List<String> parseAnnotations(String annotationsString) {
         return this.divideAll(annotationsString.strip(), (state1, c) -> this.foldByDelimiter(state1, c, '\n'))
-                .query()
+                .iterate()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(value -> value.substring(1))
@@ -1882,7 +1814,7 @@ public class Main {
     private Option<Tuple2<CompileState, IncompleteClassSegment>> parseStructureWithMaybePermits(String targetInfix, CompileState state, String beforeInfix, String beforeContent, String content1, List<String> annotations) {
         return this.last(beforeContent, " permits ", (s, s2) -> {
             var variants = this.divideAll(s2, this::foldValueChar)
-                    .query()
+                    .iterate()
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
                     .collect(new ListCollector<>());
@@ -1907,7 +1839,7 @@ public class Main {
 
     private List<TypeRef> parseTypeRefs(String s2) {
         return this.divideAll(s2, this::foldValueChar)
-                .query()
+                .iterate()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(TypeRef::new)
@@ -2002,17 +1934,20 @@ public class Main {
 
     private Option<Tuple2<CompileState, ClassSegment>> completeStructure(CompileState state, StructurePrototype prototype) {
         var thisType = prototype.createObjectType();
-        var withThis = state.enterDefinitions().define(ImmutableDefinition.createSimpleDefinition("this", thisType));
+        var withThis = state.enterDefinitions().define(Definition.createSimpleDefinition("this", thisType));
 
         return this.resolveTypeRefs(withThis, prototype.interfaces).flatMap(interfacesTuple -> {
             return this.resolveTypeRefs(interfacesTuple.left(), prototype.superTypes).flatMap(superTypesTuple -> {
                 var interfaces = interfacesTuple.right();
                 var superTypes = superTypesTuple.right();
 
-                var bases = this.resolveBaseTypes(interfaces).addAllLast(this.resolveBaseTypes(superTypes));
-                var variantsSuper = this.findSuperTypesOfVariants(bases, prototype.name);
+                var bases = this.resolveBaseTypes(interfaces)
+                        .addAllLast(this.resolveBaseTypes(superTypes));
 
-                return this.mapUsingState(superTypesTuple.left(), prototype.segments(), this.createClassSegmentRule())
+                var left = superTypesTuple.left();
+                var variantsSuper = this.findBaseNamesOfVariants(left, bases, prototype.name);
+
+                return this.mapUsingState(left, prototype.segments(), this.createClassSegmentRule())
                         .map(this.completeStructureWithStatements(prototype, variantsSuper, thisType, interfaces));
             });
         });
@@ -2021,7 +1956,7 @@ public class Main {
     private Function<Tuple2<CompileState, List<ClassSegment>>, Tuple2<CompileState, ClassSegment>> completeStructureWithStatements(
             StructurePrototype prototype,
             List<String> variantsSuper,
-            ObjectType thisType,
+            StructureType thisType,
             List<Type> interfaces
     ) {
         return oldStatementsTuple -> {
@@ -2060,7 +1995,7 @@ public class Main {
 
     private String joinSuperTypes(CompileState state, StructurePrototype prototype) {
         return prototype.superTypes
-                .query()
+                .iterate()
                 .map(value -> state.resolveType(value.value))
                 .flatMap(Queries::fromOption)
                 .map(Type::generate)
@@ -2069,8 +2004,8 @@ public class Main {
                 .orElse("");
     }
 
-    private List<ClassSegment> implementEnumValues(List<ClassSegment> withConstructor, ObjectType thisType) {
-        return withConstructor.query()
+    private List<ClassSegment> implementEnumValues(List<ClassSegment> withConstructor, StructureType thisType) {
+        return withConstructor.iterate()
                 .flatMap(segment -> this.flattenEnumValues(segment, thisType))
                 .collect(new ListCollector<>());
     }
@@ -2087,7 +2022,7 @@ public class Main {
 
         var enumState = state.addStructure(enumGenerated);
 
-        var enumType = new ObjectType(name + "Variant", Lists.empty(), Lists.empty(), variants);
+        var enumType = new ObjectRefType(name + "Variant");
         var enumDefinition = this.createVariantDefinition(enumType);
 
         return new Tuple2Impl<>(enumState, segments.addFirst(new Statement(1, enumDefinition)));
@@ -2097,9 +2032,9 @@ public class Main {
             String name,
             List<String> variantsBases,
             List<ClassSegment> oldStatements) {
-        return variantsBases.query().fold(oldStatements, (classSegmentList, superType) -> {
+        return variantsBases.iterate().fold(oldStatements, (classSegmentList, superType) -> {
             var variantTypeName = superType + "Variant";
-            var variantType = new ObjectType(variantTypeName, Lists.empty(), Lists.empty(), Lists.empty());
+            var variantType = new ObjectRefType(variantTypeName);
 
             var definition = this.createVariantDefinition(variantType);
             var source = new SymbolValue(variantTypeName + "." + name, variantType);
@@ -2109,41 +2044,41 @@ public class Main {
         });
     }
 
-    private List<String> findSuperTypesOfVariants(List<BaseType> bases, String name) {
-        return bases.query()
+    private List<String> findBaseNamesOfVariants(CompileState state, List<ObjectRefType> refs, String name) {
+        return refs.iterate()
+                .map(base -> state.findStructure(base.name))
+                .flatMap(Queries::fromOption)
                 .filter(type -> type.hasVariant(name))
-                .map(BaseType::findName)
+                .map(StructureType::name)
                 .collect(new ListCollector<>());
     }
 
-    private List<BaseType> resolveBaseTypes(List<Type> interfaces) {
-        return interfaces.query()
-                .map(Main::retainFindableType)
-                .flatMap(Queries::fromOption)
-                .map(FindableType::findBase)
+    private List<ObjectRefType> resolveBaseTypes(List<Type> interfaces) {
+        return interfaces.iterate()
+                .map(Main::retainObjectRefType)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
     }
 
     private String joinSegments(List<ClassSegment> segmentsWithMaybeConstructor) {
-        return segmentsWithMaybeConstructor.query()
+        return segmentsWithMaybeConstructor.iterate()
                 .map(ClassSegment::generate)
                 .collect(Joiner.empty())
                 .orElse("");
     }
 
     private String joinInterfaces(List<Type> interfaces) {
-        return interfaces.query()
+        return interfaces.iterate()
                 .map(Type::generate)
                 .collect(new Joiner(", "))
                 .map(inner -> " implements " + inner)
                 .orElse("");
     }
 
-    private Query<ClassSegment> flattenEnumValues(ClassSegment segment, ObjectType thisType) {
+    private Query<ClassSegment> flattenEnumValues(ClassSegment segment, StructureType thisType) {
         if (segment instanceof EnumValues enumValues) {
-            return enumValues.values.query().map(enumValue -> {
-                var definition = new ImmutableDefinition(Lists.empty(), Lists.of("static"), enumValue.value, thisType, Lists.empty());
+            return enumValues.values.iterate().map(enumValue -> {
+                var definition = new Definition(Lists.empty(), Lists.of("static"), enumValue.value, thisType, Lists.empty());
                 return new Statement(1, new FieldInitialization(definition, new Invokable(new ConstructionCaller(thisType), enumValue.values, thisType)));
             });
         }
@@ -2151,20 +2086,20 @@ public class Main {
         return Queries.from(segment);
     }
 
-    private ImmutableDefinition createVariantDefinition(ObjectType type) {
-        return ImmutableDefinition.createSimpleDefinition("_" + type.name, type);
+    private Definition createVariantDefinition(ObjectRefType type) {
+        return Definition.createSimpleDefinition("_" + type.name, type);
     }
 
-    private List<ClassSegment> defineConstructor(List<ClassSegment> segments, List<ImmutableDefinition> parameters) {
+    private List<ClassSegment> defineConstructor(List<ClassSegment> segments, List<Definition> parameters) {
         if (parameters.isEmpty()) {
             return segments;
         }
 
-        List<ClassSegment> definitions = parameters.query()
+        List<ClassSegment> definitions = parameters.iterate()
                 .<ClassSegment>map(definition -> new Statement(1, definition))
                 .collect(new ListCollector<>());
 
-        var collect = parameters.query()
+        var collect = parameters.iterate()
                 .map(definition -> {
                     var destination = new DataAccess(new SymbolValue("this", Primitive.Unknown), definition.findName(), Primitive.Unknown);
                     return new Assignment(destination, new SymbolValue(definition.findName(), Primitive.Unknown));
@@ -2203,8 +2138,8 @@ public class Main {
         return new Some<>(new Tuple2Impl<>(state1, statement));
     }
 
-    private Option<ImmutableDefinition> retainDefinition(Parameter parameter) {
-        if (parameter instanceof ImmutableDefinition definition) {
+    private Option<Definition> retainDefinition(Parameter parameter) {
+        if (parameter instanceof Definition definition) {
             return new Some<>(definition);
         }
         return new None<>();
@@ -2287,7 +2222,7 @@ public class Main {
 
         var oldHeader = prototype.header();
         Header newHeader;
-        if (oldHeader instanceof ImmutableDefinition maybeDefinition) {
+        if (oldHeader instanceof Definition maybeDefinition) {
             newHeader = maybeDefinition.removeAnnotations();
         }
         else {
@@ -2319,8 +2254,8 @@ public class Main {
         return new None<>();
     }
 
-    private List<ImmutableDefinition> retainDefinitions(List<Parameter> right) {
-        return right.query()
+    private List<Definition> retainDefinitions(List<Parameter> right) {
+        return right.iterate()
                 .map(this::retainDefinition)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
@@ -2375,7 +2310,7 @@ public class Main {
         var divisions = this.divideAll(input, this::foldBlockStart);
         return divisions.removeFirst().map(removed -> {
             var right = removed.left();
-            var left = removed.right().query().collect(new Joiner("")).orElse("");
+            var left = removed.right().iterate().collect(new Joiner("")).orElse("");
 
             return new Tuple2Impl<>(right, left);
         });
@@ -2454,10 +2389,10 @@ public class Main {
         });
     }
 
-    private Option<Tuple2<CompileState, StatementValue>> parseInitialization(CompileState state, ImmutableDefinition rawDefinition, Value source) {
-        var definition = rawDefinition.mapType(type -> {
+    private Option<Tuple2<CompileState, StatementValue>> parseInitialization(CompileState state, Definition destination, Value source) {
+        var definition = destination.mapType(type -> {
             if (type.equals(Primitive.Unknown)) {
-                return source.type();
+                return this.resolveValue(state, source);
             }
             else {
                 return type;
@@ -2465,6 +2400,23 @@ public class Main {
         });
 
         return new Some<>(new Tuple2Impl<>(state.define(definition), new Initialization(definition, source)));
+    }
+
+    private Type resolveValue(CompileState state, Value value) {
+        return switch (value) {
+            case BooleanValue booleanValue -> Primitive.Unknown;
+            case Cast cast -> Primitive.Unknown;
+            case DataAccess dataAccess -> Primitive.Unknown;
+            case IndexValue indexValue -> Primitive.Unknown;
+            case Invokable invokable -> Primitive.Unknown;
+            case Lambda lambda -> Primitive.Unknown;
+            case Not not -> Primitive.Unknown;
+            case Operation operation -> Primitive.Unknown;
+            case Placeholder placeholder -> Primitive.Unknown;
+            case StringValue stringValue -> Primitive.Unknown;
+            case SymbolValue symbolValue -> Primitive.Unknown;
+            case TupleNode tupleNode -> Primitive.Unknown;
+        };
     }
 
     private Tuple2<CompileState, Value> parseValue(CompileState state, String input, int depth) {
@@ -2511,23 +2463,27 @@ public class Main {
     }
 
     private Option<Tuple2<CompileState, Value>> parseInstanceOf(CompileState state, String input, int depth) {
-        return this.last(input, "instanceof", (s, s2) -> {
-            var childTuple = this.parseValue(state, s, depth);
-            return this.parseDefinition(childTuple.left(), s2).map(definitionTuple -> {
-                var value = childTuple.right();
-                var definition = definitionTuple.right();
-
-                var type = value.type();
-                var variant = new DataAccess(value, "_" + type.findName() + "Variant", Primitive.Unknown);
-
-                var generate = type.findName();
-                var temp = new SymbolValue(generate + "Variant." + definition.findType().findName(), Primitive.Unknown);
-                var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(value, definition.findType())));
-                return new Tuple2Impl<>(definitionTuple.left()
-                        .addFunctionSegment(functionSegment)
-                        .define(definition), new Operation(variant, Operator.EQUALS, temp));
-            });
+        return this.last(input, "instanceof", (beforeKeyword, afterKeyword) -> {
+            var childTuple = this.parseValue(state, beforeKeyword, depth);
+            return this.parseDefinition(childTuple.left(), afterKeyword).map(this.parseInstanceOfWithValue(depth, childTuple.right()));
         });
+    }
+
+    private Function<Tuple2<CompileState, Definition>, Tuple2<CompileState, Value>> parseInstanceOfWithValue(int depth, Value child) {
+        return definitionTuple -> {
+            var definitionSTate = definitionTuple.left();
+            var definition = definitionTuple.right();
+
+            var type = this.resolveValue(definitionSTate, child);
+            var variant = new DataAccess(child, "_" + type.findName() + "Variant", Primitive.Unknown);
+
+            var generate = type.findName();
+            var temp = new SymbolValue(generate + "Variant." + definition.findType().findName(), Primitive.Unknown);
+            var functionSegment = new Statement(depth + 1, new Initialization(definition, new Cast(child, definition.findType())));
+            return new Tuple2Impl<>(definitionSTate
+                    .addFunctionSegment(functionSegment)
+                    .define(definition), new Operation(variant, Operator.EQUALS, temp));
+        };
     }
 
     private Option<Tuple2<CompileState, Value>> parseMethodReference(CompileState state, String input, int depth) {
@@ -2559,15 +2515,15 @@ public class Main {
                         type = functionType.arguments.get(0).orElse(null);
                     }
                 }
-                return this.assembleLambda(state, Lists.of(ImmutableDefinition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
+                return this.assembleLambda(state, Lists.of(Definition.createSimpleDefinition(strippedBeforeArrow, type)), valueString, depth);
             }
 
             if (strippedBeforeArrow.startsWith("(") && strippedBeforeArrow.endsWith(")")) {
                 var parameterNames = this.divideAll(strippedBeforeArrow.substring(1, Strings.length(strippedBeforeArrow) - 1), this::foldValueChar)
-                        .query()
+                        .iterate()
                         .map(String::strip)
                         .filter(value -> !value.isEmpty())
-                        .map(name -> ImmutableDefinition.createSimpleDefinition(name, Primitive.Unknown))
+                        .map(name -> Definition.createSimpleDefinition(name, Primitive.Unknown))
                         .collect(new ListCollector<>());
 
                 return this.assembleLambda(state, parameterNames, valueString, depth);
@@ -2577,7 +2533,7 @@ public class Main {
         });
     }
 
-    private Some<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<ImmutableDefinition> definitions, String valueString, int depth) {
+    private Some<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<Definition> definitions, String valueString, int depth) {
         var strippedValueString = valueString.strip();
 
         Tuple2<CompileState, LambdaValue> value;
@@ -2645,14 +2601,14 @@ public class Main {
         var oldCaller = callerTuple.right();
 
         var newCaller = this.modifyCaller(oldCallerState, oldCaller);
-        var callerType = this.findCallerType(newCaller);
+        var callerType = this.findCallerType(newCaller, oldCallerState);
 
         var argumentsTuple = this.parseValuesWithIndices(oldCallerState, argumentsString, (currentState, pair) -> this.getTuple2Some(depth, currentState, pair, callerType)).orElseGet(() -> new Tuple2Impl<>(oldCallerState, Lists.empty()));
 
         var argumentsState = argumentsTuple.left();
         var argumentsWithActualTypes = argumentsTuple.right();
 
-        var arguments = this.retainValues(argumentsWithActualTypes.query()
+        var arguments = this.retainValues(argumentsWithActualTypes.iterate()
                 .map(Tuple2::left)
                 .collect(new ListCollector<>()));
 
@@ -2666,7 +2622,7 @@ public class Main {
             if (value instanceof DataAccess access) {
                 var parent = access.parent;
                 var property = access.property;
-                var parentType = parent.type();
+                var parentType = this.resolveValue(argumentsState, parent);
 
                 if (parentType instanceof TupleType) {
                     if (property.equals("left")) {
@@ -2705,7 +2661,7 @@ public class Main {
     }
 
     private List<Value> retainValues(List<Argument> arguments) {
-        return arguments.query()
+        return arguments.iterate()
                 .map(this::retainValue)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
@@ -2728,14 +2684,14 @@ public class Main {
         return new Tuple2Impl<>(tuple.left(), tuple.right());
     }
 
-    private FunctionType findCallerType(Caller newCaller) {
+    private FunctionType findCallerType(Caller newCaller, CompileState state) {
         FunctionType callerType = new FunctionType(Lists.empty(), Primitive.Unknown);
         switch (newCaller) {
             case ConstructionCaller constructionCaller -> {
                 callerType = constructionCaller.toFunction();
             }
             case Value value -> {
-                var type = value.type();
+                var type = this.resolveValue(state, value);
                 if (type instanceof FunctionType functionType) {
                     callerType = functionType;
                 }
@@ -2746,17 +2702,13 @@ public class Main {
 
     private Caller modifyCaller(CompileState state, Caller oldCaller) {
         if (oldCaller instanceof DataAccess access) {
-            var type = this.resolveType(access.parent, state);
+            var type = this.resolveValue(state, access.parent);
             if (type instanceof FunctionType) {
                 return access.parent;
             }
         }
 
         return oldCaller;
-    }
-
-    private Type resolveType(Value value, CompileState state) {
-        return value.type();
     }
 
     private Tuple2<CompileState, Caller> invocationHeader(CompileState state, int depth, String callerString1) {
@@ -2801,10 +2753,10 @@ public class Main {
             var tuple = this.parseValue(state, parentString, depth);
             var parent = tuple.right();
 
-            var parentType = parent.type();
+            var parentType = this.resolveValue(tuple.left(), parent);
             Type type = Primitive.Unknown;
-            if (parentType instanceof FindableType objectType) {
-                if (objectType.find(property) instanceof Some(var memberType)) {
+            if (parentType instanceof StructureType structureType) {
+                if (structureType.find(property) instanceof Some(var memberType)) {
                     type = memberType;
                 }
             }
@@ -2898,7 +2850,7 @@ public class Main {
         });
     }
 
-    private Option<Tuple2<CompileState, ImmutableDefinition>> parseDefinition(CompileState state, String input) {
+    private Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return this.last(input.strip(), " ", (beforeName, name) -> {
             return this.split(() -> this.toLast(beforeName, " ", this::foldTypeSeparator), (beforeType, type) -> {
                 return this.last(beforeType, "\n", (s, s2) -> {
@@ -2911,7 +2863,7 @@ public class Main {
         });
     }
 
-    private Option<Tuple2<CompileState, ImmutableDefinition>> getOr(CompileState state, String name, String beforeType, String type, List<String> annotations) {
+    private Option<Tuple2<CompileState, Definition>> getOr(CompileState state, String name, String beforeType, String type, List<String> annotations) {
         return this.suffix(beforeType.strip(), ">", withoutTypeParamStart -> {
             return this.first(withoutTypeParamStart, "<", (beforeTypeParams, typeParamsString) -> {
                 var typeParams = this.parseValuesOrEmpty(state, typeParamsString, (state1, s) -> new Some<>(new Tuple2Impl<>(state1, s.strip())));
@@ -2924,7 +2876,7 @@ public class Main {
 
     private List<String> parseModifiers(String modifiers) {
         return this.divideAll(modifiers.strip(), (state1, c) -> this.foldByDelimiter(state1, c, ' '))
-                .query()
+                .iterate()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .collect(new ListCollector<>());
@@ -2933,7 +2885,7 @@ public class Main {
     private Option<Tuple2<String, String>> toLast(String input, String separator, BiFunction<DivideState, Character, DivideState> folder) {
         var divisions = this.divideAll(input, folder);
         return divisions.removeLast().map(removed -> {
-            var left = removed.left().query().collect(new Joiner(separator)).orElse("");
+            var left = removed.left().iterate().collect(new Joiner(separator)).orElse("");
             var right = removed.right();
 
             return new Tuple2Impl<>(left, right);
@@ -2955,7 +2907,7 @@ public class Main {
         return appended;
     }
 
-    private Option<Tuple2<CompileState, ImmutableDefinition>> assembleDefinition(
+    private Option<Tuple2<CompileState, Definition>> assembleDefinition(
             CompileState state,
             List<String> annotations,
             List<String> modifiers,
@@ -2969,12 +2921,12 @@ public class Main {
                 return new None<>();
             }
 
-            var newModifiers = modifiers.query()
+            var newModifiers = modifiers.iterate()
                     .filter(value -> !this.isAccessor(value))
                     .map(modifier -> modifier.equals("final") ? "readonly" : modifier)
                     .collect(new ListCollector<>());
 
-            var node = new ImmutableDefinition(annotations, newModifiers, stripped, type1.right(), typeParams);
+            var node = new Definition(annotations, newModifiers, stripped, type1.right(), typeParams);
             return new Some<>(new Tuple2Impl<>(type1.left(), node));
         });
     }
@@ -3055,7 +3007,7 @@ public class Main {
 
     private Tuple2<CompileState, Type> assembleTemplate(String base, CompileState state, List<Argument> arguments) {
         var children = arguments
-                .query()
+                .iterate()
                 .map(this::retainType)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<>());
@@ -3086,12 +3038,12 @@ public class Main {
 
         if (state.resolveType(base) instanceof Some<Type> some) {
             var baseType = some.value;
-            if (baseType instanceof ObjectType findableType) {
+            if (baseType instanceof ObjectRefType findableType) {
                 return new Tuple2Impl<>(state, new Template(findableType, children));
             }
         }
 
-        return new Tuple2Impl<>(state, new Template(new ObjectType(base, Lists.empty(), Lists.empty(), Lists.empty()), children));
+        return new Tuple2Impl<>(state, new Template(new ObjectRefType(base), children));
     }
 
     private Option<Tuple2<CompileState, Type>> parseTemplate(CompileState state, String input) {
@@ -3205,9 +3157,5 @@ public class Main {
             return this.value;
         }
 
-        @Override
-        public Type type() {
-            return Primitive.Boolean;
-        }
     }
 }
