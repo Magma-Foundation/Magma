@@ -149,7 +149,7 @@ public class Main {
             }
         }
 
-        return new Tuple<>(state, placeholder(input));
+        return new Tuple<>(state, generatePlaceholder(input));
     }
 
     private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
@@ -160,7 +160,7 @@ public class Main {
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = placeholder(beforeKeyword) + "class " + name.strip() + " {" + outputContent + "}";
+                    var generated = generatePlaceholder(beforeKeyword) + "class " + name.strip() + " {" + outputContent + "}";
                     return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });
@@ -176,20 +176,29 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return Optional.of(new Tuple<>(state, "\n\t" + compileDefinition(withoutEnd) + ";"));
+            var definitionTuple = compileDefinition(withoutEnd, state);
+            return Optional.of(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
         });
     }
 
-    private static String compileDefinition(String input) {
+    private static Tuple<CompileState, String> compileDefinition(String input, CompileState state) {
         var stripped = input.strip();
         return compileLast(stripped, " ", (beforeName, name) -> {
             return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
-                return Optional.of(placeholder(beforeType) + " " + placeholder(type) + " " + placeholder(name));
+                var typeTuple = compileType(type, state);
+                var generated = generatePlaceholder(beforeType) + " " + typeTuple.right + " " + generatePlaceholder(name);
+                return Optional.of(new Tuple<>(typeTuple.left, generated));
             });
-        }).orElseGet(() -> placeholder(input));
+        }).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<String> compileLast(String input, String infix, BiFunction<String, String, Optional<String>> mapper) {
+    private static Tuple<CompileState, String> compileType(String type, CompileState state) {
+        return compileOr(state, type, List.of(
+
+        ));
+    }
+
+    private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
         return compileInfix(input, infix, Main::findLast, mapper);
     }
 
@@ -225,7 +234,7 @@ public class Main {
         return input.indexOf(infix);
     }
 
-    private static String placeholder(String input) {
+    private static String generatePlaceholder(String input) {
         var replaced = input
                 .replace("/*", "start")
                 .replace("*/", "end");
