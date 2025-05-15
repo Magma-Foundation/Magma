@@ -37,6 +37,29 @@
 		return this.depth === 1;
 	}
 }
+/*private*/class Tuple<A, B>(A left, B right) {
+}
+/*private*/class CompileState(String output, Optional<String> structureName) {
+	CompileState(): /*public*/ {
+		this("", Optional.empty());
+	}
+	/*public*/append(element : string): /*CompileState*/ {
+		return new /*CompileState*/(this.output + element, this.structureName);
+	}
+	/*public*/withStructureName(name : string): /*CompileState*/ {
+		return new /*CompileState*/(this.output, Optional.of(name));
+	}
+}
+/*private*/class Definition(Optional<String> maybeBeforeType, String name, String type) implements MethodHeader {
+	/*private*/generate(): string {
+		return this.generateWithAfterName(" ");
+	}
+	/*@Override
+        public*/generateWithAfterName(afterName : string): string {
+		/*var beforeTypeString */ = this.maybeBeforeType(/*).map(Main::generatePlaceholder).orElse(""*/);
+		return beforeTypeString + this.name + afterName + ": " + this.type();
+	}
+}
 /*private static*/class ConstructorHeader implements MethodHeader {
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
@@ -44,32 +67,6 @@
 	}
 }
 /*public*/class Main {
-	/*private record*/B>(left : /*A*/, right : /*B*/): /*Tuple<A,*/ {
-	}
-	/*private*/CompileState(output : string, structureName : /*Optional*/<string>): /*record*/ {/*public CompileState() {
-            this("", Optional.empty());
-        }*//*
-
-        public CompileState append(String element) {
-            return new CompileState(this.output + element, this.structureName);
-        }*//*
-
-        public CompileState withStructureName(String name) {
-            return new CompileState(this.output, Optional.of(name));
-        }*/
-	}/*
-
-    private record Definition(Optional<String> maybeBeforeType, String name, String type) implements MethodHeader {
-        private String generate() {
-            return this.generateWithAfterName(" ");
-        }
-
-        @Override
-        public String generateWithAfterName(String afterName) {
-            var beforeTypeString = this.maybeBeforeType().map(Main::generatePlaceholder).orElse("");
-            return beforeTypeString + this.name + afterName + ": " + this.type();
-        }
-    }*/
 	/*public static*/main(): /*void*/ {
 		/*var source */ = Paths.get(".", "src", "java", "magma", "Main.java");
 		/*var target */ = source.resolveSibling("main.ts");/*
@@ -139,12 +136,12 @@
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileNamespaced,
-                createStructureRule("class ")
+                createStructureRule("class ", "class ")
         ));
     }*//*
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String infix) {
-        return (state1, input1) -> compileFirst(input1, infix, (beforeKeyword, right1) -> {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
+        return (state1, input1) -> compileFirst(input1, sourceInfix, (beforeKeyword, right1) -> {
             return compileFirst(right1, "{", (rawName, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var name = rawName.strip();
@@ -152,7 +149,7 @@
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = generatePlaceholder(beforeKeyword.strip()) + infix + name + " {" + outputContent + "\n}\n";
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + targetInfix + name + " {" + outputContent + "\n}\n";
                     return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });
@@ -191,8 +188,9 @@
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
         return compileOrPlaceholder(state1, input1, List.of(
                 Main::compileWhitespace,
-                createStructureRule("class "),
-                createStructureRule("interface "),
+                createStructureRule("class ", "class "),
+                createStructureRule("interface ", "interface "),
+                createStructureRule("record ", "class "),
                 Main::compileMethod,
                 Main::compileFieldDefinition
         ));

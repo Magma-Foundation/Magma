@@ -172,12 +172,12 @@ public class Main {
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileNamespaced,
-                createStructureRule("class ")
+                createStructureRule("class ", "class ")
         ));
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String infix) {
-        return (state1, input1) -> compileFirst(input1, infix, (beforeKeyword, right1) -> {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
+        return (state1, input1) -> compileFirst(input1, sourceInfix, (beforeKeyword, right1) -> {
             return compileFirst(right1, "{", (rawName, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var name = rawName.strip();
@@ -185,7 +185,7 @@ public class Main {
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = generatePlaceholder(beforeKeyword.strip()) + infix + name + " {" + outputContent + "\n}\n";
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + targetInfix + name + " {" + outputContent + "\n}\n";
                     return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });
@@ -224,8 +224,9 @@ public class Main {
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
         return compileOrPlaceholder(state1, input1, List.of(
                 Main::compileWhitespace,
-                createStructureRule("class "),
-                createStructureRule("interface "),
+                createStructureRule("class ", "class "),
+                createStructureRule("interface ", "interface "),
+                createStructureRule("record ", "class "),
                 Main::compileMethod,
                 Main::compileFieldDefinition
         ));
