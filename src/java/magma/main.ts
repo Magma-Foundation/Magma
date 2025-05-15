@@ -8,7 +8,7 @@
 		this.depth = depth;
 	}
 	constructor(){
-		this(/*new ArrayList<>*/(), /*new StringBuilder*/(), /* 0*/);
+		this(new /*ArrayList*/</**/>(), new /*StringBuilder*/(), /* 0*/);
 	}/*
 
         private DivideState advance() {
@@ -223,18 +223,27 @@ public */class Main {/*
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOr(state, withoutEnd, List.of(
                 Main::compileAssignment,
-                Main::compileInvocation
+                Main::compileInvokable
         ));
     }*//*
 
-    private static Optional<Tuple<CompileState, String>> compileInvocation(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
             return compileFirst(withoutEnd, "(", (caller, arguments) -> {
-                var callerTuple = compileValue(state, caller);
-                var argumentsTuple = compileValues(callerTuple.left, arguments, Main::compileValue);
-                return Optional.of(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
+                return compilePrefix(caller.strip(), "new ", type -> {
+                    var callerTuple = compileType(state, type);
+                    return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
+                }).or(() -> {
+                    var callerTuple = compileValue(state, caller);
+                    return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+                });
             });
         });
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> assembleInvokable(CompileState state, String caller, String arguments) {
+        var argumentsTuple = compileValues(state, arguments, Main::compileValue);
+        return Optional.of(new Tuple<>(argumentsTuple.left, caller + "(" + argumentsTuple.right + ")"));
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
@@ -249,7 +258,7 @@ public */class Main {/*
         return compileOr(state, input, List.of(
                 Main::compileAccess,
                 Main::compileSymbol,
-                Main::compileInvocation
+                Main::compileInvokable
         ));
     }*//*
 
