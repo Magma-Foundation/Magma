@@ -208,18 +208,25 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileFirst(input, "(", (beforeParams, withParams) -> {
-            return compileLast(beforeParams.strip(), " ", (beforeName, name) -> {
-                return compileFirst(withParams, ")", (params, afterParams) -> {
-                    return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
-                        return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
-                            if (state.structureName.filter(name::equals).isPresent()) {
-                                var parametersTuple = compileValues(state, params, Main::compileParameter);
-                                var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
-                                return Optional.of(new Tuple<>(statementsTuple.left, "\n\tconstructor(" + parametersTuple.right + "){" + statementsTuple.right + "\n\t}"));
-                            }
-                            return Optional.empty();
-                        });
-                    });
+            return compileLast(beforeParams.strip(), " ", (_, name) -> {
+                if (state.structureName.filter(name::equals).isPresent()) {
+                    return compileMethodWithBeforeParams(state, "constructor", withParams);
+                }
+
+                var tuple = compileDefinitionOrPlaceholder(state, beforeParams);
+                return compileMethodWithBeforeParams(tuple.left, tuple.right, withParams);
+            });
+        });
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, String beforeParams, String withParams) {
+        return compileFirst(withParams, ")", (params, afterParams) -> {
+            return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
+                return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
+                    var parametersTuple = compileValues(state, params, Main::compileParameter);
+                    var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
+                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + beforeParams + "(" + parametersTuple.right + "){" + statementsTuple.right + "\n\t}"));
+
                 });
             });
         });
@@ -356,12 +363,12 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            var definitionTuple = compileDefinitionOrPlaceholder(withoutEnd, state);
+            var definitionTuple = compileDefinitionOrPlaceholder(state, withoutEnd);
             return Optional.of(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
         });
     }
 
-    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
         return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 

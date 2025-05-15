@@ -9,81 +9,67 @@
 	}
 	constructor(){
 		this(new /*ArrayList*/<>(), new /*StringBuilder*/(), 0);
+	}
+	/*private*/advance : /*DivideState*/(){
+		this.segments.add(this.buffer.toString());
+		this.buffer = new /*StringBuilder*/();
+		/*return this*/;
+	}
+	/*private*/append : /*DivideState*/(c : /*char*/){
+		this.buffer.append(c);
+		/*return this*/;
+	}
+	/*public*/isLevel : /*boolean*/(){
+		/*return this*/.depth = /*= 0*/;
+	}
+	/*public*/enter : /*DivideState*/(){
+		/*this.depth++*/;
+		/*return this*/;
+	}
+	/*public*/exit : /*DivideState*/(){
+		/*this.depth--*/;
+		/*return this*/;
+	}
+	/*public*/isShallow : /*boolean*/(){
+		/*return this*/.depth = /*= 1*/;
 	}/*
-
-        private DivideState advance() {
-            this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
-        }*//*
-
-        private DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
-        }*//*
-
-        public boolean isLevel() {
-            return this.depth == 0;
-        }*//*
-
-        public DivideState enter() {
-            this.depth++;
-            return this;
-        }*//*
-
-        public DivideState exit() {
-            this.depth--;
-            return this;
-        }*//*
-
-        public boolean isShallow() {
-            return this.depth == 1;
-        }*//*
     */}/*
 
-public */class Main {/*
-
-    private record Tuple<A, B>(A left, B right) {
-    }*//*
-
-    private record CompileState(String output, Optional<String> structureName) {
-        public CompileState() {
+public */class Main {
+	/*private record*/B> : /*Tuple<A,*/(left : /*A*/, right : /*B*/){
+	}
+	/*private*/CompileState : /*record*/(output : string, structureName : /*Optional*/<string>){/*public CompileState() {
             this("", Optional.empty());
-        }
+        }*//*
 
         public CompileState append(String element) {
             return new CompileState(this.output + element, this.structureName);
-        }
+        }*//*
 
         public CompileState withStructureName(String name) {
             return new CompileState(this.output, Optional.of(name));
-        }
-    }*//*
-
-    public static void main() {
-        var source = Paths.get(".", "src", "java", "magma", "Main.java");
-        var target = source.resolveSibling("main.ts");
+        }*/
+	}
+	/*public static*/main : /*void*/(){
+		/*var source */ = Paths.get(".", "src", "java", "magma", "Main.java");
+		/*var target */ = source.resolveSibling("main.ts");/*
         try {
             var input = Files.readString(source);
             Files.writeString(target, compileRoot(input));
-        } catch (IOException e) {
+        }*//* catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }*//*
-
-    private static String compileRoot(String input) {
-        var compiled = compileSegments(new CompileState(), input, Main::compileRootSegment);
-        return compiled.left.output + compiled.right;
-    }*//*
-
-    private static Tuple<CompileState, String> compileSegments(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        return compileAll(state, input, Main::foldStatements, mapper, Main::mergeStatements);
-    }*//*
-
-    private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        var divisions = divide(input, folder);
-
-        var current = new Tuple<>(state, new StringBuilder());
+        }*/
+	}
+	/*private static*/compileRoot : string(input : string){
+		/*var compiled */ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
+		/*return compiled.left.output + compiled.right*/;
+	}
+	/*private static Tuple<CompileState,*/compileSegments : /*String>*/(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/){
+		/*return compileAll*/(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
+	}
+	/*private static Tuple<CompileState,*/compileAll : /*String>*/(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/){
+		/*var divisions */ = divide(input, folder);
+		/*var current */ = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
         for (var segment : divisions) {
             var currentState = current.left;
             var currentElement = current.right;
@@ -93,33 +79,29 @@ public */class Main {/*
             var mappedElement = mappedTuple.right;
 
             current = new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
-        }
-
-        return new Tuple<>(current.left, current.right.toString());
-    }*//*
-
-    private static StringBuilder mergeStatements(StringBuilder cache, String element) {
-        return cache.append(element);
-    }*//*
-
-    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState();
-
-        for (var i = 0; i < input.length(); i++) {
+        }*/
+		/*return new Tuple<>*/(current.left, current.right.toString());
+	}
+	/*private static*/mergeStatements : /*StringBuilder*/(cache : /*StringBuilder*/, element : string){
+		/*return cache*/.append(element);
+	}
+	/*private static*/divide : /*List*/<string>(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/){
+		/*var current */ = new /*DivideState*/();
+		/*for (var i */ = 0;
+		/*i < input*/.length();/* i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
-        }
-
-        return current.advance().segments;
-    }*//*
-
-    private static DivideState foldStatements(DivideState state, char c) {
-        var appended = state.append(c);
-        if (c == ';' && appended.isLevel()) {
+        }*/
+		/*return current.advance().segments*/;
+	}
+	/*private static*/foldStatements : /*DivideState*/(state : /*DivideState*/, c : /*char*/){
+		/*var appended */ = state.append(c);
+		/*if (c */ = /*= '*/;/*' && appended.isLevel()) {
             return appended.advance();
-        }
+        }*//*
 
-        if (c == '}*//*' && appended.isShallow()) {
+        if (c == '*/
+	}/*' && appended.isShallow()) {
             return appended.advance().exit();
         }*//*
 
@@ -193,18 +175,25 @@ public */class Main {/*
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileFirst(input, "(", (beforeParams, withParams) -> {
-            return compileLast(beforeParams.strip(), " ", (beforeName, name) -> {
-                return compileFirst(withParams, ")", (params, afterParams) -> {
-                    return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
-                        return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
-                            if (state.structureName.filter(name::equals).isPresent()) {
-                                var parametersTuple = compileValues(state, params, Main::compileParameter);
-                                var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
-                                return Optional.of(new Tuple<>(statementsTuple.left, "\n\tconstructor(" + parametersTuple.right + "){" + statementsTuple.right + "\n\t}"));
-                            }
-                            return Optional.empty();
-                        });
-                    });
+            return compileLast(beforeParams.strip(), " ", (_, name) -> {
+                if (state.structureName.filter(name::equals).isPresent()) {
+                    return compileMethodWithBeforeParams(state, "constructor", withParams);
+                }
+
+                var tuple = compileDefinitionOrPlaceholder(state, beforeParams);
+                return compileMethodWithBeforeParams(tuple.left, tuple.right, withParams);
+            });
+        });
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, String beforeParams, String withParams) {
+        return compileFirst(withParams, ")", (params, afterParams) -> {
+            return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
+                return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
+                    var parametersTuple = compileValues(state, params, Main::compileParameter);
+                    var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
+                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + beforeParams + "(" + parametersTuple.right + "){" + statementsTuple.right + "\n\t}"));
+
                 });
             });
         });
@@ -341,12 +330,12 @@ public */class Main {/*
 
     private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            var definitionTuple = compileDefinitionOrPlaceholder(withoutEnd, state);
+            var definitionTuple = compileDefinitionOrPlaceholder(state, withoutEnd);
             return Optional.of(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
         });
     }*//*
 
-    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(String input, CompileState state) {
+    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
         return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }*//*
 
