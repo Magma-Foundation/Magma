@@ -17,7 +17,7 @@
 		this.buffer = new /*StringBuilder*/();
 		return this;
 	}
-	/*private*/append(c : /*char*/): /*DivideState*/{
+	/*private*/append(c : string): /*DivideState*/{
 		this.buffer.append(c);
 		return this;
 	}
@@ -117,7 +117,7 @@ public */class Main {/*private interface MethodHeader {
         }*/
 		return current.advance().segments;
 	}
-	/*private static*/foldStatements(state : /*DivideState*/, c : /*char*/): /*DivideState*/{
+	/*private static*/foldStatements(state : /*DivideState*/, c : string): /*DivideState*/{
 		/*var appended */ = state.append(c);
 		/*if (c */ = /*= '*/;/*' && appended.isLevel()) {
             return appended.advance();
@@ -406,11 +406,12 @@ public */class Main {/*private interface MethodHeader {
     }*//*
 
     private static Optional<String> findPrimitiveValue(String input) {
-        if (input.equals("String")) {
+        var stripped = input.strip();
+        if (stripped.equals("String") || stripped.equals("char")) {
             return Optional.of("string");
         }
 
-        if (input.equals("int")) {
+        if (stripped.equals("int")) {
             return Optional.of("number");
         }
 

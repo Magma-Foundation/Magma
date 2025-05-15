@@ -439,11 +439,12 @@ public class Main {
     }
 
     private static Optional<String> findPrimitiveValue(String input) {
-        if (input.equals("String")) {
+        var stripped = input.strip();
+        if (stripped.equals("String") || stripped.equals("char")) {
             return Optional.of("string");
         }
 
-        if (input.equals("int")) {
+        if (stripped.equals("int")) {
             return Optional.of("number");
         }
 
