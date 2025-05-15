@@ -519,6 +519,10 @@ public class Main {
             return Optional.of("boolean");
         }
 
+        if (stripped.equals("var")) {
+            return Optional.of("unknown");
+        }
+
         return Optional.empty();
     }
 

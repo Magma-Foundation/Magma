@@ -56,7 +56,7 @@
 	}
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
-		let beforeTypeString : /*var*/ = this.maybeBeforeType(/*).map(Main::generatePlaceholder).orElse(""*/);
+		let beforeTypeString : unknown = this.maybeBeforeType(/*).map(Main::generatePlaceholder).orElse(""*/);
 		return beforeTypeString + this.name + afterName + ": " + this.type();
 	}
 }
@@ -68,8 +68,8 @@
 }
 /*public*/class Main {
 	/*public static*/main(): /*void*/ {
-		let source : /*var*/ = Paths.get(".", "src", "java", "magma", "Main.java");
-		let target : /*var*/ = source.resolveSibling("main.ts");/*
+		let source : unknown = Paths.get(".", "src", "java", "magma", "Main.java");
+		let target : unknown = source.resolveSibling("main.ts");/*
         try {
             var input = Files.readString(source);
             Files.writeString(target, compileRoot(input));
@@ -78,15 +78,15 @@
         }*/
 	}
 	/*private static*/compileRoot(input : string): string {
-		let compiled : /*var*/ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
+		let compiled : unknown = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
 		return compiled.left.output + compiled.right;
 	}
 	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
 		return compileAll(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
 	}
 	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/ {
-		let divisions : /*var*/ = divide(input, folder);
-		let current : /*var*/ = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
+		let divisions : unknown = divide(input, folder);
+		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
         for (var segment : divisions) {
             var currentState = current.left;
             var currentElement = current.right;
@@ -103,7 +103,7 @@
 		return cache.append(element);
 	}
 	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string> {
-		let current : /*var*/ = new /*DivideState*/();
+		let current : unknown = new /*DivideState*/();
 		let /*for*/i : /*(var*/ = 0;
 		/*i < input*/.length();/* i++) {
             var c = input.charAt(i);
@@ -112,7 +112,7 @@
 		return current.advance().segments;
 	}
 	/*private static*/foldStatements(state : /*DivideState*/, c : string): /*DivideState*/ {
-		let appended : /*var*/ = state.append(c);
+		let appended : unknown = state.append(c);
 		let (c : /*if*/ = /*= '*/;/*' && appended.isLevel()) {
             return appended.advance();
         }*//*
@@ -481,6 +481,10 @@
 
         if (stripped.equals("boolean")) {
             return Optional.of("boolean");
+        }
+
+        if (stripped.equals("var")) {
+            return Optional.of("unknown");
         }
 
         return Optional.empty();
