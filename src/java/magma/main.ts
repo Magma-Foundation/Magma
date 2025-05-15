@@ -37,7 +37,7 @@
 /*private static*/class ConstructorHeader implements MethodHeader {
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
-		return /*"constructor " + afterName*/;
+		return /*"constructor " */ + afterName;
 	}
 }
 /*public*/class Main {/*private interface MethodHeader {
@@ -81,7 +81,7 @@
 	}
 	/*private static*/compileRoot(input : string): string {
 		/*var compiled */ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
-		return /*compiled.left.output + compiled*/.right;
+		return compiled.left.output + compiled.right;
 	}
 	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
 		return compileAll(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
@@ -294,15 +294,16 @@
                 Main::compileSymbol,
                 Main::compileInvokable,
                 Main::compileNumber,
-                Main::compileEquals
+                createOperatorRule("==", "==="),
+                createOperatorRule("+", "+")
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }*//*
 
-    private static Optional<Tuple<CompileState, String>> compileEquals(CompileState state, String input) {
-        return compileFirst(input, "==", (left, right) -> {
-            var leftTuple = compileValue(state, left);
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {
+        return (state1, input1) -> compileFirst(input1, sourceInfix, (left, right) -> {
+            var leftTuple = compileValue(state1, left);
             var rightTuple = compileValue(leftTuple.left, right);
-            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " === " + rightTuple.right));
+            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
         });
     }*//*
 

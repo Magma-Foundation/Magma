@@ -328,15 +328,16 @@ public class Main {
                 Main::compileSymbol,
                 Main::compileInvokable,
                 Main::compileNumber,
-                Main::compileEquals
+                createOperatorRule("==", "==="),
+                createOperatorRule("+", "+")
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileEquals(CompileState state, String input) {
-        return compileFirst(input, "==", (left, right) -> {
-            var leftTuple = compileValue(state, left);
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {
+        return (state1, input1) -> compileFirst(input1, sourceInfix, (left, right) -> {
+            var leftTuple = compileValue(state1, left);
             var rightTuple = compileValue(leftTuple.left, right);
-            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " === " + rightTuple.right));
+            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
         });
     }
 
