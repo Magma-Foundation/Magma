@@ -317,7 +317,7 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
-            return compileSplit(getSplit(withoutEnd), (caller, arguments) -> {
+            return compileSplit(splitLast(withoutEnd), (caller, arguments) -> {
                 return compilePrefix(caller.strip(), "new ", type -> {
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
@@ -329,18 +329,19 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<String, String>> getSplit(String input) {
+    private static Optional<Tuple<String, String>> splitLast(String input) {
         var divisions = divide(input, Main::foldInvocationStarts);
-        if (divisions.size() >= 2) {
-            var beforeLast = divisions.subList(0, divisions.size() - 1);
-            var last = divisions.getLast();
-
-            var joined = String.join("", beforeLast);
-            return compileSuffix(joined, "(", withoutStart -> {
-                return Optional.of(new Tuple<>(withoutStart, last));
-            });
+        if (divisions.size() < 2) {
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        var beforeLast = divisions.subList(0, divisions.size() - 1);
+        var last = divisions.getLast();
+
+        var joined = String.join("", beforeLast);
+        return compileSuffix(joined, "(", withoutStart -> {
+            return Optional.of(new Tuple<>(withoutStart, last));
+        });
     }
 
     private static DivideState foldInvocationStarts(DivideState state, char c) {
@@ -385,7 +386,8 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         return compileOr(state, input, List.of(
-                Main::compileAccess,
+                createAccessRule("."),
+                createAccessRule("::"),
                 Main::compileSymbol,
                 Main::compileInvokable,
                 Main::compileNumber,
@@ -393,6 +395,19 @@ public class Main {
                 createOperatorRule("+", "+"),
                 Main::compileString
         ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createAccessRule(String infix) {
+        return (state, input) -> compileLast(input, infix, (child, rawProperty) -> {
+            var tuple = compileValueOrPlaceholder(state, child);
+            var property = rawProperty.strip();
+            if (isSymbol(property)) {
+                return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
+            }
+            else {
+                return Optional.empty();
+            }
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileString(CompileState state, String input) {
@@ -432,19 +447,6 @@ public class Main {
             return false;
         }
         return true;
-    }
-
-    private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
-        return compileLast(input, ".", (child, rawProperty) -> {
-            var tuple = compileValueOrPlaceholder(state, child);
-            var property = rawProperty.strip();
-            if (isSymbol(property)) {
-                return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
-            }
-            else {
-                return Optional.empty();
-            }
-        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
