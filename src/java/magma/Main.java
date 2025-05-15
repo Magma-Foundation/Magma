@@ -277,8 +277,30 @@ public class Main {
         return compileOr(state, input, List.of(
                 Main::compileAccess,
                 Main::compileSymbol,
-                Main::compileInvokable
+                Main::compileInvokable,
+                Main::compileNumber
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileNumber(CompileState state, String input) {
+        var stripped = input.strip();
+        if (isNumber(stripped)) {
+            return Optional.of(new Tuple<>(state, stripped));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private static boolean isNumber(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
     private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
