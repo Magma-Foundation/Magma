@@ -3,9 +3,9 @@
 	/*private*/buffer : /*StringBuilder*/;
 	/*private*/depth : number;
 	constructor(segments : /*List*/<string>, buffer : /*StringBuilder*/, depth : number){
-		/*this.segments */ = segments;
-		/*this.buffer */ = buffer;
-		/*this.depth */ = depth;
+		this.segments = segments;
+		this.buffer = buffer;
+		this.depth = depth;
 	}
 	constructor(){
 		/*this(new ArrayList<>(), new StringBuilder(), 0)*/;
@@ -236,8 +236,16 @@ public */class Main {/*
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
         return compileOr(state, input, List.of(
+                Main::compileAccess,
                 Main::compileSymbol
         ));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
+        return compileLast(input, ".", (child, property) -> {
+            var tuple = compileValue(state, child);
+            return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property.strip()));
+        });
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
