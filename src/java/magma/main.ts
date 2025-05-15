@@ -56,7 +56,7 @@
 	}
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
-		let beforeTypeString : unknown = this.maybeBeforeType(/*).map(Main::generatePlaceholder).orElse(""*/);
+		let beforeTypeString : unknown = this.maybeBeforeType().map(/*Main::generatePlaceholder*/).orElse("");
 		return beforeTypeString + this.name + afterName + ": " + this.type();
 	}
 }
@@ -281,7 +281,7 @@
 
     private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
-            return compileFirst(withoutEnd, "(", (caller, arguments) -> {
+            return compileSplit(getSplit(withoutEnd), (caller, arguments) -> {
                 return compilePrefix(caller.strip(), "new ", type -> {
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
@@ -291,6 +291,39 @@
                 });
             });
         });
+    }*//*
+
+    private static Optional<Tuple<String, String>> getSplit(String input) {
+        var divisions = divide(input, Main::foldInvocationStarts);
+        if (divisions.size() >= 2) {
+            var beforeLast = divisions.subList(0, divisions.size() - 1);
+            var last = divisions.getLast();
+
+            var joined = String.join("", beforeLast);
+            return compileSuffix(joined, "(", withoutStart -> {
+                return Optional.of(new Tuple<>(withoutStart, last));
+            });
+        }
+        return Optional.empty();
+    }*//*
+
+    private static DivideState foldInvocationStarts(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '(') {
+            var entered = appended.enter();
+            if (entered.isShallow()) {
+                return entered.advance();
+            }
+            else {
+                return entered;
+            }
+        }
+
+        if (c == ')') {
+            return appended.exit();
+        }
+
+        return appended;
     }*//*
 
     private static Optional<Tuple<CompileState, String>> assembleInvokable(CompileState state, String caller, String arguments) {
@@ -470,24 +503,13 @@
     }*//*
 
     private static Optional<String> findPrimitiveValue(String input) {
-        var stripped = input.strip();
-        if (stripped.equals("String") || stripped.equals("char")) {
-            return Optional.of("string");
-        }
-
-        if (stripped.equals("int")) {
-            return Optional.of("number");
-        }
-
-        if (stripped.equals("boolean")) {
-            return Optional.of("boolean");
-        }
-
-        if (stripped.equals("var")) {
-            return Optional.of("unknown");
-        }
-
-        return Optional.empty();
+        return switch (input.strip()) {
+            case "String", "char" -> Optional.of("string");
+            case "int" -> Optional.of("number");
+            case "boolean" -> Optional.of("boolean");
+            case "var" -> Optional.of("unknown");
+            default -> Optional.empty();
+        };
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
@@ -546,6 +568,14 @@
     }*//*
 
     private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Optional<T>> mapper) {
+        return compileSplit(split(input, infix, locator), mapper);
+    }*//*
+
+    private static <T> Optional<T> compileSplit(Optional<Tuple<String, String>> splitter, BiFunction<String, String, Optional<T>> mapper) {
+        return splitter.flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
+    }*//*
+
+    private static Optional<Tuple<String, String>> split(String input, String infix, BiFunction<String, String, Integer> locator) {
         var index = locator.apply(input, infix);
         if (index < 0) {
             return Optional.empty();
@@ -553,7 +583,7 @@
 
         var left = input.substring(0, index);
         var right = input.substring(index + infix.length());
-        return mapper.apply(left, right);
+        return Optional.of(new Tuple<>(left, right));
     }*//*
 
     private static int findFirst(String input, String infix) {
