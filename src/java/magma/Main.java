@@ -274,8 +274,17 @@ public class Main {
         return compileOrPlaceholder(state, withoutEnd, List.of(
                 Main::compileReturn,
                 Main::compileAssignment,
-                Main::compileInvokable
+                Main::compileInvokable,
+                createPostRule("++"),
+                createPostRule("--")
         ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createPostRule(String suffix) {
+        return (state1, input) -> compileSuffix(input.strip(), suffix, child -> {
+            var tuple = compileValue(state1, child);
+            return Optional.of(new Tuple<>(tuple.left, tuple.right + suffix));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
