@@ -1,15 +1,13 @@
 /*private static */class DivideState {
 	/*private final*/segments : /*List*/<string>;
 	/*private*/buffer : /*StringBuilder*/;
-	/*private*/depth : number;/*
-
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+	/*private*/depth : number;
+	constructor(/*List<String> segments, StringBuilder buffer, int depth) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
-        }*//*
-
-        public DivideState() {
+        }*/
+	constructor(/*) {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }*//*
 
@@ -48,13 +46,17 @@ public */class Main {/*
     private record Tuple<A, B>(A left, B right) {
     }*//*
 
-    private record CompileState(String output) {
+    private record CompileState(String output, Optional<String> structureName) {
         public CompileState() {
-            this("");
+            this("", Optional.empty());
         }
 
         public CompileState append(String element) {
-            return new CompileState(this.output + element);
+            return new CompileState(this.output + element, this.structureName);
+        }
+
+        public CompileState withStructureName(String name) {
+            return new CompileState(this.output, Optional.of(name));
         }
     }*//*
 
@@ -129,13 +131,14 @@ public */class Main {/*
             return appended.exit();
         }*/
 	/*return appended*/;/*
-    */}/*return compileFirst(right1, "{", (name, withEnd) -> {
+    */}/*return compileFirst(right1, "{", (rawName, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
-                    var outputContentTuple = compileSegments(state, inputContent, Main::compileClassSegment);
+                    var name = rawName.strip();
+                    var outputContentTuple = compileSegments(state.withStructureName(name), inputContent, Main::compileClassSegment);
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = generatePlaceholder(beforeKeyword) + "*/class " + name.strip() + " {
+                    var generated = generatePlaceholder(beforeKeyword) + "*/class " + name + " {
 	/*" + outputContent + "}";
                     return Optional.of(new Tuple<>(outputContentState.append(generated),*/}) : /*""));*/;}/*
 
@@ -179,8 +182,28 @@ public */class Main {/*
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
         return compileOr(state1, input1, List.of(
                 Main::compileClass,
-                Main::compileFieldDefinition
+                Main::compileFieldDefinition,
+                Main::compileMethod
         ));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+        return compileFirst(input, "(", new BiFunction<String, String, Optional<Tuple<CompileState, String>>>() {
+            @Override
+            public Optional<Tuple<CompileState, String>> apply(String s, String s2) {
+                return compileLast(s.strip(), " ", new BiFunction<String, String, Optional<Tuple<CompileState, String>>>() {
+                    @Override
+                    public Optional<Tuple<CompileState, String>> apply(String beforeName, String name) {
+                        if (name.equals("DivideState")) {
+                            return Optional.of(new Tuple<>(state, "\n\tconstructor(" + generatePlaceholder(s2)));
+                        }
+                        else {
+                            return Optional.empty();
+                        }
+                    }
+                });
+            }
+        });
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
