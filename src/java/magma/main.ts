@@ -91,10 +91,10 @@
 		let compiled : unknown = compileStatements(new /*CompileState*/(), input, Main.compileRootSegment);
 		return compiled.left.output + compiled.right;
 	}
-	/*private static Tuple<CompileState,*/compileStatements(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
+	/*private static*/compileStatements(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*Tuple*/</*CompileState*/, string> {
 		return compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
-	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/ {
+	/*private static*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*Tuple*/</*CompileState*/, string> {
 		let divisions : unknown = divide(input, folder);
 		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());
 		/*for (var segment : divisions) */{
@@ -310,20 +310,20 @@
 
     private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
-            return compileSplit(splitLast(withoutEnd), (caller, arguments) -> {
-                return compilePrefix(caller.strip(), "new ", type -> {
+            return compileSplit(splitFolded(withoutEnd, "", Main::foldInvocationStarts), (callerWithArgStart, arguments) -> {
+                return compileSuffix(callerWithArgStart, "(", caller -> compilePrefix(caller.strip(), "new ", type -> {
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
                 }).or(() -> {
                     var callerTuple = compileValueOrPlaceholder(state, caller);
                     return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
-                });
+                }));
             });
         });
     }*//*
 
-    private static Optional<Tuple<String, String>> splitLast(String input) {
-        var divisions = divide(input, Main::foldInvocationStarts);
+    private static Optional<Tuple<String, String>> splitFolded(String input, String delimiter, BiFunction<DivideState, Character, DivideState> folder) {
+        var divisions = divide(input, folder);
         if (divisions.size() < 2) {
             return Optional.empty();
         }
@@ -331,10 +331,8 @@
         var beforeLast = divisions.subList(0, divisions.size() - 1);
         var last = divisions.getLast();
 
-        var joined = String.join("", beforeLast);
-        return compileSuffix(joined, "(", withoutStart -> {
-            return Optional.of(new Tuple<>(withoutStart, last));
-        });
+        var joined = String.join(delimiter, beforeLast);
+        return Optional.of(new Tuple<>(joined, last));
     }*//*
 
     private static DivideState foldInvocationStarts(DivideState state, char c) {
@@ -503,12 +501,28 @@
 
     private static Optional<Tuple<CompileState, Definition>> compileDefinition(CompileState state, String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
-            return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
+            var splits = splitFolded(beforeName.strip(), " ", Main::foldTypeSeparators);
+            return compileSplit(splits, (beforeType, type) -> {
                 return assembleDefinition(state, Optional.of(beforeType), name, type);
             }).or(() -> {
                 return assembleDefinition(state, Optional.empty(), name, beforeName);
             });
         });
+    }*//*
+
+    private static DivideState foldTypeSeparators(DivideState state, char c) {
+        if (c == ' ' && state.isLevel()) {
+            return state.advance();
+        }
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }*//*
 
     private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, String type) {
