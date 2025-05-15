@@ -170,11 +170,11 @@ public class Main {
             return appended.advance().exit();
         }
 
-        if (c == '{') {
+        if (c == '{' || c == '(') {
             return appended.enter();
         }
 
-        if (c == '}') {
+        if (c == '}' || c == ')') {
             return appended.exit();
         }
 
@@ -296,8 +296,8 @@ public class Main {
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
-                Main::compileFunctionStatement,
-                Main::compileBlock
+                Main::compileBlock,
+                Main::compileFunctionStatement
         ));
     }
 
