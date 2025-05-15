@@ -1,5 +1,5 @@
 /*private*/interface MethodHeader {
-	/*String*/afterName) : /*generateWithAfterName(String*/;
+	generateWithAfterName(afterName : string): string;
 }
 /*private static*/class DivideState {
 	/*private final*/segments : /*List*/<string>;
@@ -193,8 +193,8 @@
                 Main::compileWhitespace,
                 createStructureRule("class "),
                 createStructureRule("interface "),
-                Main::compileFieldDefinition,
-                Main::compileMethod
+                Main::compileMethod,
+                Main::compileFieldDefinition
         ));
     }*//*
 
@@ -213,14 +213,23 @@
 
     private static Optional<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
         return compileFirst(withParams, ")", (params, afterParams) -> {
+            var parametersTuple = compileValues(state, params, Main::compileParameter);
+            var parametersState = parametersTuple.left;
+            var parameters = parametersTuple.right;
+
+            var headerGenerated = header.generateWithAfterName("(" + parameters + ")");
             return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
-                    var parametersTuple = compileValues(state, params, Main::compileParameter);
-                    var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
+                    var statementsTuple = compileSegments(parametersState, withoutContentEnd, Main::compileFunctionSegment);
 
-                    var headerGenerated = header.generateWithAfterName("(" + parametersTuple.right + ")");
                     return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
+            }).or(() -> {
+                if (afterParams.strip().equals(";")) {
+                    return Optional.of(new Tuple<>(parametersState, "\n\t" + headerGenerated + ";"));
+                }
+
+                return Optional.empty();
             });
         });
     }*//*
