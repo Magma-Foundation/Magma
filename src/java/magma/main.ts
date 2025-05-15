@@ -67,7 +67,7 @@
 	}
 }
 /*public*/class Main {
-	/*public static*/main(): /*void*/ {
+	/*public static*/main(): void {
 		let source : unknown = Paths.get(".", "src", "java", "magma", "Main.java");
 		let target : unknown = source.resolveSibling("main.ts");/*
         try {
@@ -510,6 +510,7 @@
             case "int" -> Optional.of("number");
             case "boolean" -> Optional.of("boolean");
             case "var" -> Optional.of("unknown");
+            case "void" -> Optional.of("void");
             default -> Optional.empty();
         };
     }*//*

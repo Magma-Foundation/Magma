@@ -546,6 +546,7 @@ public class Main {
             case "int" -> Optional.of("number");
             case "boolean" -> Optional.of("boolean");
             case "var" -> Optional.of("unknown");
+            case "void" -> Optional.of("void");
             default -> Optional.empty();
         };
     }
