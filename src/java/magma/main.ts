@@ -8,7 +8,7 @@
 		this.depth = depth;
 	}
 	constructor(){
-		this(new /*ArrayList*/</**/>(), new /*StringBuilder*/(), /* 0*/);
+		this(new /*ArrayList*/<>(), new /*StringBuilder*/(), /* 0*/);
 	}/*
 
         private DivideState advance() {
@@ -148,7 +148,7 @@ public */class Main {/*
 	/*})*/;}/*
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOrPlaceholder(state, input, List.of(
                 Main::compileNamespaced,
                 Main::compileClass
         ));
@@ -164,23 +164,27 @@ public */class Main {/*
         }
     }*//*
 
-    private static Tuple<CompileState, String> compileOr(
+    private static Tuple<CompileState, String> compileOrPlaceholder(
             CompileState state,
             String input,
             List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
     ) {
+        return compileOr(state, input, rules).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules) {
         for (var rule : rules) {
             var maybeTuple = rule.apply(state, input);
             if (maybeTuple.isPresent()) {
-                return maybeTuple.get();
+                return maybeTuple;
             }
         }
 
-        return new Tuple<>(state, generatePlaceholder(input));
+        return Optional.empty();
     }*//*
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
-        return compileOr(state1, input1, List.of(
+        return compileOrPlaceholder(state1, input1, List.of(
                 Main::compileClass,
                 Main::compileFieldDefinition,
                 Main::compileMethod
@@ -207,7 +211,7 @@ public */class Main {/*
     }*//*
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
                 Main::compileFunctionStatement
         ));
@@ -221,7 +225,7 @@ public */class Main {/*
     }*//*
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
-        return compileOr(state, withoutEnd, List.of(
+        return compileOrPlaceholder(state, withoutEnd, List.of(
                 Main::compileAssignment,
                 Main::compileInvokable
         ));
@@ -231,7 +235,7 @@ public */class Main {/*
         return compileSuffix(input.strip(), ")", withoutEnd -> {
             return compileFirst(withoutEnd, "(", (caller, arguments) -> {
                 return compilePrefix(caller.strip(), "new ", type -> {
-                    var callerTuple = compileType(state, type);
+                    var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
                 }).or(() -> {
                     var callerTuple = compileValue(state, caller);
@@ -259,7 +263,7 @@ public */class Main {/*
                 Main::compileAccess,
                 Main::compileSymbol,
                 Main::compileInvokable
-        ));
+        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
@@ -300,7 +304,7 @@ public */class Main {/*
     }*//*
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
                 Main::compileDefinition
         ));
@@ -335,14 +339,18 @@ public */class Main {/*
     }*//*
 
     private static Optional<Tuple<CompileState, String>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, String type) {
-        var typeTuple = compileType(state, type);
+        var typeTuple = compileTypeOrPlaceholder(state, type);
 
         var beforeTypeString = maybeBeforeType.map(Main::generatePlaceholder).orElse("");
         var generated = beforeTypeString + name + " : " + typeTuple.right;
         return Optional.of(new Tuple<>(typeTuple.left, generated));
     }*//*
 
-    private static Tuple<CompileState, String> compileType(CompileState state, String type) {
+    private static Tuple<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
+        return compileType(state, type).orElseGet(() -> new Tuple<>(state, generatePlaceholder(type)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileType(CompileState state, String type) {
         return compileOr(state, type, List.of(
                 Main::compileGeneric,
                 Main::compilePrimitive
@@ -368,10 +376,17 @@ public */class Main {/*
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
-                var argumentsTuple = compileValues(state, argumentsString, Main::compileType);
+                var argumentsTuple = compileValues(state, argumentsString, Main::compileTypeArgument);
                 return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(baseString) + "<" + argumentsTuple.right + ">"));
             });
         });
+    }*//*
+
+    private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String s) {
+        return compileOrPlaceholder(state, s, List.of(
+                Main::compileWhitespace,
+                Main::compileType
+        ));
     }*//*
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
