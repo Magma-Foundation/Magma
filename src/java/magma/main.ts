@@ -20,7 +20,7 @@
 		return this;
 	}
 	/*public*/isLevel(): boolean {
-		/*return this*/.depth = /*= 0*/;
+		return this.depth === 0;
 	}
 	/*public*/enter(): /*DivideState*/ {
 		/*this.depth++*/;
@@ -31,7 +31,7 @@
 		return this;
 	}
 	/*public*/isShallow(): boolean {
-		/*return this*/.depth = /*= 1*/;
+		return this.depth === 1;
 	}/*
     */}/*private static*/class ConstructorHeader implements MethodHeader {
 	/*@Override
@@ -68,8 +68,8 @@
         }
     }*/
 	/*public static*/main(): /*void*/ {
-		/*var source */ = Paths.get(".", "src", "java", "magma", "Main.java");
-		/*var target */ = source.resolveSibling("main.ts");/*
+		/*var source */ = Paths.get(/*"."*/, /* "src"*/, /* "java"*/, /* "magma"*/, /* "Main.java"*/);
+		/*var target */ = source.resolveSibling(/*"main.ts"*/);/*
         try {
             var input = Files.readString(source);
             Files.writeString(target, compileRoot(input));
@@ -79,10 +79,10 @@
 	}
 	/*private static*/compileRoot(input : string): string {
 		/*var compiled */ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
-		return compiled.left.output + compiled.right;
+		return /*compiled.left.output + compiled*/.right;
 	}
 	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
-		/*return compileAll*/(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
+		return compileAll(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
 	}
 	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/ {
 		/*var divisions */ = divide(input, folder);
@@ -97,10 +97,10 @@
 
             current = new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
         }*/
-		/*return new Tuple<>*/(current.left, current.right.toString());
+		return new /*Tuple*/<>(current.left, current.right.toString());
 	}
 	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/ {
-		/*return cache*/.append(element);
+		return cache.append(element);
 	}
 	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string> {
 		/*var current */ = new /*DivideState*/();
@@ -231,9 +231,9 @@
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOrPlaceholder(state, withoutEnd, List.of(
+                Main::compileReturn,
                 Main::compileAssignment,
-                Main::compileInvokable,
-                Main::compileReturn
+                Main::compileInvokable
         ));
     }*//*
 
@@ -276,8 +276,17 @@
                 Main::compileAccess,
                 Main::compileSymbol,
                 Main::compileInvokable,
-                Main::compileNumber
+                Main::compileNumber,
+                Main::compileEquals
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileEquals(CompileState state, String input) {
+        return compileFirst(input, "==", (left, right) -> {
+            var leftTuple = compileValue(state, left);
+            var rightTuple = compileValue(leftTuple.left, right);
+            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " === " + rightTuple.right));
+        });
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileNumber(CompileState state, String input) {
@@ -302,9 +311,15 @@
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
-        return compileLast(input, ".", (child, property) -> {
+        return compileLast(input, ".", (child, rawProperty) -> {
             var tuple = compileValue(state, child);
-            return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property.strip()));
+            var property = rawProperty.strip();
+            if (isSymbol(property)) {
+                return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
+            }
+            else {
+                return Optional.empty();
+            }
         });
     }*//*
 
@@ -409,7 +424,7 @@
             return Optional.of("number");
         }
 
-        if(stripped.equals("boolean")) {
+        if (stripped.equals("boolean")) {
             return Optional.of("boolean");
         }
 

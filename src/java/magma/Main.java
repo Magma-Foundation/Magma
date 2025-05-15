@@ -272,9 +272,9 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOrPlaceholder(state, withoutEnd, List.of(
+                Main::compileReturn,
                 Main::compileAssignment,
-                Main::compileInvokable,
-                Main::compileReturn
+                Main::compileInvokable
         ));
     }
 
@@ -317,8 +317,17 @@ public class Main {
                 Main::compileAccess,
                 Main::compileSymbol,
                 Main::compileInvokable,
-                Main::compileNumber
+                Main::compileNumber,
+                Main::compileEquals
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileEquals(CompileState state, String input) {
+        return compileFirst(input, "==", (left, right) -> {
+            var leftTuple = compileValue(state, left);
+            var rightTuple = compileValue(leftTuple.left, right);
+            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " === " + rightTuple.right));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileNumber(CompileState state, String input) {
@@ -343,9 +352,15 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
-        return compileLast(input, ".", (child, property) -> {
+        return compileLast(input, ".", (child, rawProperty) -> {
             var tuple = compileValue(state, child);
-            return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property.strip()));
+            var property = rawProperty.strip();
+            if (isSymbol(property)) {
+                return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
+            }
+            else {
+                return Optional.empty();
+            }
         });
     }
 
@@ -450,7 +465,7 @@ public class Main {
             return Optional.of("number");
         }
 
-        if(stripped.equals("boolean")) {
+        if (stripped.equals("boolean")) {
             return Optional.of("boolean");
         }
 
