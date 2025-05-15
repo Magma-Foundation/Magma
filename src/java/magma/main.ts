@@ -91,10 +91,10 @@
 		let compiled : unknown = compileStatements(new /*CompileState*/(), input, Main.compileRootSegment);
 		return compiled.left.output + compiled.right;
 	}
-	/*private static*/compileStatements(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*Tuple*/</*CompileState*/, string> {
+	/*private static*/compileStatements(state : /*CompileState*/, input : string, mapper : /*BiFunction*/</*CompileState*/, string, /*Tuple*/</*CompileState*/, string>>): /*Tuple*/</*CompileState*/, string> {
 		return compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
-	/*private static*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*Tuple*/</*CompileState*/, string> {
+	/*private static*/compileAll(state : /*CompileState*/, input : string, folder : /*BiFunction*/</*DivideState*/, /* Character*/, /* DivideState*/>, mapper : /*BiFunction*/</*CompileState*/, string, /*Tuple*/</*CompileState*/, string>>, merger : /*BiFunction*/</*StringBuilder*/, string, /* StringBuilder*/>): /*Tuple*/</*CompileState*/, string> {
 		let divisions : unknown = divide(input, folder);
 		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());
 		/*for (var segment : divisions) */{
@@ -110,7 +110,7 @@
 	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/ {
 		return cache.append(element);
 	}
-	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string> {
+	/*private static*/divide(input : string, folder : /*BiFunction*/</*DivideState*/, /* Character*/, /* DivideState*/>): /*List*/<string> {
 		let current : unknown = new /*DivideState*/();
 		let /*for*/i : /*(var*/ = 0;
 		/*i < input*/.length();
@@ -586,10 +586,18 @@
     }*//*
 
     private static DivideState foldValues(DivideState state, char c) {
-        if (c == ',') {
+        if (c == ',' && state.isLevel()) {
             return state.advance();
         }
-        return state.append(c);
+
+        var appended = state.append(c);
+        if (c == '<') {
+            return appended.enter();
+        }
+        if (c == '>') {
+            return appended.exit();
+        }
+        return appended;
     }*//*
 
     private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
