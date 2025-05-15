@@ -214,7 +214,7 @@ public class Main {
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = generatePlaceholder(beforeKeyword) + "class " + name + " {" + outputContent + "}";
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + "class " + name + " {" + outputContent + "}";
                     return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });

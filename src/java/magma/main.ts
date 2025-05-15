@@ -1,6 +1,4 @@
-/*
-
-    private static */class DivideState {
+/*private static*/class DivideState {
 	/*private final*/segments : /*List*/<string>;
 	/*private*/buffer : /*StringBuilder*/;
 	/*private*/depth : number;
@@ -35,16 +33,12 @@
 	/*public*/isShallow(): boolean {
 		/*return this*/.depth = /*= 1*/;
 	}/*
-    */}/*
-
-    private static */class ConstructorHeader implements MethodHeader {
+    */}/*private static*/class ConstructorHeader implements MethodHeader {
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
 		return /*"constructor " + afterName*/;
 	}/*
-    */}/*
-
-public */class Main {/*private interface MethodHeader {
+    */}/*public*/class Main {/*private interface MethodHeader {
         String generateWithAfterName(String afterName);
     }*/
 	/*private record*/B>(left : /*A*/, right : /*B*/): /*Tuple<A,*/ {
@@ -143,11 +137,9 @@ public */class Main {/*private interface MethodHeader {
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = generatePlaceholder(beforeKeyword) + "*/class " + name + " {
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + "*/class " + name + " {
 	/*" + outputContent + "}";
-                    return Optional.of(new Tuple<>(outputContentState.append(generated),*/}) : /*""));*/;}/*
-
-    private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
+                    return Optional.of(new Tuple<>(outputContentState.append(generated),*/}) : /*""));*/;}/*private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         return compileFirst(input, "*/class ", (beforeKeyword, right1) -> {
 	/*)*/;
 	/*})*/;}/*
