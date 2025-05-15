@@ -248,7 +248,9 @@ public class Main {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
                     var parametersTuple = compileValues(state, params, Main::compileParameter);
                     var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
-                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + header.generateWithAfterName("(" + parametersTuple.right + ")") + "{" + statementsTuple.right + "\n\t}"));
+
+                    var headerGenerated = header.generateWithAfterName("(" + parametersTuple.right + ")");
+                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
             });
         });
@@ -446,6 +448,10 @@ public class Main {
 
         if (stripped.equals("int")) {
             return Optional.of("number");
+        }
+
+        if(stripped.equals("boolean")) {
+            return Optional.of("boolean");
         }
 
         return Optional.empty();

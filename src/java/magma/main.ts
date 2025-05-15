@@ -4,42 +4,42 @@
 	/*private final*/segments : /*List*/<string>;
 	/*private*/buffer : /*StringBuilder*/;
 	/*private*/depth : number;
-	constructor (segments : /*List*/<string>, buffer : /*StringBuilder*/, depth : number){
+	constructor (segments : /*List*/<string>, buffer : /*StringBuilder*/, depth : number) {
 		this.segments = segments;
 		this.buffer = buffer;
 		this.depth = depth;
 	}
-	constructor (){
+	constructor () {
 		this(new /*ArrayList*/<>(), new /*StringBuilder*/(), 0);
 	}
-	/*private*/advance(): /*DivideState*/{
+	/*private*/advance(): /*DivideState*/ {
 		this.segments.add(this.buffer.toString());
 		this.buffer = new /*StringBuilder*/();
 		return this;
 	}
-	/*private*/append(c : string): /*DivideState*/{
+	/*private*/append(c : string): /*DivideState*/ {
 		this.buffer.append(c);
 		return this;
 	}
-	/*public*/isLevel(): /*boolean*/{
+	/*public*/isLevel(): boolean {
 		/*return this*/.depth = /*= 0*/;
 	}
-	/*public*/enter(): /*DivideState*/{
+	/*public*/enter(): /*DivideState*/ {
 		/*this.depth++*/;
 		return this;
 	}
-	/*public*/exit(): /*DivideState*/{
+	/*public*/exit(): /*DivideState*/ {
 		/*this.depth--*/;
 		return this;
 	}
-	/*public*/isShallow(): /*boolean*/{
+	/*public*/isShallow(): boolean {
 		/*return this*/.depth = /*= 1*/;
 	}/*
     */}/*
 
     private static */class ConstructorHeader implements MethodHeader {
 	/*@Override
-        public*/generateWithAfterName(afterName : string): string{
+        public*/generateWithAfterName(afterName : string): string {
 		return /*"constructor " + afterName*/;
 	}/*
     */}/*
@@ -47,9 +47,9 @@
 public */class Main {/*private interface MethodHeader {
         String generateWithAfterName(String afterName);
     }*/
-	/*private record*/B>(left : /*A*/, right : /*B*/): /*Tuple<A,*/{
+	/*private record*/B>(left : /*A*/, right : /*B*/): /*Tuple<A,*/ {
 	}
-	/*private*/CompileState(output : string, structureName : /*Optional*/<string>): /*record*/{/*public CompileState() {
+	/*private*/CompileState(output : string, structureName : /*Optional*/<string>): /*record*/ {/*public CompileState() {
             this("", Optional.empty());
         }*//*
 
@@ -73,7 +73,7 @@ public */class Main {/*private interface MethodHeader {
             return beforeTypeString + this.name + afterName + ": " + this.type();
         }
     }*/
-	/*public static*/main(): /*void*/{
+	/*public static*/main(): /*void*/ {
 		/*var source */ = Paths.get(".", "src", "java", "magma", "Main.java");
 		/*var target */ = source.resolveSibling("main.ts");/*
         try {
@@ -83,14 +83,14 @@ public */class Main {/*private interface MethodHeader {
             throw new RuntimeException(e);
         }*/
 	}
-	/*private static*/compileRoot(input : string): string{
+	/*private static*/compileRoot(input : string): string {
 		/*var compiled */ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
 		return compiled.left.output + compiled.right;
 	}
-	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/{
+	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
 		/*return compileAll*/(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
 	}
-	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/{
+	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/ {
 		/*var divisions */ = divide(input, folder);
 		/*var current */ = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
         for (var segment : divisions) {
@@ -105,10 +105,10 @@ public */class Main {/*private interface MethodHeader {
         }*/
 		/*return new Tuple<>*/(current.left, current.right.toString());
 	}
-	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/{
+	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/ {
 		/*return cache*/.append(element);
 	}
-	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string>{
+	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string> {
 		/*var current */ = new /*DivideState*/();
 		/*for (var i */ = 0;
 		/*i < input*/.length();/* i++) {
@@ -117,7 +117,7 @@ public */class Main {/*private interface MethodHeader {
         }*/
 		return current.advance().segments;
 	}
-	/*private static*/foldStatements(state : /*DivideState*/, c : string): /*DivideState*/{
+	/*private static*/foldStatements(state : /*DivideState*/, c : string): /*DivideState*/ {
 		/*var appended */ = state.append(c);
 		/*if (c */ = /*= '*/;/*' && appended.isLevel()) {
             return appended.advance();
@@ -215,7 +215,9 @@ public */class Main {/*private interface MethodHeader {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
                     var parametersTuple = compileValues(state, params, Main::compileParameter);
                     var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
-                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + header.generateWithAfterName("(" + parametersTuple.right + ")") + "{" + statementsTuple.right + "\n\t}"));
+
+                    var headerGenerated = header.generateWithAfterName("(" + parametersTuple.right + ")");
+                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
             });
         });
@@ -413,6 +415,10 @@ public */class Main {/*private interface MethodHeader {
 
         if (stripped.equals("int")) {
             return Optional.of("number");
+        }
+
+        if(stripped.equals("boolean")) {
+            return Optional.of("boolean");
         }
 
         return Optional.empty();
