@@ -214,7 +214,7 @@ public class Main {
                     var outputContentState = outputContentTuple.left;
                     var outputContent = outputContentTuple.right;
 
-                    var generated = generatePlaceholder(beforeKeyword.strip()) + "class " + name + " {" + outputContent + "}";
+                    var generated = generatePlaceholder(beforeKeyword.strip()) + "class " + name + " {" + outputContent + "\n}\n";
                     return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
                 });
             });
@@ -223,6 +223,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
         return compileOrPlaceholder(state1, input1, List.of(
+                Main::compileWhitespace,
                 Main::compileClass,
                 Main::compileFieldDefinition,
                 Main::compileMethod

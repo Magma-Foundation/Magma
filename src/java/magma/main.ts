@@ -32,13 +32,15 @@
 	}
 	/*public*/isShallow(): boolean {
 		return this.depth === 1;
-	}/*
-    */}/*private static*/class ConstructorHeader implements MethodHeader {
+	}
+}
+/*private static*/class ConstructorHeader implements MethodHeader {
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
 		return /*"constructor " + afterName*/;
-	}/*
-    */}/*public*/class Main {/*private interface MethodHeader {
+	}
+}
+/*public*/class Main {/*private interface MethodHeader {
         String generateWithAfterName(String afterName);
     }*/
 	/*private record*/B>(left : /*A*/, right : /*B*/): /*Tuple<A,*/ {
@@ -129,8 +131,9 @@
         if (c == '}*//*') {
             return appended.exit();
         }*/
-	appended : /*return*/;/*
-    */}/*return compileFirst(right1, "{", (rawName, withEnd) -> {
+	appended : /*return*/;
+}
+/*return compileFirst(right1, "{", (rawName, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var name = rawName.strip();
                     var outputContentTuple = compileSegments(state.withStructureName(name), inputContent, Main::compileClassSegment);
@@ -138,11 +141,15 @@
                     var outputContent = outputContentTuple.right;
 
                     var generated = generatePlaceholder(beforeKeyword.strip()) + "*/class " + name + " {
-	/*" + outputContent + "}";
-                    return Optional.of(new Tuple<>(outputContentState.append(generated),*/}) : /*""));*/;}/*private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
+	/*" + outputContent + "\n}\n";
+                    return Optional.of(new Tuple<>(outputContentState.append(generated),*/}) : /*""));*/;
+}
+/*private static Optional<Tuple<CompileState, String>> compileClass(CompileState state, String input) {
         return compileFirst(input, "*/class ", (beforeKeyword, right1) -> {
 	/*)*/;
-	/*})*/;}/*
+	/*})*/;
+}
+/*
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
@@ -182,6 +189,7 @@
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
         return compileOrPlaceholder(state1, input1, List.of(
+                Main::compileWhitespace,
                 Main::compileClass,
                 Main::compileFieldDefinition,
                 Main::compileMethod
