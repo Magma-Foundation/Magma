@@ -178,18 +178,27 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
         return (state1, input1) -> compileFirst(input1, sourceInfix, (beforeKeyword, right1) -> {
-            return compileFirst(right1, "{", (rawName, withEnd) -> {
+            return compileFirst(right1, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
-                    var name = rawName.strip();
-                    var outputContentTuple = compileSegments(state1.withStructureName(name), inputContent, Main::compileClassSegment);
-                    var outputContentState = outputContentTuple.left;
-                    var outputContent = outputContentTuple.right;
-
-                    var generated = generatePlaceholder(beforeKeyword.strip()) + targetInfix + name + " {" + outputContent + "\n}\n";
-                    return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
+                    var strippedBeforeContent = beforeContent.strip();
+                    return compileFirst(strippedBeforeContent, "(", (rawName, s2) -> {
+                        var name = rawName.strip();
+                        return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, name);
+                    }).or(() -> {
+                        return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, strippedBeforeContent);
+                    });
                 });
             });
         });
+    }
+
+    private static Optional<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String beforeKeyword, String inputContent, String name) {
+        var outputContentTuple = compileSegments(state1.withStructureName(name), inputContent, Main::compileClassSegment);
+        var outputContentState = outputContentTuple.left;
+        var outputContent = outputContentTuple.right;
+
+        var generated = generatePlaceholder(beforeKeyword.strip()) + targetInfix + name + " {" + outputContent + "\n}\n";
+        return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
     }
 
     private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
