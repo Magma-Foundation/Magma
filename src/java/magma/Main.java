@@ -329,8 +329,19 @@ public class Main {
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRule("==", "==="),
-                createOperatorRule("+", "+")
+                createOperatorRule("+", "+"),
+                Main::compileString
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileString(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return Optional.of(new Tuple<>(state, stripped));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {

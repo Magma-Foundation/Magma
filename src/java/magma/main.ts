@@ -37,7 +37,7 @@
 /*private static*/class ConstructorHeader implements MethodHeader {
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
-		return /*"constructor " */ + afterName;
+		return "constructor " + afterName;
 	}
 }
 /*public*/class Main {/*private interface MethodHeader {
@@ -70,8 +70,8 @@
         }
     }*/
 	/*public static*/main(): /*void*/ {
-		/*var source */ = Paths.get(/*"."*/, /* "src"*/, /* "java"*/, /* "magma"*/, /* "Main.java"*/);
-		/*var target */ = source.resolveSibling(/*"main.ts"*/);/*
+		/*var source */ = Paths.get(".", "src", "java", "magma", "Main.java");
+		/*var target */ = source.resolveSibling("main.ts");/*
         try {
             var input = Files.readString(source);
             Files.writeString(target, compileRoot(input));
@@ -295,8 +295,19 @@
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRule("==", "==="),
-                createOperatorRule("+", "+")
+                createOperatorRule("+", "+"),
+                Main::compileString
         )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileString(CompileState state, String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return Optional.of(new Tuple<>(state, stripped));
+        }
+        else {
+            return Optional.empty();
+        }
     }*//*
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {
