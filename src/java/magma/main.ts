@@ -103,7 +103,7 @@
 			let mappedTuple : unknown = mapper.apply(currentState, segment);
 			let mappedState : unknown = mappedTuple.left;
 			let mappedElement : unknown = mappedTuple.right;
-			current = new /*Tuple*/<>(mappedState, /* merger.apply(currentElement*/, /* mappedElement)*/);
+			current = new /*Tuple*/<>(mappedState, merger.apply(currentElement, mappedElement));
 		}
 		return new /*Tuple*/<>(current.left, current.right.toString());
 	}
@@ -591,10 +591,10 @@
         }
 
         var appended = state.append(c);
-        if (c == '<') {
+        if (c == '<' || c == '(') {
             return appended.enter();
         }
-        if (c == '>') {
+        if (c == '>' || c == ')') {
             return appended.exit();
         }
         return appended;
