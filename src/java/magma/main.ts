@@ -3,9 +3,9 @@
 	/*private*/buffer : /*StringBuilder*/;
 	/*private*/depth : number;
 	constructor(segments : /*List*/<string>, buffer : /*StringBuilder*/, depth : number){
-		/*this.segments */ = /* segments*/;
-		/*this.buffer */ = /* buffer*/;
-		/*this.depth */ = /* depth*/;
+		/*this.segments */ = segments;
+		/*this.buffer */ = buffer;
+		/*this.depth */ = depth;
 	}
 	constructor(){
 		/*this(new ArrayList<>(), new StringBuilder(), 0)*/;
@@ -235,7 +235,30 @@ public */class Main {/*
     }*//*
 
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
-        return compileOr(state, input, List.of());
+        return compileOr(state, input, List.of(
+                Main::compileSymbol
+        ));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
+        var stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return Optional.of(new Tuple<>(state, stripped));
+        }
+        else {
+            return Optional.empty();
+        }
+    }*//*
+
+    private static boolean isSymbol(String input) {
+        for (var i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (Character.isLetter(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
