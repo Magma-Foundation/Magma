@@ -211,7 +211,7 @@ public class Main {
                             if (state.structureName.filter(name::equals).isPresent()) {
                                 var parametersTuple = compileValues(state, params, Main::compileParameter);
                                 var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
-                                return Optional.of(new Tuple<>(statementsTuple.left, "\n\tconstructor(" + parametersTuple.right + "){" + statementsTuple.right + "}"));
+                                return Optional.of(new Tuple<>(statementsTuple.left, "\n\tconstructor(" + parametersTuple.right + "){" + statementsTuple.right + "\n\t}"));
                             }
                             return Optional.empty();
                         });
@@ -223,7 +223,15 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         return compileOr(state, input, List.of(
+                Main::compileWhitespace,
+                Main::compileFunctionStatement
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
+        return compileSuffix(input.strip(), ";", withoutEnd -> {
+            return Optional.of(new Tuple<>(state, "\n\t\t" + generatePlaceholder(withoutEnd) + ";"));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
