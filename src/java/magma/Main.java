@@ -263,7 +263,8 @@ public class Main {
     private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
         return compileOr(state, input, List.of(
                 Main::compileAccess,
-                Main::compileSymbol
+                Main::compileSymbol,
+                Main::compileInvocation
         ));
     }
 
