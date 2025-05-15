@@ -56,7 +56,7 @@
 	}
 	/*@Override
         public*/generateWithAfterName(afterName : string): string {
-		/*var beforeTypeString */ = this.maybeBeforeType(/*).map(Main::generatePlaceholder).orElse(""*/);
+		let beforeTypeString : /*var*/ = this.maybeBeforeType(/*).map(Main::generatePlaceholder).orElse(""*/);
 		return beforeTypeString + this.name + afterName + ": " + this.type();
 	}
 }
@@ -68,8 +68,8 @@
 }
 /*public*/class Main {
 	/*public static*/main(): /*void*/ {
-		/*var source */ = Paths.get(".", "src", "java", "magma", "Main.java");
-		/*var target */ = source.resolveSibling("main.ts");/*
+		let source : /*var*/ = Paths.get(".", "src", "java", "magma", "Main.java");
+		let target : /*var*/ = source.resolveSibling("main.ts");/*
         try {
             var input = Files.readString(source);
             Files.writeString(target, compileRoot(input));
@@ -78,15 +78,15 @@
         }*/
 	}
 	/*private static*/compileRoot(input : string): string {
-		/*var compiled */ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
+		let compiled : /*var*/ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
 		return compiled.left.output + compiled.right;
 	}
 	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
 		return compileAll(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
 	}
 	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/ {
-		/*var divisions */ = divide(input, folder);
-		/*var current */ = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
+		let divisions : /*var*/ = divide(input, folder);
+		let current : /*var*/ = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
         for (var segment : divisions) {
             var currentState = current.left;
             var currentElement = current.right;
@@ -103,8 +103,8 @@
 		return cache.append(element);
 	}
 	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string> {
-		/*var current */ = new /*DivideState*/();
-		/*for (var i */ = 0;
+		let current : /*var*/ = new /*DivideState*/();
+		let /*for*/i : /*(var*/ = 0;
 		/*i < input*/.length();/* i++) {
             var c = input.charAt(i);
             current = folder.apply(current, c);
@@ -112,8 +112,8 @@
 		return current.advance().segments;
 	}
 	/*private static*/foldStatements(state : /*DivideState*/, c : string): /*DivideState*/ {
-		/*var appended */ = state.append(c);
-		/*if (c */ = /*= '*/;/*' && appended.isLevel()) {
+		let appended : /*var*/ = state.append(c);
+		let (c : /*if*/ = /*= '*/;/*' && appended.isLevel()) {
             return appended.advance();
         }*//*
 
@@ -267,14 +267,14 @@
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createPostRule(String suffix) {
         return (state1, input) -> compileSuffix(input.strip(), suffix, child -> {
-            var tuple = compileValue(state1, child);
+            var tuple = compileValueOrPlaceholder(state1, child);
             return Optional.of(new Tuple<>(tuple.left, tuple.right + suffix));
         });
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
         return compilePrefix(input.strip(), "return ", value -> {
-            var tuple = compileValue(state, value);
+            var tuple = compileValueOrPlaceholder(state, value);
             return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
         });
     }*//*
@@ -286,7 +286,7 @@
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
                 }).or(() -> {
-                    var callerTuple = compileValue(state, caller);
+                    var callerTuple = compileValueOrPlaceholder(state, caller);
                     return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
                 });
             });
@@ -294,19 +294,27 @@
     }*//*
 
     private static Optional<Tuple<CompileState, String>> assembleInvokable(CompileState state, String caller, String arguments) {
-        var argumentsTuple = compileValues(state, arguments, Main::compileValue);
+        var argumentsTuple = compileValues(state, arguments, Main::compileValueOrPlaceholder);
         return Optional.of(new Tuple<>(argumentsTuple.left, caller + "(" + argumentsTuple.right + ")"));
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
         return compileFirst(input, "=", (destination, source) -> {
-            var sourceTuple = compileValue(state, source);
-            var destinationTuple = compileValue(sourceTuple.left, destination);
+            var sourceTuple = compileValueOrPlaceholder(state, source);
+
+            var destinationTuple = compileValue(sourceTuple.left, destination)
+                    .or(() -> compileDefinition(sourceTuple.left, destination).map(tuple -> new Tuple<>(tuple.left, "let " + tuple.right.generate())))
+                    .orElseGet(() -> new Tuple<>(sourceTuple.left, generatePlaceholder(destination)));
+
             return Optional.of(new Tuple<>(destinationTuple.left, destinationTuple.right + " = " + sourceTuple.right));
         });
     }*//*
 
-    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileValueOrPlaceholder(CompileState state, String input) {
+        return compileValue(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         return compileOr(state, input, List.of(
                 Main::compileAccess,
                 Main::compileSymbol,
@@ -315,7 +323,7 @@
                 createOperatorRule("==", "==="),
                 createOperatorRule("+", "+"),
                 Main::compileString
-        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        ));
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileString(CompileState state, String input) {
@@ -330,8 +338,8 @@
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {
         return (state1, input1) -> compileFirst(input1, sourceInfix, (left, right) -> {
-            var leftTuple = compileValue(state1, left);
-            var rightTuple = compileValue(leftTuple.left, right);
+            var leftTuple = compileValueOrPlaceholder(state1, left);
+            var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
             return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
         });
     }*//*
@@ -359,7 +367,7 @@
 
     private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
         return compileLast(input, ".", (child, rawProperty) -> {
-            var tuple = compileValue(state, child);
+            var tuple = compileValueOrPlaceholder(state, child);
             var property = rawProperty.strip();
             if (isSymbol(property)) {
                 return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));

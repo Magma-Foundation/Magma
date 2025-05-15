@@ -303,14 +303,14 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createPostRule(String suffix) {
         return (state1, input) -> compileSuffix(input.strip(), suffix, child -> {
-            var tuple = compileValue(state1, child);
+            var tuple = compileValueOrPlaceholder(state1, child);
             return Optional.of(new Tuple<>(tuple.left, tuple.right + suffix));
         });
     }
 
     private static Optional<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
         return compilePrefix(input.strip(), "return ", value -> {
-            var tuple = compileValue(state, value);
+            var tuple = compileValueOrPlaceholder(state, value);
             return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
         });
     }
@@ -322,7 +322,7 @@ public class Main {
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
                 }).or(() -> {
-                    var callerTuple = compileValue(state, caller);
+                    var callerTuple = compileValueOrPlaceholder(state, caller);
                     return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
                 });
             });
@@ -330,19 +330,27 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> assembleInvokable(CompileState state, String caller, String arguments) {
-        var argumentsTuple = compileValues(state, arguments, Main::compileValue);
+        var argumentsTuple = compileValues(state, arguments, Main::compileValueOrPlaceholder);
         return Optional.of(new Tuple<>(argumentsTuple.left, caller + "(" + argumentsTuple.right + ")"));
     }
 
     private static Optional<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
         return compileFirst(input, "=", (destination, source) -> {
-            var sourceTuple = compileValue(state, source);
-            var destinationTuple = compileValue(sourceTuple.left, destination);
+            var sourceTuple = compileValueOrPlaceholder(state, source);
+
+            var destinationTuple = compileValue(sourceTuple.left, destination)
+                    .or(() -> compileDefinition(sourceTuple.left, destination).map(tuple -> new Tuple<>(tuple.left, "let " + tuple.right.generate())))
+                    .orElseGet(() -> new Tuple<>(sourceTuple.left, generatePlaceholder(destination)));
+
             return Optional.of(new Tuple<>(destinationTuple.left, destinationTuple.right + " = " + sourceTuple.right));
         });
     }
 
-    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+    private static Tuple<CompileState, String> compileValueOrPlaceholder(CompileState state, String input) {
+        return compileValue(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         return compileOr(state, input, List.of(
                 Main::compileAccess,
                 Main::compileSymbol,
@@ -351,7 +359,7 @@ public class Main {
                 createOperatorRule("==", "==="),
                 createOperatorRule("+", "+"),
                 Main::compileString
-        )).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        ));
     }
 
     private static Optional<Tuple<CompileState, String>> compileString(CompileState state, String input) {
@@ -366,8 +374,8 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {
         return (state1, input1) -> compileFirst(input1, sourceInfix, (left, right) -> {
-            var leftTuple = compileValue(state1, left);
-            var rightTuple = compileValue(leftTuple.left, right);
+            var leftTuple = compileValueOrPlaceholder(state1, left);
+            var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
             return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
         });
     }
@@ -395,7 +403,7 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileAccess(CompileState state, String input) {
         return compileLast(input, ".", (child, rawProperty) -> {
-            var tuple = compileValue(state, child);
+            var tuple = compileValueOrPlaceholder(state, child);
             var property = rawProperty.strip();
             if (isSymbol(property)) {
                 return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
