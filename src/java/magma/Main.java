@@ -237,8 +237,19 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOr(state, withoutEnd, List.of(
-                Main::compileAssignment
+                Main::compileAssignment,
+                Main::compileInvocation
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileInvocation(CompileState state, String input) {
+        return compileSuffix(input.strip(), ")", withoutEnd -> {
+            return compileFirst(withoutEnd, "(", (caller, arguments) -> {
+                var callerTuple = compileValue(state, caller);
+                var argumentsTuple = compileValues(callerTuple.left, arguments, Main::compileValue);
+                return Optional.of(new Tuple<>(argumentsTuple.left, callerTuple.right + "(" + argumentsTuple.right + ")"));
+            });
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
