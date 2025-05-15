@@ -2,12 +2,12 @@
 	/*private final*/segments : /*List*/<string>;
 	/*private*/buffer : /*StringBuilder*/;
 	/*private*/depth : number;
-	constructor(/*List<String> segments, StringBuilder buffer, int depth) {
+	constructor(/*List<String> segments*/, /* StringBuilder buffer*/, /* int depth*/)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
         }*/
-	constructor(/*) {
+	constructor()/* {
             this(new ArrayList<>(), new StringBuilder(), 0);
         }*//*
 
@@ -188,40 +188,52 @@ public */class Main {/*
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
-        return compileFirst(input, "(", new BiFunction<String, String, Optional<Tuple<CompileState, String>>>() {
-            @Override
-            public Optional<Tuple<CompileState, String>> apply(String s, String s2) {
-                return compileLast(s.strip(), " ", new BiFunction<String, String, Optional<Tuple<CompileState, String>>>() {
-                    @Override
-                    public Optional<Tuple<CompileState, String>> apply(String beforeName, String name) {
-                        if (name.equals("DivideState")) {
-                            return Optional.of(new Tuple<>(state, "\n\tconstructor(" + generatePlaceholder(s2)));
-                        }
-                        else {
-                            return Optional.empty();
-                        }
+        return compileFirst(input, "(", (beforeParams, withParams) -> {
+            return compileLast(beforeParams.strip(), " ", (beforeName, name) -> {
+                return compileFirst(withParams, ")", (params, afterParams) -> {
+                    if (state.structureName.filter(name::equals).isPresent()) {
+                        var parametersTuple = compileValues(state, params, Main::compileParameter);
+                        return Optional.of(new Tuple<>(parametersTuple.left, "\n\tconstructor(" + parametersTuple.right + ")" + generatePlaceholder(afterParams)));
                     }
+                    return Optional.empty();
                 });
-            }
+            });
         });
+    }*//*
+
+    private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
+        return compileOr(state, input, List.of(
+                Main::compileWhitespace,
+                Main::compileDefinition
+        ));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        if (input.isBlank()) {
+            return Optional.of(new Tuple<>(state, ""));
+        }
+        return Optional.empty();
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            var definitionTuple = compileDefinition(withoutEnd, state);
+            var definitionTuple = compileDefinitionOrPlaceholder(withoutEnd, state);
             return Optional.of(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
         });
     }*//*
 
-    private static Tuple<CompileState, String> compileDefinition(String input, CompileState state) {
-        var stripped = input.strip();
-        return compileLast(stripped, " ", (beforeName, name) -> {
+    private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(String input, CompileState state) {
+        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+        return compileLast(input.strip(), " ", (beforeName, name) -> {
             return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
                 var typeTuple = compileType(state, type);
                 var generated = generatePlaceholder(beforeType) + name + " : " + typeTuple.right;
                 return Optional.of(new Tuple<>(typeTuple.left, generated));
             });
-        }).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        });
     }*//*
 
     private static Tuple<CompileState, String> compileType(CompileState state, String type) {
@@ -250,10 +262,14 @@ public */class Main {/*
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
-                var argumentsTuple = compileAll(state, argumentsString, Main::foldValues, Main::compileType, Main::mergeValues);
+                var argumentsTuple = compileValues(state, argumentsString, Main::compileType);
                 return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(baseString) + "<" + argumentsTuple.right + ">"));
             });
         });
+    }*//*
+
+    private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        return compileAll(state, input, Main::foldValues, mapper, Main::mergeValues);
     }*//*
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {
