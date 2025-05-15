@@ -230,8 +230,27 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
-            return Optional.of(new Tuple<>(state, "\n\t\t" + generatePlaceholder(withoutEnd) + ";"));
+            var valueTuple = compileFunctionStatementValue(state, withoutEnd);
+            return Optional.of(new Tuple<>(valueTuple.left, "\n\t\t" + valueTuple.right + ";"));
         });
+    }
+
+    private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
+        return compileOr(state, withoutEnd, List.of(
+                Main::compileAssignment
+        ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
+        return compileFirst(input, "=", (destination, source) -> {
+            var sourceTuple = compileValue(state, source);
+            var destinationTuple = compileValue(sourceTuple.left, destination);
+            return Optional.of(new Tuple<>(destinationTuple.left, destinationTuple.right + " = " + sourceTuple.right));
+        });
+    }
+
+    private static Tuple<CompileState, String> compileValue(CompileState state, String input) {
+        return compileOr(state, input, List.of());
     }
 
     private static Optional<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
