@@ -2,7 +2,7 @@
 	/*private final*/segments : /*List*/<string>;
 	/*private*/buffer : /*StringBuilder*/;
 	/*private*/depth : number;
-	constructor(/*List<String> segments*/, /* StringBuilder buffer*/, /* int depth*/)/* {
+	constructor(segments : /*List*/<string>, buffer : /*StringBuilder*/, depth : number)/* {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
@@ -130,7 +130,7 @@ public */class Main {/*
         if (c == '}*//*') {
             return appended.exit();
         }*/
-	/*return appended*/;/*
+	appended : /*return*/;/*
     */}/*return compileFirst(right1, "{", (rawName, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var name = rawName.strip();
@@ -148,7 +148,7 @@ public */class Main {/*
 	/*})*/;}/*
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOrPlaceholder(state, input, List.of(
                 Main::compileNamespaced,
                 Main::compileClass
         ));
@@ -164,7 +164,15 @@ public */class Main {/*
         }
     }*//*
 
-    private static Tuple<CompileState, String> compileOr(
+    private static Tuple<CompileState, String> compileOrPlaceholder(
+            CompileState state,
+            String input,
+            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
+    ) {
+        return compileOr(state, input, rules).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileOr(
             CompileState state,
             String input,
             List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
@@ -172,15 +180,15 @@ public */class Main {/*
         for (var rule : rules) {
             var maybeTuple = rule.apply(state, input);
             if (maybeTuple.isPresent()) {
-                return maybeTuple.get();
+                return maybeTuple;
             }
         }
 
-        return new Tuple<>(state, generatePlaceholder(input));
+        return Optional.empty();
     }*//*
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
-        return compileOr(state1, input1, List.of(
+        return compileOrPlaceholder(state1, input1, List.of(
                 Main::compileClass,
                 Main::compileFieldDefinition,
                 Main::compileMethod
@@ -202,7 +210,7 @@ public */class Main {/*
     }*//*
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
                 Main::compileDefinition
         ));
@@ -229,15 +237,23 @@ public */class Main {/*
     private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
             return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
-                var typeTuple = compileType(state, type);
-                var generated = generatePlaceholder(beforeType) + name + " : " + typeTuple.right;
-                return Optional.of(new Tuple<>(typeTuple.left, generated));
+                return assembleDefinition(state, Optional.of(beforeType), name, type);
+            }).or(() -> {
+                return assembleDefinition(state, Optional.empty(), name, beforeName);
             });
         });
     }*//*
 
+    private static Optional<Tuple<CompileState, String>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, String type) {
+        var typeTuple = compileType(state, type);
+
+        var beforeTypeString = maybeBeforeType.map(Main::generatePlaceholder).orElse("");
+        var generated = beforeTypeString + name + " : " + typeTuple.right;
+        return Optional.of(new Tuple<>(typeTuple.left, generated));
+    }*//*
+
     private static Tuple<CompileState, String> compileType(CompileState state, String type) {
-        return compileOr(state, type, List.of(
+        return compileOrPlaceholder(state, type, List.of(
                 Main::compileGeneric,
                 Main::compilePrimitive
         ));
