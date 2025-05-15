@@ -41,13 +41,22 @@
 }
 /*private*/class CompileState {
 	constructor () {
-		this("", Optional.empty());
+		this("", Optional.empty(), 0);
 	}
 	/*public*/append(element : string): /*CompileState*/ {
-		return new /*CompileState*/(this.output + element, this.structureName);
+		return new /*CompileState*/(this.output + element, this.structureName, this.depth);
 	}
 	/*public*/withStructureName(name : string): /*CompileState*/ {
-		return new /*CompileState*/(this.output, Optional.of(name));
+		return new /*CompileState*/(this.output, Optional.of(name), this.depth);
+	}
+	/*public*/depth(): number {
+		return this.depth;
+	}
+	/*public*/enterDepth(): /*CompileState*/ {
+		return new /*CompileState*/(this.output, this.structureName, this.depth + 1);
+	}
+	/*public*/exitDepth(): /*CompileState*/ {
+		return new /*CompileState*/(this.output, this.structureName, /* this.depth - 1*/);
 	}
 }
 /*private*/class Definition {
@@ -69,34 +78,33 @@
 /*public*/class Main {
 	/*public static*/main(): void {
 		let source : unknown = Paths.get(".", "src", "java", "magma", "Main.java");
-		let target : unknown = source.resolveSibling("main.ts");/*
-        try {
-            var input = Files.readString(source);
-            Files.writeString(target, compileRoot(input));
-        }*//* catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
+		let target : unknown = source.resolveSibling("main.ts");
+		/*try */{
+			let input : unknown = Files.readString(source);
+			Files.writeString(target, compileRoot(input));
+		}
+		/*catch (IOException e) */{
+			/*throw new RuntimeException*/(e);
+		}
 	}
 	/*private static*/compileRoot(input : string): string {
-		let compiled : unknown = compileSegments(new /*CompileState*/(), input, Main.compileRootSegment);
+		let compiled : unknown = compileStatements(new /*CompileState*/(), input, Main.compileRootSegment);
 		return compiled.left.output + compiled.right;
 	}
-	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
+	/*private static Tuple<CompileState,*/compileStatements(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/ {
 		return compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
 	/*private static Tuple<CompileState,*/compileAll(state : /*CompileState*/, input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/, /* BiFunction<StringBuilder*/, /* String*/, merger : /*StringBuilder>*/): /*String>*/ {
 		let divisions : unknown = divide(input, folder);
-		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
-        for (var segment : divisions) {
-            var currentState = current.left;
-            var currentElement = current.right;
-
-            var mappedTuple = mapper.apply(currentState, segment);
-            var mappedState = mappedTuple.left;
-            var mappedElement = mappedTuple.right;
-
-            current = new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
-        }*/
+		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());
+		/*for (var segment : divisions) */{
+			let currentState : unknown = current.left;
+			let currentElement : unknown = current.right;
+			let mappedTuple : unknown = mapper.apply(currentState, segment);
+			let mappedState : unknown = mappedTuple.left;
+			let mappedElement : unknown = mappedTuple.right;
+			current = new /*Tuple*/<>(mappedState, /* merger.apply(currentElement*/, /* mappedElement)*/);
+		}
 		return new /*Tuple*/<>(current.left, current.right.toString());
 	}
 	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/ {
@@ -105,17 +113,19 @@
 	/*private static*/divide(input : string, /* BiFunction<DivideState*/, /* Character*/, folder : /*DivideState>*/): /*List*/<string> {
 		let current : unknown = new /*DivideState*/();
 		let /*for*/i : /*(var*/ = 0;
-		/*i < input*/.length();/* i++) {
-            var c = input.charAt(i);
-            current = folder.apply(current, c);
-        }*/
+		/*i < input*/.length();
+		/*i++) */{
+			let c : unknown = input.charAt(i);
+			current = folder.apply(current, c);
+		}
 		return current.advance().segments;
 	}
 	/*private static*/foldStatements(state : /*DivideState*/, c : string): /*DivideState*/ {
 		let appended : unknown = state.append(c);
-		let (c : /*if*/ = /*= '*/;/*' && appended.isLevel()) {
-            return appended.advance();
-        }*//*
+		let (c : /*if*/ = /*= '*/;
+		/*' && appended.isLevel()) */{
+			return appended.advance();
+		}/*
 
         if (c == '*/
 	}/*' && appended.isShallow()) {
@@ -157,7 +167,7 @@
     }*//*
 
     private static Optional<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String beforeKeyword, String inputContent, String name) {
-        var outputContentTuple = compileSegments(state1.withStructureName(name), inputContent, Main::compileClassSegment);
+        var outputContentTuple = compileStatements(state1.withStructureName(name), inputContent, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
 
@@ -227,9 +237,9 @@
             var headerGenerated = header.generateWithAfterName("(" + parameters + ")");
             return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
-                    var statementsTuple = compileSegments(parametersState, withoutContentEnd, Main::compileFunctionSegment);
+                    var statementsTuple = compileFunctionStatements(parametersState.enterDepth().enterDepth(), withoutContentEnd);
 
-                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
+                    return Optional.of(new Tuple<>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
             }).or(() -> {
                 if (afterParams.strip().equals(";")) {
@@ -241,18 +251,37 @@
         });
     }*//*
 
+    private static Tuple<CompileState, String> compileFunctionStatements(CompileState state, String input) {
+        return compileStatements(state, input, Main::compileFunctionSegment);
+    }*//*
+
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
-                Main::compileFunctionStatement
+                Main::compileFunctionStatement,
+                Main::compileBlock
         ));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
+        return compileSuffix(input.strip(), "}*//*", withoutEnd -> {
+            return compileFirst(withoutEnd, "{", (beforeContent, content) -> {
+                var tuple = compileFunctionStatements(state.enterDepth(), content);
+                var indent = generateIndent(state.depth());
+                return Optional.of(new Tuple<>(tuple.left.exitDepth(), indent + generatePlaceholder(beforeContent) + "{" + tuple.right + indent + "}"));
+            });
+        });
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             var valueTuple = compileFunctionStatementValue(state, withoutEnd);
-            return Optional.of(new Tuple<>(valueTuple.left, "\n\t\t" + valueTuple.right + ";"));
+            return Optional.of(new Tuple<>(valueTuple.left, generateIndent(state.depth()) + valueTuple.right + ";"));
         });
+    }*//*
+
+    private static String generateIndent(int indent) {
+        return "\n" + "\t".repeat(indent);
     }*//*
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {

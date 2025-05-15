@@ -62,17 +62,29 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompileState(String output, Optional<String> structureName) {
+    private record CompileState(String output, Optional<String> structureName, int depth) {
         public CompileState() {
-            this("", Optional.empty());
+            this("", Optional.empty(), 0);
         }
 
         public CompileState append(String element) {
-            return new CompileState(this.output + element, this.structureName);
+            return new CompileState(this.output + element, this.structureName, this.depth);
         }
 
         public CompileState withStructureName(String name) {
-            return new CompileState(this.output, Optional.of(name));
+            return new CompileState(this.output, Optional.of(name), this.depth);
+        }
+
+        public int depth() {
+            return this.depth;
+        }
+
+        public CompileState enterDepth() {
+            return new CompileState(this.output, this.structureName, this.depth + 1);
+        }
+
+        public CompileState exitDepth() {
+            return new CompileState(this.output, this.structureName, this.depth - 1);
         }
     }
 
@@ -107,11 +119,11 @@ public class Main {
     }
 
     private static String compileRoot(String input) {
-        var compiled = compileSegments(new CompileState(), input, Main::compileRootSegment);
+        var compiled = compileStatements(new CompileState(), input, Main::compileRootSegment);
         return compiled.left.output + compiled.right;
     }
 
-    private static Tuple<CompileState, String> compileSegments(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+    private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         return compileAll(state, input, Main::foldStatements, mapper, Main::mergeStatements);
     }
 
@@ -193,7 +205,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String beforeKeyword, String inputContent, String name) {
-        var outputContentTuple = compileSegments(state1.withStructureName(name), inputContent, Main::compileClassSegment);
+        var outputContentTuple = compileStatements(state1.withStructureName(name), inputContent, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
 
@@ -263,9 +275,9 @@ public class Main {
             var headerGenerated = header.generateWithAfterName("(" + parameters + ")");
             return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
-                    var statementsTuple = compileSegments(parametersState, withoutContentEnd, Main::compileFunctionSegment);
+                    var statementsTuple = compileFunctionStatements(parametersState.enterDepth().enterDepth(), withoutContentEnd);
 
-                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
+                    return Optional.of(new Tuple<>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
             }).or(() -> {
                 if (afterParams.strip().equals(";")) {
@@ -277,18 +289,37 @@ public class Main {
         });
     }
 
+    private static Tuple<CompileState, String> compileFunctionStatements(CompileState state, String input) {
+        return compileStatements(state, input, Main::compileFunctionSegment);
+    }
+
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
-                Main::compileFunctionStatement
+                Main::compileFunctionStatement,
+                Main::compileBlock
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
+        return compileSuffix(input.strip(), "}", withoutEnd -> {
+            return compileFirst(withoutEnd, "{", (beforeContent, content) -> {
+                var tuple = compileFunctionStatements(state.enterDepth(), content);
+                var indent = generateIndent(state.depth());
+                return Optional.of(new Tuple<>(tuple.left.exitDepth(), indent + generatePlaceholder(beforeContent) + "{" + tuple.right + indent + "}"));
+            });
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             var valueTuple = compileFunctionStatementValue(state, withoutEnd);
-            return Optional.of(new Tuple<>(valueTuple.left, "\n\t\t" + valueTuple.right + ";"));
+            return Optional.of(new Tuple<>(valueTuple.left, generateIndent(state.depth()) + valueTuple.right + ";"));
         });
+    }
+
+    private static String generateIndent(int indent) {
+        return "\n" + "\t".repeat(indent);
     }
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
