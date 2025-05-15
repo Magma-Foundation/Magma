@@ -94,7 +94,7 @@
 	/*private static*/compileStatements(state : /*CompileState*/, input : string, mapper : /*BiFunction*/</*CompileState*/, string, /*Tuple*/</*CompileState*/, string>>): /*Tuple*/</*CompileState*/, string> {
 		return compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
-	/*private static*/compileAll(state : /*CompileState*/, input : string, folder : /*BiFunction*/</*DivideState*/, /* Character*/, /* DivideState*/>, mapper : /*BiFunction*/</*CompileState*/, string, /*Tuple*/</*CompileState*/, string>>, merger : /*BiFunction*/</*StringBuilder*/, string, /* StringBuilder*/>): /*Tuple*/</*CompileState*/, string> {
+	/*private static*/compileAll(state : /*CompileState*/, input : string, folder : /*BiFunction*/</*DivideState*/, string, /* DivideState*/>, mapper : /*BiFunction*/</*CompileState*/, string, /*Tuple*/</*CompileState*/, string>>, merger : /*BiFunction*/</*StringBuilder*/, string, /* StringBuilder*/>): /*Tuple*/</*CompileState*/, string> {
 		let divisions : unknown = divide(input, folder);
 		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());
 		/*for (var segment : divisions) */{
@@ -110,7 +110,7 @@
 	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/ {
 		return cache.append(element);
 	}
-	/*private static*/divide(input : string, folder : /*BiFunction*/</*DivideState*/, /* Character*/, /* DivideState*/>): /*List*/<string> {
+	/*private static*/divide(input : string, folder : /*BiFunction*/</*DivideState*/, string, /* DivideState*/>): /*List*/<string> {
 		let current : unknown = new /*DivideState*/();
 		let /*for*/i : /*(var*/ = 0;
 		/*i < input*/.length();
@@ -549,7 +549,7 @@
 
     private static Optional<String> findPrimitiveValue(String input) {
         return switch (input.strip()) {
-            case "String", "char" -> Optional.of("string");
+            case "char", "Character", "String" -> Optional.of("string");
             case "int" -> Optional.of("number");
             case "boolean" -> Optional.of("boolean");
             case "var" -> Optional.of("unknown");

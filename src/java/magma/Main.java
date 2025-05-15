@@ -587,7 +587,7 @@ public class Main {
 
     private static Optional<String> findPrimitiveValue(String input) {
         return switch (input.strip()) {
-            case "String", "char" -> Optional.of("string");
+            case "char", "Character", "String" -> Optional.of("string");
             case "int" -> Optional.of("number");
             case "boolean" -> Optional.of("boolean");
             case "var" -> Optional.of("unknown");
