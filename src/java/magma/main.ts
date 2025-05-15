@@ -15,22 +15,22 @@
 	/*private*/advance(): /*DivideState*/{
 		this.segments.add(this.buffer.toString());
 		this.buffer = new /*StringBuilder*/();
-		/*return this*/;
+		return this;
 	}
 	/*private*/append(c : /*char*/): /*DivideState*/{
 		this.buffer.append(c);
-		/*return this*/;
+		return this;
 	}
 	/*public*/isLevel(): /*boolean*/{
 		/*return this*/.depth = /*= 0*/;
 	}
 	/*public*/enter(): /*DivideState*/{
 		/*this.depth++*/;
-		/*return this*/;
+		return this;
 	}
 	/*public*/exit(): /*DivideState*/{
 		/*this.depth--*/;
-		/*return this*/;
+		return this;
 	}
 	/*public*/isShallow(): /*boolean*/{
 		/*return this*/.depth = /*= 1*/;
@@ -40,7 +40,7 @@
     private static */class ConstructorHeader implements MethodHeader {
 	/*@Override
         public*/generateWithAfterName(afterName : string): string{
-		/*return "constructor " + afterName*/;
+		return /*"constructor " + afterName*/;
 	}/*
     */}/*
 
@@ -85,7 +85,7 @@ public */class Main {/*private interface MethodHeader {
 	}
 	/*private static*/compileRoot(input : string): string{
 		/*var compiled */ = compileSegments(new /*CompileState*/(), input, /* Main::compileRootSegment*/);
-		/*return compiled.left.output + compiled.right*/;
+		return compiled.left.output + compiled.right;
 	}
 	/*private static Tuple<CompileState,*/compileSegments(state : /*CompileState*/, input : string, /* BiFunction<CompileState*/, /* String*/, /* Tuple<CompileState*/, mapper : /*String>>*/): /*String>*/{
 		/*return compileAll*/(state, input, /* Main::foldStatements*/, mapper, /* Main::mergeStatements*/);
@@ -115,7 +115,7 @@ public */class Main {/*private interface MethodHeader {
             var c = input.charAt(i);
             current = folder.apply(current, c);
         }*/
-		/*return current.advance().segments*/;
+		return current.advance().segments;
 	}
 	/*private static*/foldStatements(state : /*DivideState*/, c : /*char*/): /*DivideState*/{
 		/*var appended */ = state.append(c);
@@ -216,7 +216,6 @@ public */class Main {/*private interface MethodHeader {
                     var parametersTuple = compileValues(state, params, Main::compileParameter);
                     var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
                     return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + header.generateWithAfterName("(" + parametersTuple.right + ")") + "{" + statementsTuple.right + "\n\t}"));
-
                 });
             });
         });
@@ -239,8 +238,16 @@ public */class Main {/*private interface MethodHeader {
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOrPlaceholder(state, withoutEnd, List.of(
                 Main::compileAssignment,
-                Main::compileInvokable
+                Main::compileInvokable,
+                Main::compileReturn
         ));
+    }*//*
+
+    private static Optional<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
+        return compilePrefix(input.strip(), "return ", value -> {
+            var tuple = compileValue(state, value);
+            return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
+        });
     }*//*
 
     private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {

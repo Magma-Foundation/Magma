@@ -249,7 +249,6 @@ public class Main {
                     var parametersTuple = compileValues(state, params, Main::compileParameter);
                     var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
                     return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + header.generateWithAfterName("(" + parametersTuple.right + ")") + "{" + statementsTuple.right + "\n\t}"));
-
                 });
             });
         });
@@ -272,8 +271,16 @@ public class Main {
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOrPlaceholder(state, withoutEnd, List.of(
                 Main::compileAssignment,
-                Main::compileInvokable
+                Main::compileInvokable,
+                Main::compileReturn
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
+        return compilePrefix(input.strip(), "return ", value -> {
+            var tuple = compileValue(state, value);
+            return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
