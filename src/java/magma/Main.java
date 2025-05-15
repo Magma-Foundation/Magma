@@ -10,6 +10,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Main {
+    private interface MethodHeader {
+        String generateWithAfterName(String afterName);
+    }
+
     private static class DivideState {
         private final List<String> segments;
         private StringBuilder buffer;
@@ -69,6 +73,25 @@ public class Main {
 
         public CompileState withStructureName(String name) {
             return new CompileState(this.output, Optional.of(name));
+        }
+    }
+
+    private record Definition(Optional<String> maybeBeforeType, String name, String type) implements MethodHeader {
+        private String generate() {
+            return this.generateWithAfterName(" ");
+        }
+
+        @Override
+        public String generateWithAfterName(String afterName) {
+            var beforeTypeString = this.maybeBeforeType().map(Main::generatePlaceholder).orElse("");
+            return beforeTypeString + this.name + afterName + ": " + this.type();
+        }
+    }
+
+    private static class ConstructorHeader implements MethodHeader {
+        @Override
+        public String generateWithAfterName(String afterName) {
+            return "constructor " + afterName;
         }
     }
 
@@ -210,22 +233,22 @@ public class Main {
         return compileFirst(input, "(", (beforeParams, withParams) -> {
             return compileLast(beforeParams.strip(), " ", (_, name) -> {
                 if (state.structureName.filter(name::equals).isPresent()) {
-                    return compileMethodWithBeforeParams(state, "constructor", withParams);
+                    return compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
-                var tuple = compileDefinitionOrPlaceholder(state, beforeParams);
-                return compileMethodWithBeforeParams(tuple.left, tuple.right, withParams);
+                return compileDefinition(state, beforeParams)
+                        .flatMap(tuple -> compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
             });
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, String beforeParams, String withParams) {
+    private static Optional<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
         return compileFirst(withParams, ")", (params, afterParams) -> {
             return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
                     var parametersTuple = compileValues(state, params, Main::compileParameter);
                     var statementsTuple = compileSegments(parametersTuple.left, withoutContentEnd, Main::compileFunctionSegment);
-                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + beforeParams + "(" + parametersTuple.right + "){" + statementsTuple.right + "\n\t}"));
+                    return Optional.of(new Tuple<>(statementsTuple.left, "\n\t" + header.generateWithAfterName("(" + parametersTuple.right + ")") + "{" + statementsTuple.right + "\n\t}"));
 
                 });
             });
@@ -350,7 +373,9 @@ public class Main {
     private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
-                Main::compileDefinition
+                (state1, input1) -> {
+                    return compileDefinition(state1, input1).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+                }
         ));
     }
 
@@ -369,10 +394,12 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileDefinitionOrPlaceholder(CompileState state, String input) {
-        return compileDefinition(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
+        return compileDefinition(state, input)
+                .map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()))
+                .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileDefinition(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, Definition>> compileDefinition(CompileState state, String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
             return compileLast(beforeName.strip(), " ", (beforeType, type) -> {
                 return assembleDefinition(state, Optional.of(beforeType), name, type);
@@ -382,11 +409,10 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, String type) {
+    private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, String type) {
         var typeTuple = compileTypeOrPlaceholder(state, type);
 
-        var beforeTypeString = maybeBeforeType.map(Main::generatePlaceholder).orElse("");
-        var generated = beforeTypeString + name + " : " + typeTuple.right;
+        var generated = new Definition(maybeBeforeType, name, typeTuple.right);
         return Optional.of(new Tuple<>(typeTuple.left, generated));
     }
 
