@@ -26,11 +26,11 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
+import { IOError } from "../../../magma/api/io/IOError";
+import { Option } from "../../../magma/api/option/Option";
+import { Result } from "../../../magma/api/result/Result";
 import { List } from "../../../magma/api/collect/List";
 import { Query } from "../../../magma/api/collect/query/Query";
-import { Result } from "../../../magma/api/result/Result";
-import { Option } from "../../../magma/api/option/Option";
-import { IOException } from "../../../java/io/IOException";
 export interface Path {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;

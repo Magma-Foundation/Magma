@@ -26,14 +26,13 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Tuple2 } from "../../../../magma/api/Tuple2";
-import { Collector } from "../../../../magma/api/collect/Collector";
-import { EmptyHead } from "../../../../magma/api/collect/EmptyHead";
-import { Head } from "../../../../magma/api/collect/Head";
-import { SingleHead } from "../../../../magma/api/collect/SingleHead";
-import { Option } from "../../../../magma/api/option/Option";
-import { Main } from "../../../../magma/app/Main";
 import { Query } from "../../../../magma/api/collect/query/Query";
+import { Head } from "../../../../magma/api/collect/Head";
+import { Option } from "../../../../magma/api/option/Option";
+import { Collector } from "../../../../magma/api/collect/Collector";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { EmptyHead } from "../../../../magma/api/collect/EmptyHead";
+import { SingleHead } from "../../../../magma/api/collect/SingleHead";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {

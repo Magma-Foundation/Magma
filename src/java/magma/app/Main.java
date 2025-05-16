@@ -1170,7 +1170,7 @@ public final class Main {
                 }
 
                 var compileState = state.addResolvedImport(parent, child);
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(compileState, ""));
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
             });
         });
     }
@@ -1907,7 +1907,7 @@ public final class Main {
     private static Option<Tuple2<CompileState, Type>> parseSymbolType(CompileState state, String input) {
         var stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
-            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state, new SymbolNode(stripped)));
+            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped)));
         }
         return new None<Tuple2<CompileState, Type>>();
     }

@@ -26,8 +26,6 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Actual } from "../../../magma/annotate/Actual";
-import { Namespace } from "../../../magma/annotate/Namespace";
 export interface StringsInstance {
 	length(stripped: string): number;
 

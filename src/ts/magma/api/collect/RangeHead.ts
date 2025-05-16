@@ -26,10 +26,10 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { None } from "../../../magma/api/option/None";
-import { Option } from "../../../magma/api/option/Option";
-import { Some } from "../../../magma/api/option/Some";
 import { Head } from "../../../magma/api/collect/Head";
+import { Option } from "../../../magma/api/option/Option";
+import { None } from "../../../magma/api/option/None";
+import { Some } from "../../../magma/api/option/Some";
 export class RangeHead implements Head<number> {
 	length: number;
 	counter: number;

@@ -26,28 +26,28 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Console } from "../../magma/api/Console";
+import { Option } from "../../magma/api/option/Option";
+import { List } from "../../magma/api/collect/List";
+import { Lists } from "../../magma/api/collect/Lists";
 import { Tuple2 } from "../../magma/api/Tuple2";
+import { Strings } from "../../magma/api/text/Strings";
+import { None } from "../../magma/api/option/None";
+import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Collector } from "../../magma/api/collect/Collector";
-import { EmptyHead } from "../../magma/api/collect/EmptyHead";
-import { Head } from "../../magma/api/collect/Head";
-import { List } from "../../magma/api/collect/List";
-import { ListCollector } from "../../magma/api/collect/ListCollector";
-import { Lists } from "../../magma/api/collect/Lists";
-import { RangeHead } from "../../magma/api/collect/RangeHead";
-import { SingleHead } from "../../magma/api/collect/SingleHead";
-import { HeadedQuery } from "../../magma/api/collect/query/HeadedQuery";
-import { Query } from "../../magma/api/collect/query/Query";
-import { IOError } from "../../magma/api/io/IOError";
-import { Path } from "../../magma/api/io/Path";
-import { None } from "../../magma/api/option/None";
-import { Option } from "../../magma/api/option/Option";
-import { Some } from "../../magma/api/option/Some";
 import { Result } from "../../magma/api/result/Result";
-import { Characters } from "../../magma/api/text/Characters";
-import { Strings } from "../../magma/api/text/Strings";
+import { Head } from "../../magma/api/collect/Head";
+import { Query } from "../../magma/api/collect/query/Query";
+import { HeadedQuery } from "../../magma/api/collect/query/HeadedQuery";
+import { EmptyHead } from "../../magma/api/collect/EmptyHead";
+import { SingleHead } from "../../magma/api/collect/SingleHead";
+import { Path } from "../../magma/api/io/Path";
+import { IOError } from "../../magma/api/io/IOError";
+import { ListCollector } from "../../magma/api/collect/ListCollector";
 import { Files } from "../../magma/jvm/io/Files";
+import { Console } from "../../magma/api/Console";
+import { RangeHead } from "../../magma/api/collect/RangeHead";
+import { Characters } from "../../magma/api/text/Characters";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -944,7 +944,7 @@ export class Main {
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 				}
 				let compileState = state.addResolvedImport(parent, child);
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(compileState, ""));
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 			});
 		});
 	}
@@ -1464,7 +1464,7 @@ export class Main {
 	static parseSymbolType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input);
 		if (Main.isSymbol(stripped)){
-			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state, new SymbolNode(stripped)));
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped)));
 		}
 		return new None<Tuple2<CompileState, Type>>();
 	}

@@ -26,10 +26,6 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Actual } from "../../../magma/annotate/Actual";
-import { Namespace } from "../../../magma/annotate/Namespace";
-import { ArrayList } from "../../../java/util/ArrayList";
-import { Arrays } from "../../../java/util/Arrays";
 import { List } from "../../../magma/api/collect/List";
 export interface ListsInstance {
 	empty<T>(): List<T>;
