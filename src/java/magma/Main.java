@@ -82,6 +82,8 @@ public class Main {
         Option<T> find(int index);
 
         Query<Tuple<Integer, T>> queryWithIndices();
+
+        List<T> addAll(List<T> others);
     }
 
     private interface Head<T> {
@@ -215,6 +217,11 @@ public class Main {
             }
 
             @Override
+            public List<T> addAll(List<T> others) {
+                return others.query().<List<T>>fold(this, List::add);
+            }
+
+            @Override
             public Option<List<T>> subList(int startInclusive, int endExclusive) {
                 return new Some<>(this.subList0(startInclusive, endExclusive));
             }
@@ -322,17 +329,17 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompileState(String output, Option<String> structureName, int depth) {
+    private record CompileState(String output, Option<String> structureName, int depth, List<Definition> definitions) {
         public CompileState() {
-            this("", new None<String>(), 0);
+            this("", new None<String>(), 0, Lists.empty());
         }
 
         public CompileState append(String element) {
-            return new CompileState(this.output + element, this.structureName, this.depth);
+            return new CompileState(this.output + element, this.structureName, this.depth, this.definitions);
         }
 
         public CompileState withStructureName(String name) {
-            return new CompileState(this.output, new Some<String>(name), this.depth);
+            return new CompileState(this.output, new Some<String>(name), this.depth, this.definitions);
         }
 
         public int depth() {
@@ -340,11 +347,15 @@ public class Main {
         }
 
         public CompileState enterDepth() {
-            return new CompileState(this.output, this.structureName, this.depth + 1);
+            return new CompileState(this.output, this.structureName, this.depth + 1, this.definitions);
         }
 
         public CompileState exitDepth() {
-            return new CompileState(this.output, this.structureName, this.depth - 1);
+            return new CompileState(this.output, this.structureName, this.depth - 1, this.definitions);
+        }
+
+        public CompileState defineAll(List<Definition> definitions) {
+            return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
         }
     }
 
@@ -504,10 +515,6 @@ public class Main {
             return false;
         }
 
-        public T get() {
-            return this.value;
-        }
-
         @Override
         public T orElse(T other) {
             return this.value;
@@ -620,6 +627,18 @@ public class Main {
         @Override
         public Option<R> next() {
             return this.head.next().map(this.mapper);
+        }
+    }
+
+    private record Whitespace() implements Parameter {
+        @Override
+        public String generate() {
+            return "";
+        }
+
+        @Override
+        public Option<Definition> asDefinition() {
+            return new None<>();
         }
     }
 
@@ -803,12 +822,8 @@ public class Main {
                         return compileFirst(withParameters, ")", (parametersString, _) -> {
                             var name = rawName.strip();
 
-                            var parametersTuple = parseValues(state, parametersString, Main::parseParameter);
-                            var parameters = parametersTuple.right
-                                    .query()
-                                    .map(Parameter::asDefinition)
-                                    .flatMap(Iterators::fromOption)
-                                    .collect(new ListCollector<>());
+                            var parametersTuple = parseParameters(state, parametersString);
+                            var parameters = retainDefinitionsFromParameters(parametersTuple.right);
 
                             return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
                         });
@@ -818,6 +833,13 @@ public class Main {
                 });
             });
         });
+    }
+
+    private static List<Definition> retainDefinitionsFromParameters(List<Parameter> parameters) {
+        return parameters.query()
+                .map(Parameter::asDefinition)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
     }
 
     private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<Definition> parameters) {
@@ -914,14 +936,20 @@ public class Main {
 
     private static Option<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
         return compileFirst(withParams, ")", (params, afterParams) -> {
-            var parametersTuple = compileValues(state, params, Main::compileParameter);
+            var parametersTuple = parseParameters(state, params);
+
             var parametersState = parametersTuple.left;
             var parameters = parametersTuple.right;
+            var definitions = retainDefinitionsFromParameters(parameters);
 
-            var headerGenerated = header.generateWithAfterName("(" + parameters + ")");
+            var joinedDefinitions = definitions.query()
+                    .map(Definition::generate)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+            var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
             return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
-                    var statementsTuple = compileFunctionStatements(parametersState.enterDepth().enterDepth(), withoutContentEnd);
+                    var statementsTuple = compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
 
                     return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
@@ -933,6 +961,10 @@ public class Main {
                 return new None<Tuple<CompileState, String>>();
             });
         });
+    }
+
+    private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
+        return parseValues(state, params, Main::parseParameter);
     }
 
     private static Tuple<CompileState, String> compileFunctionStatements(CompileState state, String input) {
@@ -1347,20 +1379,15 @@ public class Main {
         return mapper.apply(slice);
     }
 
-    private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
-        return compileOrPlaceholder(state, input, Lists.of(
-                Main::compileWhitespace,
-                (state1, input1) -> {
-                    return parseDefinition(state1, input1).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
-                }
-        ));
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+        return parseWhitespace(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
+            return new Some<Tuple<CompileState, Whitespace>>(new Tuple<>(state, new Whitespace()));
         }
-        return new None<Tuple<CompileState, String>>();
+        return new None<Tuple<CompileState, Whitespace>>();
     }
 
     private static Option<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
@@ -1376,8 +1403,8 @@ public class Main {
     }
 
     private static Tuple<CompileState, Parameter> parseParameter(CompileState state, String input) {
-        return parseDefinition(state, input)
-                .<Tuple<CompileState, Parameter>>map(tuple -> new Tuple<>(tuple.left, tuple.right))
+        return parseWhitespace(state, input).<Tuple<CompileState, Parameter>>map(tuple -> new Tuple<>(tuple.left, tuple.right))
+                .or(() -> parseDefinition(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right)))
                 .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
     }
 

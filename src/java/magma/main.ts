@@ -38,6 +38,7 @@ interface List<T> {
 	findFirst(): Option<T>;
 	find(index : number): Option<T>;
 	queryWithIndices(): Query<Tuple<number, T>>;
+	addAll(others : List<T>): List<T>;
 }
 interface Head<T> {
 	next(): Option<T>;
@@ -139,6 +140,9 @@ class JVMList<T> {
 		return new /*HeadedQuery<>(new RangeHead(this.list.size()))
                         .map*/((index) => new Tuple<>(index, this.list.get(index)));
 	}
+	addAll(others : List<T>): List<T> {
+		return /*others.query().<List<T>>fold*/(this, List.add);
+	}
 	subList(startInclusive : number, endExclusive : number): Option<List<T>> {
 		return new Some<>(this.subList0(startInclusive, endExclusive));
 	}
@@ -232,28 +236,33 @@ class CompileState {
 	output : string;
 	structureName : Option<string>;
 	depth : number;
-	constructor (output : string, structureName : Option<string>, depth : number) {
+	definitions : List<Definition>;
+	constructor (output : string, structureName : Option<string>, depth : number, definitions : List<Definition>) {
 		this.output = output;
 		this.structureName = structureName;
 		this.depth = depth;
+		this.definitions = definitions;
 	}
 	constructor () {
-		this("", new None<string>(), 0);
+		this("", new None<string>(), 0, Lists.empty());
 	}
 	append(element : string): CompileState {
-		return new CompileState(this.output + element, this.structureName, this.depth);
+		return new CompileState(this.output + element, this.structureName, this.depth, this.definitions);
 	}
 	withStructureName(name : string): CompileState {
-		return new CompileState(this.output, new Some<string>(name), this.depth);
+		return new CompileState(this.output, new Some<string>(name), this.depth, this.definitions);
 	}
 	depth(): number {
 		return this.depth;
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.output, this.structureName, this.depth + 1);
+		return new CompileState(this.output, this.structureName, this.depth + 1, this.definitions);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.output, this.structureName, this.depth - 1);
+		return new CompileState(this.output, this.structureName, this.depth - 1, this.definitions);
+	}
+	defineAll(definitions : List<Definition>): CompileState {
+		return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
 	}
 }
 class Joiner {
@@ -391,9 +400,6 @@ class Some<T> {
 	isEmpty(): boolean {
 		return false;
 	}
-	get(): T {
-		return this.value;
-	}
 	orElse(other : T): T {
 		return this.value;
 	}
@@ -474,6 +480,14 @@ class MapHead<T, R> {
 	}
 	next(): Option<R> {
 		return this.head.next().map(this.mapper);
+	}
+}
+class Whitespace {
+	generate(): string {
+		return "";
+	}
+	asDefinition(): Option<Definition> {
+		return new None<>();
 	}
 }
 class Main {
@@ -603,8 +617,8 @@ class Main {
 					return compileFirst(strippedBeforeContent, "(", (rawName, withParameters) => {
 						return compileFirst(withParameters, ")", (parametersString, _) => {
 							let name : unknown = rawName.strip();
-							let parametersTuple : unknown = parseValues(state, parametersString, Main.parseParameter);
-							let parameters : unknown = parametersTuple.right.query().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
+							let parametersTuple : unknown = parseParameters(state, parametersString);
+							let parameters : unknown = retainDefinitionsFromParameters(parametersTuple.right);
 							return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
 						});
 					}).or(() => {
@@ -613,6 +627,9 @@ class Main {
 				});
 			});
 		});
+	}
+	retainDefinitionsFromParameters(parameters : List<Parameter>): List<Definition> {
+		return parameters.query().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
 	}
 	assembleStructure(state : CompileState, infix : string, content : string, name : string, parameters : List<Definition>): Option<Tuple<CompileState, string>> {
 		let outputContentTuple : unknown = compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
@@ -666,13 +683,15 @@ class Main {
 	}
 	compileMethodWithBeforeParams(state : CompileState, header : MethodHeader, withParams : string): Option<Tuple<CompileState, string>> {
 		return compileFirst(withParams, ")", (params, afterParams) => {
-			let parametersTuple : unknown = compileValues(state, params, Main.compileParameter);
+			let parametersTuple : unknown = parseParameters(state, params);
 			let parametersState : unknown = parametersTuple.left;
 			let parameters : unknown = parametersTuple.right;
-			let headerGenerated : unknown = header.generateWithAfterName("(" + parameters + ")");
+			let definitions : unknown = retainDefinitionsFromParameters(parameters);
+			let joinedDefinitions : unknown = definitions.query().map(Definition.generate).collect(new Joiner(", ")).orElse("");
+			let headerGenerated : unknown = header.generateWithAfterName("(" + joinedDefinitions + ")");
 			return compilePrefix(afterParams.strip(), "{", (withoutContentStart) => {
 				return compileSuffix(withoutContentStart.strip(), "}", (withoutContentEnd) => {
-					let statementsTuple : unknown = compileFunctionStatements(parametersState.enterDepth().enterDepth(), withoutContentEnd);
+					let statementsTuple : unknown = compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
 					return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
 				});
 			}).or(() => {
@@ -682,6 +701,9 @@ class Main {
 				return new None<Tuple<CompileState, string>>();
 			});
 		});
+	}
+	parseParameters(state : CompileState, params : string): Tuple<CompileState, List<Parameter>> {
+		return parseValues(state, params, Main.parseParameter);
 	}
 	compileFunctionStatements(state : CompileState, input : string): Tuple<CompileState, string> {
 		return compileStatements(state, input, Main.compileFunctionSegment);
@@ -983,16 +1005,14 @@ class Main {
 		let slice : unknown = input.substring(infix.length());
 		return mapper.apply(slice);
 	}
-	compileParameter(state : CompileState, input : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, (state1, input1) => {
-			return parseDefinition(state1, input1).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
-		}));
-	}
 	compileWhitespace(state : CompileState, input : string): Option<Tuple<CompileState, string>> {
+		return parseWhitespace(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
+	}
+	parseWhitespace(state : CompileState, input : string): Option<Tuple<CompileState, Whitespace>> {
 		if (input.isBlank()){
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
+			return new Some<Tuple<CompileState, Whitespace>>(new Tuple<>(state, new Whitespace()));
 		}
-		return new None<Tuple<CompileState, string>>();
+		return new None<Tuple<CompileState, Whitespace>>();
 	}
 	compileFieldDefinition(state : CompileState, input : string): Option<Tuple<CompileState, string>> {
 		return compileSuffix(input.strip(), ";", (withoutEnd) => {
@@ -1005,8 +1025,7 @@ class Main {
 		return new Tuple<>(tuple.left, tuple.right.generate());
 	}
 	parseParameter(state : CompileState, input : string): Tuple<CompileState, Parameter> {
-		return /*parseDefinition(state, input)
-                .<Tuple<CompileState, Parameter>>map*/((tuple) => new Tuple<>(tuple.left, tuple.right)).orElseGet(() => new Tuple<>(state, new Placeholder(input)));
+		return /*parseWhitespace(state, input).<Tuple<CompileState, Parameter>>map*/((tuple) => new Tuple<>(tuple.left, tuple.right)).or(() => parseDefinition(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right))).orElseGet(() => new Tuple<>(state, new Placeholder(input)));
 	}
 	parseDefinition(state : CompileState, input : string): Option<Tuple<CompileState, Definition>> {
 		return compileLast(input.strip(), " ", (beforeName, name) => {
