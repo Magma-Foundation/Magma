@@ -1,7 +1,6 @@
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Query } from "../../../magma/api/collect/query/Query";
 import { Option } from "../../../magma/api/option/Option";
-import { List } from "./List";
 export interface List<T> {
 	addLast(element: T): List<T>;
 	query(): Query<T>;

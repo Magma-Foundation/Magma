@@ -1413,8 +1413,15 @@ export class Main {
 				let args = argsTuple.right();
 				let base = Strings.strip(baseString);
 				return Main.assembleFunctionType(argsState, base, args).or(() => {
-					let importString = new Import(Lists.of(".", base), base);
-					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState.addImport(importString), new Generic(base, args)));
+					/*CompileState compileState*/;
+					if (state.maybeStructureName.filter((value: string) => value.equals(base)).isPresent()){
+						compileState = argsState;
+					}
+					else {
+						let importString = new Import(Lists.of(".", base), base);
+						compileState = argsState.addImport(importString);
+					}
+					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
 				});
 			});
 		});

@@ -6,7 +6,6 @@ import { SingleHead } from "../../../../magma/api/collect/SingleHead";
 import { Option } from "../../../../magma/api/option/Option";
 import { Main } from "../../../../magma/app/Main";
 import { Query } from "./Query";
-import { HeadedQuery } from "./HeadedQuery";
 import { Main.MapHead } from "./Main.MapHead";
 import { Main.FlatMapHead } from "./Main.FlatMapHead";
 export class HeadedQuery<T> implements Query<T> {

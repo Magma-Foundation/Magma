@@ -169,7 +169,7 @@ public final class Main {
                     .query()
                     .filter((Import node) -> Strings.equalsTo(node.child, importString.child))
                     .next()
-                    .isPresent()){
+                    .isPresent()) {
                 return this;
             }
 
@@ -1872,8 +1872,16 @@ public final class Main {
 
                 var base = Strings.strip(baseString);
                 return Main.assembleFunctionType(argsState, base, args).or(() -> {
-                    var importString = new Import(Lists.of(".", base), base);
-                    return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState.addImport(importString), new Generic(base, args)));
+                    CompileState compileState;
+                    if (state.maybeStructureName.filter((String value) -> value.equals(base)).isPresent()) {
+                        compileState = argsState;
+                    }
+                    else {
+                        var importString = new Import(Lists.of(".", base), base);
+                        compileState = argsState.addImport(importString);
+                    }
+
+                    return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
                 });
             });
         });

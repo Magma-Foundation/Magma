@@ -1,5 +1,4 @@
 import { Tuple2 } from "../../../magma/api/Tuple2";
-import { Option } from "./Option";
 export interface Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R>;
 	orElse(other: T): T;
