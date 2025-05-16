@@ -492,14 +492,10 @@
 		}
 	}
 	/*private static*/isSymbol(input : string): boolean {
-		/*for (var i = 0; i < input.length(); i++) */{
-			let c : unknown = input.charAt(i);
-			if (Character.isLetter(c) || (i !== 0 && Character.isDigit(c))){
-				/*continue*/;
-			}
-			return false;
-		}
-		return true;
+		return IntStream.range(0, input.length()).allMatch((index) => isSymbolChar(index, input.charAt(index)));
+	}
+	/*private static*/isSymbolChar(index : number, c : string): boolean {
+		return Character.isLetter(c) || (index !== 0 && Character.isDigit(c));
 	}
 	/*private static*/compilePrefix(input : string, infix : string, mapper : /*Function*/<string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		if (!input.startsWith(infix)){

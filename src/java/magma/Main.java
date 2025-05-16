@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.stream.IntStream;
 
 public class Main {
     private interface MethodHeader {
@@ -660,14 +662,12 @@ public class Main {
     }
 
     private static boolean isSymbol(String input) {
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (Character.isLetter(c) || (i != 0 && Character.isDigit(c))) {
-                continue;
-            }
-            return false;
-        }
-        return true;
+        return IntStream.range(0, input.length())
+                .allMatch(index -> isSymbolChar(index, input.charAt(index)));
+    }
+
+    private static boolean isSymbolChar(int index, char c) {
+        return Character.isLetter(c) || (index != 0 && Character.isDigit(c));
     }
 
     private static Optional<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
