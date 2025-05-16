@@ -538,12 +538,12 @@ public class Main {
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createTextRule(String slice) {
         return (state1, input1) -> {
             var stripped = input1.strip();
-            if (stripped.startsWith(slice) && stripped.endsWith(slice)) {
-                return Optional.of(new Tuple<>(state1, stripped));
-            }
-            else {
+            if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() <= slice.length()) {
                 return Optional.empty();
             }
+
+            var value = stripped.substring(slice.length(), stripped.length() - slice.length());
+            return Optional.of(new Tuple<>(state1, "\"" + value + "\""));
         };
     }
 
