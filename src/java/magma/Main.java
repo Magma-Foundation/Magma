@@ -775,17 +775,19 @@ public class Main {
             return compileFirst(right1, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var strippedBeforeContent = beforeContent.strip();
-                    return compileFirst(strippedBeforeContent, "(", (rawName, parametersString) -> {
-                        var name = rawName.strip();
+                    return compileFirst(strippedBeforeContent, "(", (rawName, withParameters) -> {
+                        return compileFirst(withParameters, ")", (parametersString, _) -> {
+                            var name = rawName.strip();
 
-                        var parametersTuple = parseValues(state, parametersString, Main::parseParameter);
-                        var parameters = parametersTuple.right
-                                .iterate()
-                                .map(Parameter::asDefinition)
-                                .flatMap(Iterators::fromOption)
-                                .collect(new ListCollector<>());
+                            var parametersTuple = parseValues(state, parametersString, Main::parseParameter);
+                            var parameters = parametersTuple.right
+                                    .iterate()
+                                    .map(Parameter::asDefinition)
+                                    .flatMap(Iterators::fromOption)
+                                    .collect(new ListCollector<>());
 
-                        return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
+                            return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
+                        });
                     }).or(() -> {
                         return assembleStructure(state, targetInfix, inputContent, strippedBeforeContent, Lists.empty());
                     });

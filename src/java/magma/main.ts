@@ -46,7 +46,7 @@ interface Parameter {
 	asDefinition(): Option<Definition>;
 }
 class HeadedIterator<T> {
-	Iterator<T> : implements;
+	head : Head<T>;
 	next(): Option<T> {
 		return this.head.next();
 	}
@@ -99,7 +99,7 @@ class RangeHead implements Head<Integer> {
 	}
 }
 class JVMList<T> {
-	List<T> : implements;
+	list : java.util.List<T>;
 	JVMList(): public {
 		this(new ArrayList<>());
 	}
@@ -212,12 +212,12 @@ class DivideState {
 }
 class Tuple<A, B> {
 	left : A;
-	right) : B;
+	right : B;
 }
 class CompileState {
 	output : string;
 	structureName : Option<string>;
-	depth) : number;
+	depth : number;
 	constructor () {
 		this("", new None<string>(), 0);
 	}
@@ -238,7 +238,7 @@ class CompileState {
 	}
 }
 class Joiner {
-	Collector<String : implements;
+	delimiter : string;
 	constructor () {
 		this("");
 	}
@@ -253,7 +253,7 @@ class Definition {
 	maybeBeforeType : Option<string>;
 	name : string;
 	typeParams : List<string>;
-	Parameter : /*MethodHeader,*/;
+	type : string;
 	generate(): string {
 		return this.generateWithAfterName(" ");
 	}
@@ -274,13 +274,13 @@ class ConstructorHeader implements MethodHeader {
 	}
 }
 class Ok<T, X> {
-	Result<T : implements;
+	value : T;
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenOk.apply(this.value);
 	}
 }
 class Err<T, X> {
-	Result<T : implements;
+	error : X;
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenErr.apply(this.error);
 	}
@@ -347,7 +347,7 @@ class FlatMapHead<T, R> implements Head<R> {
 	}
 }
 class Some<T> {
-	Option<T> : implements;
+	value : T;
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
 		return new Some<>(mapper.apply(this.value));
 	}
@@ -380,7 +380,6 @@ class Some<T> {
 	}
 }
 class None<T> {
-	Option<T> : implements;
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
 		return new None<>();
 	}
@@ -412,7 +411,7 @@ class None<T> {
 	}
 }
 class Placeholder {
-	Parameter : implements;
+	input : string;
 	generate(): string {
 		return generatePlaceholder(this.input);
 	}
@@ -544,11 +543,13 @@ class Main {
 			return compileFirst(right1, "{", (beforeContent, withEnd) => {
 				return compileSuffix(withEnd.strip(), "}", (inputContent) => {
 					let strippedBeforeContent : unknown = beforeContent.strip();
-					return compileFirst(strippedBeforeContent, "(", (rawName, parametersString) => {
-						let name : unknown = rawName.strip();
-						let parametersTuple : unknown = parseValues(state, parametersString, Main.parseParameter);
-						let parameters : unknown = parametersTuple.right.iterate().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
-						return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
+					return compileFirst(strippedBeforeContent, "(", (rawName, withParameters) => {
+						return compileFirst(withParameters, ")", (parametersString, _) => {
+							let name : unknown = rawName.strip();
+							let parametersTuple : unknown = parseValues(state, parametersString, Main.parseParameter);
+							let parameters : unknown = parametersTuple.right.iterate().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
+							return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
+						});
 					}).or(() => {
 						return assembleStructure(state, targetInfix, inputContent, strippedBeforeContent, Lists.empty());
 					});
