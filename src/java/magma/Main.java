@@ -2,6 +2,7 @@ package magma;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,10 @@ import java.util.stream.IntStream;
 public class Main {
     private interface MethodHeader {
         String generateWithAfterName(String afterName);
+    }
+
+    private interface Result<T, X> {
+        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
     private static class DivideState {
@@ -137,14 +142,48 @@ public class Main {
         }
     }
 
+    private record Ok<T, X>(T value) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenOk.apply(this.value);
+        }
+    }
+
+    private record Err<T, X>(X error) implements Result<T, X> {
+        @Override
+        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
+            return whenErr.apply(this.error);
+        }
+    }
+
     public static void main() {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("main.ts");
+
+        readString(source)
+                .match(input -> compileAndWrite(input, target), Optional::of)
+                .ifPresent(Throwable::printStackTrace);
+    }
+
+    private static Optional<IOException> compileAndWrite(String input, Path target) {
+        var output = compileRoot(input);
+        return writeString(target, output);
+    }
+
+    private static Optional<IOException> writeString(Path target, String output) {
         try {
-            var input = Files.readString(source);
-            Files.writeString(target, compileRoot(input));
+            Files.writeString(target, output);
+            return Optional.empty();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Optional.of(e);
+        }
+    }
+
+    private static Result<String, IOException> readString(Path source) {
+        try {
+            return new Ok<>(Files.readString(source));
+        } catch (IOException e) {
+            return new Err<>(e);
         }
     }
 

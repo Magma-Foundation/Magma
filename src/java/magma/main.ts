@@ -1,6 +1,9 @@
 interface MethodHeader {
 	generateWithAfterName(afterName : string): string;
 }
+interface Result<T, X> {
+	match(whenOk : Function<T, R>, whenErr : Function<X, R>): R;
+}
 class DivideState {
 	segments : List<string>;
 	input : string;
@@ -96,15 +99,37 @@ class ConstructorHeader implements MethodHeader {
 		return "constructor " + afterName;
 	}
 }
+class Ok<T, X> {
+	match(whenOk : Function<T, R>, whenErr : Function<X, R>): R {
+		return whenOk.apply(this.value);
+	}
+}
+class Err<T, X> {
+	match(whenOk : Function<T, R>, whenErr : Function<X, R>): R {
+		return whenErr.apply(this.error);
+	}
+}
 class Main {
 	main(): void {
 		let source : unknown = Paths.get(".", "src", "java", "magma", "Main.java");
-		let target : unknown = source.resolveSibling("main.ts");/*
-        try {
-            var input = Files.readString(source);
-            Files.writeString(target, compileRoot(input));
+		let target : unknown = source.resolveSibling("main.ts");
+		readString(source).match((input) => compileAndWrite(input, target), Optional.of).ifPresent(Throwable.printStackTrace);
+	}
+	compileAndWrite(input : string, target : Path): Optional<IOException> {
+		let output : unknown = compileRoot(input);
+		return writeString(target, output);
+	}
+	writeString(target : Path, output : string): Optional<IOException> {/*try {
+            Files.writeString(target, output);
+            return Optional.empty();
         }*//* catch (IOException e) {
-            throw new RuntimeException(e);
+            return Optional.of(e);
+        }*/
+	}
+	readString(source : Path): Result<string, IOException> {/*try {
+            return new Ok<>(Files.readString(source));
+        }*//* catch (IOException e) {
+            return new Err<>(e);
         }*/
 	}
 	compileRoot(input : string): string {
