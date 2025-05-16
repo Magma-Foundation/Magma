@@ -521,6 +521,7 @@ public class Main {
                 createAccessRule("."),
                 createAccessRule("::"),
                 Main::compileSymbol,
+                Main::compileLambda,
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRule("==", "==="),
@@ -528,6 +529,19 @@ public class Main {
                 compileOperatorWithValue("<"),
                 Main::compileString
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileLambda(CompileState state, String input) {
+        return compileFirst(input, "->", (beforeArrow, afterArrow) -> {
+            var strippedBeforeArrow = beforeArrow.strip();
+            if (isSymbol(strippedBeforeArrow)) {
+                var tuple = compileValueOrPlaceholder(state, afterArrow);
+                return Optional.of(new Tuple<>(tuple.left, strippedBeforeArrow + " => " + tuple.right));
+            }
+            else {
+                return Optional.empty();
+            }
+        });
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> compileOperatorWithValue(String infix) {
