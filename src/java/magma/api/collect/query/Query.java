@@ -1,14 +1,14 @@
-package magma.api.collect;
+package magma.api.collect.query;
 
+import magma.api.collect.Collector;
 import magma.api.option.Option;
-import magma.app.Main;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Query<T> {
-    <C> C collect(Main.Collector<T, C> collector);
+    <C> C collect(Collector<T, C> collector);
 
     <R> Query<R> map(Function<T, R> mapper);
 

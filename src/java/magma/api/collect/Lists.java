@@ -3,6 +3,8 @@ package magma.api.collect;
 import magma.Actual;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.api.collect.query.HeadedQuery;
+import magma.api.collect.query.Query;
 import magma.api.option.Option;
 import magma.app.Main;
 
@@ -77,6 +79,11 @@ public final class Lists {
         @Override
         public boolean isEmpty() {
             return this.list.isEmpty();
+        }
+
+        @Override
+        public boolean equalsTo(List<T> other) {
+            return this.equals(other);
         }
 
         @Override

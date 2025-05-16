@@ -1,6 +1,7 @@
 package magma.api.collect;
 
 import magma.api.Tuple2;
+import magma.api.collect.query.Query;
 import magma.api.option.Option;
 
 public interface List<T> {
@@ -29,4 +30,6 @@ public interface List<T> {
     List<T> addFirst(T element);
 
     boolean isEmpty();
+
+    boolean equalsTo(List<T> other);
 }

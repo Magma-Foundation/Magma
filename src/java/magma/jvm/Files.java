@@ -1,10 +1,10 @@
 package magma.jvm;
 
 import magma.Actual;
-import magma.api.collect.HeadedQuery;
+import magma.api.collect.query.HeadedQuery;
 import magma.api.collect.List;
 import magma.api.collect.Lists;
-import magma.api.collect.Query;
+import magma.api.collect.query.Query;
 import magma.api.collect.RangeHead;
 import magma.api.io.IOError;
 import magma.api.io.Path;

@@ -1,6 +1,8 @@
-import { Tuple2 } from "../../../magma/api/Tuple2";
-import { Option } from "../../../magma/api/option/Option";
-import { Main } from "../../../magma/app/Main";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { Collector } from "../../../../magma/api/collect/Collector";
+import { Head } from "../../../../magma/api/collect/Head";
+import { Option } from "../../../../magma/api/option/Option";
+import { Main } from "../../../../magma/app/Main";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
@@ -9,7 +11,7 @@ export class HeadedQuery<T> implements Query<T> {
 	next(): Option<T> {
 		return this.head.next();
 	}
-	collect<C>(collector: Main.Collector<T, C>): C {
+	collect<C>(collector: Collector<T, C>): C {
 		return this.foldWithInitial(collector.createInitial(), collector.fold);
 	}
 	map<R>(mapper: (arg0 : T) => R): Query<R> {

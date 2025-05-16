@@ -1,18 +1,21 @@
 package magma.app;
 
-import magma.Actual;
+import magma.api.Console;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.api.collect.Collector;
 import magma.api.collect.Head;
-import magma.api.collect.HeadedQuery;
 import magma.api.collect.List;
 import magma.api.collect.Lists;
-import magma.api.collect.Query;
 import magma.api.collect.RangeHead;
+import magma.api.collect.query.HeadedQuery;
+import magma.api.collect.query.Query;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.Option;
 import magma.api.result.Result;
+import magma.api.text.Characters;
+import magma.api.text.Strings;
 import magma.jvm.Files;
 
 import java.util.function.BiFunction;
@@ -26,12 +29,6 @@ public final class Main {
         String generateWithAfterName(String afterName);
 
         boolean hasAnnotation(String annotation);
-    }
-
-    public interface Collector<T, C> {
-        C createInitial();
-
-        C fold(C current, T element);
     }
 
     private interface Parameter {
@@ -782,55 +779,6 @@ public final class Main {
         }
     }
 
-    private static final class Strings {
-        @Actual
-        private static int length(String stripped) {
-            return stripped.length();
-        }
-
-        @Actual
-        private static String sliceBetween(String input, int startInclusive, int endExclusive) {
-            return input.substring(startInclusive, endExclusive);
-        }
-
-        @Actual
-        private static String sliceFrom(String input, int startInclusive) {
-            return input.substring(startInclusive);
-        }
-
-        @Actual
-        private static boolean isEmpty(String cache) {
-            return cache.isEmpty();
-        }
-
-        @Actual
-        private static boolean equalsTo(String left, String right) {
-            return left.equals(right);
-        }
-
-        @Actual
-        private static String strip(String input) {
-            return input.strip();
-        }
-
-        @Actual
-        static boolean isBlank(String value) {
-            return value.isBlank();
-        }
-    }
-
-    private static class Characters {
-        @Actual
-        private static boolean isDigit(char c) {
-            return Character.isDigit(c);
-        }
-
-        @Actual
-        private static boolean isLetter(char c) {
-            return Character.isLetter(c);
-        }
-    }
-
     private record VarArgs(Type type) implements Type {
         @Override
         public String generate() {
@@ -853,17 +801,10 @@ public final class Main {
         }
     }
 
-    private static class Console {
-        @Actual
-        private static void printErrLn(String message) {
-            System.err.println(message);
-        }
-    }
-
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
-                .match((List<Path> children) -> Main.runWithChildren(children, sourceDirectory).next(), Some::new)
+                .match((List<Path> children) -> Main.runWithChildren(children, sourceDirectory).next(), (IOError value) -> new Some<IOError>(value))
                 .map((IOError error) -> error.display())
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
@@ -875,7 +816,7 @@ public final class Main {
                     var relative = sourceDirectory.relativize(source);
                     var namespace = relative.getParent()
                             .query()
-                            .collect(new ListCollector<>());
+                            .collect(new ListCollector<String>());
 
                     var fileName = source.findFileName();
                     var separator = fileName.lastIndexOf('.');
@@ -1116,13 +1057,8 @@ public final class Main {
 
         var constructorString = Main.generateConstructorFromRecordParameters(parameters);
         var joinedTypeParams = Main.joinTypeParams(typeParams);
-
         var implementingString = Main.generateImplementing(maybeImplementing);
-
-        var newModifiers = Lists.<String>empty();
-        if (oldModifiers.contains("public")) {
-            newModifiers = newModifiers.add("export");
-        }
+        var newModifiers = Main.modifyModifiers0(oldModifiers);
 
         var joinedModifiers = newModifiers.query()
                 .map((String value) -> value + " ")
@@ -1131,6 +1067,13 @@ public final class Main {
 
         var generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
         return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+    }
+
+    private static List<String> modifyModifiers0(List<String> oldModifiers) {
+        if (oldModifiers.contains("public")) {
+            return Lists.of("export");
+        }
+        return Lists.empty();
     }
 
     private static String generateImplementing(Option<Type> maybeImplementing) {
@@ -1190,7 +1133,7 @@ public final class Main {
         return Main.compilePrefix(stripped, "import ", (String s) -> {
             return Main.compileSuffix(s, ";", (String s1) -> {
                 var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'));
-                var child = divisions.findLast().orElse("").strip();
+                var child = Strings.strip(divisions.findLast().orElse(""));
                 var parent = divisions.subList(0, divisions.size() - 1)
                         .orElse(Lists.empty());
 
@@ -1200,12 +1143,14 @@ public final class Main {
                     parent1 = parent1.addFirst(".");
                 }
 
-                for (var i = 0; i < namespace.size(); i++) {
+                var i = 0;
+                while (i < namespace.size()) {
                     parent1 = parent1.addFirst("..");
+                    i++;
                 }
 
-                if (parent.equals(Lists.of("java", "util", "function"))) {
-                    return new Some<>(new Tuple2Impl<>(state, ""));
+                if (parent.equalsTo(Lists.of("java", "util", "function"))) {
+                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                 }
 
                 var s2 = parent1.add(child)
@@ -1213,7 +1158,7 @@ public final class Main {
                         .collect(new Joiner("/"))
                         .orElse("");
 
-                return new Some<>(new Tuple2Impl<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
             });
         });
     }

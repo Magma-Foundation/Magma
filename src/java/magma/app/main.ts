@@ -1,24 +1,23 @@
-import { Actual } from "../../magma/Actual";
+import { Console } from "../../magma/api/Console";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Collector } from "../../magma/api/collect/Collector";
 import { Head } from "../../magma/api/collect/Head";
-import { HeadedQuery } from "../../magma/api/collect/HeadedQuery";
 import { List } from "../../magma/api/collect/List";
 import { Lists } from "../../magma/api/collect/Lists";
-import { Query } from "../../magma/api/collect/Query";
 import { RangeHead } from "../../magma/api/collect/RangeHead";
+import { HeadedQuery } from "../../magma/api/collect/query/HeadedQuery";
+import { Query } from "../../magma/api/collect/query/Query";
 import { IOError } from "../../magma/api/io/IOError";
 import { Path } from "../../magma/api/io/Path";
 import { Option } from "../../magma/api/option/Option";
 import { Result } from "../../magma/api/result/Result";
+import { Characters } from "../../magma/api/text/Characters";
+import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/Files";
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
-}
-export interface Collector<T, C> {
-	createInitial(): C;
-	fold(current: C, element: T): C;
 }
 interface Parameter  {
 	generate(): string;
@@ -621,19 +620,6 @@ class Iterators  {
 		return new SingleHead<T>(element);
 	}
 }
-class Strings  {
-	static length(stripped: string): number;
-	static sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-	static sliceFrom(input: string, startInclusive: number): string;
-	static isEmpty(cache: string): boolean;
-	static equalsTo(left: string, right: string): boolean;
-	static strip(input: string): string;
-	static isBlank(value: string): boolean;
-}
-class Characters  {
-	static isDigit(c: string): boolean;
-	static isLetter(c: string): boolean;
-}
 class VarArgs implements Type {
 	type: Type;
 	constructor (type: Type) {
@@ -651,9 +637,6 @@ class VarArgs implements Type {
 	generateBeforeName(): string {
 		return "...";
 	}
-}
-class Console  {
-	static printErrLn(message: string): void;
 }
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
@@ -682,12 +665,12 @@ class Primitive implements Type {
 export class Main  {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
-		sourceDirectory.walk().match((children: List<Path>) => Main.runWithChildren(children, sourceDirectory).next(), Some.new).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
+		sourceDirectory.walk().match((children: List<Path>) => Main.runWithChildren(children, sourceDirectory).next(), (value: IOError) => new Some<IOError>(value)).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
 	}
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Query<IOError> {
 		return children.query().filter((source: Path) => source.endsWith(".java")).map((source: Path) => {
 			let relative = sourceDirectory.relativize(source);
-			let namespace = relative.getParent().query().collect(new ListCollector<>());
+			let namespace = relative.getParent().query().collect(new ListCollector<string>());
 			let fileName = source.findFileName();
 			let separator = fileName.lastIndexOf(".");
 			let name = fileName.substring(0, separator);
@@ -859,13 +842,16 @@ export class Main  {
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
 		let joinedTypeParams = Main.joinTypeParams(typeParams);
 		let implementingString = Main.generateImplementing(maybeImplementing);
-		let newModifiers = Lists. < String > empty();
-		if (oldModifiers.contains("public")){
-			newModifiers = newModifiers.add("export");
-		}
+		let newModifiers = Main.modifyModifiers0(oldModifiers);
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
 		let generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
 		return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""));
+	}
+	static modifyModifiers0(oldModifiers: List<string>): List<string> {
+		if (oldModifiers.contains("public")){
+			return Lists.of("export");
+		}
+		return Lists.empty();
 	}
 	static generateImplementing(maybeImplementing: Option<Type>): string {
 		return maybeImplementing.map((type: Type) => type.generate()).map((inner: string) => " implements " + inner).orElse("");
@@ -897,22 +883,23 @@ export class Main  {
 		return Main.compilePrefix(stripped, "import ", (s: string) => {
 			return Main.compileSuffix(s, ";", (s1: string) => {
 				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
-				let child = divisions.findLast().orElse("").strip();
+				let child = Strings.strip(divisions.findLast().orElse(""));
 				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
 				let parent1 = parent;
 				let namespace = state.namespace;
 				if (namespace.isEmpty()){
 					parent1 = parent1.addFirst(".");
-				}/*
-
-                for (var i = 0; i < namespace.size(); i++) {
-                    parent1 = parent1.addFirst("..");
-                }*/
-				if (parent.equals(Lists.of("java", "util", "function"))){
-					return new Some<>(new Tuple2Impl<>(state, ""));
+				}
+				let i = 0;
+				while (i < namespace.size()){
+					parent1 = parent1.addFirst("..");
+					i++;
+				}
+				if (parent.equalsTo(Lists.of("java", "util", "function"))){
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 				}
 				let s2 = parent1.add(child).query().collect(new Joiner("/")).orElse("");
-				return new Some<>(new Tuple2Impl<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
 			});
 		});
 	}

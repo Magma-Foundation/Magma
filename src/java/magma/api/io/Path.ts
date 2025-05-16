@@ -1,5 +1,5 @@
 import { List } from "../../../magma/api/collect/List";
-import { Query } from "../../../magma/api/collect/Query";
+import { Query } from "../../../magma/api/collect/query/Query";
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
 export interface Path  {

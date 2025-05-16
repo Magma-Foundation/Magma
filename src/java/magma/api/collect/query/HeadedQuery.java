@@ -1,6 +1,8 @@
-package magma.api.collect;
+package magma.api.collect.query;
 
 import magma.api.Tuple2;
+import magma.api.collect.Collector;
+import magma.api.collect.Head;
 import magma.api.option.Option;
 import magma.app.Main;
 
@@ -15,7 +17,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public <C> C collect(Main.Collector<T, C> collector) {
+    public <C> C collect(Collector<T, C> collector) {
         return this.foldWithInitial(collector.createInitial(), collector::fold);
     }
 
