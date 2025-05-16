@@ -35,7 +35,7 @@ import { Option } from "../../../magma/api/option/Option";
 import { Some } from "../../../magma/api/option/Some";
 import { ArrayList } from "../../../java/util/ArrayList";
 import { Arrays } from "../../../java/util/Arrays";
-import { List } from "./List";
+import { List } from "../../../magma/api/collect/List";
 export interface ListsInstance {
 	empty<T>(): List<T>;
 

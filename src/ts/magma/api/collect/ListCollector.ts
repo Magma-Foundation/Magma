@@ -25,8 +25,9 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { List } from "./List";
-import { Collector } from "./Collector";
+import { List } from "../../../magma/api/collect/List";
+import { Collector } from "../../../magma/api/collect/Collector";
+import { Lists } from "../../../magma/api/collect/Lists";
 export class ListCollector<T> implements Collector<T, List<T>> {
 	createInitial(): List<T> {
 		return Lists.empty();

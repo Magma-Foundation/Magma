@@ -25,7 +25,7 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Tuple2 } from "./Tuple2";
+import { Tuple2 } from "../../magma/api/Tuple2";
 export class Tuple2Impl<A, B> implements Tuple2<A, B> {
 	leftValue: A;
 	rightValue: B;

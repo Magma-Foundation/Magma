@@ -28,7 +28,7 @@
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
 import { Main } from "../../../magma/app/Main";
-import { Option } from "./Option";
+import { Option } from "../../../magma/api/option/Option";
 export class None<T> implements Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return new None<R>();

@@ -47,10 +47,10 @@ import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/io/Files";
+import { Main } from "../../magma/app/Main";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
-	addModifier(modifier: string): MethodHeader;
 	removeModifier(modifier: string): MethodHeader;
 }
 interface Parameter {
@@ -149,6 +149,25 @@ class CompileState {
 	static createInitial(): CompileState {
 		return new CompileState(Lists.empty(), "", new None<string>(), 0, Lists.empty(), new None<>(), Lists.empty());
 	}
+	addResolvedImport(parent: List<string>, child: string): CompileState {
+		let parent1 = parent;
+		let namespace = this.maybeNamespace.orElse(Lists.empty());
+		if (namespace.isEmpty()){
+			parent1 = parent1.addFirst(".");
+		}
+		let i = 0;
+		let size = namespace.size();
+		while (i < size){
+			parent1 = parent1.addFirst("..");
+			i++;
+		}
+		let stringList = parent1.addLast(child);
+		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()){
+			return this;
+		}
+		let importString = new Import(stringList, child);
+		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+	}
 	withNamespace(namespace: List<string>): CompileState {
 		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.sources);
 	}
@@ -170,12 +189,6 @@ class CompileState {
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
-	addImport(importString: Import): CompileState {
-		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, importString.child)).next().isPresent()){
-			return this;
-		}
-		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
-	}
 	clearImports(): CompileState {
 		return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
@@ -184,6 +197,15 @@ class CompileState {
 	}
 	addSource(source: Source): CompileState {
 		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+	}
+	findSource(name: string): Option<Source> {
+		return this.sources.query().filter((source: Source) => source.computeName().equals(name)).next();
+	}
+	addResolvedImportFromCache(base: string): CompileState {
+		if (this.maybeStructureName.filter((inner: string) => inner.equals(base)).isPresent()){
+			return this;
+		}
+		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -237,9 +259,6 @@ class Definition {
 	hasAnnotation(annotation: string): boolean {
 		return this.annotations.contains(annotation);
 	}
-	addModifier(modifier: string): MethodHeader {
-		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
-	}
 	removeModifier(modifier: string): MethodHeader {
 		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
 	}
@@ -250,9 +269,6 @@ class ConstructorHeader implements MethodHeader {
 	}
 	hasAnnotation(annotation: string): boolean {
 		return false;
-	}
-	addModifier(modifier: string): MethodHeader {
-		return this;
 	}
 	removeModifier(modifier: string): MethodHeader {
 		return this;
@@ -915,23 +931,11 @@ export class Main {
 				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
 				let child = Strings.strip(divisions.findLast().orElse(""));
 				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-				let parent1 = parent;
-				let namespace = state.maybeNamespace.orElse(Lists.empty());
-				if (namespace.isEmpty()){
-					parent1 = parent1.addFirst(".");
-				}
-				let i = 0;
-				let size = namespace.size();
-				while (i < size){
-					parent1 = parent1.addFirst("..");
-					i++;
-				}
 				if (parent.equalsTo(Lists.of("java", "util", "function"))){
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 				}
-				let stringList = parent1.addLast(child);
-				let importString = new Import(stringList, child);
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state.addImport(importString), ""));
+				let compileState = state.addResolvedImport(parent, child);
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(compileState, ""));
 			});
 		});
 	}
@@ -1302,7 +1306,8 @@ export class Main {
 	static parseSymbol(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
 		if (Main.isSymbol(stripped)){
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
+			let withImport = state.addResolvedImportFromCache(stripped);
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped)));
 		}
 		else {
 			return new None<Tuple2<CompileState, Value>>();
@@ -1484,18 +1489,11 @@ export class Main {
 				let args = argsTuple.right();
 				let base = Strings.strip(baseString);
 				return Main.assembleFunctionType(argsState, base, args).or(() => {
-					let compileState = Main.getCompileState(state, base, argsState);
+					let compileState = argsState.addResolvedImportFromCache(base);
 					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
 				});
 			});
 		});
-	}
-	static getCompileState(state: CompileState, base: string, argsState: CompileState): CompileState {
-		if (state.maybeStructureName.filter((value: string) => Strings.equalsTo(value, base)).isPresent()){
-			return argsState;
-		}
-		let importString = new Import(Lists.of(".", base), base);
-		return argsState.addImport(importString);
 	}
 	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple2<CompileState, Type>> {
 		return Main.mapFunctionType(base, args).map((generated: Type) => new Tuple2Impl<CompileState, Type>(state, generated));

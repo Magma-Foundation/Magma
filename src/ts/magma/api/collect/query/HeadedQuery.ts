@@ -32,9 +32,7 @@ import { Head } from "../../../../magma/api/collect/Head";
 import { SingleHead } from "../../../../magma/api/collect/SingleHead";
 import { Option } from "../../../../magma/api/option/Option";
 import { Main } from "../../../../magma/app/Main";
-import { Query } from "./Query";
-import { Main.MapHead } from "./Main.MapHead";
-import { Main.FlatMapHead } from "./Main.FlatMapHead";
+import { Query } from "../../../../magma/api/collect/query/Query";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {

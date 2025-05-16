@@ -28,8 +28,8 @@
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
 import { Main } from "../../../magma/app/Main";
-import { Option } from "./Option";
-import { None } from "./None";
+import { Option } from "../../../magma/api/option/Option";
+import { None } from "../../../magma/api/option/None";
 export class Some<T> implements Option<T> {
 	value: T;
 	constructor (value: T) {

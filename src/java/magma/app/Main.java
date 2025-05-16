@@ -32,8 +32,6 @@ public final class Main {
 
         boolean hasAnnotation(String annotation);
 
-        MethodHeader addModifier(String modifier);
-
         MethodHeader removeModifier(String modifier);
     }
 
@@ -138,6 +136,33 @@ public final class Main {
             return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), new None<>(), Lists.empty());
         }
 
+        private CompileState addResolvedImport(List<String> parent, String child) {
+            var parent1 = parent;
+            var namespace = this.maybeNamespace.orElse(Lists.empty());
+            if (namespace.isEmpty()) {
+                parent1 = parent1.addFirst(".");
+            }
+
+            var i = 0;
+            var size = namespace.size();
+            while (i < size) {
+                parent1 = parent1.addFirst("..");
+                i++;
+            }
+
+            var stringList = parent1.addLast(child);
+            if (this.imports
+                    .query()
+                    .filter((Import node) -> Strings.equalsTo(node.child, child))
+                    .next()
+                    .isPresent()) {
+                return this;
+            }
+
+            var importString = new Import(stringList, child);
+            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        }
+
         private CompileState withNamespace(List<String> namespace) {
             return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.sources);
         }
@@ -169,18 +194,6 @@ public final class Main {
                     .next();
         }
 
-        public CompileState addImport(Import importString) {
-            if (this.imports
-                    .query()
-                    .filter((Import node) -> Strings.equalsTo(node.child, importString.child))
-                    .next()
-                    .isPresent()) {
-                return this;
-            }
-
-            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
-        }
-
         public CompileState clearImports() {
             return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
@@ -191,6 +204,22 @@ public final class Main {
 
         public CompileState addSource(Source source) {
             return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+        }
+
+        public Option<Source> findSource(String name) {
+            return this.sources.query()
+                    .filter((Source source) -> source.computeName().equals(name))
+                    .next();
+        }
+
+        public CompileState addResolvedImportFromCache(String base) {
+            if (this.maybeStructureName.filter((String inner) -> inner.equals(base)).isPresent()) {
+                return this;
+            }
+
+            return this.findSource(base)
+                    .map((Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
+                    .orElse(this);
         }
     }
 
@@ -256,11 +285,6 @@ public final class Main {
         }
 
         @Override
-        public MethodHeader addModifier(String modifier) {
-            return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
-        }
-
-        @Override
         public MethodHeader removeModifier(String modifier) {
             return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
         }
@@ -275,11 +299,6 @@ public final class Main {
         @Override
         public boolean hasAnnotation(String annotation) {
             return false;
-        }
-
-        @Override
-        public MethodHeader addModifier(String modifier) {
-            return this;
         }
 
         @Override
@@ -1129,26 +1148,12 @@ public final class Main {
                 var parent = divisions.subList(0, divisions.size() - 1)
                         .orElse(Lists.empty());
 
-                var parent1 = parent;
-                var namespace = state.maybeNamespace.orElse(Lists.empty());
-                if (namespace.isEmpty()) {
-                    parent1 = parent1.addFirst(".");
-                }
-
-                var i = 0;
-                var size = namespace.size();
-                while (i < size) {
-                    parent1 = parent1.addFirst("..");
-                    i++;
-                }
-
                 if (parent.equalsTo(Lists.of("java", "util", "function"))) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                 }
 
-                var stringList = parent1.addLast(child);
-                var importString = new Import(stringList, child);
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state.addImport(importString), ""));
+                var compileState = state.addResolvedImport(parent, child);
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(compileState, ""));
             });
         });
     }
@@ -1672,7 +1677,8 @@ public final class Main {
     private static Option<Tuple2<CompileState, Value>> parseSymbol(CompileState state, String input) {
         var stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
-            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
+            var withImport = state.addResolvedImportFromCache(stripped);
+            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped)));
         }
         else {
             return new None<Tuple2<CompileState, Value>>();
@@ -1927,23 +1933,11 @@ public final class Main {
 
                 var base = Strings.strip(baseString);
                 return Main.assembleFunctionType(argsState, base, args).or(() -> {
-                    var compileState = Main.getCompileState(state, base, argsState);
+                    var compileState = argsState.addResolvedImportFromCache(base);
                     return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
                 });
             });
         });
-    }
-
-    private static CompileState getCompileState(CompileState state, String base, CompileState argsState) {
-        if (state.maybeStructureName
-                .filter((String value) -> Strings.equalsTo(value, base))
-                .isPresent()
-        ) {
-            return argsState;
-        }
-
-        var importString = new Import(Lists.of(".", base), base);
-        return argsState.addImport(importString);
     }
 
     private static Option<Tuple2<CompileState, Type>> assembleFunctionType(CompileState state, String base, List<String> args) {
