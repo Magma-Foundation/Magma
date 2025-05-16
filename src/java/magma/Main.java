@@ -79,6 +79,10 @@ public class Main {
         public Optional<DivideState> popAndAppendToOption() {
             return this.popAndAppendToTuple().map(Tuple::left);
         }
+
+        public char peek() {
+            return this.input.charAt(this.index);
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -708,12 +712,24 @@ public class Main {
         }
 
         var appended = state.append(c);
+        if (c == '-') {
+            var peeked = appended.peek();
+            if (peeked == '>') {
+                return appended.popAndAppendToOption().orElse(appended);
+            }
+            else {
+                return appended;
+            }
+        }
+
         if (c == '<' || c == '(') {
             return appended.enter();
         }
+
         if (c == '>' || c == ')') {
             return appended.exit();
         }
+
         return appended;
     }
 
