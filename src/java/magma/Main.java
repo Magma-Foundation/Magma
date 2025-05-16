@@ -279,34 +279,17 @@ public class Main {
         }
     }
 
-    private static class DivideState {
-        private final String input;
-        private List<String> segments;
-        private int index;
-        private StringBuilder buffer;
-        private int depth;
-
-        private DivideState(List<String> segments, StringBuilder buffer, int depth, String input, int index) {
-            this.segments = segments;
-            this.buffer = buffer;
-            this.depth = depth;
-            this.input = input;
-            this.index = index;
-        }
-
+    private record DivideState(List<String> segments, String buffer, int depth, String input, int index) {
         public DivideState(String input) {
-            this(Lists.empty(), new StringBuilder(), 0, input, 0);
+            this(Lists.empty(), "", 0, input, 0);
         }
 
         private DivideState advance() {
-            this.segments = this.segments.add(this.buffer.toString());
-            this.buffer = new StringBuilder();
-            return this;
+            return new DivideState(this.segments.add(this.buffer), "", this.depth, this.input, this.index);
         }
 
         private DivideState append(char c) {
-            this.buffer.append(c);
-            return this;
+            return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
         }
 
         public boolean isLevel() {
@@ -314,13 +297,11 @@ public class Main {
         }
 
         public DivideState enter() {
-            this.depth++;
-            return this;
+            return new DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
         }
 
         public DivideState exit() {
-            this.depth--;
-            return this;
+            return new DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
         }
 
         public boolean isShallow() {
@@ -333,8 +314,8 @@ public class Main {
             }
 
             var c = this.input.charAt(this.index);
-            this.index++;
-            return new Some<Tuple<DivideState, Character>>(new Tuple<DivideState, Character>(this, c));
+            var nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
+            return new Some<Tuple<DivideState, Character>>(new Tuple<DivideState, Character>(nextState, c));
         }
 
         public Option<Tuple<DivideState, Character>> popAndAppendToTuple() {
@@ -1005,15 +986,14 @@ public class Main {
         return compileAll(state, input, Main::foldStatements, mapper, Main::mergeStatements);
     }
 
-    private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger) {
         var folded = parseAll(state, input, folder, mapper);
         return new Tuple<>(folded.left, generateAll(folded.right, merger));
     }
 
-    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
+    private static String generateAll(List<String> elements, BiFunction<String, String, String> merger) {
         return elements.query()
-                .fold(new StringBuilder(), merger)
-                .toString();
+                .fold("", merger);
     }
 
     private static <T> Tuple<CompileState, List<T>> parseAll(
@@ -1035,8 +1015,8 @@ public class Main {
         });
     }
 
-    private static StringBuilder mergeStatements(StringBuilder cache, String element) {
-        return cache.append(element);
+    private static String mergeStatements(String cache, String element) {
+        return cache + element;
     }
 
     private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
@@ -2001,11 +1981,11 @@ public class Main {
         return parseAll(state, input, Main::foldValues, mapper);
     }
 
-    private static StringBuilder mergeValues(StringBuilder cache, String element) {
+    private static String mergeValues(String cache, String element) {
         if (cache.isEmpty()) {
-            return cache.append(element);
+            return cache + element;
         }
-        return cache.append(", ").append(element);
+        return cache + ", " + element;
     }
 
     private static DivideState foldValues(DivideState state, char c) {
