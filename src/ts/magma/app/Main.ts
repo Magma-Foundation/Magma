@@ -670,21 +670,28 @@ export class Main {
 		return source.read().match((input: string) => Main.compileAndWrite(state, source, input, target), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Tuple2<CompileState, Option<IOError>> {
-		let namespace = source.computeNamespace();
-		let output = Main.compileRoot(state, input, namespace);
+		let output = Main.compileRoot(state, source, input);
 		let parent = target.getParent();
 		if (!parent.exists()){
 			parent.createDirectories();
 		}
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}
-	static compileRoot(state: CompileState, input: string, namespace: List<string>): Tuple2Impl<CompileState, string> {
-		let compiled = Main.compileStatements(state.withNamespace(namespace), input, Main.compileRootSegment);
+	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {
+		let compiled = Main.compileStatements(state.withNamespace(source.computeNamespace()), input, Main.compileRootSegment);
 		let compiledState = compiled.left();
 		let imports = compiledState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
 		let compileState = state.clearImports().clearOutput();
-		let segment = compileState.sources.query().map((source: Source) => Main.formatSource(source)).collect(new Joiner(", ")).orElse("");
-		return new Tuple2Impl<CompileState, string>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
+		let segment = compileState.sources.query().map((source1: Source) => Main.formatSource(source1)).collect(new Joiner(", ")).orElse("");
+		let withMain = Main.createMain(source);
+		let output = "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right() + withMain;
+		return new Tuple2Impl<CompileState, string>(compileState, output);
+	}
+	static createMain(source: Source): string {
+		if (Strings.equalsTo(source.computeName(), "Main")){
+			return "Main.main();";
+		}
+		return "";
 	}
 	static formatSource(source: Source): string {
 		let joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
@@ -1579,3 +1586,4 @@ export class Main {
 		return "/*" + replaced + "*/";
 	}
 }
+Main.main();

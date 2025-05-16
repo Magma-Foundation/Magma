@@ -1,18 +1,19 @@
 package magma.app;
 
-import magma.api.io.Console;
+import jvm.api.collect.list.Lists;
+import jvm.api.io.Files;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Collector;
+import magma.api.collect.Query;
 import magma.api.collect.head.EmptyHead;
 import magma.api.collect.head.Head;
-import magma.api.collect.list.List;
-import magma.api.collect.list.ListCollector;
-import jvm.api.collect.list.Lists;
+import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.head.SingleHead;
-import magma.api.collect.head.HeadedQuery;
-import magma.api.collect.Query;
+import magma.api.collect.list.List;
+import magma.api.collect.list.ListCollector;
+import magma.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.None;
@@ -21,7 +22,6 @@ import magma.api.option.Some;
 import magma.api.result.Result;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
-import jvm.api.io.Files;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -771,8 +771,7 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Path target) {
-        var namespace = source.computeNamespace();
-        var output = Main.compileRoot(state, input, namespace);
+        var output = Main.compileRoot(state, source, input);
 
         var parent = target.getParent();
         if (!parent.exists()) {
@@ -782,8 +781,8 @@ public final class Main {
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
     }
 
-    private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
-        var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
+    private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, Source source, String input) {
+        var compiled = Main.compileStatements(state.withNamespace(source.computeNamespace()), input, Main::compileRootSegment);
         var compiledState = compiled.left();
         var imports = compiledState.imports.query()
                 .map((Import anImport) -> anImport.generate())
@@ -793,11 +792,20 @@ public final class Main {
         var compileState = state.clearImports().clearOutput();
         var segment = compileState.sources
                 .query()
-                .map((Source source) -> Main.formatSource(source))
+                .map((Source source1) -> Main.formatSource(source1))
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
+        var withMain = Main.createMain(source);
+        var output = "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right() + withMain;
+        return new Tuple2Impl<CompileState, String>(compileState, output);
+    }
+
+    private static String createMain(Source source) {
+        if (Strings.equalsTo(source.computeName(), "Main")) {
+            return "Main.main();";
+        }
+        return "";
     }
 
     private static String formatSource(Source source) {
