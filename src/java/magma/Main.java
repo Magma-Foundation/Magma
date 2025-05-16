@@ -526,6 +526,7 @@ public class Main {
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRuleWithDifferentInfixes("==", "==="),
+                createOperatorRuleWithDifferentInfixes("!=", "!=="),
                 createTextRule("\""),
                 createTextRule("'"),
                 createOperatorRule("+"),

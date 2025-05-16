@@ -146,7 +146,7 @@
 		return current.advance().segments;
 	}
 	/*private static*/foldDoubleQuotes(state : /*DivideState*/, c : string): /*Optional*/</*DivideState*/> {
-		if (/*c != '\"'*/){
+		if (c !== "\""){
 			return Optional.empty();
 		}
 		let appended : unknown = state.append(c);
@@ -167,7 +167,7 @@
 		return Optional.of(appended);
 	}
 	/*private static*/foldSingleQuotes(state : /*DivideState*/, c : string): /*Optional*/</*DivideState*/> {
-		if (/*c != '\''*/){
+		if (c !== "\'"){
 			return Optional.empty();
 		}
 		return state.append(c).popAndAppendToTuple().flatMap(Main.foldEscaped).flatMap(DivideState.popAndAppendToOption);
@@ -385,7 +385,7 @@
 		return compileValue(state, input).orElseGet(() => new /*Tuple*/<>(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileValue(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||")));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createOperatorRuleWithDifferentInfixes(/*"*/ !== /*"*/, /* "!*/ === /*"*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||")));
 	}
 	/*private static*/createTextRule(slice : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
 		/*return (state1, input1) -> */{
@@ -494,7 +494,7 @@
 	/*private static*/isSymbol(input : string): boolean {
 		/*for (var i = 0; i < input.length(); i++) */{
 			let c : unknown = input.charAt(i);
-			if (Character.isLetter(c) || (/*i != 0 */ && Character.isDigit(c))){
+			if (Character.isLetter(c) || (i !== 0 && Character.isDigit(c))){
 				/*continue*/;
 			}
 			return false;
