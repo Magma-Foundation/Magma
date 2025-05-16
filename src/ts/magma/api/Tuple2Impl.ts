@@ -1,3 +1,4 @@
+import { Tuple2 } from "./Tuple2";
 export class Tuple2Impl<A, B> implements Tuple2<A, B> {
 	leftValue: A;
 	rightValue: B;

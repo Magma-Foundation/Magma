@@ -1,5 +1,8 @@
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { Option } from "../../../../magma/api/option/Option";
+import { Collector } from "./Collector";
+import { Query } from "./Query";
+import { Option } from "./Option";
 export interface Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;

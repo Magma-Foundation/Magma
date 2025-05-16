@@ -124,7 +124,7 @@ public final class Main {
     }
 
     private record CompileState(
-            String imports,
+            List<Import> imports,
             String output,
             Option<String> maybeStructureName,
             int depth,
@@ -132,7 +132,7 @@ public final class Main {
             List<String> namespace
     ) {
         private static CompileState createInitial(List<String> namespace) {
-            return new CompileState("", "", new None<String>(), 0, Lists.empty(), namespace);
+            return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), namespace);
         }
 
         CompileState append(String element) {
@@ -162,8 +162,12 @@ public final class Main {
                     .next();
         }
 
-        public CompileState addImport(String importString) {
-            return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
+        public CompileState addImport(Import importString) {
+            if (this.imports.contains(importString)) {
+                return this;
+            }
+
+            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
         }
     }
 
@@ -825,6 +829,16 @@ public final class Main {
         }
     }
 
+    private record Import(List<String> namespace, String child) {
+        private String generate() {
+            var joinedNamespace = this.namespace().query()
+                    .collect(new Joiner("/"))
+                    .orElse("");
+
+            return "import { " + this.child() + " } from \"" + joinedNamespace + "\";\n";
+        }
+    }
+
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -872,7 +886,12 @@ public final class Main {
     private static String compileRoot(String input, List<String> namespace) {
         var compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main::compileRootSegment);
         var compiledState = compiled.left();
-        return compiledState.imports + compiledState.output + compiled.right();
+        var imports = compiledState.imports.query()
+                .map(Import::generate)
+                .collect(new Joiner(""))
+                .orElse("");
+
+        return imports + compiledState.output + compiled.right();
     }
 
     private static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
@@ -1211,12 +1230,9 @@ public final class Main {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                 }
 
-                var s2 = parent1.addLast(child)
-                        .query()
-                        .collect(new Joiner("/"))
-                        .orElse("");
-
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
+                var stringList = parent1.addLast(child);
+                var importString = new Import(stringList, child);
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state.addImport(importString), ""));
             });
         });
     }
@@ -1995,7 +2011,8 @@ public final class Main {
 
                 var base = Strings.strip(baseString);
                 return Main.assembleFunctionType(argsState, base, args).or(() -> {
-                    return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState, new Generic(base, args)));
+                    var importString = new Import(Lists.of(".", base), base);
+                    return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState.addImport(importString), new Generic(base, args)));
                 });
             });
         });

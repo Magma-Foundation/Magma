@@ -15,6 +15,20 @@ import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/io/Files";
+import { Option } from "./Option";
+import { List } from "./List";
+import { Tuple2 } from "./Tuple2";
+import { None } from "./None";
+import { Some } from "./Some";
+import { Tuple2Impl } from "./Tuple2Impl";
+import { Collector } from "./Collector";
+import { Result } from "./Result";
+import { Head } from "./Head";
+import { Query } from "./Query";
+import { HeadedQuery } from "./HeadedQuery";
+import { EmptyHead } from "./EmptyHead";
+import { SingleHead } from "./SingleHead";
+import { ListCollector } from "./ListCollector";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -98,13 +112,13 @@ class DivideState {
 	}
 }
 class CompileState {
-	imports: string;
+	imports: List<Import>;
 	output: string;
 	maybeStructureName: Option<string>;
 	depth: number;
 	definitions: List<Definition>;
 	namespace: List<string>;
-	constructor (imports: string, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>, namespace: List<string>) {
+	constructor (imports: List<Import>, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>, namespace: List<string>) {
 		this.imports = imports;
 		this.output = output;
 		this.maybeStructureName = maybeStructureName;
@@ -113,7 +127,7 @@ class CompileState {
 		this.namespace = namespace;
 	}
 	static createInitial(namespace: List<string>): CompileState {
-		return new CompileState("", "", new None<string>(), 0, Lists.empty(), namespace);
+		return new CompileState(Lists.empty(), "", new None<string>(), 0, Lists.empty(), namespace);
 	}
 	append(element: string): CompileState {
 		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.namespace);
@@ -133,8 +147,11 @@ class CompileState {
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
-	addImport(importString: string): CompileState {
-		return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
+	addImport(importString: Import): CompileState {
+		if (this.imports.contains(importString)){
+			return this;
+		}
+		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -652,6 +669,18 @@ class VarArgs implements Type {
 		return "...";
 	}
 }
+class Import {
+	namespace: List<string>;
+	child: string;
+	constructor (namespace: List<string>, child: string) {
+		this.namespace = namespace;
+		this.child = child;
+	}
+	generate(): string {
+		let joinedNamespace = this.namespace().query().collect(new Joiner("/")).orElse("");
+		return "import { " + this.child() + " } from \"" + joinedNamespace + "\";\n";
+	}
+}
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
@@ -704,7 +733,8 @@ export class Main {
 	static compileRoot(input: string, namespace: List<string>): string {
 		let compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main.compileRootSegment);
 		let compiledState = compiled.left();
-		return compiledState.imports + compiledState.output + compiled.right();
+		let imports = compiledState.imports.query().map(Import.generate).collect(new Joiner("")).orElse("");
+		return imports + compiledState.output + compiled.right();
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
@@ -935,8 +965,9 @@ export class Main {
 				if (parent.equalsTo(Lists.of("java", "util", "function"))){
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 				}
-				let s2 = parent1.addLast(child).query().collect(new Joiner("/")).orElse("");
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
+				let stringList = parent1.addLast(child);
+				let importString = new Import(stringList, child);
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state.addImport(importString), ""));
 			});
 		});
 	}
@@ -1489,7 +1520,8 @@ export class Main {
 				let args = argsTuple.right();
 				let base = Strings.strip(baseString);
 				return Main.assembleFunctionType(argsState, base, args).or(() => {
-					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState, new Generic(base, args)));
+					let importString = new Import(Lists.of(".", base), base);
+					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState.addImport(importString), new Generic(base, args)));
 				});
 			});
 		});

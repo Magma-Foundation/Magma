@@ -3,6 +3,16 @@ import { Collector } from "../../../../magma/api/collect/Collector";
 import { Head } from "../../../../magma/api/collect/Head";
 import { Option } from "../../../../magma/api/option/Option";
 import { Main } from "../../../../magma/app/Main";
+import { Query } from "./Query";
+import { Head } from "./Head";
+import { Option } from "./Option";
+import { Collector } from "./Collector";
+import { HeadedQuery } from "./HeadedQuery";
+import { Main.MapHead } from "./Main.MapHead";
+import { Tuple2 } from "./Tuple2";
+import { Main.FlatMapHead } from "./Main.FlatMapHead";
+import { Main.EmptyHead } from "./Main.EmptyHead";
+import { Main.SingleHead } from "./Main.SingleHead";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
