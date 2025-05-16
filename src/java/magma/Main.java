@@ -71,13 +71,13 @@ public class Main {
 
         int size();
 
-        List<T> subList(int startInclusive, int endExclusive);
+        Option<List<T>> subList(int startInclusive, int endExclusive);
 
-        T getLast();
+        Option<T> findLast();
 
-        T getFirst();
+        Option<T> findFirst();
 
-        T get(int index);
+        Option<T> find(int index);
 
         Iterator<Tuple<Integer, T>> iterateWithIndices();
     }
@@ -179,23 +179,19 @@ public class Main {
                 return this.list.size();
             }
 
-            @Override
-            public List<T> subList(int startInclusive, int endExclusive) {
+            private List<T> subList0(int startInclusive, int endExclusive) {
                 return new JVMList<>(this.list.subList(startInclusive, endExclusive));
             }
 
-            @Override
-            public T getLast() {
+            private T getLast() {
                 return this.list.getLast();
             }
 
-            @Override
-            public T getFirst() {
+            private T getFirst() {
                 return this.list.getFirst();
             }
 
-            @Override
-            public T get(int index) {
+            private T get(int index) {
                 return this.list.get(index);
             }
 
@@ -203,6 +199,26 @@ public class Main {
             public Iterator<Tuple<Integer, T>> iterateWithIndices() {
                 return new HeadedIterator<>(new RangeHead(this.list.size()))
                         .map(index -> new Tuple<>(index, this.list.get(index)));
+            }
+
+            @Override
+            public Option<List<T>> subList(int startInclusive, int endExclusive) {
+                return new Some<>(this.subList0(startInclusive, endExclusive));
+            }
+
+            @Override
+            public Option<T> findLast() {
+                return new Some<>(this.getLast());
+            }
+
+            @Override
+            public Option<T> findFirst() {
+                return new Some<>(this.getFirst());
+            }
+
+            @Override
+            public Option<T> find(int index) {
+                return new Some<>(this.get(index));
             }
         }
 
@@ -990,8 +1006,8 @@ public class Main {
     }
 
     private static Option<Tuple<String, String>> selectLast(List<String> divisions, String delimiter) {
-        var beforeLast = divisions.subList(0, divisions.size() - 1);
-        var last = divisions.getLast();
+        var beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
+        var last = divisions.findLast().orElse(null);
 
         var joined = beforeLast.iterate()
                 .collect(new Joiner(delimiter))
@@ -1157,8 +1173,8 @@ public class Main {
     }
 
     private static Option<Tuple<String, String>> selectFirst(List<String> divisions, String delimiter) {
-        var first = divisions.getFirst();
-        var afterFirst = divisions.subList(1, divisions.size())
+        var first = divisions.findFirst().orElse(null);
+        var afterFirst = divisions.subList(1, divisions.size()).orElse(divisions)
                 .iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
@@ -1374,11 +1390,11 @@ public class Main {
 
     private static Option<String> mapFunctionType(String base, List<String> arguments) {
         if (base.equals("Function")) {
-            return new Some<String>(generateFunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+            return new Some<String>(generateFunctionType(Lists.of(arguments.find(0).orElse(null)), arguments.find(1).orElse(null)));
         }
 
         if (base.equals("BiFunction")) {
-            return new Some<String>(generateFunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+            return new Some<String>(generateFunctionType(Lists.of(arguments.find(0).orElse(null), arguments.find(1).orElse(null)), arguments.find(2).orElse(null)));
         }
 
         return new None<String>();

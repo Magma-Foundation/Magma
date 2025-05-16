@@ -32,10 +32,10 @@ interface List<T> {
 	add(element : T): List<T>;
 	iterate(): Iterator<T>;
 	size(): number;
-	subList(startInclusive : number, endExclusive : number): List<T>;
-	getLast(): T;
-	getFirst(): T;
-	get(index : number): T;
+	subList(startInclusive : number, endExclusive : number): Option<List<T>>;
+	findLast(): Option<T>;
+	findFirst(): Option<T>;
+	find(index : number): Option<T>;
 	iterateWithIndices(): Iterator<Tuple<number, T>>;
 }
 interface Head<T> {
@@ -107,7 +107,7 @@ class JVMList<T> {
 	size(): number {
 		return this.list.size();
 	}
-	subList(startInclusive : number, endExclusive : number): List<T> {
+	subList0(startInclusive : number, endExclusive : number): List<T> {
 		return new JVMList<>(this.list.subList(startInclusive, endExclusive));
 	}
 	getLast(): T {
@@ -122,6 +122,18 @@ class JVMList<T> {
 	iterateWithIndices(): Iterator<Tuple<number, T>> {
 		return new /*HeadedIterator<>(new RangeHead(this.list.size()))
                         .map*/((index) => new Tuple<>(index, this.list.get(index)));
+	}
+	subList(startInclusive : number, endExclusive : number): Option<List<T>> {
+		return new Some<>(this.subList0(startInclusive, endExclusive));
+	}
+	findLast(): Option<T> {
+		return new Some<>(this.getLast());
+	}
+	findFirst(): Option<T> {
+		return new Some<>(this.getFirst());
+	}
+	find(index : number): Option<T> {
+		return new Some<>(this.get(index));
 	}
 }
 class Lists {
@@ -689,8 +701,8 @@ class Main {
 		return selector.apply(divisions);
 	}
 	selectLast(divisions : List<string>, delimiter : string): Option<Tuple<string, string>> {
-		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1);
-		let last : unknown = divisions.getLast();
+		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1).orElse(divisions);
+		let last : unknown = divisions.findLast().orElse(null);
 		let joined : unknown = beforeLast.iterate().collect(new Joiner(delimiter)).orElse("");
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(joined, last));
 	}
@@ -806,8 +818,8 @@ class Main {
 		};
 	}
 	selectFirst(divisions : List<string>, delimiter : string): Option<Tuple<string, string>> {
-		let first : unknown = divisions.getFirst();
-		let afterFirst : unknown = divisions.subList(1, divisions.size()).iterate().collect(new Joiner(delimiter)).orElse("");
+		let first : unknown = divisions.findFirst().orElse(null);
+		let afterFirst : unknown = divisions.subList(1, divisions.size()).orElse(divisions).iterate().collect(new Joiner(delimiter)).orElse("");
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(first, afterFirst));
 	}
 	foldOperator(infix : string): (arg0 : DivideState, arg1 : string) => DivideState {
@@ -969,10 +981,10 @@ class Main {
 	}
 	mapFunctionType(base : string, arguments : List<string>): Option<string> {
 		if (base.equals("Function")){
-			return new Some<string>(generateFunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+			return new Some<string>(generateFunctionType(Lists.of(arguments.find(0).orElse(null)), arguments.find(1).orElse(null)));
 		}
 		if (base.equals("BiFunction")){
-			return new Some<string>(generateFunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+			return new Some<string>(generateFunctionType(Lists.of(arguments.find(0).orElse(null), arguments.find(1).orElse(null)), arguments.find(2).orElse(null)));
 		}
 		return new None<string>();
 	}
