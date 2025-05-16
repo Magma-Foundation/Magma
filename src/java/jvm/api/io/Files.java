@@ -60,11 +60,6 @@ public final class Files {
         }
 
         @Override
-        public magma.api.io.Path resolveSibling(String siblingName) {
-            return new JVMPath(this.path.resolveSibling(siblingName));
-        }
-
-        @Override
         public Result<List<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
                 return new Main.Ok<>(new JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
@@ -115,12 +110,12 @@ public final class Files {
         }
 
         @Override
-        public Option<IOException> createDirectories() {
+        public Option<IOError> createDirectories() {
             try {
                 java.nio.file.Files.createDirectories(this.path);
                 return new None<>();
             } catch (IOException e) {
-                return new Some<>(e);
+                return new Some<>(new JVMIOError(e));
             }
         }
     }

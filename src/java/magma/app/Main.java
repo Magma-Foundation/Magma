@@ -2,6 +2,8 @@ package magma.app;
 
 import jvm.api.collect.list.Lists;
 import jvm.api.io.Files;
+import jvm.api.text.Characters;
+import jvm.api.text.Strings;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Collector;
@@ -20,8 +22,6 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Result;
-import jvm.api.text.Characters;
-import jvm.api.text.Strings;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -791,7 +791,10 @@ public final class Main {
 
         var parent = target.getParent();
         if (!parent.exists()) {
-            parent.createDirectories();
+            var maybeError = parent.createDirectories();
+            if (maybeError.isPresent()) {
+                return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
+            }
         }
 
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));

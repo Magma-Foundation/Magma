@@ -688,7 +688,10 @@ export class Main {
 		let target = Files.get(".", "src", "ts").resolveChildSegments(location.namespace).resolveChild(location.name + ".ts");
 		let parent = target.getParent();
 		if (!parent.exists()){
-			parent.createDirectories();
+			let maybeError = parent.createDirectories();
+			if (maybeError.isPresent()){
+				return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
+			}
 		}
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}

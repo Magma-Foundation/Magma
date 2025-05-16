@@ -36,7 +36,6 @@ import { Query } from "../../../magma/api/collect/Query";
 export interface Path {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;
-	resolveSibling(siblingName: string): Path;
 	walk(): Result<List<Path>, IOError>;
 	findFileName(): string;
 	endsWith(suffix: string): boolean;
@@ -46,5 +45,5 @@ export interface Path {
 	resolveChildSegments(children: List<string>): Path;
 	resolveChild(name: string): Path;
 	exists(): boolean;
-	createDirectories(): Option<IOException>;
+	createDirectories(): Option<IOError>;
 }
