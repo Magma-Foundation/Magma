@@ -559,25 +559,46 @@ public class Main {
         return compileFirst(input, "->", (beforeArrow, afterArrow) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
-                var strippedAfterArrow = afterArrow.strip();
-                return compilePrefix(strippedAfterArrow, "{", withoutContentStart -> {
-                    return compileSuffix(withoutContentStart, "}", withoutContentEnd -> {
-                        var statementsTuple = compileFunctionStatements(state.enterDepth(), withoutContentEnd);
-                        var statementsState = statementsTuple.left;
-                        var statements = statementsTuple.right;
+                return getCompileStateStringTuple(state, List.of(strippedBeforeArrow), afterArrow);
+            }
 
-                        var exited = statementsState.exitDepth();
-                        return Optional.of(new Tuple<>(exited, strippedBeforeArrow + " => {" + statements + generateIndent(exited.depth) + "}"));
-                    });
-                }).or(() -> {
-                    var tuple = compileValueOrPlaceholder(state, strippedAfterArrow);
-                    return Optional.of(new Tuple<>(tuple.left, strippedBeforeArrow + " => " + tuple.right));
+            return compilePrefix(strippedBeforeArrow, "(", withoutStart -> {
+                return compileSuffix(withoutStart, ")", withoutEnd -> {
+                    var paramNames = divide(withoutEnd, Main::foldValues)
+                            .stream()
+                            .map(String::strip)
+                            .filter(value -> !value.isEmpty())
+                            .toList();
+
+                    if (paramNames.stream().allMatch(Main::isSymbol)) {
+                        return getCompileStateStringTuple(state, paramNames, afterArrow);
+                    } else {
+                        return Optional.empty();
+                    }
                 });
-            }
-            else {
-                return Optional.empty();
-            }
+            });
         });
+    }
+
+    private static Optional<Tuple<CompileState, String>> getCompileStateStringTuple(CompileState state, List<String> paramNames, String afterArrow) {
+        var strippedAfterArrow = afterArrow.strip();
+        return compilePrefix(strippedAfterArrow, "{", withoutContentStart -> {
+            return compileSuffix(withoutContentStart, "}", withoutContentEnd -> {
+                var statementsTuple = compileFunctionStatements(state.enterDepth(), withoutContentEnd);
+                var statementsState = statementsTuple.left;
+                var statements = statementsTuple.right;
+
+                var exited = statementsState.exitDepth();
+                return assembleLambda(exited, paramNames, "{" + statements + generateIndent(exited.depth) + "}");
+            });
+        }).or(() -> {
+            var tuple = compileValueOrPlaceholder(state, strippedAfterArrow);
+            return assembleLambda(tuple.left, paramNames, tuple.right);
+        });
+    }
+
+    private static Optional<Tuple<CompileState, String>> assembleLambda(CompileState exited, List<String> paramNames, String content) {
+        return Optional.of(new Tuple<>(exited, "(" + String.join(", ", paramNames) + ")" + " => " + content));
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String infix) {
