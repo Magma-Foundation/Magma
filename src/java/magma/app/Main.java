@@ -295,12 +295,12 @@ public final class Main {
 
         @Override
         public boolean hasAnnotation(String annotation) {
-            return this.annotations.contains(annotation);
+            return this.annotations.contains(annotation, Strings::equalsTo);
         }
 
         @Override
         public MethodHeader removeModifier(String modifier) {
-            return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
+            return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings::equalsTo), this.typeParams, this.type, this.name);
         }
     }
 
@@ -967,7 +967,7 @@ public final class Main {
                     return Main.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> {
                         return Main.compileLast(beforeInfix, "\n", (String s, String s2) -> {
                             var annotations = Main.parseAnnotations(s);
-                            if (annotations.contains("Actual")) {
+                            if (annotations.contains("Actual", Strings::equalsTo)) {
                                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                             }
 
@@ -1062,7 +1062,7 @@ public final class Main {
                 .collect(Joiner.empty())
                 .orElse("");
 
-        if (annotations.contains("Namespace")) {
+        if (annotations.contains("Namespace", Strings::equalsTo)) {
             String actualInfix = "interface ";
             String newName = name + "Instance";
 
@@ -1079,7 +1079,7 @@ public final class Main {
     }
 
     private static List<String> modifyModifiers0(List<String> oldModifiers) {
-        if (oldModifiers.contains("public")) {
+        if (oldModifiers.contains("public", Strings::equalsTo)) {
             return Lists.of("export");
         }
         return Lists.empty();
@@ -1146,7 +1146,7 @@ public final class Main {
                 var parent = divisions.subList(0, divisions.size() - 1)
                         .orElse(Lists.empty());
 
-                if (parent.equalsTo(Lists.of("java", "util", "function"))) {
+                if (parent.equalsTo(Lists.of("java", "util", "function"), Strings::equalsTo)) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                 }
 
@@ -1848,7 +1848,7 @@ public final class Main {
     }
 
     private static List<String> modifyModifiers(List<String> oldModifiers) {
-        if (oldModifiers.contains("static")) {
+        if (oldModifiers.contains("static", Strings::equalsTo)) {
             return Lists.of("static");
         }
         return Lists.empty();
@@ -1858,10 +1858,6 @@ public final class Main {
         return Main.parseType(state, type)
                 .map((Tuple2<CompileState, Type> tuple) -> new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right()))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
-    }
-
-    private static Tuple2<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
-        return Main.compileType(state, type).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, Main.generatePlaceholder(type)));
     }
 
     private static Option<Tuple2<CompileState, String>> compileType(CompileState state, String type) {

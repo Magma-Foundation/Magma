@@ -79,11 +79,11 @@ export interface List<T> {
 	find(index: number): Option<T>;
 	queryWithIndices(): Query<Tuple2<number, T>>;
 	addAll(others: List<T>): List<T>;
-	contains(element: T): boolean;
+	contains(element: T, equator: (arg0 : T, arg1 : T) => boolean): boolean;
 	queryReversed(): Query<T>;
 	addFirst(element: T): List<T>;
 	isEmpty(): boolean;
-	equalsTo(other: List<T>): boolean;
-	removeValue(element: T): List<T>;
+	equalsTo(other: List<T>, equator: (arg0 : T, arg1 : T) => boolean): boolean;
+	removeValue(element: T, equator: (arg0 : T, arg1 : T) => boolean): List<T>;
 	removeLast(): Option<List<T>>;
 }

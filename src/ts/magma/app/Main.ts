@@ -303,10 +303,10 @@ class Definition {
 		return Main.joinTypeParams(this.typeParams);
 	}
 	hasAnnotation(annotation: string): boolean {
-		return this.annotations.contains(annotation);
+		return this.annotations.contains(annotation, Strings.equalsTo);
 	}
 	removeModifier(modifier: string): MethodHeader {
-		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
+		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 	}
 }
 class ConstructorHeader implements MethodHeader {
@@ -844,7 +844,7 @@ export class Main {
 					return Main.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => {
 						return Main.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 							let annotations = Main.parseAnnotations(s);
-							if (annotations.contains("Actual")){
+							if (annotations.contains("Actual", Strings.equalsTo)){
 								return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 							}
 							return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
@@ -909,7 +909,7 @@ export class Main {
 		let implementingString = Main.generateImplementing(maybeImplementing);
 		let newModifiers = Main.modifyModifiers0(oldModifiers);
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
-		if (annotations.contains("Namespace")){
+		if (annotations.contains("Namespace", Strings.equalsTo)){
 			let actualInfix: string = "interface ";
 			let newName: string = name + "Instance";
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
@@ -923,7 +923,7 @@ export class Main {
 		}
 	}
 	static modifyModifiers0(oldModifiers: List<string>): List<string> {
-		if (oldModifiers.contains("public")){
+		if (oldModifiers.contains("public", Strings.equalsTo)){
 			return Lists.of("export");
 		}
 		return Lists.empty();
@@ -960,7 +960,7 @@ export class Main {
 				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
 				let child = Strings.strip(divisions.findLast().orElse(""));
 				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-				if (parent.equalsTo(Lists.of("java", "util", "function"))){
+				if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)){
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 				}
 				let compileState = state.addResolvedImport(parent, child);
@@ -1457,16 +1457,13 @@ export class Main {
 		});
 	}
 	static modifyModifiers(oldModifiers: List<string>): List<string> {
-		if (oldModifiers.contains("static")){
+		if (oldModifiers.contains("static", Strings.equalsTo)){
 			return Lists.of("static");
 		}
 		return Lists.empty();
 	}
 	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, Type> {
 		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right())).orElseGet(() => new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
-	}
-	static compileTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, string> {
-		return Main.compileType(state, type).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(type)));
 	}
 	static compileType(state: CompileState, type: string): Option<Tuple2<CompileState, string>> {
 		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate()));
