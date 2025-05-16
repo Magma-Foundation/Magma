@@ -201,22 +201,22 @@
 		return compileOrPlaceholder(state, input, List.of(Main.compileNamespaced, createStructureRule("class ", "class ")));
 	}
 	/*private static*/createStructureRule(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return (/*state1*/, /* input1*/) - /*> compileFirst*/(/*input1*/, sourceInfix, (beforeKeyword, /* right1*/) - /*> {
-            return compileFirst*/(/*right1*/, "{", /* (beforeContent, withEnd*/) - /*> {
-                return compileSuffix(withEnd.strip(), "}", inputContent */ - /*> {
-                    var strippedBeforeContent = beforeContent.strip();
-                    return compileFirst*/(strippedBeforeContent, "(", /* (rawName, s2*/) - /*> {
-                        var name = rawName.strip();
-                        return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, name);
-                    }).or(*/() - /*> {
-                        return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, strippedBeforeContent);
-                    });
-                });
-            });
-        }*/);
+		return (state1, input1) => compileFirst(input1, sourceInfix, (beforeKeyword, right1) => {
+			return compileFirst(right1, "{", (beforeContent, withEnd) => {
+				return compileSuffix(withEnd.strip(), "}", (inputContent) => {
+					let strippedBeforeContent : unknown = beforeContent.strip();
+					return compileFirst(strippedBeforeContent, "(", (rawName, s2) => {
+						let name : unknown = rawName.strip();
+						return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, name);
+					}).or(() => {
+						return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, strippedBeforeContent);
+					});
+				});
+			});
+		});
 	}
 	/*private static*/assembleStructure(targetInfix : string, state1 : /*CompileState*/, beforeKeyword : string, inputContent : string, name : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		let outputContentTuple : unknown = compileStatements(/*state1*/.withStructureName(name), inputContent, Main.compileClassSegment);
+		let outputContentTuple : unknown = compileStatements(state1.withStructureName(name), inputContent, Main.compileClassSegment);
 		let outputContentState : unknown = outputContentTuple.left;
 		let outputContent : unknown = outputContentTuple.right;
 		let generated : unknown = generatePlaceholder(beforeKeyword.strip()) + targetInfix + name + " {" + outputContent + "\n}\n";
@@ -244,7 +244,7 @@
 		return Optional.empty();
 	}
 	/*private static*/compileClassSegment(state1 : /*CompileState*/, input1 : string): /*Tuple*/</*CompileState*/, string> {
-		return compileOrPlaceholder(/*state1*/, /* input1*/, List.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
+		return compileOrPlaceholder(state1, input1, List.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
 	}
 	/*private static*/compileMethod(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileFirst(input, "(", (beforeParams, withParams) => {
@@ -320,8 +320,8 @@
 		return compileOrPlaceholder(state, withoutEnd, List.of(Main.compileReturn, Main.compileAssignment, Main.compileInvokable, createPostRule("++"), createPostRule("--")));
 	}
 	/*private static*/createPostRule(suffix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return (/*state1*/, input) - /*> compileSuffix*/(input.strip(), suffix, (child) => {
-			let tuple : unknown = compileValueOrPlaceholder(/*state1*/, child);
+		return (state1, input) => compileSuffix(input.strip(), suffix, (child) => {
+			let tuple : unknown = compileValueOrPlaceholder(state1, child);
 			return Optional.of(new /*Tuple*/<>(tuple.left, tuple.right + suffix));
 		});
 	}
@@ -389,12 +389,12 @@
 	}
 	/*private static*/createTextRule(slice : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
 		/*return (state1, input1) -> */{
-			let stripped : unknown = /*input1*/.strip();
+			let stripped : unknown = input1.strip();
 			if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() < /*= slice*/.length()){
 				return Optional.empty();
 			}
 			let value : unknown = stripped.substring(slice.length(), stripped.length() - slice.length());
-			return Optional.of(new /*Tuple*/<>(/*state1*/, "\"" + value + "\""));
+			return Optional.of(new /*Tuple*/<>(state1, "\"" + value + "\""));
 		}
 		/**/;
 	}
@@ -457,8 +457,8 @@
 		});
 	}
 	/*private static*/createOperatorRuleWithDifferentInfixes(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return (/*state1*/, /* input1*/) - /*> compileFirst*/(/*input1*/, sourceInfix, (left, right) => {
-			let leftTuple : unknown = compileValueOrPlaceholder(/*state1*/, left);
+		return (state1, input1) => compileFirst(input1, sourceInfix, (left, right) => {
+			let leftTuple : unknown = compileValueOrPlaceholder(state1, left);
 			let rightTuple : unknown = compileValueOrPlaceholder(leftTuple.left, right);
 			return Optional.of(new /*Tuple*/<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
 		});
@@ -494,7 +494,7 @@
 	/*private static*/isSymbol(input : string): boolean {
 		/*for (var i = 0; i < input.length(); i++) */{
 			let c : unknown = input.charAt(i);
-			if (Character.isLetter(c)){
+			if (Character.isLetter(c) || (/*i != 0 */ && Character.isDigit(c))){
 				/*continue*/;
 			}
 			return false;
@@ -509,10 +509,9 @@
 		return mapper.apply(slice);
 	}
 	/*private static*/compileParameter(state : /*CompileState*/, input : string): /*Tuple*/</*CompileState*/, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, (/*state1*/, /* input1*/) - /*> {
-                    return compileDefinition(state1, input1).map(tuple */ - /*> new Tuple*/ < /*>(tuple.left, tuple.right.generate()));
-                }
-        */));
+		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, (state1, input1) => {
+			return compileDefinition(state1, input1).map((tuple) => new /*Tuple*/<>(tuple.left, tuple.right.generate()));
+		}));
 	}
 	/*private static*/compileWhitespace(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		if (input.isBlank()){
