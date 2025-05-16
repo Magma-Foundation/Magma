@@ -1,7 +1,9 @@
 package magma.api.text;
 
-import magma.Actual;
+import magma.annotate.Actual;
+import magma.annotate.Namespace;
 
+@Namespace
 public final class Strings {
     @Actual
     public static int length(String stripped) {
