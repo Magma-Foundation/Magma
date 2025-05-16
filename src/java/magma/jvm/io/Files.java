@@ -1,6 +1,7 @@
-package magma.jvm;
+package magma.jvm.io;
 
 import magma.annotate.Actual;
+import magma.annotate.Namespace;
 import magma.api.collect.List;
 import magma.api.collect.Lists;
 import magma.api.collect.RangeHead;
@@ -18,6 +19,7 @@ import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+@Namespace
 public final class Files {
     @Actual
     private record JVMPath(java.nio.file.Path path) implements Path {

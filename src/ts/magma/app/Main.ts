@@ -14,7 +14,7 @@ import { Option } from "../../magma/api/option/Option";
 import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
-import { Files } from "../../magma/jvm/Files";
+import { Files } from "../../magma/jvm/io/Files";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -827,8 +827,8 @@ export class Main {
 		});
 	}
 	static compileStructureWithExtends(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
-		return Main.compileFirst(beforeContent, " extends ", (s, s2) -  > Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, s, new Some<>(s2), maybeImplementing, inputContent)).or(() => {
-			return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<>(), maybeImplementing, inputContent);
+		return Main.compileFirst(beforeContent, " extends ", (beforeExtends: string, afterExtends: string) => Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeExtends, new Some<string>(afterExtends), maybeImplementing, inputContent)).or(() => {
+			return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<string>(), maybeImplementing, inputContent);
 		});
 	}
 	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeSuperType: Option<string>, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
@@ -860,9 +860,9 @@ export class Main {
 		if (annotations.contains("Actual")){
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 		}
-		let name = rawName.strip();
+		let name = Strings.strip(rawName);
 		if (!Main.isSymbol(name)){
-			return new None<>();
+			return new None<Tuple2<CompileState, string>>();
 		}
 		let outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
 		let outputContentState = outputContentTuple.left();

@@ -16,7 +16,7 @@ import magma.api.option.Option;
 import magma.api.result.Result;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
-import magma.jvm.Files;
+import magma.jvm.io.Files;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -1039,8 +1039,8 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithExtends(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Option<Type> maybeImplementing, String inputContent) {
-        return Main.compileFirst(beforeContent, " extends ", (s, s2) -> Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, s, new Some<>(s2), maybeImplementing, inputContent)).or(() -> {
-            return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<>(), maybeImplementing, inputContent);
+        return Main.compileFirst(beforeContent, " extends ", (String beforeExtends, String afterExtends) -> Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeExtends, new Some<String>(afterExtends), maybeImplementing, inputContent)).or(() -> {
+            return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<String>(), maybeImplementing, inputContent);
         });
     }
 
@@ -1093,9 +1093,9 @@ public final class Main {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
         }
 
-        var name = rawName.strip();
+        var name = Strings.strip(rawName);
         if (!Main.isSymbol(name)) {
-            return new None<>();
+            return new None<Tuple2<CompileState, String>>();
         }
 
         var outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
