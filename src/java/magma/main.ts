@@ -198,17 +198,14 @@ class CompileState {
 		this.depth = depth;
 		this.definitions = definitions;
 	}
-	constructor () {
-		this("", new None<string>(), 0, Lists.empty());
+	static createInitial(): CompileState {
+		return new CompileState("", new None<string>(), 0, Lists.empty());
 	}
 	append(element: string): CompileState {
 		return new CompileState(this.output + element, this.structureName, this.depth, this.definitions);
 	}
 	withStructureName(name: string): CompileState {
 		return new CompileState(this.output, new Some<string>(name), this.depth, this.definitions);
-	}
-	depth(): number {
-		return this.depth;
 	}
 	enterDepth(): CompileState {
 		return new CompileState(this.output, this.structureName, this.depth + 1, this.definitions);
@@ -221,6 +218,9 @@ class CompileState {
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.query().filter((definition) => definition.name.equals(name)).map(Definition.type).next();
+	}
+	toString(): string {
+		return "CompileState[" + "output=" + this.output + ", " + "structureName=" + this.structureName + ", " + "depth=" + this.depth + ", " + "definitions=" + this.definitions + "]";
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -759,7 +759,7 @@ class Main  {
         }*/
 	}
 	static compileRoot(input: string): string {
-		let compiled = Main.compileStatements(new CompileState(), input, Main.compileRootSegment);
+		let compiled = Main.compileStatements(CompileState.createInitial(), input, Main.compileRootSegment);
 		return compiled.left.output + compiled.right;
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple<CompileState, string>): Tuple<CompileState, string> {

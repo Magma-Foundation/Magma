@@ -260,8 +260,8 @@ public final class Main {
     }
 
     private record CompileState(String output, Option<String> structureName, int depth, List<Definition> definitions) {
-        private CompileState() {
-            this("", new None<String>(), 0, Lists.empty());
+        private static CompileState createInitial() {
+            return new CompileState("", new None<String>(), 0, Lists.empty());
         }
 
         CompileState append(String element) {
@@ -270,10 +270,6 @@ public final class Main {
 
         CompileState withStructureName(String name) {
             return new CompileState(this.output, new Some<String>(name), this.depth, this.definitions);
-        }
-
-        public int depth() {
-            return this.depth;
         }
 
         CompileState enterDepth() {
@@ -294,6 +290,16 @@ public final class Main {
                     .map(Definition::type)
                     .next();
         }
+
+        @Override
+        public String toString() {
+            return "CompileState[" +
+                    "output=" + this.output + ", " +
+                    "structureName=" + this.structureName + ", " +
+                    "depth=" + this.depth + ", " +
+                    "definitions=" + this.definitions + ']';
+        }
+
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
@@ -995,7 +1001,7 @@ public final class Main {
     }
 
     private static String compileRoot(String input) {
-        var compiled = Main.compileStatements(new CompileState(), input, Main::compileRootSegment);
+        var compiled = Main.compileStatements(CompileState.createInitial(), input, Main::compileRootSegment);
         return compiled.left.output + compiled.right;
     }
 
