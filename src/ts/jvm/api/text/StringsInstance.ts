@@ -2,6 +2,8 @@
 	JVMList: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
 	Files: jvm.api.io, 
+	Characters: jvm.api.text, 
+	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
@@ -22,15 +24,23 @@
 	Option: magma.api.option, 
 	Some: magma.api.option, 
 	Result: magma.api.result, 
-	Characters: magma.api.text, 
-	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface CharactersInstance {
-	isDigit(c: string): boolean;
+export interface StringsInstance {
+	length(stripped: string): number;
 
-	isLetter(c: string): boolean;
+	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
+
+	sliceFrom(input: string, startInclusive: number): string;
+
+	isEmpty(cache: string): boolean;
+
+	equalsTo(left: string, right: string): boolean;
+
+	strip(input: string): string;
+
+	isBlank(value: string): boolean;
 
 }

@@ -2,6 +2,8 @@
 	JVMList: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
 	Files: jvm.api.io, 
+	Characters: jvm.api.text, 
+	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
@@ -22,8 +24,6 @@
 	Option: magma.api.option, 
 	Some: magma.api.option, 
 	Result: magma.api.result, 
-	Characters: magma.api.text, 
-	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	Main: magma.app
@@ -32,7 +32,7 @@ import { Option } from "../../magma/api/option/Option";
 import { List } from "../../magma/api/collect/list/List";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { Strings } from "../../magma/api/text/Strings";
+import { Strings } from "../../jvm/api/text/Strings";
 import { None } from "../../magma/api/option/None";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
@@ -49,7 +49,7 @@ import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Files } from "../../jvm/api/io/Files";
 import { Console } from "../../magma/api/io/Console";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
-import { Characters } from "../../magma/api/text/Characters";
+import { Characters } from "../../jvm/api/text/Characters";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;

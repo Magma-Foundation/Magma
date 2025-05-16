@@ -20,8 +20,8 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Result;
-import magma.api.text.Characters;
-import magma.api.text.Strings;
+import jvm.api.text.Characters;
+import jvm.api.text.Strings;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
