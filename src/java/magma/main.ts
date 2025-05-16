@@ -47,6 +47,8 @@ interface Parameter {
 }
 class HeadedIterator<T> {
 	head : Head<T>;
+	constructor (head : Head<T>) {
+	}
 	next(): Option<T> {
 		return this.head.next();
 	}
@@ -100,6 +102,8 @@ class RangeHead implements Head<Integer> {
 }
 class JVMList<T> {
 	list : java.util.List<T>;
+	constructor (list : java.util.List<T>) {
+	}
 	JVMList(): public {
 		this(new ArrayList<>());
 	}
@@ -213,11 +217,15 @@ class DivideState {
 class Tuple<A, B> {
 	left : A;
 	right : B;
+	constructor (left : A, right : B) {
+	}
 }
 class CompileState {
 	output : string;
 	structureName : Option<string>;
 	depth : number;
+	constructor (output : string, structureName : Option<string>, depth : number) {
+	}
 	constructor () {
 		this("", new None<string>(), 0);
 	}
@@ -239,6 +247,8 @@ class CompileState {
 }
 class Joiner {
 	delimiter : string;
+	constructor (delimiter : string) {
+	}
 	constructor () {
 		this("");
 	}
@@ -254,6 +264,8 @@ class Definition {
 	name : string;
 	typeParams : List<string>;
 	type : string;
+	constructor (maybeBeforeType : Option<string>, name : string, typeParams : List<string>, type : string) {
+	}
 	generate(): string {
 		return this.generateWithAfterName(" ");
 	}
@@ -275,12 +287,16 @@ class ConstructorHeader implements MethodHeader {
 }
 class Ok<T, X> {
 	value : T;
+	constructor (value : T) {
+	}
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenOk.apply(this.value);
 	}
 }
 class Err<T, X> {
 	error : X;
+	constructor (error : X) {
+	}
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenErr.apply(this.error);
 	}
@@ -348,6 +364,8 @@ class FlatMapHead<T, R> implements Head<R> {
 }
 class Some<T> {
 	value : T;
+	constructor (value : T) {
+	}
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
 		return new Some<>(mapper.apply(this.value));
 	}
@@ -412,6 +430,8 @@ class None<T> {
 }
 class Placeholder {
 	input : string;
+	constructor (input : string) {
+	}
 	generate(): string {
 		return generatePlaceholder(this.input);
 	}
@@ -561,9 +581,13 @@ class Main {
 		let outputContentTuple : unknown = compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
 		let outputContentState : unknown = outputContentTuple.left;
 		let outputContent : unknown = outputContentTuple.right;
-		let joinedParameters : unknown = joinParameters(parameters);
-		let generated : unknown = infix + name + " {" + joinedParameters + outputContent + "\n}\n";
+		let joinedParametersAsClassDefinitions : unknown = joinParameters(parameters);
+		let constructorString : unknown = generateConstructorFromRecordParameters(parameters);
+		let generated : unknown = infix + name + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
 		return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(outputContentState.append(generated), ""));
+	}
+	generateConstructorFromRecordParameters(parameters : List<Definition>): string {
+		return parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).map((generatedParameters) => "\n\tconstructor (" + generatedParameters + ") {\n\t}").orElse("");
 	}
 	joinParameters(parameters : List<Definition>): string {
 		return parameters.iterate().map(Definition.generate).map((generated) => "\n\t" + generated + ";").collect(new Joiner()).orElse("");

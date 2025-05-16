@@ -800,9 +800,20 @@ public class Main {
         var outputContentTuple = compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
-        var joinedParameters = joinParameters(parameters);
-        var generated = infix + name + " {" + joinedParameters + outputContent + "\n}\n";
+        var joinedParametersAsClassDefinitions = joinParameters(parameters);
+
+        var constructorString = generateConstructorFromRecordParameters(parameters);
+
+        var generated = infix + name + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
         return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(outputContentState.append(generated), ""));
+    }
+
+    private static String generateConstructorFromRecordParameters(List<Definition> parameters) {
+        return parameters.iterate()
+                .map(Definition::generate)
+                .collect(new Joiner(", "))
+                .map(generatedParameters -> "\n\tconstructor (" + generatedParameters + ") {\n\t}")
+                .orElse("");
     }
 
     private static String joinParameters(List<Definition> parameters) {
