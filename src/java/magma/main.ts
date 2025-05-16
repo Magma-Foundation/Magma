@@ -12,10 +12,10 @@ interface Option<T> {
 	map<R>(mapper : (arg0 : T) => R): Option<R>;
 	isEmpty(): boolean;
 	orElse(other : T): T;
-	orElseGet(supplier : Supplier<T>): T;
+	orElseGet(supplier : () => T): T;
 	isPresent(): boolean;
 	ifPresent(consumer : Consumer<T>): void;
-	or(other : Supplier<Option<T>>): Option<T>;
+	or(other : () => Option<T>): Option<T>;
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R>;
 	filter(predicate : Predicate<T>): Option<T>;
 }
@@ -335,7 +335,7 @@ class Some<T> {
 	orElse(other : T): T {
 		return this.value;
 	}
-	orElseGet(supplier : Supplier<T>): T {
+	orElseGet(supplier : () => T): T {
 		return this.value;
 	}
 	isPresent(): boolean {
@@ -344,7 +344,7 @@ class Some<T> {
 	ifPresent(consumer : Consumer<T>): void {
 		consumer.accept(this.value);
 	}
-	or(other : Supplier<Option<T>>): Option<T> {
+	or(other : () => Option<T>): Option<T> {
 		return this;
 	}
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R> {
@@ -367,7 +367,7 @@ class None<T> {
 	orElse(other : T): T {
 		return other;
 	}
-	orElseGet(supplier : Supplier<T>): T {
+	orElseGet(supplier : () => T): T {
 		return supplier.get();
 	}
 	isPresent(): boolean {
@@ -375,7 +375,7 @@ class None<T> {
 	}
 	ifPresent(consumer : Consumer<T>): void {
 	}
-	or(other : Supplier<Option<T>>): Option<T> {
+	or(other : () => Option<T>): Option<T> {
 		return other.get();
 	}
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R> {
@@ -985,6 +985,9 @@ class Main {
 		}
 		if (base.equals("BiFunction")){
 			return new Some<string>(generateFunctionType(Lists.of(arguments.find(0).orElse(null), arguments.find(1).orElse(null)), arguments.find(2).orElse(null)));
+		}
+		if (base.equals("Supplier")){
+			return arguments.findFirst().map((first) => generateFunctionType(Lists.empty(), first));
 		}
 		return new None<string>();
 	}

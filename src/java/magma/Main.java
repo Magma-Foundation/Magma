@@ -1397,6 +1397,10 @@ public class Main {
             return new Some<String>(generateFunctionType(Lists.of(arguments.find(0).orElse(null), arguments.find(1).orElse(null)), arguments.find(2).orElse(null)));
         }
 
+        if (base.equals("Supplier")) {
+            return arguments.findFirst().map(first -> generateFunctionType(Lists.empty(), first));
+        }
+
         return new None<String>();
     }
 
