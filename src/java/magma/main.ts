@@ -1,5 +1,6 @@
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
+	hasAnnotation(annotation: string): boolean;
 }
 interface Result<T, X> {
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
@@ -65,6 +66,8 @@ interface Type  {
 	isFunctional(): boolean;
 	isVar(): boolean;
 	generateBeforeName(): string;
+}
+interface Actual  {
 }
 class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
@@ -259,7 +262,7 @@ class Definition {
 	generateWithAfterName(afterName: string): string {
 		let joinedTypeParams = this.joinTypeParams();
 		let joinedModifiers = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
-		return joinedModifiers + type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 	}
 	generateType(): string {
 		if (this.type.isVar()){
@@ -270,10 +273,16 @@ class Definition {
 	joinTypeParams(): string {
 		return Main.joinTypeParams(this.typeParams);
 	}
+	hasAnnotation(annotation: string): boolean {
+		return this.annotations.contains(annotation);
+	}
 }
 class ConstructorHeader implements MethodHeader {
 	generateWithAfterName(afterName: string): string {
 		return "constructor " + afterName;
+	}
+	hasAnnotation(annotation: string): boolean {
+		return false;
 	}
 }
 class Ok<T, X> implements Result<T, X> {
@@ -788,6 +797,10 @@ class VarArgs implements Type {
 		return "...";
 	}
 }
+class Files  {
+	static writeString(target: Path, output: string): Option<IOException>;
+	static readString(source: Path): Result<string, IOException>;
+}
 class Primitive implements Type {
 	Unknown("unknown"): /*Void("void"),*/;
 	value: string;/*
@@ -812,24 +825,11 @@ class Main  {
 	static main(): void {
 		let source = Paths.get(".", "src", "java", "magma", "Main.java");
 		let target = source.resolveSibling("main.ts");
-		Main.readString(source).match((input: string) => Main.compileAndWrite(input, target), Some.new).ifPresent(Throwable.printStackTrace);
+		Files.readString(source).match((input: string) => Main.compileAndWrite(input, target), Some.new).ifPresent(Throwable.printStackTrace);
 	}
 	static compileAndWrite(input: string, target: Path): Option<IOException> {
 		let output = Main.compileRoot(input);
-		return Main.writeString(target, output);
-	}
-	static writeString(target: Path, output: string): Option<IOException> {/*try {
-            Files.writeString(target, output);
-            return new None<IOException>();
-        }*//* catch (IOException e) {
-            return new Some<IOException>(e);
-        }*/
-	}
-	static readString(source: Path): Result<string, IOException> {/*try {
-            return new Ok<>(Files.readString(source));
-        }*//* catch (IOException e) {
-            return new Err<>(e);
-        }*/
+		return Files.writeString(target, output);
 	}
 	static compileRoot(input: string): string {
 		let compiled = Main.compileStatements(CompileState.createInitial(), input, Main.compileRootSegment);
@@ -1032,6 +1032,9 @@ class Main  {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
+			if (header.hasAnnotation("Actual")){
+				return new Some<>(new Tuple<>(parametersState, "\n\t" + headerGenerated + ";"));
+			}
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {
 				return Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
 					let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);

@@ -1,7 +1,6 @@
 package magma;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -15,6 +14,8 @@ import java.util.function.Supplier;
 public final class Main {
     private interface MethodHeader {
         String generateWithAfterName(String afterName);
+
+        boolean hasAnnotation(String annotation);
     }
 
     private interface Result<T, X> {
@@ -123,6 +124,9 @@ public final class Main {
         boolean isVar();
 
         String generateBeforeName();
+    }
+
+    private @interface Actual {
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -339,7 +343,7 @@ public final class Main {
                     .collect(new Joiner(""))
                     .orElse("");
 
-            return joinedModifiers + type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+            return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
         }
 
         private String generateType() {
@@ -353,12 +357,22 @@ public final class Main {
         private String joinTypeParams() {
             return Main.joinTypeParams(this.typeParams);
         }
+
+        @Override
+        public boolean hasAnnotation(String annotation) {
+            return this.annotations.contains(annotation);
+        }
     }
 
     private static class ConstructorHeader implements MethodHeader {
         @Override
         public String generateWithAfterName(String afterName) {
             return "constructor " + afterName;
+        }
+
+        @Override
+        public boolean hasAnnotation(String annotation) {
+            return false;
         }
     }
 
@@ -1039,35 +1053,39 @@ public final class Main {
         }
     }
 
+    public static class Files {
+        @Actual
+        private static Option<IOException> writeString(Path target, String output) {
+            try {
+                java.nio.file.Files.writeString(target, output);
+                return new None<IOException>();
+            } catch (IOException e) {
+                return new Some<IOException>(e);
+            }
+        }
+
+        @Actual
+        private static Result<String, IOException> readString(Path source) {
+            try {
+                return new Ok<String, IOException>(java.nio.file.Files.readString(source));
+            } catch (IOException e) {
+                return new Err<String, IOException>(e);
+            }
+        }
+    }
+
     public static void main() {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("main.ts");
 
-        Main.readString(source)
+        Files.readString(source)
                 .match((String input) -> Main.compileAndWrite(input, target), Some::new)
                 .ifPresent(Throwable::printStackTrace);
     }
 
     private static Option<IOException> compileAndWrite(String input, Path target) {
         var output = Main.compileRoot(input);
-        return Main.writeString(target, output);
-    }
-
-    private static Option<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return new None<IOException>();
-        } catch (IOException e) {
-            return new Some<IOException>(e);
-        }
-    }
-
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
+        return Files.writeString(target, output);
     }
 
     private static String compileRoot(String input) {
@@ -1386,6 +1404,10 @@ public final class Main {
                     .orElse("");
 
             var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
+            if (header.hasAnnotation("Actual")) {
+                return new Some<>(new Tuple<>(parametersState, "\n\t" + headerGenerated + ";"));
+            }
+
             return Main.compilePrefix(Strings.strip(afterParams), "{", (String withoutContentStart) -> {
                 return Main.compileSuffix(Strings.strip(withoutContentStart), "}", (String withoutContentEnd) -> {
                     var statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
