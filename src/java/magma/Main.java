@@ -554,6 +554,7 @@ public class Main {
                 createTextRule("'"),
                 createOperatorRule("+"),
                 createOperatorRule("-"),
+                createOperatorRule("<="),
                 createOperatorRule("<"),
                 createOperatorRule("&&"),
                 createOperatorRule("||")

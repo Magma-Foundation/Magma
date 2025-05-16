@@ -408,12 +408,12 @@
 		return compileValue(state, input).orElseGet(() => new /*Tuple*/<>(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileValue(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createOperatorRuleWithDifferentInfixes(/*"*/ !== /*"*/, /* "!*/ === /*"*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||")));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createOperatorRuleWithDifferentInfixes(/*"*/ !== /*"*/, /* "!*/ === /*"*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||")));
 	}
 	/*private static*/createTextRule(slice : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
 		return (state1, input1) => {
 			let stripped : unknown = input1.strip();
-			if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() < /*= slice*/.length()){
+			if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() <= slice.length()){
 				return Optional.empty();
 			}
 			let value : unknown = stripped.substring(slice.length(), stripped.length() - slice.length());
