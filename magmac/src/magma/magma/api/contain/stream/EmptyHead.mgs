@@ -1,6 +1,0 @@
-import magma.api.option.Option;
-import static magma.api.option.None.None;
-export object EmptyHead {
-	public def head() => None();
-	implements Head<T>;
-}
