@@ -375,7 +375,10 @@ class Some<T> implements Option<T> {
 		return mapper(this.value);
 	}
 	filter(predicate: (arg0 : T) => boolean): Option<T> {
-		/*return predicate.test(this.value) ? this : new None<>()*/;
+		if (predicate(this.value)){
+			return this;
+		}
+		return new None<>();
 	}
 	toTuple(other: T): Tuple<Boolean, T> {
 		return new Tuple<>(true, this.value);
@@ -567,13 +570,13 @@ class Lambda implements Value {
 }
 class Invokable implements Value {
 	caller: Caller;
-	arguments: List<Value>;
-	constructor (caller: Caller, arguments: List<Value>) {
+	args: List<Value>;
+	constructor (caller: Caller, args: List<Value>) {
 		this.caller = caller;
-		this.arguments = arguments;
+		this.args = args;
 	}
 	generate(): string {
-		let joinedArguments = Main.generateValues(this.arguments);
+		let joinedArguments = Main.generateValues(this.args);
 		return this.caller.generate() + "(" + joinedArguments + ")";
 	}
 	toValue(): Option<Value> {
@@ -621,14 +624,14 @@ class ConstructionCaller implements Caller {
 	}
 }
 class FunctionType implements Type {
-	arguments: List<string>;
+	args: List<string>;
 	returns: string;
-	constructor (arguments: List<string>, returns: string) {
-		this.arguments = arguments;
+	constructor (args: List<string>, returns: string) {
+		this.args = args;
 		this.returns = returns;
 	}
 	generate(): string {
-		let joinedArguments = this.arguments.queryWithIndices().map((tuple) => "arg" + tuple.left + " : " + tuple.right).collect(new Joiner(", ")).orElse("");
+		let joinedArguments = this.args.queryWithIndices().map((tuple) => "arg" + tuple.left + " : " + tuple.right).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + this.returns;
 	}
 	isFunctional(): boolean {
@@ -640,13 +643,13 @@ class FunctionType implements Type {
 }
 class Generic implements Type {
 	base: string;
-	arguments: List<string>;
-	constructor (base: string, arguments: List<string>) {
+	args: List<string>;
+	constructor (base: string, args: List<string>) {
 		this.base = base;
-		this.arguments = arguments;
+		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + Main.generateValueStrings(this.arguments) + ">";
+		return this.base + "<" + Main.generateValueStrings(this.args) + ">";
 	}
 	isFunctional(): boolean {
 		return false;
@@ -727,8 +730,6 @@ class Strings  {
 	}
 }
 class Main  {
-	Main(): private {
-	}
 	static main(): void {
 		let source = Paths.get(".", "src", "java", "magma", "Main.java");
 		let target = source.resolveSibling("main.ts");
@@ -782,11 +783,11 @@ class Main  {
 	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): List<string> {
 		let current = DivideState.createInitial(input);
 		while (true){
-			let maybePopped = current.pop();
-			if (maybePopped.isEmpty()){
+			let poppedTuple0 = current.pop().toTuple(new Tuple<>(current, "\0"));
+			if (!poppedTuple0.left()){
 				break;
 			}
-			let poppedTuple = maybePopped.orElse(null);
+			let poppedTuple = poppedTuple0.right;
 			let poppedState = poppedTuple.left;
 			let popped = poppedTuple.right;
 			current = Main.foldSingleQuotes(poppedState, popped).or(() => Main.foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder(poppedState, popped));
@@ -799,11 +800,11 @@ class Main  {
 		}
 		let appended = state.append(c);
 		while (true){
-			let maybeTuple = appended.popAndAppendToTuple();
-			if (maybeTuple.isEmpty()){
+			let maybeTuple = appended.popAndAppendToTuple().toTuple(new Tuple<>(appended, "\0"));
+			if (!maybeTuple.left()){
 				break;
 			}
-			let tuple = maybeTuple.orElse(null);
+			let tuple = maybeTuple.right;
 			appended = tuple.left;
 			if ("\\" === tuple.right){
 				appended = appended.popAndAppendToOption().orElse(appended);
@@ -1074,16 +1075,16 @@ class Main  {
 	}
 	static parseInvokable(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
 		return Main.compileSuffix(input.strip(), ")", (withoutEnd) => {
-			return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart, arguments) => {
+			return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart, args) => {
 				return Main.compileSuffix(callerWithArgStart, "(", (callerString) => {
 					return Main.compilePrefix(callerString.strip(), "new ", (type) => {
 						let callerTuple = Main.compileTypeOrPlaceholder(state, type);
 						let callerState = callerTuple.right;
 						let caller = callerTuple.left;
-						return Main.assembleInvokable(caller, new ConstructionCaller(callerState), arguments);
+						return Main.assembleInvokable(caller, new ConstructionCaller(callerState), args);
 					}).or(() => {
 						return Main.parseValue(state, callerString).flatMap((callerTuple) => {
-							return Main.assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+							return Main.assembleInvokable(callerTuple.left, callerTuple.right, args);
 						});
 					});
 				});
@@ -1102,7 +1103,7 @@ class Main  {
 	}
 	static selectLast(divisions: List<string>, delimiter: string): Option<Tuple<string, string>> {
 		let beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
-		let last = divisions.findLast().orElse(null);
+		let last = divisions.findLast().orElse("");
 		let joined = beforeLast.query().collect(new Joiner(delimiter)).orElse("");
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(joined, last));
 	}
@@ -1122,12 +1123,12 @@ class Main  {
 		}
 		return appended;
 	}
-	static assembleInvokable(state: CompileState, oldCaller: Caller, argumentsString: string): Option<Tuple<CompileState, Value>> {
-		let argumentsTuple = Main.parseValues(state, argumentsString, Main.parseArgument);
-		let argumentsState = argumentsTuple.left;
-		let arguments = Main.retain(argumentsTuple.right, Argument.toValue);
-		let newCaller = Main.transformCaller(argumentsState, oldCaller);
-		return new Some<>(new Tuple<>(argumentsState, new Invokable(newCaller, arguments)));
+	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple<CompileState, Value>> {
+		let argsTuple = Main.parseValues(state, argsString, Main.parseArgument);
+		let argsState = argsTuple.left;
+		let args = Main.retain(argsTuple.right, Argument.toValue);
+		let newCaller = Main.transformCaller(argsState, oldCaller);
+		return new Some<>(new Tuple<>(argsState, new Invokable(newCaller, args)));
 	}
 	static transformCaller(state: CompileState, oldCaller: Caller): Caller {
 		return oldCaller.findChild().flatMap((parent) => {
@@ -1138,8 +1139,8 @@ class Main  {
 			return new None<>();
 		}).orElse(oldCaller);
 	}
-	static retain<T, R>(arguments: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
-		return arguments.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<>());
+	static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
+		return args.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<>());
 	}
 	static parseArgument(state1: CompileState, input: string): Tuple<CompileState, Argument> {
 		/*return Main.parseValue(state1, input)
@@ -1247,7 +1248,7 @@ class Main  {
 		};
 	}
 	static selectFirst(divisions: List<string>, delimiter: string): Option<Tuple<string, string>> {
-		let first = divisions.findFirst().orElse(null);
+		let first = divisions.findFirst().orElse("");
 		let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("");
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(first, afterFirst));
 	}
@@ -1429,39 +1430,39 @@ class Main  {
 	}
 	static parseGeneric(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
 		return Main.compileSuffix(input.strip(), ">", (withoutEnd) => {
-			return Main.compileFirst(withoutEnd, "<", (baseString, argumentsString) => {
-				let argumentsTuple = Main.parseValues(state, argumentsString, Main.compileTypeArgument);
-				let argumentsState = argumentsTuple.left;
-				let arguments = argumentsTuple.right;
+			return Main.compileFirst(withoutEnd, "<", (baseString, argsString) => {
+				let argsTuple = Main.parseValues(state, argsString, Main.compileTypeArgument);
+				let argsState = argsTuple.left;
+				let args = argsTuple.right;
 				let base = baseString.strip();
-				return Main.assembleFunctionType(argumentsState, base, arguments).or(() => {
-					return new Some<>(new Tuple<>(argumentsState, new Generic(base, arguments)));
+				return Main.assembleFunctionType(argsState, base, args).or(() => {
+					return new Some<>(new Tuple<>(argsState, new Generic(base, args)));
 				});
 			});
 		});
 	}
-	static assembleFunctionType(state: CompileState, base: string, arguments: List<string>): Option<Tuple<CompileState, Type>> {
-		return Main.mapFunctionType(base, arguments).map((generated) => new Tuple<>(state, generated));
+	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple<CompileState, Type>> {
+		return Main.mapFunctionType(base, args).map((generated) => new Tuple<>(state, generated));
 	}
-	static mapFunctionType(base: string, arguments: List<string>): Option<Type> {
+	static mapFunctionType(base: string, args: List<string>): Option<Type> {
 		if ("Function".equals(base)){
-			return arguments.findFirst().and(() => arguments.find(1)).map((tuple) => new FunctionType(Lists.of(tuple.left), tuple.right));
+			return args.findFirst().and(() => args.find(1)).map((tuple) => new FunctionType(Lists.of(tuple.left), tuple.right));
 		}
 		if ("BiFunction".equals(base)){
-			return arguments.find(0).and(() => arguments.find(1)).and(() => arguments.find(2)).map((tuple) => new FunctionType(Lists.of(tuple.left.left, tuple.left.right), tuple.right));
+			return args.find(0).and(() => args.find(1)).and(() => args.find(2)).map((tuple) => new FunctionType(Lists.of(tuple.left.left, tuple.left.right), tuple.right));
 		}
 		if ("Supplier".equals(base)){
-			return arguments.findFirst().map((first) => {
+			return args.findFirst().map((first) => {
 				return new FunctionType(Lists.empty(), first);
 			});
 		}
 		if ("Consumer".equals(base)){
-			return arguments.findFirst().map((first) => {
+			return args.findFirst().map((first) => {
 				return new FunctionType(Lists.of(first), "void");
 			});
 		}
 		if ("Predicate".equals(base)){
-			return arguments.findFirst().map((first) => {
+			return args.findFirst().map((first) => {
 				return new FunctionType(Lists.of(first), "boolean");
 			});
 		}
@@ -1542,8 +1543,8 @@ class Main  {
 		let replaced = input.replace("/*", "start").replace("*/", "end");
 		return "/*" + replaced + "*/";
 	}
-	static generateValues(arguments: List<Value>): string {
-		return arguments.query().map(Value.generate).collect(new Joiner(", ")).orElse("");
+	static generateValues(args: List<Value>): string {
+		return args.query().map(Value.generate).collect(new Joiner(", ")).orElse("");
 	}/*
 
     private enum Primitive implements Type {
