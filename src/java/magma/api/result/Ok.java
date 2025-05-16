@@ -9,12 +9,12 @@ import java.util.function.Function;
 public record Ok<T, X>(T value) implements Result<T, X> {
     @Override
     public Option<X> findError() {
-        return new None<>();
+        return new None<X>();
     }
 
     @Override
     public Option<T> findValue() {
-        return new Some<>(this.value);
+        return new Some<T>(this.value);
     }
 
     @Override

@@ -7,5 +7,8 @@ export const Lists: ListsInstance = {
     },
     of: function <T>(...elements: T[]): List<T> {
         throw new Error("Function not implemented.");
+    },
+    fromArray: function <T>(elements: T[]): List<T> {
+        throw new Error("Function not implemented.");
     }
 };

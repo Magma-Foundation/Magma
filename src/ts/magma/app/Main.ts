@@ -617,7 +617,7 @@ class ArrayType implements Type {
 		this.child = child;
 	}
 	generate(): string {
-		return child.generate() + "[]";
+		return this.child.generate() + "[]";
 	}
 	isFunctional(): boolean {
 		return false;
