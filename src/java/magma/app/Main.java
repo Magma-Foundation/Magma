@@ -129,11 +129,11 @@ public final class Main {
             List<String> structureNames,
             int depth,
             List<Definition> definitions,
-            Option<List<String>> maybeNamespace,
+            Option<Location> maybeLocation,
             List<Source> sources
     ) {
         private static CompileState createInitial() {
-            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
+            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty());
         }
 
         private boolean isLastWithin(String name) {
@@ -143,8 +143,11 @@ public final class Main {
         }
 
         private CompileState addResolvedImport(List<String> parent, String child) {
+            var namespace = this.maybeLocation
+                    .map((Location location) -> location.namespace)
+                    .orElse(Lists.empty());
+
             var parent1 = parent;
-            var namespace = this.maybeNamespace.orElse(Lists.empty());
             if (namespace.isEmpty()) {
                 parent1 = parent1.addFirst(".");
             }
@@ -166,31 +169,31 @@ public final class Main {
             }
 
             var importString = new Import(stringList, child);
-            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
-        private CompileState withNamespace(List<String> namespace) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<String>>(namespace), this.sources);
+        private CompileState withLocation(Location namespace) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState pushStructureName(String name) {
-            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources);
         }
 
         Option<Type> resolve(String name) {
@@ -200,25 +203,25 @@ public final class Main {
                     .next();
         }
 
-        public CompileState clearImports() {
-            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        CompileState clearImports() {
+            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
-        public CompileState clearOutput() {
-            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        CompileState clearOutput() {
+            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
-        public CompileState addSource(Source source) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+        CompileState addSource(Source source) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source));
         }
 
-        public Option<Source> findSource(String name) {
+        Option<Source> findSource(String name) {
             return this.sources.query()
                     .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
                     .next();
         }
 
-        public CompileState addResolvedImportFromCache(String base) {
+        CompileState addResolvedImportFromCache(String base) {
             if (this.structureNames.query().anyMatch((String inner) -> Strings.equalsTo(inner, base))) {
                 return this;
             }
@@ -228,8 +231,12 @@ public final class Main {
                     .orElse(this);
         }
 
-        public CompileState popStructureName() {
-            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
+        CompileState popStructureName() {
+            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources);
+        }
+
+        public CompileState mapLocation(Function<Location, Location> mapper) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources);
         }
     }
 
@@ -723,6 +730,13 @@ public final class Main {
                     .query()
                     .collect(new ListCollector<String>());
         }
+
+        Location computeLocation() {
+            return new Location(this.computeNamespace(), this.computeName());
+        }
+    }
+
+    private record Location(List<String> namespace, String name) {
     }
 
     public static void main() {
@@ -761,17 +775,19 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
-        var target = Files.get(".", "src", "ts")
-                .resolveChildSegments(source.computeNamespace())
-                .resolveChild(source.computeName() + ".ts");
-
         return source.read().match(
-                (String input) -> Main.compileAndWrite(state, source, input, target),
+                (String input) -> Main.compileAndWrite(state, source, input),
                 (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Path target) {
-        var output = Main.compileRoot(state, source, input);
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input) {
+        var output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
+
+        var location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
+
+        var target = Files.get(".", "src", "ts")
+                .resolveChildSegments(location.namespace)
+                .resolveChild(location.name + ".ts");
 
         var parent = target.getParent();
         if (!parent.exists()) {
@@ -782,14 +798,14 @@ public final class Main {
     }
 
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, Source source, String input) {
-        var compiled = Main.compileStatements(state.withNamespace(source.computeNamespace()), input, Main::compileRootSegment);
-        var compiledState = compiled.left();
-        var imports = compiledState.imports.query()
+        var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
+        var statementsState = statementsTuple.left();
+        var imports = statementsState.imports.query()
                 .map((Import anImport) -> anImport.generate())
                 .collect(new Joiner(""))
                 .orElse("");
 
-        var compileState = state.clearImports().clearOutput();
+        var compileState = statementsState.clearImports().clearOutput();
         var segment = compileState.sources
                 .query()
                 .map((Source source1) -> Main.formatSource(source1))
@@ -797,7 +813,7 @@ public final class Main {
                 .orElse("");
 
         var withMain = Main.createMain(source);
-        var output = "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right() + withMain;
+        var output = "/*[" + segment + "\n]*/\n" + imports + statementsState.output + statementsTuple.right() + withMain;
         return new Tuple2Impl<CompileState, String>(compileState, output);
     }
 
@@ -1055,8 +1071,9 @@ public final class Main {
             String newName = name + "Instance";
 
             var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated)
-                    .append("export declare const " + name + ": " + newName + ";\n"), ""));
+            var withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace, location.name + "Instance"));
+
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(withNewLocation, ""));
         }
         else {
             var extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");

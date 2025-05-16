@@ -28,8 +28,9 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface ConsoleInstance {
-	printErrLn(message: string): void;
+export interface CharactersInstance {
+	isDigit(c: string): boolean;
+
+	isLetter(c: string): boolean;
 
 }
-export declare const Console: ConsoleInstance;

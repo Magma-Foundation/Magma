@@ -137,26 +137,26 @@ class CompileState {
 	structureNames: List<string>;
 	depth: number;
 	definitions: List<Definition>;
-	maybeNamespace: Option<List<string>>;
+	maybeLocation: Option<Location>;
 	sources: List<Source>;
-	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>, sources: List<Source>) {
+	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
 		this.depth = depth;
 		this.definitions = definitions;
-		this.maybeNamespace = maybeNamespace;
+		this.maybeLocation = maybeLocation;
 		this.sources = sources;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty());
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty());
 	}
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	addResolvedImport(parent: List<string>, child: string): CompileState {
+		let namespace = this.maybeLocation.map((location: Location) => location.namespace).orElse(Lists.empty());
 		let parent1 = parent;
-		let namespace = this.maybeNamespace.orElse(Lists.empty());
 		if (namespace.isEmpty()){
 			parent1 = parent1.addFirst(".");
 		}
@@ -171,37 +171,37 @@ class CompileState {
 			return this;
 		}
 		let importString = new Import(stringList, child);
-		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
 	}
-	withNamespace(namespace: List<string>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<string>>(namespace), this.sources);
+	withLocation(namespace: Location): CompileState {
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources);
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
 	}
 	pushStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources);
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 	clearImports(): CompileState {
-		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
 	}
 	clearOutput(): CompileState {
-		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
 	}
 	addSource(source: Source): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source));
 	}
 	findSource(name: string): Option<Source> {
 		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
@@ -213,7 +213,10 @@ class CompileState {
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 	popStructureName(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources);
+	}
+	mapLocation(mapper: (arg0 : Location) => Location): CompileState {
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -621,6 +624,17 @@ class Source {
 	computeNamespace(): List<string> {
 		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>());
 	}
+	computeLocation(): Location {
+		return new Location(this.computeNamespace(), this.computeName());
+	}
+}
+class Location {
+	namespace: List<string>;
+	name: string;
+	constructor (namespace: List<string>, name: string) {
+		this.namespace = namespace;
+		this.name = name;
+	}
 }
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
@@ -666,11 +680,12 @@ export class Main {
 		return Main.runWithSource(state, source);
 	}
 	static runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
-		let target = Files.get(".", "src", "ts").resolveChildSegments(source.computeNamespace()).resolveChild(source.computeName() + ".ts");
-		return source.read().match((input: string) => Main.compileAndWrite(state, source, input, target), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
+		return source.read().match((input: string) => Main.compileAndWrite(state, source, input), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
 	}
-	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Tuple2<CompileState, Option<IOError>> {
-		let output = Main.compileRoot(state, source, input);
+	static compileAndWrite(state: CompileState, source: Source, input: string): Tuple2<CompileState, Option<IOError>> {
+		let output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
+		let location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
+		let target = Files.get(".", "src", "ts").resolveChildSegments(location.namespace).resolveChild(location.name + ".ts");
 		let parent = target.getParent();
 		if (!parent.exists()){
 			parent.createDirectories();
@@ -678,13 +693,13 @@ export class Main {
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {
-		let compiled = Main.compileStatements(state.withNamespace(source.computeNamespace()), input, Main.compileRootSegment);
-		let compiledState = compiled.left();
-		let imports = compiledState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
-		let compileState = state.clearImports().clearOutput();
+		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
+		let statementsState = statementsTuple.left();
+		let imports = statementsState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
+		let compileState = statementsState.clearImports().clearOutput();
 		let segment = compileState.sources.query().map((source1: Source) => Main.formatSource(source1)).collect(new Joiner(", ")).orElse("");
 		let withMain = Main.createMain(source);
-		let output = "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right() + withMain;
+		let output = "/*[" + segment + "\n]*/\n" + imports + statementsState.output + statementsTuple.right() + withMain;
 		return new Tuple2Impl<CompileState, string>(compileState, output);
 	}
 	static createMain(source: Source): string {
@@ -867,7 +882,8 @@ export class Main {
 			let actualInfix: string = "interface ";
 			let newName: string = name + "Instance";
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated).append("export declare const " + name + ": " + newName + ";\n"), ""));
+			let withNewLocation = outputContentState.append(generated).mapLocation((location: Location) => new Location(location.namespace, location.name + "Instance"));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(withNewLocation, ""));
 		}
 		else {
 			let extendsString = maybeSuperType.map((inner: string) => " extends " + inner).orElse("");

@@ -44,4 +44,3 @@ export interface StringsInstance {
 	isBlank(value: string): boolean;
 
 }
-export declare const Strings: StringsInstance;

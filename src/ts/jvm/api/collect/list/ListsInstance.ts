@@ -35,4 +35,3 @@ export interface ListsInstance {
 	of<T>(...elements: T[]): List<T>;
 
 }
-export declare const Lists: ListsInstance;

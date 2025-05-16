@@ -33,4 +33,3 @@ export interface FilesInstance {
 	get(first: string, ...more: string[]): Path;
 
 }
-export declare const Files: FilesInstance;
