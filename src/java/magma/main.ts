@@ -1,3 +1,6 @@
+interface IOError  {
+	display(): string;
+}
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -11,7 +14,6 @@ interface Collector<T, C> {
 }
 interface Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R>;
-	isEmpty(): boolean;
 	orElse(other: T): T;
 	orElseGet(supplier: () => T): T;
 	isPresent(): boolean;
@@ -71,8 +73,8 @@ interface Type  {
 interface Actual  {
 }
 interface Path  {
-	writeString(output: string): Option<IOException>;
-	readString(): Result<string, IOException>;
+	writeString(output: string): Option<IOError>;
+	readString(): Result<string, IOError>;
 	resolveSibling(siblingName: string): Path;
 }
 class HeadedQuery<T> implements Query<T> {
@@ -370,9 +372,6 @@ class Some<T> implements Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return new Some<R>(mapper(this.value));
 	}
-	isEmpty(): boolean {
-		return false;
-	}
 	orElse(other: T): T {
 		return this.value;
 	}
@@ -407,9 +406,6 @@ class Some<T> implements Option<T> {
 class None<T> implements Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return new None<R>();
-	}
-	isEmpty(): boolean {
-		return true;
 	}
 	orElse(other: T): T {
 		return other;
@@ -760,6 +756,11 @@ class VarArgs implements Type {
 class Files  {
 	static get(first: string, ...more: string[]): Path;
 }
+class Console  {
+	static printErrLn(message: string): void {
+		System.err.println(message);
+	}
+}
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
@@ -788,9 +789,9 @@ class Main  {
 	static main(): void {
 		let source = Files.get(".", "src", "java", "magma", "Main.java");
 		let target = source.resolveSibling("main.ts");
-		source.readString().match((input: string) => Main.compileAndWrite(input, target), Some.new).ifPresent(Throwable.printStackTrace);
+		source.readString().match((input: string) => Main.compileAndWrite(input, target), (value: IOError) => new Some<IOError>(value)).ifPresent((error: IOError) => Console.printErrLn(error.display()));
 	}
-	static compileAndWrite(input: string, target: Path): Option<IOException> {
+	static compileAndWrite(input: string, target: Path): Option<IOError> {
 		let output = Main.compileRoot(input);
 		return target.writeString(output);
 	}

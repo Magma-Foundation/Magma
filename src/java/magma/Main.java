@@ -1,6 +1,8 @@
 package magma;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +13,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class Main {
+    private interface IOError {
+        String display();
+    }
+
     private interface MethodHeader {
         String generateWithAfterName(String afterName);
 
@@ -29,8 +35,6 @@ public final class Main {
 
     private interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
-
-        boolean isEmpty();
 
         T orElse(T other);
 
@@ -131,9 +135,9 @@ public final class Main {
     }
 
     private interface Path {
-        Option<IOException> writeString(String output);
+        Option<IOError> writeString(String output);
 
-        Result<String, IOException> readString();
+        Result<String, IOError> readString();
 
         Path resolveSibling(String siblingName);
     }
@@ -479,11 +483,6 @@ public final class Main {
         }
 
         @Override
-        public boolean isEmpty() {
-            return false;
-        }
-
-        @Override
         public T orElse(T other) {
             return this.value;
         }
@@ -536,11 +535,6 @@ public final class Main {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<R>();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return true;
         }
 
         @Override
@@ -1126,25 +1120,34 @@ public final class Main {
         }
     }
 
-    public static class Files {
+    private static class Files {
         @Actual
         private record JVMPath(java.nio.file.Path path) implements Path {
-            @Override
-            public Option<IOException> writeString(String output) {
-                try {
-                    java.nio.file.Files.writeString(this.path, output);
-                    return new None<IOException>();
-                } catch (IOException e) {
-                    return new Some<IOException>(e);
+            private record JVMIOError(IOException error) implements IOError {
+                @Override
+                public String display() {
+                    var writer = new StringWriter();
+                    this.error.printStackTrace(new PrintWriter(writer));
+                    return writer.toString();
                 }
             }
 
             @Override
-            public Result<String, IOException> readString() {
+            public Option<IOError> writeString(String output) {
                 try {
-                    return new Ok<String, IOException>(java.nio.file.Files.readString(this.path));
+                    java.nio.file.Files.writeString(this.path, output);
+                    return new None<IOError>();
                 } catch (IOException e) {
-                    return new Err<String, IOException>(e);
+                    return new Some<IOError>(new JVMIOError(e));
+                }
+            }
+
+            @Override
+            public Result<String, IOError> readString() {
+                try {
+                    return new Ok<String, IOError>(java.nio.file.Files.readString(this.path));
+                } catch (IOException e) {
+                    return new Err<String, IOError>(new JVMIOError(e));
                 }
             }
 
@@ -1160,16 +1163,22 @@ public final class Main {
         }
     }
 
+    public static class Console {
+        private static void printErrLn(String message) {
+            System.err.println(message);
+        }
+    }
+
     public static void main() {
         var source = Files.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("main.ts");
 
         source.readString()
-                .match((String input) -> Main.compileAndWrite(input, target), Some::new)
-                .ifPresent(Throwable::printStackTrace);
+                .match((String input) -> Main.compileAndWrite(input, target), (IOError value) -> new Some<IOError>(value))
+                .ifPresent((IOError error) -> Console.printErrLn(error.display()));
     }
 
-    private static Option<IOException> compileAndWrite(String input, Path target) {
+    private static Option<IOError> compileAndWrite(String input, Path target) {
         var output = Main.compileRoot(input);
         return target.writeString(output);
     }
@@ -1372,7 +1381,7 @@ public final class Main {
     }
 
     private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<String> typeParams, List<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations) {
-        if(annotations.contains("Actual")) {
+        if (annotations.contains("Actual")) {
             return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
 
