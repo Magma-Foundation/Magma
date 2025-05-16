@@ -826,7 +826,7 @@ public final class Main {
         var separator = fileName.lastIndexOf('.');
         var name = fileName.substring(0, separator);
 
-        var target = Files.get(".", "out")
+        var target = Files.get(".", "src", "ts")
                 .resolveChildSegments(namespace)
                 .resolveChild(name + ".ts");
 
