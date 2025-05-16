@@ -100,6 +100,8 @@ public class Main {
 
     private interface Value extends Argument, Caller {
         String generate();
+
+        Type resolve(CompileState state);
     }
 
     private interface Argument {
@@ -108,10 +110,14 @@ public class Main {
 
     private interface Caller {
         String generate();
+
+        Option<Value> findChild();
     }
 
     private interface Type {
         String generate();
+
+        boolean isFunctional();
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -375,6 +381,13 @@ public class Main {
         public CompileState defineAll(List<Definition> definitions) {
             return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
         }
+
+        public Option<Type> resolve(String name) {
+            return this.definitions.query()
+                    .filter(definition -> definition.name.equals(name))
+                    .map(Definition::type)
+                    .next();
+        }
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
@@ -397,7 +410,7 @@ public class Main {
             Option<String> maybeBeforeType,
             String name,
             List<String> typeParams,
-            String type
+            Type type
     ) implements MethodHeader, Parameter {
         @Override
         public String generate() {
@@ -412,7 +425,7 @@ public class Main {
         @Override
         public String generateWithAfterName(String afterName) {
             var joinedTypeParams = this.joinTypeParams();
-            return this.name + joinedTypeParams + afterName + ": " + this.type();
+            return this.name + joinedTypeParams + afterName + ": " + this.type.generate();
         }
 
         private String joinTypeParams() {
@@ -635,10 +648,20 @@ public class Main {
         }
     }
 
-    private record Placeholder(String input) implements Parameter, Argument, Value {
+    private record Placeholder(String input) implements Parameter, Argument, Value, Type {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
         }
 
         @Override
@@ -649,6 +672,11 @@ public class Main {
         @Override
         public Option<Value> toValue() {
             return new None<>();
+        }
+
+        @Override
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
         }
     }
 
@@ -671,23 +699,25 @@ public class Main {
         }
     }
 
-    private static class Access implements Value {
-        private final String child;
-        private final String property;
-
-        public Access(String child, String property) {
-            this.child = child;
-            this.property = property;
-        }
-
+    private record Access(Value child, String property) implements Value {
         @Override
         public String generate() {
-            return this.child + "." + this.property;
+            return this.child.generate() + "." + this.property;
         }
 
         @Override
         public Option<Value> toValue() {
             return new Some<>(this);
+        }
+
+        @Override
+        public Option<Value> findChild() {
+            return new Some<>(this.child);
+        }
+
+        @Override
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
         }
     }
 
@@ -698,8 +728,23 @@ public class Main {
         }
 
         @Override
+        public Type resolve(CompileState state) {
+            return state.resolve(this.value).orElse(Primitive.Unknown);
+        }
+
+        @Override
         public Option<Value> toValue() {
             return new Some<>(this);
+        }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
         }
     }
 
@@ -719,6 +764,15 @@ public class Main {
         public Option<Value> toValue() {
             return new Some<>(this);
         }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
+        }
+
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
+        }
     }
 
     private static class Not implements Value {
@@ -736,6 +790,15 @@ public class Main {
         @Override
         public Option<Value> toValue() {
             return new Some<>(this);
+        }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
+        }
+
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
         }
     }
 
@@ -761,6 +824,15 @@ public class Main {
         public Option<Value> toValue() {
             return new Some<>(this);
         }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
+        }
+
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
+        }
     }
 
     private record Invokable(Caller caller, List<Value> arguments) implements Value {
@@ -773,6 +845,15 @@ public class Main {
         @Override
         public Option<Value> toValue() {
             return new Some<>(this);
+        }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
+        }
+
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
         }
     }
 
@@ -796,18 +877,26 @@ public class Main {
         public Option<Value> toValue() {
             return new Some<>(this);
         }
-    }
 
-    private static class ConstructionCaller implements Caller {
-        private final String right;
-
-        public ConstructionCaller(String right) {
-            this.right = right;
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
         }
 
+        public Type resolve(CompileState state) {
+            return Primitive.Unknown;
+        }
+    }
+
+    private record ConstructionCaller(String right) implements Caller {
         @Override
         public String generate() {
             return "new " + this.right;
+        }
+
+        @Override
+        public Option<Value> findChild() {
+            return new None<>();
         }
     }
 
@@ -830,6 +919,11 @@ public class Main {
 
             return "(" + joinedArguments + ") => " + this.returns;
         }
+
+        @Override
+        public boolean isFunctional() {
+            return true;
+        }
     }
 
     private static class Generic implements Type {
@@ -844,6 +938,11 @@ public class Main {
         @Override
         public String generate() {
             return this.base + "<" + generateValueStrings(this.arguments) + ">";
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
         }
     }
 
@@ -1385,12 +1484,24 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller caller, String argumentsString) {
+    private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller oldCaller, String argumentsString) {
         var argumentsTuple = parseValues(state, argumentsString, Main::parseArgument);
         var argumentsState = argumentsTuple.left;
         var arguments = retain(argumentsTuple.right, Argument::toValue);
 
-        return new Some<>(new Tuple<>(argumentsState, new Invokable(caller, arguments)));
+        var newCaller = transformCaller(argumentsState, oldCaller);
+        return new Some<>(new Tuple<>(argumentsState, new Invokable(newCaller, arguments)));
+    }
+
+    private static Caller transformCaller(CompileState state, Caller oldCaller) {
+        return oldCaller.findChild().flatMap(parent -> {
+            var parentType = parent.resolve(state);
+            if (parentType.isFunctional()) {
+                return new Some<Caller>(parent);
+            }
+
+            return new None<>();
+        }).orElse(oldCaller);
     }
 
     private static <T, R> List<R> retain(List<T> arguments, Function<T, Option<R>> mapper) {
@@ -1521,7 +1632,7 @@ public class Main {
         return (state, input) -> compileLast(input, infix, (childString, rawProperty) -> {
             var property = rawProperty.strip();
             if (isSymbol(property)) {
-                var childTuple = compileValueOrPlaceholder(state, childString);
+                var childTuple = parseValueOrPlaceholder(state, childString);
                 var childState = childTuple.left;
                 var child = childTuple.right;
                 return new Some<>(new Tuple<>(childState, new Access(child, property)));
@@ -1692,10 +1803,16 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, String name, List<String> typeParams, String type) {
-        var typeTuple = compileTypeOrPlaceholder(state, type);
+        var typeTuple = parseTypeOrPlaceholder(state, type);
 
         var generated = new Definition(maybeBeforeType, name, typeParams, typeTuple.right);
         return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+    }
+
+    private static Tuple<CompileState, Type> parseTypeOrPlaceholder(CompileState state, String type) {
+        return parseType(state, type)
+                .map(tuple -> new Tuple<CompileState, Type>(tuple.left, tuple.right))
+                .orElseGet(() -> new Tuple<>(state, new Placeholder(type)));
     }
 
     private static Tuple<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
@@ -1703,10 +1820,10 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileType(CompileState state, String type) {
-        return getOr(state, type).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+        return parseType(state, type).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
     }
 
-    private static Option<Tuple<CompileState, Type>> getOr(CompileState state, String type) {
+    private static Option<Tuple<CompileState, Type>> parseType(CompileState state, String type) {
         return or(state, type, Lists.of(
                 Main::parseGeneric,
                 Main::parsePrimitive,
@@ -1926,7 +2043,8 @@ public class Main {
         Number("number"),
         Boolean("boolean"),
         Var("var"),
-        Void("void");
+        Void("void"),
+        Unknown("unknown");
 
         private final String value;
 
@@ -1937,6 +2055,11 @@ public class Main {
         @Override
         public java.lang.String generate() {
             return this.value;
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
         }
     }
 }

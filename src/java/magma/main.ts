@@ -50,15 +50,18 @@ interface Parameter {
 }
 interface Value extends Argument, Caller {
 	generate(): string;
+	resolve(state : CompileState): Type;
 }
 interface Argument {
 	toValue(): Option<Value>;
 }
 interface Caller {
 	generate(): string;
+	findChild(): Option<Value>;
 }
 interface Type {
 	generate(): string;
+	isFunctional(): boolean;
 }
 class HeadedQuery<T> {
 	head : Head<T>;
@@ -78,7 +81,7 @@ class HeadedQuery<T> {
 		let result : R = initial;
 		while (true){
 			let finalResult : R = result;
-			let maybeNext : Tuple<Boolean, R> = this.head.next().map((inner) => folder.apply(finalResult, inner)).toTuple(finalResult);
+			let maybeNext : Tuple<Boolean, R> = this.head.next().map((inner) => folder(finalResult, inner)).toTuple(finalResult);
 			if (maybeNext.left){
 				result = maybeNext.right;
 			}
@@ -95,7 +98,7 @@ class HeadedQuery<T> {
 	}
 	filter(predicate : (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element) => {
-			if (predicate.test(element)){
+			if (predicate(element)){
 				return new HeadedQuery<>(new SingleHead<>(element));
 			}
 			else {
@@ -277,6 +280,9 @@ class CompileState {
 	defineAll(definitions : List<Definition>): CompileState {
 		return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
 	}
+	resolve(name : string): Option<Type> {
+		return this.definitions.query().filter((definition) => definition.name.equals(name)).map(Definition.type).next();
+	}
 }
 class Joiner {
 	delimiter : string;
@@ -297,8 +303,8 @@ class Definition {
 	maybeBeforeType : Option<string>;
 	name : string;
 	typeParams : List<string>;
-	type : string;
-	constructor (maybeBeforeType : Option<string>, name : string, typeParams : List<string>, type : string) {
+	type : Type;
+	constructor (maybeBeforeType : Option<string>, name : string, typeParams : List<string>, type : Type) {
 		this.maybeBeforeType = maybeBeforeType;
 		this.name = name;
 		this.typeParams = typeParams;
@@ -312,7 +318,7 @@ class Definition {
 	}
 	generateWithAfterName(afterName : string): string {
 		let joinedTypeParams : var = this.joinTypeParams();
-		return this.name + joinedTypeParams + afterName + ": " + this.type();
+		return this.name + joinedTypeParams + afterName + ": " + this.type.generate();
 	}
 	joinTypeParams(): string {
 		return this.typeParams.query().collect(new Joiner(", ")).map((joined) => "<" + joined + ">").orElse("");
@@ -329,7 +335,7 @@ class Ok<T, X> {
 		this.value = value;
 	}
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
-		return whenOk.apply(this.value);
+		return whenOk(this.value);
 	}
 }
 class Err<T, X> {
@@ -338,7 +344,7 @@ class Err<T, X> {
 		this.error = error;
 	}
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
-		return whenErr.apply(this.error);
+		return whenErr(this.error);
 	}
 }
 class Iterators {
@@ -408,7 +414,7 @@ class Some<T> {
 		this.value = value;
 	}
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
-		return new Some<>(mapper.apply(this.value));
+		return new Some<>(mapper(this.value));
 	}
 	isEmpty(): boolean {
 		return false;
@@ -423,13 +429,13 @@ class Some<T> {
 		return true;
 	}
 	ifPresent(consumer : (arg0 : T) => void): void {
-		consumer.accept(this.value);
+		consumer(this.value);
 	}
 	or(other : () => Option<T>): Option<T> {
 		return this;
 	}
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R> {
-		return mapper.apply(this.value);
+		return mapper(this.value);
 	}
 	filter(predicate : (arg0 : T) => boolean): Option<T> {
 		return /*predicate.test(this.value) ? this : new None<>*/();
@@ -452,7 +458,7 @@ class None<T> {
 		return other;
 	}
 	orElseGet(supplier : () => T): T {
-		return supplier.get();
+		return supplier();
 	}
 	isPresent(): boolean {
 		return false;
@@ -483,11 +489,20 @@ class Placeholder {
 	generate(): string {
 		return generatePlaceholder(this.input);
 	}
+	isFunctional(): boolean {
+		return false;
+	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
 	asDefinition(): Option<Definition> {
 		return new None<>();
 	}
 	toValue(): Option<Value> {
 		return new None<>();
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
 	}
 }
 class MapHead<T, R> {
@@ -509,18 +524,24 @@ class Whitespace {
 		return new None<>();
 	}
 }
-class Access implements Value {
-	child : string;
+class Access {
+	child : Value;
 	property : string;
-	Access(child : string, property : string): public {
+	constructor (child : Value, property : string) {
 		this.child = child;
 		this.property = property;
 	}
 	generate(): string {
-		return this.child + "." + this.property;
+		return this.child.generate() + "." + this.property;
 	}
 	toValue(): Option<Value> {
 		return new Some<>(this);
+	}
+	findChild(): Option<Value> {
+		return new Some<>(this.child);
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
 	}
 }
 class Symbol {
@@ -531,8 +552,17 @@ class Symbol {
 	generate(): string {
 		return this.value;
 	}
+	resolve(state : CompileState): Type {
+		return state.resolve(this.value).orElse(Primitive.Unknown);
+	}
 	toValue(): Option<Value> {
 		return new Some<>(this);
+	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
+	isFunctional(): boolean {
+		return false;
 	}
 }
 class StringValue implements Value {
@@ -546,6 +576,12 @@ class StringValue implements Value {
 	toValue(): Option<Value> {
 		return new Some<>(this);
 	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
+	}
 }
 class Not implements Value {
 	child : string;
@@ -557,6 +593,12 @@ class Not implements Value {
 	}
 	toValue(): Option<Value> {
 		return new Some<>(this);
+	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
 	}
 }
 class Lambda implements Value {
@@ -573,6 +615,12 @@ class Lambda implements Value {
 	toValue(): Option<Value> {
 		return new Some<>(this);
 	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
+	}
 }
 class Invokable {
 	caller : Caller;
@@ -587,6 +635,12 @@ class Invokable {
 	}
 	toValue(): Option<Value> {
 		return new Some<>(this);
+	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
 	}
 }
 class Operation implements Value {
@@ -604,14 +658,23 @@ class Operation implements Value {
 	toValue(): Option<Value> {
 		return new Some<>(this);
 	}
+	findChild(): Option<Value> {
+		return new None<>();
+	}
+	resolve(state : CompileState): Type {
+		return Primitive.Unknown;
+	}
 }
-class ConstructionCaller implements Caller {
+class ConstructionCaller {
 	right : string;
-	ConstructionCaller(right : string): public {
+	constructor (right : string) {
 		this.right = right;
 	}
 	generate(): string {
 		return "new " + this.right;
+	}
+	findChild(): Option<Value> {
+		return new None<>();
 	}
 }
 class FunctionType implements Type {
@@ -625,6 +688,9 @@ class FunctionType implements Type {
 		let joinedArguments : var = this.arguments.queryWithIndices().map((tuple) => "arg" + tuple.left + " : " + tuple.right).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + this.returns;
 	}
+	isFunctional(): boolean {
+		return true;
+	}
 }
 class Generic implements Type {
 	base : string;
@@ -635,6 +701,9 @@ class Generic implements Type {
 	}
 	generate(): string {
 		return this.base + "<" + generateValueStrings(this.arguments) + ">";
+	}
+	isFunctional(): boolean {
+		return false;
 	}
 }
 class Main {
@@ -678,7 +747,7 @@ class Main {
 		return divide(input, folder).query().fold(new Tuple<CompileState, List<T>>(state, Lists.empty()), (current, segment) => {
 			let currentState : var = current.left;
 			let currentElement : var = current.right;
-			let mappedTuple : var = mapper.apply(currentState, segment);
+			let mappedTuple : var = mapper(currentState, segment);
 			let mappedState : var = mappedTuple.left;
 			let mappedElement : var = mappedTuple.right;
 			currentElement.add(mappedElement);
@@ -698,7 +767,7 @@ class Main {
 			let poppedTuple : var = maybePopped.orElse(null);
 			let poppedState : var = poppedTuple.left;
 			let popped : var = poppedTuple.right;
-			current = foldSingleQuotes(poppedState, popped).or(() => foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder.apply(poppedState, popped));
+			current = foldSingleQuotes(poppedState, popped).or(() => foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder(poppedState, popped));
 		}
 		return current.advance().segments;
 	}
@@ -951,7 +1020,7 @@ class Main {
 	}
 	compileReturn(input : string, mapper : (arg0 : string) => Option<Tuple<CompileState, string>>): Option<Tuple<CompileState, string>> {
 		return compilePrefix(input.strip(), "return ", (value) => {
-			return mapper.apply(value).flatMap((tuple) => {
+			return mapper(value).flatMap((tuple) => {
 				return new Some<>(new Tuple<>(tuple.left, "return " + tuple.right));
 			});
 		});
@@ -984,7 +1053,7 @@ class Main {
 		if (divisions.size() < 2){
 			return new None<Tuple<string, string>>();
 		}
-		return selector.apply(divisions);
+		return selector(divisions);
 	}
 	selectLast(divisions : List<string>, delimiter : string): Option<Tuple<string, string>> {
 		let beforeLast : var = divisions.subList(0, divisions.size() - 1).orElse(divisions);
@@ -1008,11 +1077,21 @@ class Main {
 		}
 		return appended;
 	}
-	assembleInvokable(state : CompileState, caller : Caller, argumentsString : string): Option<Tuple<CompileState, Value>> {
+	assembleInvokable(state : CompileState, oldCaller : Caller, argumentsString : string): Option<Tuple<CompileState, Value>> {
 		let argumentsTuple : var = parseValues(state, argumentsString, Main.parseArgument);
 		let argumentsState : var = argumentsTuple.left;
 		let arguments : var = retain(argumentsTuple.right, Argument.toValue);
-		return new Some<>(new Tuple<>(argumentsState, new Invokable(caller, arguments)));
+		let newCaller : var = transformCaller(argumentsState, oldCaller);
+		return new Some<>(new Tuple<>(argumentsState, new Invokable(newCaller, arguments)));
+	}
+	transformCaller(state : CompileState, oldCaller : Caller): Caller {
+		return oldCaller.findChild().flatMap((parent) => {
+			let parentType : var = parent.resolve(state);
+			if (parentType.isFunctional()){
+				return new Some<Caller>(parent);
+			}
+			return new None<>();
+		}).orElse(oldCaller);
 	}
 	retain<T, R>(arguments : List<T>, mapper : (arg0 : T) => Option<R>): List<R> {
 		return arguments.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<>());
@@ -1099,7 +1178,7 @@ class Main {
 		return (state, input) => compileLast(input, infix, (childString, rawProperty) => {
 			let property : var = rawProperty.strip();
 			if (isSymbol(property)){
-				let childTuple : var = compileValueOrPlaceholder(state, childString);
+				let childTuple : var = parseValueOrPlaceholder(state, childString);
 				let childState : var = childTuple.left;
 				let child : var = childTuple.right;
 				return new Some<>(new Tuple<>(childState, new Access(child, property)));
@@ -1174,7 +1253,7 @@ class Main {
 			return new None<>();
 		}
 		let slice : var = input.substring(infix.length());
-		return mapper.apply(slice);
+		return mapper(slice);
 	}
 	compileWhitespace(state : CompileState, input : string): Option<Tuple<CompileState, string>> {
 		return parseWhitespace(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
@@ -1231,17 +1310,20 @@ class Main {
 		return appended;
 	}
 	assembleDefinition(state : CompileState, maybeBeforeType : Option<string>, name : string, typeParams : List<string>, type : string): Option<Tuple<CompileState, Definition>> {
-		let typeTuple : var = compileTypeOrPlaceholder(state, type);
+		let typeTuple : var = parseTypeOrPlaceholder(state, type);
 		let generated : var = new Definition(maybeBeforeType, name, typeParams, typeTuple.right);
 		return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+	}
+	parseTypeOrPlaceholder(state : CompileState, type : string): Tuple<CompileState, Type> {
+		return parseType(state, type).map((tuple) => new Tuple<CompileState, Type>(tuple.left, tuple.right)).orElseGet(() => new Tuple<>(state, new Placeholder(type)));
 	}
 	compileTypeOrPlaceholder(state : CompileState, type : string): Tuple<CompileState, string> {
 		return compileType(state, type).orElseGet(() => new Tuple<>(state, generatePlaceholder(type)));
 	}
 	compileType(state : CompileState, type : string): Option<Tuple<CompileState, string>> {
-		return getOr(state, type).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
+		return parseType(state, type).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
 	}
-	getOr(state : CompileState, type : string): Option<Tuple<CompileState, Type>> {
+	parseType(state : CompileState, type : string): Option<Tuple<CompileState, Type>> {
 		return or(state, type, Lists.of(Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
 	}
 	parseSymbolType(state : CompileState, input : string): Option<Tuple<CompileState, Type>> {
@@ -1365,7 +1447,7 @@ class Main {
 			return new None<T>();
 		}
 		let content : var = input.substring(0, input.length() - suffix.length());
-		return mapper.apply(content);
+		return mapper(content);
 	}
 	compileFirst<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return compileInfix(input, infix, Main.findFirst, mapper);
@@ -1374,10 +1456,10 @@ class Main {
 		return compileSplit(split(input, infix, locator), mapper);
 	}
 	compileSplit<T>(splitter : Option<Tuple<string, string>>, mapper : (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return splitter.flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
+		return splitter.flatMap((tuple) => mapper(tuple.left, tuple.right));
 	}
 	split(input : string, infix : string, locator : (arg0 : string, arg1 : string) => number): Option<Tuple<string, string>> {
-		let index : var = locator.apply(input, infix);
+		let index : var = locator(input, infix);
 		if (index < 0){
 			return new None<Tuple<string, string>>();
 		}
@@ -1401,7 +1483,8 @@ class Main {
         Number("number"),
         Boolean("boolean"),
         Var("var"),
-        Void("void");
+        Void("void"),
+        Unknown("unknown");
 
         private final String value;
 
@@ -1412,6 +1495,11 @@ class Main {
         @Override
         public java.lang.String generate() {
             return this.value;
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
         }
     }*/
 }
