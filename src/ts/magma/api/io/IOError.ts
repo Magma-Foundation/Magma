@@ -1,3 +1,3 @@
-export interface IOError  {
+export interface IOError {
 	display(): string;
 }

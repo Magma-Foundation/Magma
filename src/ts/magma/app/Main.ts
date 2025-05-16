@@ -15,28 +15,28 @@ import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/Files";
-interface MethodHeader  {
+interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
 	addModifier(modifier: string): MethodHeader;
 	removeModifier(modifier: string): MethodHeader;
 }
-interface Parameter  {
+interface Parameter {
 	generate(): string;
 	asDefinition(): Option<Definition>;
 }
-interface Value extends Argument, Caller  {
+interface Value extends Argument, Caller {
 	resolve(state: CompileState): Type;
 	generateAsEnumValue(structureName: string): Option<string>;
 }
-interface Argument  {
+interface Argument {
 	toValue(): Option<Value>;
 }
-interface Caller  {
+interface Caller {
 	generate(): string;
 	findChild(): Option<Value>;
 }
-interface Type  {
+interface Type {
 	generate(): string;
 	isFunctional(): boolean;
 	isVar(): boolean;
@@ -626,7 +626,7 @@ class Generic implements Type {
 		return "";
 	}
 }
-class Iterators  {
+class Iterators {
 	static fromOption<T>(option: Option<T>): Query<T> {
 		return new HeadedQuery<T>(option.map((element: T) => Iterators.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));
 	}
@@ -652,6 +652,22 @@ class VarArgs implements Type {
 		return "...";
 	}
 }
+interface ";
+            String newName = name + "Instance";
+
+            var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {/*" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated)
+                    .append("export declare const " + name + ": " + newName + ";\n"), ""));
+        }
+        else {
+            String actualInfix = infix;
+            String newName = name;
+
+            var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+        }
+    */
+}
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
@@ -676,7 +692,7 @@ class Primitive implements Type {
 		return "";
 	}
 }
-export class Main  {
+export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
 		sourceDirectory.walk().match((children: List<Path>) => Main.runWithChildren(children, sourceDirectory).next(), (value: IOError) => new Some<IOError>(value)).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
@@ -851,21 +867,6 @@ export class Main  {
 			return Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content);
 		});
 	}
-	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, name: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string): Option<Tuple2<CompileState, string>> {
-		if (annotations.contains("Actual")){
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
-		}
-		let outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
-		let outputContentState = outputContentTuple.left();
-		let outputContent = outputContentTuple.right();
-		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
-		let joinedTypeParams = Main.joinTypeParams(typeParams);
-		let implementingString = Main.generateImplementing(maybeImplementing);
-		let newModifiers = Main.modifyModifiers0(oldModifiers);
-		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
-		let generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-		return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""));
-	}
 	static modifyModifiers0(oldModifiers: List<string>): List<string> {
 		if (oldModifiers.contains("public")){
 			return Lists.of("export");
@@ -960,9 +961,8 @@ export class Main  {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			if (header.hasAnnotation("Actual")){
-				let headerGenerated = header.removeModifier("static").addModifier("export").addModifier("declare").addModifier("function").generateWithAfterName("(" + joinedDefinitions + ")");
-				let append = parametersState.append(headerGenerated + ";\n");
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(append, ""));
+				let headerGenerated = header.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"));
 			}
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {

@@ -1076,7 +1076,7 @@ public final class Main {
             List<String> annotations,
             List<String> oldModifiers,
             String infix,
-            String name,
+            String rawName,
             List<String> typeParams,
             List<Definition> parameters,
             Option<Type> maybeImplementing,
@@ -1086,6 +1086,7 @@ public final class Main {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
         }
 
+        var name = rawName.strip();
         var outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left();
         var outputContent = outputContentTuple.right();
@@ -1100,8 +1101,21 @@ public final class Main {
                 .collect(Joiner.empty())
                 .orElse("");
 
-        var generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-        return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+        if (annotations.contains("Namespace")) {
+            String actualInfix = "interface ";
+            String newName = name + "Instance";
+
+            var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated)
+                    .append("export declare const " + name + ": " + newName + ";\n"), ""));
+        }
+        else {
+            String actualInfix = infix;
+            String newName = name;
+
+            var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+        }
     }
 
     private static List<String> modifyModifiers0(List<String> oldModifiers) {
@@ -1271,13 +1285,9 @@ public final class Main {
             if (header.hasAnnotation("Actual")) {
                 var headerGenerated = header
                         .removeModifier("static")
-                        .addModifier("export")
-                        .addModifier("declare")
-                        .addModifier("function")
                         .generateWithAfterName("(" + joinedDefinitions + ")");
 
-                var append = parametersState.append(headerGenerated + ";\n");
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(append, ""));
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";\n"));
             }
 
             var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");

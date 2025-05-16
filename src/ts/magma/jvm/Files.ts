@@ -14,6 +14,7 @@ import { PrintWriter } from "../../java/io/PrintWriter";
 import { StringWriter } from "../../java/io/StringWriter";
 import { Paths } from "../../java/nio/file/Paths";
 import { Stream } from "../../java/util/stream/Stream";
-export declare function get(first: string, ...more: string[]): Path;
-export class Files  {
+export class Files {
+	get(first: string, ...more: string[]): Path;
+
 }

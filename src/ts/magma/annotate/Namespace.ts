@@ -1,2 +1,2 @@
-export interface Namespace  {
+export interface Namespace {
 }

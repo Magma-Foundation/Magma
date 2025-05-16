@@ -3,7 +3,7 @@ import { Query } from "../../../magma/api/collect/query/Query";
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
 import { IOException } from "../../../java/io/IOException";
-export interface Path  {
+export interface Path {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;
 	resolveSibling(siblingName: string): Path;
