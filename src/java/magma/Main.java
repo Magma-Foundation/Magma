@@ -86,6 +86,8 @@ public final class Main {
         Query<Tuple<Integer, T>> queryWithIndices();
 
         List<T> addAll(List<T> others);
+
+        boolean contains(T element);
     }
 
     private interface Head<T> {
@@ -915,6 +917,11 @@ public final class Main {
             @Override
             public List<T> addAll(List<T> others) {
                 return others.query().<List<T>>fold(this, List::add);
+            }
+
+            @Override
+            public boolean contains(T element) {
+                return this.list.contains(element);
             }
 
             @Override
@@ -1877,12 +1884,18 @@ public final class Main {
             CompileState state,
             List<String> annotations,
             List<String> typeParams,
-            List<String> modifiers,
+            List<String> oldModifiers,
             String type,
             String name
     ) {
         var typeTuple = Main.parseTypeOrPlaceholder(state, type);
-        var generated = new Definition(annotations, modifiers, typeParams, typeTuple.right, name);
+
+        var newModifiers = Lists.<String>empty();
+        if (oldModifiers.contains("static")) {
+            newModifiers = newModifiers.add("static");
+        }
+
+        var generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right, name);
         return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
     }
 
