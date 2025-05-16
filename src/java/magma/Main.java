@@ -416,8 +416,18 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
         return compileOr(state, input, List.of(
-                Main::compileIf
+                Main::compileIf,
+                Main::compileElse
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileElse(CompileState state, String input) {
+        if (input.strip().equals("else")) {
+            return Optional.of(new Tuple<>(state, "else "));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<Tuple<CompileState, String>> compileIf(CompileState state, String input) {

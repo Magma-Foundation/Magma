@@ -234,10 +234,10 @@
 		let stripped : unknown = input.strip();
 		if (stripped.startsWith("package ") || stripped.startsWith("import ")){
 			return Optional.of(new /*Tuple*/<>(state, ""));
-		}/*
-        else {
-            return Optional.empty();
-        }*/
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	/*private static*/compileOrPlaceholder(state : /*CompileState*/, input : string, rules : /*List*/</*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>>): /*Tuple*/</*CompileState*/, string> {
 		return compileOr(state, input, rules).orElseGet(() => new /*Tuple*/<>(state, generatePlaceholder(input)));
@@ -293,10 +293,10 @@
 	/*private static*/compileEmptySegment(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		if (input.strip().equals(";")){
 			return Optional.of(new /*Tuple*/<>(state, ";"));
-		}/*
-        else {
-            return Optional.empty();
-        }*/
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	/*private static*/compileReturnWithoutSuffix(state1 : /*CompileState*/, input1 : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileReturn(input1, (withoutPrefix) => compileValue(state1, withoutPrefix)).map((tuple) => new /*Tuple*/<>(tuple.left, generateIndent(state1.depth) + tuple.right));
@@ -313,7 +313,15 @@
 		});
 	}
 	/*private static*/compileBlockHeader(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(Main.compileIf));
+		return compileOr(state, input, List.of(Main.compileIf, Main.compileElse));
+	}
+	/*private static*/compileElse(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
+		if (input.strip().equals("else")){
+			return Optional.of(new /*Tuple*/<>(state, "else "));
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	/*private static*/compileIf(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compilePrefix(input.strip(), "if", (withoutPrefix) => {
@@ -383,10 +391,10 @@
 			let entered : unknown = appended.enter();
 			if (entered.isShallow()){
 				return entered.advance();
-			}/*
-            else {
-                return entered;
-            }*/
+			}
+			else {
+				return entered;
+			}
 		}
 		if (c === ")"){
 			return appended.exit();
@@ -437,10 +445,10 @@
 					let paramNames : unknown = divide(withoutEnd, Main.foldValues).stream().map(String.strip).filter((value) => !value.isEmpty()).toList();
 					if (paramNames.stream().allMatch(Main.isSymbol)){
 						return getCompileStateStringTuple(state, paramNames, afterArrow);
-					}/*
-                    else {
-                        return Optional.empty();
-                    }*/
+					}
+					else {
+						return Optional.empty();
+					}
 				});
 			});
 		});
@@ -472,10 +480,10 @@
 			let property : unknown = rawProperty.strip();
 			if (isSymbol(property)){
 				return Optional.of(new /*Tuple*/<>(tuple.left, tuple.right + "." + property));
-			}/*
-            else {
-                return Optional.empty();
-            }*/
+			}
+			else {
+				return Optional.empty();
+			}
 		});
 	}
 	/*private static*/createOperatorRuleWithDifferentInfixes(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
@@ -489,10 +497,10 @@
 		let stripped : unknown = input.strip();
 		if (isNumber(stripped)){
 			return Optional.of(new /*Tuple*/<>(state, stripped));
-		}/*
-        else {
-            return Optional.empty();
-        }*/
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	/*private static*/isNumber(input : string): boolean {
 		return IntStream.range(/*0*/, input.length()).allMatch(Character.isDigit);
@@ -501,10 +509,10 @@
 		let stripped : unknown = input.strip();
 		if (isSymbol(stripped)){
 			return Optional.of(new /*Tuple*/<>(state, stripped));
-		}/*
-        else {
-            return Optional.empty();
-        }*/
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	/*private static*/isSymbol(input : string): boolean {
 		return IntStream.range(/*0*/, input.length()).allMatch((index) => isSymbolChar(index, input.charAt(index)));
@@ -615,10 +623,10 @@
 			let peeked : unknown = appended.peek();
 			if (peeked === ">"){
 				return appended.popAndAppendToOption().orElse(appended);
-			}/*
-            else {
-                return appended;
-            }*/
+			}
+			else {
+				return appended;
+			}
 		}
 		if (c === /* '*/ < /*' */ || c === "("){
 			return appended.enter();
