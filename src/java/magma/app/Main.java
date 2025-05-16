@@ -131,34 +131,34 @@ public final class Main {
             Option<String> maybeStructureName,
             int depth,
             List<Definition> definitions,
-            Option<List<String>> maybeNamespace
-    ) {
+            Option<List<String>> maybeNamespace,
+            List<String> names) {
         private static CompileState createInitial() {
-            return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), new None<>());
+            return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), new None<>(), Lists.empty());
         }
 
         private CompileState withNamespace(List<String> namespace) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace));
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.names);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
         }
 
         CompileState withStructureName(String name) {
-            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.maybeNamespace);
+            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.maybeNamespace, this.names);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace, this.names);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace, this.names);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.names);
         }
 
         Option<Type> resolve(String name) {
@@ -177,15 +177,19 @@ public final class Main {
                 return this;
             }
 
-            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
         }
 
         public CompileState clearImports() {
-            return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+            return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
         }
 
         public CompileState clearOutput() {
-            return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+            return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
+        }
+
+        public CompileState addName(String name) {
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names.addLast(name));
         }
     }
 
@@ -756,11 +760,11 @@ public final class Main {
                 .resolveChild(name + ".ts");
 
         return source.readString().match(
-                (String input) -> Main.compileAndWrite(state, input, target, namespace),
+                (String input) -> Main.compileAndWrite(state, input, target, namespace, name),
                 (IOError value) -> new Tuple2Impl<>(state, new Some<IOError>(value)));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, String input, Path target, List<String> namespace) {
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, String input, Path target, List<String> namespace, String name) {
         var output = Main.compileRoot(state, input, namespace);
 
         var parent = target.getParent();
@@ -768,7 +772,7 @@ public final class Main {
             parent.createDirectories();
         }
 
-        return new Tuple2Impl<>(output.left(), target.writeString(output.right()));
+        return new Tuple2Impl<>(output.left().addName(name), target.writeString(output.right()));
     }
 
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
@@ -779,7 +783,13 @@ public final class Main {
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return new Tuple2Impl<>(state.clearImports().clearOutput(), imports + compiledState.output + compiled.right());
+        var compileState = state.clearImports().clearOutput();
+        var s = compileState.names
+                .query()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return new Tuple2Impl<>(compileState, "// [" + s + "]\n" + imports + compiledState.output + compiled.right());
     }
 
     private static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {

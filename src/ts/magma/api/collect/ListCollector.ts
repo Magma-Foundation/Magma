@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector, EmptyHead, Head, List]
 import { List } from "./List";
 import { Collector } from "./Collector";
 export class ListCollector<T> implements Collector<T, List<T>> {

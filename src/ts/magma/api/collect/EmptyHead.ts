@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector]
 import { None } from "../../../magma/api/option/None";
 import { Option } from "../../../magma/api/option/Option";
 import { Head } from "./Head";

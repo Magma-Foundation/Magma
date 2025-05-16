@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery, Query, RangeHead, SingleHead]
 import { Actual } from "../../magma/annotate/Actual";
 import { Namespace } from "../../magma/annotate/Namespace";
 export interface ConsoleInstance {

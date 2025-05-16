@@ -1,2 +1,3 @@
+// [Actual]
 export interface Namespace {
 }

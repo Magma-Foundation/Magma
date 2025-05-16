@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery]
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { Option } from "../../../../magma/api/option/Option";
 export interface Query<T> {

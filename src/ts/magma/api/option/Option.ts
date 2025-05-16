@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery, Query, RangeHead, SingleHead, Console, IOError, Path, None]
 import { Tuple2 } from "../../../magma/api/Tuple2";
 export interface Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R>;

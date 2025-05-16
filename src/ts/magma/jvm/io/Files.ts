@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery, Query, RangeHead, SingleHead, Console, IOError, Path, None, Option, Some, Result, Characters, Strings, Tuple2, Tuple2Impl, Main]
 import { Actual } from "../../../magma/annotate/Actual";
 import { Namespace } from "../../../magma/annotate/Namespace";
 import { List } from "../../../magma/api/collect/List";

@@ -1,3 +1,4 @@
+// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery, Query, RangeHead, SingleHead, Console, IOError, Path, None, Option, Some, Result, Characters, Strings, Tuple2, Tuple2Impl]
 import { Console } from "../../magma/api/Console";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
@@ -109,34 +110,36 @@ class CompileState {
 	depth: number;
 	definitions: List<Definition>;
 	maybeNamespace: Option<List<string>>;
-	constructor (imports: List<Import>, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>) {
+	names: List<string>;
+	constructor (imports: List<Import>, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>, names: List<string>) {
 		this.imports = imports;
 		this.output = output;
 		this.maybeStructureName = maybeStructureName;
 		this.depth = depth;
 		this.definitions = definitions;
 		this.maybeNamespace = maybeNamespace;
+		this.names = names;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", new None<string>(), 0, Lists.empty(), new None<>());
+		return new CompileState(Lists.empty(), "", new None<string>(), 0, Lists.empty(), new None<>(), Lists.empty());
 	}
 	withNamespace(namespace: List<string>): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace));
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.names);
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
 	}
 	withStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, new Some<string>(name), this.depth, this.definitions, this.maybeNamespace);
+		return new CompileState(this.imports, this.output, new Some<string>(name), this.depth, this.definitions, this.maybeNamespace, this.names);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace, this.names);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace, this.names);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.names);
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
@@ -145,13 +148,16 @@ class CompileState {
 		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, importString.child)).next().isPresent()){
 			return this;
 		}
-		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
 	}
 	clearImports(): CompileState {
-		return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+		return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
 	}
 	clearOutput(): CompileState {
-		return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+		return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
+	}
+	addName(name: string): CompileState {
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names.addLast(name));
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -631,21 +637,23 @@ export class Main {
 		let separator = fileName.lastIndexOf(".");
 		let name = fileName.substring(0, separator);
 		let target = Files.get(".", "src", "ts").resolveChildSegments(namespace).resolveChild(name + ".ts");
-		return source.readString().match((input: string) => Main.compileAndWrite(state, input, target, namespace), (value: IOError) => new Tuple2Impl<>(state, new Some<IOError>(value)));
+		return source.readString().match((input: string) => Main.compileAndWrite(state, input, target, namespace, name), (value: IOError) => new Tuple2Impl<>(state, new Some<IOError>(value)));
 	}
-	static compileAndWrite(state: CompileState, input: string, target: Path, namespace: List<string>): Tuple2<CompileState, Option<IOError>> {
+	static compileAndWrite(state: CompileState, input: string, target: Path, namespace: List<string>, name: string): Tuple2<CompileState, Option<IOError>> {
 		let output = Main.compileRoot(state, input, namespace);
 		let parent = target.getParent();
 		if (!parent.exists()){
 			parent.createDirectories();
 		}
-		return new Tuple2Impl<>(output.left(), target.writeString(output.right()));
+		return new Tuple2Impl<>(output.left().addName(name), target.writeString(output.right()));
 	}
 	static compileRoot(state: CompileState, input: string, namespace: List<string>): Tuple2Impl<CompileState, string> {
 		let compiled = Main.compileStatements(state.withNamespace(namespace), input, Main.compileRootSegment);
 		let compiledState = compiled.left();
 		let imports = compiledState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
-		return new Tuple2Impl<>(state.clearImports().clearOutput(), imports + compiledState.output + compiled.right());
+		let compileState = state.clearImports().clearOutput();
+		let s = compileState.names.query().collect(new Joiner(", ")).orElse("");
+		return new Tuple2Impl<>(compileState, "// [" + s + "]\n" + imports + compiledState.output + compiled.right());
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
