@@ -533,7 +533,7 @@
 	/*private static*/findPrimitiveValue(input : string): /*Optional*/<string> {
 		/*return switch (input.strip()) */{
 			/*case "char", "Character", "String" -> Optional*/.of("string");
-			/*case "int" -> Optional*/.of("number");
+			/*case "int", "Integer" -> Optional*/.of("number");
 			/*case "boolean" -> Optional*/.of("boolean");
 			/*case "var" -> Optional*/.of("unknown");
 			/*case "void" -> Optional*/.of("void");
@@ -599,13 +599,13 @@
 	/*private static <T>*/compileFirst(input : string, infix : string, mapper : /*BiFunction*/<string, string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
 		return compileInfix(input, infix, Main.findFirst, mapper);
 	}
-	/*private static <T>*/compileInfix(input : string, infix : string, locator : /*BiFunction*/<string, string, /* Integer*/>, mapper : /*BiFunction*/<string, string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
+	/*private static <T>*/compileInfix(input : string, infix : string, locator : /*BiFunction*/<string, string, number>, mapper : /*BiFunction*/<string, string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
 		return compileSplit(split(input, infix, locator), mapper);
 	}
 	/*private static <T>*/compileSplit(splitter : /*Optional*/</*Tuple*/<string, string>>, mapper : /*BiFunction*/<string, string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
 		return splitter.flatMap(/*tuple -> mapper*/.apply(tuple.left, tuple.right));
 	}
-	/*private static*/split(input : string, infix : string, locator : /*BiFunction*/<string, string, /* Integer*/>): /*Optional*/</*Tuple*/<string, string>> {
+	/*private static*/split(input : string, infix : string, locator : /*BiFunction*/<string, string, number>): /*Optional*/</*Tuple*/<string, string>> {
 		let index : unknown = locator.apply(input, infix);
 		if (index < 0){
 			return Optional.empty();
