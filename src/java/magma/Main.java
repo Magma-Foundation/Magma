@@ -202,7 +202,7 @@ public final class Main {
         }
     }
 
-    private static class RangeHead implements Head<Integer> {
+    private static final class RangeHead implements Head<Integer> {
         private final int length;
         private int counter;
 
@@ -404,7 +404,7 @@ public final class Main {
         }
     }
 
-    private static class SingleHead<T> implements Head<T> {
+    private static final class SingleHead<T> implements Head<T> {
         private final T element;
         private boolean retrieved;
 
@@ -717,13 +717,7 @@ public final class Main {
         }
     }
 
-    private static class StringValue implements Value {
-        private final String value;
-
-        private StringValue(String value) {
-            this.value = value;
-        }
-
+    private record StringValue(String value) implements Value {
         @Override
         public String generate() {
             return "\"" + this.value + "\"";
@@ -749,13 +743,7 @@ public final class Main {
         }
     }
 
-    private static class Not implements Value {
-        private final String child;
-
-        private Not(String child) {
-            this.child = child;
-        }
-
+    private record Not(String child) implements Value {
         @Override
         public String generate() {
             return this.child;
@@ -884,15 +872,7 @@ public final class Main {
         }
     }
 
-    private static class FunctionType implements Type {
-        private final List<String> args;
-        private final String returns;
-
-        private FunctionType(List<String> args, String returns) {
-            this.args = args;
-            this.returns = returns;
-        }
-
+    private record FunctionType(List<String> args, String returns) implements Type {
         @Override
         public String generate() {
             var joinedArguments = this.args
@@ -920,15 +900,7 @@ public final class Main {
         }
     }
 
-    private static class Generic implements Type {
-        private final String base;
-        private final List<String> args;
-
-        private Generic(String base, List<String> args) {
-            this.base = base;
-            this.args = args;
-        }
-
+    private record Generic(String base, List<String> args) implements Type {
         @Override
         public String generate() {
             return this.base + "<" + Main.generateValueStrings(this.args) + ">";
@@ -1049,7 +1021,7 @@ public final class Main {
         }
     }
 
-    private static class Strings {
+    private static final class Strings {
         @Actual
         private static int length(String stripped) {
             return stripped.length();
@@ -1163,7 +1135,7 @@ public final class Main {
         }
     }
 
-    public static class Console {
+    private static class Console {
         @Actual
         private static void printErrLn(String message) {
             System.err.println(message);
