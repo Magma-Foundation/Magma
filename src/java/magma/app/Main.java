@@ -30,7 +30,9 @@ public final class Main {
 
         boolean hasAnnotation(String annotation);
 
-        MethodHeader withModifier(String modifier);
+        MethodHeader addModifier(String modifier);
+
+        MethodHeader removeModifier(String modifier);
     }
 
     private interface Parameter {
@@ -71,7 +73,7 @@ public final class Main {
         }
 
         private DivideState advance() {
-            return new DivideState(this.segments.add(this.buffer), "", this.depth, this.input, this.index);
+            return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
         }
 
         private DivideState append(char c) {
@@ -227,8 +229,13 @@ public final class Main {
         }
 
         @Override
-        public MethodHeader withModifier(String modifier) {
-            return new Definition(this.annotations, this.modifiers.add(modifier), this.typeParams, this.type, this.name);
+        public MethodHeader addModifier(String modifier) {
+            return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+        }
+
+        @Override
+        public MethodHeader removeModifier(String modifier) {
+            return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
         }
     }
 
@@ -244,7 +251,12 @@ public final class Main {
         }
 
         @Override
-        public MethodHeader withModifier(String modifier) {
+        public MethodHeader addModifier(String modifier) {
+            return this;
+        }
+
+        @Override
+        public MethodHeader removeModifier(String modifier) {
             return this;
         }
     }
@@ -298,7 +310,7 @@ public final class Main {
 
         @Override
         public List<T> fold(List<T> current, T element) {
-            return current.add(element);
+            return current.addLast(element);
         }
     }
 
@@ -886,7 +898,7 @@ public final class Main {
                 return biFunction.apply(currentState, segment).map((Tuple2<CompileState, T> mappedTuple) -> {
                     var mappedState = mappedTuple.left();
                     var mappedElement = mappedTuple.right();
-                    return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.add(mappedElement));
+                    return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
                 });
             });
         });
@@ -1176,7 +1188,7 @@ public final class Main {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                 }
 
-                var s2 = parent1.add(child)
+                var s2 = parent1.addLast(child)
                         .query()
                         .collect(new Joiner("/"))
                         .orElse("");
@@ -1257,8 +1269,14 @@ public final class Main {
                     .orElse("");
 
             if (header.hasAnnotation("Actual")) {
-                var headerGenerated = header.withModifier("declare").generateWithAfterName("(" + joinedDefinitions + ")");
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";"));
+                var headerGenerated = header
+                        .removeModifier("static")
+                        .addModifier("declare")
+                        .addModifier("function")
+                        .generateWithAfterName("(" + joinedDefinitions + ")");
+
+                var append = parametersState.append(headerGenerated + ";\n");
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(append, ""));
             }
 
             var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");

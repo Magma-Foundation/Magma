@@ -5,7 +5,7 @@ import magma.api.collect.query.Query;
 import magma.api.option.Option;
 
 public interface List<T> {
-    List<T> add(T element);
+    List<T> addLast(T element);
 
     Query<T> query();
 
@@ -32,4 +32,6 @@ public interface List<T> {
     boolean isEmpty();
 
     boolean equalsTo(List<T> other);
+
+    List<T> removeValue(T element);
 }

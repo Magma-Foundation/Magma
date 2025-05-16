@@ -18,7 +18,8 @@ import { Files } from "../../magma/jvm/Files";
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
-	withModifier(modifier: string): MethodHeader;
+	addModifier(modifier: string): MethodHeader;
+	removeModifier(modifier: string): MethodHeader;
 }
 interface Parameter  {
 	generate(): string;
@@ -58,7 +59,7 @@ class DivideState {
 		return new DivideState(Lists.empty(), "", 0, input, 0);
 	}
 	advance(): DivideState {
-		return new DivideState(this.segments.add(this.buffer), "", this.depth, this.input, this.index);
+		return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
 	}
 	append(c: string): DivideState {
 		return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
@@ -187,8 +188,11 @@ class Definition {
 	hasAnnotation(annotation: string): boolean {
 		return this.annotations.contains(annotation);
 	}
-	withModifier(modifier: string): MethodHeader {
-		return new Definition(this.annotations, this.modifiers.add(modifier), this.typeParams, this.type, this.name);
+	addModifier(modifier: string): MethodHeader {
+		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+	}
+	removeModifier(modifier: string): MethodHeader {
+		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
 	}
 }
 class ConstructorHeader implements MethodHeader {
@@ -198,7 +202,10 @@ class ConstructorHeader implements MethodHeader {
 	hasAnnotation(annotation: string): boolean {
 		return false;
 	}
-	withModifier(modifier: string): MethodHeader {
+	addModifier(modifier: string): MethodHeader {
+		return this;
+	}
+	removeModifier(modifier: string): MethodHeader {
 		return this;
 	}
 }
@@ -245,7 +252,7 @@ class ListCollector<T> implements Collector<T, List<T>> {
 		return Lists.empty();
 	}
 	fold(current: List<T>, element: T): List<T> {
-		return current.add(element);
+		return current.addLast(element);
 	}
 }
 export class FlatMapHead<T, R> implements Head<R> {
@@ -717,7 +724,7 @@ export class Main  {
 				return biFunction(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
 					let mappedState = mappedTuple.left();
 					let mappedElement = mappedTuple.right();
-					return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.add(mappedElement));
+					return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
 				});
 			});
 		});
@@ -910,7 +917,7 @@ export class Main  {
 				if (parent.equalsTo(Lists.of("java", "util", "function"))){
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 				}
-				let s2 = parent1.add(child).query().collect(new Joiner("/")).orElse("");
+				let s2 = parent1.addLast(child).query().collect(new Joiner("/")).orElse("");
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
 			});
 		});
@@ -953,8 +960,9 @@ export class Main  {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			if (header.hasAnnotation("Actual")){
-				let headerGenerated = header.withModifier("declare").generateWithAfterName("(" + joinedDefinitions + ")");
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
+				let headerGenerated = header.removeModifier("static").addModifier("declare").addModifier("function").generateWithAfterName("(" + joinedDefinitions + ")");
+				let append = parametersState.append(headerGenerated + ";\n");
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(append, ""));
 			}
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {

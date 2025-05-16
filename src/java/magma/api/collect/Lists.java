@@ -15,7 +15,7 @@ public final class Lists {
     @Actual
     public record JVMList<T>(java.util.List<T> list) implements List<T> {
         @Override
-        public List<T> add(T element) {
+        public List<T> addLast(T element) {
             this.list.add(element);
             return this;
         }
@@ -50,7 +50,7 @@ public final class Lists {
 
         @Override
         public List<T> addAll(List<T> others) {
-            return others.query().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.add(element));
+            return others.query().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.addLast(element));
         }
 
         private List<T> toList() {
@@ -84,6 +84,13 @@ public final class Lists {
         @Override
         public boolean equalsTo(List<T> other) {
             return this.equals(other);
+        }
+
+        @Override
+        public List<T> removeValue(T element) {
+            var copy = new ArrayList<T>(this.list);
+            copy.remove(element);
+            return new JVMList<>(copy);
         }
 
         @Override

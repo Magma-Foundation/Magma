@@ -2,7 +2,7 @@ import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Query } from "../../../magma/api/collect/query/Query";
 import { Option } from "../../../magma/api/option/Option";
 export interface List<T> {
-	add(element: T): List<T>;
+	addLast(element: T): List<T>;
 	query(): Query<T>;
 	size(): number;
 	subList(startInclusive: number, endExclusive: number): Option<List<T>>;
@@ -16,4 +16,5 @@ export interface List<T> {
 	addFirst(element: T): List<T>;
 	isEmpty(): boolean;
 	equalsTo(other: List<T>): boolean;
+	removeValue(element: T): List<T>;
 }
