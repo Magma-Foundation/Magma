@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class Main {
     private interface IOError {
@@ -140,6 +141,12 @@ public final class Main {
         Result<String, IOError> readString();
 
         Path resolveSibling(String siblingName);
+
+        Result<List<Path>, IOError> walk();
+
+        String findFileName();
+
+        boolean endsWith(String suffix);
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -1127,6 +1134,25 @@ public final class Main {
             public Path resolveSibling(String siblingName) {
                 return new JVMPath(this.path.resolveSibling(siblingName));
             }
+
+            @Override
+            public Result<List<Path>, IOError> walk() {
+                try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
+                    return new Ok<>(new Lists.JVMList<>(stream.<Path>map(JVMPath::new).toList()));
+                } catch (IOException e) {
+                    return new Err<>(new JVMIOError(e));
+                }
+            }
+
+            @Override
+            public String findFileName() {
+                return this.path.getFileName().toString();
+            }
+
+            @Override
+            public boolean endsWith(String suffix) {
+                return this.path.toString().endsWith(suffix);
+            }
         }
 
         @Actual
@@ -1143,12 +1169,26 @@ public final class Main {
     }
 
     public static void main() {
-        var source = Files.get(".", "src", "java", "magma", "Main.java");
-        var target = source.resolveSibling("main.ts");
+        var sourceDirectory = Files.get(".", "src", "java");
+        sourceDirectory.walk()
+                .match((List<Path> children) -> Main.getIoErrorQuery(children).next(), Some::new)
+                .map((IOError error) -> error.display())
+                .ifPresent((String displayed) -> Console.printErrLn(displayed));
+    }
 
-        source.readString()
-                .match((String input) -> Main.compileAndWrite(input, target), (IOError value) -> new Some<IOError>(value))
-                .ifPresent((IOError error) -> Console.printErrLn(error.display()));
+    private static Query<IOError> getIoErrorQuery(List<Path> children) {
+        return children.query()
+                .filter((Path source) -> source.endsWith(".java"))
+                .map((Path source) -> {
+                    var fileName = source.findFileName();
+                    var separator = fileName.lastIndexOf('.');
+                    var name = fileName.substring(0, separator);
+
+                    var target = source.resolveSibling(name + ".ts");
+
+                    return source.readString()
+                            .match((String input) -> Main.compileAndWrite(input, target), (IOError value) -> new Some<IOError>(value));
+                }).flatMap(Iterators::fromOption);
     }
 
     private static Option<IOError> compileAndWrite(String input, Path target) {

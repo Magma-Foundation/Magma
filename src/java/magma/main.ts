@@ -76,6 +76,9 @@ interface Path  {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;
 	resolveSibling(siblingName: string): Path;
+	walk(): Result<List<Path>, IOError>;
+	findFileName(): string;
+	endsWith(suffix: string): boolean;
 }
 class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
@@ -785,9 +788,17 @@ class Primitive implements Type {
 }
 class Main  {
 	static main(): void {
-		let source = Files.get(".", "src", "java", "magma", "Main.java");
-		let target = source.resolveSibling("main.ts");
-		source.readString().match((input: string) => Main.compileAndWrite(input, target), (value: IOError) => new Some<IOError>(value)).ifPresent((error: IOError) => Console.printErrLn(error.display()));
+		let sourceDirectory = Files.get(".", "src", "java");
+		sourceDirectory.walk().match((children: List<Path>) => Main.getIoErrorQuery(children).next(), Some.new).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
+	}
+	static getIoErrorQuery(children: List<Path>): Query<IOError> {
+		return children.query().filter((source: Path) => source.endsWith(".java")).map((source: Path) => {
+			let fileName = source.findFileName();
+			let separator = fileName.lastIndexOf(".");
+			let name = fileName.substring(0, separator);
+			let target = source.resolveSibling(name + ".ts");
+			return source.readString().match((input: string) => Main.compileAndWrite(input, target), (value: IOError) => new Some<IOError>(value));
+		}).flatMap(Iterators.fromOption);
 	}
 	static compileAndWrite(input: string, target: Path): Option<IOError> {
 		let output = Main.compileRoot(input);
