@@ -18,6 +18,7 @@ interface Option<T> {
 	or(other : () => Option<T>): Option<T>;
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R>;
 	filter(predicate : (arg0 : T) => boolean): Option<T>;
+	toTuple(other : T): Tuple<Boolean, T>;
 }
 interface Query<T> {
 	collect<C>(collector : Collector<T, C>): C;
@@ -62,11 +63,14 @@ class HeadedQuery<T> {
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R): R {
 		let result : R = initial;
 		while (true){
-			let maybeNext : Option<T> = this.head.next();
-			if (maybeNext.isEmpty()){
+			let finalResult : R = result;
+			let maybeNext : Tuple<Boolean, R> = this.head.next().map((inner) => folder.apply(finalResult, inner)).toTuple(finalResult);
+			if (maybeNext.left){
+				result = maybeNext.right;
+			}
+			else {
 				return result;
 			}
-			result = folder.apply(result, maybeNext.orElse(null));
 		}
 	}
 	flatMap<R>(mapper : (arg0 : T) => Query<R>): Query<R> {
@@ -411,6 +415,9 @@ class Some<T> {
 	filter(predicate : (arg0 : T) => boolean): Option<T> {
 		return /*predicate.test(this.value) ? this : new None<>*/();
 	}
+	toTuple(other : T): Tuple<Boolean, T> {
+		return new Tuple<>(true, this.value);
+	}
 }
 class None<T> {
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
@@ -441,6 +448,9 @@ class None<T> {
 	}
 	filter(predicate : (arg0 : T) => boolean): Option<T> {
 		return new None<>();
+	}
+	toTuple(other : T): Tuple<Boolean, T> {
+		return new Tuple<>(false, other);
 	}
 }
 class Placeholder {

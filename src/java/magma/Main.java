@@ -46,6 +46,8 @@ public class Main {
         <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
         Option<T> filter(Predicate<T> predicate);
+
+        Tuple<Boolean, T> toTuple(T other);
     }
 
     private interface Query<T> {
@@ -112,12 +114,17 @@ public class Main {
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             R result = initial;
             while (true) {
-                Option<T> maybeNext = this.head.next();
-                if (maybeNext.isEmpty()) {
+                R finalResult = result;
+                Tuple<Boolean, R> maybeNext = this.head.next()
+                        .map(inner -> folder.apply(finalResult, inner))
+                        .toTuple(finalResult);
+
+                if (maybeNext.left) {
+                    result = maybeNext.right;
+                }
+                else {
                     return result;
                 }
-
-                result = folder.apply(result, maybeNext.orElse(null));
             }
         }
 
@@ -535,6 +542,11 @@ public class Main {
         public Option<T> filter(Predicate<T> predicate) {
             return predicate.test(this.value) ? this : new None<>();
         }
+
+        @Override
+        public Tuple<Boolean, T> toTuple(T other) {
+            return new Tuple<>(true, this.value);
+        }
     }
 
     private record None<T>() implements Option<T> {
@@ -584,6 +596,11 @@ public class Main {
         @Override
         public Option<T> filter(Predicate<T> predicate) {
             return new None<>();
+        }
+
+        @Override
+        public Tuple<Boolean, T> toTuple(T other) {
+            return new Tuple<>(false, other);
         }
     }
 
