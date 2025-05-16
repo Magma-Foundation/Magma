@@ -242,13 +242,8 @@
 	/*private static*/compileOrPlaceholder(state : /*CompileState*/, input : string, rules : /*List*/</*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>>): /*Tuple*/</*CompileState*/, string> {
 		return compileOr(state, input, rules).orElseGet(() => new /*Tuple*/<>(state, generatePlaceholder(input)));
 	}
-	/*private static*/compileOr(state : /*CompileState*/, input : string, rules : /*List*/</*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {/*for (var rule : rules) {
-            var maybeTuple = rule.apply(state, input);
-            if (maybeTuple.isPresent()) {
-                return maybeTuple;
-            }
-        }*/
-		return Optional.empty();
+	/*private static*/compileOr(state : /*CompileState*/, input : string, rules : /*List*/</*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
+		return rules.stream().map((rule) => rule.apply(state, input)).flatMap(Optional.stream).findFirst();
 	}
 	/*private static*/compileClassSegment(state1 : /*CompileState*/, input1 : string): /*Tuple*/</*CompileState*/, string> {
 		return compileOrPlaceholder(state1, input1, List.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));

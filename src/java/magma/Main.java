@@ -316,14 +316,10 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules) {
-        for (var rule : rules) {
-            var maybeTuple = rule.apply(state, input);
-            if (maybeTuple.isPresent()) {
-                return maybeTuple;
-            }
-        }
-
-        return Optional.empty();
+        return rules.stream()
+                .map(rule -> rule.apply(state, input))
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
