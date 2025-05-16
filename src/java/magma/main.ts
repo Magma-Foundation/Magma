@@ -629,14 +629,23 @@ class Main {
 		return findPrimitiveValue(input.strip()).map((result) => new Tuple<>(state, result));
 	}
 	findPrimitiveValue(input : string): Optional<string> {
-		return /*switch (input.strip()) {
-            case "char", "Character", "String" */ - /*> Optional.of("string");
-            case "int", "Integer" */ - /*> Optional.of("number");
-            case "boolean" */ - /*> Optional.of("boolean");
-            case "var" */ - /*> Optional.of("unknown");
-            case "void" */ - /*> Optional.of("void");
-            default */ - /*> Optional.empty();
-        }*/;
+		let stripped : unknown = input.strip();
+		if (stripped.equals("char") || stripped.equals("Character") || stripped.equals("String")){
+			return Optional.of("string");
+		}
+		if (stripped.equals("int") || stripped.equals("Integer")){
+			return Optional.of("number");
+		}
+		if (stripped.equals("boolean")){
+			return Optional.of("boolean");
+		}
+		if (stripped.equals("var")){
+			return Optional.of("unknown");
+		}
+		if (stripped.equals("void")){
+			return Optional.of("void");
+		}
+		return Optional.empty();
 	}
 	compileGeneric(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		return compileSuffix(input.strip(), ">", (withoutEnd) => {

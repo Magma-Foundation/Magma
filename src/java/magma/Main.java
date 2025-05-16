@@ -864,14 +864,28 @@ public class Main {
     }
 
     private static Optional<String> findPrimitiveValue(String input) {
-        return switch (input.strip()) {
-            case "char", "Character", "String" -> Optional.of("string");
-            case "int", "Integer" -> Optional.of("number");
-            case "boolean" -> Optional.of("boolean");
-            case "var" -> Optional.of("unknown");
-            case "void" -> Optional.of("void");
-            default -> Optional.empty();
-        };
+        var stripped = input.strip();
+        if (stripped.equals("char") || stripped.equals("Character") || stripped.equals("String")) {
+            return Optional.of("string");
+        }
+
+        if (stripped.equals("int") || stripped.equals("Integer")) {
+            return Optional.of("number");
+        }
+
+        if (stripped.equals("boolean")) {
+            return Optional.of("boolean");
+        }
+
+        if (stripped.equals("var")) {
+            return Optional.of("unknown");
+        }
+
+        if (stripped.equals("void")) {
+            return Optional.of("void");
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
