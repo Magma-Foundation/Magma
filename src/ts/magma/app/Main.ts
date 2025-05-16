@@ -15,17 +15,8 @@ import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/io/Files";
-import { Option } from "./Option";
-import { List } from "./List";
-import { Tuple2 } from "./Tuple2";
 import { None } from "./None";
 import { Some } from "./Some";
-import { Tuple2Impl } from "./Tuple2Impl";
-import { Collector } from "./Collector";
-import { Result } from "./Result";
-import { Head } from "./Head";
-import { Query } from "./Query";
-import { HeadedQuery } from "./HeadedQuery";
 import { EmptyHead } from "./EmptyHead";
 import { SingleHead } from "./SingleHead";
 import { ListCollector } from "./ListCollector";
@@ -148,7 +139,7 @@ class CompileState {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 	addImport(importString: Import): CompileState {
-		if (this.imports.contains(importString)){
+		if (this.imports.query().filter((node: Import) => node.child.equals(importString.child)).next().isPresent()){
 			return this;
 		}
 		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);

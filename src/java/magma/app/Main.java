@@ -163,7 +163,11 @@ public final class Main {
         }
 
         public CompileState addImport(Import importString) {
-            if (this.imports.contains(importString)) {
+            if (this.imports
+                    .query()
+                    .filter((Import node) -> node.child.equals(importString.child))
+                    .next()
+                    .isPresent()){
                 return this;
             }
 

@@ -1,7 +1,6 @@
 import { Option } from "../../../magma/api/option/Option";
 import { Main } from "../../../magma/app/Main";
 import { Head } from "./Head";
-import { Option } from "./Option";
 import { Main.None } from "./Main.None";
 import { Main.Some } from "./Main.Some";
 export class RangeHead implements Head<number> {
