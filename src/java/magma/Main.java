@@ -592,7 +592,8 @@ public class Main {
                 createOperatorRule("<="),
                 createOperatorRule("<"),
                 createOperatorRule("&&"),
-                createOperatorRule("||")
+                createOperatorRule("||"),
+                createOperatorRule(">=")
         ));
     }
 

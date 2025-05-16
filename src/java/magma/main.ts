@@ -41,7 +41,7 @@ class DivideState {
 		return this.depth === 1;
 	}
 	pop(): Optional<Tuple<DivideState, string>> {
-		if (/*this.index >= this*/.input.length()){
+		if (this.index >= this.input.length()){
 			return Optional.empty();
 		}
 		let c : unknown = this.input.charAt(this.index);
@@ -421,7 +421,7 @@ class Main {
 		return compileValue(state, input).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
 	}
 	compileValue(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createOperatorRuleWithDifferentInfixes(/*"*/ !== /*"*/, /* "!*/ === /*"*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||")));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createOperatorRuleWithDifferentInfixes(/*"*/ !== /*"*/, /* "!*/ === /*"*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">=")));
 	}
 	createTextRule(slice : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => {
