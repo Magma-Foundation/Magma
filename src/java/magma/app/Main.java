@@ -12,7 +12,7 @@ import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
-import magma.api.io.Console;
+import jvm.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.None;
