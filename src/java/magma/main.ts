@@ -189,10 +189,10 @@
 			return appended.advance().exit();
 		}
 		/*if (c == '*/{
-			let c : /*' ||*/ = /*= '(') {
+			' || c = /*= '(') {
             return appended.enter()*/;
 		}
-		if (c === /* '}' || c */ === ')'){
+		if (c === '}' || c === ')'){
 			return appended.exit();
 		}
 		return appended;
@@ -224,7 +224,7 @@
 	}
 	/*private static*/compileNamespaced(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		let stripped : unknown = input.strip();
-		if (/*stripped.startsWith("package ") || stripped*/.startsWith("import ")){
+		if (stripped.startsWith("package ") || stripped.startsWith("import ")){
 			return Optional.of(new /*Tuple*/<>(state, ""));
 		}
 		/*else */{
@@ -392,7 +392,7 @@
 		return compileValue(state, input).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileValue(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), createTextRule("\""), createTextRule("'")));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), createOperatorRule(" || "), createTextRule("\""), createTextRule("'")));
 	}
 	/*private static*/createTextRule(slice : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
 		/*return (state1, input1) -> */{
@@ -594,10 +594,10 @@
 				return appended;
 			}
 		}
-		if (c === ' < /*' || c */ === '('){
+		if (c === ' < ' || c === '('){
 			return appended.enter();
 		}
-		if (c === /* '>' || c */ === ')'){
+		if (c === '>' || c === ')'){
 			return appended.exit();
 		}
 		return appended;
