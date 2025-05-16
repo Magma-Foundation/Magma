@@ -380,10 +380,20 @@ public class Main {
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
+                Main::compileEmptySegment,
                 Main::compileBlock,
                 Main::compileFunctionStatement,
                 Main::compileReturnWithoutSuffix
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileEmptySegment(CompileState state, String input) {
+        if (input.strip().equals(";")) {
+            return Optional.of(new Tuple<>(state, ";"));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<Tuple<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {

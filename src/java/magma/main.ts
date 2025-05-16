@@ -288,7 +288,15 @@
 		return compileStatements(state, input, Main.compileFunctionSegment);
 	}
 	/*private static*/compileFunctionSegment(state : /*CompileState*/, input : string): /*Tuple*/</*CompileState*/, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
+		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileEmptySegment, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
+	}
+	/*private static*/compileEmptySegment(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
+		if (input.strip().equals(";")){
+			return Optional.of(new /*Tuple*/<>(state, ";"));
+		}/*
+        else {
+            return Optional.empty();
+        }*/
 	}
 	/*private static*/compileReturnWithoutSuffix(state1 : /*CompileState*/, input1 : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileReturn(input1, (withoutPrefix) => compileValue(state1, withoutPrefix)).map((tuple) => new /*Tuple*/<>(tuple.left, generateIndent(state1.depth) + tuple.right));
@@ -410,8 +418,7 @@
 			}
 			let value : unknown = stripped.substring(slice.length(), stripped.length() - slice.length());
 			return Optional.of(new /*Tuple*/<>(state1, "\"" + value + "\""));
-		}
-		/**/;
+		};
 	}
 	/*private static*/compileNot(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compilePrefix(input.strip(), "!", (withoutPrefix) => {
@@ -577,8 +584,7 @@
             case "var" */ - /*> Optional.of("unknown");
             case "void" */ - /*> Optional.of("void");
             default */ - /*> Optional.empty();
-        }*/
-		/**/;
+        }*/;
 	}
 	/*private static*/compileGeneric(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileSuffix(input.strip(), ">", (withoutEnd) => {
