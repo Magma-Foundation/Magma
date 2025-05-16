@@ -179,20 +179,22 @@ public class Main {
 
     private static class RangeHead implements Head<Integer> {
         private final int length;
-        private int counter = 0;
+        private int counter;
 
         public RangeHead(int length) {
             this.length = length;
+            this.counter = 0;
         }
 
         @Override
         public Option<Integer> next() {
-            if (this.counter < this.length) {
-                var value = this.counter;
-                this.counter++;
-                return new Some<Integer>(value);
+            if (this.counter >= this.length) {
+                return new None<Integer>();
             }
-            return new None<Integer>();
+
+            var value = this.counter;
+            this.counter++;
+            return new Some<Integer>(value);
         }
     }
 
@@ -1108,21 +1110,30 @@ public class Main {
         return (state, input1) -> compileFirst(input1, sourceInfix, (_, right1) -> {
             return compileFirst(right1, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
-                    var strippedBeforeContent = beforeContent.strip();
-                    return compileFirst(strippedBeforeContent, "(", (rawName, withParameters) -> {
-                        return compileFirst(withParameters, ")", (parametersString, _) -> {
-                            var name = rawName.strip();
-
-                            var parametersTuple = parseParameters(state, parametersString);
-                            var parameters = retainDefinitionsFromParameters(parametersTuple.right);
-
-                            return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
+                    return compileLast(beforeContent, " implements ", (s, s2) -> {
+                        return parseType(state, s2).flatMap(implementingTuple -> {
+                            return getOr(targetInfix, implementingTuple.left, s, inputContent, new Some<>(implementingTuple.right));
                         });
                     }).or(() -> {
-                        return assembleStructure(state, targetInfix, inputContent, strippedBeforeContent, Lists.empty());
+                        return getOr(targetInfix, state, beforeContent, inputContent, new None<>());
                     });
                 });
             });
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> getOr(String targetInfix, CompileState state, String beforeContent, String inputContent, Option<Type> maybeImplementing) {
+        return compileFirst(beforeContent, "(", (rawName, withParameters) -> {
+            return compileFirst(withParameters, ")", (parametersString, _) -> {
+                var name = rawName.strip();
+
+                var parametersTuple = parseParameters(state, parametersString);
+                var parameters = retainDefinitionsFromParameters(parametersTuple.right);
+
+                return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing);
+            });
+        }).or(() -> {
+            return assembleStructure(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing);
         });
     }
 
@@ -1133,18 +1144,18 @@ public class Main {
                 .collect(new ListCollector<>());
     }
 
-    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String beforeParams, List<Definition> parameters) {
+    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String beforeParams, List<Definition> parameters, Option<Type> maybeImplementing) {
         return compileSuffix(beforeParams.strip(), ">", withoutTypeParamEnd -> {
             return compileFirst(withoutTypeParamEnd, "<", (name, typeParamsString) -> {
                 var typeParams = divideValues(typeParamsString);
-                return assembleStructure(state, infix, content, name, typeParams, parameters);
+                return assembleStructure(state, infix, content, name, typeParams, parameters, maybeImplementing);
             });
         }).or(() -> {
-            return assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters);
+            return assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters, maybeImplementing);
         });
     }
 
-    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<String> typeParams, List<Definition> parameters) {
+    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<String> typeParams, List<Definition> parameters, Option<Type> maybeImplementing) {
         var outputContentTuple = compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
@@ -1153,8 +1164,16 @@ public class Main {
         var constructorString = generateConstructorFromRecordParameters(parameters);
         var joinedTypeParams = joinTypeParams(typeParams);
 
-        var generated = infix + name + joinedTypeParams + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
+        var implementingString = generateImplementing(maybeImplementing);
+
+        var generated = infix + name + joinedTypeParams + implementingString + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
         return new Some<>(new Tuple<>(outputContentState.append(generated), ""));
+    }
+
+    private static String generateImplementing(Option<Type> maybeImplementing) {
+        return maybeImplementing.map(Type::generate)
+                .map(inner -> " implements " + inner)
+                .orElse("");
     }
 
     private static String joinTypeParams(List<String> typeParams) {

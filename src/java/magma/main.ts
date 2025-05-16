@@ -1,4 +1,4 @@
-interface MethodHeader {
+interface MethodHeader  {
 	generateWithAfterName(afterName : string): string;
 }
 interface Result<T, X> {
@@ -44,26 +44,26 @@ interface List<T> {
 interface Head<T> {
 	next(): Option<T>;
 }
-interface Parameter {
+interface Parameter  {
 	generate(): string;
 	asDefinition(): Option<Definition>;
 }
-interface Value extends Argument, Caller {
+interface Value extends Argument, Caller  {
 	generate(): string;
 	resolve(state : CompileState): Type;
 }
-interface Argument {
+interface Argument  {
 	toValue(): Option<Value>;
 }
-interface Caller {
+interface Caller  {
 	generate(): string;
 	findChild(): Option<Value>;
 }
-interface Type {
+interface Type  {
 	generate(): string;
 	isFunctional(): boolean;
 }
-class HeadedQuery<T> {
+class HeadedQuery<T> implements Query<T> {
 	head : Head<T>;
 	constructor (head : Head<T>) {
 		this.head = head;
@@ -107,22 +107,23 @@ class HeadedQuery<T> {
 		});
 	}
 }
-class RangeHead implements Head<Integer> {
+class RangeHead implements Head<number> {
 	length : number;
-	0 : /*=*/;
-	RangeHead(length : number): public {
+	counter : number;
+	constructor (length : number) {
 		this.length = length;
+		this.counter = 0;
 	}
 	next(): Option<number> {
-		if (this.counter < this.length){
-			let value : var = this.counter;
-			this.counter++;
-			return new Some<number>(value);
+		if (this.counter >= this.length){
+			return new None<number>();
 		}
-		return new None<number>();
+		let value : var = this.counter;
+		this.counter++;
+		return new Some<number>(value);
 	}
 }
-class JVMList<T> {
+class JVMList<T> implements List<T> {
 	list : java.util.List<T>;
 	constructor (list : java.util.List<T>) {
 		this.list = list;
@@ -172,7 +173,7 @@ class JVMList<T> {
 		return new Some<>(this.get(index));
 	}
 }
-class Lists {
+class Lists  {
 	empty<T>(): List<T> {
 		return new JVMList<>();
 	}
@@ -180,20 +181,20 @@ class Lists {
 		return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
 	}
 }
-class DivideState {
+class DivideState  {
 	input : string;
 	segments : List<string>;
 	index : number;
 	buffer : StringBuilder;
 	depth : number;
-	constructor (segments : List<string>, buffer : StringBuilder, depth : number, input : string, index : number) {
+	DivideState(segments : List<string>, buffer : StringBuilder, depth : number, input : string, index : number): private {
 		this.segments = segments;
 		this.buffer = buffer;
 		this.depth = depth;
 		this.input = input;
 		this.index = index;
 	}
-	constructor (input : string) {
+	DivideState(input : string): public {
 		this(Lists.empty(), new StringBuilder(), 0, input, 0);
 	}
 	advance(): DivideState {
@@ -284,7 +285,7 @@ class CompileState {
 		return this.definitions.query().filter((definition) => definition.name.equals(name)).map(Definition.type).next();
 	}
 }
-class Joiner {
+class Joiner implements Collector<string, Option<string>> {
 	delimiter : string;
 	constructor (delimiter : string) {
 		this.delimiter = delimiter;
@@ -329,7 +330,7 @@ class ConstructorHeader implements MethodHeader {
 		return "constructor " + afterName;
 	}
 }
-class Ok<T, X> {
+class Ok<T, X> implements Result<T, X> {
 	value : T;
 	constructor (value : T) {
 		this.value = value;
@@ -338,7 +339,7 @@ class Ok<T, X> {
 		return whenOk(this.value);
 	}
 }
-class Err<T, X> {
+class Err<T, X> implements Result<T, X> {
 	error : X;
 	constructor (error : X) {
 		this.error = error;
@@ -347,7 +348,7 @@ class Err<T, X> {
 		return whenErr(this.error);
 	}
 }
-class Iterators {
+class Iterators  {
 	fromOption<T>(option : Option<T>): Query<T> {
 		return new HeadedQuery<>();
 	}
@@ -408,7 +409,7 @@ class FlatMapHead<T, R> implements Head<R> {
 		}
 	}
 }
-class Some<T> {
+class Some<T> implements Option<T> {
 	value : T;
 	constructor (value : T) {
 		this.value = value;
@@ -447,7 +448,7 @@ class Some<T> {
 		return other.get().map((otherValue) => new Tuple<>(this.value, otherValue));
 	}
 }
-class None<T> {
+class None<T> implements Option<T> {
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
 		return new None<>();
 	}
@@ -505,7 +506,7 @@ class Placeholder {
 		return Primitive.Unknown;
 	}
 }
-class MapHead<T, R> {
+class MapHead<T, R> implements Head<R> {
 	head : Head<T>;
 	mapper : (arg0 : T) => R;
 	constructor (head : Head<T>, mapper : (arg0 : T) => R) {
@@ -516,7 +517,7 @@ class MapHead<T, R> {
 		return this.head.next().map(this.mapper);
 	}
 }
-class Whitespace {
+class Whitespace implements Parameter {
 	generate(): string {
 		return "";
 	}
@@ -524,7 +525,7 @@ class Whitespace {
 		return new None<>();
 	}
 }
-class Access {
+class Access implements Value {
 	child : Value;
 	property : string;
 	constructor (child : Value, property : string) {
@@ -567,7 +568,7 @@ class Symbol {
 }
 class StringValue implements Value {
 	value : string;
-	StringValue(value : string): public {
+	constructor (value : string) {
 		this.value = value;
 	}
 	generate(): string {
@@ -585,7 +586,7 @@ class StringValue implements Value {
 }
 class Not implements Value {
 	child : string;
-	Not(child : string): public {
+	constructor (child : string) {
 		this.child = child;
 	}
 	generate(): string {
@@ -604,7 +605,7 @@ class Not implements Value {
 class Lambda implements Value {
 	paramNames : List<string>;
 	content : string;
-	Lambda(paramNames : List<string>, content : string): public {
+	constructor (paramNames : List<string>, content : string) {
 		this.paramNames = paramNames;
 		this.content = content;
 	}
@@ -622,7 +623,7 @@ class Lambda implements Value {
 		return Primitive.Unknown;
 	}
 }
-class Invokable {
+class Invokable implements Value {
 	caller : Caller;
 	arguments : List<Value>;
 	constructor (caller : Caller, arguments : List<Value>) {
@@ -643,7 +644,7 @@ class Invokable {
 		return Primitive.Unknown;
 	}
 }
-class Operation {
+class Operation implements Value {
 	left : Value;
 	targetInfix : string;
 	right : Value;
@@ -665,7 +666,7 @@ class Operation {
 		return Primitive.Unknown;
 	}
 }
-class ConstructionCaller {
+class ConstructionCaller implements Caller {
 	right : string;
 	constructor (right : string) {
 		this.right = right;
@@ -680,7 +681,7 @@ class ConstructionCaller {
 class FunctionType implements Type {
 	arguments : List<string>;
 	returns : string;
-	FunctionType(arguments : List<string>, returns : string): public {
+	constructor (arguments : List<string>, returns : string) {
 		this.arguments = arguments;
 		this.returns = returns;
 	}
@@ -695,7 +696,7 @@ class FunctionType implements Type {
 class Generic implements Type {
 	base : string;
 	arguments : List<string>;
-	Generic(base : string, arguments : List<string>): public {
+	constructor (base : string, arguments : List<string>) {
 		this.base = base;
 		this.arguments = arguments;
 	}
@@ -706,7 +707,7 @@ class Generic implements Type {
 		return false;
 	}
 }
-class Main {
+class Main  {
 	main(): void {
 		let source : var = Paths.get(".", "src", "java", "magma", "Main.java");
 		let target : var = source.resolveSibling("main.ts");
@@ -829,43 +830,55 @@ class Main {
 		return (state, input1) => compileFirst(input1, sourceInfix, (_, right1) => {
 			return compileFirst(right1, "{", (beforeContent, withEnd) => {
 				return compileSuffix(withEnd.strip(), "}", (inputContent) => {
-					let strippedBeforeContent : var = beforeContent.strip();
-					return compileFirst(strippedBeforeContent, "(", (rawName, withParameters) => {
-						return compileFirst(withParameters, ")", (parametersString, _) => {
-							let name : var = rawName.strip();
-							let parametersTuple : var = parseParameters(state, parametersString);
-							let parameters : var = retainDefinitionsFromParameters(parametersTuple.right);
-							return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
+					return compileLast(beforeContent, " implements ", (s, s2) => {
+						return parseType(state, s2).flatMap((implementingTuple) => {
+							return getOr(targetInfix, implementingTuple.left, s, inputContent, new Some<>(implementingTuple.right));
 						});
 					}).or(() => {
-						return assembleStructure(state, targetInfix, inputContent, strippedBeforeContent, Lists.empty());
+						return getOr(targetInfix, state, beforeContent, inputContent, new None<>());
 					});
 				});
 			});
 		});
 	}
+	getOr(targetInfix : string, state : CompileState, beforeContent : string, inputContent : string, maybeImplementing : Option<Type>): Option<Tuple<CompileState, string>> {
+		return compileFirst(beforeContent, "(", (rawName, withParameters) => {
+			return compileFirst(withParameters, ")", (parametersString, _) => {
+				let name : var = rawName.strip();
+				let parametersTuple : var = parseParameters(state, parametersString);
+				let parameters : var = retainDefinitionsFromParameters(parametersTuple.right);
+				return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing);
+			});
+		}).or(() => {
+			return assembleStructure(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing);
+		});
+	}
 	retainDefinitionsFromParameters(parameters : List<Parameter>): List<Definition> {
 		return parameters.query().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
 	}
-	assembleStructure(state : CompileState, infix : string, content : string, beforeParams : string, parameters : List<Definition>): Option<Tuple<CompileState, string>> {
+	assembleStructure(state : CompileState, infix : string, content : string, beforeParams : string, parameters : List<Definition>, maybeImplementing : Option<Type>): Option<Tuple<CompileState, string>> {
 		return compileSuffix(beforeParams.strip(), ">", (withoutTypeParamEnd) => {
 			return compileFirst(withoutTypeParamEnd, "<", (name, typeParamsString) => {
 				let typeParams : var = divideValues(typeParamsString);
-				return assembleStructure(state, infix, content, name, typeParams, parameters);
+				return assembleStructure(state, infix, content, name, typeParams, parameters, maybeImplementing);
 			});
 		}).or(() => {
-			return assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters);
+			return assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters, maybeImplementing);
 		});
 	}
-	assembleStructure(state : CompileState, infix : string, content : string, name : string, typeParams : List<string>, parameters : List<Definition>): Option<Tuple<CompileState, string>> {
+	assembleStructure(state : CompileState, infix : string, content : string, name : string, typeParams : List<string>, parameters : List<Definition>, maybeImplementing : Option<Type>): Option<Tuple<CompileState, string>> {
 		let outputContentTuple : var = compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
 		let outputContentState : var = outputContentTuple.left;
 		let outputContent : var = outputContentTuple.right;
 		let joinedParametersAsClassDefinitions : var = joinParameters(parameters);
 		let constructorString : var = generateConstructorFromRecordParameters(parameters);
 		let joinedTypeParams : var = joinTypeParams(typeParams);
-		let generated : var = infix + name + joinedTypeParams + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
+		let implementingString : var = generateImplementing(maybeImplementing);
+		let generated : var = infix + name + joinedTypeParams + implementingString + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
 		return new Some<>(new Tuple<>(outputContentState.append(generated), ""));
+	}
+	generateImplementing(maybeImplementing : Option<Type>): string {
+		return maybeImplementing.map(Type.generate).map((inner) => " implements " + inner).orElse("");
 	}
 	joinTypeParams(typeParams : List<string>): string {
 		return typeParams.query().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
