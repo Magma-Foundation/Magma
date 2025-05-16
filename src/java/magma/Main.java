@@ -1,7 +1,6 @@
 package magma;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,6 +128,14 @@ public final class Main {
     }
 
     private @interface Actual {
+    }
+
+    private interface Path {
+        Option<IOException> writeString(String output);
+
+        Result<String, IOException> readString();
+
+        Path resolveSibling(String siblingName);
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -1125,37 +1132,51 @@ public final class Main {
 
     public static class Files {
         @Actual
-        private static Option<IOException> writeString(Path target, String output) {
-            try {
-                java.nio.file.Files.writeString(target, output);
-                return new None<IOException>();
-            } catch (IOException e) {
-                return new Some<IOException>(e);
+        private record JVMPath(java.nio.file.Path path) implements Path {
+            @Override
+            public Option<IOException> writeString(String output) {
+                try {
+                    java.nio.file.Files.writeString(this.path, output);
+                    return new None<IOException>();
+                } catch (IOException e) {
+                    return new Some<IOException>(e);
+                }
+            }
+
+            @Override
+            public Result<String, IOException> readString() {
+                try {
+                    return new Ok<String, IOException>(java.nio.file.Files.readString(this.path));
+                } catch (IOException e) {
+                    return new Err<String, IOException>(e);
+                }
+            }
+
+            @Override
+            public Path resolveSibling(String siblingName) {
+                return new JVMPath(path.resolveSibling(siblingName));
             }
         }
 
+
         @Actual
-        private static Result<String, IOException> readString(Path source) {
-            try {
-                return new Ok<String, IOException>(java.nio.file.Files.readString(source));
-            } catch (IOException e) {
-                return new Err<String, IOException>(e);
-            }
+        private static Path get(String first, String... more) {
+            return new JVMPath(Paths.get(first, more));
         }
     }
 
     public static void main() {
-        var source = Paths.get(".", "src", "java", "magma", "Main.java");
+        var source = Files.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("main.ts");
 
-        Files.readString(source)
+        source.readString()
                 .match((String input) -> Main.compileAndWrite(input, target), Some::new)
                 .ifPresent(Throwable::printStackTrace);
     }
 
     private static Option<IOException> compileAndWrite(String input, Path target) {
         var output = Main.compileRoot(input);
-        return Files.writeString(target, output);
+        return target.writeString(output);
     }
 
     private static String compileRoot(String input) {

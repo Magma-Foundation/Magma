@@ -70,6 +70,11 @@ interface Type  {
 }
 interface Actual  {
 }
+interface Path  {
+	writeString(output: string): Option<IOException>;
+	readString(): Result<string, IOException>;
+	resolveSibling(siblingName: string): Path;
+}
 class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
@@ -809,9 +814,26 @@ class VarArgs implements Type {
 		return "...";
 	}
 }
+class JVMPath implements Path {
+	writeString(output: string): Option<IOException> {/*try {
+                    java.nio.file.Files.writeString(this.path, output);
+                    return new None<IOException>();
+                }*//* catch (IOException e) {
+                    return new Some<IOException>(e);
+                }*/
+	}
+	readString(): Result<string, IOException> {/*try {
+                    return new Ok<String, IOException>(java.nio.file.Files.readString(this.path));
+                }*//* catch (IOException e) {
+                    return new Err<String, IOException>(e);
+                }*/
+	}
+	resolveSibling(siblingName: string): Path {
+		return new JVMPath(path.resolveSibling(siblingName));
+	}
+}
 class Files  {
-	static writeString(target: Path, output: string): Option<IOException>;
-	static readString(source: Path): Result<string, IOException>;
+	static get(first: string, ...more: string[]): Path;
 }
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
@@ -839,13 +861,13 @@ class Primitive implements Type {
 }
 class Main  {
 	static main(): void {
-		let source = Paths.get(".", "src", "java", "magma", "Main.java");
+		let source = Files.get(".", "src", "java", "magma", "Main.java");
 		let target = source.resolveSibling("main.ts");
-		Files.readString(source).match((input: string) => Main.compileAndWrite(input, target), Some.new).ifPresent(Throwable.printStackTrace);
+		source.readString().match((input: string) => Main.compileAndWrite(input, target), Some.new).ifPresent(Throwable.printStackTrace);
 	}
 	static compileAndWrite(input: string, target: Path): Option<IOException> {
 		let output = Main.compileRoot(input);
-		return Files.writeString(target, output);
+		return target.writeString(output);
 	}
 	static compileRoot(input: string): string {
 		let compiled = Main.compileStatements(CompileState.createInitial(), input, Main.compileRootSegment);
