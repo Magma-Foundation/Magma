@@ -122,8 +122,7 @@ public class Main {
 
         @Override
         public String generateWithAfterName(String afterName) {
-            var beforeTypeString = this.maybeBeforeType().map(Main::generatePlaceholder).orElse("");
-            return beforeTypeString + this.name + afterName + ": " + this.type();
+            return this.name + afterName + ": " + this.type();
         }
     }
 
@@ -292,7 +291,7 @@ public class Main {
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
 
-        var generated = generatePlaceholder(beforeKeyword.strip()) + targetInfix + name + " {" + outputContent + "\n}\n";
+        var generated = targetInfix + name + " {" + outputContent + "\n}\n";
         return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
     }
 
@@ -699,7 +698,7 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        return IntStream.range(0, input.length()).allMatch(Character::isDigit);
+        return IntStream.range(0, input.length()).mapToObj(input::charAt).allMatch(Character::isDigit);
     }
 
     private static Optional<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
@@ -801,8 +800,17 @@ public class Main {
     private static Optional<Tuple<CompileState, String>> compileType(CompileState state, String type) {
         return compileOr(state, type, List.of(
                 Main::compileGeneric,
-                Main::compilePrimitive
+                Main::compilePrimitive,
+                Main::compileSymbolType
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileSymbolType(CompileState state, String input) {
+        var stripped = input.strip();
+        if (isSymbol(stripped)) {
+            return Optional.of(new Tuple<>(state, stripped));
+        }
+        return Optional.empty();
     }
 
     private static Optional<Tuple<CompileState, String>> compilePrimitive(CompileState state, String input) {
@@ -824,7 +832,7 @@ public class Main {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
                 var argumentsTuple = compileValues(state, argumentsString, Main::compileTypeArgument);
-                return Optional.of(new Tuple<>(argumentsTuple.left, generatePlaceholder(baseString) + "<" + argumentsTuple.right + ">"));
+                return Optional.of(new Tuple<>(argumentsTuple.left, baseString + "<" + argumentsTuple.right + ">"));
             });
         });
     }
