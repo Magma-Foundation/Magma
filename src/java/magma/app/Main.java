@@ -131,30 +131,34 @@ public final class Main {
             Option<String> maybeStructureName,
             int depth,
             List<Definition> definitions,
-            List<String> namespace
+            Option<List<String>> maybeNamespace
     ) {
-        private static CompileState createInitial(List<String> namespace) {
-            return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), namespace);
+        private static CompileState createInitial() {
+            return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), new None<>());
+        }
+
+        private CompileState withNamespace(List<String> namespace) {
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace));
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.namespace);
+            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
         }
 
         CompileState withStructureName(String name) {
-            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.namespace);
+            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.maybeNamespace);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.namespace);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.namespace);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.namespace);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace);
         }
 
         Option<Type> resolve(String name) {
@@ -173,7 +177,15 @@ public final class Main {
                 return this;
             }
 
-            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
+            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+        }
+
+        public CompileState clearImports() {
+            return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
+        }
+
+        public CompileState clearOutput() {
+            return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace);
         }
     }
 
@@ -703,19 +715,33 @@ public final class Main {
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
-                .match((List<Path> children) -> Main.runWithChildren(children, sourceDirectory).next(), (IOError value) -> new Some<IOError>(value))
+                .match(
+                        (List<Path> children) -> Main.runWithChildren(children, sourceDirectory),
+                        (IOError value) -> new Some<IOError>(value))
                 .map((IOError error) -> error.display())
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
 
-    private static Query<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
+    private static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
         return children.query()
                 .filter((Path source) -> source.endsWith(".java"))
-                .map((Path source) -> Main.runWithSource(sourceDirectory, source))
-                .flatMap(Iterators::fromOption);
+                .foldWithInitial(Main.createInitialState(), (Tuple2<CompileState, Option<IOError>> current, Path path) -> Main.foldChild(sourceDirectory, current, path))
+                .right();
     }
 
-    private static Option<IOError> runWithSource(Path sourceDirectory, Path source) {
+    private static Tuple2<CompileState, Option<IOError>> createInitialState() {
+        return new Tuple2Impl<>(CompileState.createInitial(), new None<IOError>());
+    }
+
+    private static Tuple2<CompileState, Option<IOError>> foldChild(Path sourceDirectory, Tuple2<CompileState, Option<IOError>> current, Path path) {
+        if (current.right().isPresent()) {
+            return current;
+        }
+
+        return Main.runWithSource(current.left(), sourceDirectory, path);
+    }
+
+    private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Path sourceDirectory, Path source) {
         var relative = sourceDirectory.relativize(source);
         var namespace = relative.getParent()
                 .query()
@@ -729,30 +755,31 @@ public final class Main {
                 .resolveChildSegments(namespace)
                 .resolveChild(name + ".ts");
 
-        return source.readString()
-                .match((String input) -> Main.compileAndWrite(input, target, namespace), (IOError value) -> new Some<IOError>(value));
+        return source.readString().match(
+                (String input) -> Main.compileAndWrite(state, input, target, namespace),
+                (IOError value) -> new Tuple2Impl<>(state, new Some<IOError>(value)));
     }
 
-    private static Option<IOError> compileAndWrite(String input, Path target, List<String> namespace) {
-        var output = Main.compileRoot(input, namespace);
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, String input, Path target, List<String> namespace) {
+        var output = Main.compileRoot(state, input, namespace);
 
         var parent = target.getParent();
         if (!parent.exists()) {
             parent.createDirectories();
         }
 
-        return target.writeString(output);
+        return new Tuple2Impl<>(output.left(), target.writeString(output.right()));
     }
 
-    private static String compileRoot(String input, List<String> namespace) {
-        var compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main::compileRootSegment);
+    private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
+        var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
         var compiledState = compiled.left();
         var imports = compiledState.imports.query()
                 .map((Import anImport) -> anImport.generate())
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return imports + compiledState.output + compiled.right();
+        return new Tuple2Impl<>(state.clearImports().clearOutput(), imports + compiledState.output + compiled.right());
     }
 
     private static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
@@ -1076,13 +1103,14 @@ public final class Main {
                         .orElse(Lists.empty());
 
                 var parent1 = parent;
-                var namespace = state.namespace;
+                var namespace = state.maybeNamespace.orElse(Lists.empty());
                 if (namespace.isEmpty()) {
                     parent1 = parent1.addFirst(".");
                 }
 
                 var i = 0;
-                while (i < namespace.size()) {
+                var size = namespace.size();
+                while (i < size) {
                     parent1 = parent1.addFirst("..");
                     i++;
                 }
