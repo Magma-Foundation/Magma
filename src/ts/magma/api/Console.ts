@@ -1,4 +1,4 @@
 import { Actual } from "../../magma/Actual";
 export class Console  {
-	static printErrLn(message: string): void;
+	static declare printErrLn(message: string): void;
 }

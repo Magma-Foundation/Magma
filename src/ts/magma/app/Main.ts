@@ -18,6 +18,7 @@ import { Files } from "../../magma/jvm/Files";
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
+	withModifier(modifier: string): MethodHeader;
 }
 interface Parameter  {
 	generate(): string;
@@ -186,6 +187,9 @@ class Definition {
 	hasAnnotation(annotation: string): boolean {
 		return this.annotations.contains(annotation);
 	}
+	withModifier(modifier: string): MethodHeader {
+		return new Definition(this.annotations, this.modifiers.add(modifier), this.typeParams, this.type, this.name);
+	}
 }
 class ConstructorHeader implements MethodHeader {
 	generateWithAfterName(afterName: string): string {
@@ -193,6 +197,9 @@ class ConstructorHeader implements MethodHeader {
 	}
 	hasAnnotation(annotation: string): boolean {
 		return false;
+	}
+	withModifier(modifier: string): MethodHeader {
+		return this;
 	}
 }
 export class Ok<T, X> implements Result<T, X> {
@@ -945,10 +952,11 @@ export class Main  {
 			let parameters = parametersTuple.right();
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
-			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
 			if (header.hasAnnotation("Actual")){
+				let headerGenerated = header.withModifier("declare").generateWithAfterName("(" + joinedDefinitions + ")");
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
 			}
+			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {
 				return Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
 					let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);

@@ -15,5 +15,5 @@ import { StringWriter } from "../../java/io/StringWriter";
 import { Paths } from "../../java/nio/file/Paths";
 import { Stream } from "../../java/util/stream/Stream";
 export class Files  {
-	static get(first: string, ...more: string[]): Path;
+	static declare get(first: string, ...more: string[]): Path;
 }

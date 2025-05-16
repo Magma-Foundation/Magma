@@ -29,6 +29,8 @@ public final class Main {
         String generateWithAfterName(String afterName);
 
         boolean hasAnnotation(String annotation);
+
+        MethodHeader withModifier(String modifier);
     }
 
     private interface Parameter {
@@ -223,6 +225,11 @@ public final class Main {
         public boolean hasAnnotation(String annotation) {
             return this.annotations.contains(annotation);
         }
+
+        @Override
+        public MethodHeader withModifier(String modifier) {
+            return new Definition(this.annotations, this.modifiers.add(modifier), this.typeParams, this.type, this.name);
+        }
     }
 
     private static class ConstructorHeader implements MethodHeader {
@@ -234,6 +241,11 @@ public final class Main {
         @Override
         public boolean hasAnnotation(String annotation) {
             return false;
+        }
+
+        @Override
+        public MethodHeader withModifier(String modifier) {
+            return this;
         }
     }
 
@@ -838,7 +850,7 @@ public final class Main {
         var output = Main.compileRoot(input, namespace);
 
         var parent = target.getParent();
-        if(!parent.exists()) {
+        if (!parent.exists()) {
             parent.createDirectories();
         }
 
@@ -1244,11 +1256,12 @@ public final class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
             if (header.hasAnnotation("Actual")) {
+                var headerGenerated = header.withModifier("declare").generateWithAfterName("(" + joinedDefinitions + ")");
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";"));
             }
 
+            var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
             return Main.compilePrefix(Strings.strip(afterParams), "{", (String withoutContentStart) -> {
                 return Main.compileSuffix(Strings.strip(withoutContentStart), "}", (String withoutContentEnd) -> {
                     var statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);

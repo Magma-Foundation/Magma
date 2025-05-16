@@ -8,6 +8,6 @@ import { Main } from "../../../magma/app/Main";
 import { ArrayList } from "../../../java/util/ArrayList";
 import { Arrays } from "../../../java/util/Arrays";
 export class Lists  {
-	static empty<T>(): List<T>;
-	static of<T>(...elements: T[]): List<T>;
+	static declare empty<T>(): List<T>;
+	static declare of<T>(...elements: T[]): List<T>;
 }

@@ -1,10 +1,10 @@
 import { Actual } from "../../../magma/Actual";
 export class Strings  {
-	static length(stripped: string): number;
-	static sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-	static sliceFrom(input: string, startInclusive: number): string;
-	static isEmpty(cache: string): boolean;
-	static equalsTo(left: string, right: string): boolean;
-	static strip(input: string): string;
-	static isBlank(value: string): boolean;
+	static declare length(stripped: string): number;
+	static declare sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
+	static declare sliceFrom(input: string, startInclusive: number): string;
+	static declare isEmpty(cache: string): boolean;
+	static declare equalsTo(left: string, right: string): boolean;
+	static declare strip(input: string): string;
+	static declare isBlank(value: string): boolean;
 }
