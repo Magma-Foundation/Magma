@@ -502,9 +502,7 @@ class Main {
 	}
 	createOperatorRuleWithDifferentInfix(sourceInfix : string, targetInfix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => {
-			return compileSplit(splitFolded(input1, foldOperator(sourceInfix), (divisions) => {
-				return selectFirst(divisions, sourceInfix);
-			}), (left, right) => {
+			return compileSplit(splitFolded(input1, foldOperator(sourceInfix), (divisions) => selectFirst(divisions, sourceInfix)), (left, right) => {
 				let leftTuple : unknown = compileValueOrPlaceholder(state1, left);
 				let rightTuple : unknown = compileValueOrPlaceholder(leftTuple.left, right);
 				return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
