@@ -147,7 +147,7 @@ class CompileState {
 		this.sources = sources;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty());
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty());
 	}
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
@@ -172,7 +172,7 @@ class CompileState {
 		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	withNamespace(namespace: List<string>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(namespace), this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<string>>(namespace), this.sources);
 	}
 	append(element: string): CompileState {
 		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
@@ -202,10 +202,10 @@ class CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
 	}
 	findSource(name: string): Option<Source> {
-		return this.sources.query().filter((source: Source) => source.computeName().equals(name)).next();
+		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.query().anyMatch((inner: string) => inner.equals(base))){
+		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base))){
 			return this;
 		}
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
@@ -644,13 +644,16 @@ class Source {
 		this.sourceDirectory = sourceDirectory;
 		this.source = source;
 	}
+	read(): Result<string, IOError> {
+		return this.source.readString();
+	}
 	computeName(): string {
 		let fileName = this.source.findFileName();
 		let separator = fileName.lastIndexOf(".");
 		return fileName.substring(0, separator);
 	}
 	computeNamespace(): List<string> {
-		return this.sourceDirectory().relativize(this.source()).getParent().query().collect(new ListCollector<string>());
+		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>());
 	}
 }
 class Primitive implements Type {
@@ -683,31 +686,31 @@ export class Main {
 		sourceDirectory.walk().match((children: List<Path>) => Main.runWithChildren(children, sourceDirectory), (value: IOError) => new Some<IOError>(value)).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
 	}
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
-		let sources = children.query().filter((source: Path) => source.endsWith(".java")).map((child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<>());
-		let initial = sources.query().foldWithInitial(CompileState.createInitial(), CompileState.addSource);
+		let sources = children.query().filter((source: Path) => source.endsWith(".java")).map((child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<Source>());
+		let initial = sources.query().foldWithInitial(CompileState.createInitial(), (state: CompileState, source: Source) => state.addSource(source));
 		return sources.query().foldWithInitial(Main.createInitialState(initial), (current: Tuple2<CompileState, Option<IOError>>, source1: Source) => Main.foldChild(current.left(), current.right(), source1)).right();
 	}
 	static createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
-		return new Tuple2Impl<>(state, new None<IOError>());
+		return new Tuple2Impl<CompileState, Option<IOError>>(state, new None<IOError>());
 	}
 	static foldChild(state: CompileState, maybeError: Option<IOError>, source: Source): Tuple2<CompileState, Option<IOError>> {
 		if (maybeError.isPresent()){
-			return new Tuple2Impl<>(state, maybeError);
+			return new Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
 		}
 		return Main.runWithSource(state, source);
 	}
 	static runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
 		let target = Files.get(".", "src", "ts").resolveChildSegments(source.computeNamespace()).resolveChild(source.computeName() + ".ts");
-		return source.source().readString().match((input: string) => Main.compileAndWrite(state, source, input, target), (value: IOError) => new Tuple2Impl<>(state, new Some<IOError>(value)));
+		return source.read().match((input: string) => Main.compileAndWrite(state, source, input, target), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Tuple2<CompileState, Option<IOError>> {
-		List < String > namespace = source.computeNamespace();
+		let namespace = source.computeNamespace();
 		let output = Main.compileRoot(state, input, namespace);
 		let parent = target.getParent();
 		if (!parent.exists()){
 			parent.createDirectories();
 		}
-		return new Tuple2Impl<>(output.left(), target.writeString(output.right()));
+		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}
 	static compileRoot(state: CompileState, input: string, namespace: List<string>): Tuple2Impl<CompileState, string> {
 		let compiled = Main.compileStatements(state.withNamespace(namespace), input, Main.compileRootSegment);
@@ -715,7 +718,7 @@ export class Main {
 		let imports = compiledState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
 		let compileState = state.clearImports().clearOutput();
 		let segment = compileState.sources.query().map((source: Source) => Main.formatSource(source)).collect(new Joiner(", ")).orElse("");
-		return new Tuple2Impl<>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
+		return new Tuple2Impl<CompileState, string>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
 	}
 	static formatSource(source: Source): string {
 		let joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");

@@ -133,7 +133,7 @@ public final class Main {
             List<Source> sources
     ) {
         private static CompileState createInitial() {
-            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty());
+            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
         }
 
         private boolean isLastWithin(String name) {
@@ -170,7 +170,7 @@ public final class Main {
         }
 
         private CompileState withNamespace(List<String> namespace) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(namespace), this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<String>>(namespace), this.sources);
         }
 
         CompileState append(String element) {
@@ -214,12 +214,12 @@ public final class Main {
 
         public Option<Source> findSource(String name) {
             return this.sources.query()
-                    .filter((Source source) -> source.computeName().equals(name))
+                    .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
                     .next();
         }
 
         public CompileState addResolvedImportFromCache(String base) {
-            if (this.structureNames.query().anyMatch((String inner) -> inner.equals(base))) {
+            if (this.structureNames.query().anyMatch((String inner) -> Strings.equalsTo(inner, base))) {
                 return this;
             }
 
@@ -747,6 +747,10 @@ public final class Main {
     }
 
     private record Source(Path sourceDirectory, Path source) {
+        private Result<String, IOError> read() {
+            return this.source.readString();
+        }
+
         private String computeName() {
             var fileName = this.source.findFileName();
             var separator = fileName.lastIndexOf('.');
@@ -754,7 +758,10 @@ public final class Main {
         }
 
         private List<String> computeNamespace() {
-            return this.sourceDirectory().relativize(this.source()).getParent().query().collect(new ListCollector<String>());
+            return this.sourceDirectory.relativize(this.source)
+                    .getParent()
+                    .query()
+                    .collect(new ListCollector<String>());
         }
     }
 
@@ -772,9 +779,9 @@ public final class Main {
         var sources = children.query()
                 .filter((Path source) -> source.endsWith(".java"))
                 .map((Path child) -> new Source(sourceDirectory, child))
-                .collect(new ListCollector<>());
+                .collect(new ListCollector<Source>());
 
-        var initial = sources.query().foldWithInitial(CompileState.createInitial(), CompileState::addSource);
+        var initial = sources.query().foldWithInitial(CompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
 
         return sources.query()
                 .foldWithInitial(Main.createInitialState(initial), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
@@ -782,12 +789,12 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, Option<IOError>> createInitialState(CompileState state) {
-        return new Tuple2Impl<>(state, new None<IOError>());
+        return new Tuple2Impl<CompileState, Option<IOError>>(state, new None<IOError>());
     }
 
     private static Tuple2<CompileState, Option<IOError>> foldChild(CompileState state, Option<IOError> maybeError, Source source) {
         if (maybeError.isPresent()) {
-            return new Tuple2Impl<>(state, maybeError);
+            return new Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
         }
 
         return Main.runWithSource(state, source);
@@ -798,13 +805,13 @@ public final class Main {
                 .resolveChildSegments(source.computeNamespace())
                 .resolveChild(source.computeName() + ".ts");
 
-        return source.source().readString().match(
+        return source.read().match(
                 (String input) -> Main.compileAndWrite(state, source, input, target),
-                (IOError value) -> new Tuple2Impl<>(state, new Some<IOError>(value)));
+                (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
     }
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Path target) {
-        List<String> namespace = source.computeNamespace();
+        var namespace = source.computeNamespace();
         var output = Main.compileRoot(state, input, namespace);
 
         var parent = target.getParent();
@@ -812,7 +819,7 @@ public final class Main {
             parent.createDirectories();
         }
 
-        return new Tuple2Impl<>(output.left(), target.writeString(output.right()));
+        return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
     }
 
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
@@ -830,7 +837,7 @@ public final class Main {
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Tuple2Impl<>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
+        return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
     }
 
     private static String formatSource(Source source) {
