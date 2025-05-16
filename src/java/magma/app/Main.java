@@ -740,22 +740,28 @@ public final class Main {
     }
 
     private static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
-        return children.query()
+        var sources = children.query()
                 .filter((Path source) -> source.endsWith(".java"))
-                .foldWithInitial(Main.createInitialState(), (Tuple2<CompileState, Option<IOError>> current, Path path) -> Main.foldChild(sourceDirectory, current, path))
+                .map((Path child) -> new Source(sourceDirectory, child))
+                .collect(new ListCollector<>());
+
+        var initial = sources.query().foldWithInitial(CompileState.createInitial(), CompileState::addSource);
+
+        return sources.query()
+                .foldWithInitial(Main.createInitialState(initial), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
                 .right();
     }
 
-    private static Tuple2<CompileState, Option<IOError>> createInitialState() {
-        return new Tuple2Impl<>(CompileState.createInitial(), new None<IOError>());
+    private static Tuple2<CompileState, Option<IOError>> createInitialState(CompileState state) {
+        return new Tuple2Impl<>(state, new None<IOError>());
     }
 
-    private static Tuple2<CompileState, Option<IOError>> foldChild(Path sourceDirectory, Tuple2<CompileState, Option<IOError>> current, Path path) {
-        if (current.right().isPresent()) {
-            return current;
+    private static Tuple2<CompileState, Option<IOError>> foldChild(CompileState state, Option<IOError> maybeError, Source source) {
+        if (maybeError.isPresent()) {
+            return new Tuple2Impl<>(state, maybeError);
         }
 
-        return Main.runWithSource(current.left(), new Source(sourceDirectory, path));
+        return Main.runWithSource(state, source);
     }
 
     private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
@@ -770,7 +776,6 @@ public final class Main {
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Path target) {
         List<String> namespace = source.computeNamespace();
-        String name = source.computeName();
         var output = Main.compileRoot(state, input, namespace);
 
         var parent = target.getParent();
@@ -778,7 +783,7 @@ public final class Main {
             parent.createDirectories();
         }
 
-        return new Tuple2Impl<>(output.left().addSource(source), target.writeString(output.right()));
+        return new Tuple2Impl<>(output.left(), target.writeString(output.right()));
     }
 
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {

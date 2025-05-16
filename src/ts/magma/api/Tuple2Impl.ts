@@ -20,7 +20,10 @@
 	Result: magma.api.result, 
 	Characters: magma.api.text, 
 	Strings: magma.api.text, 
-	Tuple2: magma.api
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app, 
+	Files: magma.jvm.io
 ]*/
 import { Tuple2 } from "./Tuple2";
 export class Tuple2Impl<A, B> implements Tuple2<A, B> {

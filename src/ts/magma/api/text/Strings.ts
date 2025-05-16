@@ -18,7 +18,12 @@
 	Option: magma.api.option, 
 	Some: magma.api.option, 
 	Result: magma.api.result, 
-	Characters: magma.api.text
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app, 
+	Files: magma.jvm.io
 ]*/
 import { Actual } from "../../../magma/annotate/Actual";
 import { Namespace } from "../../../magma/annotate/Namespace";

@@ -12,7 +12,18 @@
 	RangeHead: magma.api.collect, 
 	SingleHead: magma.api.collect, 
 	Console: magma.api, 
-	IOError: magma.api.io
+	IOError: magma.api.io, 
+	Path: magma.api.io, 
+	None: magma.api.option, 
+	Option: magma.api.option, 
+	Some: magma.api.option, 
+	Result: magma.api.result, 
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app, 
+	Files: magma.jvm.io
 ]*/
 import { List } from "../../../magma/api/collect/List";
 import { Query } from "../../../magma/api/collect/query/Query";

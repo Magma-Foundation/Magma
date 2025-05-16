@@ -19,7 +19,11 @@
 	Some: magma.api.option, 
 	Result: magma.api.result, 
 	Characters: magma.api.text, 
-	Strings: magma.api.text
+	Strings: magma.api.text, 
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app, 
+	Files: magma.jvm.io
 ]*/
 export interface Tuple2<A, B> {
 	left(): A;

@@ -13,7 +13,17 @@
 	SingleHead: magma.api.collect, 
 	Console: magma.api, 
 	IOError: magma.api.io, 
-	Path: magma.api.io
+	Path: magma.api.io, 
+	None: magma.api.option, 
+	Option: magma.api.option, 
+	Some: magma.api.option, 
+	Result: magma.api.result, 
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app, 
+	Files: magma.jvm.io
 ]*/
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";

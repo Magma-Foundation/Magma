@@ -22,7 +22,8 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
-	Main: magma.app
+	Main: magma.app, 
+	Files: magma.jvm.io
 ]*/
 import { Actual } from "../../../magma/annotate/Actual";
 import { Namespace } from "../../../magma/annotate/Namespace";
