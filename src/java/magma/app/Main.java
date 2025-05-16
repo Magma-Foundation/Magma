@@ -938,6 +938,14 @@ public final class Main {
             }
 
             @Override
+            public List<T> addFirst(T element) {
+                var copy = new ArrayList<T>();
+                copy.addFirst(element);
+                copy.addAll(this.list);
+                return new JVMList<>(copy);
+            }
+
+            @Override
             public Option<List<T>> subList(int startInclusive, int endExclusive) {
                 return new Some<List<T>>(new JVMList<T>(this.list.subList(startInclusive, endExclusive)));
             }
@@ -1344,9 +1352,16 @@ public final class Main {
             return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
 
-        return Main.compilePrefix(stripped, "import ", s -> {
-            return Main.compileSuffix(s, ";", s1 -> {
-                return new Some<>(new Tuple<>(state.addImport("import from '" + s1 + "'.ts;\n"), ""));
+        return Main.compilePrefix(stripped, "import ", (String s) -> {
+            return Main.compileSuffix(s, ";", (String s1) -> {
+                var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'));
+                var child = divisions.findLast().orElse("").strip();
+                var parent = divisions.subList(0, divisions.size() - 1)
+                        .orElse(Lists.empty())
+                        .addFirst(".");
+
+                var s2 = parent.query().collect(new Joiner("/")).orElse("");
+                return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + ".ts\";\n"), ""));
             });
         });
     }

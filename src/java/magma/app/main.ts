@@ -1,17 +1,17 @@
-import from 'magma.Actual'.ts;
-import from 'magma.api.collect.List'.ts;
-import from 'magma.api.io.IOError'.ts;
-import from 'magma.api.io.Path'.ts;
-import from 'magma.api.option.Option'.ts;
-import from 'magma.api.result.Result'.ts;
-import from 'magma.jvm.Files'.ts;
-import from 'java.util.ArrayList'.ts;
-import from 'java.util.Arrays'.ts;
-import from 'java.util.function.BiFunction'.ts;
-import from 'java.util.function.Consumer'.ts;
-import from 'java.util.function.Function'.ts;
-import from 'java.util.function.Predicate'.ts;
-import from 'java.util.function.Supplier'.ts;
+import { Actual } from "./magma.ts";
+import { List } from "./magma/api/collect.ts";
+import { IOError } from "./magma/api/io.ts";
+import { Path } from "./magma/api/io.ts";
+import { Option } from "./magma/api/option.ts";
+import { Result } from "./magma/api/result.ts";
+import { Files } from "./magma/jvm.ts";
+import { ArrayList } from "./java/util.ts";
+import { Arrays } from "./java/util.ts";
+import { BiFunction } from "./java/util/function.ts";
+import { Consumer } from "./java/util/function.ts";
+import { Function } from "./java/util/function.ts";
+import { Predicate } from "./java/util/function.ts";
+import { Supplier } from "./java/util/function.ts";
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -965,11 +965,15 @@ class Main  {
 		if (stripped.startsWith("package ")){
 			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
 		}
-		/*return Main.compilePrefix(stripped, "import ", s -> {
-            return Main.compileSuffix(s, ";", s1 -> {
-                return new Some<>(new Tuple<>(state.addImport("import from '" + s1 + "'.ts;\n"), ""));
-            });
-        })*/;
+		return Main.compilePrefix(stripped, "import ", (s: string) => {
+			return Main.compileSuffix(s, ";", (s1: string) => {
+				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
+				let child = divisions.findLast().orElse("").strip();
+				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty()).addFirst(".");
+				let s2 = parent.query().collect(new Joiner("/")).orElse("");
+				return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + ".ts\";\n"), ""));
+			});
+		});
 	}
 	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>>>): Tuple<CompileState, string> {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple<CompileState, string>(state, Main.generatePlaceholder(input)));

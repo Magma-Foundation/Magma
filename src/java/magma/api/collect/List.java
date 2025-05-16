@@ -25,4 +25,6 @@ public interface List<T> {
     boolean contains(T element);
 
     Main.Query<T> queryReversed();
+
+    List<T> addFirst(T element);
 }
