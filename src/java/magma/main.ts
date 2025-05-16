@@ -92,7 +92,7 @@ class HeadedQuery<T> implements Query<T> {
 		}
 	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return new HeadedQuery<>(new FlatMapHead<T, R>(this.head, mapper));
+		return this.head.next().map(mapper).map((initial) => new HeadedQuery<>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<>(new EmptyHead<>()));
 	}
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.fold(true, (maybeAllTrue, element) => maybeAllTrue && predicate(element));
@@ -323,28 +323,24 @@ class ListCollector<T> implements Collector<T, List<T>> {
 class FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;
-	maybeCurrent: Option<Query<R>>;
-	constructor (head: Head<T>, mapper: (arg0 : T) => Query<R>) {
-		this.mapper = mapper;
-		this.maybeCurrent = new None<Query<R>>();
+	current: Query<R>;
+	constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
 		this.head = head;
+		this.current = initial;
+		this.mapper = mapper;
 	}
 	next(): Option<R> {
 		while (true){
-			if (this.maybeCurrent.isPresent()){
-				let it: Query<R> = this.maybeCurrent.orElse(null);
-				let next = it.next();
-				if (next.isPresent()){
-					return next;
-				}
-				this.maybeCurrent = new None<Query<R>>();
+			let next = this.current.next();
+			if (next.isPresent()){
+				return next;
 			}
-			let outer: Option<T> = this.head.next();
-			if (outer.isPresent()){
-				this.maybeCurrent = new Some<Query<R>>(this.mapper.apply(outer.orElse(null)));
+			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
+			if (tuple.left){
+				this.current = tuple.right;
 			}
 			else {
-				return new None<R>();
+				return new None<>();
 			}
 		}
 	}

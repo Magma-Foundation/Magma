@@ -158,7 +158,10 @@ public final class Main {
 
         @Override
         public <R> Query<R> flatMap(Function<T, Query<R>> mapper) {
-            return new HeadedQuery<>(new FlatMapHead<T, R>(this.head, mapper));
+            return this.head.next()
+                    .map(mapper)
+                    .map(initial -> new HeadedQuery<>(new FlatMapHead<T, R>(this.head, initial, mapper)))
+                    .orElseGet(() -> new HeadedQuery<>(new EmptyHead<>()));
         }
 
         @Override
@@ -405,35 +408,34 @@ public final class Main {
         }
     }
 
-    private static class FlatMapHead<T, R> implements Head<R> {
+    private static final class FlatMapHead<T, R> implements Head<R> {
         private final Function<T, Query<R>> mapper;
         private final Head<T> head;
-        private Option<Query<R>> maybeCurrent;
+        private Query<R> current;
 
-        private FlatMapHead(Head<T> head, Function<T, Query<R>> mapper) {
-            this.mapper = mapper;
-            this.maybeCurrent = new None<Query<R>>();
+        private FlatMapHead(Head<T> head, Query<R> initial, Function<T, Query<R>> mapper) {
             this.head = head;
+            this.current = initial;
+            this.mapper = mapper;
         }
 
         @Override
         public Option<R> next() {
             while (true) {
-                if (this.maybeCurrent.isPresent()) {
-                    Query<R> it = this.maybeCurrent.orElse(null);
-                    var next = it.next();
-                    if (next.isPresent()) {
-                        return next;
-                    }
-
-                    this.maybeCurrent = new None<Query<R>>();
+                var next = this.current.next();
+                if (next.isPresent()) {
+                    return next;
                 }
-                Option<T> outer = this.head.next();
-                if (outer.isPresent()) {
-                    this.maybeCurrent = new Some<Query<R>>(this.mapper.apply(outer.orElse(null)));
+
+                var tuple = this.head.next()
+                        .map(this.mapper)
+                        .toTuple(this.current);
+
+                if (tuple.left) {
+                    this.current = tuple.right;
                 }
                 else {
-                    return new None<R>();
+                    return new None<>();
                 }
             }
         }
