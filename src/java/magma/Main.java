@@ -1082,9 +1082,14 @@ public final class Main {
         private static String strip(String input) {
             return input.strip();
         }
+
+        @Actual
+        static boolean isBlank(String value) {
+            return value.isBlank();
+        }
     }
 
-    public static class Characters {
+    private static class Characters {
         @Actual
         private static boolean isDigit(char c) {
             return Character.isDigit(c);
@@ -1421,9 +1426,13 @@ public final class Main {
             List<BiFunction<CompileState, String, Option<Tuple<CompileState, T>>>> rules
     ) {
         return rules.query()
-                .map((BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> rule) -> rule.apply(state, input))
+                .map((BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> rule) -> Main.getApply(state, input, rule))
                 .flatMap(Iterators::fromOption)
                 .next();
+    }
+
+    private static <T> Option<Tuple<CompileState, T>> getApply(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> rule) {
+        return rule.apply(state, input);
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
@@ -1533,7 +1542,7 @@ public final class Main {
                     return Main.compileBlockHeader(state, beforeContent).flatMap((Tuple<CompileState, String> headerTuple) -> {
                         var contentTuple = Main.compileFunctionStatements(headerTuple.left.enterDepth(), content);
 
-                        var indent = Main.generateIndent(state.depth());
+                        var indent = Main.generateIndent(state.depth);
                         return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
                     });
                 });
@@ -1591,7 +1600,7 @@ public final class Main {
     private static Option<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
         return Main.compileSuffix(Strings.strip(input), ";", (String withoutEnd) -> {
             var valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(valueTuple.left, Main.generateIndent(state.depth()) + valueTuple.right + ";"));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(valueTuple.left, Main.generateIndent(state.depth) + valueTuple.right + ";"));
         });
     }
 
@@ -1708,7 +1717,7 @@ public final class Main {
     private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller oldCaller, String argsString) {
         return Main.parseValues(state, argsString, (CompileState state1, String s) -> Main.parseArgument(state1, s)).flatMap((Tuple<CompileState, List<Argument>> argsTuple) -> {
             var argsState = argsTuple.left;
-            var args = Main.retain(argsTuple.right, Argument::toValue);
+            var args = Main.retain(argsTuple.right, (Argument argument) -> argument.toValue());
 
             var newCaller = Main.transformCaller(argsState, oldCaller);
             return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(argsState, new Invokable(newCaller, args)));
@@ -1809,7 +1818,7 @@ public final class Main {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
             return Main.compilePrefix(strippedBeforeArrow, "(", (String withoutStart) -> {
                 return Main.compileSuffix(withoutStart, ")", (String withoutEnd) -> {
-                    return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> Main.parseParameter(state1, s)).flatMap(paramNames -> {
+                    return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> Main.parseParameter(state1, s)).flatMap((Tuple<CompileState, List<Parameter>> paramNames) -> {
                         return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
                     });
                 });
@@ -1954,7 +1963,7 @@ public final class Main {
     }
 
     private static Option<Tuple<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
-        if (input.isBlank()) {
+        if (Strings.isBlank(input)) {
             return new Some<Tuple<CompileState, Whitespace>>(new Tuple<CompileState, Whitespace>(state, new Whitespace()));
         }
         return new None<Tuple<CompileState, Whitespace>>();
@@ -2015,7 +2024,7 @@ public final class Main {
                 .filter((String value) -> !Strings.isEmpty(value))
                 .filter((String value) -> 1 <= Strings.length(value))
                 .map((String value) -> Strings.sliceFrom(value, 1))
-                .map((String s1) -> s1.strip())
+                .map((String s1) -> Strings.strip(s1))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());
     }
@@ -2035,7 +2044,7 @@ public final class Main {
     private static List<String> parseModifiers(String beforeType) {
         return Main.divide(Strings.strip(beforeType), (DivideState state1, Character c) -> Main.foldDelimited(state1, c, ' '))
                 .query()
-                .map((String s) -> s.strip())
+                .map((String s) -> Strings.strip(s))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());
     }
@@ -2116,7 +2125,7 @@ public final class Main {
     }
 
     private static Option<Tuple<CompileState, Type>> parseVarArgs(CompileState state, String input) {
-        var stripped = input.strip();
+        var stripped = Strings.strip(input);
         return Main.compileSuffix(stripped, "...", (String s) -> {
             var child = Main.parseTypeOrPlaceholder(state, s);
             return new Some<Tuple<CompileState, Type>>(new Tuple<CompileState, Type>(child.left, new VarArgs(child.right)));

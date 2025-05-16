@@ -785,6 +785,7 @@ class Strings  {
 	static isEmpty(cache: string): boolean;
 	static equalsTo(left: string, right: string): boolean;
 	static strip(input: string): string;
+	static isBlank(value: string): boolean;
 }
 class Characters  {
 	static isDigit(c: string): boolean;
@@ -1026,7 +1027,10 @@ class Main  {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple<CompileState, string>(state, Main.generatePlaceholder(input)));
 	}
 	static or<T>(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>>): Option<Tuple<CompileState, T>> {
-		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>) => rule.apply(state, input)).flatMap(Iterators.fromOption).next();
+		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>) => Main.getApply(state, input, rule)).flatMap(Iterators.fromOption).next();
+	}
+	static getApply<T>(state: CompileState, input: string, rule: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, T>> {
+		return rule(state, input);
 	}
 	static compileClassSegment(state1: CompileState, input1: string): Tuple<CompileState, string> {
 		return Main.compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class "), Main.compileMethod, Main.compileFieldDefinition));
@@ -1099,7 +1103,7 @@ class Main  {
 				return Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => {
 					return Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple<CompileState, string>) => {
 						let contentTuple = Main.compileFunctionStatements(headerTuple.left.enterDepth(), content);
-						let indent = Main.generateIndent(state.depth());
+						let indent = Main.generateIndent(state.depth);
 						return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
 					});
 				});
@@ -1147,7 +1151,7 @@ class Main  {
 	static compileFunctionStatement(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
 			let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(valueTuple.left, Main.generateIndent(state.depth()) + valueTuple.right + ";"));
+			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(valueTuple.left, Main.generateIndent(state.depth) + valueTuple.right + ";"));
 		});
 	}
 	static generateIndent(indent: number): string {
@@ -1234,7 +1238,7 @@ class Main  {
 	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple<CompileState, Value>> {
 		return Main.parseValues(state, argsString, (state1: CompileState, s: string) => Main.parseArgument(state1, s)).flatMap((argsTuple: Tuple<CompileState, List<Argument>>) => {
 			let argsState = argsTuple.left;
-			let args = Main.retain(argsTuple.right, Argument.toValue);
+			let args = Main.retain(argsTuple.right, (argument: Argument) => argument.toValue());
 			let newCaller = Main.transformCaller(argsState, oldCaller);
 			return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(argsState, new Invokable(newCaller, args)));
 		});
@@ -1294,9 +1298,9 @@ class Main  {
 			let strippedBeforeArrow = Strings.strip(beforeArrow);
 			return Main.compilePrefix(strippedBeforeArrow, "(", (withoutStart: string) => {
 				return Main.compileSuffix(withoutStart, ")", (withoutEnd: string) => {
-					/*return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> Main.parseParameter(state1, s)).flatMap(paramNames -> {
-                        return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
-                    })*/;
+					return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => Main.parseParameter(state1, s)).flatMap((paramNames: Tuple<CompileState, List<Parameter>>) => {
+						return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
+					});
 				});
 			});
 		});
@@ -1409,7 +1413,7 @@ class Main  {
 		return Main.parseWhitespace(state, input).map((tuple: Tuple<CompileState, Whitespace>) => new Tuple<CompileState, string>(tuple.left, tuple.right.generate()));
 	}
 	static parseWhitespace(state: CompileState, input: string): Option<Tuple<CompileState, Whitespace>> {
-		if (input.isBlank()){
+		if (Strings.isBlank(input)){
 			return new Some<Tuple<CompileState, Whitespace>>(new Tuple<CompileState, Whitespace>(state, new Whitespace()));
 		}
 		return new None<Tuple<CompileState, Whitespace>>();
@@ -1457,7 +1461,7 @@ class Main  {
 		});
 	}
 	static parseAnnotations(s: string): List<string> {
-		return Main.divide(s, (state1: DivideState, c: string) => Main.foldDelimited(state1, c, "\n")).query().map((s2: string) => Strings.strip(s2)).filter((value: string) => !Strings.isEmpty(value)).filter((value: string) => 1 <= Strings.length(value)).map((value: string) => Strings.sliceFrom(value, 1)).map((s1: string) => s1.strip()).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
+		return Main.divide(s, (state1: DivideState, c: string) => Main.foldDelimited(state1, c, "\n")).query().map((s2: string) => Strings.strip(s2)).filter((value: string) => !Strings.isEmpty(value)).filter((value: string) => 1 <= Strings.length(value)).map((value: string) => Strings.sliceFrom(value, 1)).map((s1: string) => Strings.strip(s1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple<CompileState, Definition>> {
 		return Main.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: string) => {
@@ -1471,7 +1475,7 @@ class Main  {
 		});
 	}
 	static parseModifiers(beforeType: string): List<string> {
-		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => Main.foldDelimited(state1, c, " ")).query().map((s: string) => s.strip()).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
+		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => Main.foldDelimited(state1, c, " ")).query().map((s: string) => Strings.strip(s)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static foldDelimited(state1: DivideState, c: string, delimiter: string): DivideState {
 		if (delimiter === c){
@@ -1521,7 +1525,7 @@ class Main  {
 		return Main.or(state, type, Lists.of(Main.parseVarArgs, Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
 	}
 	static parseVarArgs(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
-		let stripped = input.strip();
+		let stripped = Strings.strip(input);
 		return Main.compileSuffix(stripped, "...", (s: string) => {
 			let child = Main.parseTypeOrPlaceholder(state, s);
 			return new Some<Tuple<CompileState, Type>>(new Tuple<CompileState, Type>(child.left, new VarArgs(child.right)));
