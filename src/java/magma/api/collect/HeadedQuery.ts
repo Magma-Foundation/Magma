@@ -1,9 +1,6 @@
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Option } from "../../../magma/api/option/Option";
 import { Main } from "../../../magma/app/Main";
-import { BiFunction } from "../../../java/util/function/BiFunction";
-import { Function } from "../../../java/util/function/Function";
-import { Predicate } from "../../../java/util/function/Predicate";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {

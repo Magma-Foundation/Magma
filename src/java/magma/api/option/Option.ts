@@ -1,8 +1,4 @@
 import { Tuple2 } from "../../../magma/api/Tuple2";
-import { Consumer } from "../../../java/util/function/Consumer";
-import { Function } from "../../../java/util/function/Function";
-import { Predicate } from "../../../java/util/function/Predicate";
-import { Supplier } from "../../../java/util/function/Supplier";
 export interface Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R>;
 	orElse(other: T): T;

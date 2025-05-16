@@ -1194,15 +1194,21 @@ public final class Main {
                 var parent = divisions.subList(0, divisions.size() - 1)
                         .orElse(Lists.empty());
 
-                if (state.namespace.isEmpty()) {
-                    parent = parent.addFirst(".");
+                var parent1 = parent;
+                var namespace = state.namespace;
+                if (namespace.isEmpty()) {
+                    parent1 = parent1.addFirst(".");
                 }
 
-                for (var i = 0; i < state.namespace.size(); i++) {
-                    parent = parent.addFirst("..");
+                for (var i = 0; i < namespace.size(); i++) {
+                    parent1 = parent1.addFirst("..");
                 }
 
-                var s2 = parent.add(child)
+                if (parent.equals(Lists.of("java", "util", "function"))) {
+                    return new Some<>(new Tuple2Impl<>(state, ""));
+                }
+
+                var s2 = parent1.add(child)
                         .query()
                         .collect(new Joiner("/"))
                         .orElse("");

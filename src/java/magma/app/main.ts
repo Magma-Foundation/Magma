@@ -12,11 +12,6 @@ import { Path } from "../../magma/api/io/Path";
 import { Option } from "../../magma/api/option/Option";
 import { Result } from "../../magma/api/result/Result";
 import { Files } from "../../magma/jvm/Files";
-import { BiFunction } from "../../java/util/function/BiFunction";
-import { Consumer } from "../../java/util/function/Consumer";
-import { Function } from "../../java/util/function/Function";
-import { Predicate } from "../../java/util/function/Predicate";
-import { Supplier } from "../../java/util/function/Supplier";
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -904,14 +899,19 @@ export class Main  {
 				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
 				let child = divisions.findLast().orElse("").strip();
 				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-				if (state.namespace.isEmpty()){
-					parent = parent.addFirst(".");
+				let parent1 = parent;
+				let namespace = state.namespace;
+				if (namespace.isEmpty()){
+					parent1 = parent1.addFirst(".");
 				}/*
 
-                for (var i = 0; i < state.namespace.size(); i++) {
-                    parent = parent.addFirst("..");
+                for (var i = 0; i < namespace.size(); i++) {
+                    parent1 = parent1.addFirst("..");
                 }*/
-				let s2 = parent.add(child).query().collect(new Joiner("/")).orElse("");
+				if (parent.equals(Lists.of("java", "util", "function"))){
+					return new Some<>(new Tuple2Impl<>(state, ""));
+				}
+				let s2 = parent1.add(child).query().collect(new Joiner("/")).orElse("");
 				return new Some<>(new Tuple2Impl<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
 			});
 		});

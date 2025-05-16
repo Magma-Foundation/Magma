@@ -1,8 +1,5 @@
 import { Option } from "../../../magma/api/option/Option";
 import { Main } from "../../../magma/app/Main";
-import { BiFunction } from "../../../java/util/function/BiFunction";
-import { Function } from "../../../java/util/function/Function";
-import { Predicate } from "../../../java/util/function/Predicate";
 export interface Query<T> {
 	collect<C>(collector: Main.Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;
