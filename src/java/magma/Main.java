@@ -524,9 +524,10 @@ public class Main {
                 Main::compileLambda,
                 Main::compileInvokable,
                 Main::compileNumber,
-                createOperatorRule("==", "==="),
-                compileOperatorWithValue("+"),
-                compileOperatorWithValue("<"),
+                createOperatorRuleWithDifferentInfixes("==", "==="),
+                createOperatorRule("+"),
+                createOperatorRule("-"),
+                createOperatorRule("<"),
                 Main::compileString
         ));
     }
@@ -544,8 +545,8 @@ public class Main {
         });
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> compileOperatorWithValue(String infix) {
-        return createOperatorRule(infix, infix);
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String infix) {
+        return createOperatorRuleWithDifferentInfixes(infix, infix);
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createAccessRule(String infix) {
@@ -571,7 +572,7 @@ public class Main {
         }
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String sourceInfix, String targetInfix) {
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfixes(String sourceInfix, String targetInfix) {
         return (state1, input1) -> compileFirst(input1, sourceInfix, (left, right) -> {
             var leftTuple = compileValueOrPlaceholder(state1, left);
             var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);

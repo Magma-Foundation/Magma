@@ -77,7 +77,7 @@
 		return new /*CompileState*/(this.output, this.structureName, this.depth + 1);
 	}
 	/*public*/exitDepth(): /*CompileState*/ {
-		return new /*CompileState*/(this.output, this.structureName, /* this.depth - 1*/);
+		return new /*CompileState*/(this.output, this.structureName, this.depth - 1);
 	}
 }
 /*private*/class Definition {
@@ -141,7 +141,7 @@
 			let poppedTuple : unknown = maybePopped.get();
 			let poppedState : unknown = poppedTuple.left;
 			let popped : unknown = poppedTuple.right;
-			current = foldSingleQuotes(poppedState, popped).or(/*() -> foldDoubleQuotes*/(poppedState, popped)).orElseGet(/*() -> folder*/.apply(poppedState, popped));
+			current = foldSingleQuotes(poppedState, popped).or(() - /*> foldDoubleQuotes*/(poppedState, popped)).orElseGet(() - /*> folder*/.apply(poppedState, popped));
 		}
 		return current.advance().segments;
 	}
@@ -201,14 +201,14 @@
 		return compileOrPlaceholder(state, input, List.of(Main.compileNamespaced, createStructureRule("class ", "class ")));
 	}
 	/*private static*/createStructureRule(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return /*(state1, input1) -> compileFirst*/(/*input1*/, sourceInfix, /* (beforeKeyword, right1) -> {
-            return compileFirst(right1, "{", (beforeContent, withEnd) -> {
-                return compileSuffix(withEnd.strip(), "}", inputContent -> {
+		return (/*state1*/, /* input1*/) - /*> compileFirst*/(/*input1*/, sourceInfix, (beforeKeyword, /* right1*/) - /*> {
+            return compileFirst*/(/*right1*/, "{", /* (beforeContent, withEnd*/) - /*> {
+                return compileSuffix(withEnd.strip(), "}", inputContent */ - /*> {
                     var strippedBeforeContent = beforeContent.strip();
-                    return compileFirst(strippedBeforeContent, "(", (rawName, s2) -> {
+                    return compileFirst*/(strippedBeforeContent, "(", /* (rawName, s2*/) - /*> {
                         var name = rawName.strip();
                         return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, name);
-                    }).or(() -> {
+                    }).or(*/() - /*> {
                         return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, strippedBeforeContent);
                     });
                 });
@@ -232,7 +232,7 @@
 		}
 	}
 	/*private static*/compileOrPlaceholder(state : /*CompileState*/, input : string, rules : /*List*/</*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>>): /*Tuple*/</*CompileState*/, string> {
-		return compileOr(state, input, rules).orElseGet(/*() -> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
+		return compileOr(state, input, rules).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileOr(state : /*CompileState*/, input : string, rules : /*List*/</*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		/*for (var rule : rules) */{
@@ -247,31 +247,31 @@
 		return compileOrPlaceholder(/*state1*/, /* input1*/, List.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
 	}
 	/*private static*/compileMethod(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileFirst(input, "(", /* (beforeParams, withParams) -> {
-            return compileLast(beforeParams.strip(), " ", (_, name) -> {
+		return compileFirst(input, "(", (beforeParams, withParams) - /*> {
+            return compileLast*/(beforeParams.strip(), " ", /* (_, name*/) - /*> {
                 if (state.structureName.filter(name::equals).isPresent()) {
                     return compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
                 return compileDefinition(state, beforeParams)
-                        .flatMap(tuple -> compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
+                        .flatMap(tuple */ - /*> compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
             });
         }*/);
 	}
 	/*private static*/compileMethodWithBeforeParams(state : /*CompileState*/, header : /*MethodHeader*/, withParams : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileFirst(withParams, ")", /* (params, afterParams) -> {
+		return compileFirst(withParams, ")", (params, afterParams) - /*> {
             var parametersTuple = compileValues(state, params, Main::compileParameter);
             var parametersState = parametersTuple.left;
             var parameters = parametersTuple.right;
 
             var headerGenerated = header.generateWithAfterName("(" */ + parameters + /* ")");
-            return compilePrefix(afterParams.strip(), "{", withoutContentStart -> {
-                return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
+            return compilePrefix(afterParams.strip(), "{", withoutContentStart */ - /*> {
+                return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd */ - /*> {
                     var statementsTuple = compileFunctionStatements(parametersState.enterDepth().enterDepth(), withoutContentEnd);
 
                     return Optional.of(new Tuple*/ < /*>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" */ + headerGenerated + " {" + statementsTuple.right + /* "\n\t}"));
                 });
-            }).or(() -> {
+            }).or(() */ - /*> {
                 if (afterParams.strip().equals(";")) {
                     return Optional.of(new Tuple*/ < /*>(parametersState, "\n\t" */ + headerGenerated + /* ";"));
                 }
@@ -287,8 +287,8 @@
 		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileBlock, Main.compileFunctionStatement));
 	}
 	/*private static*/compileBlock(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileSuffix(input.strip(), "}", withoutEnd => /* {
-            return compileFirst(withoutEnd, "{", (beforeContent, content) -> {
+		return compileSuffix(input.strip(), "}", withoutEnd => /*{
+            return compileFirst*/(withoutEnd, "{", /* (beforeContent, content*/) - /*> {
                 var headerTuple = compileBlockHeader(state, beforeContent);
                 var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
 
@@ -303,8 +303,8 @@
 	/*private static*/compileIf(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compilePrefix(input.strip(), "if", withoutPrefix => /* {
             var strippedCondition = withoutPrefix.strip();
-            return compilePrefix(strippedCondition, "(", withoutConditionStart -> {
-                return compileSuffix(withoutConditionStart, ")", withoutConditionEnd -> {
+            return compilePrefix(strippedCondition, "(", withoutConditionStart */ - /*> {
+                return compileSuffix(withoutConditionStart, ")", withoutConditionEnd */ - /*> {
                     var tuple = compileValueOrPlaceholder(state, withoutConditionEnd);
                     return Optional.of(new Tuple*/ < /*>(tuple.left, "if (" */ + tuple.right + /* ")"));
                 });
@@ -321,10 +321,10 @@
 		return "\n" + "\t".repeat(indent);
 	}
 	/*private static*/compileFunctionStatementValue(state : /*CompileState*/, withoutEnd : string): /*Tuple*/</*CompileState*/, string> {
-		return compileOrPlaceholder(state, withoutEnd, List.of(Main.compileReturn, Main.compileAssignment, Main.compileInvokable, createPostRule(" +  + "), createPostRule("--")));
+		return compileOrPlaceholder(state, withoutEnd, List.of(Main.compileReturn, Main.compileAssignment, Main.compileInvokable, createPostRule(" +  + "), createPostRule(" -  - ")));
 	}
 	/*private static*/createPostRule(suffix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return /*(state1, input) -> compileSuffix*/(input.strip(), suffix, child => /* {
+		return (/*state1*/, input) - /*> compileSuffix*/(input.strip(), suffix, child => /* {
             var tuple = compileValueOrPlaceholder(state1, child);
             return Optional.of(new Tuple*/ < /*>(tuple.left, tuple*/.right + /* suffix));
         }*/);
@@ -336,12 +336,12 @@
         }*/);
 	}
 	/*private static*/compileInvokable(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileSuffix(input.strip(), ")", withoutEnd => /* {
-            return compileSplit(splitFolded(withoutEnd, "", Main::foldInvocationStarts), (callerWithArgStart, arguments) -> {
-                return compileSuffix(callerWithArgStart, "(", caller -> compilePrefix(caller.strip(), "new ", type -> {
+		return compileSuffix(input.strip(), ")", withoutEnd => /*{
+            return compileSplit*/(splitFolded(withoutEnd, "", Main.foldInvocationStarts), /* (callerWithArgStart, arguments*/) - /*> {
+                return compileSuffix(callerWithArgStart, "(", caller */ - /*> compilePrefix(caller.strip(), "new ", type */ - /*> {
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " */ + /* callerTuple.right, arguments);
-                }).or(() -> {
+                }).or(() */ - /*> {
                     var callerTuple = compileValueOrPlaceholder(state, caller);
                     return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
                 }));
@@ -353,7 +353,7 @@
 		if (divisions.size() < 2){
 			return Optional.empty();
 		}
-		let beforeLast : unknown = divisions.subList(0, /* divisions.size() - 1*/);
+		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1);
 		let last : unknown = divisions.getLast();
 		let joined : unknown = String.join(delimiter, beforeLast);
 		return Optional.of(new /*Tuple*/<>(joined, last));
@@ -379,24 +379,23 @@
 		return Optional.of(new /*Tuple*/<>(argumentsTuple.left, caller + "(" + argumentsTuple.right + ")"));
 	}
 	/*private static*/compileAssignment(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileFirst(input, "=", /* (destination, source) -> {
+		return compileFirst(input, "=", (destination, source) - /*> {
             var sourceTuple = compileValueOrPlaceholder(state, source);
 
-            var destinationTuple = compileValue(sourceTuple.left, destination)
-                    .or(() -> compileDefinition(sourceTuple.left, destination).map(tuple -> new Tuple*/ < /*>(tuple.left, "let " */ + /* tuple.right.generate())))
-                    .orElseGet(() -> new Tuple*/ < /*>(sourceTuple.left, generatePlaceholder(destination)));
+            var destinationTuple = compileValue*/(sourceTuple.left, destination).or(/*(*/) - /*> compileDefinition(sourceTuple.left, destination).map(tuple */ - /*> new Tuple*/ < /*>(tuple.left, "let " */ + tuple.right.generate(/*))))
+                    .orElseGet((*/) - /*> new Tuple*/ < /*>(sourceTuple.left, generatePlaceholder(destination)));
 
             return Optional.of(new Tuple*/ < /*>(destinationTuple.left, destinationTuple*/.right + " = " + /* sourceTuple.right));
         }*/);
 	}
 	/*private static*/compileValueOrPlaceholder(state : /*CompileState*/, input : string): /*Tuple*/</*CompileState*/, string> {
-		return compileValue(state, input).orElseGet(/*() -> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
+		return compileValue(state, input).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileValue(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileInvokable, Main.compileNumber, createOperatorRule(" === ", " === /*="*/), compileOperatorWithValue(" + "), compileOperatorWithValue(" < "), Main.compileString));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), Main.compileString));
 	}
 	/*private static*/compileLambda(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileFirst(input, "->", /* (beforeArrow, afterArrow) -> {
+		return compileFirst(input, " - /*>"*/, (beforeArrow, afterArrow) - /*> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
                 var tuple = compileValueOrPlaceholder(state, afterArrow);
@@ -407,11 +406,11 @@
             }
         }*/);
 	}
-	/*private static*/compileOperatorWithValue(infix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return createOperatorRule(infix, infix);
+	/*private static*/createOperatorRule(infix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
+		return createOperatorRuleWithDifferentInfixes(infix, infix);
 	}
 	/*private static*/createAccessRule(infix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return /*(state, input) -> compileLast*/(input, infix, /* (child, rawProperty) -> {
+		return (state, input) - /*> compileLast*/(input, infix, (child, rawProperty) - /*> {
             var tuple = compileValueOrPlaceholder(state, child);
             var property = rawProperty.strip();
             if (isSymbol(property)) {
@@ -431,8 +430,8 @@
 			return Optional.empty();
 		}
 	}
-	/*private static*/createOperatorRule(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
-		return /*(state1, input1) -> compileFirst*/(/*input1*/, sourceInfix, /* (left, right) -> {
+	/*private static*/createOperatorRuleWithDifferentInfixes(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
+		return (/*state1*/, /* input1*/) - /*> compileFirst*/(/*input1*/, sourceInfix, (left, right) - /*> {
             var leftTuple = compileValueOrPlaceholder(state1, left);
             var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
             return Optional.of(new Tuple*/ < /*>(rightTuple.left, leftTuple*/.right + " " + targetInfix + " " + /* rightTuple.right));
@@ -484,9 +483,8 @@
 		return mapper.apply(slice);
 	}
 	/*private static*/compileParameter(state : /*CompileState*/, input : string): /*Tuple*/</*CompileState*/, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, /*
-                (state1, input1) -> {
-                    return compileDefinition(state1, input1).map(tuple -> new Tuple*/ < /*>(tuple.left, tuple.right.generate()));
+		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, (/*state1*/, /* input1*/) - /*> {
+                    return compileDefinition(state1, input1).map(tuple */ - /*> new Tuple*/ < /*>(tuple.left, tuple.right.generate()));
                 }
         */));
 	}
@@ -503,14 +501,14 @@
         }*/);
 	}
 	/*private static*/compileDefinitionOrPlaceholder(state : /*CompileState*/, input : string): /*Tuple*/</*CompileState*/, string> {
-		return compileDefinition(state, input).map(tuple => new /*Tuple*/<>(tuple.left, tuple.right.generate())).orElseGet(/*() -> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
+		return compileDefinition(state, input).map(tuple => new /*Tuple*/<>(tuple.left, tuple.right.generate())).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileDefinition(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, /* Definition*/>> {
-		return compileLast(input.strip(), " ", /* (beforeName, name) -> {
+		return compileLast(input.strip(), " ", (beforeName, name) - /*> {
             var splits = splitFolded(beforeName.strip(), " ", Main::foldTypeSeparators);
-            return compileSplit(splits, (beforeType, type) -> {
+            return compileSplit*/(splits, /* (beforeType, type*/) - /*> {
                 return assembleDefinition(state, Optional.of(beforeType), name, type);
-            }).or(() -> {
+            }).or(*/() - /*> {
                 return assembleDefinition(state, Optional.empty(), name, beforeName);
             });
         }*/);
@@ -534,7 +532,7 @@
 		return Optional.of(new /*Tuple*/<>(typeTuple.left, generated));
 	}
 	/*private static*/compileTypeOrPlaceholder(state : /*CompileState*/, type : string): /*Tuple*/</*CompileState*/, string> {
-		return compileType(state, type).orElseGet(/*() -> new Tuple*/ < /*>*/(state, generatePlaceholder(type)));
+		return compileType(state, type).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(type)));
 	}
 	/*private static*/compileType(state : /*CompileState*/, type : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileOr(state, type, List.of(Main.compileGeneric, Main.compilePrimitive));
@@ -544,18 +542,18 @@
 	}
 	/*private static*/findPrimitiveValue(input : string): /*Optional*/<string> {
 		/*return switch (input.strip()) */{
-			/*case "char", "Character", "String" -> Optional*/.of("string");
-			/*case "int", "Integer" -> Optional*/.of("number");
-			/*case "boolean" -> Optional*/.of("boolean");
-			/*case "var" -> Optional*/.of("unknown");
-			/*case "void" -> Optional*/.of("void");
+			/*case "char", "Character", "String" */ - /*> Optional*/.of("string");
+			/*case "int", "Integer" */ - /*> Optional*/.of("number");
+			/*case "boolean" */ - /*> Optional*/.of("boolean");
+			/*case "var" */ - /*> Optional*/.of("unknown");
+			/*case "void" */ - /*> Optional*/.of("void");
 			default => Optional.empty();
 		}
 		/**/;
 	}
 	/*private static*/compileGeneric(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileSuffix(input.strip(), ">", withoutEnd => /*{
-            return compileFirst*/(withoutEnd, " < ", /* (baseString, argumentsString) -> {
+            return compileFirst*/(withoutEnd, " < ", (baseString, argumentsString) - /*> {
                 var argumentsTuple = compileValues(state, argumentsString, Main::compileTypeArgument);
                 return Optional.of(new Tuple*/ < /*>(argumentsTuple.left, generatePlaceholder(baseString*/) + " < " + argumentsTuple.right + /* ">"));
             });
@@ -578,7 +576,7 @@
 			return state.advance();
 		}
 		let appended : unknown = state.append(c);
-		if (c === /* '-'*/){
+		if (c === /* '*/ - /*'*/){
 			let peeked : unknown = appended.peek();
 			if (peeked === /* '>'*/){
 				return appended.popAndAppendToOption().orElse(appended);
@@ -605,7 +603,7 @@
 		if (/*!input*/.endsWith(suffix)){
 			return Optional.empty();
 		}
-		let content : unknown = input.substring(0, /*input.length() - suffix*/.length());
+		let content : unknown = input.substring(0, input.length() - suffix.length());
 		return mapper.apply(content);
 	}
 	/*private static <T>*/compileFirst(input : string, infix : string, mapper : /*BiFunction*/<string, string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
