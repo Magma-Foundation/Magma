@@ -48,6 +48,8 @@ public class Main {
         Option<T> filter(Predicate<T> predicate);
 
         Tuple<Boolean, T> toTuple(T other);
+
+        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
     }
 
     private interface Query<T> {
@@ -110,6 +112,10 @@ public class Main {
     }
 
     private interface Caller {
+        String generate();
+    }
+
+    private interface Type {
         String generate();
     }
 
@@ -571,6 +577,11 @@ public class Main {
         public Tuple<Boolean, T> toTuple(T other) {
             return new Tuple<>(true, this.value);
         }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return other.get().map(otherValue -> new Tuple<>(this.value, otherValue));
+        }
     }
 
     private record None<T>() implements Option<T> {
@@ -621,6 +632,11 @@ public class Main {
         @Override
         public Tuple<Boolean, T> toTuple(T other) {
             return new Tuple<>(false, other);
+        }
+
+        @Override
+        public <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other) {
+            return new None<>();
         }
     }
 
@@ -675,16 +691,10 @@ public class Main {
         }
     }
 
-    private static class Symbol implements Value {
-        private final String stripped;
-
-        public Symbol(String stripped) {
-            this.stripped = stripped;
-        }
-
+    private record Symbol(String value) implements Value, Type {
         @Override
         public String generate() {
-            return this.stripped;
+            return this.value;
         }
     }
 
@@ -768,6 +778,42 @@ public class Main {
         @Override
         public String generate() {
             return "new " + this.right;
+        }
+    }
+
+    private static class FunctionType implements Type {
+        private final List<String> arguments;
+        private final String returns;
+
+        public FunctionType(List<String> arguments, String returns) {
+            this.arguments = arguments;
+            this.returns = returns;
+        }
+
+        @Override
+        public String generate() {
+            var joinedArguments = this.arguments
+                    .queryWithIndices()
+                    .map(tuple -> "arg" + tuple.left + " : " + tuple.right)
+                    .collect(new Joiner(", "))
+                    .orElse("");
+
+            return "(" + joinedArguments + ") => " + this.returns;
+        }
+    }
+
+    private static class Generic implements Type {
+        private final String base;
+        private final List<String> arguments;
+
+        public Generic(String base, List<String> arguments) {
+            this.base = base;
+            this.arguments = arguments;
+        }
+
+        @Override
+        public String generate() {
+            return this.base + "<" + generateValueStrings(this.arguments) + ">";
         }
     }
 
@@ -1311,8 +1357,10 @@ public class Main {
 
     private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller caller, String argumentsString) {
         var argumentsTuple = parseValues(state, argumentsString, Main::parseArgument);
+        var argumentsState = argumentsTuple.left;
         var arguments = retain(argumentsTuple.right, Argument::toValue);
-        return new Some<>(new Tuple<>(argumentsTuple.left, new Invokable(caller, arguments)));
+
+        return new Some<>(new Tuple<>(argumentsState, new Invokable(caller, arguments)));
     }
 
     private static <T, R> List<R> retain(List<T> arguments, Function<T, Option<R>> mapper) {
@@ -1625,51 +1673,55 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileType(CompileState state, String type) {
+        return getOr(state, type).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
+    }
+
+    private static Option<Tuple<CompileState, Type>> getOr(CompileState state, String type) {
         return or(state, type, Lists.of(
-                Main::compileGeneric,
-                Main::compilePrimitive,
-                Main::compileSymbolType
+                Main::parseGeneric,
+                Main::parsePrimitive,
+                Main::parseSymbolType
         ));
     }
 
-    private static Option<Tuple<CompileState, String>> compileSymbolType(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> parseSymbolType(CompileState state, String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
-            return new Some<>(new Tuple<>(state, stripped));
+            return new Some<>(new Tuple<>(state, new Symbol(stripped)));
         }
         return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> compilePrimitive(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> parsePrimitive(CompileState state, String input) {
         return findPrimitiveValue(input.strip()).map(result -> new Tuple<>(state, result));
     }
 
-    private static Option<String> findPrimitiveValue(String input) {
+    private static Option<Type> findPrimitiveValue(String input) {
         var stripped = input.strip();
         if (stripped.equals("char") || stripped.equals("Character") || stripped.equals("String")) {
-            return new Some<String>("string");
+            return new Some<>(Primitive.String);
         }
 
         if (stripped.equals("int") || stripped.equals("Integer")) {
-            return new Some<String>("number");
+            return new Some<>(Primitive.Number);
         }
 
         if (stripped.equals("boolean")) {
-            return new Some<String>("boolean");
+            return new Some<>(Primitive.Boolean);
         }
 
         if (stripped.equals("var")) {
-            return new Some<String>("unknown");
+            return new Some<>(Primitive.Var);
         }
 
         if (stripped.equals("void")) {
-            return new Some<String>("void");
+            return new Some<>(Primitive.Void);
         }
 
-        return new None<String>();
+        return new None<>();
     }
 
-    private static Option<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Type>> parseGeneric(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
                 var argumentsTuple = parseValues(state, argumentsString, Main::compileTypeArgument);
@@ -1678,48 +1730,48 @@ public class Main {
 
                 var base = baseString.strip();
                 return assembleFunctionType(argumentsState, base, arguments).or(() -> {
-                    return new Some<>(new Tuple<>(argumentsState, base + "<" + generateValueStrings(arguments) + ">"));
+                    return new Some<>(new Tuple<>(argumentsState, new Generic(base, arguments)));
                 });
             });
         });
     }
 
-    private static Option<Tuple<CompileState, String>> assembleFunctionType(CompileState state, String base, List<String> arguments) {
+    private static Option<Tuple<CompileState, Type>> assembleFunctionType(CompileState state, String base, List<String> arguments) {
         return mapFunctionType(base, arguments).map(generated -> new Tuple<>(state, generated));
     }
 
-    private static Option<String> mapFunctionType(String base, List<String> arguments) {
+    private static Option<Type> mapFunctionType(String base, List<String> arguments) {
         if (base.equals("Function")) {
-            return new Some<String>(generateFunctionType(Lists.of(arguments.find(0).orElse(null)), arguments.find(1).orElse(null)));
+            return arguments.findFirst().and(() -> arguments.find(1))
+                    .map(tuple -> new FunctionType(Lists.of(tuple.left), tuple.right));
         }
 
         if (base.equals("BiFunction")) {
-            return new Some<String>(generateFunctionType(Lists.of(arguments.find(0).orElse(null), arguments.find(1).orElse(null)), arguments.find(2).orElse(null)));
+            return arguments.find(0)
+                    .and(() -> arguments.find(1))
+                    .and(() -> arguments.find(2))
+                    .map(tuple -> new FunctionType(Lists.of(tuple.left.left, tuple.left.right), tuple.right));
         }
 
         if (base.equals("Supplier")) {
-            return arguments.findFirst().map(first -> generateFunctionType(Lists.empty(), first));
+            return arguments.findFirst().map(first -> {
+                return new FunctionType(Lists.empty(), first);
+            });
         }
 
         if (base.equals("Consumer")) {
-            return arguments.findFirst().map(first -> generateFunctionType(Lists.of(first), "void"));
+            return arguments.findFirst().map(first -> {
+                return new FunctionType(Lists.of(first), "void");
+            });
         }
 
         if (base.equals("Predicate")) {
-            return arguments.findFirst().map(first -> generateFunctionType(Lists.of(first), "boolean"));
+            return arguments.findFirst().map(first -> {
+                return new FunctionType(Lists.of(first), "boolean");
+            });
         }
 
-        return new None<String>();
-    }
-
-    private static String generateFunctionType(List<String> arguments, String returns) {
-        var joinedArguments = arguments
-                .queryWithIndices()
-                .map(tuple -> "arg" + tuple.left + " : " + tuple.right)
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        return "(" + joinedArguments + ") => " + returns;
+        return new None<>();
     }
 
     private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String input) {
@@ -1837,5 +1889,24 @@ public class Main {
                 .map(Value::generate)
                 .collect(new Joiner(", "))
                 .orElse("");
+    }
+
+    private enum Primitive implements Type {
+        String("string"),
+        Number("number"),
+        Boolean("boolean"),
+        Var("var"),
+        Void("void");
+
+        private final String value;
+
+        Primitive(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public java.lang.String generate() {
+            return this.value;
+        }
     }
 }
