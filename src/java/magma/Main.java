@@ -1358,7 +1358,7 @@ public final class Main {
         var appended = state.append(c);
         if ('{' == c) {
             var entered = appended.enter();
-            if (appended.isShallow()) {
+            if (entered.isShallow()) {
                 return entered.advance();
             }
             else {
