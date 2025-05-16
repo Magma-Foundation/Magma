@@ -429,10 +429,7 @@ public class Main {
         }
 
         private String joinTypeParams() {
-            return this.typeParams.query()
-                    .collect(new Joiner(", "))
-                    .map(joined -> "<" + joined + ">")
-                    .orElse("");
+            return Main.joinTypeParams(this.typeParams);
         }
     }
 
@@ -1146,16 +1143,35 @@ public class Main {
                 .collect(new ListCollector<>());
     }
 
-    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<Definition> parameters) {
+    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String beforeParams, List<Definition> parameters) {
+        return compileSuffix(beforeParams.strip(), ">", withoutTypeParamEnd -> {
+            return compileFirst(withoutTypeParamEnd, "<", (name, typeParamsString) -> {
+                var typeParams = divideValues(typeParamsString);
+                return assembleStructure(state, infix, content, name, typeParams, parameters);
+            });
+        }).or(() -> {
+            return assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters);
+        });
+    }
+
+    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<String> typeParams, List<Definition> parameters) {
         var outputContentTuple = compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
         var joinedParametersAsClassDefinitions = joinParameters(parameters);
 
         var constructorString = generateConstructorFromRecordParameters(parameters);
+        var joinedTypeParams = joinTypeParams(typeParams);
 
-        var generated = infix + name + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
+        var generated = infix + name + joinedTypeParams + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
         return new Some<>(new Tuple<>(outputContentState.append(generated), ""));
+    }
+
+    private static String joinTypeParams(List<String> typeParams) {
+        return typeParams.query()
+                .collect(new Joiner(", "))
+                .map(inner -> "<" + inner + ">")
+                .orElse("");
     }
 
     private static String generateConstructorFromRecordParameters(List<Definition> parameters) {

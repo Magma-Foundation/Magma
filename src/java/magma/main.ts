@@ -127,7 +127,7 @@ class JVMList<T> {
 	constructor (list : java.util.List<T>) {
 		this.list = list;
 	}
-	JVMList(): public {
+	constructor () {
 		this(new ArrayList<>());
 	}
 	add(element : T): List<T> {
@@ -321,7 +321,7 @@ class Definition {
 		return this.name + joinedTypeParams + afterName + ": " + this.type.generate();
 	}
 	joinTypeParams(): string {
-		return this.typeParams.query().collect(new Joiner(", ")).map((joined) => "<" + joined + ">").orElse("");
+		return Main.joinTypeParams(this.typeParams);
 	}
 }
 class ConstructorHeader implements MethodHeader {
@@ -355,7 +355,7 @@ class Iterators {
 class SingleHead<T> implements Head<T> {
 	element : T;
 	false : /*=*/;
-	SingleHead(element : T): public {
+	constructor (element : T) {
 		this.element = element;
 	}
 	next(): Option<T> {
@@ -383,7 +383,7 @@ class FlatMapHead<T, R> implements Head<R> {
 	mapper : (arg0 : T) => Query<R>;
 	head : Head<T>;
 	maybeCurrent : Option<Query<R>>;
-	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Query<R>): public {
+	constructor (head : Head<T>, mapper : (arg0 : T) => Query<R>) {
 		this.mapper = mapper;
 		this.maybeCurrent = new None<Query<R>>();
 		this.head = head;
@@ -847,14 +847,28 @@ class Main {
 	retainDefinitionsFromParameters(parameters : List<Parameter>): List<Definition> {
 		return parameters.query().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
 	}
-	assembleStructure(state : CompileState, infix : string, content : string, name : string, parameters : List<Definition>): Option<Tuple<CompileState, string>> {
+	assembleStructure(state : CompileState, infix : string, content : string, beforeParams : string, parameters : List<Definition>): Option<Tuple<CompileState, string>> {
+		return compileSuffix(beforeParams.strip(), ">", (withoutTypeParamEnd) => {
+			return compileFirst(withoutTypeParamEnd, "<", (name, typeParamsString) => {
+				let typeParams : var = divideValues(typeParamsString);
+				return assembleStructure(state, infix, content, name, typeParams, parameters);
+			});
+		}).or(() => {
+			return assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters);
+		});
+	}
+	assembleStructure(state : CompileState, infix : string, content : string, name : string, typeParams : List<string>, parameters : List<Definition>): Option<Tuple<CompileState, string>> {
 		let outputContentTuple : var = compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
 		let outputContentState : var = outputContentTuple.left;
 		let outputContent : var = outputContentTuple.right;
 		let joinedParametersAsClassDefinitions : var = joinParameters(parameters);
 		let constructorString : var = generateConstructorFromRecordParameters(parameters);
-		let generated : var = infix + name + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
+		let joinedTypeParams : var = joinTypeParams(typeParams);
+		let generated : var = infix + name + joinedTypeParams + " {" + joinedParametersAsClassDefinitions + constructorString + outputContent + "\n}\n";
 		return new Some<>(new Tuple<>(outputContentState.append(generated), ""));
+	}
+	joinTypeParams(typeParams : List<string>): string {
+		return typeParams.query().collect(new Joiner(", ")).map((inner) => "<" + inner + ">").orElse("");
 	}
 	generateConstructorFromRecordParameters(parameters : List<Definition>): string {
 		return parameters.query().map(Definition.generate).collect(new Joiner(", ")).map((generatedParameters) => generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
