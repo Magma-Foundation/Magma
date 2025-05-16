@@ -27,4 +27,6 @@ public interface List<T> {
     Main.Query<T> queryReversed();
 
     List<T> addFirst(T element);
+
+    boolean isEmpty();
 }

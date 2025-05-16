@@ -4,8 +4,8 @@ import magma.Actual;
 import magma.api.collect.List;
 import magma.api.io.IOError;
 import magma.api.io.Path;
-import magma.api.result.Result;
 import magma.api.option.Option;
+import magma.api.result.Result;
 import magma.app.Main;
 
 import java.io.IOException;
@@ -24,6 +24,12 @@ public final class Files {
                 this.error.printStackTrace(new PrintWriter(writer));
                 return writer.toString();
             }
+        }
+
+        private static java.nio.file.Path fromPath(Path path) {
+            return path.query()
+                    .foldWithMapper(Paths::get, java.nio.file.Path::resolve)
+                    .orElse(Paths.get("."));
         }
 
         @Override
@@ -67,6 +73,22 @@ public final class Files {
         @Override
         public boolean endsWith(String suffix) {
             return this.path.toString().endsWith(suffix);
+        }
+
+        @Override
+        public Path relativize(Path source) {
+            return new JVMPath(this.path.relativize(JVMPath.fromPath(source)));
+        }
+
+        @Override
+        public Path getParent() {
+            return new JVMPath(this.path.getParent());
+        }
+
+        @Override
+        public Main.Query<String> query() {
+            return new Main.HeadedQuery<>(new Main.RangeHead(this.path.getNameCount()))
+                    .map((Integer index) -> this.path.getName(index).toString());
         }
     }
 

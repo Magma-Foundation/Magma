@@ -1,5 +1,5 @@
-import { Option } from "./magma/api/option.ts";
-import { Main } from "./magma/app.ts";
+import { Option } from "../../../magma/api/option/Option";
+import { Main } from "../../../magma/app/Main";
 export interface List<T> {
 	add(element: T): List<T>;
 	query(): Main.Query<T>;
@@ -13,4 +13,5 @@ export interface List<T> {
 	contains(element: T): boolean;
 	queryReversed(): Main.Query<T>;
 	addFirst(element: T): List<T>;
+	isEmpty(): boolean;
 }

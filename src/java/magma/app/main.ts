@@ -1,17 +1,17 @@
-import { Actual } from "./magma.ts";
-import { List } from "./magma/api/collect.ts";
-import { IOError } from "./magma/api/io.ts";
-import { Path } from "./magma/api/io.ts";
-import { Option } from "./magma/api/option.ts";
-import { Result } from "./magma/api/result.ts";
-import { Files } from "./magma/jvm.ts";
-import { ArrayList } from "./java/util.ts";
-import { Arrays } from "./java/util.ts";
-import { BiFunction } from "./java/util/function.ts";
-import { Consumer } from "./java/util/function.ts";
-import { Function } from "./java/util/function.ts";
-import { Predicate } from "./java/util/function.ts";
-import { Supplier } from "./java/util/function.ts";
+import { Actual } from "../../magma/Actual";
+import { List } from "../../magma/api/collect/List";
+import { IOError } from "../../magma/api/io/IOError";
+import { Path } from "../../magma/api/io/Path";
+import { Option } from "../../magma/api/option/Option";
+import { Result } from "../../magma/api/result/Result";
+import { Files } from "../../magma/jvm/Files";
+import { ArrayList } from "../../java/util/ArrayList";
+import { Arrays } from "../../java/util/Arrays";
+import { BiFunction } from "../../java/util/function/BiFunction";
+import { Consumer } from "../../java/util/function/Consumer";
+import { Function } from "../../java/util/function/Function";
+import { Predicate } from "../../java/util/function/Predicate";
+import { Supplier } from "../../java/util/function/Supplier";
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -23,7 +23,8 @@ interface Collector<T, C> {
 export interface Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;
-	fold<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
+	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
+	foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R>;
 	next(): Option<T>;
 	allMatch(predicate: (arg0 : T) => boolean): boolean;
@@ -53,7 +54,7 @@ interface Type  {
 	isVar(): boolean;
 	generateBeforeName(): string;
 }
-class HeadedQuery<T> implements Query<T> {
+export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
 		this.head = head;
@@ -62,12 +63,12 @@ class HeadedQuery<T> implements Query<T> {
 		return this.head.next();
 	}
 	collect<C>(collector: Collector<T, C>): C {
-		return this.fold(collector.createInitial(), collector.fold);
+		return this.foldWithInitial(collector.createInitial(), collector.fold);
 	}
 	map<R>(mapper: (arg0 : T) => R): Query<R> {
 		return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
 	}
-	fold<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
+	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		let result: R = initial;
 		while (true){
 			let finalResult: R = result;
@@ -80,11 +81,16 @@ class HeadedQuery<T> implements Query<T> {
 			}
 		}
 	}
+	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
+		return this.head.next().map(next).map((maybeNext: R) => {
+			return this.foldWithInitial(maybeNext, folder);
+		});
+	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
 		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
 	}
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this.fold(true, (maybeAllTrue: Boolean, element: T) => maybeAllTrue && predicate(element));
+		return this.foldWithInitial(true, (maybeAllTrue: Boolean, element: T) => maybeAllTrue && predicate(element));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
@@ -97,7 +103,7 @@ class HeadedQuery<T> implements Query<T> {
 		});
 	}
 }
-class RangeHead implements Head<number> {
+export class RangeHead implements Head<number> {
 	length: number;
 	counter: number;
 	constructor (length: number) {
@@ -182,36 +188,38 @@ class CompileState {
 	maybeStructureName: Option<string>;
 	depth: number;
 	definitions: List<Definition>;
-	constructor (imports: string, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>) {
+	namespace: List<string>;
+	constructor (imports: string, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>, namespace: List<string>) {
 		this.imports = imports;
 		this.output = output;
 		this.maybeStructureName = maybeStructureName;
 		this.depth = depth;
 		this.definitions = definitions;
+		this.namespace = namespace;
 	}
-	static createInitial(): CompileState {
-		return new CompileState("", "", new None<string>(), 0, Lists.empty());
+	static createInitial(namespace: List<string>): CompileState {
+		return new CompileState("", "", new None<string>(), 0, Lists.empty(), namespace);
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions);
+		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.namespace);
 	}
 	withStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, new Some<string>(name), this.depth, this.definitions);
+		return new CompileState(this.imports, this.output, new Some<string>(name), this.depth, this.definitions, this.namespace);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.namespace);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.namespace);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.namespace);
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 	addImport(importString: string): CompileState {
-		return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions);
+		return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -332,7 +340,7 @@ class FlatMapHead<T, R> implements Head<R> {
 	next(): Option<R> {
 		while (true){
 			let next = this.current.next();
-			if (next.isPresent()){
+			if (next()){
 				return next;
 			}
 			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
@@ -764,23 +772,25 @@ class Primitive implements Type {
 export class Main  {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
-		sourceDirectory.walk().match((children: List<Path>) => Main.getIoErrorQuery(children).next(), Some.new).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
+		sourceDirectory.walk().match((children: List<Path>) => Main.runWithChildren(children, sourceDirectory).next(), Some.new).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
 	}
-	static getIoErrorQuery(children: List<Path>): Query<IOError> {
+	static runWithChildren(children: List<Path>, sourceDirectory: Path): Query<IOError> {
 		return children.query().filter((source: Path) => source.endsWith(".java")).map((source: Path) => {
+			let relative = sourceDirectory.relativize(source);
+			let namespace = relative.getParent().query().collect(new ListCollector<>());
 			let fileName = source.findFileName();
 			let separator = fileName.lastIndexOf(".");
 			let name = fileName.substring(0, separator);
 			let target = source.resolveSibling(name + ".ts");
-			return source.readString().match((input: string) => Main.compileAndWrite(input, target), (value: IOError) => new Some<IOError>(value));
+			return source.readString().match((input: string) => Main.compileAndWrite(input, target, namespace), (value: IOError) => new Some<IOError>(value));
 		}).flatMap(Iterators.fromOption);
 	}
-	static compileAndWrite(input: string, target: Path): Option<IOError> {
-		let output = Main.compileRoot(input);
+	static compileAndWrite(input: string, target: Path, namespace: List<string>): Option<IOError> {
+		let output = Main.compileRoot(input, namespace);
 		return target.writeString(output);
 	}
-	static compileRoot(input: string): string {
-		let compiled = Main.compileStatements(CompileState.createInitial(), input, Main.compileRootSegment);
+	static compileRoot(input: string, namespace: List<string>): string {
+		let compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main.compileRootSegment);
 		let compiledState = compiled.left;
 		return compiledState.imports + compiledState.output + compiled.right;
 	}
@@ -792,10 +802,10 @@ export class Main  {
 		return new Tuple<CompileState, string>(folded.left, Main.generateAll(folded.right, merger));
 	}
 	static generateAll(elements: List<string>, merger: (arg0 : string, arg1 : string) => string): string {
-		return elements.query().fold("", merger);
+		return elements.query().foldWithInitial("", merger);
 	}
 	static parseAll<T>(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, List<T>>> {
-		return Main.divide(input, folder).query().fold(new Some<Tuple<CompileState, List<T>>>(new Tuple<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple<CompileState, List<T>>>, segment: string) => {
+		return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple<CompileState, List<T>>>(new Tuple<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple<CompileState, List<T>>>, segment: string) => {
 			return maybeCurrent.flatMap((current: Tuple<CompileState, List<T>>) => {
 				let currentState = current.left;
 				let currentElement = current.right;
@@ -971,13 +981,23 @@ export class Main  {
 		if (stripped.startsWith("package ")){
 			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
 		}
+		return Main.compileImport(state, stripped);
+	}
+	static compileImport(state: CompileState, stripped: string): Option<Tuple<CompileState, string>> {
 		return Main.compilePrefix(stripped, "import ", (s: string) => {
 			return Main.compileSuffix(s, ";", (s1: string) => {
 				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
 				let child = divisions.findLast().orElse("").strip();
-				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty()).addFirst(".");
-				let s2 = parent.query().collect(new Joiner("/")).orElse("");
-				return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + ".ts\";\n"), ""));
+				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
+				if (state.namespace.isEmpty()){
+					parent = parent.addFirst(".");
+				}/*
+
+                for (var i = 0; i < state.namespace.size(); i++) {
+                    parent = parent.addFirst("..");
+                }*/
+				let s2 = parent.add(child).query().collect(new Joiner("/")).orElse("");
+				return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
 			});
 		});
 	}

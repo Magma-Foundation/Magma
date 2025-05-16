@@ -34,7 +34,9 @@ public final class Main {
 
         <R> Query<R> map(Function<T, R> mapper);
 
-        <R> R fold(R initial, BiFunction<R, T, R> folder);
+        <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
+
+        <R> Option<R> foldWithMapper(Function<T, R> mapper, BiFunction<R, T, R> folder);
 
         <R> Query<R> flatMap(Function<T, Query<R>> mapper);
 
@@ -81,7 +83,7 @@ public final class Main {
         String generateBeforeName();
     }
 
-    private record HeadedQuery<T>(Head<T> head) implements Query<T> {
+    public record HeadedQuery<T>(Head<T> head) implements Query<T> {
         @Override
         public Option<T> next() {
             return this.head.next();
@@ -89,7 +91,7 @@ public final class Main {
 
         @Override
         public <C> C collect(Collector<T, C> collector) {
-            return this.fold(collector.createInitial(), collector::fold);
+            return this.foldWithInitial(collector.createInitial(), collector::fold);
         }
 
         @Override
@@ -98,7 +100,7 @@ public final class Main {
         }
 
         @Override
-        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+        public <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder) {
             R result = initial;
             while (true) {
                 R finalResult = result;
@@ -116,6 +118,13 @@ public final class Main {
         }
 
         @Override
+        public <R> Option<R> foldWithMapper(Function<T, R> next, BiFunction<R, T, R> folder) {
+            return this.head.next().map(next).map((R maybeNext) -> {
+                return this.foldWithInitial(maybeNext, folder);
+            });
+        }
+
+        @Override
         public <R> Query<R> flatMap(Function<T, Query<R>> mapper) {
             return this.head.next()
                     .map(mapper)
@@ -125,7 +134,7 @@ public final class Main {
 
         @Override
         public boolean allMatch(Predicate<T> predicate) {
-            return this.fold(true, (Boolean maybeAllTrue, T element) -> maybeAllTrue && predicate.test(element));
+            return this.foldWithInitial(true, (Boolean maybeAllTrue, T element) -> maybeAllTrue && predicate.test(element));
         }
 
         @Override
@@ -141,11 +150,11 @@ public final class Main {
         }
     }
 
-    private static final class RangeHead implements Head<Integer> {
+    public static final class RangeHead implements Head<Integer> {
         private final int length;
         private int counter;
 
-        private RangeHead(int length) {
+        public RangeHead(int length) {
             this.length = length;
             this.counter = 0;
         }
@@ -226,30 +235,31 @@ public final class Main {
             String output,
             Option<String> maybeStructureName,
             int depth,
-            List<Definition> definitions
+            List<Definition> definitions,
+            List<String> namespace
     ) {
-        private static CompileState createInitial() {
-            return new CompileState("", "", new None<String>(), 0, Lists.empty());
+        private static CompileState createInitial(List<String> namespace) {
+            return new CompileState("", "", new None<String>(), 0, Lists.empty(), namespace);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions);
+            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.namespace);
         }
 
         CompileState withStructureName(String name) {
-            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions);
+            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.namespace);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.namespace);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.namespace);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.namespace);
         }
 
         Option<Type> resolve(String name) {
@@ -260,7 +270,7 @@ public final class Main {
         }
 
         public CompileState addImport(String importString) {
-            return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions);
+            return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
         }
     }
 
@@ -919,7 +929,7 @@ public final class Main {
 
             @Override
             public List<T> addAll(List<T> others) {
-                return others.query().fold(this.toList(), (List<T> list1, T element) -> list1.add(element));
+                return others.query().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.add(element));
             }
 
             private List<T> toList() {
@@ -943,6 +953,11 @@ public final class Main {
                 copy.addFirst(element);
                 copy.addAll(this.list);
                 return new JVMList<>(copy);
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return list.isEmpty();
             }
 
             @Override
@@ -1058,15 +1073,20 @@ public final class Main {
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
-                .match((List<Path> children) -> Main.getIoErrorQuery(children).next(), Some::new)
+                .match((List<Path> children) -> Main.runWithChildren(children, sourceDirectory).next(), Some::new)
                 .map((IOError error) -> error.display())
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
 
-    private static Query<IOError> getIoErrorQuery(List<Path> children) {
+    private static Query<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
         return children.query()
                 .filter((Path source) -> source.endsWith(".java"))
                 .map((Path source) -> {
+                    var relative = sourceDirectory.relativize(source);
+                    var namespace = relative.getParent()
+                            .query()
+                            .collect(new ListCollector<>());
+
                     var fileName = source.findFileName();
                     var separator = fileName.lastIndexOf('.');
                     var name = fileName.substring(0, separator);
@@ -1074,17 +1094,17 @@ public final class Main {
                     var target = source.resolveSibling(name + ".ts");
 
                     return source.readString()
-                            .match((String input) -> Main.compileAndWrite(input, target), (IOError value) -> new Some<IOError>(value));
+                            .match((String input) -> Main.compileAndWrite(input, target, namespace), (IOError value) -> new Some<IOError>(value));
                 }).flatMap(Iterators::fromOption);
     }
 
-    private static Option<IOError> compileAndWrite(String input, Path target) {
-        var output = Main.compileRoot(input);
+    private static Option<IOError> compileAndWrite(String input, Path target, List<String> namespace) {
+        var output = Main.compileRoot(input, namespace);
         return target.writeString(output);
     }
 
-    private static String compileRoot(String input) {
-        var compiled = Main.compileStatements(CompileState.createInitial(), input, Main::compileRootSegment);
+    private static String compileRoot(String input, List<String> namespace) {
+        var compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main::compileRootSegment);
         var compiledState = compiled.left;
         return compiledState.imports + compiledState.output + compiled.right;
     }
@@ -1100,11 +1120,11 @@ public final class Main {
 
     private static String generateAll(List<String> elements, BiFunction<String, String, String> merger) {
         return elements.query()
-                .fold("", merger);
+                .foldWithInitial("", merger);
     }
 
     private static <T> Option<Tuple<CompileState, List<T>>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> biFunction) {
-        return Main.divide(input, folder).query().fold(new Some<Tuple<CompileState, List<T>>>(new Tuple<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple<CompileState, List<T>>> maybeCurrent, String segment) -> {
+        return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple<CompileState, List<T>>>(new Tuple<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple<CompileState, List<T>>> maybeCurrent, String segment) -> {
             return maybeCurrent.flatMap((Tuple<CompileState, List<T>> current) -> {
                 var currentState = current.left;
                 var currentElement = current.right;
@@ -1373,16 +1393,31 @@ public final class Main {
             return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
 
+        return Main.compileImport(state, stripped);
+    }
+
+    private static Option<Tuple<CompileState, String>> compileImport(CompileState state, String stripped) {
         return Main.compilePrefix(stripped, "import ", (String s) -> {
             return Main.compileSuffix(s, ";", (String s1) -> {
                 var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'));
                 var child = divisions.findLast().orElse("").strip();
                 var parent = divisions.subList(0, divisions.size() - 1)
-                        .orElse(Lists.empty())
-                        .addFirst(".");
+                        .orElse(Lists.empty());
 
-                var s2 = parent.query().collect(new Joiner("/")).orElse("");
-                return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + ".ts\";\n"), ""));
+                if (state.namespace.isEmpty()) {
+                    parent = parent.addFirst(".");
+                }
+
+                for (var i = 0; i < state.namespace.size(); i++) {
+                    parent = parent.addFirst("..");
+                }
+
+                var s2 = parent.add(child)
+                        .query()
+                        .collect(new Joiner("/"))
+                        .orElse("");
+
+                return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
             });
         });
     }

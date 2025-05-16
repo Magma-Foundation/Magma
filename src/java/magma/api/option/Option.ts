@@ -1,8 +1,8 @@
-import { Main } from "./magma/app.ts";
-import { Consumer } from "./java/util/function.ts";
-import { Function } from "./java/util/function.ts";
-import { Predicate } from "./java/util/function.ts";
-import { Supplier } from "./java/util/function.ts";
+import { Main } from "../../../magma/app/Main";
+import { Consumer } from "../../../java/util/function/Consumer";
+import { Function } from "../../../java/util/function/Function";
+import { Predicate } from "../../../java/util/function/Predicate";
+import { Supplier } from "../../../java/util/function/Supplier";
 export interface Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R>;
 	orElse(other: T): T;
