@@ -133,45 +133,38 @@
 		return cache.append(element);
 	}
 	/*private static*/divide(input : string, folder : /*BiFunction*/</*DivideState*/, string, /* DivideState*/>): /*List*/<string> {
-		let current : unknown = new /*DivideState*/(input);/*
-
-        while (true) {
-            var maybePopped = current.pop();
-            if (maybePopped.isEmpty()) {
-                break;
-            }
-
-            var poppedTuple = maybePopped.get();
-            var poppedState = poppedTuple.left;
-            var popped = poppedTuple.right;
-
-            current = foldSingleQuotes(poppedState, popped)
-                    .or(() -> foldDoubleQuotes(poppedState, popped))
-                    .orElseGet(() -> folder.apply(poppedState, popped));
-        }*/
+		let current : unknown = new /*DivideState*/(input);
+		while (true){
+			let maybePopped : unknown = current.pop();
+			if (maybePopped.isEmpty()){
+				/*break*/;
+			}
+			let poppedTuple : unknown = maybePopped.get();
+			let poppedState : unknown = poppedTuple.left;
+			let popped : unknown = poppedTuple.right;
+			current = foldSingleQuotes(poppedState, popped).or(() => foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder.apply(poppedState, popped));
+		}
 		return current.advance().segments;
 	}
 	/*private static*/foldDoubleQuotes(state : /*DivideState*/, c : string): /*Optional*/</*DivideState*/> {
 		if (c !== "\""){
 			return Optional.empty();
 		}
-		let appended : unknown = state.append(c);/*
-        while (true) {
-            var maybeTuple = appended.popAndAppendToTuple();
-            if (maybeTuple.isEmpty()) {
-                break;
-            }
-
-            var tuple = maybeTuple.get();
-            appended = tuple.left;
-
-            if (tuple.right == '\\') {
-                appended = appended.popAndAppendToOption().orElse(appended);
-            }
-            if (tuple.right == '\"') {
-                break;
-            }
-        }*/
+		let appended : unknown = state.append(c);
+		while (true){
+			let maybeTuple : unknown = appended.popAndAppendToTuple();
+			if (maybeTuple.isEmpty()){
+				/*break*/;
+			}
+			let tuple : unknown = maybeTuple.get();
+			appended = tuple.left;
+			if (tuple.right === "\\"){
+				appended = appended.popAndAppendToOption().orElse(appended);
+			}
+			if (tuple.right === "\""){
+				/*break*/;
+			}
+		}
 		return Optional.of(appended);
 	}
 	/*private static*/foldSingleQuotes(state : /*DivideState*/, c : string): /*Optional*/</*DivideState*/> {
@@ -323,7 +316,18 @@
 		return appended;
 	}
 	/*private static*/compileBlockHeader(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(Main.compileIf, Main.compileElse));
+		return compileOr(state, input, List.of(createConditionalRule("if"), createConditionalRule("while"), Main.compileElse));
+	}
+	/*private static*/createConditionalRule(prefix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
+		return (state1, input1) => compilePrefix(input1.strip(), prefix, (withoutPrefix) => {
+			let strippedCondition : unknown = withoutPrefix.strip();
+			return compilePrefix(strippedCondition, "(", (withoutConditionStart) => {
+				return compileSuffix(withoutConditionStart, ")", (withoutConditionEnd) => {
+					let tuple : unknown = compileValueOrPlaceholder(state1, withoutConditionEnd);
+					return Optional.of(new /*Tuple*/<>(tuple.left, prefix + " (" + tuple.right + ")"));
+				});
+			});
+		});
 	}
 	/*private static*/compileElse(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		if (input.strip().equals("else")){
@@ -332,17 +336,6 @@
 		else {
 			return Optional.empty();
 		}
-	}
-	/*private static*/compileIf(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compilePrefix(input.strip(), "if", (withoutPrefix) => {
-			let strippedCondition : unknown = withoutPrefix.strip();
-			return compilePrefix(strippedCondition, "(", (withoutConditionStart) => {
-				return compileSuffix(withoutConditionStart, ")", (withoutConditionEnd) => {
-					let tuple : unknown = compileValueOrPlaceholder(state, withoutConditionEnd);
-					return Optional.of(new /*Tuple*/<>(tuple.left, "if (" + tuple.right + ")"));
-				});
-			});
-		});
 	}
 	/*private static*/compileFunctionStatement(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileSuffix(input.strip(), ";", (withoutEnd) => {

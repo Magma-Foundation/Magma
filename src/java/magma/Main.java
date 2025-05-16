@@ -432,9 +432,22 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
         return compileOr(state, input, List.of(
-                Main::compileIf,
+                createConditionalRule("if"),
+                createConditionalRule("while"),
                 Main::compileElse
         ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createConditionalRule(String prefix) {
+        return (state1, input1) -> compilePrefix(input1.strip(), prefix, withoutPrefix -> {
+            var strippedCondition = withoutPrefix.strip();
+            return compilePrefix(strippedCondition, "(", withoutConditionStart -> {
+                return compileSuffix(withoutConditionStart, ")", withoutConditionEnd -> {
+                    var tuple = compileValueOrPlaceholder(state1, withoutConditionEnd);
+                    return Optional.of(new Tuple<>(tuple.left, prefix + " (" + tuple.right + ")"));
+                });
+            });
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileElse(CompileState state, String input) {
@@ -444,18 +457,6 @@ public class Main {
         else {
             return Optional.empty();
         }
-    }
-
-    private static Optional<Tuple<CompileState, String>> compileIf(CompileState state, String input) {
-        return compilePrefix(input.strip(), "if", withoutPrefix -> {
-            var strippedCondition = withoutPrefix.strip();
-            return compilePrefix(strippedCondition, "(", withoutConditionStart -> {
-                return compileSuffix(withoutConditionStart, ")", withoutConditionEnd -> {
-                    var tuple = compileValueOrPlaceholder(state, withoutConditionEnd);
-                    return Optional.of(new Tuple<>(tuple.left, "if (" + tuple.right + ")"));
-                });
-            });
-        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
