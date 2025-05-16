@@ -57,6 +57,8 @@ public class Main {
         T getFirst();
 
         T get(int index);
+
+        Iterator<Tuple<Integer, T>> iterateWithIndices();
     }
 
     private interface Head<T> {
@@ -149,7 +151,7 @@ public class Main {
 
             @Override
             public Iterator<T> iterate() {
-                return new HeadedIterator<>(new RangeHead(this.list.size())).map(this.list::get);
+                return this.iterateWithIndices().map(Tuple::right);
             }
 
             @Override
@@ -175,6 +177,12 @@ public class Main {
             @Override
             public T get(int index) {
                 return this.list.get(index);
+            }
+
+            @Override
+            public Iterator<Tuple<Integer, T>> iterateWithIndices() {
+                return new HeadedIterator<>(new RangeHead(this.list.size()))
+                        .map(index -> new Tuple<>(index, this.list.get(index)));
             }
         }
 
@@ -1231,14 +1239,38 @@ public class Main {
                 var argumentsState = argumentsTuple.left;
                 var arguments = argumentsTuple.right;
 
-                var strippedBaseString = baseString.strip();
-                if (strippedBaseString.equals("Function")) {
-                    return Optional.of(new Tuple<>(argumentsState, "(arg0 : " + arguments.get(0) + ") => " + arguments.get(1)));
-                }
-
-                return Optional.of(new Tuple<>(argumentsState, strippedBaseString + "<" + generateValues(arguments) + ">"));
+                var base = baseString.strip();
+                return assembleFunctionType(argumentsState, base, arguments).or(() -> {
+                    return Optional.of(new Tuple<>(argumentsState, base + "<" + generateValues(arguments) + ">"));
+                });
             });
         });
+    }
+
+    private static Optional<Tuple<CompileState, String>> assembleFunctionType(CompileState state, String base, List<String> arguments) {
+        return mapFunctionType(base, arguments).map(generated -> new Tuple<>(state, generated));
+    }
+
+    private static Optional<String> mapFunctionType(String base, List<String> arguments) {
+        if (base.equals("Function")) {
+            return Optional.of(generateFunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+        }
+
+        if (base.equals("BiFunction")) {
+            return Optional.of(generateFunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+        }
+
+        return Optional.empty();
+    }
+
+    private static String generateFunctionType(List<String> arguments, String returns) {
+        var joinedArguments = arguments
+                .iterateWithIndices()
+                .map(tuple -> "arg" + tuple.left + " : " + tuple.right)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return "(" + joinedArguments + ") => " + returns;
     }
 
     private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String input) {
