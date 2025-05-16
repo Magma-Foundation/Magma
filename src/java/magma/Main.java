@@ -381,24 +381,31 @@ public class Main {
         return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
                 Main::compileBlock,
-                Main::compileFunctionStatement
+                Main::compileFunctionStatement,
+                Main::compileReturnWithoutSuffix
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
+        return compileReturn(input1, withoutPrefix -> compileValue(state1, withoutPrefix))
+                .map(tuple -> new Tuple<>(tuple.left, generateIndent(state1.depth) + tuple.right));
     }
 
     private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
         return compileSuffix(input.strip(), "}", withoutEnd -> {
             return compileFirst(withoutEnd, "{", (beforeContent, content) -> {
-                var headerTuple = compileBlockHeader(state, beforeContent);
-                var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
+                return compileBlockHeader(state, beforeContent).flatMap(headerTuple -> {
+                    var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
 
-                var indent = generateIndent(state.depth());
-                return Optional.of(new Tuple<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+                    var indent = generateIndent(state.depth());
+                    return Optional.of(new Tuple<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+                });
             });
         });
     }
 
-    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input) {
-        return compileOrPlaceholder(state, input, List.of(
+    private static Optional<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
+        return compileOr(state, input, List.of(
                 Main::compileIf
         ));
     }
@@ -428,7 +435,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
         return compileOrPlaceholder(state, withoutEnd, List.of(
-                Main::compileReturn,
+                Main::compileReturnWithValue,
                 Main::compileAssignment,
                 Main::compileInvokable,
                 createPostRule("++"),
@@ -443,10 +450,15 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileReturn(CompileState state, String input) {
+    private static Optional<Tuple<CompileState, String>> compileReturnWithValue(CompileState state, String input) {
+        return compileReturn(input, value1 -> compileValue(state, value1));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileReturn(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
         return compilePrefix(input.strip(), "return ", value -> {
-            var tuple = compileValueOrPlaceholder(state, value);
-            return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
+            return mapper.apply(value).flatMap(tuple -> {
+                return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
+            });
         });
     }
 
