@@ -1,2 +1,2 @@
-interface Actual  {
+export interface Actual  {
 }

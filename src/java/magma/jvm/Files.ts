@@ -10,6 +10,6 @@ import { PrintWriter } from "./java/io.ts";
 import { StringWriter } from "./java/io.ts";
 import { Paths } from "./java/nio/file.ts";
 import { Stream } from "./java/util/stream.ts";
-class Files  {
+export class Files  {
 	static get(first: string, ...more: string[]): Path;
 }

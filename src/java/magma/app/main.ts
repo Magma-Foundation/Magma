@@ -20,7 +20,7 @@ interface Collector<T, C> {
 	createInitial(): C;
 	fold(current: C, element: T): C;
 }
-interface Query<T> {
+export interface Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;
 	fold<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
@@ -168,7 +168,7 @@ class DivideState {
 		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
 	}
 }
-class Tuple<A, B> {
+export class Tuple<A, B> {
 	left: A;
 	right: B;
 	constructor (left: A, right: B) {
@@ -274,7 +274,7 @@ class ConstructorHeader implements MethodHeader {
 		return false;
 	}
 }
-class Ok<T, X> implements Result<T, X> {
+export class Ok<T, X> implements Result<T, X> {
 	value: T;
 	constructor (value: T) {
 		this.value = value;
@@ -283,7 +283,7 @@ class Ok<T, X> implements Result<T, X> {
 		return whenOk(this.value);
 	}
 }
-class Err<T, X> implements Result<T, X> {
+export class Err<T, X> implements Result<T, X> {
 	error: X;
 	constructor (error: X) {
 		this.error = error;
@@ -345,7 +345,7 @@ class FlatMapHead<T, R> implements Head<R> {
 		}
 	}
 }
-class Some<T> implements Option<T> {
+export class Some<T> implements Option<T> {
 	value: T;
 	constructor (value: T) {
 		this.value = value;
@@ -384,7 +384,7 @@ class Some<T> implements Option<T> {
 		return other().map((otherValue: R) => new Tuple<T, R>(this.value, otherValue));
 	}
 }
-class None<T> implements Option<T> {
+export class None<T> implements Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return new None<R>();
 	}
@@ -699,7 +699,7 @@ class Iterators  {
 		return new SingleHead<T>(element);
 	}
 }
-class Lists  {
+export class Lists  {
 	static empty<T>(): List<T>;
 	static of<T>(...elements: T[]): List<T>;
 }
@@ -761,7 +761,7 @@ class Primitive implements Type {
 		return "";
 	}
 }
-class Main  {
+export class Main  {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
 		sourceDirectory.walk().match((children: List<Path>) => Main.getIoErrorQuery(children).next(), Some.new).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
@@ -885,50 +885,51 @@ class Main  {
 					return Main.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => {
 						return Main.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 							let annotations = Main.parseAnnotations(s);
-							return Main.compileStructureWithImplementing(state, annotations, targetInfix, beforeContent, inputContent);
+							return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
 						}).or(() => {
-							return Main.compileStructureWithImplementing(state, Lists.empty(), targetInfix, beforeContent, inputContent);
+							let modifiers = Main.parseModifiers(beforeContent);
+							return Main.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
 						});
 					});
 				});
 			});
 		};
 	}
-	static compileStructureWithImplementing(state: CompileState, annotations: List<string>, targetInfix: string, beforeContent: string, content: string): Option<Tuple<CompileState, string>> {
+	static compileStructureWithImplementing(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, content: string): Option<Tuple<CompileState, string>> {
 		return Main.compileLast(beforeContent, " implements ", (s: string, s2: string) => {
 			return Main.parseType(state, s2).flatMap((implementingTuple: Tuple<CompileState, Type>) => {
-				return Main.compileStructureWithParameters(implementingTuple.left, annotations, targetInfix, s, content, new Some<Type>(implementingTuple.right));
+				return Main.compileStructureWithParameters(implementingTuple.left, annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right), content);
 			});
 		}).or(() => {
-			return Main.compileStructureWithParameters(state, annotations, targetInfix, beforeContent, content, new None<Type>());
+			return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<Type>(), content);
 		});
 	}
-	static compileStructureWithParameters(state: CompileState, annotations: List<string>, targetInfix: string, beforeContent: string, inputContent: string, maybeImplementing: Option<Type>): Option<Tuple<CompileState, string>> {
+	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple<CompileState, string>> {
 		return Main.compileFirst(beforeContent, "(", (rawName: string, withParameters: string) => {
 			return Main.compileFirst(withParameters, ")", (parametersString: string, _: string) => {
 				let name = Strings.strip(rawName);
 				let parametersTuple = Main.parseParameters(state, parametersString);
 				let parameters = Main.retainDefinitionsFromParameters(parametersTuple.right);
-				return Main.assembleStructureWithTypeParams(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing, annotations);
+				return Main.assembleStructureWithTypeParams(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers);
 			});
 		}).or(() => {
-			return Main.assembleStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations);
+			return Main.assembleStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers);
 		});
 	}
 	static retainDefinitionsFromParameters(parameters: List<Parameter>): List<Definition> {
 		return parameters.query().map((parameter: Parameter) => parameter.asDefinition()).flatMap(Iterators.fromOption).collect(new ListCollector<Definition>());
 	}
-	static assembleStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>): Option<Tuple<CompileState, string>> {
+	static assembleStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>): Option<Tuple<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => {
 			return Main.compileFirst(withoutTypeParamEnd, "<", (name: string, typeParamsString: string) => {
 				let typeParams = Main.divideValues(typeParamsString);
-				return Main.assembleStructure(state, infix, content, name, typeParams, parameters, maybeImplementing, annotations);
+				return Main.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content);
 			});
 		}).or(() => {
-			return Main.assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters, maybeImplementing, annotations);
+			return Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content);
 		});
 	}
-	static assembleStructure(state: CompileState, infix: string, content: string, name: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>): Option<Tuple<CompileState, string>> {
+	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, name: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string): Option<Tuple<CompileState, string>> {
 		if (annotations.contains("Actual")){
 			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
 		}
@@ -938,7 +939,12 @@ class Main  {
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
 		let joinedTypeParams = Main.joinTypeParams(typeParams);
 		let implementingString = Main.generateImplementing(maybeImplementing);
-		let generated = infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+		let newModifiers = Lists. < String > empty();
+		if (oldModifiers.contains("public")){
+			newModifiers = newModifiers.add("export");
+		}
+		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
+		let generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
 		return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(outputContentState.append(generated), ""));
 	}
 	static generateImplementing(maybeImplementing: Option<Type>): string {

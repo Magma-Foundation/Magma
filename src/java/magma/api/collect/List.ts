@@ -1,6 +1,6 @@
 import { Option } from "./magma/api/option.ts";
 import { Main } from "./magma/app.ts";
-interface List<T> {
+export interface List<T> {
 	add(element: T): List<T>;
 	query(): Main.Query<T>;
 	size(): number;

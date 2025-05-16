@@ -1231,9 +1231,10 @@ public final class Main {
                     return Main.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> {
                         return Main.compileLast(beforeInfix, "\n", (String s, String s2) -> {
                             var annotations = Main.parseAnnotations(s);
-                            return Main.compileStructureWithImplementing(state, annotations, targetInfix, beforeContent, inputContent);
+                            return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
                         }).or(() -> {
-                            return Main.compileStructureWithImplementing(state, Lists.empty(), targetInfix, beforeContent, inputContent);
+                            var modifiers = Main.parseModifiers(beforeContent);
+                            return Main.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
                         });
                     });
                 });
@@ -1241,17 +1242,17 @@ public final class Main {
         };
     }
 
-    private static Option<Tuple<CompileState, String>> compileStructureWithImplementing(CompileState state, List<String> annotations, String targetInfix, String beforeContent, String content) {
+    private static Option<Tuple<CompileState, String>> compileStructureWithImplementing(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, String content) {
         return Main.compileLast(beforeContent, " implements ", (String s, String s2) -> {
             return Main.parseType(state, s2).flatMap((Tuple<CompileState, Type> implementingTuple) -> {
-                return Main.compileStructureWithParameters(implementingTuple.left, annotations, targetInfix, s, content, new Some<Type>(implementingTuple.right));
+                return Main.compileStructureWithParameters(implementingTuple.left, annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right), content);
             });
         }).or(() -> {
-            return Main.compileStructureWithParameters(state, annotations, targetInfix, beforeContent, content, new None<Type>());
+            return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<Type>(), content);
         });
     }
 
-    private static Option<Tuple<CompileState, String>> compileStructureWithParameters(CompileState state, List<String> annotations, String targetInfix, String beforeContent, String inputContent, Option<Type> maybeImplementing) {
+    private static Option<Tuple<CompileState, String>> compileStructureWithParameters(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Option<Type> maybeImplementing, String inputContent) {
         return Main.compileFirst(beforeContent, "(", (String rawName, String withParameters) -> {
             return Main.compileFirst(withParameters, ")", (String parametersString, String _) -> {
                 var name = Strings.strip(rawName);
@@ -1259,10 +1260,10 @@ public final class Main {
                 var parametersTuple = Main.parseParameters(state, parametersString);
                 var parameters = Main.retainDefinitionsFromParameters(parametersTuple.right);
 
-                return Main.assembleStructureWithTypeParams(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing, annotations);
+                return Main.assembleStructureWithTypeParams(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers);
             });
         }).or(() -> {
-            return Main.assembleStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations);
+            return Main.assembleStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers);
         });
     }
 
@@ -1273,18 +1274,28 @@ public final class Main {
                 .collect(new ListCollector<Definition>());
     }
 
-    private static Option<Tuple<CompileState, String>> assembleStructureWithTypeParams(CompileState state, String infix, String content, String beforeParams, List<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations) {
+    private static Option<Tuple<CompileState, String>> assembleStructureWithTypeParams(CompileState state, String infix, String content, String beforeParams, List<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations, List<String> modifiers) {
         return Main.compileSuffix(Strings.strip(beforeParams), ">", (String withoutTypeParamEnd) -> {
             return Main.compileFirst(withoutTypeParamEnd, "<", (String name, String typeParamsString) -> {
                 var typeParams = Main.divideValues(typeParamsString);
-                return Main.assembleStructure(state, infix, content, name, typeParams, parameters, maybeImplementing, annotations);
+                return Main.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content);
             });
         }).or(() -> {
-            return Main.assembleStructure(state, infix, content, beforeParams, Lists.empty(), parameters, maybeImplementing, annotations);
+            return Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content);
         });
     }
 
-    private static Option<Tuple<CompileState, String>> assembleStructure(CompileState state, String infix, String content, String name, List<String> typeParams, List<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations) {
+    private static Option<Tuple<CompileState, String>> assembleStructure(
+            CompileState state,
+            List<String> annotations,
+            List<String> oldModifiers,
+            String infix,
+            String name,
+            List<String> typeParams,
+            List<Definition> parameters,
+            Option<Type> maybeImplementing,
+            String content
+    ) {
         if (annotations.contains("Actual")) {
             return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
@@ -1298,7 +1309,17 @@ public final class Main {
 
         var implementingString = Main.generateImplementing(maybeImplementing);
 
-        var generated = infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+        var newModifiers = Lists.<String>empty();
+        if (oldModifiers.contains("public")) {
+            newModifiers = newModifiers.add("export");
+        }
+
+        var joinedModifiers = newModifiers.query()
+                .map((String value) -> value + " ")
+                .collect(Joiner.empty())
+                .orElse("");
+
+        var generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
         return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(outputContentState.append(generated), ""));
     }
 
