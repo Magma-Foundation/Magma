@@ -1,27 +1,24 @@
 package magma.app;
 
-import magma.api.io.Console;
+import jvm.api.collect.list.Lists;
+import jvm.api.io.Files;
+import jvm.api.text.Characters;
+import jvm.api.text.Strings;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Collector;
-import magma.api.collect.head.EmptyHead;
-import magma.api.collect.head.Head;
+import magma.api.collect.Queries;
+import magma.api.collect.head.HeadedQuery;
+import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
-import jvm.api.collect.list.Lists;
-import magma.api.collect.head.RangeHead;
-import magma.api.collect.head.SingleHead;
-import magma.api.collect.head.HeadedQuery;
-import magma.api.collect.Query;
+import jvm.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Result;
-import magma.api.text.Characters;
-import magma.api.text.Strings;
-import jvm.api.io.Files;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -101,7 +98,7 @@ public final class Main {
                 return new None<Tuple2<DivideState, Character>>();
             }
 
-            var c = this.input.charAt(this.index);
+            var c = Strings.charAt(this.input, this.index);
             var nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
             return new Some<Tuple2<DivideState, Character>>(new Tuple2Impl<DivideState, Character>(nextState, c));
         }
@@ -115,7 +112,7 @@ public final class Main {
         }
 
         char peek() {
-            return this.input.charAt(this.index);
+            return Strings.charAt(this.input, this.index);
         }
 
         boolean startsWith(String slice) {
@@ -129,11 +126,11 @@ public final class Main {
             List<String> structureNames,
             int depth,
             List<Definition> definitions,
-            Option<List<String>> maybeNamespace,
+            Option<Location> maybeLocation,
             List<Source> sources
     ) {
         private static CompileState createInitial() {
-            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
+            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty());
         }
 
         private boolean isLastWithin(String name) {
@@ -143,8 +140,11 @@ public final class Main {
         }
 
         private CompileState addResolvedImport(List<String> parent, String child) {
+            var namespace = this.maybeLocation
+                    .map((Location location) -> location.namespace)
+                    .orElse(Lists.empty());
+
             var parent1 = parent;
-            var namespace = this.maybeNamespace.orElse(Lists.empty());
             if (namespace.isEmpty()) {
                 parent1 = parent1.addFirst(".");
             }
@@ -166,31 +166,31 @@ public final class Main {
             }
 
             var importString = new Import(stringList, child);
-            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
-        private CompileState withNamespace(List<String> namespace) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<String>>(namespace), this.sources);
+        private CompileState withLocation(Location namespace) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState pushStructureName(String name) {
-            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources);
         }
 
         Option<Type> resolve(String name) {
@@ -200,25 +200,25 @@ public final class Main {
                     .next();
         }
 
-        public CompileState clearImports() {
-            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        CompileState clearImports() {
+            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
-        public CompileState clearOutput() {
-            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        CompileState clearOutput() {
+            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
         }
 
-        public CompileState addSource(Source source) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+        CompileState addSource(Source source) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source));
         }
 
-        public Option<Source> findSource(String name) {
+        Option<Source> findSource(String name) {
             return this.sources.query()
                     .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
                     .next();
         }
 
-        public CompileState addResolvedImportFromCache(String base) {
+        CompileState addResolvedImportFromCache(String base) {
             if (this.structureNames.query().anyMatch((String inner) -> Strings.equalsTo(inner, base))) {
                 return this;
             }
@@ -228,8 +228,12 @@ public final class Main {
                     .orElse(this);
         }
 
-        public CompileState popStructureName() {
-            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
+        CompileState popStructureName() {
+            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources);
+        }
+
+        public CompileState mapLocation(Function<Location, Location> mapper) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources);
         }
     }
 
@@ -291,12 +295,12 @@ public final class Main {
 
         @Override
         public boolean hasAnnotation(String annotation) {
-            return this.annotations.contains(annotation);
+            return this.annotations.contains(annotation, Strings::equalsTo);
         }
 
         @Override
         public MethodHeader removeModifier(String modifier) {
-            return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
+            return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings::equalsTo), this.typeParams, this.type, this.name);
         }
     }
 
@@ -314,20 +318,6 @@ public final class Main {
         @Override
         public MethodHeader removeModifier(String modifier) {
             return this;
-        }
-    }
-
-    public record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(this.value);
-        }
-    }
-
-    public record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(this.error);
         }
     }
 
@@ -664,16 +654,6 @@ public final class Main {
         }
     }
 
-    private static final class Iterators {
-        static <T> Query<T> fromOption(Option<T> option) {
-            return new HeadedQuery<T>(option.map((T element) -> Iterators.getTSingleHead(element)).orElseGet(() -> new EmptyHead<T>()));
-        }
-
-        private static <T> Head<T> getTSingleHead(T element) {
-            return new SingleHead<T>(element);
-        }
-    }
-
     private record VarArgs(Type type) implements Type {
         @Override
         public String generate() {
@@ -723,6 +703,35 @@ public final class Main {
                     .query()
                     .collect(new ListCollector<String>());
         }
+
+        Location computeLocation() {
+            return new Location(this.computeNamespace(), this.computeName());
+        }
+    }
+
+    private record Location(List<String> namespace, String name) {
+    }
+
+    private record ArrayType(Type child) implements Type {
+        @Override
+        public String generate() {
+            return this.child.generate() + "[]";
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
     }
 
     public static void main() {
@@ -761,43 +770,54 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
-        var target = Files.get(".", "src", "ts")
-                .resolveChildSegments(source.computeNamespace())
-                .resolveChild(source.computeName() + ".ts");
-
         return source.read().match(
-                (String input) -> Main.compileAndWrite(state, source, input, target),
+                (String input) -> Main.compileAndWrite(state, source, input),
                 (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Path target) {
-        var namespace = source.computeNamespace();
-        var output = Main.compileRoot(state, input, namespace);
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input) {
+        var output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
 
-        var parent = target.getParent();
-        if (!parent.exists()) {
-            parent.createDirectories();
+        var location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
+
+        var targetDirectory = Files.get(".", "src", "ts");
+        var targetParent = targetDirectory.resolveChildSegments(location.namespace);
+        if (!targetParent.exists()) {
+            var maybeError = targetParent.createDirectories();
+            if (maybeError.isPresent()) {
+                return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
+            }
         }
 
+        var target = targetParent.resolveChild(location.name + ".ts");
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
     }
 
-    private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
-        var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
-        var compiledState = compiled.left();
-        var imports = compiledState.imports.query()
+    private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, Source source, String input) {
+        var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
+        var statementsState = statementsTuple.left();
+        var imports = statementsState.imports.query()
                 .map((Import anImport) -> anImport.generate())
                 .collect(new Joiner(""))
                 .orElse("");
 
-        var compileState = state.clearImports().clearOutput();
+        var compileState = statementsState.clearImports().clearOutput();
         var segment = compileState.sources
                 .query()
-                .map((Source source) -> Main.formatSource(source))
+                .map((Source source1) -> Main.formatSource(source1))
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
+        var withMain = Main.createMain(source);
+        var output = "/*[" + segment + "\n]*/\n" + imports + statementsState.output + statementsTuple.right() + withMain;
+        return new Tuple2Impl<CompileState, String>(compileState, output);
+    }
+
+    private static String createMain(Source source) {
+        if (Strings.equalsTo(source.computeName(), "Main")) {
+            return "Main.main();";
+        }
+        return "";
     }
 
     private static String formatSource(Source source) {
@@ -947,7 +967,7 @@ public final class Main {
                     return Main.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> {
                         return Main.compileLast(beforeInfix, "\n", (String s, String s2) -> {
                             var annotations = Main.parseAnnotations(s);
-                            if (annotations.contains("Actual")) {
+                            if (annotations.contains("Actual", Strings::equalsTo)) {
                                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                             }
 
@@ -996,7 +1016,7 @@ public final class Main {
     private static List<Definition> retainDefinitionsFromParameters(List<Parameter> parameters) {
         return parameters.query()
                 .map((Parameter parameter) -> parameter.asDefinition())
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<Definition>());
     }
 
@@ -1042,13 +1062,14 @@ public final class Main {
                 .collect(Joiner.empty())
                 .orElse("");
 
-        if (annotations.contains("Namespace")) {
+        if (annotations.contains("Namespace", Strings::equalsTo)) {
             String actualInfix = "interface ";
             String newName = name + "Instance";
 
             var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated)
-                    .append("export declare const " + name + ": " + newName + ";\n"), ""));
+            var withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace, location.name + "Instance"));
+
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(withNewLocation, ""));
         }
         else {
             var extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
@@ -1058,7 +1079,7 @@ public final class Main {
     }
 
     private static List<String> modifyModifiers0(List<String> oldModifiers) {
-        if (oldModifiers.contains("public")) {
+        if (oldModifiers.contains("public", Strings::equalsTo)) {
             return Lists.of("export");
         }
         return Lists.empty();
@@ -1125,7 +1146,7 @@ public final class Main {
                 var parent = divisions.subList(0, divisions.size() - 1)
                         .orElse(Lists.empty());
 
-                if (parent.equalsTo(Lists.of("java", "util", "function"))) {
+                if (parent.equalsTo(Lists.of("java", "util", "function"), Strings::equalsTo)) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
                 }
 
@@ -1150,7 +1171,7 @@ public final class Main {
     ) {
         return rules.query()
                 .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> Main.getApply(state, input, rule))
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .next();
     }
 
@@ -1465,7 +1486,7 @@ public final class Main {
     private static <T, R> List<R> retain(List<T> args, Function<T, Option<R>> mapper) {
         return args.query()
                 .map(mapper)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<R>());
     }
 
@@ -1620,7 +1641,7 @@ public final class Main {
 
     private static BiFunction<DivideState, Character, DivideState> foldOperator(String infix) {
         return (DivideState state, Character c) -> {
-            if (c == infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
+            if (c == Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
                 var length = Strings.length(infix) - 1;
                 var counter = 0;
                 var current = state;
@@ -1648,7 +1669,7 @@ public final class Main {
 
     private static boolean isNumber(String input) {
         var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
-        return query.map(input::charAt).allMatch((Character c) -> Characters.isDigit(c));
+        return query.map((Integer index) -> input.charAt(index)).allMatch((Character c) -> Characters.isDigit(c));
     }
 
     private static Option<Tuple2<CompileState, Value>> parseSymbol(CompileState state, String input) {
@@ -1664,7 +1685,7 @@ public final class Main {
 
     private static boolean isSymbol(String input) {
         var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
-        return query.allMatch((Integer index) -> Main.isSymbolChar(index, input.charAt(index)));
+        return query.allMatch((Integer index) -> Main.isSymbolChar(index, Strings.charAt(input, index)));
     }
 
     private static boolean isSymbolChar(int index, char c) {
@@ -1827,7 +1848,7 @@ public final class Main {
     }
 
     private static List<String> modifyModifiers(List<String> oldModifiers) {
-        if (oldModifiers.contains("static")) {
+        if (oldModifiers.contains("static", Strings::equalsTo)) {
             return Lists.of("static");
         }
         return Lists.empty();
@@ -1839,21 +1860,26 @@ public final class Main {
                 .orElseGet(() -> new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
     }
 
-    private static Tuple2<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
-        return Main.compileType(state, type).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, Main.generatePlaceholder(type)));
-    }
-
     private static Option<Tuple2<CompileState, String>> compileType(CompileState state, String type) {
         return Main.parseType(state, type).map((Tuple2<CompileState, Type> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
     }
 
     private static Option<Tuple2<CompileState, Type>> parseType(CompileState state, String type) {
         return Main.or(state, type, Lists.of(
+                Main::parseArrayType,
                 Main::parseVarArgs,
                 Main::parseGeneric,
                 Main::parsePrimitive,
                 Main::parseSymbolType
         ));
+    }
+
+    private static Option<Tuple2<CompileState, Type>> parseArrayType(CompileState state, String input) {
+        var stripped = Strings.strip(input);
+        return Main.compileSuffix(stripped, "[]", (String s) -> {
+            var child = Main.parseTypeOrPlaceholder(state, s);
+            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new ArrayType(child.right())));
+        });
     }
 
     private static Option<Tuple2<CompileState, Type>> parseVarArgs(CompileState state, String input) {

@@ -17,7 +17,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return this.foldWithInitial(collector.createInitial(), collector::fold);
+        return this.foldWithInitial(collector.createInitial(), (C current, T element) -> collector.fold(current, element));
     }
 
     @Override
@@ -66,6 +66,11 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     @Override
     public boolean anyMatch(Predicate<T> predicate) {
         return this.foldWithInitial(false, (Boolean aBoolean, T t) -> aBoolean || predicate.test(t));
+    }
+
+    @Override
+    public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
+        return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package magma.api.text;
+package jvm.api.text;
 
 import magma.annotate.Actual;
 import magma.annotate.Namespace;
@@ -38,5 +38,10 @@ public final class Strings {
     @Actual
     public static boolean isBlank(String value) {
         return value.isBlank();
+    }
+
+    @Actual
+    public static char charAt(String input, int index) {
+        return input.charAt(index);
     }
 }

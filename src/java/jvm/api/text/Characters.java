@@ -1,4 +1,4 @@
-package magma.api.text;
+package jvm.api.text;
 
 import magma.annotate.Actual;
 import magma.annotate.Namespace;

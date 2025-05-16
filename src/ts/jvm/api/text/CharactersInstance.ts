@@ -33,3 +33,9 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
+export interface CharactersInstance {
+	isDigit(c: string): boolean;
+
+	isLetter(c: string): boolean;
+
+}

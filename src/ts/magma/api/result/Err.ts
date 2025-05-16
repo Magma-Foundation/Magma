@@ -33,3 +33,22 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
+import { Result } from "../../../magma/api/result/Result";
+import { Option } from "../../../magma/api/option/Option";
+import { Some } from "../../../magma/api/option/Some";
+import { None } from "../../../magma/api/option/None";
+export class Err<T, X> implements Result<T, X> {
+	error: X;
+	constructor (error: X) {
+		this.error = error;
+	}
+	findError(): Option<X> {
+		return new Some<X>(this.error);
+	}
+	findValue(): Option<T> {
+		return new None<T>();
+	}
+	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+		return whenErr(this.error);
+	}
+}

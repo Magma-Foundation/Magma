@@ -1,7 +1,11 @@
 /*[
 	JVMList: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
+	Console: jvm.api.io, 
 	Files: jvm.api.io, 
+	JVMPath: jvm.api.io, 
+	Characters: jvm.api.text, 
+	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
@@ -12,22 +16,26 @@
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
+	ZipHead: magma.api.collect.head, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
-	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
 	None: magma.api.option, 
 	Option: magma.api.option, 
 	Some: magma.api.option, 
+	Err: magma.api.result, 
+	Ok: magma.api.result, 
 	Result: magma.api.result, 
-	Characters: magma.api.text, 
-	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
+import { Option } from "../../../magma/api/option/Option";
 export interface Result<T, X> {
+	findError(): Option<X>;
+	findValue(): Option<T>;
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
 }

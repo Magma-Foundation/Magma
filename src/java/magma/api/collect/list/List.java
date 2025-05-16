@@ -4,6 +4,8 @@ import magma.api.Tuple2;
 import magma.api.collect.Query;
 import magma.api.option.Option;
 
+import java.util.function.BiFunction;
+
 public interface List<T> {
     List<T> addLast(T element);
 
@@ -23,7 +25,7 @@ public interface List<T> {
 
     List<T> addAll(List<T> others);
 
-    boolean contains(T element);
+    boolean contains(T element, BiFunction<T, T, Boolean> equator);
 
     Query<T> queryReversed();
 
@@ -31,9 +33,9 @@ public interface List<T> {
 
     boolean isEmpty();
 
-    boolean equalsTo(List<T> other);
+    boolean equalsTo(List<T> other, BiFunction<T, T, Boolean> equator);
 
-    List<T> removeValue(T element);
+    List<T> removeValue(T element, BiFunction<T, T, Boolean> equator);
 
     Option<List<T>> removeLast();
 }

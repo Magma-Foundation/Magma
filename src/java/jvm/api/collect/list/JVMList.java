@@ -12,6 +12,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 
 @Actual
 public record JVMList<T>(java.util.List<T> list) implements List<T> {
@@ -60,7 +61,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean contains(T element) {
+    public boolean contains(T element, BiFunction<T, T, Boolean> equator) {
         return this.list.contains(element);
     }
 
@@ -84,12 +85,12 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean equalsTo(List<T> other) {
+    public boolean equalsTo(List<T> other, BiFunction<T, T, Boolean> equator) {
         return this.equals(other);
     }
 
     @Override
-    public List<T> removeValue(T element) {
+    public List<T> removeValue(T element, BiFunction<T, T, Boolean> equator) {
         var copy = new ArrayList<T>(this.list);
         copy.remove(element);
         return new JVMList<>(copy);
