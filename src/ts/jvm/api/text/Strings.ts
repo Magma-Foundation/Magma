@@ -27,5 +27,8 @@ export const Strings: StringsInstance = {
 
     isBlank(value: string): boolean {
         return value.trim().length === 0;
+    },
+    charAt: function (input: string, index: number): string {
+        return input.charAt(index);
     }
 };

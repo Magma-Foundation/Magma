@@ -48,4 +48,6 @@ export interface StringsInstance {
 
 	isBlank(value: string): boolean;
 
+	charAt(input: string, index: number): string;
+
 }

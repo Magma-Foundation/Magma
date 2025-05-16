@@ -39,4 +39,9 @@ public final class Strings {
     public static boolean isBlank(String value) {
         return value.isBlank();
     }
+
+    @Actual
+    public static char charAt(String input, int index) {
+        return input.charAt(index);
+    }
 }

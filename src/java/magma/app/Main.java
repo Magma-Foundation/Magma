@@ -98,7 +98,7 @@ public final class Main {
                 return new None<Tuple2<DivideState, Character>>();
             }
 
-            var c = this.input.charAt(this.index);
+            var c = Strings.charAt(this.input, this.index);
             var nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
             return new Some<Tuple2<DivideState, Character>>(new Tuple2Impl<DivideState, Character>(nextState, c));
         }
@@ -112,7 +112,7 @@ public final class Main {
         }
 
         char peek() {
-            return this.input.charAt(this.index);
+            return Strings.charAt(this.input, this.index);
         }
 
         boolean startsWith(String slice) {
@@ -1643,7 +1643,7 @@ public final class Main {
 
     private static BiFunction<DivideState, Character, DivideState> foldOperator(String infix) {
         return (DivideState state, Character c) -> {
-            if (c == infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
+            if (c == Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
                 var length = Strings.length(infix) - 1;
                 var counter = 0;
                 var current = state;
@@ -1671,7 +1671,7 @@ public final class Main {
 
     private static boolean isNumber(String input) {
         var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
-        return query.map(input::charAt).allMatch((Character c) -> Characters.isDigit(c));
+        return query.map((Integer index) -> input.charAt(index)).allMatch((Character c) -> Characters.isDigit(c));
     }
 
     private static Option<Tuple2<CompileState, Value>> parseSymbol(CompileState state, String input) {
@@ -1687,7 +1687,7 @@ public final class Main {
 
     private static boolean isSymbol(String input) {
         var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
-        return query.allMatch((Integer index) -> Main.isSymbolChar(index, input.charAt(index)));
+        return query.allMatch((Integer index) -> Main.isSymbolChar(index, Strings.charAt(input, index)));
     }
 
     private static boolean isSymbolChar(int index, char c) {

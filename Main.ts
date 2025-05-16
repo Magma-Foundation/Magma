@@ -1,57 +1,90 @@
 /*[
-	JVMList: jvm.api.collect.list, 
-	Lists: jvm.api.collect.list, 
-	Files: jvm.api.io, 
-	JVMPath: jvm.api.io, 
-	Characters: jvm.api.text, 
-	Strings: jvm.api.text, 
-	Actual: magma.annotate, 
-	Namespace: magma.annotate, 
-	Collector: magma.api.collect, 
-	EmptyHead: magma.api.collect.head, 
-	FlatMapHead: magma.api.collect.head, 
-	Head: magma.api.collect.head, 
-	HeadedQuery: magma.api.collect.head, 
-	MapHead: magma.api.collect.head, 
-	RangeHead: magma.api.collect.head, 
-	SingleHead: magma.api.collect.head, 
-	ZipHead: magma.api.collect.head, 
-	List: magma.api.collect.list, 
-	ListCollector: magma.api.collect.list, 
-	Queries: magma.api.collect, 
-	Query: magma.api.collect, 
-	Console: magma.api.io, 
-	IOError: magma.api.io, 
-	Path: magma.api.io, 
-	None: magma.api.option, 
-	Option: magma.api.option, 
-	Some: magma.api.option, 
-	Err: magma.api.result, 
-	Ok: magma.api.result, 
-	Result: magma.api.result, 
-	Tuple2: magma.api, 
-	Tuple2Impl: magma.api, 
-	Main: magma.app
+	JVMList: ..........., 
+	JVMList: ..........., 
+	Lists: ..........., 
+	Lists: ..........., 
+	Files: ........, 
+	Files: ........, 
+	JVMPath: ........, 
+	JVMPath: ........, 
+	Characters: ........, 
+	Characters: ........, 
+	Strings: ........, 
+	Strings: ........, 
+	Actual: ....., 
+	Actual: ....., 
+	Namespace: ....., 
+	Namespace: ....., 
+	Collector: ........, 
+	Collector: ........, 
+	EmptyHead: ..........., 
+	EmptyHead: ..........., 
+	FlatMapHead: ..........., 
+	FlatMapHead: ..........., 
+	Head: ..........., 
+	Head: ..........., 
+	HeadedQuery: ..........., 
+	HeadedQuery: ..........., 
+	MapHead: ..........., 
+	MapHead: ..........., 
+	RangeHead: ..........., 
+	RangeHead: ..........., 
+	SingleHead: ..........., 
+	SingleHead: ..........., 
+	ZipHead: ..........., 
+	ZipHead: ..........., 
+	List: ..........., 
+	List: ..........., 
+	ListCollector: ..........., 
+	ListCollector: ..........., 
+	Queries: ........, 
+	Queries: ........, 
+	Query: ........, 
+	Query: ........, 
+	Console: ........, 
+	Console: ........, 
+	IOError: ........, 
+	IOError: ........, 
+	Path: ........, 
+	Path: ........, 
+	None: ........, 
+	None: ........, 
+	Option: ........, 
+	Option: ........, 
+	Some: ........, 
+	Some: ........, 
+	Err: ........, 
+	Err: ........, 
+	Ok: ........, 
+	Ok: ........, 
+	Result: ........, 
+	Result: ........, 
+	Tuple2: ....., 
+	Tuple2: ....., 
+	Tuple2Impl: ....., 
+	Tuple2Impl: ....., 
+	Main: ....., 
+	Main: .....
 ]*/
-import { Option } from "../../magma/api/option/Option";
-import { List } from "../../magma/api/collect/list/List";
-import { Lists } from "../../jvm/api/collect/list/Lists";
-import { Tuple2 } from "../../magma/api/Tuple2";
-import { Strings } from "../../jvm/api/text/Strings";
-import { None } from "../../magma/api/option/None";
-import { Some } from "../../magma/api/option/Some";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Collector } from "../../magma/api/collect/Collector";
-import { Path } from "../../magma/api/io/Path";
-import { IOError } from "../../magma/api/io/IOError";
-import { Result } from "../../magma/api/result/Result";
-import { ListCollector } from "../../magma/api/collect/list/ListCollector";
-import { Files } from "../../jvm/api/io/Files";
-import { Console } from "../../magma/api/io/Console";
-import { Queries } from "../../magma/api/collect/Queries";
-import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
-import { RangeHead } from "../../magma/api/collect/head/RangeHead";
-import { Characters } from "../../jvm/api/text/Characters";
+import { Option } from "../../../../../Option";
+import { List } from "../../../../../../List";
+import { Lists } from "../../../../../../Lists";
+import { Tuple2 } from "../../../../Tuple2";
+import { Strings } from "../../../../../Strings";
+import { None } from "../../../../../None";
+import { Some } from "../../../../../Some";
+import { Tuple2Impl } from "../../../../Tuple2Impl";
+import { Collector } from "../../../../../Collector";
+import { Path } from "../../../../../Path";
+import { IOError } from "../../../../../IOError";
+import { Result } from "../../../../../Result";
+import { ListCollector } from "../../../../../../ListCollector";
+import { Files } from "../../../../../Files";
+import { Console } from "../../../../../Console";
+import { Queries } from "../../../../../Queries";
+import { HeadedQuery } from "../../../../../../HeadedQuery";
+import { RangeHead } from "../../../../../../RangeHead";
+import { Characters } from "../../../../../Characters";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
