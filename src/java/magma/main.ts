@@ -744,6 +744,23 @@ class Strings  {
 		return input.strip();
 	}
 }
+class Primitive implements Type {
+	Unknown("unknown"): /*Void("void"),*/;
+	value: string;/*
+
+        Primitive(String value) {
+            this.value = value;
+        }*/
+	generate(): /*java.lang.String*/ {
+		return this.value;
+	}
+	isFunctional(): boolean {
+		return false;
+	}
+	isVar(): boolean {
+		return Primitive.Var === this;
+	}
+}
 class Main  {
 	static main(): void {
 		let source = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -948,7 +965,7 @@ class Main  {
 		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>) => rule.apply(state, input)).flatMap(Iterators.fromOption).next();
 	}
 	static compileClassSegment(state1: CompileState, input1: string): Tuple<CompileState, string> {
-		return Main.compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
+		return Main.compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class "), Main.compileMethod, Main.compileFieldDefinition));
 	}
 	static compileMethod(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
@@ -1555,35 +1572,5 @@ class Main  {
 	}
 	static generateValues(args: List<Value>): string {
 		return args.query().map((value: Value) => value.generate()).collect(new Joiner(", ")).orElse("");
-	}/*
-
-    private enum Primitive implements Type {
-        String("string"),
-        Number("number"),
-        Boolean("boolean"),
-        Var("var"),
-        Void("void"),
-        Unknown("unknown");
-
-        private final String value;
-
-        Primitive(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public java.lang.String generate() {
-            return this.value;
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return Primitive.Var == this;
-        }
-    }*/
+	}
 }

@@ -1296,6 +1296,7 @@ public final class Main {
                 Main.createStructureRule("class ", "class "),
                 Main.createStructureRule("interface ", "interface "),
                 Main.createStructureRule("record ", "class "),
+                Main.createStructureRule("enum ", "class "),
                 Main::compileMethod,
                 Main::compileFieldDefinition
         ));
