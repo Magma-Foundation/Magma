@@ -1271,6 +1271,7 @@ public final class Main {
             if (header.hasAnnotation("Actual")) {
                 var headerGenerated = header
                         .removeModifier("static")
+                        .addModifier("export")
                         .addModifier("declare")
                         .addModifier("function")
                         .generateWithAfterName("(" + joinedDefinitions + ")");

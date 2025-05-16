@@ -960,7 +960,7 @@ export class Main  {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			if (header.hasAnnotation("Actual")){
-				let headerGenerated = header.removeModifier("static").addModifier("declare").addModifier("function").generateWithAfterName("(" + joinedDefinitions + ")");
+				let headerGenerated = header.removeModifier("static").addModifier("export").addModifier("declare").addModifier("function").generateWithAfterName("(" + joinedDefinitions + ")");
 				let append = parametersState.append(headerGenerated + ";\n");
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(append, ""));
 			}

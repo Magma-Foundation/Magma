@@ -7,7 +7,7 @@ import { Option } from "../../../magma/api/option/Option";
 import { Main } from "../../../magma/app/Main";
 import { ArrayList } from "../../../java/util/ArrayList";
 import { Arrays } from "../../../java/util/Arrays";
-declare function empty<T>(): List<T>;
-declare function of<T>(...elements: T[]): List<T>;
+export declare function empty<T>(): List<T>;
+export declare function of<T>(...elements: T[]): List<T>;
 export class Lists  {
 }
