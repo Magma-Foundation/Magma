@@ -94,7 +94,7 @@ class HeadedQuery<T> {
 		return new HeadedQuery<>(new FlatMapHead<T, R>(this.head, mapper));
 	}
 	allMatch(predicate : (arg0 : T) => boolean): boolean {
-		return this.fold(true, (maybeAllTrue, element) => maybeAllTrue && predicate.test(element));
+		return this.fold(true, (maybeAllTrue, element) => maybeAllTrue && predicate(element));
 	}
 	filter(predicate : (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element) => {
@@ -157,7 +157,7 @@ class JVMList<T> {
                         .map*/((index) => new Tuple<>(index, this.list.get(index)));
 	}
 	addAll(others : List<T>): List<T> {
-		return /*others.query().<List<T>>fold*/(this, List.add);
+		/*return others.query().<List<T>>fold(this, List::add)*/;
 	}
 	subList(startInclusive : number, endExclusive : number): Option<List<T>> {
 		return new Some<>(this.subList0(startInclusive, endExclusive));
@@ -349,7 +349,7 @@ class Err<T, X> {
 }
 class Iterators {
 	fromOption<T>(option : Option<T>): Query<T> {
-		return new HeadedQuery<>(/*option.<Head<T>>map*/(SingleHead.new).orElseGet(EmptyHead.new));
+		return new HeadedQuery<>();
 	}
 }
 class SingleHead<T> implements Head<T> {
@@ -438,7 +438,7 @@ class Some<T> {
 		return mapper(this.value);
 	}
 	filter(predicate : (arg0 : T) => boolean): Option<T> {
-		return /*predicate.test(this.value) ? this : new None<>*/();
+		/*return predicate.test(this.value) ? this : new None<>()*/;
 	}
 	toTuple(other : T): Tuple<Boolean, T> {
 		return new Tuple<>(true, this.value);
@@ -643,17 +643,17 @@ class Invokable {
 		return Primitive.Unknown;
 	}
 }
-class Operation implements Value {
-	left : string;
+class Operation {
+	left : Value;
 	targetInfix : string;
-	right : string;
-	Operation(left : string, targetInfix : string, right : string): public {
+	right : Value;
+	constructor (left : Value, targetInfix : string, right : Value) {
 		this.left = left;
 		this.targetInfix = targetInfix;
 		this.right = right;
 	}
 	generate(): string {
-		return this.left + " " + this.targetInfix + " " + this.right;
+		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
 	}
 	toValue(): Option<Value> {
 		return new Some<>(this);
@@ -1049,8 +1049,9 @@ class Main {
 						let caller : var = callerTuple.left;
 						return assembleInvokable(caller, new ConstructionCaller(callerState), arguments);
 					}).or(() => {
-						let callerTuple : var = parseValueOrPlaceholder(state, callerString);
-						return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+						return parseValue(state, callerString).flatMap((callerTuple) => {
+							return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+						});
 					});
 				});
 			});
@@ -1111,8 +1112,9 @@ class Main {
 		return arguments.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<>());
 	}
 	parseArgument(state1 : CompileState, input : string): Tuple<CompileState, Argument> {
-		return /*parseValue(state1, input)
-                .<Tuple<CompileState, Argument>>map*/((tuple) => new Tuple<>(tuple.left, tuple.right)).orElseGet(() => new Tuple<>(state1, new Placeholder(input)));
+		/*return parseValue(state1, input)
+                .<Tuple<CompileState, Argument>>map(tuple -> new Tuple<>(tuple.left, tuple.right))
+                .orElseGet(() -> new Tuple<>(state1, new Placeholder(input)))*/;
 	}
 	compileAssignment(state : CompileState, input : string): Option<Tuple<CompileState, string>> {
 		return compileFirst(input, "=", (destination, source) => {
@@ -1128,7 +1130,7 @@ class Main {
 		return parseValue(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
 	}
 	parseValue(state : CompileState, input : string): Option<Tuple<CompileState, Value>> {
-		return or(state, input, Lists.of(createAccessRule("."), createAccessRule("::"), Main.parseSymbol, Main.parseLambda, Main.parseNot, Main.parseInvokable, Main.parseNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">="), createTextRule("\""), createTextRule("'")));
+		return or(state, input, Lists.of(Main.parseLambda, createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">="), Main.parseInvokable, createAccessRule("."), createAccessRule("::"), Main.parseSymbol, Main.parseNot, Main.parseNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createTextRule("\""), createTextRule("'")));
 	}
 	createTextRule(slice : string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
 		return (state1, input1) => {
@@ -1136,7 +1138,7 @@ class Main {
 			if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() <= slice.length()){
 				return new None<>();
 			}
-			let value : var = stripped.substring(slice.length(), stripped.length() - slice.length());
+			let value : var = stripped.substring(slice.length()) - slice.length();
 			return new Some<>(new Tuple<>(state1, new StringValue(value)));
 		};
 	}
@@ -1191,22 +1193,21 @@ class Main {
 	createAccessRule(infix : string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
 		return (state, input) => compileLast(input, infix, (childString, rawProperty) => {
 			let property : var = rawProperty.strip();
-			if (isSymbol(property)){
-				let childTuple : var = parseValueOrPlaceholder(state, childString);
+			if (!isSymbol(property)){
+				return new None<>();
+			}
+			return parseValue(state, childString).flatMap((childTuple) => {
 				let childState : var = childTuple.left;
 				let child : var = childTuple.right;
 				return new Some<>(new Tuple<>(childState, new Access(child, property)));
-			}
-			else {
-				return new None<>();
-			}
+			});
 		});
 	}
 	createOperatorRuleWithDifferentInfix(sourceInfix : string, targetInfix : string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
 		return (state1, input1) => {
 			return compileSplit(splitFolded(input1, foldOperator(sourceInfix), (divisions) => selectFirst(divisions, sourceInfix)), (leftString, rightString) => {
-				return compileValue(state1, leftString).flatMap((leftTuple) => {
-					return compileValue(leftTuple.left, rightString).flatMap((rightTuple) => {
+				return parseValue(state1, leftString).flatMap((leftTuple) => {
+					return parseValue(leftTuple.left, rightString).flatMap((rightTuple) => {
 						let left : var = leftTuple.right;
 						let right : var = rightTuple.right;
 						return new Some<>(new Tuple<>(rightTuple.left, new Operation(left, targetInfix, right)));
@@ -1289,7 +1290,9 @@ class Main {
 		return new Tuple<>(tuple.left, tuple.right.generate());
 	}
 	parseParameter(state : CompileState, input : string): Tuple<CompileState, Parameter> {
-		return /*parseWhitespace(state, input).<Tuple<CompileState, Parameter>>map*/((tuple) => new Tuple<>(tuple.left, tuple.right)).or(() => parseDefinition(state, input).map((tuple) => new Tuple<>(tuple.left, tuple.right))).orElseGet(() => new Tuple<>(state, new Placeholder(input)));
+		/*return parseWhitespace(state, input).<Tuple<CompileState, Parameter>>map(tuple -> new Tuple<>(tuple.left, tuple.right))
+                .or(() -> parseDefinition(state, input).map(tuple -> new Tuple<>(tuple.left, tuple.right)))
+                .orElseGet(() -> new Tuple<>(state, new Placeholder(input)))*/;
 	}
 	parseDefinition(state : CompileState, input : string): Option<Tuple<CompileState, Definition>> {
 		return compileLast(input.strip(), " ", (beforeName, name) => {
@@ -1460,7 +1463,7 @@ class Main {
 		if (!input.endsWith(suffix)){
 			return new None<T>();
 		}
-		let content : var = input.substring(0, input.length() - suffix.length());
+		let content : var = input.substring(0) - suffix.length();
 		return mapper(content);
 	}
 	compileFirst<T>(input : string, infix : string, mapper : (arg0 : string, arg1 : string) => Option<T>): Option<T> {

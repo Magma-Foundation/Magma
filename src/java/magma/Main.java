@@ -854,20 +854,10 @@ public class Main {
         }
     }
 
-    private static class Operation implements Value {
-        private final String left;
-        private final String targetInfix;
-        private final String right;
-
-        public Operation(String left, String targetInfix, String right) {
-            this.left = left;
-            this.targetInfix = targetInfix;
-            this.right = right;
-        }
-
+    private record Operation(Value left, String targetInfix, Value right) implements Value {
         @Override
         public String generate() {
-            return this.left + " " + this.targetInfix + " " + this.right;
+            return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
         }
 
         @Override
@@ -1441,8 +1431,9 @@ public class Main {
                         var caller = callerTuple.left;
                         return assembleInvokable(caller, new ConstructionCaller(callerState), arguments);
                     }).or(() -> {
-                        var callerTuple = parseValueOrPlaceholder(state, callerString);
-                        return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+                        return parseValue(state, callerString).flatMap(callerTuple -> {
+                            return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+                        });
                     });
                 });
             });
@@ -1555,15 +1546,7 @@ public class Main {
 
     private static Option<Tuple<CompileState, Value>> parseValue(CompileState state, String input) {
         return or(state, input, Lists.of(
-                createAccessRule("."),
-                createAccessRule("::"),
-                Main::parseSymbol,
                 Main::parseLambda,
-                Main::parseNot,
-                Main::parseInvokable,
-                Main::parseNumber,
-                createOperatorRuleWithDifferentInfix("==", "==="),
-                createOperatorRuleWithDifferentInfix("!=", "!=="),
                 createOperatorRule("+"),
                 createOperatorRule("-"),
                 createOperatorRule("<="),
@@ -1571,6 +1554,14 @@ public class Main {
                 createOperatorRule("&&"),
                 createOperatorRule("||"),
                 createOperatorRule(">="),
+                Main::parseInvokable,
+                createAccessRule("."),
+                createAccessRule("::"),
+                Main::parseSymbol,
+                Main::parseNot,
+                Main::parseNumber,
+                createOperatorRuleWithDifferentInfix("==", "==="),
+                createOperatorRuleWithDifferentInfix("!=", "!=="),
                 createTextRule("\""),
                 createTextRule("'")
         ));
@@ -1647,23 +1638,23 @@ public class Main {
     private static BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>> createAccessRule(String infix) {
         return (state, input) -> compileLast(input, infix, (childString, rawProperty) -> {
             var property = rawProperty.strip();
-            if (isSymbol(property)) {
-                var childTuple = parseValueOrPlaceholder(state, childString);
+            if (!isSymbol(property)) {
+                return new None<>();
+            }
+
+            return parseValue(state, childString).flatMap(childTuple -> {
                 var childState = childTuple.left;
                 var child = childTuple.right;
                 return new Some<>(new Tuple<>(childState, new Access(child, property)));
-            }
-            else {
-                return new None<>();
-            }
+            });
         });
     }
 
     private static BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (state1, input1) -> {
             return compileSplit(splitFolded(input1, foldOperator(sourceInfix), divisions -> selectFirst(divisions, sourceInfix)), (leftString, rightString) -> {
-                return compileValue(state1, leftString).flatMap(leftTuple -> {
-                    return compileValue(leftTuple.left, rightString).flatMap(rightTuple -> {
+                return parseValue(state1, leftString).flatMap(leftTuple -> {
+                    return parseValue(leftTuple.left, rightString).flatMap(rightTuple -> {
                         var left = leftTuple.right;
                         var right = rightTuple.right;
                         return new Some<>(new Tuple<>(rightTuple.left, new Operation(left, targetInfix, right)));
