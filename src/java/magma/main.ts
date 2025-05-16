@@ -17,7 +17,7 @@ interface Option<T> {
 	ifPresent(consumer : (arg0 : T) => void): void;
 	or(other : () => Option<T>): Option<T>;
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R>;
-	filter(predicate : Predicate<T>): Option<T>;
+	filter(predicate : (arg0 : T) => boolean): Option<T>;
 }
 interface Iterator<T> {
 	collect<C>(collector : Collector<T, C>): C;
@@ -25,8 +25,8 @@ interface Iterator<T> {
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R): R;
 	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R>;
 	next(): Option<T>;
-	allMatch(predicate : Predicate<T>): boolean;
-	filter(predicate : Predicate<T>): Iterator<T>;
+	allMatch(predicate : (arg0 : T) => boolean): boolean;
+	filter(predicate : (arg0 : T) => boolean): Iterator<T>;
 }
 interface List<T> {
 	add(element : T): List<T>;
@@ -64,10 +64,10 @@ class HeadedIterator<T> {
 	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R> {
 		return new HeadedIterator<>(new FlatMapHead<T, R>(this.head, mapper));
 	}
-	allMatch(predicate : Predicate<T>): boolean {
+	allMatch(predicate : (arg0 : T) => boolean): boolean {
 		return this.fold(true, (maybeAllTrue, element) => maybeAllTrue && predicate.test(element));
 	}
-	filter(predicate : Predicate<T>): Iterator<T> {
+	filter(predicate : (arg0 : T) => boolean): Iterator<T> {
 		return this.flatMap((element) => {
 			if (predicate.test(element)){
 				return new HeadedIterator<>(new SingleHead<>(element));
@@ -350,7 +350,7 @@ class Some<T> {
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R> {
 		return mapper.apply(this.value);
 	}
-	filter(predicate : Predicate<T>): Option<T> {
+	filter(predicate : (arg0 : T) => boolean): Option<T> {
 		return /*predicate.test(this.value) ? this : new None*/ < /*>*/();
 	}
 }
@@ -381,7 +381,7 @@ class None<T> {
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R> {
 		return new None<>();
 	}
-	filter(predicate : Predicate<T>): Option<T> {
+	filter(predicate : (arg0 : T) => boolean): Option<T> {
 		return new None<>();
 	}
 }
@@ -991,6 +991,9 @@ class Main {
 		}
 		if (base.equals("Consumer")){
 			return arguments.findFirst().map((first) => generateFunctionType(Lists.of(first), "void"));
+		}
+		if (base.equals("Predicate")){
+			return arguments.findFirst().map((first) => generateFunctionType(Lists.of(first), "boolean"));
 		}
 		return new None<string>();
 	}

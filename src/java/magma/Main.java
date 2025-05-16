@@ -1405,6 +1405,10 @@ public class Main {
             return arguments.findFirst().map(first -> generateFunctionType(Lists.of(first), "void"));
         }
 
+        if (base.equals("Predicate")) {
+            return arguments.findFirst().map(first -> generateFunctionType(Lists.of(first), "boolean"));
+        }
+
         return new None<String>();
     }
 
