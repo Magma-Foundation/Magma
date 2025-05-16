@@ -1,0 +1,3 @@
+interface IOError  {
+	display(): string;
+}

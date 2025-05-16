@@ -1,3 +1,17 @@
+import from 'magma.Actual'.ts;
+import from 'magma.api.collect.List'.ts;
+import from 'magma.api.io.IOError'.ts;
+import from 'magma.api.io.Path'.ts;
+import from 'magma.api.option.Option'.ts;
+import from 'magma.api.result.Result'.ts;
+import from 'magma.jvm.Files'.ts;
+import from 'java.util.ArrayList'.ts;
+import from 'java.util.Arrays'.ts;
+import from 'java.util.function.BiFunction'.ts;
+import from 'java.util.function.Consumer'.ts;
+import from 'java.util.function.Function'.ts;
+import from 'java.util.function.Predicate'.ts;
+import from 'java.util.function.Supplier'.ts;
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -163,36 +177,41 @@ class Tuple<A, B> {
 	}
 }
 class CompileState {
+	imports: string;
 	output: string;
 	maybeStructureName: Option<string>;
 	depth: number;
 	definitions: List<Definition>;
-	constructor (output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>) {
+	constructor (imports: string, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>) {
+		this.imports = imports;
 		this.output = output;
 		this.maybeStructureName = maybeStructureName;
 		this.depth = depth;
 		this.definitions = definitions;
 	}
 	static createInitial(): CompileState {
-		return new CompileState("", new None<string>(), 0, Lists.empty());
+		return new CompileState("", "", new None<string>(), 0, Lists.empty());
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.output + element, this.maybeStructureName, this.depth, this.definitions);
+		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions);
 	}
 	withStructureName(name: string): CompileState {
-		return new CompileState(this.output, new Some<string>(name), this.depth, this.definitions);
+		return new CompileState(this.imports, this.output, new Some<string>(name), this.depth, this.definitions);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.output, this.maybeStructureName, this.depth + 1, this.definitions);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.output, this.maybeStructureName, this.depth - 1, this.definitions);
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
+		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
+	}
+	addImport(importString: string): CompileState {
+		return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -762,7 +781,8 @@ class Main  {
 	}
 	static compileRoot(input: string): string {
 		let compiled = Main.compileStatements(CompileState.createInitial(), input, Main.compileRootSegment);
-		return compiled.left.output + compiled.right;
+		let compiledState = compiled.left;
+		return compiledState.imports + compiledState.output + compiled.right;
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple<CompileState, string>): Tuple<CompileState, string> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
@@ -942,12 +962,14 @@ class Main  {
 	}
 	static compileNamespaced(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		let stripped = Strings.strip(input);
-		if (stripped.startsWith("package ") || stripped.startsWith("import ")){
+		if (stripped.startsWith("package ")){
 			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
 		}
-		else {
-			return new None<Tuple<CompileState, string>>();
-		}
+		/*return Main.compilePrefix(stripped, "import ", s -> {
+            return Main.compileSuffix(s, ";", s1 -> {
+                return new Some<>(new Tuple<>(state.addImport("import from '" + s1 + "'.ts;\n"), ""));
+            });
+        })*/;
 	}
 	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>>>): Tuple<CompileState, string> {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple<CompileState, string>(state, Main.generatePlaceholder(input)));

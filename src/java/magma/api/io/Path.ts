@@ -1,3 +1,6 @@
+import from 'magma.api.collect.List'.ts;
+import from 'magma.api.result.Result'.ts;
+import from 'magma.api.option.Option'.ts;
 interface Path  {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;

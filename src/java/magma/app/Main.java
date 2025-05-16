@@ -4,8 +4,8 @@ import magma.Actual;
 import magma.api.collect.List;
 import magma.api.io.IOError;
 import magma.api.io.Path;
-import magma.api.result.Result;
 import magma.api.option.Option;
+import magma.api.result.Result;
 import magma.jvm.Files;
 
 import java.util.ArrayList;
@@ -221,30 +221,35 @@ public final class Main {
     public record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompileState(String output, Option<String> maybeStructureName, int depth,
-                                List<Definition> definitions) {
+    private record CompileState(
+            String imports,
+            String output,
+            Option<String> maybeStructureName,
+            int depth,
+            List<Definition> definitions
+    ) {
         private static CompileState createInitial() {
-            return new CompileState("", new None<String>(), 0, Lists.empty());
+            return new CompileState("", "", new None<String>(), 0, Lists.empty());
         }
 
         CompileState append(String element) {
-            return new CompileState(this.output + element, this.maybeStructureName, this.depth, this.definitions);
+            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions);
         }
 
         CompileState withStructureName(String name) {
-            return new CompileState(this.output, new Some<String>(name), this.depth, this.definitions);
+            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.output, this.maybeStructureName, this.depth + 1, this.definitions);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.output, this.maybeStructureName, this.depth - 1, this.definitions);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
         }
 
         Option<Type> resolve(String name) {
@@ -252,6 +257,10 @@ public final class Main {
                     .filter((Definition definition) -> Strings.equalsTo(definition.name, name))
                     .map((Definition definition1) -> definition1.type)
                     .next();
+        }
+
+        public CompileState addImport(String importString) {
+            return new CompileState(this.imports + importString, this.output, this.maybeStructureName, this.depth, this.definitions);
         }
     }
 
@@ -1068,7 +1077,8 @@ public final class Main {
 
     private static String compileRoot(String input) {
         var compiled = Main.compileStatements(CompileState.createInitial(), input, Main::compileRootSegment);
-        return compiled.left.output + compiled.right;
+        var compiledState = compiled.left;
+        return compiledState.imports + compiledState.output + compiled.right;
     }
 
     private static Tuple<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
@@ -1330,12 +1340,15 @@ public final class Main {
 
     private static Option<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
         var stripped = Strings.strip(input);
-        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
+        if (stripped.startsWith("package ")) {
             return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
-        else {
-            return new None<Tuple<CompileState, String>>();
-        }
+
+        return Main.compilePrefix(stripped, "import ", s -> {
+            return Main.compileSuffix(s, ";", s1 -> {
+                return new Some<>(new Tuple<>(state.addImport("import from '" + s1 + "'.ts;\n"), ""));
+            });
+        });
     }
 
     private static Tuple<CompileState, String> compileOrPlaceholder(
