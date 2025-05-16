@@ -2,7 +2,9 @@ package magma.api.collect.query;
 
 import magma.api.Tuple2;
 import magma.api.collect.Collector;
+import magma.api.collect.EmptyHead;
 import magma.api.collect.Head;
+import magma.api.collect.SingleHead;
 import magma.api.option.Option;
 import magma.app.Main;
 
@@ -56,7 +58,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
         return this.head.next()
                 .map(mapper)
                 .map((Query<R> initial) -> new HeadedQuery<R>(new Main.FlatMapHead<T, R>(this.head, initial, mapper)))
-                .orElseGet(() -> new HeadedQuery<R>(new Main.EmptyHead<R>()));
+                .orElseGet(() -> new HeadedQuery<R>(new EmptyHead<R>()));
     }
 
     @Override
@@ -68,10 +70,10 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     public Query<T> filter(Predicate<T> predicate) {
         return this.flatMap((T element) -> {
             if (predicate.test(element)) {
-                return new HeadedQuery<T>(new Main.SingleHead<T>(element));
+                return new HeadedQuery<T>(new SingleHead<T>(element));
             }
             else {
-                return new HeadedQuery<T>(new Main.EmptyHead<T>());
+                return new HeadedQuery<T>(new EmptyHead<T>());
             }
         });
     }

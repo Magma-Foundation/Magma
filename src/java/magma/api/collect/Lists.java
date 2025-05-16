@@ -7,7 +7,7 @@ import magma.api.Tuple2Impl;
 import magma.api.collect.query.HeadedQuery;
 import magma.api.collect.query.Query;
 import magma.api.option.Option;
-import magma.app.Main;
+import magma.api.option.Some;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,22 +97,22 @@ public final class Lists {
 
         @Override
         public Option<List<T>> subList(int startInclusive, int endExclusive) {
-            return new Main.Some<List<T>>(new JVMList<T>(this.list.subList(startInclusive, endExclusive)));
+            return new Some<List<T>>(new JVMList<T>(this.list.subList(startInclusive, endExclusive)));
         }
 
         @Override
         public Option<T> findLast() {
-            return new Main.Some<T>(this.getLast());
+            return new Some<T>(this.getLast());
         }
 
         @Override
         public Option<T> findFirst() {
-            return new Main.Some<T>(this.getFirst());
+            return new Some<T>(this.getFirst());
         }
 
         @Override
         public Option<T> find(int index) {
-            return new Main.Some<T>(this.get(index));
+            return new Some<T>(this.get(index));
         }
     }
 

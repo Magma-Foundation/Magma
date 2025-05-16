@@ -1,14 +1,14 @@
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { Collector } from "../../../../magma/api/collect/Collector";
+import { EmptyHead } from "../../../../magma/api/collect/EmptyHead";
 import { Head } from "../../../../magma/api/collect/Head";
+import { SingleHead } from "../../../../magma/api/collect/SingleHead";
 import { Option } from "../../../../magma/api/option/Option";
 import { Main } from "../../../../magma/app/Main";
 import { Query } from "./Query";
 import { HeadedQuery } from "./HeadedQuery";
 import { Main.MapHead } from "./Main.MapHead";
 import { Main.FlatMapHead } from "./Main.FlatMapHead";
-import { Main.EmptyHead } from "./Main.EmptyHead";
-import { Main.SingleHead } from "./Main.SingleHead";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
@@ -42,7 +42,7 @@ export class HeadedQuery<T> implements Query<T> {
 		});
 	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new Main.FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new Main.EmptyHead<R>()));
+		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new Main.FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
 	}
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(true, (maybeAllTrue: Boolean, element: T) => maybeAllTrue && predicate(element));
@@ -50,10 +50,10 @@ export class HeadedQuery<T> implements Query<T> {
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
 			if (predicate(element)){
-				return new HeadedQuery<T>(new Main.SingleHead<T>(element));
+				return new HeadedQuery<T>(new SingleHead<T>(element));
 			}
 			else {
-				return new HeadedQuery<T>(new Main.EmptyHead<T>());
+				return new HeadedQuery<T>(new EmptyHead<T>());
 			}
 		});
 	}

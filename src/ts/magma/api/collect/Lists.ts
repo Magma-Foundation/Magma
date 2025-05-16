@@ -5,7 +5,7 @@ import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
 import { HeadedQuery } from "../../../magma/api/collect/query/HeadedQuery";
 import { Query } from "../../../magma/api/collect/query/Query";
 import { Option } from "../../../magma/api/option/Option";
-import { Main } from "../../../magma/app/Main";
+import { Some } from "../../../magma/api/option/Some";
 import { ArrayList } from "../../../java/util/ArrayList";
 import { Arrays } from "../../../java/util/Arrays";
 import { List } from "./List";

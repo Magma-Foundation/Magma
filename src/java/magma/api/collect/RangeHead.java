@@ -1,7 +1,8 @@
 package magma.api.collect;
 
+import magma.api.option.None;
 import magma.api.option.Option;
-import magma.app.Main;
+import magma.api.option.Some;
 
 public final class RangeHead implements Head<Integer> {
     private final int length;
@@ -15,11 +16,11 @@ public final class RangeHead implements Head<Integer> {
     @Override
     public Option<Integer> next() {
         if (this.counter >= this.length) {
-            return new Main.None<Integer>();
+            return new None<Integer>();
         }
 
         var value = this.counter;
         this.counter++;
-        return new Main.Some<Integer>(value);
+        return new Some<Integer>(value);
     }
 }

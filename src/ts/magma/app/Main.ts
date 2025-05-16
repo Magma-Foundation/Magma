@@ -2,24 +2,24 @@ import { Console } from "../../magma/api/Console";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Collector } from "../../magma/api/collect/Collector";
+import { EmptyHead } from "../../magma/api/collect/EmptyHead";
 import { Head } from "../../magma/api/collect/Head";
 import { List } from "../../magma/api/collect/List";
+import { ListCollector } from "../../magma/api/collect/ListCollector";
 import { Lists } from "../../magma/api/collect/Lists";
 import { RangeHead } from "../../magma/api/collect/RangeHead";
+import { SingleHead } from "../../magma/api/collect/SingleHead";
 import { HeadedQuery } from "../../magma/api/collect/query/HeadedQuery";
 import { Query } from "../../magma/api/collect/query/Query";
 import { IOError } from "../../magma/api/io/IOError";
 import { Path } from "../../magma/api/io/Path";
+import { None } from "../../magma/api/option/None";
 import { Option } from "../../magma/api/option/Option";
+import { Some } from "../../magma/api/option/Some";
 import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/io/Files";
-import { None } from "./None";
-import { Some } from "./Some";
-import { EmptyHead } from "./EmptyHead";
-import { SingleHead } from "./SingleHead";
-import { ListCollector } from "./ListCollector";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -139,7 +139,7 @@ class CompileState {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 	addImport(importString: Import): CompileState {
-		if (this.imports.query().filter((node: Import) => node.child.equals(importString.child)).next().isPresent()){
+		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, importString.child)).next().isPresent()){
 			return this;
 		}
 		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.namespace);
@@ -235,34 +235,6 @@ export class Err<T, X> implements Result<T, X> {
 		return whenErr(this.error);
 	}
 }
-export class SingleHead<T> implements Head<T> {
-	element: T;
-	retrieved: boolean;
-	constructor (element: T) {
-		this.element = element;
-		this.retrieved = false;
-	}
-	next(): Option<T> {
-		if (this.retrieved){
-			return new None<T>();
-		}
-		this.retrieved = true;
-		return new Some<T>(this.element);
-	}
-}
-export class EmptyHead<T> implements Head<T> {
-	next(): Option<T> {
-		return new None<T>();
-	}
-}
-class ListCollector<T> implements Collector<T, List<T>> {
-	createInitial(): List<T> {
-		return Lists.empty();
-	}
-	fold(current: List<T>, element: T): List<T> {
-		return current.addLast(element);
-	}
-}
 export class FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;
@@ -286,76 +258,6 @@ export class FlatMapHead<T, R> implements Head<R> {
 				return new None<R>();
 			}
 		}
-	}
-}
-export class Some<T> implements Option<T> {
-	value: T;
-	constructor (value: T) {
-		this.value = value;
-	}
-	map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return new Some<R>(mapper(this.value));
-	}
-	orElse(other: T): T {
-		return this.value;
-	}
-	orElseGet(supplier: () => T): T {
-		return this.value;
-	}
-	isPresent(): boolean {
-		return true;
-	}
-	ifPresent(consumer: (arg0 : T) => void): void {
-		consumer(this.value);
-	}
-	or(other: () => Option<T>): Option<T> {
-		return this;
-	}
-	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return mapper(this.value);
-	}
-	filter(predicate: (arg0 : T) => boolean): Option<T> {
-		if (predicate(this.value)){
-			return this;
-		}
-		return new None<T>();
-	}
-	toTuple(other: T): Tuple2<Boolean, T> {
-		return new Tuple2Impl<Boolean, T>(true, this.value);
-	}
-	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue));
-	}
-}
-export class None<T> implements Option<T> {
-	map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return new None<R>();
-	}
-	orElse(other: T): T {
-		return other;
-	}
-	orElseGet(supplier: () => T): T {
-		return supplier();
-	}
-	isPresent(): boolean {
-		return false;
-	}
-	ifPresent(consumer: (arg0 : T) => void): void {
-	}
-	or(other: () => Option<T>): Option<T> {
-		return other();
-	}
-	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return new None<R>();
-	}
-	filter(predicate: (arg0 : T) => boolean): Option<T> {
-		return new None<T>();
-	}
-	toTuple(other: T): Tuple2<Boolean, T> {
-		return new Tuple2Impl<Boolean, T>(false, other);
-	}
-	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return new None<Tuple2<T, R>>();
 	}
 }
 class Placeholder {
@@ -668,8 +570,8 @@ class Import {
 		this.child = child;
 	}
 	generate(): string {
-		let joinedNamespace = this.namespace().query().collect(new Joiner("/")).orElse("");
-		return "import { " + this.child() + " } from \"" + joinedNamespace + "\";\n";
+		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("");
+		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }
 class Primitive implements Type {
@@ -724,7 +626,7 @@ export class Main {
 	static compileRoot(input: string, namespace: List<string>): string {
 		let compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main.compileRootSegment);
 		let compiledState = compiled.left();
-		let imports = compiledState.imports.query().map(Import.generate).collect(new Joiner("")).orElse("");
+		let imports = compiledState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
 		return imports + compiledState.output + compiled.right();
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {

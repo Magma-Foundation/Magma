@@ -4,25 +4,27 @@ import magma.api.Console;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Collector;
+import magma.api.collect.EmptyHead;
 import magma.api.collect.Head;
 import magma.api.collect.List;
+import magma.api.collect.ListCollector;
 import magma.api.collect.Lists;
 import magma.api.collect.RangeHead;
+import magma.api.collect.SingleHead;
 import magma.api.collect.query.HeadedQuery;
 import magma.api.collect.query.Query;
 import magma.api.io.IOError;
 import magma.api.io.Path;
+import magma.api.option.None;
 import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Result;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.jvm.io.Files;
 
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public final class Main {
     private interface MethodHeader {
@@ -165,7 +167,7 @@ public final class Main {
         public CompileState addImport(Import importString) {
             if (this.imports
                     .query()
-                    .filter((Import node) -> node.child.equals(importString.child))
+                    .filter((Import node) -> Strings.equalsTo(node.child, importString.child))
                     .next()
                     .isPresent()){
                 return this;
@@ -283,45 +285,6 @@ public final class Main {
         }
     }
 
-    public static final class SingleHead<T> implements Head<T> {
-        private final T element;
-        private boolean retrieved;
-
-        public SingleHead(T element) {
-            this.element = element;
-            this.retrieved = false;
-        }
-
-        @Override
-        public Option<T> next() {
-            if (this.retrieved) {
-                return new None<T>();
-            }
-
-            this.retrieved = true;
-            return new Some<T>(this.element);
-        }
-    }
-
-    public static class EmptyHead<T> implements Head<T> {
-        @Override
-        public Option<T> next() {
-            return new None<T>();
-        }
-    }
-
-    private static class ListCollector<T> implements Collector<T, List<T>> {
-        @Override
-        public List<T> createInitial() {
-            return Lists.empty();
-        }
-
-        @Override
-        public List<T> fold(List<T> current, T element) {
-            return current.addLast(element);
-        }
-    }
-
     public static final class FlatMapHead<T, R> implements Head<R> {
         private final Function<T, Query<R>> mapper;
         private final Head<T> head;
@@ -352,112 +315,6 @@ public final class Main {
                     return new None<R>();
                 }
             }
-        }
-    }
-
-    public record Some<T>(T value) implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new Some<R>(mapper.apply(this.value));
-        }
-
-        @Override
-        public T orElse(T other) {
-            return this.value;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> supplier) {
-            return this.value;
-        }
-
-        @Override
-        public boolean isPresent() {
-            return true;
-        }
-
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-            consumer.accept(this.value);
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return this;
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return mapper.apply(this.value);
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            if (predicate.test(this.value)) {
-                return this;
-            }
-            return new None<T>();
-        }
-
-        @Override
-        public Tuple2<Boolean, T> toTuple(T other) {
-            return new Tuple2Impl<Boolean, T>(true, this.value);
-        }
-
-        @Override
-        public <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other) {
-            return other.get().map((R otherValue) -> new Tuple2Impl<T, R>(this.value, otherValue));
-        }
-    }
-
-    public record None<T>() implements Option<T> {
-        @Override
-        public <R> Option<R> map(Function<T, R> mapper) {
-            return new None<R>();
-        }
-
-        @Override
-        public T orElse(T other) {
-            return other;
-        }
-
-        @Override
-        public T orElseGet(Supplier<T> supplier) {
-            return supplier.get();
-        }
-
-        @Override
-        public boolean isPresent() {
-            return false;
-        }
-
-        @Override
-        public void ifPresent(Consumer<T> consumer) {
-        }
-
-        @Override
-        public Option<T> or(Supplier<Option<T>> other) {
-            return other.get();
-        }
-
-        @Override
-        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-            return new None<R>();
-        }
-
-        @Override
-        public Option<T> filter(Predicate<T> predicate) {
-            return new None<T>();
-        }
-
-        @Override
-        public Tuple2<Boolean, T> toTuple(T other) {
-            return new Tuple2Impl<Boolean, T>(false, other);
-        }
-
-        @Override
-        public <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other) {
-            return new None<Tuple2<T, R>>();
         }
     }
 
@@ -835,11 +692,11 @@ public final class Main {
 
     private record Import(List<String> namespace, String child) {
         private String generate() {
-            var joinedNamespace = this.namespace().query()
+            var joinedNamespace = this.namespace.query()
                     .collect(new Joiner("/"))
                     .orElse("");
 
-            return "import { " + this.child() + " } from \"" + joinedNamespace + "\";\n";
+            return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
         }
     }
 
@@ -891,7 +748,7 @@ public final class Main {
         var compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main::compileRootSegment);
         var compiledState = compiled.left();
         var imports = compiledState.imports.query()
-                .map(Import::generate)
+                .map((Import anImport) -> anImport.generate())
                 .collect(new Joiner(""))
                 .orElse("");
 

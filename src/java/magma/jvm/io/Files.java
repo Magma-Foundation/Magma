@@ -9,7 +9,9 @@ import magma.api.collect.query.HeadedQuery;
 import magma.api.collect.query.Query;
 import magma.api.io.IOError;
 import magma.api.io.Path;
+import magma.api.option.None;
 import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Result;
 import magma.app.Main;
 
@@ -42,9 +44,9 @@ public final class Files {
         public Option<IOError> writeString(String output) {
             try {
                 java.nio.file.Files.writeString(this.path, output);
-                return new Main.None<IOError>();
+                return new None<IOError>();
             } catch (IOException e) {
-                return new Main.Some<IOError>(new JVMPath.JVMIOError(e));
+                return new Some<IOError>(new JVMPath.JVMIOError(e));
             }
         }
 
@@ -116,9 +118,9 @@ public final class Files {
         public Option<IOException> createDirectories() {
             try {
                 java.nio.file.Files.createDirectories(this.path);
-                return new Main.None<>();
+                return new None<>();
             } catch (IOException e) {
-                return new Main.Some<>(e);
+                return new Some<>(e);
             }
         }
     }
