@@ -838,7 +838,7 @@ public final class Main {
 
         @Override
         public Option<String> generateAsEnumValue(String structureName) {
-            return new Some<>("\n\t" + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
+            return new Some<>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
         }
     }
 
@@ -1422,11 +1422,20 @@ public final class Main {
 
     private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return Main.compileFirst(input, "(", (String beforeParams, String withParams) -> {
-            return Main.compileLast(Strings.strip(beforeParams), " ", (String _, String name) -> {
+            var strippedBeforeParams = Strings.strip(beforeParams);
+            return Main.compileLast(strippedBeforeParams, " ", (String _, String name) -> {
                 if (state.maybeStructureName.filter((String anObject) -> Strings.equalsTo(name, anObject)).isPresent()) {
                     return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
+                return new None<>();
+            }).or(() -> {
+                if (state.maybeStructureName.filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+                    return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
+                }
+
+                return new None<>();
+            }).or(() -> {
                 return Main.parseDefinition(state, beforeParams)
                         .flatMap((Tuple<CompileState, Definition> tuple) -> Main.compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
             });

@@ -628,7 +628,7 @@ class Invokable implements Value {
 		return Primitive.Unknown;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new Some<>("\n\t" + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
+		return new Some<>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
 	}
 }
 class Operation implements Value {
@@ -830,17 +830,16 @@ class Files  {
 	static readString(source: Path): Result<string, IOException>;
 }
 class Primitive implements Type {
-	String: Primitive = new Primitive("string");
-	Number: Primitive = new Primitive("number");
-	Boolean: Primitive = new Primitive("boolean");
-	Var: Primitive = new Primitive("var");
-	Void: Primitive = new Primitive("void");
-	Unknown: Primitive = new Primitive("unknown");
-	value: string;/*
-
-        Primitive(String value) {
-            this.value = value;
-        }*/
+	static String: Primitive = new Primitive("string");
+	static Number: Primitive = new Primitive("number");
+	static Boolean: Primitive = new Primitive("boolean");
+	static Var: Primitive = new Primitive("var");
+	static Void: Primitive = new Primitive("void");
+	static Unknown: Primitive = new Primitive("unknown");
+	value: string;
+	constructor (value: string) {
+		this.value = value;
+	}
 	generate(): string {
 		return this.value;
 	}
@@ -1051,10 +1050,18 @@ class Main  {
 	}
 	static compileMethod(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
-			return Main.compileLast(Strings.strip(beforeParams), " ", (_: string, name: string) => {
+			let strippedBeforeParams = Strings.strip(beforeParams);
+			return Main.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
 				if (state.maybeStructureName.filter() -  > Strings.equalsTo(name)){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
+				return new None<>();
+			}).or(() => {
+				if (state.maybeStructureName.filter() -  > Strings.equalsTo(strippedBeforeParams)){
+					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
+				}
+				return new None<>();
+			}).or(() => {
 				return Main.parseDefinition(state, beforeParams).flatMap() -  > Main.compileMethodWithBeforeParams(tuple.left, tuple.right);
 			});
 		});
