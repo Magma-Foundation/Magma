@@ -812,25 +812,36 @@ public final class Main {
     private static Query<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
         return children.query()
                 .filter((Path source) -> source.endsWith(".java"))
-                .map((Path source) -> {
-                    var relative = sourceDirectory.relativize(source);
-                    var namespace = relative.getParent()
-                            .query()
-                            .collect(new ListCollector<String>());
+                .map((Path source) -> Main.runWithSource(sourceDirectory, source))
+                .flatMap(Iterators::fromOption);
+    }
 
-                    var fileName = source.findFileName();
-                    var separator = fileName.lastIndexOf('.');
-                    var name = fileName.substring(0, separator);
+    private static Option<IOError> runWithSource(Path sourceDirectory, Path source) {
+        var relative = sourceDirectory.relativize(source);
+        var namespace = relative.getParent()
+                .query()
+                .collect(new ListCollector<String>());
 
-                    var target = source.resolveSibling(name + ".ts");
+        var fileName = source.findFileName();
+        var separator = fileName.lastIndexOf('.');
+        var name = fileName.substring(0, separator);
 
-                    return source.readString()
-                            .match((String input) -> Main.compileAndWrite(input, target, namespace), (IOError value) -> new Some<IOError>(value));
-                }).flatMap(Iterators::fromOption);
+        var target = Files.get(".", "out")
+                .resolveChildSegments(namespace)
+                .resolveChild(name + ".ts");
+
+        return source.readString()
+                .match((String input) -> Main.compileAndWrite(input, target, namespace), (IOError value) -> new Some<IOError>(value));
     }
 
     private static Option<IOError> compileAndWrite(String input, Path target, List<String> namespace) {
         var output = Main.compileRoot(input, namespace);
+
+        var parent = target.getParent();
+        if(!parent.exists()) {
+            parent.createDirectories();
+        }
+
         return target.writeString(output);
     }
 

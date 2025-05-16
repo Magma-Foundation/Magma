@@ -1,11 +1,11 @@
 package magma.jvm;
 
 import magma.Actual;
-import magma.api.collect.query.HeadedQuery;
 import magma.api.collect.List;
 import magma.api.collect.Lists;
-import magma.api.collect.query.Query;
 import magma.api.collect.RangeHead;
+import magma.api.collect.query.HeadedQuery;
+import magma.api.collect.query.Query;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.Option;
@@ -93,6 +93,31 @@ public final class Files {
         public Query<String> query() {
             return new HeadedQuery<>(new RangeHead(this.path.getNameCount()))
                     .map((Integer index) -> this.path.getName(index).toString());
+        }
+
+        @Override
+        public Path resolveChildSegments(List<String> children) {
+            return children.query().foldWithInitial(this, Path::resolveChild);
+        }
+
+        @Override
+        public Path resolveChild(String name) {
+            return new JVMPath(this.path.resolve(name));
+        }
+
+        @Override
+        public boolean exists() {
+            return java.nio.file.Files.exists(this.path);
+        }
+
+        @Override
+        public Option<IOException> createDirectories() {
+            try {
+                java.nio.file.Files.createDirectories(this.path);
+                return new Main.None<>();
+            } catch (IOException e) {
+                return new Main.Some<>(e);
+            }
         }
     }
 

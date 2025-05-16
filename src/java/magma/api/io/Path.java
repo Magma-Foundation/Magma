@@ -5,6 +5,8 @@ import magma.api.collect.query.Query;
 import magma.api.result.Result;
 import magma.api.option.Option;
 
+import java.io.IOException;
+
 public interface Path {
     Option<IOError> writeString(String output);
 
@@ -23,4 +25,12 @@ public interface Path {
     Path getParent();
 
     Query<String> query();
+
+    Path resolveChildSegments(List<String> children);
+
+    Path resolveChild(String name);
+
+    boolean exists();
+
+    Option<IOException> createDirectories();
 }
