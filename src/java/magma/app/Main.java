@@ -758,19 +758,18 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
-        var namespace = source.computeNamespace();
-        var name = source.computeName();
-
         var target = Files.get(".", "src", "ts")
-                .resolveChildSegments(namespace)
-                .resolveChild(name + ".ts");
+                .resolveChildSegments(source.computeNamespace())
+                .resolveChild(source.computeName() + ".ts");
 
         return source.source().readString().match(
-                (String input) -> Main.compileAndWrite(state, input, target, namespace, name),
+                (String input) -> Main.compileAndWrite(state, source, input, target),
                 (IOError value) -> new Tuple2Impl<>(state, new Some<IOError>(value)));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, String input, Path target, List<String> namespace, String name) {
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Path target) {
+        List<String> namespace = source.computeNamespace();
+        String name = source.computeName();
         var output = Main.compileRoot(state, input, namespace);
 
         var parent = target.getParent();

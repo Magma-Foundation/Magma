@@ -589,6 +589,22 @@ class Import {
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }
+class Source {
+	sourceDirectory: Path;
+	source: Path;
+	constructor (sourceDirectory: Path, source: Path) {
+		this.sourceDirectory = sourceDirectory;
+		this.source = source;
+	}
+	computeName(): string {
+		let fileName = this.source.findFileName();
+		let separator = fileName.lastIndexOf(".");
+		return fileName.substring(0, separator);
+	}
+	computeNamespace(): List<string> {
+		return this.sourceDirectory().relativize(this.source()).getParent().query().collect(new ListCollector<string>());
+	}
+}
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
@@ -628,18 +644,15 @@ export class Main {
 		if (current.right().isPresent()){
 			return current;
 		}
-		return Main.runWithSource(current.left(), sourceDirectory, path);
+		return Main.runWithSource(current.left(), new Source(sourceDirectory, path));
 	}
-	static runWithSource(state: CompileState, sourceDirectory: Path, source: Path): Tuple2<CompileState, Option<IOError>> {
-		let relative = sourceDirectory.relativize(source);
-		let namespace = relative.getParent().query().collect(new ListCollector<string>());
-		let fileName = source.findFileName();
-		let separator = fileName.lastIndexOf(".");
-		let name = fileName.substring(0, separator);
-		let target = Files.get(".", "src", "ts").resolveChildSegments(namespace).resolveChild(name + ".ts");
-		return source.readString().match((input: string) => Main.compileAndWrite(state, input, target, namespace, name), (value: IOError) => new Tuple2Impl<>(state, new Some<IOError>(value)));
+	static runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
+		let target = Files.get(".", "src", "ts").resolveChildSegments(source.computeNamespace()).resolveChild(source.computeName() + ".ts");
+		return source.source().readString().match((input: string) => Main.compileAndWrite(state, source, input, target), (value: IOError) => new Tuple2Impl<>(state, new Some<IOError>(value)));
 	}
-	static compileAndWrite(state: CompileState, input: string, target: Path, namespace: List<string>, name: string): Tuple2<CompileState, Option<IOError>> {
+	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Tuple2<CompileState, Option<IOError>> {
+		List < String > namespace = source.computeNamespace();
+		let name: string = source.computeName();
 		let output = Main.compileRoot(state, input, namespace);
 		let parent = target.getParent();
 		if (!parent.exists()){
