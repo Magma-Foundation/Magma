@@ -1872,19 +1872,23 @@ public final class Main {
 
                 var base = Strings.strip(baseString);
                 return Main.assembleFunctionType(argsState, base, args).or(() -> {
-                    CompileState compileState;
-                    if (state.maybeStructureName.filter((String value) -> value.equals(base)).isPresent()) {
-                        compileState = argsState;
-                    }
-                    else {
-                        var importString = new Import(Lists.of(".", base), base);
-                        compileState = argsState.addImport(importString);
-                    }
-
+                    var compileState = Main.getCompileState(state, base, argsState);
                     return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
                 });
             });
         });
+    }
+
+    private static CompileState getCompileState(CompileState state, String base, CompileState argsState) {
+        if (state.maybeStructureName
+                .filter((String value) -> Strings.equalsTo(value, base))
+                .isPresent()
+        ) {
+            return argsState;
+        }
+
+        var importString = new Import(Lists.of(".", base), base);
+        return argsState.addImport(importString);
     }
 
     private static Option<Tuple2<CompileState, Type>> assembleFunctionType(CompileState state, String base, List<String> args) {

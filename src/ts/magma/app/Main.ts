@@ -1413,18 +1413,18 @@ export class Main {
 				let args = argsTuple.right();
 				let base = Strings.strip(baseString);
 				return Main.assembleFunctionType(argsState, base, args).or(() => {
-					/*CompileState compileState*/;
-					if (state.maybeStructureName.filter((value: string) => value.equals(base)).isPresent()){
-						compileState = argsState;
-					}
-					else {
-						let importString = new Import(Lists.of(".", base), base);
-						compileState = argsState.addImport(importString);
-					}
+					let compileState = Main.getCompileState(state, base, argsState);
 					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
 				});
 			});
 		});
+	}
+	static getCompileState(state: CompileState, base: string, argsState: CompileState): CompileState {
+		if (state.maybeStructureName.filter((value: string) => Strings.equalsTo(value, base)).isPresent()){
+			return argsState;
+		}
+		let importString = new Import(Lists.of(".", base), base);
+		return argsState.addImport(importString);
 	}
 	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple2<CompileState, Type>> {
 		return Main.mapFunctionType(base, args).map((generated: Type) => new Tuple2Impl<CompileState, Type>(state, generated));
