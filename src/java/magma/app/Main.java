@@ -132,33 +132,34 @@ public final class Main {
             int depth,
             List<Definition> definitions,
             Option<List<String>> maybeNamespace,
-            List<String> names) {
+            List<Source> sources
+    ) {
         private static CompileState createInitial() {
             return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), new None<>(), Lists.empty());
         }
 
         private CompileState withNamespace(List<String> namespace) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.names);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.sources);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState withStructureName(String name) {
-            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.names);
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
         }
 
         Option<Type> resolve(String name) {
@@ -177,19 +178,19 @@ public final class Main {
                 return this;
             }
 
-            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         public CompileState clearImports() {
-            return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         public CompileState clearOutput() {
-            return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names);
+            return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
-        public CompileState addName(String name) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.names.addLast(name));
+        public CompileState addSource(Source source) {
+            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
         }
     }
 
@@ -777,7 +778,7 @@ public final class Main {
             parent.createDirectories();
         }
 
-        return new Tuple2Impl<>(output.left().addName(name), target.writeString(output.right()));
+        return new Tuple2Impl<>(output.left().addSource(source), target.writeString(output.right()));
     }
 
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
@@ -789,12 +790,18 @@ public final class Main {
                 .orElse("");
 
         var compileState = state.clearImports().clearOutput();
-        var s = compileState.names
+        var segment = compileState.sources
                 .query()
+                .map((Source source) -> Main.formatSource(source))
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Tuple2Impl<>(compileState, "// [" + s + "]\n" + imports + compiledState.output + compiled.right());
+        return new Tuple2Impl<>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output + compiled.right());
+    }
+
+    private static String formatSource(Source source) {
+        var joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
+        return "\n\t" + source.computeName() + ": " + joinedNamespace;
     }
 
     private static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {

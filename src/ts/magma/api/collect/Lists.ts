@@ -1,4 +1,12 @@
-// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector]
+/*[
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
+	Collector: magma.api.collect, 
+	EmptyHead: magma.api.collect, 
+	Head: magma.api.collect, 
+	List: magma.api.collect, 
+	ListCollector: magma.api.collect
+]*/
 import { Actual } from "../../../magma/annotate/Actual";
 import { Namespace } from "../../../magma/annotate/Namespace";
 import { Tuple2 } from "../../../magma/api/Tuple2";

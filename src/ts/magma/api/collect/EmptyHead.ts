@@ -1,4 +1,8 @@
-// [Actual, Namespace, Collector]
+/*[
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
+	Collector: magma.api.collect
+]*/
 import { None } from "../../../magma/api/option/None";
 import { Option } from "../../../magma/api/option/Option";
 import { Head } from "./Head";

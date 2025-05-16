@@ -1,4 +1,20 @@
-// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery, Query, RangeHead, SingleHead, Console, IOError, Path]
+/*[
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
+	Collector: magma.api.collect, 
+	EmptyHead: magma.api.collect, 
+	Head: magma.api.collect, 
+	List: magma.api.collect, 
+	ListCollector: magma.api.collect, 
+	Lists: magma.api.collect, 
+	HeadedQuery: magma.api.collect.query, 
+	Query: magma.api.collect.query, 
+	RangeHead: magma.api.collect, 
+	SingleHead: magma.api.collect, 
+	Console: magma.api, 
+	IOError: magma.api.io, 
+	Path: magma.api.io
+]*/
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
 import { Main } from "../../../magma/app/Main";

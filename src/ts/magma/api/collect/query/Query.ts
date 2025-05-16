@@ -1,4 +1,14 @@
-// [Actual, Namespace, Collector, EmptyHead, Head, List, ListCollector, Lists, HeadedQuery]
+/*[
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
+	Collector: magma.api.collect, 
+	EmptyHead: magma.api.collect, 
+	Head: magma.api.collect, 
+	List: magma.api.collect, 
+	ListCollector: magma.api.collect, 
+	Lists: magma.api.collect, 
+	HeadedQuery: magma.api.collect.query
+]*/
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { Option } from "../../../../magma/api/option/Option";
 export interface Query<T> {
