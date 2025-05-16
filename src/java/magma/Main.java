@@ -265,6 +265,7 @@ public class Main {
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
         return compileOrPlaceholder(state, input, List.of(
+                Main::compileWhitespace,
                 Main::compileNamespaced,
                 createStructureRule("class ", "class ")
         ));
@@ -583,17 +584,17 @@ public class Main {
                 Main::compileNot,
                 Main::compileInvokable,
                 Main::compileNumber,
-                createOperatorRuleWithDifferentInfixes("==", "==="),
-                createOperatorRuleWithDifferentInfixes("!=", "!=="),
-                createTextRule("\""),
-                createTextRule("'"),
+                createOperatorRuleWithDifferentInfix("==", "==="),
+                createOperatorRuleWithDifferentInfix("!=", "!=="),
                 createOperatorRule("+"),
                 createOperatorRule("-"),
                 createOperatorRule("<="),
                 createOperatorRule("<"),
                 createOperatorRule("&&"),
                 createOperatorRule("||"),
-                createOperatorRule(">=")
+                createOperatorRule(">="),
+                createTextRule("\""),
+                createTextRule("'")
         ));
     }
 
@@ -664,14 +665,14 @@ public class Main {
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String infix) {
-        return createOperatorRuleWithDifferentInfixes(infix, infix);
+        return createOperatorRuleWithDifferentInfix(infix, infix);
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createAccessRule(String infix) {
         return (state, input) -> compileLast(input, infix, (child, rawProperty) -> {
-            var tuple = compileValueOrPlaceholder(state, child);
             var property = rawProperty.strip();
             if (isSymbol(property)) {
+                var tuple = compileValueOrPlaceholder(state, child);
                 return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
             }
             else {
@@ -680,12 +681,14 @@ public class Main {
         });
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfixes(String sourceInfix, String targetInfix) {
-        return (state1, input1) -> compileFirst(input1, sourceInfix, (left, right) -> {
-            var leftTuple = compileValueOrPlaceholder(state1, left);
-            var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
-            return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
-        });
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
+        return (state1, input1) -> {
+            return compileSplit(split(input1, sourceInfix, Main::findFirst), (left, right) -> {
+                var leftTuple = compileValueOrPlaceholder(state1, left);
+                var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
+                return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+            });
+        };
     }
 
     private static Optional<Tuple<CompileState, String>> compileNumber(CompileState state, String input) {
