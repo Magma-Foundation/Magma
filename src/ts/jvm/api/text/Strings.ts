@@ -1,25 +1,31 @@
 import { StringsInstance } from "./StringsInstance";
 
 export const Strings: StringsInstance = {
-    length: function (stripped: string): number {
-        throw new Error("Function not implemented.");
+    length(str: string): number {
+        return str.length;
     },
-    sliceBetween: function (input: string, startInclusive: number, endExclusive: number): string {
-        throw new Error("Function not implemented.");
+
+    sliceBetween(input: string, startInclusive: number, endExclusive: number): string {
+        return input.slice(startInclusive, endExclusive);
     },
-    sliceFrom: function (input: string, startInclusive: number): string {
-        throw new Error("Function not implemented.");
+
+    sliceFrom(input: string, startInclusive: number): string {
+        return input.slice(startInclusive);
     },
-    isEmpty: function (cache: string): boolean {
-        throw new Error("Function not implemented.");
+
+    isEmpty(value: string): boolean {
+        return value.length === 0;
     },
-    equalsTo: function (left: string, right: string): boolean {
-        throw new Error("Function not implemented.");
+
+    equalsTo(left: string, right: string): boolean {
+        return left === right;
     },
-    strip: function (input: string): string {
-        throw new Error("Function not implemented.");
+
+    strip(input: string): string {
+        return input.trim();
     },
-    isBlank: function (value: string): boolean {
-        throw new Error("Function not implemented.");
+
+    isBlank(value: string): boolean {
+        return value.trim().length === 0;
     }
-}
+};

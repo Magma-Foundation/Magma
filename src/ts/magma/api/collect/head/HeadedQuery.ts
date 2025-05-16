@@ -15,6 +15,7 @@
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
+	ZipHead: magma.api.collect.head, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Queries: magma.api.collect, 
@@ -40,6 +41,7 @@ import { MapHead } from "../../../../magma/api/collect/head/MapHead";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
+import { ZipHead } from "../../../../magma/api/collect/head/ZipHead";
 import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
@@ -81,6 +83,9 @@ export class HeadedQuery<T> implements Query<T> {
 	}
 	anyMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t));
+	}
+	zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
+		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {

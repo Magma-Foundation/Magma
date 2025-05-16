@@ -15,6 +15,7 @@
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
+	ZipHead: magma.api.collect.head, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Queries: magma.api.collect, 
@@ -34,6 +35,7 @@
 ]*/
 import { Collector } from "../../../magma/api/collect/Collector";
 import { Option } from "../../../magma/api/option/Option";
+import { Tuple2 } from "../../../magma/api/Tuple2";
 export interface Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;
@@ -44,4 +46,5 @@ export interface Query<T> {
 	allMatch(predicate: (arg0 : T) => boolean): boolean;
 	filter(predicate: (arg0 : T) => boolean): Query<T>;
 	anyMatch(predicate: (arg0 : T) => boolean): boolean;
+	zip<R>(other: Query<R>): Query<Tuple2<T, R>>;
 }

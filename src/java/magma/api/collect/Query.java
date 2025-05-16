@@ -1,5 +1,6 @@
 package magma.api.collect;
 
+import magma.api.Tuple2;
 import magma.api.option.Option;
 
 import java.util.function.BiFunction;
@@ -24,4 +25,6 @@ public interface Query<T> {
     Query<T> filter(Predicate<T> predicate);
 
     boolean anyMatch(Predicate<T> predicate);
+
+    <R> Query<Tuple2<T, R>> zip(Query<R> other);
 }

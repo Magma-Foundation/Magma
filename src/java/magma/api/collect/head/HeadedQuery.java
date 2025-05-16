@@ -69,6 +69,11 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
+    public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
+        return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
+    }
+
+    @Override
     public Query<T> filter(Predicate<T> predicate) {
         return this.flatMap((T element) -> {
             if (predicate.test(element)) {
