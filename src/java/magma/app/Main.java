@@ -1,6 +1,7 @@
 package magma.app;
 
 import jvm.api.collect.list.Lists;
+import jvm.api.io.Console;
 import jvm.api.io.Files;
 import jvm.api.text.Characters;
 import jvm.api.text.Strings;
@@ -12,7 +13,6 @@ import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
-import jvm.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.None;
@@ -777,10 +777,13 @@ public final class Main {
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input) {
         var output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
+        var ts = Main.getCompileStateOptionTuple2(output, "ts");
+        return Main.getCompileStateOptionTuple2(new Tuple2Impl<>(ts.left(), output.right()), "magma");
+    }
 
+    private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(Tuple2Impl<CompileState, String> output, String extension) {
         var location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
-
-        var targetDirectory = Files.get(".", "src", "ts");
+        var targetDirectory = Files.get(".", "src", extension);
         var targetParent = targetDirectory.resolveChildSegments(location.namespace);
         if (!targetParent.exists()) {
             var maybeError = targetParent.createDirectories();
@@ -789,7 +792,7 @@ public final class Main {
             }
         }
 
-        var target = targetParent.resolveChild(location.name + ".ts");
+        var target = targetParent.resolveChild(location.name + "." + extension);
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
     }
 
