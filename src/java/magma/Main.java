@@ -387,9 +387,28 @@ public class Main {
     private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
         return compileSuffix(input.strip(), "}", withoutEnd -> {
             return compileFirst(withoutEnd, "{", (beforeContent, content) -> {
-                var tuple = compileFunctionStatements(state.enterDepth(), content);
+                var headerTuple = compileBlockHeader(state, beforeContent);
+                var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
+
                 var indent = generateIndent(state.depth());
-                return Optional.of(new Tuple<>(tuple.left.exitDepth(), indent + generatePlaceholder(beforeContent) + "{" + tuple.right + indent + "}"));
+                return Optional.of(new Tuple<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+            });
+        });
+    }
+
+    private static Tuple<CompileState, String> compileBlockHeader(CompileState state, String input) {
+        return compileOrPlaceholder(state, input, List.of(
+                Main::compileIf
+        ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileIf(CompileState state, String input) {
+        return compilePrefix(input.strip(), "if", withoutPrefix -> {
+            var strippedCondition = withoutPrefix.strip();
+            return compilePrefix(strippedCondition, "(", withoutConditionStart -> {
+                return compileSuffix(withoutConditionStart, ")", withoutConditionEnd -> {
+                    return Optional.of(new Tuple<>(state, "if (" + generatePlaceholder(withoutConditionEnd) + ")"));
+                });
             });
         });
     }
