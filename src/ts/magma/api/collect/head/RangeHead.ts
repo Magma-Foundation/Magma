@@ -2,6 +2,7 @@
 	JVMList: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
 	Files: jvm.api.io, 
+	JVMPath: jvm.api.io, 
 	Characters: jvm.api.text, 
 	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
