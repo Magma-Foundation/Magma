@@ -716,6 +716,18 @@ public final class Main {
         }
     }
 
+    private record Source(Path sourceDirectory, Path source) {
+        private String computeName() {
+            var fileName = this.source.findFileName();
+            var separator = fileName.lastIndexOf('.');
+            return fileName.substring(0, separator);
+        }
+
+        private List<String> computeNamespace() {
+            return this.sourceDirectory().relativize(this.source()).getParent().query().collect(new ListCollector<String>());
+        }
+    }
+
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -742,24 +754,18 @@ public final class Main {
             return current;
         }
 
-        return Main.runWithSource(current.left(), sourceDirectory, path);
+        return Main.runWithSource(current.left(), new Source(sourceDirectory, path));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Path sourceDirectory, Path source) {
-        var relative = sourceDirectory.relativize(source);
-        var namespace = relative.getParent()
-                .query()
-                .collect(new ListCollector<String>());
-
-        var fileName = source.findFileName();
-        var separator = fileName.lastIndexOf('.');
-        var name = fileName.substring(0, separator);
+    private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
+        var namespace = source.computeNamespace();
+        var name = source.computeName();
 
         var target = Files.get(".", "src", "ts")
                 .resolveChildSegments(namespace)
                 .resolveChild(name + ".ts");
 
-        return source.readString().match(
+        return source.source().readString().match(
                 (String input) -> Main.compileAndWrite(state, input, target, namespace, name),
                 (IOError value) -> new Tuple2Impl<>(state, new Some<IOError>(value)));
     }
