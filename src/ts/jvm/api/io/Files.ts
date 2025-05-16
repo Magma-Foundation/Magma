@@ -58,8 +58,7 @@ class NodePathImpl implements Path {
 
     walk(): Result<List<Path>, IOError> {
         try {
-            let entries: List<Path> = Lists.empty();
-
+            let entries: List<Path> = Lists.empty<Path>().addLast(this);
             const stats = fs.statSync(this.asString());
             if (stats.isDirectory()) {
                 for (const name of fs.readdirSync(this.asString())) {
@@ -68,21 +67,12 @@ class NodePathImpl implements Path {
 
                     const maybeError = subResult.findError();
                     if (maybeError.isPresent()) {
-                        // bubble up the first error
                         return new Err(maybeError.orElse(new NodeIOError("")));
                     }
 
-                    const maybeValue = subResult.findValue();
-                    if (maybeValue.isPresent()) {
-                        const value = maybeValue.orElse(Lists.empty());
-
-                        // if directory, sub.value is a List<Path>; otherwise it’s [child]
-                        entries = entries.addLast(child).addAll(value);
-                    }
+                    entries = entries
+                        .addAll(subResult.findValue().orElse(Lists.empty()));
                 }
-            } else {
-                // just this file
-                entries = entries.addLast(this);
             }
 
             return new Ok(entries);
