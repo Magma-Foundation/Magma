@@ -48,6 +48,7 @@ interface Parameter {
 class HeadedIterator<T> {
 	head : Head<T>;
 	constructor (head : Head<T>) {
+		this.head = head;
 	}
 	next(): Option<T> {
 		return this.head.next();
@@ -103,6 +104,7 @@ class RangeHead implements Head<Integer> {
 class JVMList<T> {
 	list : java.util.List<T>;
 	constructor (list : java.util.List<T>) {
+		this.list = list;
 	}
 	JVMList(): public {
 		this(new ArrayList<>());
@@ -218,6 +220,8 @@ class Tuple<A, B> {
 	left : A;
 	right : B;
 	constructor (left : A, right : B) {
+		this.left = left;
+		this.right = right;
 	}
 }
 class CompileState {
@@ -225,6 +229,9 @@ class CompileState {
 	structureName : Option<string>;
 	depth : number;
 	constructor (output : string, structureName : Option<string>, depth : number) {
+		this.output = output;
+		this.structureName = structureName;
+		this.depth = depth;
 	}
 	constructor () {
 		this("", new None<string>(), 0);
@@ -248,6 +255,7 @@ class CompileState {
 class Joiner {
 	delimiter : string;
 	constructor (delimiter : string) {
+		this.delimiter = delimiter;
 	}
 	constructor () {
 		this("");
@@ -265,6 +273,10 @@ class Definition {
 	typeParams : List<string>;
 	type : string;
 	constructor (maybeBeforeType : Option<string>, name : string, typeParams : List<string>, type : string) {
+		this.maybeBeforeType = maybeBeforeType;
+		this.name = name;
+		this.typeParams = typeParams;
+		this.type = type;
 	}
 	generate(): string {
 		return this.generateWithAfterName(" ");
@@ -288,6 +300,7 @@ class ConstructorHeader implements MethodHeader {
 class Ok<T, X> {
 	value : T;
 	constructor (value : T) {
+		this.value = value;
 	}
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenOk.apply(this.value);
@@ -296,6 +309,7 @@ class Ok<T, X> {
 class Err<T, X> {
 	error : X;
 	constructor (error : X) {
+		this.error = error;
 	}
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenErr.apply(this.error);
@@ -365,6 +379,7 @@ class FlatMapHead<T, R> implements Head<R> {
 class Some<T> {
 	value : T;
 	constructor (value : T) {
+		this.value = value;
 	}
 	map<R>(mapper : (arg0 : T) => R): Option<R> {
 		return new Some<>(mapper.apply(this.value));
@@ -431,6 +446,7 @@ class None<T> {
 class Placeholder {
 	input : string;
 	constructor (input : string) {
+		this.input = input;
 	}
 	generate(): string {
 		return generatePlaceholder(this.input);
@@ -587,7 +603,14 @@ class Main {
 		return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(outputContentState.append(generated), ""));
 	}
 	generateConstructorFromRecordParameters(parameters : List<Definition>): string {
-		return parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).map((generatedParameters) => "\n\tconstructor (" + generatedParameters + ") {\n\t}").orElse("");
+		return parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).map((generatedParameters) => generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
+	}
+	generateConstructorWithParameterString(parameters : List<Definition>, parametersString : string): string {
+		let constructorAssignments : unknown = generateConstructorAssignments(parameters);
+		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
+	}
+	generateConstructorAssignments(parameters : List<Definition>): string {
+		return parameters.iterate().map((definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(new Joiner()).orElse("");
 	}
 	joinParameters(parameters : List<Definition>): string {
 		return parameters.iterate().map(Definition.generate).map((generated) => "\n\t" + generated + ";").collect(new Joiner()).orElse("");

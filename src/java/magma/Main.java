@@ -812,7 +812,22 @@ public class Main {
         return parameters.iterate()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
-                .map(generatedParameters -> "\n\tconstructor (" + generatedParameters + ") {\n\t}")
+                .map(generatedParameters -> generateConstructorWithParameterString(parameters, generatedParameters))
+                .orElse("");
+    }
+
+    private static String generateConstructorWithParameterString(List<Definition> parameters, String parametersString) {
+        var constructorAssignments = generateConstructorAssignments(parameters);
+
+        return "\n\tconstructor (" + parametersString + ") {" +
+                constructorAssignments +
+                "\n\t}";
+    }
+
+    private static String generateConstructorAssignments(List<Definition> parameters) {
+        return parameters.iterate()
+                .map(definition -> "\n\t\tthis." + definition.name + " = " + definition.name + ";")
+                .collect(new Joiner())
                 .orElse("");
     }
 
