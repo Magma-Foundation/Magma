@@ -23,4 +23,6 @@ public interface Query<T> {
     boolean allMatch(Predicate<T> predicate);
 
     Query<T> filter(Predicate<T> predicate);
+
+    boolean anyMatch(Predicate<T> predicate);
 }

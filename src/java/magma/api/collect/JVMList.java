@@ -15,8 +15,9 @@ import java.util.ArrayList;
 public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public List<T> addLast(T element) {
-        this.list.add(element);
-        return this;
+        var copy = new ArrayList<>(this.list);
+        copy.add(element);
+        return new JVMList<>(copy);
     }
 
     @Override

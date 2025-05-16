@@ -48,7 +48,6 @@ import { Result } from "../../magma/api/result/Result";
 import { Characters } from "../../magma/api/text/Characters";
 import { Strings } from "../../magma/api/text/Strings";
 import { Files } from "../../magma/jvm/io/Files";
-import { Main } from "../../magma/app/Main";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
@@ -178,7 +177,7 @@ class CompileState {
 	append(element: string): CompileState {
 		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
-	withStructureName(name: string): CompileState {
+	pushStructureName(name: string): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	enterDepth(): CompileState {
@@ -206,7 +205,7 @@ class CompileState {
 		return this.sources.query().filter((source: Source) => source.computeName().equals(name)).next();
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.findLast().filter((inner: string) => inner.equals(base)).isPresent()){
+		if (this.structureNames.query().anyMatch((inner: string) => inner.equals(base))){
 			return this;
 		}
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
@@ -311,7 +310,7 @@ export class FlatMapHead<T, R> implements Head<R> {
 	next(): Option<R> {
 		while (true){
 			let next = this.current.next();
-			if (next()){
+			if (next.isPresent()){
 				return next;
 			}
 			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
@@ -880,7 +879,7 @@ export class Main {
 		if (!Main.isSymbol(name)){
 			return new None<Tuple2<CompileState, string>>();
 		}
-		let outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
+		let outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main.compileClassSegment);
 		let outputContentState = outputContentTuple.left().popStructureName();
 		let outputContent = outputContentTuple.right();
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);

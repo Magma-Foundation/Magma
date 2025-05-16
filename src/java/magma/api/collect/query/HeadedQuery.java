@@ -33,7 +33,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
         R result = initial;
         while (true) {
             R finalResult = result;
-            Tuple2<Boolean,R> maybeNext = this.head.next()
+            Tuple2<Boolean, R> maybeNext = this.head.next()
                     .map((T inner) -> folder.apply(finalResult, inner))
                     .toTuple(finalResult);
 
@@ -64,6 +64,11 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     @Override
     public boolean allMatch(Predicate<T> predicate) {
         return this.foldWithInitial(true, (Boolean maybeAllTrue, T element) -> maybeAllTrue && predicate.test(element));
+    }
+
+    @Override
+    public boolean anyMatch(Predicate<T> predicate) {
+        return this.foldWithInitial(false, (Boolean aBoolean, T t) -> aBoolean || predicate.test(t));
     }
 
     @Override

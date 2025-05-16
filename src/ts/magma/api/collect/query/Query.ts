@@ -37,4 +37,5 @@ export interface Query<T> {
 	next(): Option<T>;
 	allMatch(predicate: (arg0 : T) => boolean): boolean;
 	filter(predicate: (arg0 : T) => boolean): Query<T>;
+	anyMatch(predicate: (arg0 : T) => boolean): boolean;
 }

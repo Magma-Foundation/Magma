@@ -177,7 +177,7 @@ public final class Main {
             return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
-        CompileState withStructureName(String name) {
+        CompileState pushStructureName(String name) {
             return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
@@ -219,7 +219,7 @@ public final class Main {
         }
 
         public CompileState addResolvedImportFromCache(String base) {
-            if (this.structureNames.findLast().filter((String inner) -> inner.equals(base)).isPresent()) {
+            if (this.structureNames.query().anyMatch((String inner) -> inner.equals(base))) {
                 return this;
             }
 
@@ -1061,7 +1061,7 @@ public final class Main {
             return new None<Tuple2<CompileState, String>>();
         }
 
-        var outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
+        var outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left().popStructureName();
         var outputContent = outputContentTuple.right();
 

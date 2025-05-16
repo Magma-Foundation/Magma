@@ -72,6 +72,9 @@ export class HeadedQuery<T> implements Query<T> {
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(true, (maybeAllTrue: Boolean, element: T) => maybeAllTrue && predicate(element));
 	}
+	anyMatch(predicate: (arg0 : T) => boolean): boolean {
+		return this.foldWithInitial(false, (aBoolean: Boolean, t: T) => aBoolean || predicate(t));
+	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
 			if (predicate(element)){

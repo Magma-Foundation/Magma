@@ -26,18 +26,12 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Tuple2 } from "../../magma/api/Tuple2";
-export class Tuple2Impl<A, B> implements Tuple2<A, B> {
-	leftValue: A;
-	rightValue: B;
-	constructor (leftValue: A, rightValue: B) {
-		this.leftValue = leftValue;
-		this.rightValue = rightValue;
-	}
-	left(): A {
-		return this.leftValue;
-	}
-	right(): B {
-		return this.rightValue;
-	}
-}
+import { Actual } from "../../../magma/annotate/Actual";
+import { Tuple2 } from "../../../magma/api/Tuple2";
+import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
+import { HeadedQuery } from "../../../magma/api/collect/query/HeadedQuery";
+import { Query } from "../../../magma/api/collect/query/Query";
+import { None } from "../../../magma/api/option/None";
+import { Option } from "../../../magma/api/option/Option";
+import { Some } from "../../../magma/api/option/Some";
+import { ArrayList } from "../../../java/util/ArrayList";
