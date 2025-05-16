@@ -197,9 +197,22 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var folded = parseAll(state, input, folder, mapper);
+        return generateAll(folded.left, folded.right, merger);
+    }
+
+    private static Tuple<CompileState, String> generateAll(CompileState state, List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        var output = elements.stream()
+                .reduce(new StringBuilder(), merger, (_, next) -> next)
+                .toString();
+
+        return new Tuple<>(state, output);
+    }
+
+    private static Tuple<CompileState, List<String>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         var divisions = divide(input, folder);
 
-        var folded = divisions.stream().reduce(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()), (current, segment) -> {
+        var folded = divisions.stream().reduce(new Tuple<CompileState, List<String>>(state, new ArrayList<>()), (current, segment) -> {
             var currentState = current.left;
             var currentElement = current.right;
 
@@ -207,10 +220,10 @@ public class Main {
             var mappedState = mappedTuple.left;
             var mappedElement = mappedTuple.right;
 
-            return new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
+            currentElement.add(mappedElement);
+            return new Tuple<>(mappedState, currentElement);
         }, (_, next) -> next);
-
-        return new Tuple<>(folded.left, folded.right.toString());
+        return folded;
     }
 
     private static StringBuilder mergeStatements(StringBuilder cache, String element) {
