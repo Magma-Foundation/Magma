@@ -757,9 +757,7 @@ class Files  {
 	static get(first: string, ...more: string[]): Path;
 }
 class Console  {
-	static printErrLn(message: string): void {
-		System.err.println(message);
-	}
+	static printErrLn(message: string): void;
 }
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");

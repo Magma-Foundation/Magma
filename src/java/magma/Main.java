@@ -1164,6 +1164,7 @@ public final class Main {
     }
 
     public static class Console {
+        @Actual
         private static void printErrLn(String message) {
             System.err.println(message);
         }
