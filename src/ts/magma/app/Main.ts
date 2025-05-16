@@ -837,6 +837,9 @@ export class Main {
 					return Main.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => {
 						return Main.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 							let annotations = Main.parseAnnotations(s);
+							if (annotations.contains("Actual")){
+								return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
+							}
 							return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
 						}).or(() => {
 							let modifiers = Main.parseModifiers(beforeContent);
@@ -887,9 +890,6 @@ export class Main {
 		});
 	}
 	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, rawName: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string, maybeSuperType: Option<string>): Option<Tuple2<CompileState, string>> {
-		if (annotations.contains("Actual")){
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
-		}
 		let name = Strings.strip(rawName);
 		if (!Main.isSymbol(name)){
 			return new None<Tuple2<CompileState, string>>();

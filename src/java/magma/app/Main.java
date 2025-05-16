@@ -1036,6 +1036,10 @@ public final class Main {
                     return Main.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> {
                         return Main.compileLast(beforeInfix, "\n", (String s, String s2) -> {
                             var annotations = Main.parseAnnotations(s);
+                            if (annotations.contains("Actual")) {
+                                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
+                            }
+
                             return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
                         }).or(() -> {
                             var modifiers = Main.parseModifiers(beforeContent);
@@ -1108,10 +1112,6 @@ public final class Main {
             String content,
             Option<String> maybeSuperType
     ) {
-        if (annotations.contains("Actual")) {
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-        }
-
         var name = Strings.strip(rawName);
         if (!Main.isSymbol(name)) {
             return new None<Tuple2<CompileState, String>>();

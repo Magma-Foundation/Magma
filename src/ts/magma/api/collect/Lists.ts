@@ -9,7 +9,6 @@ import { Main } from "../../../magma/app/Main";
 import { ArrayList } from "../../../java/util/ArrayList";
 import { Arrays } from "../../../java/util/Arrays";
 import { List } from "./List";
-import { java.util.List } from "./java.util.List";
 export interface ListsInstance {
 	empty<T>(): List<T>;
 
