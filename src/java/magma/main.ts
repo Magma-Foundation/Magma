@@ -116,18 +116,15 @@
 	}
 	/*private static*/compileAll(state : /*CompileState*/, input : string, folder : /*BiFunction*/</*DivideState*/, string, /* DivideState*/>, mapper : /*BiFunction*/</*CompileState*/, string, /*Tuple*/</*CompileState*/, string>>, merger : /*BiFunction*/</*StringBuilder*/, string, /* StringBuilder*/>): /*Tuple*/</*CompileState*/, string> {
 		let divisions : unknown = divide(input, folder);
-		let current : unknown = new /*Tuple*/<>(state, new /*StringBuilder*/());/*
-        for (var segment : divisions) {
-            var currentState = current.left;
-            var currentElement = current.right;
-
-            var mappedTuple = mapper.apply(currentState, segment);
-            var mappedState = mappedTuple.left;
-            var mappedElement = mappedTuple.right;
-
-            current = new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
-        }*/
-		return new /*Tuple*/<>(current.left, current.right.toString());
+		let folded : unknown = divisions.stream().reduce(new /*Tuple*/</*CompileState*/, /* StringBuilder*/>(state, new /*StringBuilder*/()), (current, segment) => {
+			let currentState : unknown = current.left;
+			let currentElement : unknown = current.right;
+			let mappedTuple : unknown = mapper.apply(currentState, segment);
+			let mappedState : unknown = mappedTuple.left;
+			let mappedElement : unknown = mappedTuple.right;
+			return new /*Tuple*/<>(mappedState, merger.apply(currentElement, mappedElement));
+		}, (_, next) => next);
+		return new /*Tuple*/<>(folded.left, folded.right.toString());
 	}
 	/*private static*/mergeStatements(cache : /*StringBuilder*/, element : string): /*StringBuilder*/ {
 		return cache.append(element);

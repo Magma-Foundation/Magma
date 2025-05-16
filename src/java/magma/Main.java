@@ -157,8 +157,7 @@ public class Main {
     private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
         var divisions = divide(input, folder);
 
-        var current = new Tuple<>(state, new StringBuilder());
-        for (var segment : divisions) {
+        var folded = divisions.stream().reduce(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()), (current, segment) -> {
             var currentState = current.left;
             var currentElement = current.right;
 
@@ -166,10 +165,10 @@ public class Main {
             var mappedState = mappedTuple.left;
             var mappedElement = mappedTuple.right;
 
-            current = new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
-        }
+            return new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
+        }, (_, next) -> next);
 
-        return new Tuple<>(current.left, current.right.toString());
+        return new Tuple<>(folded.left, folded.right.toString());
     }
 
     private static StringBuilder mergeStatements(StringBuilder cache, String element) {
