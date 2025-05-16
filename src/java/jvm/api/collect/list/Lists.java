@@ -10,6 +10,11 @@ import java.util.Arrays;
 @Namespace
 public final class Lists {
     @Actual
+    public static <T> List<T> fromArray(T[] elements) {
+        return new JVMList<>(Arrays.asList(elements));
+    }
+
+    @Actual
     public static <T> List<T> empty() {
         return new JVMList<T>(new ArrayList<T>());
     }

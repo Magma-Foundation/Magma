@@ -32,9 +32,22 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface CharactersInstance {
-	isDigit(c: string): boolean;
-
-	isLetter(c: string): boolean;
-
+import { Result } from "../../../magma/api/result/Result";
+import { Option } from "../../../magma/api/option/Option";
+import { None } from "../../../magma/api/option/None";
+import { Some } from "../../../magma/api/option/Some";
+export class Ok<T, X> implements Result<T, X> {
+	value: T;
+	constructor (value: T) {
+		this.value = value;
+	}
+	findError(): Option<X> {
+		return new None<>();
+	}
+	findValue(): Option<T> {
+		return new Some<>(this.value);
+	}
+	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+		return whenOk(this.value);
+	}
 }

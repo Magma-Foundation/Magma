@@ -17,6 +17,7 @@
 	SingleHead: magma.api.collect.head, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
@@ -24,6 +25,8 @@
 	None: magma.api.option, 
 	Option: magma.api.option, 
 	Some: magma.api.option, 
+	Err: magma.api.result, 
+	Ok: magma.api.result, 
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
@@ -35,6 +38,7 @@ import { Result } from "../../../magma/api/result/Result";
 import { List } from "../../../magma/api/collect/list/List";
 import { Query } from "../../../magma/api/collect/Query";
 export interface Path {
+	asString(): string;
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;
 	walk(): Result<List<Path>, IOError>;

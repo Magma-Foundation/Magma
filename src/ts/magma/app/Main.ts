@@ -17,6 +17,7 @@
 	SingleHead: magma.api.collect.head, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
@@ -24,6 +25,8 @@
 	None: magma.api.option, 
 	Option: magma.api.option, 
 	Some: magma.api.option, 
+	Err: magma.api.result, 
+	Ok: magma.api.result, 
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
@@ -38,17 +41,14 @@ import { None } from "../../magma/api/option/None";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Collector } from "../../magma/api/collect/Collector";
-import { Result } from "../../magma/api/result/Result";
-import { Query } from "../../magma/api/collect/Query";
-import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
-import { EmptyHead } from "../../magma/api/collect/head/EmptyHead";
-import { Head } from "../../magma/api/collect/head/Head";
-import { SingleHead } from "../../magma/api/collect/head/SingleHead";
 import { Path } from "../../magma/api/io/Path";
 import { IOError } from "../../magma/api/io/IOError";
+import { Result } from "../../magma/api/result/Result";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Files } from "../../jvm/api/io/Files";
 import { Console } from "../../magma/api/io/Console";
+import { Queries } from "../../magma/api/collect/Queries";
+import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
 interface MethodHeader {
@@ -284,24 +284,6 @@ class ConstructorHeader implements MethodHeader {
 	}
 	removeModifier(modifier: string): MethodHeader {
 		return this;
-	}
-}
-export class Ok<T, X> implements Result<T, X> {
-	value: T;
-	constructor (value: T) {
-		this.value = value;
-	}
-	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenOk(this.value);
-	}
-}
-export class Err<T, X> implements Result<T, X> {
-	error: X;
-	constructor (error: X) {
-		this.error = error;
-	}
-	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenErr(this.error);
 	}
 }
 class Placeholder {
@@ -569,14 +551,6 @@ class Generic implements Type {
 		return "";
 	}
 }
-class Iterators {
-	static fromOption<T>(option: Option<T>): Query<T> {
-		return new HeadedQuery<T>(option.map((element: T) => Iterators.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));
-	}
-	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element);
-	}
-}
 class VarArgs implements Type {
 	type: Type;
 	constructor (type: Type) {
@@ -635,6 +609,24 @@ class Location {
 	constructor (namespace: List<string>, name: string) {
 		this.namespace = namespace;
 		this.name = name;
+	}
+}
+class ArrayType implements Type {
+	child: Type;
+	constructor (child: Type) {
+		this.child = child;
+	}
+	generate(): string {
+		return child.generate() + "[]";
+	}
+	isFunctional(): boolean {
+		return false;
+	}
+	isVar(): boolean {
+		return false;
+	}
+	generateBeforeName(): string {
+		return "";
 	}
 }
 class Primitive implements Type {
@@ -857,7 +849,7 @@ export class Main {
 		});
 	}
 	static retainDefinitionsFromParameters(parameters: List<Parameter>): List<Definition> {
-		return parameters.query().map((parameter: Parameter) => parameter.asDefinition()).flatMap(Iterators.fromOption).collect(new ListCollector<Definition>());
+		return parameters.query().map((parameter: Parameter) => parameter.asDefinition()).flatMap(Queries.fromOption).collect(new ListCollector<Definition>());
 	}
 	static compileStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>, maybeSuperType: Option<string>): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => {
@@ -945,7 +937,7 @@ export class Main {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(input)));
 	}
 	static or<T>(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>>): Option<Tuple2<CompileState, T>> {
-		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>) => Main.getApply(state, input, rule)).flatMap(Iterators.fromOption).next();
+		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>) => Main.getApply(state, input, rule)).flatMap(Queries.fromOption).next();
 	}
 	static getApply<T>(state: CompileState, input: string, rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		return rule(state, input);
@@ -1172,7 +1164,7 @@ export class Main {
 		}).orElse(oldCaller);
 	}
 	static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
-		return args.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<R>());
+		return args.query().map(mapper).flatMap(Queries.fromOption).collect(new ListCollector<R>());
 	}
 	static parseArgumentOrPlaceholder(state1: CompileState, input: string): Tuple2<CompileState, Argument> {
 		return Main.parseArgument(state1, input).orElseGet(() => new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
@@ -1445,7 +1437,14 @@ export class Main {
 		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate()));
 	}
 	static parseType(state: CompileState, type: string): Option<Tuple2<CompileState, Type>> {
-		return Main.or(state, type, Lists.of(Main.parseVarArgs, Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
+		return Main.or(state, type, Lists.of(Main.parseArrayType, Main.parseVarArgs, Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
+	}
+	static parseArrayType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
+		let stripped = Strings.strip(input);
+		return Main.compileSuffix(stripped, "[]", (s: string) => {
+			let child = Main.parseTypeOrPlaceholder(state, s);
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new ArrayType(child.right())));
+		});
 	}
 	static parseVarArgs(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input);

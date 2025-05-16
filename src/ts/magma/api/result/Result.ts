@@ -17,6 +17,7 @@
 	SingleHead: magma.api.collect.head, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
@@ -24,11 +25,16 @@
 	None: magma.api.option, 
 	Option: magma.api.option, 
 	Some: magma.api.option, 
+	Err: magma.api.result, 
+	Ok: magma.api.result, 
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
+import { Option } from "../../../magma/api/option/Option";
 export interface Result<T, X> {
+	findError(): Option<X>;
+	findValue(): Option<T>;
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
 }

@@ -11,8 +11,9 @@ import magma.api.io.Path;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.api.result.Err;
+import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.app.Main;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,6 +39,11 @@ record JVMPath(java.nio.file.Path path) implements Path {
     }
 
     @Override
+    public String asString() {
+        return this.path.toAbsolutePath().toString();
+    }
+
+    @Override
     public Option<IOError> writeString(String output) {
         try {
             java.nio.file.Files.writeString(this.path, output);
@@ -50,18 +56,18 @@ record JVMPath(java.nio.file.Path path) implements Path {
     @Override
     public Result<String, IOError> readString() {
         try {
-            return new Main.Ok<String, IOError>(java.nio.file.Files.readString(this.path));
+            return new Ok<String, IOError>(java.nio.file.Files.readString(this.path));
         } catch (IOException e) {
-            return new Main.Err<String, IOError>(new JVMIOError(e));
+            return new Err<String, IOError>(new JVMIOError(e));
         }
     }
 
     @Override
     public Result<List<Path>, IOError> walk() {
         try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-            return new Main.Ok<>(new JVMList<>(stream.<Path>map(JVMPath::new).toList()));
+            return new Ok<>(new JVMList<>(stream.<Path>map(JVMPath::new).toList()));
         } catch (IOException e) {
-            return new Main.Err<>(new JVMIOError(e));
+            return new Err<>(new JVMIOError(e));
         }
     }
 

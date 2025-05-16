@@ -1,11 +1,13 @@
 package magma.api.io;
 
-import magma.api.collect.list.List;
 import magma.api.collect.Query;
-import magma.api.result.Result;
+import magma.api.collect.list.List;
 import magma.api.option.Option;
+import magma.api.result.Result;
 
 public interface Path {
+    String asString();
+
     Option<IOError> writeString(String output);
 
     Result<String, IOError> readString();

@@ -7,12 +7,9 @@ import jvm.api.text.Strings;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Collector;
-import magma.api.collect.Query;
-import magma.api.collect.head.EmptyHead;
-import magma.api.collect.head.Head;
+import magma.api.collect.Queries;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
-import magma.api.collect.head.SingleHead;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
 import magma.api.io.Console;
@@ -321,20 +318,6 @@ public final class Main {
         @Override
         public MethodHeader removeModifier(String modifier) {
             return this;
-        }
-    }
-
-    public record Ok<T, X>(T value) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenOk.apply(this.value);
-        }
-    }
-
-    public record Err<T, X>(X error) implements Result<T, X> {
-        @Override
-        public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
-            return whenErr.apply(this.error);
         }
     }
 
@@ -671,16 +654,6 @@ public final class Main {
         }
     }
 
-    private static final class Iterators {
-        static <T> Query<T> fromOption(Option<T> option) {
-            return new HeadedQuery<T>(option.map((T element) -> Iterators.getTSingleHead(element)).orElseGet(() -> new EmptyHead<T>()));
-        }
-
-        private static <T> Head<T> getTSingleHead(T element) {
-            return new SingleHead<T>(element);
-        }
-    }
-
     private record VarArgs(Type type) implements Type {
         @Override
         public String generate() {
@@ -737,6 +710,28 @@ public final class Main {
     }
 
     private record Location(List<String> namespace, String name) {
+    }
+
+    private record ArrayType(Type child) implements Type {
+        @Override
+        public String generate() {
+            return this.child.generate() + "[]";
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
     }
 
     public static void main() {
@@ -1023,7 +1018,7 @@ public final class Main {
     private static List<Definition> retainDefinitionsFromParameters(List<Parameter> parameters) {
         return parameters.query()
                 .map((Parameter parameter) -> parameter.asDefinition())
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<Definition>());
     }
 
@@ -1178,7 +1173,7 @@ public final class Main {
     ) {
         return rules.query()
                 .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> Main.getApply(state, input, rule))
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .next();
     }
 
@@ -1493,7 +1488,7 @@ public final class Main {
     private static <T, R> List<R> retain(List<T> args, Function<T, Option<R>> mapper) {
         return args.query()
                 .map(mapper)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Queries::fromOption)
                 .collect(new ListCollector<R>());
     }
 
@@ -1877,11 +1872,20 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, Type>> parseType(CompileState state, String type) {
         return Main.or(state, type, Lists.of(
+                Main::parseArrayType,
                 Main::parseVarArgs,
                 Main::parseGeneric,
                 Main::parsePrimitive,
                 Main::parseSymbolType
         ));
+    }
+
+    private static Option<Tuple2<CompileState, Type>> parseArrayType(CompileState state, String input) {
+        var stripped = Strings.strip(input);
+        return Main.compileSuffix(stripped, "[]", (String s) -> {
+            var child = Main.parseTypeOrPlaceholder(state, s);
+            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new ArrayType(child.right())));
+        });
     }
 
     private static Option<Tuple2<CompileState, Type>> parseVarArgs(CompileState state, String input) {
