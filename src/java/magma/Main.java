@@ -476,8 +476,18 @@ public class Main {
                 Main::compileAssignment,
                 Main::compileInvokable,
                 createPostRule("++"),
-                createPostRule("--")
+                createPostRule("--"),
+                Main::compileBreak
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileBreak(CompileState state, String input) {
+        if (input.strip().equals("break")) {
+            return Optional.of(new Tuple<>(state, "break"));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createPostRule(String suffix) {

@@ -137,7 +137,7 @@
 		while (true){
 			let maybePopped : unknown = current.pop();
 			if (maybePopped.isEmpty()){
-				/*break*/;
+				break;
 			}
 			let poppedTuple : unknown = maybePopped.get();
 			let poppedState : unknown = poppedTuple.left;
@@ -154,7 +154,7 @@
 		while (true){
 			let maybeTuple : unknown = appended.popAndAppendToTuple();
 			if (maybeTuple.isEmpty()){
-				/*break*/;
+				break;
 			}
 			let tuple : unknown = maybeTuple.get();
 			appended = tuple.left;
@@ -162,7 +162,7 @@
 				appended = appended.popAndAppendToOption().orElse(appended);
 			}
 			if (tuple.right === "\""){
-				/*break*/;
+				break;
 			}
 		}
 		return Optional.of(appended);
@@ -347,7 +347,15 @@
 		return "\n" + "\t".repeat(indent);
 	}
 	/*private static*/compileFunctionStatementValue(state : /*CompileState*/, withoutEnd : string): /*Tuple*/</*CompileState*/, string> {
-		return compileOrPlaceholder(state, withoutEnd, List.of(Main.compileReturnWithValue, Main.compileAssignment, Main.compileInvokable, createPostRule("++"), createPostRule("--")));
+		return compileOrPlaceholder(state, withoutEnd, List.of(Main.compileReturnWithValue, Main.compileAssignment, Main.compileInvokable, createPostRule("++"), createPostRule("--"), Main.compileBreak));
+	}
+	/*private static*/compileBreak(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
+		if (input.strip().equals("break")){
+			return Optional.of(new /*Tuple*/<>(state, "break"));
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 	/*private static*/createPostRule(suffix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
 		return (state1, input) => compileSuffix(input.strip(), suffix, (child) => {
