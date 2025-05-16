@@ -712,14 +712,15 @@ export class Main {
 	static compileAndWrite(state: CompileState, source: Source, input: string): Tuple2<CompileState, Option<IOError>> {
 		let output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
 		let location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
-		let target = Files.get(".", "src", "ts").resolveChildSegments(location.namespace).resolveChild(location.name + ".ts");
-		let parent = target.getParent();
-		if (!parent.exists()){
-			let maybeError = parent.createDirectories();
+		let targetDirectory = Files.get(".", "src", "ts");
+		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
+		if (!targetParent.exists()){
+			let maybeError = targetParent.createDirectories();
 			if (maybeError.isPresent()){
 				return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
+		let target = targetParent.resolveChild(location.name + ".ts");
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {

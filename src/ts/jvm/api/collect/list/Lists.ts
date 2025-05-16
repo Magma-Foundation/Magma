@@ -8,105 +8,121 @@ import { Some } from "../../../../magma/api/option/Some";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../../../magma/api/Tuple2Impl";
 import { ListsInstance } from "./ListsInstance";
-export function NodeList<T>(elements: T[]): List<T> {
-    return {
-        addLast(element: T): List<T> {
-            return NodeList([...elements, element]);
-        },
 
-        query(): Query<T> {
-            return this.queryWithIndices().map(tuple => tuple.right());
-        },
+export class NodeList<T> implements List<T> {
+  private readonly elements: T[];
 
-        size(): number {
-            return elements.length;
-        },
+  constructor(elements: T[]) {
+    this.elements = elements;
+  }
 
-        subList(startInclusive: number, endExclusive: number): Option<List<T>> {
-            if (
-                startInclusive < 0 ||
-                endExclusive > elements.length ||
-                startInclusive > endExclusive
-            ) {
-                return new None();
-            }
-            return new Some(NodeList(elements.slice(startInclusive, endExclusive)));
-        },
+  addLast(element: T): List<T> {
+    return new NodeList([...this.elements, element]);
+  }
 
-        findLast(): Option<T> {
-            if (elements.length === 0) return new None();
-            return new Some(elements[elements.length - 1]);
-        },
+  addFirst(element: T): List<T> {
+    return new NodeList([element, ...this.elements]);
+  }
 
-        findFirst(): Option<T> {
-            if (elements.length === 0) return new None();
-            return new Some(elements[0]);
-        },
+  addAll(others: List<T>): List<T> {
+    return others
+      .query()
+      .foldWithInitial(this as List<T>, (current, e) => current.addLast(e));
+  }
 
-        find(index: number): Option<T> {
-            if (index < 0 || index >= elements.length) return new None();
-            return new Some(elements[index]);
-        },
+  query(): Query<T> {
+    return this.queryWithIndices().map(tuple => tuple.right());
+  }
 
-        queryWithIndices(): Query<Tuple2<number, T>> {
-            return new HeadedQuery(new RangeHead(elements.length))
-                .map(index => new Tuple2Impl(index, elements[index]));
-        },
+  queryWithIndices(): Query<Tuple2<number, T>> {
+    return new HeadedQuery(new RangeHead(this.elements.length))
+      .map(i => new Tuple2Impl(i, this.elements[i]));
+  }
 
-        addAll(others: List<T>): List<T> {
-            return others.query().foldWithInitial(this, (current, element) => current.addLast(element));
-        },
+  queryReversed(): Query<T> {
+    return new HeadedQuery(new RangeHead(this.elements.length))
+      .map(i => this.elements.length - i - 1)
+      .map(i => this.elements[i]);
+  }
 
-        contains(element: T): boolean {
-            return elements.indexOf(element) !== -1;
-        },
+  size(): number {
+    return this.elements.length;
+  }
 
-        queryReversed(): Query<T> {
-            return new HeadedQuery(new RangeHead(elements.length))
-                .map(index => elements.length - index - 1)
-                .map(index => elements[index]);
-        },
+  isEmpty(): boolean {
+    return this.elements.length === 0;
+  }
 
-        addFirst(element: T): List<T> {
-            return NodeList([element, ...elements]);
-        },
+  contains(element: T): boolean {
+    return this.elements.indexOf(element) !== -1;
+  }
 
-        isEmpty(): boolean {
-            return elements.length === 0;
-        },
+  subList(startInclusive: number, endExclusive: number): Option<List<T>> {
+    if (
+      startInclusive < 0 ||
+      endExclusive > this.elements.length ||
+      startInclusive > endExclusive
+    ) {
+      return new None();
+    }
+    return new Some(
+      new NodeList(this.elements.slice(startInclusive, endExclusive))
+    );
+  }
 
-        equalsTo(other: List<T>): boolean {
-            if (this.size() !== other.size()) return false;
+  findFirst(): Option<T> {
+    return this.isEmpty()
+      ? new None()
+      : new Some(this.elements[0]);
+  }
 
-            return this.query().zip(other.query())
-                .allMatch(tuple => tuple.left() === tuple.right());
-        },
+  findLast(): Option<T> {
+    return this.isEmpty()
+      ? new None()
+      : new Some(this.elements[this.elements.length - 1]);
+  }
 
-        removeValue(element: T): List<T> {
-            const idx = elements.indexOf(element);
-            if (idx === -1) return this;
-            return NodeList([
-                ...elements.slice(0, idx),
-                ...elements.slice(idx + 1),
-            ]);
-        },
+  find(index: number): Option<T> {
+    if (index < 0 || index >= this.elements.length) {
+      return new None();
+    }
+    return new Some(this.elements[index]);
+  }
 
-        removeLast(): Option<List<T>> {
-            if (elements.length === 0) return new None();
-            return new Some(NodeList(elements.slice(0, elements.length - 1)));
-        },
-    };
+  removeValue(element: T): List<T> {
+    const idx = this.elements.indexOf(element);
+    if (idx === -1) return this;
+    return new NodeList([
+      ...this.elements.slice(0, idx),
+      ...this.elements.slice(idx + 1),
+    ]);
+  }
+
+  removeLast(): Option<List<T>> {
+    if (this.isEmpty()) return new None();
+    return new Some(new NodeList(this.elements.slice(0, -1)));
+  }
+
+  equalsTo(other: List<T>): boolean {
+    if (this.size() !== other.size()) return false;
+    return this.query()
+      .zip(other.query())
+      .allMatch(tuple => tuple.left() === tuple.right());
+  }
 }
 
+// And now update your ListsInstance to use the class:
 
 export const Lists: ListsInstance = {
-    empty: function <T>(): List<T> {
-        return this.fromArray([]);
-    },
-    of: function <T>(...elements: T[]): List<T> {
-        return this.fromArray(elements);
-    },
-    fromArray: function <T>(elements: T[]): List<T> {
-        return NodeList(elements);
-    }
+  empty: function <T>(): List<T> {
+    return new NodeList<T>([]);
+  },
+
+  of: function <T>(...elements: T[]): List<T> {
+    return new NodeList<T>(elements);
+  },
+
+  fromArray: function <T>(elements: T[]): List<T> {
+    return new NodeList<T>(elements);
+  },
 };

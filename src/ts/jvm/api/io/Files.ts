@@ -100,12 +100,8 @@ class NodePathImpl implements Path {
     }
 
     relativize(source: Path): Path {
-        const src = source.query()
-            .foldWithMapper(first => first, (current, next) => paths.join(current, next))
-            .orElse("");
-
-        const rel = paths.relative(src, this.asString());
-        return new NodePathImpl(Lists.fromArray(rel.split(paths.sep)));
+        const relative = paths.relative(this.asString(), source.asString());
+        return new NodePathImpl(Lists.fromArray(relative.split(paths.sep)));
     }
 
     getParent(): Path {
@@ -115,7 +111,7 @@ class NodePathImpl implements Path {
 
     query(): Query<string> {
         return new HeadedQuery(new RangeHead(this.elements.size()))
-            .map(this.elements.find.bind(this))
+            .map(this.elements.find.bind(this.elements))
             .flatMap(Queries.fromOption);
     }
 

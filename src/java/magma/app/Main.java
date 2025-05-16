@@ -780,18 +780,16 @@ public final class Main {
 
         var location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
 
-        var target = Files.get(".", "src", "ts")
-                .resolveChildSegments(location.namespace)
-                .resolveChild(location.name + ".ts");
-
-        var parent = target.getParent();
-        if (!parent.exists()) {
-            var maybeError = parent.createDirectories();
+        var targetDirectory = Files.get(".", "src", "ts");
+        var targetParent = targetDirectory.resolveChildSegments(location.namespace);
+        if (!targetParent.exists()) {
+            var maybeError = targetParent.createDirectories();
             if (maybeError.isPresent()) {
                 return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
             }
         }
 
+        var target = targetParent.resolveChild(location.name + ".ts");
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
     }
 

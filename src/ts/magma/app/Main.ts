@@ -1,36 +1,69 @@
 /*[
 	JVMList: jvm.api.collect.list, 
+	JVMList: jvm.api.collect.list, 
+	Lists: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
 	Files: jvm.api.io, 
+	Files: jvm.api.io, 
+	JVMPath: jvm.api.io, 
 	JVMPath: jvm.api.io, 
 	Characters: jvm.api.text, 
+	Characters: jvm.api.text, 
+	Strings: jvm.api.text, 
 	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
+	Collector: magma.api.collect, 
+	EmptyHead: magma.api.collect.head, 
 	EmptyHead: magma.api.collect.head, 
 	FlatMapHead: magma.api.collect.head, 
+	FlatMapHead: magma.api.collect.head, 
+	Head: magma.api.collect.head, 
 	Head: magma.api.collect.head, 
 	HeadedQuery: magma.api.collect.head, 
+	HeadedQuery: magma.api.collect.head, 
+	MapHead: magma.api.collect.head, 
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
+	RangeHead: magma.api.collect.head, 
+	SingleHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
 	ZipHead: magma.api.collect.head, 
+	ZipHead: magma.api.collect.head, 
+	List: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	ListCollector: magma.api.collect.list, 
+	Queries: magma.api.collect, 
 	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
+	Query: magma.api.collect, 
+	Console: magma.api.io, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
+	IOError: magma.api.io, 
+	Path: magma.api.io, 
 	Path: magma.api.io, 
 	None: magma.api.option, 
+	None: magma.api.option, 
+	Option: magma.api.option, 
 	Option: magma.api.option, 
 	Some: magma.api.option, 
+	Some: magma.api.option, 
+	Err: magma.api.result, 
 	Err: magma.api.result, 
 	Ok: magma.api.result, 
+	Ok: magma.api.result, 
+	Result: magma.api.result, 
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
+	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app, 
 	Main: magma.app
 ]*/
 import { Option } from "../../magma/api/option/Option";
@@ -679,14 +712,15 @@ export class Main {
 	static compileAndWrite(state: CompileState, source: Source, input: string): Tuple2<CompileState, Option<IOError>> {
 		let output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
 		let location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
-		let target = Files.get(".", "src", "ts").resolveChildSegments(location.namespace).resolveChild(location.name + ".ts");
-		let parent = target.getParent();
-		if (!parent.exists()){
-			let maybeError = parent.createDirectories();
+		let targetDirectory = Files.get(".", "src", "ts");
+		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
+		if (!targetParent.exists()){
+			let maybeError = targetParent.createDirectories();
 			if (maybeError.isPresent()){
 				return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
+		let target = targetParent.resolveChild(location.name + ".ts");
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {
