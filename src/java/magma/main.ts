@@ -195,11 +195,10 @@
 		}
 		if (c === "}" && appended.isShallow()){
 			return appended.advance().exit();
-		}/*
-
-        if (c == '{' || c == '(') {
-            return appended.enter();
-        }*/
+		}
+		if (c === "{" || c === "("){
+			return appended.enter();
+		}
 		if (c === "}" || c === ")"){
 			return appended.exit();
 		}
@@ -296,14 +295,32 @@
 	}
 	/*private static*/compileBlock(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileSuffix(input.strip(), "}", (withoutEnd) => {
-			return compileFirst(withoutEnd, "{", (beforeContent, content) => {
-				return compileBlockHeader(state, beforeContent).flatMap((headerTuple) => {
-					let contentTuple : unknown = compileFunctionStatements(headerTuple.left.enterDepth(), content);
-					let indent : unknown = generateIndent(state.depth());
-					return Optional.of(new /*Tuple*/<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+			return compileSplit(splitFolded(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd, content) => {
+				return compileSuffix(beforeContentWithEnd, "{", (beforeContent) => {
+					return compileBlockHeader(state, beforeContent).flatMap((headerTuple) => {
+						let contentTuple : unknown = compileFunctionStatements(headerTuple.left.enterDepth(), content);
+						let indent : unknown = generateIndent(state.depth());
+						return Optional.of(new /*Tuple*/<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+					});
 				});
 			});
 		});
+	}
+	/*private static*/foldBlockStarts(state : /*DivideState*/, c : string): /*DivideState*/ {
+		let appended : unknown = state.append(c);
+		if (c === "{"){
+			let entered : unknown = appended.enter();
+			if (appended.isShallow()){
+				return entered.advance();
+			}
+			else {
+				return entered;
+			}
+		}
+		if (c === "}"){
+			return appended.exit();
+		}
+		return appended;
 	}
 	/*private static*/compileBlockHeader(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileOr(state, input, List.of(Main.compileIf, Main.compileElse));

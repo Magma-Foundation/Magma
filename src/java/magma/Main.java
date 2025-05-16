@@ -399,15 +399,35 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
         return compileSuffix(input.strip(), "}", withoutEnd -> {
-            return compileFirst(withoutEnd, "{", (beforeContent, content) -> {
-                return compileBlockHeader(state, beforeContent).flatMap(headerTuple -> {
-                    var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
+            return compileSplit(splitFolded(withoutEnd, "", Main::foldBlockStarts), (beforeContentWithEnd, content) -> {
+                return compileSuffix(beforeContentWithEnd, "{", beforeContent -> {
+                    return compileBlockHeader(state, beforeContent).flatMap(headerTuple -> {
+                        var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
 
-                    var indent = generateIndent(state.depth());
-                    return Optional.of(new Tuple<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+                        var indent = generateIndent(state.depth());
+                        return Optional.of(new Tuple<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+                    });
                 });
             });
         });
+    }
+
+    private static DivideState foldBlockStarts(DivideState state, char c) {
+        var appended = state.append(c);
+        if (c == '{') {
+            var entered = appended.enter();
+            if (appended.isShallow()) {
+                return entered.advance();
+            }
+            else {
+                return entered;
+            }
+        }
+
+        if (c == '}') {
+            return appended.exit();
+        }
+        return appended;
     }
 
     private static Optional<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
