@@ -87,6 +87,8 @@ public final class Main {
         List<T> addAll(List<T> others);
 
         boolean contains(T element);
+
+        Query<T> queryReversed();
     }
 
     private interface Head<T> {
@@ -119,6 +121,8 @@ public final class Main {
         boolean isFunctional();
 
         boolean isVar();
+
+        String generateBeforeName();
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -287,9 +291,9 @@ public final class Main {
         }
 
         Option<Type> resolve(String name) {
-            return this.definitions.query()
+            return this.definitions.queryReversed()
                     .filter((Definition definition) -> Strings.equalsTo(definition.name, name))
-                    .map(Definition::type)
+                    .map((Definition definition1) -> definition1.type)
                     .next();
         }
     }
@@ -311,7 +315,11 @@ public final class Main {
     }
 
     private record Definition(
-            List<String> annotations, List<String> modifiers, List<String> typeParams, Type type, String name
+            List<String> annotations,
+            List<String> modifiers,
+            List<String> typeParams,
+            Type type,
+            String name
     ) implements MethodHeader, Parameter {
         @Override
         public String generate() {
@@ -331,7 +339,7 @@ public final class Main {
                     .collect(new Joiner(""))
                     .orElse("");
 
-            return joinedModifiers + this.name + joinedTypeParams + afterName + this.generateType();
+            return joinedModifiers + type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
         }
 
         private String generateType() {
@@ -591,6 +599,11 @@ public final class Main {
         public boolean isVar() {
             return false;
         }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
     }
 
     private record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
@@ -663,6 +676,11 @@ public final class Main {
         @Override
         public boolean isVar() {
             return false;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
         }
     }
 
@@ -830,6 +848,11 @@ public final class Main {
         public boolean isVar() {
             return false;
         }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
     }
 
     private static class Generic implements Type {
@@ -855,6 +878,11 @@ public final class Main {
         public boolean isVar() {
             return false;
         }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
     }
 
     private static final class Iterators {
@@ -873,7 +901,7 @@ public final class Main {
 
             @Override
             public Query<T> query() {
-                return this.queryWithIndices().map(Tuple::right);
+                return this.queryWithIndices().map((Tuple<Integer, T> integerTTuple) -> integerTTuple.right);
             }
 
             @Override
@@ -915,6 +943,12 @@ public final class Main {
             @Override
             public boolean contains(T element) {
                 return this.list.contains(element);
+            }
+
+            @Override
+            public Query<T> queryReversed() {
+                var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
+                return query.map((Integer index) -> this.list.size() - index - 1).map((Integer index1) -> this.list.get(index1));
             }
 
             @Override
@@ -980,6 +1014,28 @@ public final class Main {
 
         private static boolean isLetter(char c) {
             return Character.isLetter(c);
+        }
+    }
+
+    private record VarArgs(Type type) implements Type {
+        @Override
+        public String generate() {
+            return this.type.generate() + "[]";
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "...";
         }
     }
 
@@ -1935,10 +1991,19 @@ public final class Main {
 
     private static Option<Tuple<CompileState, Type>> parseType(CompileState state, String type) {
         return Main.or(state, type, Lists.of(
+                Main::parseVarArgs,
                 Main::parseGeneric,
                 Main::parsePrimitive,
                 Main::parseSymbolType
         ));
+    }
+
+    private static Option<Tuple<CompileState, Type>> parseVarArgs(CompileState state, String input) {
+        var stripped = input.strip();
+        return Main.compileSuffix(stripped, "...", s -> {
+            var child = Main.parseTypeOrPlaceholder(state, s);
+            return new Some<>(new Tuple<>(child.left, new VarArgs(child.right)));
+        });
     }
 
     private static Option<Tuple<CompileState, Type>> parseSymbolType(CompileState state, String input) {
@@ -2162,7 +2227,7 @@ public final class Main {
         }
 
         @Override
-        public java.lang.String generate() {
+        public String generate() {
             return this.value;
         }
 
@@ -2174,6 +2239,11 @@ public final class Main {
         @Override
         public boolean isVar() {
             return Primitive.Var == this;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
         }
     }
 }

@@ -41,6 +41,7 @@ interface List<T> {
 	queryWithIndices(): Query<Tuple<number, T>>;
 	addAll(others: List<T>): List<T>;
 	contains(element: T): boolean;
+	queryReversed(): Query<T>;
 }
 interface Head<T> {
 	next(): Option<T>;
@@ -63,6 +64,7 @@ interface Type  {
 	generate(): string;
 	isFunctional(): boolean;
 	isVar(): boolean;
+	generateBeforeName(): string;
 }
 class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
@@ -217,7 +219,7 @@ class CompileState {
 		return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
 	}
 	resolve(name: string): Option<Type> {
-		return this.definitions.query().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map(Definition.type).next();
+		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -257,7 +259,7 @@ class Definition {
 	generateWithAfterName(afterName: string): string {
 		let joinedTypeParams = this.joinTypeParams();
 		let joinedModifiers = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
-		return joinedModifiers + this.name + joinedTypeParams + afterName + this.generateType();
+		return joinedModifiers + type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 	}
 	generateType(): string {
 		if (this.type.isVar()){
@@ -384,7 +386,7 @@ class Some<T> implements Option<T> {
 		return new Tuple<>(true, this.value);
 	}
 	and<R>(other: () => Option<R>): Option<Tuple<T, R>> {
-		return other.get().map((otherValue: R) => new Tuple<>(this.value, otherValue));
+		return other().map((otherValue: R) => new Tuple<>(this.value, otherValue));
 	}
 }
 class None<T> implements Option<T> {
@@ -406,7 +408,7 @@ class None<T> implements Option<T> {
 	ifPresent(consumer: (arg0 : T) => void): void {
 	}
 	or(other: () => Option<T>): Option<T> {
-		return other.get();
+		return other();
 	}
 	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
 		return new None<>();
@@ -446,6 +448,9 @@ class Placeholder {
 	}
 	isVar(): boolean {
 		return false;
+	}
+	generateBeforeName(): string {
+		return "";
 	}
 }
 class MapHead<T, R> implements Head<R> {
@@ -509,6 +514,9 @@ class SymbolNode {
 	}
 	isVar(): boolean {
 		return false;
+	}
+	generateBeforeName(): string {
+		return "";
 	}
 }
 class StringValue implements Value {
@@ -640,6 +648,9 @@ class FunctionType implements Type {
 	isVar(): boolean {
 		return false;
 	}
+	generateBeforeName(): string {
+		return "";
+	}
 }
 class Generic implements Type {
 	base: string;
@@ -657,6 +668,9 @@ class Generic implements Type {
 	isVar(): boolean {
 		return false;
 	}
+	generateBeforeName(): string {
+		return "";
+	}
 }
 class Iterators  {
 	static fromOption<T>(option: Option<T>): Query<T> {
@@ -673,7 +687,7 @@ class JVMList<T> implements List<T> {
 		return this;
 	}
 	query(): Query<T> {
-		return this.queryWithIndices().map(Tuple.right);
+		return this.queryWithIndices().map((integerTTuple: Tuple<number, T>) => integerTTuple.right);
 	}
 	size(): number {
 		return this.list.size();
@@ -702,6 +716,10 @@ class JVMList<T> implements List<T> {
 	}
 	contains(element: T): boolean {
 		return this.list.contains(element);
+	}
+	queryReversed(): Query<T> {
+		let query = new HeadedQuery<number>(new RangeHead(this.list.size()));
+		return query.map((index: number) => this.list.size() - index - 1).map((index1: number) => this.list.get(index1));
 	}
 	subList(startInclusive: number, endExclusive: number): Option<List<T>> {
 		return new Some<>(this.subList0(startInclusive, endExclusive));
@@ -752,15 +770,32 @@ class Characters  {
 		return Character.isLetter(c);
 	}
 }
-class Primitive implements Type {
-	static Unknown = new Primitive("unknown");
-	
-	value: string;
-	constructor(value : string) {
-		this.value = value;
+class VarArgs implements Type {
+	type: Type;
+	constructor (type: Type) {
+		this.type = type;
 	}
-	
-	generate(): /*java.lang.String*/ {
+	generate(): string {
+		return this.type.generate() + "[]";
+	}
+	isFunctional(): boolean {
+		return false;
+	}
+	isVar(): boolean {
+		return false;
+	}
+	generateBeforeName(): string {
+		return "...";
+	}
+}
+class Primitive implements Type {
+	Unknown("unknown"): /*Void("void"),*/;
+	value: string;/*
+
+        Primitive(String value) {
+            this.value = value;
+        }*/
+	generate(): string {
 		return this.value;
 	}
 	isFunctional(): boolean {
@@ -768,11 +803,10 @@ class Primitive implements Type {
 	}
 	isVar(): boolean {
 		return Primitive.Var === this;
-	}/*
-
-Primitive(String value) {
-	this.value = value;
-}*/
+	}
+	generateBeforeName(): string {
+		return "";
+	}
 }
 class Main  {
 	static main(): void {
@@ -1433,7 +1467,11 @@ class Main  {
 		return Main.parseType(state, type).map((tuple: Tuple<CompileState, Type>) => new Tuple<>(tuple.left, tuple.right.generate()));
 	}
 	static parseType(state: CompileState, type: string): Option<Tuple<CompileState, Type>> {
-		return Main.or(state, type, Lists.of(Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
+		return Main.or(state, type, Lists.of(Main.parseVarArgs, Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
+	}
+	static parseVarArgs(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
+		let stripped = input.strip();
+		return Main.compileSuffix(stripped, "...");
 	}
 	static parseSymbolType(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
 		let stripped = Strings.strip(input);
