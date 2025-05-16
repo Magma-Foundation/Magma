@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -124,14 +125,23 @@ public class Main {
         }
     }
 
-    private record Definition(Optional<String> maybeBeforeType, String name, String type) implements MethodHeader {
+    private record Definition(Optional<String> maybeBeforeType, String name, List<String> typeParams,
+                              String type) implements MethodHeader {
         private String generate() {
             return this.generateWithAfterName(" ");
         }
 
         @Override
         public String generateWithAfterName(String afterName) {
-            return this.name + afterName + ": " + this.type();
+            var joinedTypeParams = this.joinTypeParams();
+            return this.name + joinedTypeParams + afterName + ": " + this.type();
+        }
+
+        private String joinTypeParams() {
+            if (this.typeParams.isEmpty()) {
+                return "";
+            }
+            return "<" + String.join(", ", this.typeParams) + ">";
         }
     }
 
@@ -692,11 +702,7 @@ public class Main {
 
             return compilePrefix(strippedBeforeArrow, "(", withoutStart -> {
                 return compileSuffix(withoutStart, ")", withoutEnd -> {
-                    var paramNames = divide(withoutEnd, Main::foldValues)
-                            .stream()
-                            .map(String::strip)
-                            .filter(value -> !value.isEmpty())
-                            .toList();
+                    var paramNames = divideValues(withoutEnd);
 
                     if (paramNames.stream().allMatch(Main::isSymbol)) {
                         return getCompileStateStringTuple(state, paramNames, afterArrow);
@@ -858,13 +864,27 @@ public class Main {
 
     private static Optional<Tuple<CompileState, Definition>> compileDefinition(CompileState state, String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
-            var splits = splitFoldedLast(beforeName.strip(), " ", Main::foldTypeSeparators);
-            return compileSplit(splits, (beforeType, type) -> {
-                return assembleDefinition(state, Optional.of(beforeType), name, type);
+            return compileSplit(splitFoldedLast(beforeName.strip(), " ", Main::foldTypeSeparators), (beforeType, type) -> {
+                return compileSuffix(beforeType.strip(), ">", withoutTypeParamEnd -> {
+                    return compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams, typeParamsString) -> {
+                        var typeParams = divideValues(typeParamsString);
+                        return assembleDefinition(state, Optional.of(beforeTypeParams), name, typeParams, type);
+                    });
+                }).or(() -> {
+                    return assembleDefinition(state, Optional.of(beforeType), name, Collections.emptyList(), type);
+                });
             }).or(() -> {
-                return assembleDefinition(state, Optional.empty(), name, beforeName);
+                return assembleDefinition(state, Optional.empty(), name, Collections.emptyList(), beforeName);
             });
         });
+    }
+
+    private static List<String> divideValues(String s2) {
+        return divide(s2, Main::foldValues)
+                .stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .toList();
     }
 
     private static DivideState foldTypeSeparators(DivideState state, char c) {
@@ -882,10 +902,10 @@ public class Main {
         return appended;
     }
 
-    private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, String type) {
+    private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, List<String> typeParams, String type) {
         var typeTuple = compileTypeOrPlaceholder(state, type);
 
-        var generated = new Definition(maybeBeforeType, name, typeTuple.right);
+        var generated = new Definition(maybeBeforeType, name, typeParams, typeTuple.right);
         return Optional.of(new Tuple<>(typeTuple.left, generated));
     }
 

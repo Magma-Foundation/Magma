@@ -2,7 +2,7 @@ interface MethodHeader {
 	generateWithAfterName(afterName : string): string;
 }
 interface Result<T, X> {
-	match(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R;
+	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R;
 }
 class DivideState {
 	segments : List<string>;
@@ -91,7 +91,14 @@ class Definition {
 		return this.generateWithAfterName(" ");
 	}
 	generateWithAfterName(afterName : string): string {
-		return this.name + afterName + ": " + this.type();
+		let joinedTypeParams : unknown = this.joinTypeParams();
+		return this.name + joinedTypeParams + afterName + ": " + this.type();
+	}
+	joinTypeParams(): string {
+		if (this.typeParams.isEmpty()){
+			return "";
+		}
+		return "<" + String.join(", ", this.typeParams) + ">";
 	}
 }
 class ConstructorHeader implements MethodHeader {
@@ -100,12 +107,12 @@ class ConstructorHeader implements MethodHeader {
 	}
 }
 class Ok<T, X> {
-	match(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
+	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenOk.apply(this.value);
 	}
 }
 class Err<T, X> {
-	match(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
+	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenErr.apply(this.error);
 	}
 }
@@ -489,7 +496,7 @@ class Main {
 			}
 			return compilePrefix(strippedBeforeArrow, "(", (withoutStart) => {
 				return compileSuffix(withoutStart, ")", (withoutEnd) => {
-					let paramNames : unknown = divide(withoutEnd, Main.foldValues).stream().map(String.strip).filter((value) => !value.isEmpty()).toList();
+					let paramNames : unknown = divideValues(withoutEnd);
 					if (paramNames.stream().allMatch(Main.isSymbol)){
 						return getCompileStateStringTuple(state, paramNames, afterArrow);
 					}
@@ -619,13 +626,22 @@ class Main {
 	}
 	compileDefinition(state : CompileState, input : string): Optional<Tuple<CompileState, Definition>> {
 		return compileLast(input.strip(), " ", (beforeName, name) => {
-			let splits : unknown = splitFoldedLast(beforeName.strip(), " ", Main.foldTypeSeparators);
-			return compileSplit(splits, (beforeType, type) => {
-				return assembleDefinition(state, Optional.of(beforeType), name, type);
+			return compileSplit(splitFoldedLast(beforeName.strip(), " ", Main.foldTypeSeparators), (beforeType, type) => {
+				return compileSuffix(beforeType.strip(), ">", (withoutTypeParamEnd) => {
+					return compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams, typeParamsString) => {
+						let typeParams : unknown = divideValues(typeParamsString);
+						return assembleDefinition(state, Optional.of(beforeTypeParams), name, typeParams, type);
+					});
+				}).or(() => {
+					return assembleDefinition(state, Optional.of(beforeType), name, Collections.emptyList(), type);
+				});
 			}).or(() => {
-				return assembleDefinition(state, Optional.empty(), name, beforeName);
+				return assembleDefinition(state, Optional.empty(), name, Collections.emptyList(), beforeName);
 			});
 		});
+	}
+	divideValues(s2 : string): List<string> {
+		return divide(s2, Main.foldValues).stream().map(String.strip).filter((value) => !value.isEmpty()).toList();
 	}
 	foldTypeSeparators(state : DivideState, c : string): DivideState {
 		if (c === " " && state.isLevel()){
@@ -640,9 +656,9 @@ class Main {
 		}
 		return appended;
 	}
-	assembleDefinition(state : CompileState, maybeBeforeType : Optional<string>, name : string, type : string): Optional<Tuple<CompileState, Definition>> {
+	assembleDefinition(state : CompileState, maybeBeforeType : Optional<string>, name : string, typeParams : List<string>, type : string): Optional<Tuple<CompileState, Definition>> {
 		let typeTuple : unknown = compileTypeOrPlaceholder(state, type);
-		let generated : unknown = new Definition(maybeBeforeType, name, typeTuple.right);
+		let generated : unknown = new Definition(maybeBeforeType, name, typeParams, typeTuple.right);
 		return Optional.of(new Tuple<>(typeTuple.left, generated));
 	}
 	compileTypeOrPlaceholder(state : CompileState, type : string): Tuple<CompileState, string> {
@@ -735,26 +751,26 @@ class Main {
 		}
 		return appended;
 	}
-	compileLast(input : string, infix : string, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
+	compileLast<T>(input : string, infix : string, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
 		return compileInfix(input, infix, Main.findLast, mapper);
 	}
 	findLast(input : string, infix : string): number {
 		return input.lastIndexOf(infix);
 	}
-	compileSuffix(input : string, suffix : string, mapper : (arg0 : string) => Optional<T>): Optional<T> {
+	compileSuffix<T>(input : string, suffix : string, mapper : (arg0 : string) => Optional<T>): Optional<T> {
 		if (!input.endsWith(suffix)){
 			return Optional.empty();
 		}
 		let content : unknown = input.substring(0, input.length() - suffix.length());
 		return mapper.apply(content);
 	}
-	compileFirst(input : string, infix : string, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
+	compileFirst<T>(input : string, infix : string, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
 		return compileInfix(input, infix, Main.findFirst, mapper);
 	}
-	compileInfix(input : string, infix : string, locator : BiFunction<string, string, number>, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
+	compileInfix<T>(input : string, infix : string, locator : BiFunction<string, string, number>, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
 		return compileSplit(split(input, infix, locator), mapper);
 	}
-	compileSplit(splitter : Optional<Tuple<string, string>>, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
+	compileSplit<T>(splitter : Optional<Tuple<string, string>>, mapper : BiFunction<string, string, Optional<T>>): Optional<T> {
 		return splitter.flatMap((tuple) => mapper.apply(tuple.left, tuple.right));
 	}
 	split(input : string, infix : string, locator : BiFunction<string, string, number>): Optional<Tuple<string, string>> {
