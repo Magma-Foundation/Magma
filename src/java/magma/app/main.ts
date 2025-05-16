@@ -4,6 +4,7 @@ import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Head } from "../../magma/api/collect/Head";
 import { HeadedQuery } from "../../magma/api/collect/HeadedQuery";
 import { List } from "../../magma/api/collect/List";
+import { Lists } from "../../magma/api/collect/Lists";
 import { Query } from "../../magma/api/collect/Query";
 import { RangeHead } from "../../magma/api/collect/RangeHead";
 import { IOError } from "../../magma/api/io/IOError";
@@ -11,8 +12,6 @@ import { Path } from "../../magma/api/io/Path";
 import { Option } from "../../magma/api/option/Option";
 import { Result } from "../../magma/api/result/Result";
 import { Files } from "../../magma/jvm/Files";
-import { ArrayList } from "../../java/util/ArrayList";
-import { Arrays } from "../../java/util/Arrays";
 import { BiFunction } from "../../java/util/function/BiFunction";
 import { Consumer } from "../../java/util/function/Consumer";
 import { Function } from "../../java/util/function/Function";
@@ -626,10 +625,6 @@ class Iterators  {
 	static getTSingleHead<T>(element: T): Head<T> {
 		return new SingleHead<T>(element);
 	}
-}
-export class Lists  {
-	static empty<T>(): List<T>;
-	static of<T>(...elements: T[]): List<T>;
 }
 class Strings  {
 	static length(stripped: string): number;

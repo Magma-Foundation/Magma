@@ -3,6 +3,7 @@ package magma.jvm;
 import magma.Actual;
 import magma.api.collect.HeadedQuery;
 import magma.api.collect.List;
+import magma.api.collect.Lists;
 import magma.api.collect.Query;
 import magma.api.collect.RangeHead;
 import magma.api.io.IOError;
@@ -62,7 +63,7 @@ public final class Files {
         @Override
         public Result<List<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-                return new Main.Ok<>(new Main.Lists.JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
+                return new Main.Ok<>(new Lists.JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
             } catch (IOException e) {
                 return new Main.Err<>(new JVMPath.JVMIOError(e));
             }
