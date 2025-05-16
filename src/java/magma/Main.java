@@ -198,15 +198,13 @@ public class Main {
 
     private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<StringBuilder, String, StringBuilder> merger) {
         var folded = parseAll(state, input, folder, mapper);
-        return generateAll(folded.left, folded.right, merger);
+        return new Tuple<>(folded.left, generateAll(folded.right, merger));
     }
 
-    private static Tuple<CompileState, String> generateAll(CompileState state, List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        var output = elements.stream()
+    private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
+        return elements.stream()
                 .reduce(new StringBuilder(), merger, (_, next) -> next)
                 .toString();
-
-        return new Tuple<>(state, output);
     }
 
     private static Tuple<CompileState, List<String>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
@@ -943,21 +941,38 @@ public class Main {
     private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
-                var argumentsTuple = compileValues(state, argumentsString, Main::compileTypeArgument);
-                return Optional.of(new Tuple<>(argumentsTuple.left, baseString + "<" + argumentsTuple.right + ">"));
+                var argumentsTuple = parseValues(state, argumentsString, Main::compileTypeArgument);
+                var argumentsState = argumentsTuple.left;
+                var arguments = argumentsTuple.right;
+
+                var strippedBaseString = baseString.strip();
+                if (strippedBaseString.equals("Function")) {
+                    return Optional.of(new Tuple<>(argumentsState, "(arg0 : " + arguments.get(0) + ") => " + arguments.get(1)));
+                }
+
+                return Optional.of(new Tuple<>(argumentsState, strippedBaseString + "<" + generateValues(arguments) + ">"));
             });
         });
     }
 
-    private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String s) {
-        return compileOrPlaceholder(state, s, List.of(
+    private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String input) {
+        return compileOrPlaceholder(state, input, List.of(
                 Main::compileWhitespace,
                 Main::compileType
         ));
     }
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        return compileAll(state, input, Main::foldValues, mapper, Main::mergeValues);
+        var folded = parseValues(state, input, mapper);
+        return new Tuple<>(folded.left, generateValues(folded.right));
+    }
+
+    private static String generateValues(List<String> values) {
+        return generateAll(values, Main::mergeValues);
+    }
+
+    private static Tuple<CompileState, List<String>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
+        return parseAll(state, input, Main::foldValues, mapper);
     }
 
     private static StringBuilder mergeValues(StringBuilder cache, String element) {

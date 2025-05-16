@@ -2,7 +2,7 @@ interface MethodHeader {
 	generateWithAfterName(afterName : string): string;
 }
 interface Result<T, X> {
-	match(whenOk : Function<T, R>, whenErr : Function<X, R>): R;
+	match(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R;
 }
 class DivideState {
 	segments : List<string>;
@@ -100,12 +100,12 @@ class ConstructorHeader implements MethodHeader {
 	}
 }
 class Ok<T, X> {
-	match(whenOk : Function<T, R>, whenErr : Function<X, R>): R {
+	match(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenOk.apply(this.value);
 	}
 }
 class Err<T, X> {
-	match(whenOk : Function<T, R>, whenErr : Function<X, R>): R {
+	match(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenErr.apply(this.error);
 	}
 }
@@ -140,16 +140,24 @@ class Main {
 		return compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
 	compileAll(state : CompileState, input : string, folder : BiFunction<DivideState, string, DivideState>, mapper : BiFunction<CompileState, string, Tuple<CompileState, string>>, merger : BiFunction<StringBuilder, string, StringBuilder>): Tuple<CompileState, string> {
+		let folded : unknown = parseAll(state, input, folder, mapper);
+		return new Tuple<>(folded.left, generateAll(folded.right, merger));
+	}
+	generateAll(elements : List<string>, merger : BiFunction<StringBuilder, string, StringBuilder>): string {
+		return elements.stream().reduce(new StringBuilder(), merger, (_, next) => next).toString();
+	}
+	parseAll(state : CompileState, input : string, folder : BiFunction<DivideState, string, DivideState>, mapper : BiFunction<CompileState, string, Tuple<CompileState, string>>): Tuple<CompileState, List<string>> {
 		let divisions : unknown = divide(input, folder);
-		let folded : unknown = divisions.stream().reduce(new Tuple<CompileState, StringBuilder>(state, new StringBuilder()), (current, segment) => {
+		let folded : unknown = divisions.stream().reduce(new Tuple<CompileState, List<string>>(state, new ArrayList<>()), (current, segment) => {
 			let currentState : unknown = current.left;
 			let currentElement : unknown = current.right;
 			let mappedTuple : unknown = mapper.apply(currentState, segment);
 			let mappedState : unknown = mappedTuple.left;
 			let mappedElement : unknown = mappedTuple.right;
-			return new Tuple<>(mappedState, merger.apply(currentElement, mappedElement));
+			currentElement.add(mappedElement);
+			return new Tuple<>(mappedState, currentElement);
 		}, (_, next) => next);
-		return new Tuple<>(folded.left, folded.right.toString());
+		return folded;
 	}
 	mergeStatements(cache : StringBuilder, element : string): StringBuilder {
 		return cache.append(element);
@@ -388,7 +396,7 @@ class Main {
 	compileReturnWithValue(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		return compileReturn(input, (value1) => compileValue(state, value1));
 	}
-	compileReturn(input : string, mapper : Function<string, Optional<Tuple<CompileState, string>>>): Optional<Tuple<CompileState, string>> {
+	compileReturn(input : string, mapper : (arg0 : string) => Optional<Tuple<CompileState, string>>): Optional<Tuple<CompileState, string>> {
 		return compilePrefix(input.strip(), "return ", (value) => {
 			return mapper.apply(value).flatMap((tuple) => {
 				return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
@@ -411,7 +419,7 @@ class Main {
 	splitFoldedLast(input : string, delimiter : string, folder : BiFunction<DivideState, string, DivideState>): Optional<Tuple<string, string>> {
 		return splitFolded(input, folder, (divisions1) => selectLast(divisions1, delimiter));
 	}
-	splitFolded(input : string, folder : BiFunction<DivideState, string, DivideState>, selector : Function<List<string>, Optional<Tuple<string, string>>>): Optional<Tuple<string, string>> {
+	splitFolded(input : string, folder : BiFunction<DivideState, string, DivideState>, selector : (arg0 : List<string>) => Optional<Tuple<string, string>>): Optional<Tuple<string, string>> {
 		let divisions : unknown = divide(input, folder);
 		if (divisions.size() < 2){
 			return Optional.empty();
@@ -582,7 +590,7 @@ class Main {
 	isSymbolChar(index : number, c : string): boolean {
 		return c === "_" || Character.isLetter(c) || (index !== 0 && Character.isDigit(c));
 	}
-	compilePrefix(input : string, infix : string, mapper : Function<string, Optional<Tuple<CompileState, string>>>): Optional<Tuple<CompileState, string>> {
+	compilePrefix(input : string, infix : string, mapper : (arg0 : string) => Optional<Tuple<CompileState, string>>): Optional<Tuple<CompileState, string>> {
 		if (!input.startsWith(infix)){
 			return Optional.empty();
 		}
@@ -675,16 +683,29 @@ class Main {
 	compileGeneric(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		return compileSuffix(input.strip(), ">", (withoutEnd) => {
 			return compileFirst(withoutEnd, "<", (baseString, argumentsString) => {
-				let argumentsTuple : unknown = compileValues(state, argumentsString, Main.compileTypeArgument);
-				return Optional.of(new Tuple<>(argumentsTuple.left, baseString + "<" + argumentsTuple.right + ">"));
+				let argumentsTuple : unknown = parseValues(state, argumentsString, Main.compileTypeArgument);
+				let argumentsState : unknown = argumentsTuple.left;
+				let arguments : unknown = argumentsTuple.right;
+				let strippedBaseString : unknown = baseString.strip();
+				if (strippedBaseString.equals("Function")){
+					return Optional.of(new Tuple<>(argumentsState, "(arg0 : " + arguments.get(0) + ") => " + arguments.get(1)));
+				}
+				return Optional.of(new Tuple<>(argumentsState, strippedBaseString + "<" + generateValues(arguments) + ">"));
 			});
 		});
 	}
-	compileTypeArgument(state : CompileState, s : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, s, List.of(Main.compileWhitespace, Main.compileType));
+	compileTypeArgument(state : CompileState, input : string): Tuple<CompileState, string> {
+		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileType));
 	}
 	compileValues(state : CompileState, input : string, mapper : BiFunction<CompileState, string, Tuple<CompileState, string>>): Tuple<CompileState, string> {
-		return compileAll(state, input, Main.foldValues, mapper, Main.mergeValues);
+		let folded : unknown = parseValues(state, input, mapper);
+		return new Tuple<>(folded.left, generateValues(folded.right));
+	}
+	generateValues(values : List<string>): string {
+		return generateAll(values, Main.mergeValues);
+	}
+	parseValues(state : CompileState, input : string, mapper : BiFunction<CompileState, string, Tuple<CompileState, string>>): Tuple<CompileState, List<string>> {
+		return parseAll(state, input, Main.foldValues, mapper);
 	}
 	mergeValues(cache : StringBuilder, element : string): StringBuilder {
 		if (cache.isEmpty()){
@@ -720,7 +741,7 @@ class Main {
 	findLast(input : string, infix : string): number {
 		return input.lastIndexOf(infix);
 	}
-	compileSuffix(input : string, suffix : string, mapper : Function<string, Optional<T>>): Optional<T> {
+	compileSuffix(input : string, suffix : string, mapper : (arg0 : string) => Optional<T>): Optional<T> {
 		if (!input.endsWith(suffix)){
 			return Optional.empty();
 		}
