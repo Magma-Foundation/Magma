@@ -4,6 +4,7 @@
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
 	Head: magma.api.collect, 
+	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
 	ListCollector: magma.api.collect, 
 	Lists: magma.api.collect, 
@@ -25,7 +26,6 @@
 	Main: magma.app, 
 	Files: magma.jvm.io
 ]*/
-import { Tuple2 } from "../../magma/api/Tuple2";
 export class Tuple2Impl<A, B> implements Tuple2<A, B> {
 	leftValue: A;
 	rightValue: B;

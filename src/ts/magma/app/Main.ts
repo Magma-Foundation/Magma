@@ -4,6 +4,7 @@
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
 	Head: magma.api.collect, 
+	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
 	ListCollector: magma.api.collect, 
 	Lists: magma.api.collect, 
@@ -132,22 +133,25 @@ class DivideState {
 class CompileState {
 	imports: List<Import>;
 	output: string;
-	maybeStructureName: Option<string>;
+	structureNames: List<string>;
 	depth: number;
 	definitions: List<Definition>;
 	maybeNamespace: Option<List<string>>;
 	sources: List<Source>;
-	constructor (imports: List<Import>, output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>, sources: List<Source>) {
+	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>, sources: List<Source>) {
 		this.imports = imports;
 		this.output = output;
-		this.maybeStructureName = maybeStructureName;
+		this.structureNames = structureNames;
 		this.depth = depth;
 		this.definitions = definitions;
 		this.maybeNamespace = maybeNamespace;
 		this.sources = sources;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", new None<string>(), 0, Lists.empty(), new None<>(), Lists.empty());
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty());
+	}
+	isLastWithin(name: string): boolean {
+		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	addResolvedImport(parent: List<string>, child: string): CompileState {
 		let parent1 = parent;
@@ -166,46 +170,49 @@ class CompileState {
 			return this;
 		}
 		let importString = new Import(stringList, child);
-		return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	withNamespace(namespace: List<string>): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(namespace), this.sources);
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	withStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, new Some<string>(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 	clearImports(): CompileState {
-		return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	clearOutput(): CompileState {
-		return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 	addSource(source: Source): CompileState {
-		return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
 	}
 	findSource(name: string): Option<Source> {
 		return this.sources.query().filter((source: Source) => source.computeName().equals(name)).next();
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.maybeStructureName.filter((inner: string) => inner.equals(base)).isPresent()){
+		if (this.structureNames.findLast().filter((inner: string) => inner.equals(base)).isPresent()){
 			return this;
 		}
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
+	}
+	popStructureName(): CompileState {
+		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -874,7 +881,7 @@ export class Main {
 			return new None<Tuple2<CompileState, string>>();
 		}
 		let outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
-		let outputContentState = outputContentTuple.left();
+		let outputContentState = outputContentTuple.left().popStructureName();
 		let outputContent = outputContentTuple.right();
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
 		let joinedTypeParams = Main.joinTypeParams(typeParams);
@@ -955,12 +962,12 @@ export class Main {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams);
 			return Main.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
-				if (state.maybeStructureName.filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent()){
+				if (state.isLastWithin(name)){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, string>>();
 			}).or(() => {
-				if (state.maybeStructureName.filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
+				if (state.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, string>>();
@@ -1349,7 +1356,7 @@ export class Main {
 	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
 			return Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
-				let structureName = state.maybeStructureName.orElse("");
+				let structureName = state.structureNames.findLast().orElse("");
 				return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => {
 					return new Tuple2Impl<CompileState, string>(tuple.left(), stringOption);
 				});

@@ -4,6 +4,7 @@
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
 	Head: magma.api.collect, 
+	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
 	ListCollector: magma.api.collect, 
 	Lists: magma.api.collect, 
@@ -27,8 +28,8 @@
 ]*/
 import { Actual } from "../../../magma/annotate/Actual";
 import { Namespace } from "../../../magma/annotate/Namespace";
+import { JVMList } from "../../../magma/api/collect/JVMList";
 import { List } from "../../../magma/api/collect/List";
-import { Lists } from "../../../magma/api/collect/Lists";
 import { RangeHead } from "../../../magma/api/collect/RangeHead";
 import { HeadedQuery } from "../../../magma/api/collect/query/HeadedQuery";
 import { Query } from "../../../magma/api/collect/query/Query";

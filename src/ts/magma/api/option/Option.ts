@@ -4,6 +4,7 @@
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
 	Head: magma.api.collect, 
+	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
 	ListCollector: magma.api.collect, 
 	Lists: magma.api.collect, 

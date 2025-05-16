@@ -2,8 +2,8 @@ package magma.jvm.io;
 
 import magma.annotate.Actual;
 import magma.annotate.Namespace;
+import magma.api.collect.JVMList;
 import magma.api.collect.List;
-import magma.api.collect.Lists;
 import magma.api.collect.RangeHead;
 import magma.api.collect.query.HeadedQuery;
 import magma.api.collect.query.Query;
@@ -67,7 +67,7 @@ public final class Files {
         @Override
         public Result<List<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-                return new Main.Ok<>(new Lists.JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
+                return new Main.Ok<>(new JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
             } catch (IOException e) {
                 return new Main.Err<>(new JVMPath.JVMIOError(e));
             }

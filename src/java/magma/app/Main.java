@@ -126,14 +126,20 @@ public final class Main {
     private record CompileState(
             List<Import> imports,
             String output,
-            Option<String> maybeStructureName,
+            List<String> structureNames,
             int depth,
             List<Definition> definitions,
             Option<List<String>> maybeNamespace,
             List<Source> sources
     ) {
         private static CompileState createInitial() {
-            return new CompileState(Lists.empty(), "", new None<String>(), 0, Lists.empty(), new None<>(), Lists.empty());
+            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty());
+        }
+
+        private boolean isLastWithin(String name) {
+            return this.structureNames.findLast()
+                    .filter((String anObject) -> Strings.equalsTo(name, anObject))
+                    .isPresent();
         }
 
         private CompileState addResolvedImport(List<String> parent, String child) {
@@ -160,31 +166,31 @@ public final class Main {
             }
 
             var importString = new Import(stringList, child);
-            return new CompileState(this.imports.addLast(importString), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         private CompileState withNamespace(List<String> namespace) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, new Some<>(namespace), this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(namespace), this.sources);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState withStructureName(String name) {
-            return new CompileState(this.imports, this.output, new Some<String>(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
         }
 
         Option<Type> resolve(String name) {
@@ -195,15 +201,15 @@ public final class Main {
         }
 
         public CompileState clearImports() {
-            return new CompileState(Lists.empty(), this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         public CompileState clearOutput() {
-            return new CompileState(this.imports, "", this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources);
+            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
 
         public CompileState addSource(Source source) {
-            return new CompileState(this.imports, this.output, this.maybeStructureName, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
         }
 
         public Option<Source> findSource(String name) {
@@ -213,13 +219,17 @@ public final class Main {
         }
 
         public CompileState addResolvedImportFromCache(String base) {
-            if (this.maybeStructureName.filter((String inner) -> inner.equals(base)).isPresent()) {
+            if (this.structureNames.findLast().filter((String inner) -> inner.equals(base)).isPresent()) {
                 return this;
             }
 
             return this.findSource(base)
                     .map((Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
                     .orElse(this);
+        }
+
+        public CompileState popStructureName() {
+            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
         }
     }
 
@@ -1052,7 +1062,7 @@ public final class Main {
         }
 
         var outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main::compileClassSegment);
-        var outputContentState = outputContentTuple.left();
+        var outputContentState = outputContentTuple.left().popStructureName();
         var outputContent = outputContentTuple.right();
 
         var constructorString = Main.generateConstructorFromRecordParameters(parameters);
@@ -1197,13 +1207,13 @@ public final class Main {
         return Main.compileFirst(input, "(", (String beforeParams, String withParams) -> {
             var strippedBeforeParams = Strings.strip(beforeParams);
             return Main.compileLast(strippedBeforeParams, " ", (String _, String name) -> {
-                if (state.maybeStructureName.filter((String anObject) -> Strings.equalsTo(name, anObject)).isPresent()) {
+                if (state.isLastWithin(name)) {
                     return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
                 return new None<Tuple2<CompileState, String>>();
             }).or(() -> {
-                if (state.maybeStructureName.filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+                if (state.structureNames.findLast().filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
                     return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
@@ -1735,7 +1745,7 @@ public final class Main {
     private static Option<Tuple2<CompileState, String>> compileEnumValues(CompileState state, String withoutEnd) {
         return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> {
             return Main.parseInvokable(state1, s).flatMap((Tuple2<CompileState, Value> tuple) -> {
-                var structureName = state.maybeStructureName.orElse("");
+                var structureName = state.structureNames.findLast().orElse("");
                 return tuple.right().generateAsEnumValue(structureName).map((String stringOption) -> {
                     return new Tuple2Impl<CompileState, String>(tuple.left(), stringOption);
                 });

@@ -34,4 +34,6 @@ public interface List<T> {
     boolean equalsTo(List<T> other);
 
     List<T> removeValue(T element);
+
+    Option<List<T>> removeLast();
 }
