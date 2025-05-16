@@ -692,7 +692,9 @@ public class Main {
     }
 
     private static boolean isSymbolChar(int index, char c) {
-        return Character.isLetter(c) || (index != 0 && Character.isDigit(c));
+        return c == '_'
+                || Character.isLetter(c)
+                || (index != 0 && Character.isDigit(c));
     }
 
     private static Optional<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Optional<Tuple<CompileState, String>>> mapper) {

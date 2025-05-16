@@ -255,14 +255,12 @@
 	}
 	/*private static*/compileMethod(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileFirst(input, "(", (beforeParams, withParams) => {
-			return compileLast(beforeParams.strip(), " ", (/*_*/, name) - /*> {
-                if (state.structureName.filter(name::equals).isPresent()) {
-                    return compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
-                }
-
-                return compileDefinition(state, beforeParams)
-                        .flatMap(tuple */ - /*> compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
-            }*/);
+			return compileLast(beforeParams.strip(), " ", (_, name) => {
+				if (state.structureName.filter(name.equals).isPresent()){
+					return compileMethodWithBeforeParams(state, new /*ConstructorHeader*/(), withParams);
+				}
+				return compileDefinition(state, beforeParams).flatMap((tuple) => compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
+			});
 		});
 	}
 	/*private static*/compileMethodWithBeforeParams(state : /*CompileState*/, header : /*MethodHeader*/, withParams : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
@@ -518,7 +516,7 @@
 		return IntStream.range(/*0*/, input.length()).allMatch((index) => isSymbolChar(index, input.charAt(index)));
 	}
 	/*private static*/isSymbolChar(index : number, c : string): boolean {
-		return Character.isLetter(c) || (index !== /* 0 */ && Character.isDigit(c));
+		return c === "_" || Character.isLetter(c) || (index !== /* 0 */ && Character.isDigit(c));
 	}
 	/*private static*/compilePrefix(input : string, infix : string, mapper : /*Function*/<string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		if (!input.startsWith(infix)){
