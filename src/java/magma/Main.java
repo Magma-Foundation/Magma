@@ -118,6 +118,8 @@ public class Main {
         String generate();
 
         boolean isFunctional();
+
+        boolean isVar();
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -416,7 +418,7 @@ public class Main {
     ) implements MethodHeader, Parameter {
         @Override
         public String generate() {
-            return this.generateWithAfterName(" ");
+            return this.generateWithAfterName("");
         }
 
         @Override
@@ -427,7 +429,15 @@ public class Main {
         @Override
         public String generateWithAfterName(String afterName) {
             var joinedTypeParams = this.joinTypeParams();
-            return this.name + joinedTypeParams + afterName + ": " + this.type.generate();
+            return this.name + joinedTypeParams + afterName + this.generateType();
+        }
+
+        private String generateType() {
+            if (this.type.isVar()) {
+                return "";
+            }
+
+            return ": " + this.type.generate();
         }
 
         private String joinTypeParams() {
@@ -677,6 +687,11 @@ public class Main {
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
         }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
     }
 
     private record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
@@ -743,6 +758,11 @@ public class Main {
 
         @Override
         public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
             return false;
         }
     }
@@ -913,6 +933,11 @@ public class Main {
         public boolean isFunctional() {
             return true;
         }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
     }
 
     private static class Generic implements Type {
@@ -931,6 +956,11 @@ public class Main {
 
         @Override
         public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
             return false;
         }
     }
@@ -2086,6 +2116,11 @@ public class Main {
         @Override
         public boolean isFunctional() {
             return false;
+        }
+
+        @Override
+        public boolean isVar() {
+            return this == Primitive.Var;
         }
     }
 }
