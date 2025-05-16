@@ -1,15 +1,17 @@
 package magma.api.io;
 
-import magma.app.Main;
+import magma.api.collect.List;
+import magma.api.result.Result;
+import magma.api.option.Option;
 
 public interface Path {
-    Main.Option<Main.IOError> writeString(String output);
+    Option<IOError> writeString(String output);
 
-    Main.Result<String, Main.IOError> readString();
+    Result<String, IOError> readString();
 
     Path resolveSibling(String siblingName);
 
-    Main.Result<Main.List<Path>, Main.IOError> walk();
+    Result<List<Path>, IOError> walk();
 
     String findFileName();
 

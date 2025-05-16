@@ -1,7 +1,11 @@
 package magma.jvm;
 
 import magma.Actual;
+import magma.api.collect.List;
+import magma.api.io.IOError;
 import magma.api.io.Path;
+import magma.api.result.Result;
+import magma.api.option.Option;
 import magma.app.Main;
 
 import java.io.IOException;
@@ -13,7 +17,7 @@ import java.util.stream.Stream;
 public final class Files {
     @Actual
     private record JVMPath(java.nio.file.Path path) implements Path {
-        private record JVMIOError(IOException error) implements Main.IOError {
+        private record JVMIOError(IOException error) implements IOError {
             @Override
             public String display() {
                 var writer = new StringWriter();
@@ -23,21 +27,21 @@ public final class Files {
         }
 
         @Override
-        public Main.Option<Main.IOError> writeString(String output) {
+        public Option<IOError> writeString(String output) {
             try {
                 java.nio.file.Files.writeString(this.path, output);
-                return new Main.None<Main.IOError>();
+                return new Main.None<IOError>();
             } catch (IOException e) {
-                return new Main.Some<Main.IOError>(new JVMPath.JVMIOError(e));
+                return new Main.Some<IOError>(new JVMPath.JVMIOError(e));
             }
         }
 
         @Override
-        public Main.Result<String, Main.IOError> readString() {
+        public Result<String, IOError> readString() {
             try {
-                return new Main.Ok<String, Main.IOError>(java.nio.file.Files.readString(this.path));
+                return new Main.Ok<String, IOError>(java.nio.file.Files.readString(this.path));
             } catch (IOException e) {
-                return new Main.Err<String, Main.IOError>(new JVMPath.JVMIOError(e));
+                return new Main.Err<String, IOError>(new JVMPath.JVMIOError(e));
             }
         }
 
@@ -47,7 +51,7 @@ public final class Files {
         }
 
         @Override
-        public Main.Result<Main.List<magma.api.io.Path>, Main.IOError> walk() {
+        public Result<List<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
                 return new Main.Ok<>(new Main.Lists.JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
             } catch (IOException e) {

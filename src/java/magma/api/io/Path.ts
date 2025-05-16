@@ -1,15 +1,8 @@
-/*
-
-public interface Path {
-    Main.Option<Main.IOError> writeString(String output);
-
-    Main.Result<String, Main.IOError> readString();
-
-    Path resolveSibling(String siblingName);
-
-    Main.Result<Main.List<Path>, Main.IOError> walk();
-
-    String findFileName();
-
-    boolean endsWith(String suffix);
-}*/
+interface Path  {
+	writeString(output: string): Option<IOError>;
+	readString(): Result<string, IOError>;
+	resolveSibling(siblingName: string): Path;
+	walk(): Result<List<Path>, IOError>;
+	findFileName(): string;
+	endsWith(suffix: string): boolean;
+}

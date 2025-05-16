@@ -1,7 +1,11 @@
 package magma.app;
 
 import magma.Actual;
+import magma.api.collect.List;
+import magma.api.io.IOError;
 import magma.api.io.Path;
+import magma.api.result.Result;
+import magma.api.option.Option;
 import magma.jvm.Files;
 
 import java.util.ArrayList;
@@ -13,18 +17,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public final class Main {
-    public interface IOError {
-        String display();
-    }
-
     private interface MethodHeader {
         String generateWithAfterName(String afterName);
 
         boolean hasAnnotation(String annotation);
-    }
-
-    public interface Result<T, X> {
-        <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
     private interface Collector<T, C> {
@@ -33,29 +29,7 @@ public final class Main {
         C fold(C current, T element);
     }
 
-    public interface Option<T> {
-        <R> Option<R> map(Function<T, R> mapper);
-
-        T orElse(T other);
-
-        T orElseGet(Supplier<T> supplier);
-
-        boolean isPresent();
-
-        void ifPresent(Consumer<T> consumer);
-
-        Option<T> or(Supplier<Option<T>> other);
-
-        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
-
-        Option<T> filter(Predicate<T> predicate);
-
-        Tuple<Boolean, T> toTuple(T other);
-
-        <R> Option<Tuple<T, R>> and(Supplier<Option<R>> other);
-    }
-
-    private interface Query<T> {
+    public interface Query<T> {
         <C> C collect(Collector<T, C> collector);
 
         <R> Query<R> map(Function<T, R> mapper);
@@ -69,30 +43,6 @@ public final class Main {
         boolean allMatch(Predicate<T> predicate);
 
         Query<T> filter(Predicate<T> predicate);
-    }
-
-    public interface List<T> {
-        List<T> add(T element);
-
-        Query<T> query();
-
-        int size();
-
-        Option<List<T>> subList(int startInclusive, int endExclusive);
-
-        Option<T> findLast();
-
-        Option<T> findFirst();
-
-        Option<T> find(int index);
-
-        Query<Tuple<Integer, T>> queryWithIndices();
-
-        List<T> addAll(List<T> others);
-
-        boolean contains(T element);
-
-        Query<T> queryReversed();
     }
 
     private interface Head<T> {
@@ -268,7 +218,7 @@ public final class Main {
         }
     }
 
-    private record Tuple<A, B>(A left, B right) {
+    public record Tuple<A, B>(A left, B right) {
     }
 
     private record CompileState(String output, Option<String> maybeStructureName, int depth,
@@ -1249,7 +1199,10 @@ public final class Main {
         return Main.compileOrPlaceholder(state, input, Lists.of(
                 Main::compileWhitespace,
                 Main::compileNamespaced,
-                Main.createStructureRule("class ", "class ")
+                Main.createStructureRule("class ", "class "),
+                Main.createStructureRule("interface ", "interface "),
+                Main.createStructureRule("record ", "class "),
+                Main.createStructureRule("enum ", "class ")
         ));
     }
 

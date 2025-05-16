@@ -1,28 +1,10 @@
-interface IOError  {
-	display(): string;
-}
 interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
 }
-interface Result<T, X> {
-	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
-}
 interface Collector<T, C> {
 	createInitial(): C;
 	fold(current: C, element: T): C;
-}
-interface Option<T> {
-	map<R>(mapper: (arg0 : T) => R): Option<R>;
-	orElse(other: T): T;
-	orElseGet(supplier: () => T): T;
-	isPresent(): boolean;
-	ifPresent(consumer: (arg0 : T) => void): void;
-	or(other: () => Option<T>): Option<T>;
-	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
-	filter(predicate: (arg0 : T) => boolean): Option<T>;
-	toTuple(other: T): Tuple<Boolean, T>;
-	and<R>(other: () => Option<R>): Option<Tuple<T, R>>;
 }
 interface Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
@@ -32,19 +14,6 @@ interface Query<T> {
 	next(): Option<T>;
 	allMatch(predicate: (arg0 : T) => boolean): boolean;
 	filter(predicate: (arg0 : T) => boolean): Query<T>;
-}
-interface List<T> {
-	add(element: T): List<T>;
-	query(): Query<T>;
-	size(): number;
-	subList(startInclusive: number, endExclusive: number): Option<List<T>>;
-	findLast(): Option<T>;
-	findFirst(): Option<T>;
-	find(index: number): Option<T>;
-	queryWithIndices(): Query<Tuple<number, T>>;
-	addAll(others: List<T>): List<T>;
-	contains(element: T): boolean;
-	queryReversed(): Query<T>;
 }
 interface Head<T> {
 	next(): Option<T>;
@@ -887,7 +856,7 @@ class Main  {
 		return appended;
 	}
 	static compileRootSegment(state: CompileState, input: string): Tuple<CompileState, string> {
-		return Main.compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileNamespaced, Main.createStructureRule("class ", "class ")));
+		return Main.compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileNamespaced, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class ")));
 	}
 	static createStructureRule(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>> {
 		return (state: CompileState, input1: string) => {
