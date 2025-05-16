@@ -53,6 +53,7 @@ interface Parameter  {
 }
 interface Value extends Argument, Caller  {
 	resolve(state: CompileState): Type;
+	generateAsEnumValue(structureName: string): Option<string>;
 }
 interface Argument  {
 	toValue(): Option<Value>;
@@ -194,12 +195,12 @@ class Tuple<A, B> {
 }
 class CompileState {
 	output: string;
-	structureName: Option<string>;
+	maybeStructureName: Option<string>;
 	depth: number;
 	definitions: List<Definition>;
-	constructor (output: string, structureName: Option<string>, depth: number, definitions: List<Definition>) {
+	constructor (output: string, maybeStructureName: Option<string>, depth: number, definitions: List<Definition>) {
 		this.output = output;
-		this.structureName = structureName;
+		this.maybeStructureName = maybeStructureName;
 		this.depth = depth;
 		this.definitions = definitions;
 	}
@@ -207,19 +208,19 @@ class CompileState {
 		return new CompileState("", new None<string>(), 0, Lists.empty());
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.output + element, this.structureName, this.depth, this.definitions);
+		return new CompileState(this.output + element, this.maybeStructureName, this.depth, this.definitions);
 	}
 	withStructureName(name: string): CompileState {
 		return new CompileState(this.output, new Some<string>(name), this.depth, this.definitions);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.output, this.structureName, this.depth + 1, this.definitions);
+		return new CompileState(this.output, this.maybeStructureName, this.depth + 1, this.definitions);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.output, this.structureName, this.depth - 1, this.definitions);
+		return new CompileState(this.output, this.maybeStructureName, this.depth - 1, this.definitions);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
+		return new CompileState(this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter() -  > Strings.equalsTo(definition.name).map((definition1: Definition) => definition1.type).next();
@@ -461,6 +462,9 @@ class Placeholder {
 	generateBeforeName(): string {
 		return "";
 	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
+	}
 }
 class MapHead<T, R> implements Head<R> {
 	head: Head<T>;
@@ -500,6 +504,9 @@ class Access implements Value {
 	resolve(state: CompileState): Type {
 		return Primitive.Unknown;
 	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
+	}
 }
 class SymbolNode {
 	value: string;
@@ -527,6 +534,9 @@ class SymbolNode {
 	generateBeforeName(): string {
 		return "";
 	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
+	}
 }
 class StringValue implements Value {
 	value: string;
@@ -545,6 +555,9 @@ class StringValue implements Value {
 	resolve(state: CompileState): Type {
 		return Primitive.Unknown;
 	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
+	}
 }
 class Not implements Value {
 	child: string;
@@ -562,6 +575,9 @@ class Not implements Value {
 	}
 	resolve(state: CompileState): Type {
 		return Primitive.Unknown;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
 	}
 }
 class Lambda implements Value {
@@ -584,6 +600,9 @@ class Lambda implements Value {
 	resolve(state: CompileState): Type {
 		return Primitive.Unknown;
 	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
+	}
 }
 class Invokable implements Value {
 	caller: Caller;
@@ -593,8 +612,11 @@ class Invokable implements Value {
 		this.args = args;
 	}
 	generate(): string {
-		let joinedArguments = Main.generateValues(this.args);
+		let joinedArguments = this.joinArgs();
 		return this.caller.generate() + "(" + joinedArguments + ")";
+	}
+	joinArgs(): string {
+		return Main.generateValues(this.args);
 	}
 	toValue(): Option<Value> {
 		return new Some<>(this);
@@ -604,6 +626,9 @@ class Invokable implements Value {
 	}
 	resolve(state: CompileState): Type {
 		return Primitive.Unknown;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new Some<>("\n\t" + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
 	}
 }
 class Operation implements Value {
@@ -626,6 +651,9 @@ class Operation implements Value {
 	}
 	resolve(state: CompileState): Type {
 		return Primitive.Unknown;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<>();
 	}
 }
 class ConstructionCaller implements Caller {
@@ -802,7 +830,12 @@ class Files  {
 	static readString(source: Path): Result<string, IOException>;
 }
 class Primitive implements Type {
-	Unknown("unknown"): /*Void("void"),*/;
+	String: Primitive = new Primitive("string");
+	Number: Primitive = new Primitive("number");
+	Boolean: Primitive = new Primitive("boolean");
+	Var: Primitive = new Primitive("var");
+	Void: Primitive = new Primitive("void");
+	Unknown: Primitive = new Primitive("unknown");
 	value: string;/*
 
         Primitive(String value) {
@@ -839,7 +872,7 @@ class Main  {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
 	static compileAll(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, mapper: (arg0 : CompileState, arg1 : string) => Tuple<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple<CompileState, string> {
-		let folded = Main.parseAll(state, input, folder).orElse(new Tuple<>(state, Lists.empty()));
+		let folded = Main.parseAll(state, input, folder) -  > new Some<>(state, Lists.empty());
 		return new Tuple<>(folded.left, Main.generateAll(folded.right, merger));
 	}
 	static generateAll(elements: List<string>, merger: (arg0 : string, arg1 : string) => string): string {
@@ -1019,7 +1052,7 @@ class Main  {
 	static compileMethod(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
 			return Main.compileLast(Strings.strip(beforeParams), " ", (_: string, name: string) => {
-				if (state.structureName.filter() -  > Strings.equalsTo(name)){
+				if (state.maybeStructureName.filter() -  > Strings.equalsTo(name)){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return Main.parseDefinition(state, beforeParams).flatMap() -  > Main.compileMethodWithBeforeParams(tuple.left, tuple.right);
@@ -1051,7 +1084,7 @@ class Main  {
 		});
 	}
 	static parseParameters(state: CompileState, params: string): Tuple<CompileState, List<Parameter>> {
-		return Main.parseValues(state, params) -  > new Some<>(Main.parseParameter(state1));
+		return Main.parseValuesOrEmpty(state, params) -  > new Some<>(Main.parseParameterOrPlaceholder(state1));
 	}
 	static compileFunctionStatements(state: CompileState, input: string): Tuple<CompileState, string> {
 		return Main.compileStatements(state, input, Main.compileFunctionSegment);
@@ -1209,7 +1242,7 @@ class Main  {
 		return appended;
 	}
 	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple<CompileState, Value>> {
-		let argsTuple = Main.parseValues(state, argsString) -  > new Some<>(Main.parseArgument(state1));
+		let argsTuple = Main.parseValuesOrEmpty(state, argsString) -  > new Some<>(Main.parseArgument(state1));
 		let argsState = argsTuple.left;
 		let args = Main.retain(argsTuple.right, Argument.toValue);
 		let newCaller = Main.transformCaller(argsState, oldCaller);
@@ -1267,7 +1300,7 @@ class Main  {
 			let strippedBeforeArrow = Strings.strip(beforeArrow);
 			return Main.compilePrefix(strippedBeforeArrow, "(", (withoutStart: string) => {
 				return Main.compileSuffix(withoutStart, ")", (withoutEnd: string) => {
-					let paramNames = Main.parseValues(state, withoutEnd) -  > new Some<>(Main.parseParameter(state1));
+					let paramNames = Main.parseValuesOrEmpty(state, withoutEnd) -  > new Some<>(Main.parseParameterOrPlaceholder(state1));
 					return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
 				});
 			});
@@ -1388,16 +1421,31 @@ class Main  {
 	}
 	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
-			let definitionTuple = Main.compileParameterOrPlaceholder(state, withoutEnd);
-			return new Some<>(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
+			return Main.getTupleOption(state, withoutEnd).or() -  > Main.compileEnumValues(state);
 		});
 	}
-	static compileParameterOrPlaceholder(state: CompileState, input: string): Tuple<CompileState, string> {
-		let tuple = Main.parseParameter(state, input);
-		return new Tuple<>(tuple.left, tuple.right.generate());
+	static getTupleOption(state: CompileState, withoutEnd: string): Option<Tuple<CompileState, string>> {
+		return Main.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple<CompileState, Parameter>) => {
+			return new Some<>(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right.generate() + ";"));
+		});
 	}
-	static parseParameter(state: CompileState, input: string): Tuple<CompileState, Parameter> {
-		return Main.parseWhitespace(state, input).map() -  > new Tuple<>(state, new Placeholder());
+	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple<CompileState, string>> {
+		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
+			return Main.parseInvokable(state1, s).flatMap((tuple: Tuple<CompileState, Value>) => {
+				let structureName = state.maybeStructureName.orElse("");
+				return tuple.right.generateAsEnumValue(structureName).map((stringOption: string) => {
+					return new Tuple<>(tuple.left, stringOption);
+				});
+			});
+		}).map((tuple: Tuple<CompileState, List<string>>) => {
+			return new Tuple<>(tuple.left, tuple.right.query().collect(new Joiner("")).orElse(""));
+		});
+	}
+	static parseParameterOrPlaceholder(state: CompileState, input: string): Tuple<CompileState, Parameter> {
+		return Main.parseParameter(state, input).orElseGet() -  > new Tuple<>(state, new Placeholder());
+	}
+	static parseParameter(state: CompileState, input: string): Option<Tuple<CompileState, Parameter>> {
+		return Main.parseWhitespace(state, input).map() -  > new Tuple<CompileState, Parameter>(tuple.left).or(() => Main.parseDefinition(state, input).map() -  > new Tuple<>(tuple.left));
 	}
 	static parseDefinition(state: CompileState, input: string): Option<Tuple<CompileState, Definition>> {
 		return Main.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => {
@@ -1453,10 +1501,11 @@ class Main  {
 		return appended;
 	}
 	static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<string>, typeParams: List<string>, oldModifiers: List<string>, type: string, name: string): Option<Tuple<CompileState, Definition>> {
-		let typeTuple = Main.parseTypeOrPlaceholder(state, type);
-		let newModifiers = Main.modifyModifiers(oldModifiers);
-		let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right, name);
-		return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+		return Main.parseType(state, type).flatMap((typeTuple: Tuple<CompileState, Type>) => {
+			let newModifiers = Main.modifyModifiers(oldModifiers);
+			let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right, name);
+			return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+		});
 	}
 	static modifyModifiers(oldModifiers: List<string>): List<string> {
 		if (oldModifiers.contains("static")){
@@ -1515,7 +1564,7 @@ class Main  {
 	static parseGeneric(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
 		return Main.compileSuffix(Strings.strip(input), ">", (withoutEnd: string) => {
 			return Main.compileFirst(withoutEnd, "<", (baseString: string, argsString: string) => {
-				let argsTuple = Main.parseValues(state, argsString) -  > Main.compileTypeArgument(state1);
+				let argsTuple = Main.parseValuesOrEmpty(state, argsString) -  > Main.compileTypeArgument(state1);
 				let argsState = argsTuple.left;
 				let args = argsTuple.right;
 				let base = Strings.strip(baseString);
@@ -1558,8 +1607,11 @@ class Main  {
 	static generateValueStrings(values: List<string>): string {
 		return Main.generateAll(values, Main.mergeValues);
 	}
-	static parseValues<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Tuple<CompileState, List<T>> {
-		return Main.parseAll(state, input, Main.foldValues, mapper).orElse(new Tuple<>(state, Lists.empty()));
+	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Tuple<CompileState, List<T>> {
+		return Main.parseValues(state, input, mapper).orElse(new Tuple<>(state, Lists.empty()));
+	}
+	static parseValues<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, List<T>>> {
+		return Main.parseAll(state, input, Main.foldValues, mapper);
 	}
 	static mergeValues(cache: string, element: string): string {
 		if (Strings.isEmpty(cache)){

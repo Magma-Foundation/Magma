@@ -104,6 +104,8 @@ public final class Main {
 
     private interface Value extends Argument, Caller {
         Type resolve(CompileState state);
+
+        Option<String> generateAsEnumValue(String structureName);
     }
 
     private interface Argument {
@@ -269,13 +271,14 @@ public final class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompileState(String output, Option<String> structureName, int depth, List<Definition> definitions) {
+    private record CompileState(String output, Option<String> maybeStructureName, int depth,
+                                List<Definition> definitions) {
         private static CompileState createInitial() {
             return new CompileState("", new None<String>(), 0, Lists.empty());
         }
 
         CompileState append(String element) {
-            return new CompileState(this.output + element, this.structureName, this.depth, this.definitions);
+            return new CompileState(this.output + element, this.maybeStructureName, this.depth, this.definitions);
         }
 
         CompileState withStructureName(String name) {
@@ -283,15 +286,15 @@ public final class Main {
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.output, this.structureName, this.depth + 1, this.definitions);
+            return new CompileState(this.output, this.maybeStructureName, this.depth + 1, this.definitions);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.output, this.structureName, this.depth - 1, this.definitions);
+            return new CompileState(this.output, this.maybeStructureName, this.depth - 1, this.definitions);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.output, this.structureName, this.depth, this.definitions.addAll(definitions));
+            return new CompileState(this.output, this.maybeStructureName, this.depth, this.definitions.addAll(definitions));
         }
 
         Option<Type> resolve(String name) {
@@ -618,6 +621,11 @@ public final class Main {
         public String generateBeforeName() {
             return "";
         }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
+        }
     }
 
     private record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
@@ -659,6 +667,11 @@ public final class Main {
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
         }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
+        }
     }
 
     private record SymbolNode(String value) implements Value, Type {
@@ -696,6 +709,11 @@ public final class Main {
         public String generateBeforeName() {
             return "";
         }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
+        }
     }
 
     private static class StringValue implements Value {
@@ -722,6 +740,11 @@ public final class Main {
 
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
+        }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
         }
     }
 
@@ -750,6 +773,11 @@ public final class Main {
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
         }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
+        }
     }
 
     private record Lambda(List<Definition> paramNames, String content) implements Value {
@@ -776,13 +804,22 @@ public final class Main {
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
         }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
+        }
     }
 
     private record Invokable(Caller caller, List<Value> args) implements Value {
         @Override
         public String generate() {
-            var joinedArguments = Main.generateValues(this.args);
+            var joinedArguments = this.joinArgs();
             return this.caller.generate() + "(" + joinedArguments + ")";
+        }
+
+        private String joinArgs() {
+            return Main.generateValues(this.args);
         }
 
         @Override
@@ -797,6 +834,11 @@ public final class Main {
 
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
+        }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new Some<>("\n\t" + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
         }
     }
 
@@ -818,6 +860,11 @@ public final class Main {
 
         public Type resolve(CompileState state) {
             return Primitive.Unknown;
+        }
+
+        @Override
+        public Option<String> generateAsEnumValue(String structureName) {
+            return new None<>();
         }
     }
 
@@ -1098,12 +1145,7 @@ public final class Main {
     }
 
     private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger) {
-        var folded = Main.parseAll(state, input, folder, new BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>() {
-            @Override
-            public Option<Tuple<CompileState, String>> apply(CompileState state1, String s) {
-                return new Some<>(mapper.apply(state1, s));
-            }
-        }).orElse(new Tuple<>(state, Lists.empty()));
+        var folded = Main.parseAll(state, input, folder, (CompileState state1, String s) -> new Some<>(mapper.apply(state1, s))).orElse(new Tuple<>(state, Lists.empty()));
         return new Tuple<>(folded.left, Main.generateAll(folded.right, merger));
     }
 
@@ -1381,7 +1423,7 @@ public final class Main {
     private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return Main.compileFirst(input, "(", (String beforeParams, String withParams) -> {
             return Main.compileLast(Strings.strip(beforeParams), " ", (String _, String name) -> {
-                if (state.structureName.filter((String anObject) -> Strings.equalsTo(name, anObject)).isPresent()) {
+                if (state.maybeStructureName.filter((String anObject) -> Strings.equalsTo(name, anObject)).isPresent()) {
                     return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
@@ -1426,7 +1468,7 @@ public final class Main {
     }
 
     private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
-        return Main.parseValues(state, params, (CompileState state1, String s) -> new Some<>(Main.parseParameter(state1, s)));
+        return Main.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> new Some<>(Main.parseParameterOrPlaceholder(state1, s)));
     }
 
     private static Tuple<CompileState, String> compileFunctionStatements(CompileState state, String input) {
@@ -1637,7 +1679,7 @@ public final class Main {
     }
 
     private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller oldCaller, String argsString) {
-        var argsTuple = Main.parseValues(state, argsString, (CompileState state1, String s) -> new Some<>(Main.parseArgument(state1, s)));
+        var argsTuple = Main.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> new Some<>(Main.parseArgument(state1, s)));
         var argsState = argsTuple.left;
         var args = Main.retain(argsTuple.right, Argument::toValue);
 
@@ -1736,7 +1778,7 @@ public final class Main {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
             return Main.compilePrefix(strippedBeforeArrow, "(", (String withoutStart) -> {
                 return Main.compileSuffix(withoutStart, ")", (String withoutEnd) -> {
-                    var paramNames = Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> new Some<>(Main.parseParameter(state1, s)));
+                    var paramNames = Main.parseValuesOrEmpty(state, withoutEnd, (CompileState state1, String s) -> new Some<>(Main.parseParameterOrPlaceholder(state1, s)));
                     return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
                 });
             });
@@ -1888,20 +1930,36 @@ public final class Main {
 
     private static Option<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return Main.compileSuffix(Strings.strip(input), ";", (String withoutEnd) -> {
-            var definitionTuple = Main.compileParameterOrPlaceholder(state, withoutEnd);
-            return new Some<>(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
+            return Main.getTupleOption(state, withoutEnd).or(() -> Main.compileEnumValues(state, withoutEnd));
         });
     }
 
-    private static Tuple<CompileState, String> compileParameterOrPlaceholder(CompileState state, String input) {
-        var tuple = Main.parseParameter(state, input);
-        return new Tuple<>(tuple.left, tuple.right.generate());
+    private static Option<Tuple<CompileState, String>> getTupleOption(CompileState state, String withoutEnd) {
+        return Main.parseParameter(state, withoutEnd).flatMap((Tuple<CompileState, Parameter> definitionTuple) -> {
+            return new Some<>(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right.generate() + ";"));
+        });
     }
 
-    private static Tuple<CompileState, Parameter> parseParameter(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileEnumValues(CompileState state, String withoutEnd) {
+        return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> {
+            return Main.parseInvokable(state1, s).flatMap((Tuple<CompileState, Value> tuple) -> {
+                var structureName = state.maybeStructureName.orElse("");
+                return tuple.right.generateAsEnumValue(structureName).map((String stringOption) -> {
+                    return new Tuple<>(tuple.left, stringOption);
+                });
+            });
+        }).map((Tuple<CompileState, List<String>> tuple) -> {
+            return new Tuple<>(tuple.left, tuple.right.query().collect(new Joiner("")).orElse(""));
+        });
+    }
+
+    private static Tuple<CompileState, Parameter> parseParameterOrPlaceholder(CompileState state, String input) {
+        return Main.parseParameter(state, input).orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
+    }
+
+    private static Option<Tuple<CompileState, Parameter>> parseParameter(CompileState state, String input) {
         return Main.parseWhitespace(state, input).map((Tuple<CompileState, Whitespace> tuple) -> new Tuple<CompileState, Parameter>(tuple.left, tuple.right))
-                .or(() -> Main.parseDefinition(state, input).map((Tuple<CompileState, Definition> tuple) -> new Tuple<>(tuple.left, tuple.right)))
-                .orElseGet(() -> new Tuple<>(state, new Placeholder(input)));
+                .or(() -> Main.parseDefinition(state, input).map((Tuple<CompileState, Definition> tuple) -> new Tuple<>(tuple.left, tuple.right)));
     }
 
     private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
@@ -1988,10 +2046,11 @@ public final class Main {
             String type,
             String name
     ) {
-        var typeTuple = Main.parseTypeOrPlaceholder(state, type);
-        var newModifiers = Main.modifyModifiers(oldModifiers);
-        var generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right, name);
-        return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+        return Main.parseType(state, type).flatMap((Tuple<CompileState, Type> typeTuple) -> {
+            var newModifiers = Main.modifyModifiers(oldModifiers);
+            var generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right, name);
+            return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+        });
     }
 
     private static List<String> modifyModifiers(List<String> oldModifiers) {
@@ -2072,7 +2131,7 @@ public final class Main {
     private static Option<Tuple<CompileState, Type>> parseGeneric(CompileState state, String input) {
         return Main.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> {
             return Main.compileFirst(withoutEnd, "<", (String baseString, String argsString) -> {
-                var argsTuple = Main.parseValues(state, argsString, (CompileState state1, String s) -> Main.compileTypeArgument(state1, s));
+                var argsTuple = Main.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> Main.compileTypeArgument(state1, s));
                 var argsState = argsTuple.left;
                 var args = argsTuple.right;
 
@@ -2133,12 +2192,16 @@ public final class Main {
         return Main.generateAll(values, Main::mergeValues);
     }
 
-    private static <T> Tuple<CompileState, List<T>> parseValues(
+    private static <T> Tuple<CompileState, List<T>> parseValuesOrEmpty(
             CompileState state,
             String input,
             BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
     ) {
-        return Main.parseAll(state, input, Main::foldValues, mapper).orElse(new Tuple<>(state, Lists.empty()));
+        return Main.parseValues(state, input, mapper).orElse(new Tuple<>(state, Lists.empty()));
+    }
+
+    private static <T> Option<Tuple<CompileState, List<T>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper) {
+        return Main.parseAll(state, input, Main::foldValues, mapper);
     }
 
     private static String mergeValues(String cache, String element) {
