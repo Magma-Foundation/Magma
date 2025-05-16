@@ -1696,6 +1696,7 @@ public final class Main {
                 Main.createOperatorRule("<"),
                 Main.createOperatorRule("&&"),
                 Main.createOperatorRule("||"),
+                Main.createOperatorRule(">"),
                 Main.createOperatorRule(">="),
                 Main::parseInvokable,
                 Main.createAccessRule("."),
@@ -1752,8 +1753,9 @@ public final class Main {
                 return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth) + "}");
             });
         }).or(() -> {
-            var tuple = Main.compileValueOrPlaceholder(state, strippedAfterArrow);
-            return Main.assembleLambda(tuple.left, paramNames, tuple.right);
+            return Main.compileValue(state, strippedAfterArrow).flatMap((Tuple<CompileState, String> tuple) -> {
+                return Main.assembleLambda(tuple.left, paramNames, tuple.right);
+            });
         });
     }
 
