@@ -5,11 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -21,9 +21,175 @@ public class Main {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
+    private interface Collector<T, C> {
+        C createInitial();
+
+        C fold(C current, T element);
+    }
+
+    private interface Iterator<T> {
+        <C> C collect(Collector<T, C> collector);
+
+        <R> Iterator<R> map(Function<T, R> mapper);
+
+        <R> R fold(R initial, BiFunction<R, T, R> folder);
+
+        <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+
+        Optional<T> next();
+
+        boolean allMatch(Predicate<T> predicate);
+
+        Iterator<T> filter(Predicate<T> predicate);
+    }
+
+    private interface List<T> {
+        List<T> add(T element);
+
+        Iterator<T> iterate();
+
+        int size();
+
+        List<T> subList(int startInclusive, int endExclusive);
+
+        T getLast();
+
+        T getFirst();
+
+        T get(int index);
+    }
+
+    private interface Head<T> {
+        Optional<T> next();
+    }
+
+    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+        @Override
+        public Optional<T> next() {
+            return this.head.next();
+        }
+
+        @Override
+        public <C> C collect(Collector<T, C> collector) {
+            return this.fold(collector.createInitial(), collector::fold);
+        }
+
+        @Override
+        public <R> Iterator<R> map(Function<T, R> mapper) {
+            Head<R> mapHead = () -> this.next().map(mapper);
+            return new HeadedIterator<>(mapHead);
+        }
+
+        @Override
+        public <R> R fold(R initial, BiFunction<R, T, R> folder) {
+            R result = initial;
+            while (true) {
+                Optional<T> maybeNext = this.head.next();
+                if (maybeNext.isEmpty()) {
+                    return result;
+                }
+
+                result = folder.apply(result, maybeNext.get());
+            }
+        }
+
+        @Override
+        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+            return new HeadedIterator<>(new FlatMapHead<T, R>(this.head, mapper));
+        }
+
+        @Override
+        public boolean allMatch(Predicate<T> predicate) {
+            return this.fold(true, (maybeAllTrue, element) -> maybeAllTrue && predicate.test(element));
+        }
+
+        @Override
+        public Iterator<T> filter(Predicate<T> predicate) {
+            return this.flatMap(element -> {
+                if (predicate.test(element)) {
+                    return new HeadedIterator<>(new SingleHead<>(element));
+                }
+                else {
+                    return new HeadedIterator<>(new EmptyHead<>());
+                }
+            });
+        }
+    }
+
+    private static class RangeHead implements Head<Integer> {
+        private final int length;
+        private int counter = 0;
+
+        public RangeHead(int length) {
+            this.length = length;
+        }
+
+        @Override
+        public Optional<Integer> next() {
+            if (this.counter < this.length) {
+                var value = this.counter;
+                this.counter++;
+                return Optional.of(value);
+            }
+            return Optional.empty();
+        }
+    }
+
+    private static class Lists {
+        private record JVMList<T>(java.util.List<T> list) implements List<T> {
+            public JVMList() {
+                this(new ArrayList<>());
+            }
+
+            @Override
+            public List<T> add(T element) {
+                this.list.add(element);
+                return this;
+            }
+
+            @Override
+            public Iterator<T> iterate() {
+                return new HeadedIterator<>(new RangeHead(this.list.size())).map(this.list::get);
+            }
+
+            @Override
+            public int size() {
+                return this.list.size();
+            }
+
+            @Override
+            public List<T> subList(int startInclusive, int endExclusive) {
+                return new JVMList<>(this.list.subList(startInclusive, endExclusive));
+            }
+
+            @Override
+            public T getLast() {
+                return this.list.getLast();
+            }
+
+            @Override
+            public T getFirst() {
+                return this.list.getFirst();
+            }
+
+            @Override
+            public T get(int index) {
+                return this.list.get(index);
+            }
+        }
+
+        public static <T> List<T> empty() {
+            return new JVMList<>();
+        }
+
+        public static <T> List<T> of(T... elements) {
+            return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
+        }
+    }
+
     private static class DivideState {
-        private final List<String> segments;
         private final String input;
+        private List<String> segments;
         private int index;
         private StringBuilder buffer;
         private int depth;
@@ -37,11 +203,11 @@ public class Main {
         }
 
         public DivideState(String input) {
-            this(new ArrayList<>(), new StringBuilder(), 0, input, 0);
+            this(Lists.empty(), new StringBuilder(), 0, input, 0);
         }
 
         private DivideState advance() {
-            this.segments.add(this.buffer.toString());
+            this.segments = this.segments.add(this.buffer.toString());
             this.buffer = new StringBuilder();
             return this;
         }
@@ -125,8 +291,24 @@ public class Main {
         }
     }
 
-    private record Definition(Optional<String> maybeBeforeType, String name, List<String> typeParams,
-                              String type) implements MethodHeader {
+    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+        @Override
+        public Optional<String> createInitial() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> fold(Optional<String> maybe, String element) {
+            return Optional.of(maybe.map(inner -> inner + this.delimiter + element).orElse(element));
+        }
+    }
+
+    private record Definition(
+            Optional<String> maybeBeforeType,
+            String name,
+            List<String> typeParams,
+            String type
+    ) implements MethodHeader {
         private String generate() {
             return this.generateWithAfterName(" ");
         }
@@ -138,10 +320,10 @@ public class Main {
         }
 
         private String joinTypeParams() {
-            if (this.typeParams.isEmpty()) {
-                return "";
-            }
-            return "<" + String.join(", ", this.typeParams) + ">";
+            return this.typeParams.iterate()
+                    .collect(new Joiner(", "))
+                    .map(joined -> "<" + joined + ">")
+                    .orElse("");
         }
     }
 
@@ -163,6 +345,84 @@ public class Main {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(this.error);
+        }
+    }
+
+    private static class Iterators {
+        public static <T> Iterator<T> fromOptional(Optional<T> optional) {
+            return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        }
+    }
+
+    private static class SingleHead<T> implements Head<T> {
+        private final T element;
+        private boolean retrieved = false;
+
+        public SingleHead(T element) {
+            this.element = element;
+        }
+
+        @Override
+        public Optional<T> next() {
+            if (this.retrieved) {
+                return Optional.empty();
+            }
+
+            this.retrieved = true;
+            return Optional.of(this.element);
+        }
+    }
+
+    private static class EmptyHead<T> implements Head<T> {
+        @Override
+        public Optional<T> next() {
+            return Optional.empty();
+        }
+    }
+
+    private static class ListCollector<T> implements Collector<T, List<T>> {
+        @Override
+        public List<T> createInitial() {
+            return Lists.empty();
+        }
+
+        @Override
+        public List<T> fold(List<T> current, T element) {
+            return current.add(element);
+        }
+    }
+
+    private static class FlatMapHead<T, R> implements Head<R> {
+        private final Function<T, Iterator<R>> mapper;
+        private final Head<T> head;
+        private Optional<Iterator<R>> maybeCurrent;
+
+        public FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
+            this.mapper = mapper;
+            this.maybeCurrent = Optional.empty();
+            this.head = head;
+        }
+
+        @Override
+        public Optional<R> next() {
+            while (true) {
+                if (this.maybeCurrent.isPresent()) {
+                    Iterator<R> it = this.maybeCurrent.get();
+                    var next = it.next();
+                    if (next.isPresent()) {
+                        return next;
+                    }
+
+                    this.maybeCurrent = Optional.empty();
+                }
+                Optional<T> outer = this.head.next();
+                if (outer.isPresent()) {
+                    this.maybeCurrent = Optional.of(this.mapper.apply(outer.get()));
+                }
+                else {
+                    return Optional.empty();
+                }
+            }
         }
     }
 
@@ -212,15 +472,13 @@ public class Main {
     }
 
     private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return elements.stream()
-                .reduce(new StringBuilder(), merger, (_, next) -> next)
+        return elements.iterate()
+                .fold(new StringBuilder(), merger)
                 .toString();
     }
 
     private static Tuple<CompileState, List<String>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
-        var divisions = divide(input, folder);
-
-        var folded = divisions.stream().reduce(new Tuple<CompileState, List<String>>(state, new ArrayList<>()), (current, segment) -> {
+        return divide(input, folder).iterate().fold(new Tuple<CompileState, List<String>>(state, Lists.empty()), (current, segment) -> {
             var currentState = current.left;
             var currentElement = current.right;
 
@@ -230,8 +488,7 @@ public class Main {
 
             currentElement.add(mappedElement);
             return new Tuple<>(mappedState, currentElement);
-        }, (_, next) -> next);
-        return folded;
+        });
     }
 
     private static StringBuilder mergeStatements(StringBuilder cache, String element) {
@@ -328,7 +585,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileRootSegment(CompileState state, String input) {
-        return compileOrPlaceholder(state, input, List.of(
+        return compileOrPlaceholder(state, input, Lists.of(
                 Main::compileWhitespace,
                 Main::compileNamespaced,
                 createStructureRule("class ", "class ")
@@ -342,16 +599,16 @@ public class Main {
                     var strippedBeforeContent = beforeContent.strip();
                     return compileFirst(strippedBeforeContent, "(", (rawName, s2) -> {
                         var name = rawName.strip();
-                        return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, name);
+                        return assembleStructure(targetInfix, state1, inputContent, name);
                     }).or(() -> {
-                        return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, strippedBeforeContent);
+                        return assembleStructure(targetInfix, state1, inputContent, strippedBeforeContent);
                     });
                 });
             });
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String beforeKeyword, String inputContent, String name) {
+    private static Optional<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String inputContent, String name) {
         var outputContentTuple = compileStatements(state1.withStructureName(name), inputContent, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
@@ -379,14 +636,14 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules) {
-        return rules.stream()
+        return rules.iterate()
                 .map(rule -> rule.apply(state, input))
-                .flatMap(Optional::stream)
-                .findFirst();
+                .flatMap(Iterators::fromOptional)
+                .next();
     }
 
     private static Tuple<CompileState, String> compileClassSegment(CompileState state1, String input1) {
-        return compileOrPlaceholder(state1, input1, List.of(
+        return compileOrPlaceholder(state1, input1, Lists.of(
                 Main::compileWhitespace,
                 createStructureRule("class ", "class "),
                 createStructureRule("interface ", "interface "),
@@ -437,7 +694,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        return compileOrPlaceholder(state, input, List.of(
+        return compileOrPlaceholder(state, input, Lists.of(
                 Main::compileWhitespace,
                 Main::compileEmptySegment,
                 Main::compileBlock,
@@ -494,7 +751,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOr(state, input, Lists.of(
                 createConditionalRule("if"),
                 createConditionalRule("while"),
                 Main::compileElse
@@ -534,7 +791,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
-        return compileOrPlaceholder(state, withoutEnd, List.of(
+        return compileOrPlaceholder(state, withoutEnd, Lists.of(
                 Main::compileReturnWithValue,
                 Main::compileAssignment,
                 Main::compileInvokable,
@@ -607,7 +864,10 @@ public class Main {
         var beforeLast = divisions.subList(0, divisions.size() - 1);
         var last = divisions.getLast();
 
-        var joined = String.join(delimiter, beforeLast);
+        var joined = beforeLast.iterate()
+                .collect(new Joiner(delimiter))
+                .orElse("");
+
         return Optional.of(new Tuple<>(joined, last));
     }
 
@@ -652,7 +912,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
-        return compileOr(state, input, List.of(
+        return compileOr(state, input, Lists.of(
                 createAccessRule("."),
                 createAccessRule("::"),
                 Main::compileSymbol,
@@ -697,14 +957,14 @@ public class Main {
         return compileFirst(input, "->", (beforeArrow, afterArrow) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
-                return getCompileStateStringTuple(state, List.of(strippedBeforeArrow), afterArrow);
+                return getCompileStateStringTuple(state, Lists.of(strippedBeforeArrow), afterArrow);
             }
 
             return compilePrefix(strippedBeforeArrow, "(", withoutStart -> {
                 return compileSuffix(withoutStart, ")", withoutEnd -> {
                     var paramNames = divideValues(withoutEnd);
 
-                    if (paramNames.stream().allMatch(Main::isSymbol)) {
+                    if (paramNames.iterate().allMatch(Main::isSymbol)) {
                         return getCompileStateStringTuple(state, paramNames, afterArrow);
                     }
                     else {
@@ -733,7 +993,11 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> assembleLambda(CompileState exited, List<String> paramNames, String content) {
-        return Optional.of(new Tuple<>(exited, "(" + String.join(", ", paramNames) + ")" + " => " + content));
+        var joinedParamNames = paramNames.iterate()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return Optional.of(new Tuple<>(exited, "(" + joinedParamNames + ")" + " => " + content));
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String infix) {
@@ -765,10 +1029,12 @@ public class Main {
 
     private static Optional<Tuple<String, String>> selectFirst(List<String> divisions, String delimiter) {
         var first = divisions.getFirst();
-        var afterFirst = divisions.subList(1, divisions.size());
+        var afterFirst = divisions.subList(1, divisions.size())
+                .iterate()
+                .collect(new Joiner(delimiter))
+                .orElse("");
 
-        var joined = String.join(delimiter, afterFirst);
-        return Optional.of(new Tuple<>(first, joined));
+        return Optional.of(new Tuple<>(first, afterFirst));
     }
 
     private static BiFunction<DivideState, Character, DivideState> foldOperator(String infix) {
@@ -834,7 +1100,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileParameter(CompileState state, String input) {
-        return compileOrPlaceholder(state, input, List.of(
+        return compileOrPlaceholder(state, input, Lists.of(
                 Main::compileWhitespace,
                 (state1, input1) -> {
                     return compileDefinition(state1, input1).map(tuple -> new Tuple<>(tuple.left, tuple.right.generate()));
@@ -871,20 +1137,20 @@ public class Main {
                         return assembleDefinition(state, Optional.of(beforeTypeParams), name, typeParams, type);
                     });
                 }).or(() -> {
-                    return assembleDefinition(state, Optional.of(beforeType), name, Collections.emptyList(), type);
+                    return assembleDefinition(state, Optional.of(beforeType), name, Lists.empty(), type);
                 });
             }).or(() -> {
-                return assembleDefinition(state, Optional.empty(), name, Collections.emptyList(), beforeName);
+                return assembleDefinition(state, Optional.empty(), name, Lists.empty(), beforeName);
             });
         });
     }
 
-    private static List<String> divideValues(String s2) {
-        return divide(s2, Main::foldValues)
-                .stream()
+    private static List<String> divideValues(String input) {
+        return divide(input, Main::foldValues)
+                .iterate()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
-                .toList();
+                .collect(new ListCollector<>());
     }
 
     private static DivideState foldTypeSeparators(DivideState state, char c) {
@@ -914,7 +1180,7 @@ public class Main {
     }
 
     private static Optional<Tuple<CompileState, String>> compileType(CompileState state, String type) {
-        return compileOr(state, type, List.of(
+        return compileOr(state, type, Lists.of(
                 Main::compileGeneric,
                 Main::compilePrimitive,
                 Main::compileSymbolType
@@ -976,7 +1242,7 @@ public class Main {
     }
 
     private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String input) {
-        return compileOrPlaceholder(state, input, List.of(
+        return compileOrPlaceholder(state, input, Lists.of(
                 Main::compileWhitespace,
                 Main::compileType
         ));

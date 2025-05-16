@@ -4,9 +4,122 @@ interface MethodHeader {
 interface Result<T, X> {
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R;
 }
+interface Collector<T, C> {
+	createInitial(): C;
+	fold(current : C, element : T): C;
+}
+interface Iterator<T> {
+	collect<C>(collector : Collector<T, C>): C;
+	map<R>(mapper : (arg0 : T) => R): Iterator<R>;
+	fold<R>(initial : R, folder : BiFunction<R, T, R>): R;
+	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R>;
+	next(): Optional<T>;
+	allMatch(predicate : Predicate<T>): boolean;
+	filter(predicate : Predicate<T>): Iterator<T>;
+}
+interface List<T> {
+	add(element : T): List<T>;
+	iterate(): Iterator<T>;
+	size(): number;
+	subList(startInclusive : number, endExclusive : number): List<T>;
+	getLast(): T;
+	getFirst(): T;
+	get(index : number): T;
+}
+interface Head<T> {
+	next(): Optional<T>;
+}
+class HeadedIterator<T> {
+	next(): Optional<T> {
+		return this.head.next();
+	}
+	collect<C>(collector : Collector<T, C>): C {
+		return this.fold(collector.createInitial(), collector.fold);
+	}
+	map<R>(mapper : (arg0 : T) => R): Iterator<R> {
+		Head < /*R> mapHead */ = () => this.next().map(mapper);
+		return new HeadedIterator<>(mapHead);
+	}
+	fold<R>(initial : R, folder : BiFunction<R, T, R>): R {
+		let result : R = initial;
+		while (true){
+			Optional < /*T> maybeNext */ = this.head.next();
+			if (maybeNext.isEmpty()){
+				return result;
+			}
+			result = folder.apply(result, maybeNext.get());
+		}
+	}
+	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R> {
+		return new HeadedIterator<>(new FlatMapHead<T, R>(this.head, mapper));
+	}
+	allMatch(predicate : Predicate<T>): boolean {
+		return this.fold(true, (maybeAllTrue, element) => maybeAllTrue && predicate.test(element));
+	}
+	filter(predicate : Predicate<T>): Iterator<T> {
+		return this.flatMap((element) => {
+			if (predicate.test(element)){
+				return new HeadedIterator<>(new SingleHead<>(element));
+			}
+			else {
+				return new HeadedIterator<>(new EmptyHead<>());
+			}
+		});
+	}
+}
+class RangeHead implements Head<Integer> {
+	length : number;
+	0 : /*=*/;
+	RangeHead(length : number): public {
+		this.length = length;
+	}
+	next(): Optional<number> {
+		if (this.counter < this.length){
+			let value : unknown = this.counter;
+			this.counter++;
+			return Optional.of(value);
+		}
+		return Optional.empty();
+	}
+}
+class JVMList<T> {
+	JVMList(): public {
+		this(new ArrayList<>());
+	}
+	add(element : T): List<T> {
+		this.list.add(element);
+		return this;
+	}
+	iterate(): Iterator<T> {
+		return new /*HeadedIterator<>(new RangeHead(this.list.size())).map*/(this.list.get);
+	}
+	size(): number {
+		return this.list.size();
+	}
+	subList(startInclusive : number, endExclusive : number): List<T> {
+		return new JVMList<>(this.list.subList(startInclusive, endExclusive));
+	}
+	getLast(): T {
+		return this.list.getLast();
+	}
+	getFirst(): T {
+		return this.list.getFirst();
+	}
+	get(index : number): T {
+		return this.list.get(index);
+	}
+}
+class Lists {
+	empty<T>(): List<T> {
+		return new JVMList<>();
+	}
+	of<T>(elements : /*T...*/): List<T> {
+		return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
+	}
+}
 class DivideState {
-	segments : List<string>;
 	input : string;
+	segments : List<string>;
 	index : number;
 	buffer : StringBuilder;
 	depth : number;
@@ -18,10 +131,10 @@ class DivideState {
 		this.index = index;
 	}
 	constructor (input : string) {
-		this(new ArrayList<>(), new StringBuilder(), 0, input, 0);
+		this(Lists.empty(), new StringBuilder(), 0, input, 0);
 	}
 	advance(): DivideState {
-		this.segments.add(this.buffer.toString());
+		this.segments = this.segments.add(this.buffer.toString());
 		this.buffer = new StringBuilder();
 		return this;
 	}
@@ -86,6 +199,14 @@ class CompileState {
 		return new CompileState(this.output, this.structureName, this.depth - 1);
 	}
 }
+class Joiner {
+	createInitial(): Optional<string> {
+		return Optional.empty();
+	}
+	fold(maybe : Optional<string>, element : string): Optional<string> {
+		return Optional.of(maybe.map((inner) => inner + this.delimiter + element).orElse(element));
+	}
+}
 class Definition {
 	generate(): string {
 		return this.generateWithAfterName(" ");
@@ -95,10 +216,7 @@ class Definition {
 		return this.name + joinedTypeParams + afterName + ": " + this.type();
 	}
 	joinTypeParams(): string {
-		if (this.typeParams.isEmpty()){
-			return "";
-		}
-		return "<" + String.join(", ", this.typeParams) + ">";
+		return this.typeParams.iterate().collect(new Joiner(", ")).map((joined) => "<" + joined + ">").orElse("");
 	}
 }
 class ConstructorHeader implements MethodHeader {
@@ -114,6 +232,67 @@ class Ok<T, X> {
 class Err<T, X> {
 	match<R>(whenOk : (arg0 : T) => R, whenErr : (arg0 : X) => R): R {
 		return whenErr.apply(this.error);
+	}
+}
+class Iterators {
+	fromOptional<T>(optional : Optional<T>): Iterator<T> {
+		return new HeadedIterator<>(optional. < Head < /*T>>map*/(SingleHead.new).orElseGet(EmptyHead.new));
+	}
+}
+class SingleHead<T> implements Head<T> {
+	element : T;
+	false : /*=*/;
+	SingleHead(element : T): public {
+		this.element = element;
+	}
+	next(): Optional<T> {
+		if (this.retrieved){
+			return Optional.empty();
+		}
+		this.retrieved = true;
+		return Optional.of(this.element);
+	}
+}
+class EmptyHead<T> implements Head<T> {
+	next(): Optional<T> {
+		return Optional.empty();
+	}
+}
+class ListCollector<T> implements Collector<T, List<T>> {
+	createInitial(): List<T> {
+		return Lists.empty();
+	}
+	fold(current : List<T>, element : T): List<T> {
+		return current.add(element);
+	}
+}
+class FlatMapHead<T, R> implements Head<R> {
+	mapper : (arg0 : T) => Iterator<R>;
+	head : Head<T>;
+	maybeCurrent : Optional<Iterator<R>>;
+	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Iterator<R>): public {
+		this.mapper = mapper;
+		this.maybeCurrent = Optional.empty();
+		this.head = head;
+	}
+	next(): Optional<R> {
+		while (true){
+			if (this.maybeCurrent.isPresent()){
+				Iterator < /*R> it */ = this.maybeCurrent.get();
+				let next : unknown = it.next();
+				if (next.isPresent()){
+					return next;
+				}
+				this.maybeCurrent = Optional.empty();
+			}
+			Optional < /*T> outer */ = this.head.next();
+			if (outer.isPresent()){
+				this.maybeCurrent = Optional.of(this.mapper.apply(outer.get()));
+			}
+			else {
+				return Optional.empty();
+			}
+		}
 	}
 }
 class Main {
@@ -151,11 +330,10 @@ class Main {
 		return new Tuple<>(folded.left, generateAll(folded.right, merger));
 	}
 	generateAll(elements : List<string>, merger : BiFunction<StringBuilder, string, StringBuilder>): string {
-		return elements.stream().reduce(new StringBuilder(), merger, (_, next) => next).toString();
+		return elements.iterate().fold(new StringBuilder(), merger).toString();
 	}
 	parseAll(state : CompileState, input : string, folder : BiFunction<DivideState, string, DivideState>, mapper : BiFunction<CompileState, string, Tuple<CompileState, string>>): Tuple<CompileState, List<string>> {
-		let divisions : unknown = divide(input, folder);
-		let folded : unknown = divisions.stream().reduce(new Tuple<CompileState, List<string>>(state, new ArrayList<>()), (current, segment) => {
+		return divide(input, folder).iterate().fold(new Tuple<CompileState, List<string>>(state, Lists.empty()), (current, segment) => {
 			let currentState : unknown = current.left;
 			let currentElement : unknown = current.right;
 			let mappedTuple : unknown = mapper.apply(currentState, segment);
@@ -163,8 +341,7 @@ class Main {
 			let mappedElement : unknown = mappedTuple.right;
 			currentElement.add(mappedElement);
 			return new Tuple<>(mappedState, currentElement);
-		}, (_, next) => next);
-		return folded;
+		});
 	}
 	mergeStatements(cache : StringBuilder, element : string): StringBuilder {
 		return cache.append(element);
@@ -235,7 +412,7 @@ class Main {
 		return appended;
 	}
 	compileRootSegment(state : CompileState, input : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileNamespaced, createStructureRule("class ", "class ")));
+		return compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileNamespaced, createStructureRule("class ", "class ")));
 	}
 	createStructureRule(sourceInfix : string, targetInfix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => compileFirst(input1, sourceInfix, (beforeKeyword, right1) => {
@@ -244,15 +421,15 @@ class Main {
 					let strippedBeforeContent : unknown = beforeContent.strip();
 					return compileFirst(strippedBeforeContent, "(", (rawName, s2) => {
 						let name : unknown = rawName.strip();
-						return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, name);
+						return assembleStructure(targetInfix, state1, inputContent, name);
 					}).or(() => {
-						return assembleStructure(targetInfix, state1, beforeKeyword, inputContent, strippedBeforeContent);
+						return assembleStructure(targetInfix, state1, inputContent, strippedBeforeContent);
 					});
 				});
 			});
 		});
 	}
-	assembleStructure(targetInfix : string, state1 : CompileState, beforeKeyword : string, inputContent : string, name : string): Optional<Tuple<CompileState, string>> {
+	assembleStructure(targetInfix : string, state1 : CompileState, inputContent : string, name : string): Optional<Tuple<CompileState, string>> {
 		let outputContentTuple : unknown = compileStatements(state1.withStructureName(name), inputContent, Main.compileClassSegment);
 		let outputContentState : unknown = outputContentTuple.left;
 		let outputContent : unknown = outputContentTuple.right;
@@ -272,10 +449,10 @@ class Main {
 		return compileOr(state, input, rules).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
 	}
 	compileOr(state : CompileState, input : string, rules : List<BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>>>): Optional<Tuple<CompileState, string>> {
-		return rules.stream().map((rule) => rule.apply(state, input)).flatMap(Optional.stream).findFirst();
+		return rules.iterate().map((rule) => rule.apply(state, input)).flatMap(Iterators.fromOptional).next();
 	}
 	compileClassSegment(state1 : CompileState, input1 : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state1, input1, List.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
+		return compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
 	}
 	compileMethod(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		return compileFirst(input, "(", (beforeParams, withParams) => {
@@ -310,7 +487,7 @@ class Main {
 		return compileStatements(state, input, Main.compileFunctionSegment);
 	}
 	compileFunctionSegment(state : CompileState, input : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileEmptySegment, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
+		return compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileEmptySegment, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
 	}
 	compileEmptySegment(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		if (input.strip().equals(";")){
@@ -353,7 +530,7 @@ class Main {
 		return appended;
 	}
 	compileBlockHeader(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
-		return compileOr(state, input, List.of(createConditionalRule("if"), createConditionalRule("while"), Main.compileElse));
+		return compileOr(state, input, Lists.of(createConditionalRule("if"), createConditionalRule("while"), Main.compileElse));
 	}
 	createConditionalRule(prefix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => compilePrefix(input1.strip(), prefix, (withoutPrefix) => {
@@ -384,7 +561,7 @@ class Main {
 		return "\n" + "\t".repeat(indent);
 	}
 	compileFunctionStatementValue(state : CompileState, withoutEnd : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, withoutEnd, List.of(Main.compileReturnWithValue, Main.compileAssignment, Main.compileInvokable, createPostRule("++"), createPostRule("--"), Main.compileBreak));
+		return compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, Main.compileInvokable, createPostRule("++"), createPostRule("--"), Main.compileBreak));
 	}
 	compileBreak(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		if (input.strip().equals("break")){
@@ -436,7 +613,7 @@ class Main {
 	selectLast(divisions : List<string>, delimiter : string): Optional<Tuple<string, string>> {
 		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1);
 		let last : unknown = divisions.getLast();
-		let joined : unknown = String.join(delimiter, beforeLast);
+		let joined : unknown = beforeLast.iterate().collect(new Joiner(delimiter)).orElse("");
 		return Optional.of(new Tuple<>(joined, last));
 	}
 	foldInvocationStarts(state : DivideState, c : string): DivideState {
@@ -470,7 +647,7 @@ class Main {
 		return compileValue(state, input).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
 	}
 	compileValue(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">="), createTextRule("\""), createTextRule("'")));
+		return compileOr(state, input, Lists.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">="), createTextRule("\""), createTextRule("'")));
 	}
 	createTextRule(slice : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => {
@@ -492,12 +669,12 @@ class Main {
 		return compileFirst(input, "->", (beforeArrow, afterArrow) => {
 			let strippedBeforeArrow : unknown = beforeArrow.strip();
 			if (isSymbol(strippedBeforeArrow)){
-				return getCompileStateStringTuple(state, List.of(strippedBeforeArrow), afterArrow);
+				return getCompileStateStringTuple(state, Lists.of(strippedBeforeArrow), afterArrow);
 			}
 			return compilePrefix(strippedBeforeArrow, "(", (withoutStart) => {
 				return compileSuffix(withoutStart, ")", (withoutEnd) => {
 					let paramNames : unknown = divideValues(withoutEnd);
-					if (paramNames.stream().allMatch(Main.isSymbol)){
+					if (paramNames.iterate().allMatch(Main.isSymbol)){
 						return getCompileStateStringTuple(state, paramNames, afterArrow);
 					}
 					else {
@@ -523,7 +700,8 @@ class Main {
 		});
 	}
 	assembleLambda(exited : CompileState, paramNames : List<string>, content : string): Optional<Tuple<CompileState, string>> {
-		return Optional.of(new Tuple<>(exited, "(" + String.join(", ", paramNames) + ")" + " => " + content));
+		let joinedParamNames : unknown = paramNames.iterate().collect(new Joiner(", ")).orElse("");
+		return Optional.of(new Tuple<>(exited, "(" + joinedParamNames + ")" + " => " + content));
 	}
 	createOperatorRule(infix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return createOperatorRuleWithDifferentInfix(infix, infix);
@@ -551,9 +729,8 @@ class Main {
 	}
 	selectFirst(divisions : List<string>, delimiter : string): Optional<Tuple<string, string>> {
 		let first : unknown = divisions.getFirst();
-		let afterFirst : unknown = divisions.subList(1, divisions.size());
-		let joined : unknown = String.join(delimiter, afterFirst);
-		return Optional.of(new Tuple<>(first, joined));
+		let afterFirst : unknown = divisions.subList(1, divisions.size()).iterate().collect(new Joiner(delimiter)).orElse("");
+		return Optional.of(new Tuple<>(first, afterFirst));
 	}
 	foldOperator(infix : string): BiFunction<DivideState, string, DivideState> {
 		return (state, c) => {
@@ -605,7 +782,7 @@ class Main {
 		return mapper.apply(slice);
 	}
 	compileParameter(state : CompileState, input : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, (state1, input1) => {
+		return compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, (state1, input1) => {
 			return compileDefinition(state1, input1).map((tuple) => new Tuple<>(tuple.left, tuple.right.generate()));
 		}));
 	}
@@ -633,15 +810,15 @@ class Main {
 						return assembleDefinition(state, Optional.of(beforeTypeParams), name, typeParams, type);
 					});
 				}).or(() => {
-					return assembleDefinition(state, Optional.of(beforeType), name, Collections.emptyList(), type);
+					return assembleDefinition(state, Optional.of(beforeType), name, Lists.empty(), type);
 				});
 			}).or(() => {
-				return assembleDefinition(state, Optional.empty(), name, Collections.emptyList(), beforeName);
+				return assembleDefinition(state, Optional.empty(), name, Lists.empty(), beforeName);
 			});
 		});
 	}
-	divideValues(s2 : string): List<string> {
-		return divide(s2, Main.foldValues).stream().map(String.strip).filter((value) => !value.isEmpty()).toList();
+	divideValues(input : string): List<string> {
+		return divide(input, Main.foldValues).iterate().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector<>());
 	}
 	foldTypeSeparators(state : DivideState, c : string): DivideState {
 		if (c === " " && state.isLevel()){
@@ -665,7 +842,7 @@ class Main {
 		return compileType(state, type).orElseGet(() => new Tuple<>(state, generatePlaceholder(type)));
 	}
 	compileType(state : CompileState, type : string): Optional<Tuple<CompileState, string>> {
-		return compileOr(state, type, List.of(Main.compileGeneric, Main.compilePrimitive, Main.compileSymbolType));
+		return compileOr(state, type, Lists.of(Main.compileGeneric, Main.compilePrimitive, Main.compileSymbolType));
 	}
 	compileSymbolType(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		let stripped : unknown = input.strip();
@@ -711,7 +888,7 @@ class Main {
 		});
 	}
 	compileTypeArgument(state : CompileState, input : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileType));
+		return compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileType));
 	}
 	compileValues(state : CompileState, input : string, mapper : BiFunction<CompileState, string, Tuple<CompileState, string>>): Tuple<CompileState, string> {
 		let folded : unknown = parseValues(state, input, mapper);
