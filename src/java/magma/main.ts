@@ -11,7 +11,6 @@ interface Collector<T, C> {
 interface Option<T> {
 	map<R>(mapper : (arg0 : T) => R): Option<R>;
 	isEmpty(): boolean;
-	get(): T;
 	orElse(other : T): T;
 	orElseGet(supplier : Supplier<T>): T;
 	isPresent(): boolean;
@@ -59,7 +58,7 @@ class HeadedIterator<T> {
 			if (maybeNext.isEmpty()){
 				return result;
 			}
-			result = folder.apply(result, maybeNext.get());
+			result = folder.apply(result, maybeNext.orElse(null));
 		}
 	}
 	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R> {
@@ -294,7 +293,7 @@ class FlatMapHead<T, R> implements Head<R> {
 	next(): Option<R> {
 		while (true){
 			if (this.maybeCurrent.isPresent()){
-				Iterator < /*R> it */ = this.maybeCurrent.get();
+				Iterator < /*R> it */ = this.maybeCurrent.orElse(null);
 				let next : unknown = it.next();
 				if (next.isPresent()){
 					return next;
@@ -303,7 +302,7 @@ class FlatMapHead<T, R> implements Head<R> {
 			}
 			Option < /*T> outer */ = this.head.next();
 			if (outer.isPresent()){
-				this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.get()));
+				this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.orElse(null)));
 			}
 			else {
 				return new None<R>();
@@ -432,7 +431,7 @@ class Main {
 			if (maybePopped.isEmpty()){
 				break;
 			}
-			let poppedTuple : unknown = maybePopped.get();
+			let poppedTuple : unknown = maybePopped.orElse(null);
 			let poppedState : unknown = poppedTuple.left;
 			let popped : unknown = poppedTuple.right;
 			current = foldSingleQuotes(poppedState, popped).or(() => foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder.apply(poppedState, popped));
@@ -449,7 +448,7 @@ class Main {
 			if (maybeTuple.isEmpty()){
 				break;
 			}
-			let tuple : unknown = maybeTuple.get();
+			let tuple : unknown = maybeTuple.orElse(null);
 			appended = tuple.left;
 			if (tuple.right === "\\"){
 				appended = appended.popAndAppendToOption().orElse(appended);

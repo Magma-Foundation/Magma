@@ -33,8 +33,6 @@ public class Main {
 
         boolean isEmpty();
 
-        T get();
-
         T orElse(T other);
 
         T orElseGet(Supplier<T> supplier);
@@ -113,7 +111,7 @@ public class Main {
                     return result;
                 }
 
-                result = folder.apply(result, maybeNext.get());
+                result = folder.apply(result, maybeNext.orElse(null));
             }
         }
 
@@ -437,7 +435,7 @@ public class Main {
         public Option<R> next() {
             while (true) {
                 if (this.maybeCurrent.isPresent()) {
-                    Iterator<R> it = this.maybeCurrent.get();
+                    Iterator<R> it = this.maybeCurrent.orElse(null);
                     var next = it.next();
                     if (next.isPresent()) {
                         return next;
@@ -447,7 +445,7 @@ public class Main {
                 }
                 Option<T> outer = this.head.next();
                 if (outer.isPresent()) {
-                    this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.get()));
+                    this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.orElse(null)));
                 }
                 else {
                     return new None<R>();
@@ -467,7 +465,6 @@ public class Main {
             return false;
         }
 
-        @Override
         public T get() {
             return this.value;
         }
@@ -519,7 +516,6 @@ public class Main {
             return true;
         }
 
-        @Override
         public T get() {
             return null;
         }
@@ -637,7 +633,7 @@ public class Main {
                 break;
             }
 
-            var poppedTuple = maybePopped.get();
+            var poppedTuple = maybePopped.orElse(null);
             var poppedState = poppedTuple.left;
             var popped = poppedTuple.right;
 
@@ -661,7 +657,7 @@ public class Main {
                 break;
             }
 
-            var tuple = maybeTuple.get();
+            var tuple = maybeTuple.orElse(null);
             appended = tuple.left;
 
             if (tuple.right == '\\') {
