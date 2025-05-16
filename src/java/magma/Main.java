@@ -16,17 +16,21 @@ public class Main {
 
     private static class DivideState {
         private final List<String> segments;
+        private final String input;
+        private int index;
         private StringBuilder buffer;
         private int depth;
 
-        private DivideState(List<String> segments, StringBuilder buffer, int depth) {
+        private DivideState(List<String> segments, StringBuilder buffer, int depth, String input, int index) {
             this.segments = segments;
             this.buffer = buffer;
             this.depth = depth;
+            this.input = input;
+            this.index = index;
         }
 
-        public DivideState() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
+        public DivideState(String input) {
+            this(new ArrayList<>(), new StringBuilder(), 0, input, 0);
         }
 
         private DivideState advance() {
@@ -56,6 +60,24 @@ public class Main {
 
         public boolean isShallow() {
             return this.depth == 1;
+        }
+
+        public Optional<Tuple<DivideState, Character>> pop() {
+            if (this.index >= this.input.length()) {
+                return Optional.empty();
+            }
+
+            var c = this.input.charAt(this.index);
+            this.index++;
+            return Optional.of(new Tuple<>(this, c));
+        }
+
+        public Optional<Tuple<DivideState, Character>> popAndAppendToTuple() {
+            return this.pop().map(inner -> new Tuple<>(inner.left.append(inner.right), inner.right));
+        }
+
+        public Optional<DivideState> popAndAppendToOption() {
+            return this.popAndAppendToTuple().map(Tuple::left);
         }
     }
 
@@ -150,14 +172,71 @@ public class Main {
     }
 
     private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = new DivideState();
+        var current = new DivideState(input);
 
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            current = folder.apply(current, c);
+        while (true) {
+            var maybePopped = current.pop();
+            if (maybePopped.isEmpty()) {
+                break;
+            }
+
+            var poppedTuple = maybePopped.get();
+            var poppedState = poppedTuple.left;
+            var popped = poppedTuple.right;
+
+            current = foldSingleQuotes(poppedState, popped)
+                    .or(() -> foldDoubleQuotes(poppedState, popped))
+                    .orElseGet(() -> folder.apply(poppedState, popped));
         }
 
         return current.advance().segments;
+    }
+
+    private static Optional<DivideState> foldDoubleQuotes(DivideState state, char c) {
+        if (c != '\"') {
+            return Optional.empty();
+        }
+
+        var appended = state.append(c);
+        while (true) {
+            var maybeTuple = appended.popAndAppendToTuple();
+            if (maybeTuple.isEmpty()) {
+                break;
+            }
+
+            var tuple = maybeTuple.get();
+            appended = tuple.left;
+
+            if (tuple.right == '\\') {
+                appended = appended.popAndAppendToOption().orElse(appended);
+            }
+            if (tuple.right == '\"') {
+                break;
+            }
+        }
+        return Optional.of(appended);
+    }
+
+    private static Optional<DivideState> foldSingleQuotes(DivideState state, char c) {
+        if (c != '\'') {
+            return Optional.empty();
+        }
+
+        return state.append(c)
+                .popAndAppendToTuple()
+                .flatMap(Main::foldEscaped)
+                .flatMap(DivideState::popAndAppendToOption);
+    }
+
+    private static Optional<DivideState> foldEscaped(Tuple<DivideState, Character> tuple) {
+        var state = tuple.left;
+        var c = tuple.right;
+
+        if (c == '\\') {
+            return state.popAndAppendToOption();
+        }
+
+        return Optional.of(state);
     }
 
     private static DivideState foldStatements(DivideState state, char c) {
