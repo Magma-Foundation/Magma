@@ -230,7 +230,7 @@ public final class Main {
         }
 
         Option<Tuple<DivideState, Character>> pop() {
-            if (this.index >= this.input.length()) {
+            if (this.index >= Strings.length(this.input)) {
                 return new None<Tuple<DivideState, Character>>();
             }
 
@@ -954,6 +954,12 @@ public final class Main {
         }
     }
 
+    private static class Strings {
+        private static int length(String stripped) {
+            return stripped.length();
+        }
+    }
+
     private Main() {
     }
 
@@ -1605,11 +1611,11 @@ public final class Main {
     private static BiFunction<CompileState, String, Option<Tuple<CompileState, Value>>> createTextRule(String slice) {
         return (state1, input1) -> {
             var stripped = input1.strip();
-            if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() <= slice.length()) {
+            if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || Strings.length(stripped) <= Strings.length(slice)) {
                 return new None<>();
             }
 
-            var value = stripped.substring(slice.length(), stripped.length() - slice.length());
+            var value = stripped.substring(Strings.length(slice), Strings.length(stripped) - Strings.length(slice));
             return new Some<>(new Tuple<>(state1, new StringValue(value)));
         };
     }
@@ -1712,7 +1718,7 @@ public final class Main {
     private static BiFunction<DivideState, Character, DivideState> foldOperator(String infix) {
         return (state, c) -> {
             if (c == infix.charAt(0) && state.startsWith(infix.substring(1))) {
-                var length = infix.length() - 1;
+                var length = Strings.length(infix) - 1;
                 var counter = 0;
                 var current = state;
                 while (counter < length) {
@@ -1738,7 +1744,7 @@ public final class Main {
     }
 
     private static boolean isNumber(String input) {
-        return IntStream.range(0, input.length()).mapToObj(input::charAt).allMatch(Character::isDigit);
+        return IntStream.range(0, Strings.length(input)).mapToObj(input::charAt).allMatch(Character::isDigit);
     }
 
     private static Option<Tuple<CompileState, Value>> parseSymbol(CompileState state, String input) {
@@ -1752,7 +1758,7 @@ public final class Main {
     }
 
     private static boolean isSymbol(String input) {
-        return IntStream.range(0, input.length())
+        return IntStream.range(0, Strings.length(input))
                 .allMatch(index -> Main.isSymbolChar(index, input.charAt(index)));
     }
 
@@ -1771,7 +1777,7 @@ public final class Main {
             return new None<>();
         }
 
-        var slice = input.substring(infix.length());
+        var slice = input.substring(Strings.length(infix));
         return mapper.apply(slice);
     }
 
@@ -1823,7 +1829,7 @@ public final class Main {
         return Main.divide(s, (state1, c) -> Main.foldDelimited(state1, c, '\n')).query()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
-                .filter(value -> 1 <= value.length())
+                .filter(value -> 1 <= Strings.length(value))
                 .map(value -> value.substring(1))
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
@@ -2077,7 +2083,7 @@ public final class Main {
             return new None<T>();
         }
 
-        var content = input.substring(0, input.length() - suffix.length());
+        var content = input.substring(0, Strings.length(input) - Strings.length(suffix));
         return mapper.apply(content);
     }
 
@@ -2100,7 +2106,7 @@ public final class Main {
         }
 
         var left = input.substring(0, index);
-        var right = input.substring(index + infix.length());
+        var right = input.substring(index + Strings.length(infix));
         return new Some<Tuple<String, String>>(new Tuple<String, String>(left, right));
     }
 

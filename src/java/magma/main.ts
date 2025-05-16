@@ -159,7 +159,7 @@ class DivideState {
 		return 1 === this.depth;
 	}
 	pop(): Option<Tuple<DivideState, string>> {
-		if (this.index >= this.input.length()){
+		if (this.index >= Strings.length(this.input)){
 			return new None<Tuple<DivideState, string>>();
 		}
 		let c = this.input.charAt(this.index);
@@ -728,6 +728,11 @@ class Lists  {
 		return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
 	}
 }
+class Strings  {
+	static length(stripped: string): number {
+		return stripped.length();
+	}
+}
 class Main  {
 	Main(): private {
 	}
@@ -1167,10 +1172,10 @@ class Main  {
 	static createTextRule(slice: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
 		return (state1, input1) => {
 			let stripped = input1.strip();
-			if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() <= slice.length()){
+			if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || Strings.length(stripped) <= Strings.length(slice)){
 				return new None<>();
 			}
-			let value = stripped.substring(slice.length()) - slice.length();
+			let value = stripped.substring(Strings.length(slice)) - Strings.length();
 			return new Some<>(new Tuple<>(state1, new StringValue(value)));
 		};
 	}
@@ -1256,7 +1261,7 @@ class Main  {
 	static foldOperator(infix: string): (arg0 : DivideState, arg1 : string) => DivideState {
 		return (state, c) => {
 			if (c === infix.charAt(0) && state.startsWith(infix.substring(1))){
-				let length = infix.length() - 1;
+				let length = Strings.length(infix) - 1;
 				let counter = 0;
 				let current = state;
 				while (counter < length){
@@ -1278,7 +1283,7 @@ class Main  {
 		}
 	}
 	static isNumber(input: string): boolean {
-		return IntStream.range(0, input.length()).mapToObj(input.charAt).allMatch(Character.isDigit);
+		return IntStream.range(0, Strings.length(input)).mapToObj(input.charAt).allMatch(Character.isDigit);
 	}
 	static parseSymbol(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
 		let stripped = input.strip();
@@ -1290,7 +1295,7 @@ class Main  {
 		}
 	}
 	static isSymbol(input: string): boolean {
-		return IntStream.range(0, input.length()).allMatch((index) => Main.isSymbolChar(index, input.charAt(index)));
+		return IntStream.range(0, Strings.length(input)).allMatch((index) => Main.isSymbolChar(index, input.charAt(index)));
 	}
 	static isSymbolChar(index: number, c: string): boolean {
 		return "_" === c || Character.isLetter(c) || (0 !== index && Character.isDigit(c));
@@ -1299,7 +1304,7 @@ class Main  {
 		if (!input.startsWith(infix)){
 			return new None<>();
 		}
-		let slice = input.substring(infix.length());
+		let slice = input.substring(Strings.length(infix));
 		return mapper(slice);
 	}
 	static compileWhitespace(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
@@ -1341,7 +1346,7 @@ class Main  {
 		});
 	}
 	static parseAnnotations(s: string): List<string> {
-		return Main.divide(s, (state1, c) => Main.foldDelimited(state1, c, "\n")).query().map(String.strip).filter((value) => !value.isEmpty()).filter((value) => 1 <= value.length()).map((value) => value.substring(1)).map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector<>());
+		return Main.divide(s, (state1, c) => Main.foldDelimited(state1, c, "\n")).query().map(String.strip).filter((value) => !value.isEmpty()).filter((value) => 1 <= Strings.length(value)).map((value) => value.substring(1)).map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector<>());
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple<CompileState, Definition>> {
 		return Main.compileSuffix(beforeType.strip(), ">", (withoutTypeParamEnd) => {
@@ -1516,7 +1521,7 @@ class Main  {
 		if (!input.endsWith(suffix)){
 			return new None<T>();
 		}
-		let content = input.substring(0) - suffix.length();
+		let content = input.substring(0) - Strings.length();
 		return mapper(content);
 	}
 	static compileFirst<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
@@ -1534,7 +1539,7 @@ class Main  {
 			return new None<Tuple<string, string>>();
 		}
 		let left = input.substring(0, index);
-		let right = input.substring(index + infix.length());
+		let right = input.substring(index + Strings.length(infix));
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(left, right));
 	}
 	static findFirst(input: string, infix: string): number {
