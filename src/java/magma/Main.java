@@ -407,7 +407,8 @@ public class Main {
             var strippedCondition = withoutPrefix.strip();
             return compilePrefix(strippedCondition, "(", withoutConditionStart -> {
                 return compileSuffix(withoutConditionStart, ")", withoutConditionEnd -> {
-                    return Optional.of(new Tuple<>(state, "if (" + generatePlaceholder(withoutConditionEnd) + ")"));
+                    var tuple = compileValueOrPlaceholder(state, withoutConditionEnd);
+                    return Optional.of(new Tuple<>(tuple.left, "if (" + tuple.right + ")"));
                 });
             });
         });
@@ -523,9 +524,14 @@ public class Main {
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRule("==", "==="),
-                createOperatorRule("+", "+"),
+                compileOperatorWithValue("+"),
+                compileOperatorWithValue("<"),
                 Main::compileString
         ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> compileOperatorWithValue(String infix) {
+        return createOperatorRule(infix, infix);
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createAccessRule(String infix) {
