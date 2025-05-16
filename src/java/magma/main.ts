@@ -157,10 +157,10 @@
 			}
 			let tuple : unknown = maybeTuple.get();
 			appended = tuple.left;
-			if (tuple.right === /* '\\'*/){
+			if (tuple.right === '\\'){
 				appended = appended.popAndAppendToOption().orElse(appended);
 			}
-			if (tuple.right === /* '\"'*/){
+			if (tuple.right === '\"'){
 				/*break*/;
 			}
 		}
@@ -175,7 +175,7 @@
 	/*private static*/foldEscaped(tuple : /*Tuple*/</*DivideState*/, string>): /*Optional*/</*DivideState*/> {
 		let state : unknown = tuple.left;
 		let c : unknown = tuple.right;
-		if (c === /* '\\'*/){
+		if (c === '\\'){
 			return state.popAndAppendToOption();
 		}
 		return Optional.of(state);
@@ -192,7 +192,7 @@
 			let c : /*' ||*/ = /*= '(') {
             return appended.enter()*/;
 		}
-		if (c === /* '}' || c */ === /* ')'*/){
+		if (c === /* '}' || c */ === ')'){
 			return appended.exit();
 		}
 		return appended;
@@ -360,7 +360,7 @@
 	}
 	/*private static*/foldInvocationStarts(state : /*DivideState*/, c : string): /*DivideState*/ {
 		let appended : unknown = state.append(c);
-		if (c === /* '('*/){
+		if (c === '('){
 			let entered : unknown = appended.enter();
 			if (entered.isShallow()){
 				return entered.advance();
@@ -369,7 +369,7 @@
 				return entered;
 			}
 		}
-		if (c === /* ')'*/){
+		if (c === ')'){
 			return appended.exit();
 		}
 		return appended;
@@ -392,7 +392,19 @@
 		return compileValue(state, input).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileValue(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), Main.compileString));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), createTextRule("\""), createTextRule("'")));
+	}
+	/*private static*/createTextRule(slice : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
+		/*return (state1, input1) -> */{
+			let stripped : unknown = /*input1*/.strip();
+			if (/*stripped.startsWith(slice) && stripped*/.endsWith(slice)){
+				return Optional.of(new /*Tuple*/<>(/*state1*/, stripped));
+			}
+			/*else */{
+				return Optional.empty();
+			}
+		}
+		/**/;
 	}
 	/*private static*/compileNot(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compilePrefix(input.strip(), "!", withoutPrefix => /* {
@@ -426,15 +438,6 @@
                 return Optional.empty();
             }
         }*/);
-	}
-	/*private static*/compileString(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		let stripped : unknown = input.strip();
-		if (/*stripped.startsWith("\"") && stripped*/.endsWith("\"")){
-			return Optional.of(new /*Tuple*/<>(state, stripped));
-		}
-		/*else */{
-			return Optional.empty();
-		}
 	}
 	/*private static*/createOperatorRuleWithDifferentInfixes(sourceInfix : string, targetInfix : string): /*BiFunction*/</*CompileState*/, string, /*Optional*/</*Tuple*/</*CompileState*/, string>>> {
 		return (/*state1*/, /* input1*/) - /*> compileFirst*/(/*input1*/, sourceInfix, (left, right) - /*> {
@@ -524,10 +527,10 @@
 			return state.advance();
 		}
 		let appended : unknown = state.append(c);
-		if (c === /* '*/ < /*'*/){
+		if (c === ' < '){
 			return appended.enter();
 		}
-		if (c === /* '>'*/){
+		if (c === '>'){
 			return appended.exit();
 		}
 		return appended;
@@ -582,19 +585,19 @@
 			return state.advance();
 		}
 		let appended : unknown = state.append(c);
-		if (c === /* '*/ - /*'*/){
+		if (c === ' - '){
 			let peeked : unknown = appended.peek();
-			if (peeked === /* '>'*/){
+			if (peeked === '>'){
 				return appended.popAndAppendToOption().orElse(appended);
 			}
 			/*else */{
 				return appended;
 			}
 		}
-		if (c === /* '*/ < /*' || c */ === /* '('*/){
+		if (c === ' < /*' || c */ === '('){
 			return appended.enter();
 		}
-		if (c === /* '>' || c */ === /* ')'*/){
+		if (c === /* '>' || c */ === ')'){
 			return appended.exit();
 		}
 		return appended;

@@ -529,8 +529,21 @@ public class Main {
                 createOperatorRule("+"),
                 createOperatorRule("-"),
                 createOperatorRule("<"),
-                Main::compileString
+                createTextRule("\""),
+                createTextRule("'")
         ));
+    }
+
+    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createTextRule(String slice) {
+        return (state1, input1) -> {
+            var stripped = input1.strip();
+            if (stripped.startsWith(slice) && stripped.endsWith(slice)) {
+                return Optional.of(new Tuple<>(state1, stripped));
+            }
+            else {
+                return Optional.empty();
+            }
+        };
     }
 
     private static Optional<Tuple<CompileState, String>> compileNot(CompileState state, String input) {
@@ -568,16 +581,6 @@ public class Main {
                 return Optional.empty();
             }
         });
-    }
-
-    private static Optional<Tuple<CompileState, String>> compileString(CompileState state, String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return Optional.of(new Tuple<>(state, stripped));
-        }
-        else {
-            return Optional.empty();
-        }
     }
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfixes(String sourceInfix, String targetInfix) {
