@@ -1,4 +1,5 @@
-import { Actual } from "../../../magma/Actual";
+import { Actual } from "../../../magma/annotate/Actual";
+import { Namespace } from "../../../magma/annotate/Namespace";
 export declare function length(stripped: string): number;
 export declare function sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
 export declare function sliceFrom(input: string, startInclusive: number): string;

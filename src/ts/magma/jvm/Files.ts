@@ -1,4 +1,4 @@
-import { Actual } from "../../magma/Actual";
+import { Actual } from "../../magma/annotate/Actual";
 import { List } from "../../magma/api/collect/List";
 import { Lists } from "../../magma/api/collect/Lists";
 import { RangeHead } from "../../magma/api/collect/RangeHead";

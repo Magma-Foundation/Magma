@@ -1,6 +1,6 @@
 package magma.api;
 
-import magma.Actual;
+import magma.annotate.Actual;
 
 public class Console {
     @Actual

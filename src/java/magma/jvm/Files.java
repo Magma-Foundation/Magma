@@ -1,6 +1,6 @@
 package magma.jvm;
 
-import magma.Actual;
+import magma.annotate.Actual;
 import magma.api.collect.List;
 import magma.api.collect.Lists;
 import magma.api.collect.RangeHead;

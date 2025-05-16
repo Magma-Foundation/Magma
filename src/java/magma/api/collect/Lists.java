@@ -1,6 +1,6 @@
 package magma.api.collect;
 
-import magma.Actual;
+import magma.annotate.Actual;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.query.HeadedQuery;

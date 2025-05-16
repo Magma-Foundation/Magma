@@ -1,4 +1,4 @@
-package magma;
+package magma.annotate;
 
 public @interface Actual {
 }

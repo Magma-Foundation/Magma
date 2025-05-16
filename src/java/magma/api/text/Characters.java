@@ -1,6 +1,6 @@
 package magma.api.text;
 
-import magma.Actual;
+import magma.annotate.Actual;
 
 public class Characters {
     @Actual

@@ -1,4 +1,4 @@
-import { Actual } from "../../../magma/Actual";
+import { Actual } from "../../../magma/annotate/Actual";
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
 import { HeadedQuery } from "../../../magma/api/collect/query/HeadedQuery";
