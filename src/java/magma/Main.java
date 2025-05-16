@@ -1098,7 +1098,12 @@ public final class Main {
     }
 
     private static Tuple<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper, BiFunction<String, String, String> merger) {
-        var folded = Main.parseAll(state, input, folder, mapper);
+        var folded = Main.parseAll(state, input, folder, new BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>() {
+            @Override
+            public Option<Tuple<CompileState, String>> apply(CompileState state1, String s) {
+                return new Some<>(mapper.apply(state1, s));
+            }
+        }).orElse(new Tuple<>(state, Lists.empty()));
         return new Tuple<>(folded.left, Main.generateAll(folded.right, merger));
     }
 
@@ -1107,22 +1112,18 @@ public final class Main {
                 .fold("", merger);
     }
 
-    private static <T> Tuple<CompileState, List<T>> parseAll(
-            CompileState state,
-            String input,
-            BiFunction<DivideState, Character, DivideState> folder,
-            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
-    ) {
-        return Main.divide(input, folder).query().fold(new Tuple<CompileState, List<T>>(state, Lists.empty()), (Tuple<CompileState, List<T>> current, String segment) -> {
-            var currentState = current.left;
-            var currentElement = current.right;
+    private static <T> Option<Tuple<CompileState, List<T>>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> biFunction) {
+        return Main.divide(input, folder).query().fold(new Some<>(new Tuple<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple<CompileState, List<T>>> maybeCurrent, String segment) -> {
+            return maybeCurrent.flatMap((Tuple<CompileState, List<T>> current) -> {
+                var currentState = current.left;
+                var currentElement = current.right;
 
-            var mappedTuple = mapper.apply(currentState, segment);
-            var mappedState = mappedTuple.left;
-            var mappedElement = mappedTuple.right;
-
-            currentElement.add(mappedElement);
-            return new Tuple<>(mappedState, currentElement);
+                return biFunction.apply(currentState, segment).map((Tuple<CompileState, T> mappedTuple) -> {
+                    var mappedState = mappedTuple.left;
+                    var mappedElement = mappedTuple.right;
+                    return new Tuple<>(mappedState, currentElement.add(mappedElement));
+                });
+            });
         });
     }
 
@@ -1425,7 +1426,7 @@ public final class Main {
     }
 
     private static Tuple<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
-        return Main.parseValues(state, params, Main::parseParameter);
+        return Main.parseValues(state, params, (CompileState state1, String s) -> new Some<>(Main.parseParameter(state1, s)));
     }
 
     private static Tuple<CompileState, String> compileFunctionStatements(CompileState state, String input) {
@@ -1573,10 +1574,11 @@ public final class Main {
             return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main::foldInvocationStarts), (String callerWithArgStart, String args) -> {
                 return Main.compileSuffix(callerWithArgStart, "(", (String callerString) -> {
                     return Main.compilePrefix(Strings.strip(callerString), "new ", (String type) -> {
-                        var callerTuple = Main.compileTypeOrPlaceholder(state, type);
-                        var callerState = callerTuple.right;
-                        var caller = callerTuple.left;
-                        return Main.assembleInvokable(caller, new ConstructionCaller(callerState), args);
+                        return Main.compileType(state, type).flatMap((Tuple<CompileState, String> callerTuple) -> {
+                            var callerState = callerTuple.right;
+                            var caller = callerTuple.left;
+                            return Main.assembleInvokable(caller, new ConstructionCaller(callerState), args);
+                        });
                     }).or(() -> {
                         return Main.parseValue(state, callerString).flatMap((Tuple<CompileState, Value> callerTuple) -> {
                             return Main.assembleInvokable(callerTuple.left, callerTuple.right, args);
@@ -1635,7 +1637,7 @@ public final class Main {
     }
 
     private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller oldCaller, String argsString) {
-        var argsTuple = Main.parseValues(state, argsString, Main::parseArgument);
+        var argsTuple = Main.parseValues(state, argsString, (CompileState state1, String s) -> new Some<>(Main.parseArgument(state1, s)));
         var argsState = argsTuple.left;
         var args = Main.retain(argsTuple.right, Argument::toValue);
 
@@ -1734,7 +1736,7 @@ public final class Main {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
             return Main.compilePrefix(strippedBeforeArrow, "(", (String withoutStart) -> {
                 return Main.compileSuffix(withoutStart, ")", (String withoutEnd) -> {
-                    var paramNames = Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> Main.parseParameter(state1, s));
+                    var paramNames = Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> new Some<>(Main.parseParameter(state1, s)));
                     return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
                 });
             });
@@ -2024,7 +2026,7 @@ public final class Main {
 
     private static Option<Tuple<CompileState, Type>> parseVarArgs(CompileState state, String input) {
         var stripped = input.strip();
-        return Main.compileSuffix(stripped, "...", s -> {
+        return Main.compileSuffix(stripped, "...", (String s) -> {
             var child = Main.parseTypeOrPlaceholder(state, s);
             return new Some<>(new Tuple<>(child.left, new VarArgs(child.right)));
         });
@@ -2070,7 +2072,7 @@ public final class Main {
     private static Option<Tuple<CompileState, Type>> parseGeneric(CompileState state, String input) {
         return Main.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> {
             return Main.compileFirst(withoutEnd, "<", (String baseString, String argsString) -> {
-                var argsTuple = Main.parseValues(state, argsString, (CompileState state1, String input1) -> Main.compileTypeArgument(state1, input1));
+                var argsTuple = Main.parseValues(state, argsString, (CompileState state1, String s) -> Main.compileTypeArgument(state1, s));
                 var argsState = argsTuple.left;
                 var args = argsTuple.right;
 
@@ -2120,8 +2122,8 @@ public final class Main {
         return new None<>();
     }
 
-    private static Tuple<CompileState, String> compileTypeArgument(CompileState state, String input) {
-        return Main.compileOrPlaceholder(state, input, Lists.of(
+    private static Option<Tuple<CompileState, String>> compileTypeArgument(CompileState state, String input) {
+        return Main.or(state, input, Lists.of(
                 (CompileState state2, String input1) -> Main.compileWhitespace(state2, input1),
                 (CompileState state1, String type) -> Main.compileType(state1, type)
         ));
@@ -2134,9 +2136,9 @@ public final class Main {
     private static <T> Tuple<CompileState, List<T>> parseValues(
             CompileState state,
             String input,
-            BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
+            BiFunction<CompileState, String, Option<Tuple<CompileState, T>>> mapper
     ) {
-        return Main.parseAll(state, input, Main::foldValues, mapper);
+        return Main.parseAll(state, input, Main::foldValues, mapper).orElse(new Tuple<>(state, Lists.empty()));
     }
 
     private static String mergeValues(String cache, String element) {
