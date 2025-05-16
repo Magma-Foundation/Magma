@@ -1,7 +1,7 @@
-package magma.api.collect;
+package magma.api.collect.list;
 
 import magma.api.Tuple2;
-import magma.api.collect.query.Query;
+import magma.api.collect.Query;
 import magma.api.option.Option;
 
 public interface List<T> {

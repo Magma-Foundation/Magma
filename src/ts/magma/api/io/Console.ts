@@ -28,20 +28,8 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
+export interface ConsoleInstance {
+	printErrLn(message: string): void;
 
 }
-export declare const Strings: StringsInstance;
+export declare const Console: ConsoleInstance;

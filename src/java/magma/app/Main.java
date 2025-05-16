@@ -1,18 +1,18 @@
 package magma.app;
 
-import magma.api.Console;
+import magma.api.io.Console;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Collector;
-import magma.api.collect.EmptyHead;
-import magma.api.collect.Head;
-import magma.api.collect.List;
-import magma.api.collect.ListCollector;
-import magma.api.collect.Lists;
-import magma.api.collect.RangeHead;
-import magma.api.collect.SingleHead;
-import magma.api.collect.query.HeadedQuery;
-import magma.api.collect.query.Query;
+import magma.api.collect.head.EmptyHead;
+import magma.api.collect.head.Head;
+import magma.api.collect.list.List;
+import magma.api.collect.list.ListCollector;
+import jvm.api.collect.list.Lists;
+import magma.api.collect.head.RangeHead;
+import magma.api.collect.head.SingleHead;
+import magma.api.collect.head.HeadedQuery;
+import magma.api.collect.Query;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.None;
@@ -21,7 +21,7 @@ import magma.api.option.Some;
 import magma.api.result.Result;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
-import magma.jvm.io.Files;
+import jvm.api.io.Files;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -375,13 +375,6 @@ public final class Main {
         @Override
         public Option<String> generateAsEnumValue(String structureName) {
             return new None<String>();
-        }
-    }
-
-    public record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
-        @Override
-        public Option<R> next() {
-            return this.head.next().map(this.mapper);
         }
     }
 

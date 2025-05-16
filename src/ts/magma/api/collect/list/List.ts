@@ -28,20 +28,24 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
-
+import { Query } from "../../../../magma/api/collect/Query";
+import { Option } from "../../../../magma/api/option/Option";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+export interface List<T> {
+	addLast(element: T): List<T>;
+	query(): Query<T>;
+	size(): number;
+	subList(startInclusive: number, endExclusive: number): Option<List<T>>;
+	findLast(): Option<T>;
+	findFirst(): Option<T>;
+	find(index: number): Option<T>;
+	queryWithIndices(): Query<Tuple2<number, T>>;
+	addAll(others: List<T>): List<T>;
+	contains(element: T): boolean;
+	queryReversed(): Query<T>;
+	addFirst(element: T): List<T>;
+	isEmpty(): boolean;
+	equalsTo(other: List<T>): boolean;
+	removeValue(element: T): List<T>;
+	removeLast(): Option<List<T>>;
 }
-export declare const Strings: StringsInstance;

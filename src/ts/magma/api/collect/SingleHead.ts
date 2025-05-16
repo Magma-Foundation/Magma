@@ -9,6 +9,7 @@
 	List: magma.api.collect, 
 	ListCollector: magma.api.collect, 
 	Lists: magma.api.collect, 
+	MapHead: magma.api.collect, 
 	HeadedQuery: magma.api.collect.query, 
 	Query: magma.api.collect.query, 
 	RangeHead: magma.api.collect, 

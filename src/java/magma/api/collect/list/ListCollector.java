@@ -1,4 +1,7 @@
-package magma.api.collect;
+package magma.api.collect.list;
+
+import jvm.api.collect.list.Lists;
+import magma.api.collect.Collector;
 
 public class ListCollector<T> implements Collector<T, List<T>> {
     @Override

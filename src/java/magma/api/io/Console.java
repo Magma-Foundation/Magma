@@ -1,4 +1,4 @@
-package magma.api;
+package magma.api.io;
 
 import magma.annotate.Actual;
 import magma.annotate.Namespace;

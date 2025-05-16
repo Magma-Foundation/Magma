@@ -1,7 +1,7 @@
 package magma.api.io;
 
-import magma.api.collect.List;
-import magma.api.collect.query.Query;
+import magma.api.collect.list.List;
+import magma.api.collect.Query;
 import magma.api.result.Result;
 import magma.api.option.Option;
 

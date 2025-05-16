@@ -1,13 +1,9 @@
-package magma.api.collect.query;
+package magma.api.collect.head;
 
 import magma.api.Tuple2;
 import magma.api.collect.Collector;
-import magma.api.collect.EmptyHead;
-import magma.api.collect.FlatMapHead;
-import magma.api.collect.Head;
-import magma.api.collect.SingleHead;
+import magma.api.collect.Query;
 import magma.api.option.Option;
-import magma.app.Main;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -26,7 +22,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <R> Query<R> map(Function<T, R> mapper) {
-        return new HeadedQuery<R>(new Main.MapHead<T, R>(this.head, mapper));
+        return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
     }
 
     @Override

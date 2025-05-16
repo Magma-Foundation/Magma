@@ -28,20 +28,23 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
-
+import { Head } from "../../../../magma/api/collect/head/Head";
+import { Option } from "../../../../magma/api/option/Option";
+import { None } from "../../../../magma/api/option/None";
+import { Some } from "../../../../magma/api/option/Some";
+export class RangeHead implements Head<number> {
+	length: number;
+	counter: number;
+	constructor (length: number) {
+		this.length = length;
+		this.counter = 0;
+	}
+	next(): Option<number> {
+		if (this.counter >= this.length){
+			return new None<number>();
+		}
+		let value = this.counter;
+		this.counter++;
+		return new Some<number>(value);
+	}
 }
-export declare const Strings: StringsInstance;

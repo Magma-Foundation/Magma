@@ -1,19 +1,21 @@
 /*[
+	JVMList: jvm.api.collect.list, 
+	Lists: jvm.api.collect.list, 
+	Files: jvm.api.io, 
 	Actual: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
-	EmptyHead: magma.api.collect, 
-	FlatMapHead: magma.api.collect, 
-	Head: magma.api.collect, 
-	JVMList: magma.api.collect, 
-	List: magma.api.collect, 
-	ListCollector: magma.api.collect, 
-	Lists: magma.api.collect, 
-	HeadedQuery: magma.api.collect.query, 
-	Query: magma.api.collect.query, 
-	RangeHead: magma.api.collect, 
-	SingleHead: magma.api.collect, 
-	Console: magma.api, 
+	EmptyHead: magma.api.collect.head, 
+	FlatMapHead: magma.api.collect.head, 
+	Head: magma.api.collect.head, 
+	HeadedQuery: magma.api.collect.head, 
+	MapHead: magma.api.collect.head, 
+	RangeHead: magma.api.collect.head, 
+	SingleHead: magma.api.collect.head, 
+	List: magma.api.collect.list, 
+	ListCollector: magma.api.collect.list, 
+	Query: magma.api.collect, 
+	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
 	None: magma.api.option, 
@@ -24,12 +26,11 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
-	Main: magma.app, 
-	Files: magma.jvm.io
+	Main: magma.app
 ]*/
 import { Option } from "../../magma/api/option/Option";
-import { List } from "../../magma/api/collect/List";
-import { Lists } from "../../magma/api/collect/Lists";
+import { List } from "../../magma/api/collect/list/List";
+import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Strings } from "../../magma/api/text/Strings";
 import { None } from "../../magma/api/option/None";
@@ -37,17 +38,17 @@ import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Collector } from "../../magma/api/collect/Collector";
 import { Result } from "../../magma/api/result/Result";
-import { Head } from "../../magma/api/collect/Head";
-import { Query } from "../../magma/api/collect/query/Query";
-import { HeadedQuery } from "../../magma/api/collect/query/HeadedQuery";
-import { EmptyHead } from "../../magma/api/collect/EmptyHead";
-import { SingleHead } from "../../magma/api/collect/SingleHead";
+import { Query } from "../../magma/api/collect/Query";
+import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
+import { EmptyHead } from "../../magma/api/collect/head/EmptyHead";
+import { Head } from "../../magma/api/collect/head/Head";
+import { SingleHead } from "../../magma/api/collect/head/SingleHead";
 import { Path } from "../../magma/api/io/Path";
 import { IOError } from "../../magma/api/io/IOError";
-import { ListCollector } from "../../magma/api/collect/ListCollector";
-import { Files } from "../../magma/jvm/io/Files";
-import { Console } from "../../magma/api/Console";
-import { RangeHead } from "../../magma/api/collect/RangeHead";
+import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+import { Files } from "../../jvm/api/io/Files";
+import { Console } from "../../magma/api/io/Console";
+import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../magma/api/text/Characters";
 interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
@@ -330,17 +331,6 @@ class Placeholder {
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
 		return new None<string>();
-	}
-}
-export class MapHead<T, R> implements Head<R> {
-	head: Head<T>;
-	mapper: (arg0 : T) => R;
-	constructor (head: Head<T>, mapper: (arg0 : T) => R) {
-		this.head = head;
-		this.mapper = mapper;
-	}
-	next(): Option<R> {
-		return this.head.next().map(this.mapper);
 	}
 }
 class Whitespace implements Parameter {

@@ -28,20 +28,22 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
-
+import { Head } from "../../../../magma/api/collect/head/Head";
+import { Option } from "../../../../magma/api/option/Option";
+import { None } from "../../../../magma/api/option/None";
+import { Some } from "../../../../magma/api/option/Some";
+export class SingleHead<T> implements Head<T> {
+	element: T;
+	retrieved: boolean;
+	constructor (element: T) {
+		this.element = element;
+		this.retrieved = false;
+	}
+	next(): Option<T> {
+		if (this.retrieved){
+			return new None<T>();
+		}
+		this.retrieved = true;
+		return new Some<T>(this.element);
+	}
 }
-export declare const Strings: StringsInstance;

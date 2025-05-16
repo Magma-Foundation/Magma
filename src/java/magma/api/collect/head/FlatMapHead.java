@@ -1,6 +1,6 @@
-package magma.api.collect;
+package magma.api.collect.head;
 
-import magma.api.collect.query.Query;
+import magma.api.collect.Query;
 import magma.api.option.None;
 import magma.api.option.Option;
 

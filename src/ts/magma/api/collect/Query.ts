@@ -28,20 +28,16 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
-
+import { Collector } from "../../../magma/api/collect/Collector";
+import { Option } from "../../../magma/api/option/Option";
+export interface Query<T> {
+	collect<C>(collector: Collector<T, C>): C;
+	map<R>(mapper: (arg0 : T) => R): Query<R>;
+	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
+	foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
+	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R>;
+	next(): Option<T>;
+	allMatch(predicate: (arg0 : T) => boolean): boolean;
+	filter(predicate: (arg0 : T) => boolean): Query<T>;
+	anyMatch(predicate: (arg0 : T) => boolean): boolean;
 }
-export declare const Strings: StringsInstance;

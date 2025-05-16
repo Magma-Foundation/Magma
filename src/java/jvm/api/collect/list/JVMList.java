@@ -1,10 +1,12 @@
-package magma.api.collect;
+package jvm.api.collect.list;
 
 import magma.annotate.Actual;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.api.collect.query.HeadedQuery;
-import magma.api.collect.query.Query;
+import magma.api.collect.Query;
+import magma.api.collect.head.RangeHead;
+import magma.api.collect.head.HeadedQuery;
+import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;

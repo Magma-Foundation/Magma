@@ -1,6 +1,5 @@
-package magma.api.collect.query;
+package magma.api.collect;
 
-import magma.api.collect.Collector;
 import magma.api.option.Option;
 
 import java.util.function.BiFunction;

@@ -28,20 +28,14 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
-
+import { List } from "../../../../magma/api/collect/list/List";
+import { Collector } from "../../../../magma/api/collect/Collector";
+import { Lists } from "../../../../jvm/api/collect/list/Lists";
+export class ListCollector<T> implements Collector<T, List<T>> {
+	createInitial(): List<T> {
+		return Lists.empty();
+	}
+	fold(current: List<T>, element: T): List<T> {
+		return current.addLast(element);
+	}
 }
-export declare const Strings: StringsInstance;
