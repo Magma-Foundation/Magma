@@ -219,17 +219,14 @@ class CompileState {
 	resolve(name: string): Option<Type> {
 		return this.definitions.query().filter((definition) => definition.name.equals(name)).map(Definition.type).next();
 	}
-	toString(): string {
-		return "CompileState[" + "output=" + this.output + ", " + "structureName=" + this.structureName + ", " + "depth=" + this.depth + ", " + "definitions=" + this.definitions + "]";
-	}
 }
 class Joiner implements Collector<string, Option<string>> {
 	delimiter: string;
 	constructor (delimiter: string) {
 		this.delimiter = delimiter;
 	}
-	constructor () {
-		this("");
+	static empty(): Joiner {
+		return new Joiner("");
 	}
 	createInitial(): Option<string> {
 		return new None<string>();
@@ -918,10 +915,10 @@ class Main  {
 		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 	}
 	static generateConstructorAssignments(parameters: List<Definition>): string {
-		return parameters.query().map((definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(new Joiner()).orElse("");
+		return parameters.query().map((definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(Joiner.empty()).orElse("");
 	}
 	static joinParameters(parameters: List<Definition>): string {
-		return parameters.query().map(Definition.generate).map((generated) => "\n\t" + generated + ";").collect(new Joiner()).orElse("");
+		return parameters.query().map(Definition.generate).map((generated) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");
 	}
 	static compileNamespaced(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
 		let stripped = input.strip();

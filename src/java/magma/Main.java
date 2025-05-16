@@ -290,21 +290,11 @@ public final class Main {
                     .map(Definition::type)
                     .next();
         }
-
-        @Override
-        public String toString() {
-            return "CompileState[" +
-                    "output=" + this.output + ", " +
-                    "structureName=" + this.structureName + ", " +
-                    "depth=" + this.depth + ", " +
-                    "definitions=" + this.definitions + ']';
-        }
-
     }
 
     private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private Joiner() {
-            this("");
+        private static Joiner empty() {
+            return new Joiner("");
         }
 
         @Override
@@ -1234,7 +1224,7 @@ public final class Main {
     private static String generateConstructorAssignments(List<Definition> parameters) {
         return parameters.query()
                 .map(definition -> "\n\t\tthis." + definition.name + " = " + definition.name + ";")
-                .collect(new Joiner())
+                .collect(Joiner.empty())
                 .orElse("");
     }
 
@@ -1242,7 +1232,7 @@ public final class Main {
         return parameters.query()
                 .map(Definition::generate)
                 .map(generated -> "\n\t" + generated + ";")
-                .collect(new Joiner())
+                .collect(Joiner.empty())
                 .orElse("");
     }
 
