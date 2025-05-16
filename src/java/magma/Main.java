@@ -96,7 +96,20 @@ public class Main {
         Option<Definition> asDefinition();
     }
 
-    private interface Value {
+    private interface Value extends Argument, Caller {
+        String generate();
+
+        @Override
+        default Option<Value> toValue() {
+            return new Some<>(this);
+        }
+    }
+
+    private interface Argument {
+        Option<Value> toValue();
+    }
+
+    private interface Caller {
         String generate();
     }
 
@@ -571,10 +584,6 @@ public class Main {
             return true;
         }
 
-        public T get() {
-            return null;
-        }
-
         @Override
         public T orElse(T other) {
             return other;
@@ -615,7 +624,7 @@ public class Main {
         }
     }
 
-    private record Placeholder(String input) implements Parameter {
+    private record Placeholder(String input) implements Parameter, Argument, Value {
         @Override
         public String generate() {
             return generatePlaceholder(this.input);
@@ -623,6 +632,11 @@ public class Main {
 
         @Override
         public Option<Definition> asDefinition() {
+            return new None<>();
+        }
+
+        @Override
+        public Option<Value> toValue() {
             return new None<>();
         }
     }
@@ -719,18 +733,11 @@ public class Main {
         }
     }
 
-    private static class Invokable implements Value {
-        private final String caller;
-        private final String arguments;
-
-        public Invokable(String caller, String arguments) {
-            this.caller = caller;
-            this.arguments = arguments;
-        }
-
+    private record Invokable(Caller caller, List<Value> arguments) implements Value {
         @Override
         public String generate() {
-            return this.caller + "(" + this.arguments + ")";
+            var joinedArguments = generateValues(this.arguments);
+            return this.caller.generate() + "(" + joinedArguments + ")";
         }
     }
 
@@ -748,6 +755,19 @@ public class Main {
         @Override
         public String generate() {
             return this.left + " " + this.targetInfix + " " + this.right;
+        }
+    }
+
+    private static class ConstructionCaller implements Caller {
+        private final String right;
+
+        public ConstructionCaller(String right) {
+            this.right = right;
+        }
+
+        @Override
+        public String generate() {
+            return "new " + this.right;
         }
     }
 
@@ -1223,15 +1243,23 @@ public class Main {
     private static Option<Tuple<CompileState, Value>> parseInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
             return compileSplit(splitFoldedLast(withoutEnd, "", Main::foldInvocationStarts), (callerWithArgStart, arguments) -> {
-                return compileSuffix(callerWithArgStart, "(", caller -> compilePrefix(caller.strip(), "new ", type -> {
-                    var callerTuple = compileTypeOrPlaceholder(state, type);
-                    return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
-                }).or(() -> {
-                    var callerTuple = compileValueOrPlaceholder(state, caller);
-                    return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
-                }));
+                return compileSuffix(callerWithArgStart, "(", callerString -> {
+                    return compilePrefix(callerString.strip(), "new ", type -> {
+                        var callerTuple = compileTypeOrPlaceholder(state, type);
+                        var callerState = callerTuple.right;
+                        var caller = callerTuple.left;
+                        return assembleInvokable(caller, new ConstructionCaller(callerState), arguments);
+                    }).or(() -> {
+                        var callerTuple = parseValueOrPlaceholder(state, callerString);
+                        return assembleInvokable(callerTuple.left, callerTuple.right, arguments);
+                    });
+                });
             });
         });
+    }
+
+    private static Tuple<CompileState, Value> parseValueOrPlaceholder(CompileState state, String callerString) {
+        return parseValue(state, callerString).orElseGet(() -> new Tuple<>(state, new Placeholder(callerString)));
     }
 
     private static Option<Tuple<String, String>> splitFoldedLast(String input, String delimiter, BiFunction<DivideState, Character, DivideState> folder) {
@@ -1281,10 +1309,23 @@ public class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, String caller, String argumentsString) {
-        var argumentsTuple = compileValues(state, argumentsString, Main::compileValueOrPlaceholder);
-        var arguments = argumentsTuple.right;
+    private static Option<Tuple<CompileState, Value>> assembleInvokable(CompileState state, Caller caller, String argumentsString) {
+        var argumentsTuple = parseValues(state, argumentsString, Main::parseArgument);
+        var arguments = retain(argumentsTuple.right, Argument::toValue);
         return new Some<>(new Tuple<>(argumentsTuple.left, new Invokable(caller, arguments)));
+    }
+
+    private static <T, R> List<R> retain(List<T> arguments, Function<T, Option<R>> mapper) {
+        return arguments.query()
+                .map(mapper)
+                .flatMap(Iterators::fromOption)
+                .collect(new ListCollector<>());
+    }
+
+    private static Tuple<CompileState, Argument> parseArgument(CompileState state1, String input) {
+        return parseValue(state1, input)
+                .<Tuple<CompileState, Argument>>map(tuple -> new Tuple<>(tuple.left, tuple.right))
+                .orElseGet(() -> new Tuple<>(state1, new Placeholder(input)));
     }
 
     private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
@@ -1637,7 +1678,7 @@ public class Main {
 
                 var base = baseString.strip();
                 return assembleFunctionType(argumentsState, base, arguments).or(() -> {
-                    return new Some<>(new Tuple<>(argumentsState, base + "<" + generateValues(arguments) + ">"));
+                    return new Some<>(new Tuple<>(argumentsState, base + "<" + generateValueStrings(arguments) + ">"));
                 });
             });
         });
@@ -1690,10 +1731,10 @@ public class Main {
 
     private static Tuple<CompileState, String> compileValues(CompileState state, String input, BiFunction<CompileState, String, Tuple<CompileState, String>> mapper) {
         var folded = parseValues(state, input, mapper);
-        return new Tuple<>(folded.left, generateValues(folded.right));
+        return new Tuple<>(folded.left, generateValueStrings(folded.right));
     }
 
-    private static String generateValues(List<String> values) {
+    private static String generateValueStrings(List<String> values) {
         return generateAll(values, Main::mergeValues);
     }
 
@@ -1789,5 +1830,12 @@ public class Main {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
+    }
+
+    private static String generateValues(List<Value> arguments) {
+        return arguments.query()
+                .map(Value::generate)
+                .collect(new Joiner(", "))
+                .orElse("");
     }
 }
