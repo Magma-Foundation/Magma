@@ -1,6 +1,7 @@
 package magma.api.collect;
 
 import magma.annotate.Actual;
+import magma.annotate.Namespace;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.query.HeadedQuery;
@@ -11,6 +12,7 @@ import magma.app.Main;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+@Namespace
 public final class Lists {
     @Actual
     public record JVMList<T>(java.util.List<T> list) implements List<T> {
