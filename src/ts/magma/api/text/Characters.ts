@@ -3,6 +3,7 @@
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
+	FlatMapHead: magma.api.collect, 
 	Head: magma.api.collect, 
 	JVMList: magma.api.collect, 
 	List: magma.api.collect, 

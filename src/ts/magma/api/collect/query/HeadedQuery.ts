@@ -3,6 +3,7 @@
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
+	FlatMapHead: magma.api.collect, 
 	Head: magma.api.collect, 
 	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
@@ -31,6 +32,7 @@ import { Head } from "../../../../magma/api/collect/Head";
 import { Option } from "../../../../magma/api/option/Option";
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { FlatMapHead } from "../../../../magma/api/collect/FlatMapHead";
 import { EmptyHead } from "../../../../magma/api/collect/EmptyHead";
 import { SingleHead } from "../../../../magma/api/collect/SingleHead";
 export class HeadedQuery<T> implements Query<T> {
@@ -51,7 +53,7 @@ export class HeadedQuery<T> implements Query<T> {
 		let result: R = initial;
 		while (true){
 			let finalResult: R = result;
-			let maybeNext: Tuple2<Boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)).toTuple(finalResult);
+			let maybeNext: Tuple2<boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)).toTuple(finalResult);
 			if (maybeNext.left()){
 				result = maybeNext.right();
 			}
@@ -66,13 +68,13 @@ export class HeadedQuery<T> implements Query<T> {
 		});
 	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new Main.FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
+		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
 	}
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this.foldWithInitial(true, (maybeAllTrue: Boolean, element: T) => maybeAllTrue && predicate(element));
+		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => maybeAllTrue && predicate(element));
 	}
 	anyMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this.foldWithInitial(false, (aBoolean: Boolean, t: T) => aBoolean || predicate(t));
+		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {

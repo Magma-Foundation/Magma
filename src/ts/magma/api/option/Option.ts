@@ -3,6 +3,7 @@
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
+	FlatMapHead: magma.api.collect, 
 	Head: magma.api.collect, 
 	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
@@ -36,6 +37,6 @@ export interface Option<T> {
 	or(other: () => Option<T>): Option<T>;
 	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
 	filter(predicate: (arg0 : T) => boolean): Option<T>;
-	toTuple(other: T): Tuple2<Boolean, T>;
+	toTuple(other: T): Tuple2<boolean, T>;
 	and<R>(other: () => Option<R>): Option<Tuple2<T, R>>;
 }

@@ -3,6 +3,7 @@
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
+	FlatMapHead: magma.api.collect, 
 	Head: magma.api.collect, 
 	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
@@ -296,31 +297,6 @@ export class Err<T, X> implements Result<T, X> {
 	}
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenErr(this.error);
-	}
-}
-export class FlatMapHead<T, R> implements Head<R> {
-	mapper: (arg0 : T) => Query<R>;
-	head: Head<T>;
-	current: Query<R>;
-	constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
-		this.head = head;
-		this.current = initial;
-		this.mapper = mapper;
-	}
-	next(): Option<R> {
-		while (true){
-			let next = this.current.next();
-			if (next.isPresent()){
-				return next;
-			}
-			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
-			if (tuple.left()){
-				this.current = tuple.right();
-			}
-			else {
-				return new None<R>();
-			}
-		}
 	}
 }
 class Placeholder {
@@ -1479,7 +1455,7 @@ export class Main {
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)){
 			return new Some<Type>(Primitive.Number);
 		}
-		if (Strings.equalsTo("boolean", stripped)){
+		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
 			return new Some<Type>(Primitive.Boolean);
 		}
 		if (Strings.equalsTo("var", stripped)){

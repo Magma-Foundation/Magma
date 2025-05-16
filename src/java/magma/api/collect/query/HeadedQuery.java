@@ -3,6 +3,7 @@ package magma.api.collect.query;
 import magma.api.Tuple2;
 import magma.api.collect.Collector;
 import magma.api.collect.EmptyHead;
+import magma.api.collect.FlatMapHead;
 import magma.api.collect.Head;
 import magma.api.collect.SingleHead;
 import magma.api.option.Option;
@@ -57,7 +58,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     public <R> Query<R> flatMap(Function<T, Query<R>> mapper) {
         return this.head.next()
                 .map(mapper)
-                .map((Query<R> initial) -> new HeadedQuery<R>(new Main.FlatMapHead<T, R>(this.head, initial, mapper)))
+                .map((Query<R> initial) -> new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper)))
                 .orElseGet(() -> new HeadedQuery<R>(new EmptyHead<R>()));
     }
 

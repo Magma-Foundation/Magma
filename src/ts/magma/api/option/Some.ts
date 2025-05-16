@@ -3,6 +3,7 @@
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
 	EmptyHead: magma.api.collect, 
+	FlatMapHead: magma.api.collect, 
 	Head: magma.api.collect, 
 	JVMList: magma.api.collect, 
 	List: magma.api.collect, 
@@ -62,8 +63,8 @@ export class Some<T> implements Option<T> {
 		}
 		return new None<T>();
 	}
-	toTuple(other: T): Tuple2<Boolean, T> {
-		return new Tuple2Impl<Boolean, T>(true, this.value);
+	toTuple(other: T): Tuple2<boolean, T> {
+		return new Tuple2Impl<boolean, T>(true, this.value);
 	}
 	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
 		return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue));

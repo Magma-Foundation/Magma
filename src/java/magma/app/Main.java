@@ -331,39 +331,6 @@ public final class Main {
         }
     }
 
-    public static final class FlatMapHead<T, R> implements Head<R> {
-        private final Function<T, Query<R>> mapper;
-        private final Head<T> head;
-        private Query<R> current;
-
-        public FlatMapHead(Head<T> head, Query<R> initial, Function<T, Query<R>> mapper) {
-            this.head = head;
-            this.current = initial;
-            this.mapper = mapper;
-        }
-
-        @Override
-        public Option<R> next() {
-            while (true) {
-                var next = this.current.next();
-                if (next.isPresent()) {
-                    return next;
-                }
-
-                var tuple = this.head.next()
-                        .map(this.mapper)
-                        .toTuple(this.current);
-
-                if (tuple.left()) {
-                    this.current = tuple.right();
-                }
-                else {
-                    return new None<R>();
-                }
-            }
-        }
-    }
-
     private record Placeholder(String input) implements Parameter, Value, Type {
         @Override
         public String generate() {
@@ -1926,7 +1893,7 @@ public final class Main {
             return new Some<Type>(Primitive.Number);
         }
 
-        if (Strings.equalsTo("boolean", stripped)) {
+        if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
             return new Some<Type>(Primitive.Boolean);
         }
 
