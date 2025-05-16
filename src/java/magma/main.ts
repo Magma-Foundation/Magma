@@ -392,7 +392,13 @@
 		return compileValue(state, input).orElseGet(() - /*> new Tuple*/ < /*>*/(state, generatePlaceholder(input)));
 	}
 	/*private static*/compileValue(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), Main.compileString));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(" === ", " === /*="*/), createOperatorRule(" + "), createOperatorRule(" - "), createOperatorRule(" < "), Main.compileString));
+	}
+	/*private static*/compileNot(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
+		return compilePrefix(input.strip(), "!", withoutPrefix => /* {
+            var tuple = compileValueOrPlaceholder(state, withoutPrefix);
+            return Optional.of(new Tuple*/ < /*>(tuple.left, "!" */ + /* tuple.right));
+        }*/);
 	}
 	/*private static*/compileLambda(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		return compileFirst(input, " - /*>"*/, (beforeArrow, afterArrow) - /*> {
@@ -476,7 +482,7 @@
 		return true;
 	}
 	/*private static*/compilePrefix(input : string, infix : string, mapper : /*Function*/<string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
-		if (/*!input*/.startsWith(infix)){
+		if (!input.startsWith(infix)){
 			return Optional.empty();
 		}
 		let slice : unknown = input.substring(infix.length());
@@ -600,7 +606,7 @@
 		return input.lastIndexOf(infix);
 	}
 	/*private static <T>*/compileSuffix(input : string, suffix : string, mapper : /*Function*/<string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
-		if (/*!input*/.endsWith(suffix)){
+		if (!input.endsWith(suffix)){
 			return Optional.empty();
 		}
 		let content : unknown = input.substring(0, input.length() - suffix.length());

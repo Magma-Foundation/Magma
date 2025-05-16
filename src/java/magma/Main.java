@@ -522,6 +522,7 @@ public class Main {
                 createAccessRule("::"),
                 Main::compileSymbol,
                 Main::compileLambda,
+                Main::compileNot,
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRuleWithDifferentInfixes("==", "==="),
@@ -530,6 +531,13 @@ public class Main {
                 createOperatorRule("<"),
                 Main::compileString
         ));
+    }
+
+    private static Optional<Tuple<CompileState, String>> compileNot(CompileState state, String input) {
+        return compilePrefix(input.strip(), "!", withoutPrefix -> {
+            var tuple = compileValueOrPlaceholder(state, withoutPrefix);
+            return Optional.of(new Tuple<>(tuple.left, "!" + tuple.right));
+        });
     }
 
     private static Optional<Tuple<CompileState, String>> compileLambda(CompileState state, String input) {
