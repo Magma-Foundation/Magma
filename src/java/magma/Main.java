@@ -6,10 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -27,6 +28,28 @@ public class Main {
         C fold(C current, T element);
     }
 
+    private interface Option<T> {
+        <R> Option<R> map(Function<T, R> mapper);
+
+        boolean isEmpty();
+
+        T get();
+
+        T orElse(T other);
+
+        T orElseGet(Supplier<T> supplier);
+
+        boolean isPresent();
+
+        void ifPresent(Consumer<T> consumer);
+
+        Option<T> or(Supplier<Option<T>> other);
+
+        <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+        Option<T> filter(Predicate<T> predicate);
+    }
+
     private interface Iterator<T> {
         <C> C collect(Collector<T, C> collector);
 
@@ -36,7 +59,7 @@ public class Main {
 
         <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
 
-        Optional<T> next();
+        Option<T> next();
 
         boolean allMatch(Predicate<T> predicate);
 
@@ -62,12 +85,12 @@ public class Main {
     }
 
     private interface Head<T> {
-        Optional<T> next();
+        Option<T> next();
     }
 
     private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
         @Override
-        public Optional<T> next() {
+        public Option<T> next() {
             return this.head.next();
         }
 
@@ -78,15 +101,14 @@ public class Main {
 
         @Override
         public <R> Iterator<R> map(Function<T, R> mapper) {
-            Head<R> mapHead = () -> this.next().map(mapper);
-            return new HeadedIterator<>(mapHead);
+            return new HeadedIterator<>(() -> this.next().map(mapper));
         }
 
         @Override
         public <R> R fold(R initial, BiFunction<R, T, R> folder) {
             R result = initial;
             while (true) {
-                Optional<T> maybeNext = this.head.next();
+                Option<T> maybeNext = this.head.next();
                 if (maybeNext.isEmpty()) {
                     return result;
                 }
@@ -127,13 +149,13 @@ public class Main {
         }
 
         @Override
-        public Optional<Integer> next() {
+        public Option<Integer> next() {
             if (this.counter < this.length) {
                 var value = this.counter;
                 this.counter++;
-                return Optional.of(value);
+                return new Some<Integer>(value);
             }
-            return Optional.empty();
+            return new None<Integer>();
         }
     }
 
@@ -243,21 +265,21 @@ public class Main {
             return this.depth == 1;
         }
 
-        public Optional<Tuple<DivideState, Character>> pop() {
+        public Option<Tuple<DivideState, Character>> pop() {
             if (this.index >= this.input.length()) {
-                return Optional.empty();
+                return new None<Tuple<DivideState, Character>>();
             }
 
             var c = this.input.charAt(this.index);
             this.index++;
-            return Optional.of(new Tuple<>(this, c));
+            return new Some<Tuple<DivideState, Character>>(new Tuple<DivideState, Character>(this, c));
         }
 
-        public Optional<Tuple<DivideState, Character>> popAndAppendToTuple() {
+        public Option<Tuple<DivideState, Character>> popAndAppendToTuple() {
             return this.pop().map(inner -> new Tuple<>(inner.left.append(inner.right), inner.right));
         }
 
-        public Optional<DivideState> popAndAppendToOption() {
+        public Option<DivideState> popAndAppendToOption() {
             return this.popAndAppendToTuple().map(Tuple::left);
         }
 
@@ -273,9 +295,9 @@ public class Main {
     private record Tuple<A, B>(A left, B right) {
     }
 
-    private record CompileState(String output, Optional<String> structureName, int depth) {
+    private record CompileState(String output, Option<String> structureName, int depth) {
         public CompileState() {
-            this("", Optional.empty(), 0);
+            this("", new None<String>(), 0);
         }
 
         public CompileState append(String element) {
@@ -283,7 +305,7 @@ public class Main {
         }
 
         public CompileState withStructureName(String name) {
-            return new CompileState(this.output, Optional.of(name), this.depth);
+            return new CompileState(this.output, new Some<String>(name), this.depth);
         }
 
         public int depth() {
@@ -299,20 +321,20 @@ public class Main {
         }
     }
 
-    private record Joiner(String delimiter) implements Collector<String, Optional<String>> {
+    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
         @Override
-        public Optional<String> createInitial() {
-            return Optional.empty();
+        public Option<String> createInitial() {
+            return new None<String>();
         }
 
         @Override
-        public Optional<String> fold(Optional<String> maybe, String element) {
-            return Optional.of(maybe.map(inner -> inner + this.delimiter + element).orElse(element));
+        public Option<String> fold(Option<String> maybe, String element) {
+            return new Some<String>(maybe.map(inner -> inner + this.delimiter + element).orElse(element));
         }
     }
 
     private record Definition(
-            Optional<String> maybeBeforeType,
+            Option<String> maybeBeforeType,
             String name,
             List<String> typeParams,
             String type
@@ -357,8 +379,8 @@ public class Main {
     }
 
     private static class Iterators {
-        public static <T> Iterator<T> fromOptional(Optional<T> optional) {
-            return new HeadedIterator<>(optional.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        public static <T> Iterator<T> fromOption(Option<T> option) {
+            return new HeadedIterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         }
     }
 
@@ -371,20 +393,20 @@ public class Main {
         }
 
         @Override
-        public Optional<T> next() {
+        public Option<T> next() {
             if (this.retrieved) {
-                return Optional.empty();
+                return new None<T>();
             }
 
             this.retrieved = true;
-            return Optional.of(this.element);
+            return new Some<T>(this.element);
         }
     }
 
     private static class EmptyHead<T> implements Head<T> {
         @Override
-        public Optional<T> next() {
-            return Optional.empty();
+        public Option<T> next() {
+            return new None<T>();
         }
     }
 
@@ -403,16 +425,16 @@ public class Main {
     private static class FlatMapHead<T, R> implements Head<R> {
         private final Function<T, Iterator<R>> mapper;
         private final Head<T> head;
-        private Optional<Iterator<R>> maybeCurrent;
+        private Option<Iterator<R>> maybeCurrent;
 
         public FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
             this.mapper = mapper;
-            this.maybeCurrent = Optional.empty();
+            this.maybeCurrent = new None<Iterator<R>>();
             this.head = head;
         }
 
         @Override
-        public Optional<R> next() {
+        public Option<R> next() {
             while (true) {
                 if (this.maybeCurrent.isPresent()) {
                     Iterator<R> it = this.maybeCurrent.get();
@@ -421,16 +443,119 @@ public class Main {
                         return next;
                     }
 
-                    this.maybeCurrent = Optional.empty();
+                    this.maybeCurrent = new None<Iterator<R>>();
                 }
-                Optional<T> outer = this.head.next();
+                Option<T> outer = this.head.next();
                 if (outer.isPresent()) {
-                    this.maybeCurrent = Optional.of(this.mapper.apply(outer.get()));
+                    this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.get()));
                 }
                 else {
-                    return Optional.empty();
+                    return new None<R>();
                 }
             }
+        }
+    }
+
+    private record Some<T>(T value) implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new Some<>(mapper.apply(this.value));
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public T get() {
+            return this.value;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return this.value;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return this.value;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return true;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+            consumer.accept(this.value);
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return this;
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return mapper.apply(this.value);
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return predicate.test(this.value) ? this : new None<>();
+        }
+    }
+
+    private record None<T>() implements Option<T> {
+        @Override
+        public <R> Option<R> map(Function<T, R> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public T get() {
+            return null;
+        }
+
+        @Override
+        public T orElse(T other) {
+            return other;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> supplier) {
+            return supplier.get();
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public void ifPresent(Consumer<T> consumer) {
+        }
+
+        @Override
+        public Option<T> or(Supplier<Option<T>> other) {
+            return other.get();
+        }
+
+        @Override
+        public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+            return new None<>();
+        }
+
+        @Override
+        public Option<T> filter(Predicate<T> predicate) {
+            return new None<>();
         }
     }
 
@@ -439,21 +564,21 @@ public class Main {
         var target = source.resolveSibling("main.ts");
 
         readString(source)
-                .match(input -> compileAndWrite(input, target), Optional::of)
+                .match(input -> compileAndWrite(input, target), value -> new Some<IOException>(value))
                 .ifPresent(Throwable::printStackTrace);
     }
 
-    private static Optional<IOException> compileAndWrite(String input, Path target) {
+    private static Option<IOException> compileAndWrite(String input, Path target) {
         var output = compileRoot(input);
         return writeString(target, output);
     }
 
-    private static Optional<IOException> writeString(Path target, String output) {
+    private static Option<IOException> writeString(Path target, String output) {
         try {
             Files.writeString(target, output);
-            return Optional.empty();
+            return new None<IOException>();
         } catch (IOException e) {
-            return Optional.of(e);
+            return new Some<IOException>(e);
         }
     }
 
@@ -524,9 +649,9 @@ public class Main {
         return current.advance().segments;
     }
 
-    private static Optional<DivideState> foldDoubleQuotes(DivideState state, char c) {
+    private static Option<DivideState> foldDoubleQuotes(DivideState state, char c) {
         if (c != '\"') {
-            return Optional.empty();
+            return new None<DivideState>();
         }
 
         var appended = state.append(c);
@@ -546,12 +671,12 @@ public class Main {
                 break;
             }
         }
-        return Optional.of(appended);
+        return new Some<DivideState>(appended);
     }
 
-    private static Optional<DivideState> foldSingleQuotes(DivideState state, char c) {
+    private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
         if (c != '\'') {
-            return Optional.empty();
+            return new None<DivideState>();
         }
 
         return state.append(c)
@@ -560,7 +685,7 @@ public class Main {
                 .flatMap(DivideState::popAndAppendToOption);
     }
 
-    private static Optional<DivideState> foldEscaped(Tuple<DivideState, Character> tuple) {
+    private static Option<DivideState> foldEscaped(Tuple<DivideState, Character> tuple) {
         var state = tuple.left;
         var c = tuple.right;
 
@@ -568,7 +693,7 @@ public class Main {
             return state.popAndAppendToOption();
         }
 
-        return Optional.of(state);
+        return new Some<DivideState>(state);
     }
 
     private static DivideState foldStatements(DivideState state, char c) {
@@ -600,8 +725,8 @@ public class Main {
         ));
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
-        return (state1, input1) -> compileFirst(input1, sourceInfix, (beforeKeyword, right1) -> {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
+        return (state1, input1) -> compileFirst(input1, sourceInfix, (_, right1) -> {
             return compileFirst(right1, "{", (beforeContent, withEnd) -> {
                 return compileSuffix(withEnd.strip(), "}", inputContent -> {
                     var strippedBeforeContent = beforeContent.strip();
@@ -616,37 +741,37 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String inputContent, String name) {
+    private static Option<Tuple<CompileState, String>> assembleStructure(String targetInfix, CompileState state1, String inputContent, String name) {
         var outputContentTuple = compileStatements(state1.withStructureName(name), inputContent, Main::compileClassSegment);
         var outputContentState = outputContentTuple.left;
         var outputContent = outputContentTuple.right;
 
         var generated = targetInfix + name + " {" + outputContent + "\n}\n";
-        return Optional.of(new Tuple<>(outputContentState.append(generated), ""));
+        return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(outputContentState.append(generated), ""));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileNamespaced(CompileState state, String input) {
         var stripped = input.strip();
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
-            return Optional.of(new Tuple<>(state, ""));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
         else {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
     }
 
     private static Tuple<CompileState, String> compileOrPlaceholder(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules
+            List<BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>> rules
     ) {
         return compileOr(state, input, rules).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>>> rules) {
+    private static Option<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>> rules) {
         return rules.iterate()
                 .map(rule -> rule.apply(state, input))
-                .flatMap(Iterators::fromOptional)
+                .flatMap(Iterators::fromOption)
                 .next();
     }
 
@@ -661,7 +786,7 @@ public class Main {
         ));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileMethod(CompileState state, String input) {
         return compileFirst(input, "(", (beforeParams, withParams) -> {
             return compileLast(beforeParams.strip(), " ", (_, name) -> {
                 if (state.structureName.filter(name::equals).isPresent()) {
@@ -674,7 +799,7 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
+    private static Option<Tuple<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
         return compileFirst(withParams, ")", (params, afterParams) -> {
             var parametersTuple = compileValues(state, params, Main::compileParameter);
             var parametersState = parametersTuple.left;
@@ -685,14 +810,14 @@ public class Main {
                 return compileSuffix(withoutContentStart.strip(), "}", withoutContentEnd -> {
                     var statementsTuple = compileFunctionStatements(parametersState.enterDepth().enterDepth(), withoutContentEnd);
 
-                    return Optional.of(new Tuple<>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
+                    return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
                 });
             }).or(() -> {
                 if (afterParams.strip().equals(";")) {
-                    return Optional.of(new Tuple<>(parametersState, "\n\t" + headerGenerated + ";"));
+                    return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";"));
                 }
 
-                return Optional.empty();
+                return new None<Tuple<CompileState, String>>();
             });
         });
     }
@@ -711,21 +836,21 @@ public class Main {
         ));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileEmptySegment(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileEmptySegment(CompileState state, String input) {
         if (input.strip().equals(";")) {
-            return Optional.of(new Tuple<>(state, ";"));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ";"));
         }
         else {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
     }
 
-    private static Optional<Tuple<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
+    private static Option<Tuple<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
         return compileReturn(input1, withoutPrefix -> compileValue(state1, withoutPrefix))
                 .map(tuple -> new Tuple<>(tuple.left, generateIndent(state1.depth) + tuple.right));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
         return compileSuffix(input.strip(), "}", withoutEnd -> {
             return compileSplit(splitFoldedLast(withoutEnd, "", Main::foldBlockStarts), (beforeContentWithEnd, content) -> {
                 return compileSuffix(beforeContentWithEnd, "{", beforeContent -> {
@@ -733,7 +858,7 @@ public class Main {
                         var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
 
                         var indent = generateIndent(state.depth());
-                        return Optional.of(new Tuple<>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+                        return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
                     });
                 });
             });
@@ -758,7 +883,7 @@ public class Main {
         return appended;
     }
 
-    private static Optional<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileBlockHeader(CompileState state, String input) {
         return compileOr(state, input, Lists.of(
                 createConditionalRule("if"),
                 createConditionalRule("while"),
@@ -766,31 +891,31 @@ public class Main {
         ));
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createConditionalRule(String prefix) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createConditionalRule(String prefix) {
         return (state1, input1) -> compilePrefix(input1.strip(), prefix, withoutPrefix -> {
             var strippedCondition = withoutPrefix.strip();
             return compilePrefix(strippedCondition, "(", withoutConditionStart -> {
                 return compileSuffix(withoutConditionStart, ")", withoutConditionEnd -> {
                     var tuple = compileValueOrPlaceholder(state1, withoutConditionEnd);
-                    return Optional.of(new Tuple<>(tuple.left, prefix + " (" + tuple.right + ")"));
+                    return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(tuple.left, prefix + " (" + tuple.right + ")"));
                 });
             });
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileElse(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileElse(CompileState state, String input) {
         if (input.strip().equals("else")) {
-            return Optional.of(new Tuple<>(state, "else "));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, "else "));
         }
         else {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
     }
 
-    private static Optional<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             var valueTuple = compileFunctionStatementValue(state, withoutEnd);
-            return Optional.of(new Tuple<>(valueTuple.left, generateIndent(state.depth()) + valueTuple.right + ";"));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(valueTuple.left, generateIndent(state.depth()) + valueTuple.right + ";"));
         });
     }
 
@@ -809,35 +934,35 @@ public class Main {
         ));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileBreak(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileBreak(CompileState state, String input) {
         if (input.strip().equals("break")) {
-            return Optional.of(new Tuple<>(state, "break"));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, "break"));
         }
         else {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createPostRule(String suffix) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createPostRule(String suffix) {
         return (state1, input) -> compileSuffix(input.strip(), suffix, child -> {
             var tuple = compileValueOrPlaceholder(state1, child);
-            return Optional.of(new Tuple<>(tuple.left, tuple.right + suffix));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(tuple.left, tuple.right + suffix));
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileReturnWithValue(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileReturnWithValue(CompileState state, String input) {
         return compileReturn(input, value1 -> compileValue(state, value1));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileReturn(String input, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
+    private static Option<Tuple<CompileState, String>> compileReturn(String input, Function<String, Option<Tuple<CompileState, String>>> mapper) {
         return compilePrefix(input.strip(), "return ", value -> {
             return mapper.apply(value).flatMap(tuple -> {
-                return Optional.of(new Tuple<>(tuple.left, "return " + tuple.right));
+                return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(tuple.left, "return " + tuple.right));
             });
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
             return compileSplit(splitFoldedLast(withoutEnd, "", Main::foldInvocationStarts), (callerWithArgStart, arguments) -> {
                 return compileSuffix(callerWithArgStart, "(", caller -> compilePrefix(caller.strip(), "new ", type -> {
@@ -851,24 +976,24 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<String, String>> splitFoldedLast(String input, String delimiter, BiFunction<DivideState, Character, DivideState> folder) {
+    private static Option<Tuple<String, String>> splitFoldedLast(String input, String delimiter, BiFunction<DivideState, Character, DivideState> folder) {
         return splitFolded(input, folder, divisions1 -> selectLast(divisions1, delimiter));
     }
 
-    private static Optional<Tuple<String, String>> splitFolded(
+    private static Option<Tuple<String, String>> splitFolded(
             String input,
             BiFunction<DivideState, Character, DivideState> folder,
-            Function<List<String>, Optional<Tuple<String, String>>> selector
+            Function<List<String>, Option<Tuple<String, String>>> selector
     ) {
         var divisions = divide(input, folder);
         if (divisions.size() < 2) {
-            return Optional.empty();
+            return new None<Tuple<String, String>>();
         }
 
         return selector.apply(divisions);
     }
 
-    private static Optional<Tuple<String, String>> selectLast(List<String> divisions, String delimiter) {
+    private static Option<Tuple<String, String>> selectLast(List<String> divisions, String delimiter) {
         var beforeLast = divisions.subList(0, divisions.size() - 1);
         var last = divisions.getLast();
 
@@ -876,7 +1001,7 @@ public class Main {
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
-        return Optional.of(new Tuple<>(joined, last));
+        return new Some<Tuple<String, String>>(new Tuple<String, String>(joined, last));
     }
 
     private static DivideState foldInvocationStarts(DivideState state, char c) {
@@ -898,12 +1023,12 @@ public class Main {
         return appended;
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleInvokable(CompileState state, String caller, String arguments) {
+    private static Option<Tuple<CompileState, String>> assembleInvokable(CompileState state, String caller, String arguments) {
         var argumentsTuple = compileValues(state, arguments, Main::compileValueOrPlaceholder);
-        return Optional.of(new Tuple<>(argumentsTuple.left, caller + "(" + argumentsTuple.right + ")"));
+        return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(argumentsTuple.left, caller + "(" + argumentsTuple.right + ")"));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileAssignment(CompileState state, String input) {
         return compileFirst(input, "=", (destination, source) -> {
             var sourceTuple = compileValueOrPlaceholder(state, source);
 
@@ -911,7 +1036,7 @@ public class Main {
                     .or(() -> compileDefinition(sourceTuple.left, destination).map(tuple -> new Tuple<>(tuple.left, "let " + tuple.right.generate())))
                     .orElseGet(() -> new Tuple<>(sourceTuple.left, generatePlaceholder(destination)));
 
-            return Optional.of(new Tuple<>(destinationTuple.left, destinationTuple.right + " = " + sourceTuple.right));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(destinationTuple.left, destinationTuple.right + " = " + sourceTuple.right));
         });
     }
 
@@ -919,7 +1044,7 @@ public class Main {
         return compileValue(state, input).orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileValue(CompileState state, String input) {
         return compileOr(state, input, Lists.of(
                 createAccessRule("."),
                 createAccessRule("::"),
@@ -942,26 +1067,26 @@ public class Main {
         ));
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createTextRule(String slice) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createTextRule(String slice) {
         return (state1, input1) -> {
             var stripped = input1.strip();
             if (!stripped.startsWith(slice) || !stripped.endsWith(slice) || stripped.length() <= slice.length()) {
-                return Optional.empty();
+                return new None<Tuple<CompileState, String>>();
             }
 
             var value = stripped.substring(slice.length(), stripped.length() - slice.length());
-            return Optional.of(new Tuple<>(state1, "\"" + value + "\""));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state1, "\"" + value + "\""));
         };
     }
 
-    private static Optional<Tuple<CompileState, String>> compileNot(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileNot(CompileState state, String input) {
         return compilePrefix(input.strip(), "!", withoutPrefix -> {
             var tuple = compileValueOrPlaceholder(state, withoutPrefix);
-            return Optional.of(new Tuple<>(tuple.left, "!" + tuple.right));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(tuple.left, "!" + tuple.right));
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> compileLambda(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileLambda(CompileState state, String input) {
         return compileFirst(input, "->", (beforeArrow, afterArrow) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
@@ -976,14 +1101,14 @@ public class Main {
                         return getCompileStateStringTuple(state, paramNames, afterArrow);
                     }
                     else {
-                        return Optional.empty();
+                        return new None<Tuple<CompileState, String>>();
                     }
                 });
             });
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> getCompileStateStringTuple(CompileState state, List<String> paramNames, String afterArrow) {
+    private static Option<Tuple<CompileState, String>> getCompileStateStringTuple(CompileState state, List<String> paramNames, String afterArrow) {
         var strippedAfterArrow = afterArrow.strip();
         return compilePrefix(strippedAfterArrow, "{", withoutContentStart -> {
             return compileSuffix(withoutContentStart, "}", withoutContentEnd -> {
@@ -1000,49 +1125,49 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleLambda(CompileState exited, List<String> paramNames, String content) {
+    private static Option<Tuple<CompileState, String>> assembleLambda(CompileState exited, List<String> paramNames, String content) {
         var joinedParamNames = paramNames.iterate()
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return Optional.of(new Tuple<>(exited, "(" + joinedParamNames + ")" + " => " + content));
+        return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(exited, "(" + joinedParamNames + ")" + " => " + content));
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRule(String infix) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createOperatorRule(String infix) {
         return createOperatorRuleWithDifferentInfix(infix, infix);
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createAccessRule(String infix) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createAccessRule(String infix) {
         return (state, input) -> compileLast(input, infix, (child, rawProperty) -> {
             var property = rawProperty.strip();
             if (isSymbol(property)) {
                 var tuple = compileValueOrPlaceholder(state, child);
-                return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
+                return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(tuple.left, tuple.right + "." + property));
             }
             else {
-                return Optional.empty();
+                return new None<Tuple<CompileState, String>>();
             }
         });
     }
 
-    private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
+    private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (state1, input1) -> {
             return compileSplit(splitFolded(input1, foldOperator(sourceInfix), divisions -> selectFirst(divisions, sourceInfix)), (left, right) -> {
                 var leftTuple = compileValueOrPlaceholder(state1, left);
                 var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
-                return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+                return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
             });
         };
     }
 
-    private static Optional<Tuple<String, String>> selectFirst(List<String> divisions, String delimiter) {
+    private static Option<Tuple<String, String>> selectFirst(List<String> divisions, String delimiter) {
         var first = divisions.getFirst();
         var afterFirst = divisions.subList(1, divisions.size())
                 .iterate()
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
-        return Optional.of(new Tuple<>(first, afterFirst));
+        return new Some<Tuple<String, String>>(new Tuple<String, String>(first, afterFirst));
     }
 
     private static BiFunction<DivideState, Character, DivideState> foldOperator(String infix) {
@@ -1063,13 +1188,13 @@ public class Main {
         };
     }
 
-    private static Optional<Tuple<CompileState, String>> compileNumber(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileNumber(CompileState state, String input) {
         var stripped = input.strip();
         if (isNumber(stripped)) {
-            return Optional.of(new Tuple<>(state, stripped));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, stripped));
         }
         else {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
     }
 
@@ -1077,13 +1202,13 @@ public class Main {
         return IntStream.range(0, input.length()).mapToObj(input::charAt).allMatch(Character::isDigit);
     }
 
-    private static Optional<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
-            return Optional.of(new Tuple<>(state, stripped));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, stripped));
         }
         else {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
     }
 
@@ -1098,9 +1223,9 @@ public class Main {
                 || (index != 0 && Character.isDigit(c));
     }
 
-    private static Optional<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Optional<Tuple<CompileState, String>>> mapper) {
+    private static Option<Tuple<CompileState, String>> compilePrefix(String input, String infix, Function<String, Option<Tuple<CompileState, String>>> mapper) {
         if (!input.startsWith(infix)) {
-            return Optional.empty();
+            return new None<Tuple<CompileState, String>>();
         }
 
         var slice = input.substring(infix.length());
@@ -1116,17 +1241,17 @@ public class Main {
         ));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileWhitespace(CompileState state, String input) {
         if (input.isBlank()) {
-            return Optional.of(new Tuple<>(state, ""));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, ""));
         }
-        return Optional.empty();
+        return new None<Tuple<CompileState, String>>();
     }
 
-    private static Optional<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
         return compileSuffix(input.strip(), ";", withoutEnd -> {
             var definitionTuple = compileDefinitionOrPlaceholder(state, withoutEnd);
-            return Optional.of(new Tuple<>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(definitionTuple.left, "\n\t" + definitionTuple.right + ";"));
         });
     }
 
@@ -1136,19 +1261,19 @@ public class Main {
                 .orElseGet(() -> new Tuple<>(state, generatePlaceholder(input)));
     }
 
-    private static Optional<Tuple<CompileState, Definition>> compileDefinition(CompileState state, String input) {
+    private static Option<Tuple<CompileState, Definition>> compileDefinition(CompileState state, String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
             return compileSplit(splitFoldedLast(beforeName.strip(), " ", Main::foldTypeSeparators), (beforeType, type) -> {
                 return compileSuffix(beforeType.strip(), ">", withoutTypeParamEnd -> {
                     return compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams, typeParamsString) -> {
                         var typeParams = divideValues(typeParamsString);
-                        return assembleDefinition(state, Optional.of(beforeTypeParams), name, typeParams, type);
+                        return assembleDefinition(state, new Some<String>(beforeTypeParams), name, typeParams, type);
                     });
                 }).or(() -> {
-                    return assembleDefinition(state, Optional.of(beforeType), name, Lists.empty(), type);
+                    return assembleDefinition(state, new Some<String>(beforeType), name, Lists.empty(), type);
                 });
             }).or(() -> {
-                return assembleDefinition(state, Optional.empty(), name, Lists.empty(), beforeName);
+                return assembleDefinition(state, new None<String>(), name, Lists.empty(), beforeName);
             });
         });
     }
@@ -1176,18 +1301,18 @@ public class Main {
         return appended;
     }
 
-    private static Optional<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Optional<String> maybeBeforeType, String name, List<String> typeParams, String type) {
+    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, String name, List<String> typeParams, String type) {
         var typeTuple = compileTypeOrPlaceholder(state, type);
 
         var generated = new Definition(maybeBeforeType, name, typeParams, typeTuple.right);
-        return Optional.of(new Tuple<>(typeTuple.left, generated));
+        return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
     }
 
     private static Tuple<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
         return compileType(state, type).orElseGet(() -> new Tuple<>(state, generatePlaceholder(type)));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileType(CompileState state, String type) {
+    private static Option<Tuple<CompileState, String>> compileType(CompileState state, String type) {
         return compileOr(state, type, Lists.of(
                 Main::compileGeneric,
                 Main::compilePrimitive,
@@ -1195,44 +1320,44 @@ public class Main {
         ));
     }
 
-    private static Optional<Tuple<CompileState, String>> compileSymbolType(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileSymbolType(CompileState state, String input) {
         var stripped = input.strip();
         if (isSymbol(stripped)) {
-            return Optional.of(new Tuple<>(state, stripped));
+            return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(state, stripped));
         }
-        return Optional.empty();
+        return new None<Tuple<CompileState, String>>();
     }
 
-    private static Optional<Tuple<CompileState, String>> compilePrimitive(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compilePrimitive(CompileState state, String input) {
         return findPrimitiveValue(input.strip()).map(result -> new Tuple<>(state, result));
     }
 
-    private static Optional<String> findPrimitiveValue(String input) {
+    private static Option<String> findPrimitiveValue(String input) {
         var stripped = input.strip();
         if (stripped.equals("char") || stripped.equals("Character") || stripped.equals("String")) {
-            return Optional.of("string");
+            return new Some<String>("string");
         }
 
         if (stripped.equals("int") || stripped.equals("Integer")) {
-            return Optional.of("number");
+            return new Some<String>("number");
         }
 
         if (stripped.equals("boolean")) {
-            return Optional.of("boolean");
+            return new Some<String>("boolean");
         }
 
         if (stripped.equals("var")) {
-            return Optional.of("unknown");
+            return new Some<String>("unknown");
         }
 
         if (stripped.equals("void")) {
-            return Optional.of("void");
+            return new Some<String>("void");
         }
 
-        return Optional.empty();
+        return new None<String>();
     }
 
-    private static Optional<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
+    private static Option<Tuple<CompileState, String>> compileGeneric(CompileState state, String input) {
         return compileSuffix(input.strip(), ">", withoutEnd -> {
             return compileFirst(withoutEnd, "<", (baseString, argumentsString) -> {
                 var argumentsTuple = parseValues(state, argumentsString, Main::compileTypeArgument);
@@ -1241,26 +1366,26 @@ public class Main {
 
                 var base = baseString.strip();
                 return assembleFunctionType(argumentsState, base, arguments).or(() -> {
-                    return Optional.of(new Tuple<>(argumentsState, base + "<" + generateValues(arguments) + ">"));
+                    return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(argumentsState, base + "<" + generateValues(arguments) + ">"));
                 });
             });
         });
     }
 
-    private static Optional<Tuple<CompileState, String>> assembleFunctionType(CompileState state, String base, List<String> arguments) {
+    private static Option<Tuple<CompileState, String>> assembleFunctionType(CompileState state, String base, List<String> arguments) {
         return mapFunctionType(base, arguments).map(generated -> new Tuple<>(state, generated));
     }
 
-    private static Optional<String> mapFunctionType(String base, List<String> arguments) {
+    private static Option<String> mapFunctionType(String base, List<String> arguments) {
         if (base.equals("Function")) {
-            return Optional.of(generateFunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
+            return new Some<String>(generateFunctionType(Lists.of(arguments.get(0)), arguments.get(1)));
         }
 
         if (base.equals("BiFunction")) {
-            return Optional.of(generateFunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
+            return new Some<String>(generateFunctionType(Lists.of(arguments.get(0), arguments.get(1)), arguments.get(2)));
         }
 
-        return Optional.empty();
+        return new None<String>();
     }
 
     private static String generateFunctionType(List<String> arguments, String returns) {
@@ -1327,7 +1452,7 @@ public class Main {
         return appended;
     }
 
-    private static <T> Optional<T> compileLast(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+    private static <T> Option<T> compileLast(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
         return compileInfix(input, infix, Main::findLast, mapper);
     }
 
@@ -1335,36 +1460,36 @@ public class Main {
         return input.lastIndexOf(infix);
     }
 
-    private static <T> Optional<T> compileSuffix(String input, String suffix, Function<String, Optional<T>> mapper) {
+    private static <T> Option<T> compileSuffix(String input, String suffix, Function<String, Option<T>> mapper) {
         if (!input.endsWith(suffix)) {
-            return Optional.empty();
+            return new None<T>();
         }
 
         var content = input.substring(0, input.length() - suffix.length());
         return mapper.apply(content);
     }
 
-    private static <T> Optional<T> compileFirst(String input, String infix, BiFunction<String, String, Optional<T>> mapper) {
+    private static <T> Option<T> compileFirst(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
         return compileInfix(input, infix, Main::findFirst, mapper);
     }
 
-    private static <T> Optional<T> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Optional<T>> mapper) {
+    private static <T> Option<T> compileInfix(String input, String infix, BiFunction<String, String, Integer> locator, BiFunction<String, String, Option<T>> mapper) {
         return compileSplit(split(input, infix, locator), mapper);
     }
 
-    private static <T> Optional<T> compileSplit(Optional<Tuple<String, String>> splitter, BiFunction<String, String, Optional<T>> mapper) {
+    private static <T> Option<T> compileSplit(Option<Tuple<String, String>> splitter, BiFunction<String, String, Option<T>> mapper) {
         return splitter.flatMap(tuple -> mapper.apply(tuple.left, tuple.right));
     }
 
-    private static Optional<Tuple<String, String>> split(String input, String infix, BiFunction<String, String, Integer> locator) {
+    private static Option<Tuple<String, String>> split(String input, String infix, BiFunction<String, String, Integer> locator) {
         var index = locator.apply(input, infix);
         if (index < 0) {
-            return Optional.empty();
+            return new None<Tuple<String, String>>();
         }
 
         var left = input.substring(0, index);
         var right = input.substring(index + infix.length());
-        return Optional.of(new Tuple<>(left, right));
+        return new Some<Tuple<String, String>>(new Tuple<String, String>(left, right));
     }
 
     private static int findFirst(String input, String infix) {
