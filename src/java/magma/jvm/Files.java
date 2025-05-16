@@ -1,7 +1,10 @@
 package magma.jvm;
 
 import magma.Actual;
+import magma.api.collect.HeadedQuery;
 import magma.api.collect.List;
+import magma.api.collect.Query;
+import magma.api.collect.RangeHead;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.Option;
@@ -86,8 +89,8 @@ public final class Files {
         }
 
         @Override
-        public Main.Query<String> query() {
-            return new Main.HeadedQuery<>(new Main.RangeHead(this.path.getNameCount()))
+        public Query<String> query() {
+            return new HeadedQuery<>(new RangeHead(this.path.getNameCount()))
                     .map((Integer index) -> this.path.getName(index).toString());
         }
     }

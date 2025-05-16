@@ -1,9 +1,9 @@
 package magma.api.io;
 
 import magma.api.collect.List;
+import magma.api.collect.Query;
 import magma.api.result.Result;
 import magma.api.option.Option;
-import magma.app.Main;
 
 public interface Path {
     Option<IOError> writeString(String output);
@@ -22,5 +22,5 @@ public interface Path {
 
     Path getParent();
 
-    Main.Query<String> query();
+    Query<String> query();
 }

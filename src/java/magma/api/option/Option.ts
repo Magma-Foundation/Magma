@@ -1,4 +1,4 @@
-import { Main } from "../../../magma/app/Main";
+import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Consumer } from "../../../java/util/function/Consumer";
 import { Function } from "../../../java/util/function/Function";
 import { Predicate } from "../../../java/util/function/Predicate";
@@ -12,6 +12,6 @@ export interface Option<T> {
 	or(other: () => Option<T>): Option<T>;
 	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
 	filter(predicate: (arg0 : T) => boolean): Option<T>;
-	toTuple(other: T): Main.Tuple<Boolean, T>;
-	and<R>(other: () => Option<R>): Option<Main.Tuple<T, R>>;
+	toTuple(other: T): Tuple2<Boolean, T>;
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>>;
 }

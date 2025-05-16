@@ -1,5 +1,8 @@
 import { Actual } from "../../magma/Actual";
+import { HeadedQuery } from "../../magma/api/collect/HeadedQuery";
 import { List } from "../../magma/api/collect/List";
+import { Query } from "../../magma/api/collect/Query";
+import { RangeHead } from "../../magma/api/collect/RangeHead";
 import { IOError } from "../../magma/api/io/IOError";
 import { Path } from "../../magma/api/io/Path";
 import { Option } from "../../magma/api/option/Option";

@@ -1,6 +1,6 @@
 package magma.api.option;
 
-import magma.app.Main;
+import magma.api.Tuple2;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -24,7 +24,7 @@ public interface Option<T> {
 
     Option<T> filter(Predicate<T> predicate);
 
-    Main.Tuple<Boolean, T> toTuple(T other);
+    Tuple2<Boolean,T> toTuple(T other);
 
-    <R> Option<Main.Tuple<T, R>> and(Supplier<Option<R>> other);
+    <R> Option<Tuple2<T,R>> and(Supplier<Option<R>> other);
 }

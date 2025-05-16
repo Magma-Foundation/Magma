@@ -1,7 +1,7 @@
 import { List } from "../../../magma/api/collect/List";
+import { Query } from "../../../magma/api/collect/Query";
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
-import { Main } from "../../../magma/app/Main";
 export interface Path  {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;
@@ -11,5 +11,5 @@ export interface Path  {
 	endsWith(suffix: string): boolean;
 	relativize(source: Path): Path;
 	getParent(): Path;
-	query(): Main.Query<string>;
+	query(): Query<string>;
 }

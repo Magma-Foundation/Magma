@@ -1,5 +1,11 @@
 import { Actual } from "../../magma/Actual";
+import { Tuple2 } from "../../magma/api/Tuple2";
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Head } from "../../magma/api/collect/Head";
+import { HeadedQuery } from "../../magma/api/collect/HeadedQuery";
 import { List } from "../../magma/api/collect/List";
+import { Query } from "../../magma/api/collect/Query";
+import { RangeHead } from "../../magma/api/collect/RangeHead";
 import { IOError } from "../../magma/api/io/IOError";
 import { Path } from "../../magma/api/io/Path";
 import { Option } from "../../magma/api/option/Option";
@@ -16,22 +22,9 @@ interface MethodHeader  {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
 }
-interface Collector<T, C> {
+export interface Collector<T, C> {
 	createInitial(): C;
 	fold(current: C, element: T): C;
-}
-export interface Query<T> {
-	collect<C>(collector: Collector<T, C>): C;
-	map<R>(mapper: (arg0 : T) => R): Query<R>;
-	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
-	foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
-	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R>;
-	next(): Option<T>;
-	allMatch(predicate: (arg0 : T) => boolean): boolean;
-	filter(predicate: (arg0 : T) => boolean): Query<T>;
-}
-interface Head<T> {
-	next(): Option<T>;
 }
 interface Parameter  {
 	generate(): string;
@@ -53,71 +46,6 @@ interface Type  {
 	isFunctional(): boolean;
 	isVar(): boolean;
 	generateBeforeName(): string;
-}
-export class HeadedQuery<T> implements Query<T> {
-	head: Head<T>;
-	constructor (head: Head<T>) {
-		this.head = head;
-	}
-	next(): Option<T> {
-		return this.head.next();
-	}
-	collect<C>(collector: Collector<T, C>): C {
-		return this.foldWithInitial(collector.createInitial(), collector.fold);
-	}
-	map<R>(mapper: (arg0 : T) => R): Query<R> {
-		return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
-	}
-	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-		let result: R = initial;
-		while (true){
-			let finalResult: R = result;
-			let maybeNext: Tuple<Boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)).toTuple(finalResult);
-			if (maybeNext.left){
-				result = maybeNext.right;
-			}
-			else {
-				return result;
-			}
-		}
-	}
-	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this.head.next().map(next).map((maybeNext: R) => {
-			return this.foldWithInitial(maybeNext, folder);
-		});
-	}
-	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
-	}
-	allMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this.foldWithInitial(true, (maybeAllTrue: Boolean, element: T) => maybeAllTrue && predicate(element));
-	}
-	filter(predicate: (arg0 : T) => boolean): Query<T> {
-		return this.flatMap((element: T) => {
-			if (predicate(element)){
-				return new HeadedQuery<T>(new SingleHead<T>(element));
-			}
-			else {
-				return new HeadedQuery<T>(new EmptyHead<T>());
-			}
-		});
-	}
-}
-export class RangeHead implements Head<number> {
-	length: number;
-	counter: number;
-	constructor (length: number) {
-		this.length = length;
-		this.counter = 0;
-	}
-	next(): Option<number> {
-		if (this.counter >= this.length){
-			return new None<number>();
-		}
-		let value = this.counter;
-		this.counter++;
-		return new Some<number>(value);
-	}
 }
 class DivideState {
 	segments: List<string>;
@@ -153,33 +81,25 @@ class DivideState {
 	isShallow(): boolean {
 		return 1 === this.depth;
 	}
-	pop(): Option<Tuple<DivideState, string>> {
+	pop(): Option<Tuple2<DivideState, string>> {
 		if (this.index >= Strings.length(this.input)){
-			return new None<Tuple<DivideState, string>>();
+			return new None<Tuple2<DivideState, string>>();
 		}
 		let c = this.input.charAt(this.index);
 		let nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-		return new Some<Tuple<DivideState, string>>(new Tuple<DivideState, string>(nextState, c));
+		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c));
 	}
-	popAndAppendToTuple(): Option<Tuple<DivideState, string>> {
-		return this.pop().map((inner: Tuple<DivideState, string>) => new Tuple<DivideState, string>(inner.left.append(inner.right), inner.right));
+	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
+		return this.pop().map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right()));
 	}
 	popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((tuple: Tuple<DivideState, string>) => tuple.left);
+		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left());
 	}
 	peek(): string {
 		return this.input.charAt(this.index);
 	}
 	startsWith(slice: string): boolean {
 		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
-	}
-}
-export class Tuple<A, B> {
-	left: A;
-	right: B;
-	constructor (left: A, right: B) {
-		this.left = left;
-		this.right = right;
 	}
 }
 class CompileState {
@@ -300,7 +220,7 @@ export class Err<T, X> implements Result<T, X> {
 		return whenErr(this.error);
 	}
 }
-class SingleHead<T> implements Head<T> {
+export class SingleHead<T> implements Head<T> {
 	element: T;
 	retrieved: boolean;
 	constructor (element: T) {
@@ -315,7 +235,7 @@ class SingleHead<T> implements Head<T> {
 		return new Some<T>(this.element);
 	}
 }
-class EmptyHead<T> implements Head<T> {
+export class EmptyHead<T> implements Head<T> {
 	next(): Option<T> {
 		return new None<T>();
 	}
@@ -328,7 +248,7 @@ class ListCollector<T> implements Collector<T, List<T>> {
 		return current.add(element);
 	}
 }
-class FlatMapHead<T, R> implements Head<R> {
+export class FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;
 	current: Query<R>;
@@ -340,12 +260,12 @@ class FlatMapHead<T, R> implements Head<R> {
 	next(): Option<R> {
 		while (true){
 			let next = this.current.next();
-			if (next()){
+			if (next.isPresent()){
 				return next;
 			}
 			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
-			if (tuple.left){
-				this.current = tuple.right;
+			if (tuple.left()){
+				this.current = tuple.right();
 			}
 			else {
 				return new None<R>();
@@ -385,11 +305,11 @@ export class Some<T> implements Option<T> {
 		}
 		return new None<T>();
 	}
-	toTuple(other: T): Tuple<Boolean, T> {
-		return new Tuple<Boolean, T>(true, this.value);
+	toTuple(other: T): Tuple2<Boolean, T> {
+		return new Tuple2Impl<Boolean, T>(true, this.value);
 	}
-	and<R>(other: () => Option<R>): Option<Tuple<T, R>> {
-		return other().map((otherValue: R) => new Tuple<T, R>(this.value, otherValue));
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+		return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue));
 	}
 }
 export class None<T> implements Option<T> {
@@ -416,11 +336,11 @@ export class None<T> implements Option<T> {
 	filter(predicate: (arg0 : T) => boolean): Option<T> {
 		return new None<T>();
 	}
-	toTuple(other: T): Tuple<Boolean, T> {
-		return new Tuple<Boolean, T>(false, other);
+	toTuple(other: T): Tuple2<Boolean, T> {
+		return new Tuple2Impl<Boolean, T>(false, other);
 	}
-	and<R>(other: () => Option<R>): Option<Tuple<T, R>> {
-		return new None<Tuple<T, R>>();
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+		return new None<Tuple2<T, R>>();
 	}
 }
 class Placeholder {
@@ -456,7 +376,7 @@ class Placeholder {
 		return new None<string>();
 	}
 }
-class MapHead<T, R> implements Head<R> {
+export class MapHead<T, R> implements Head<R> {
 	head: Head<T>;
 	mapper: (arg0 : T) => R;
 	constructor (head: Head<T>, mapper: (arg0 : T) => R) {
@@ -666,7 +586,7 @@ class FunctionType implements Type {
 		this.returns = returns;
 	}
 	generate(): string {
-		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple<number, string>) => "arg" + tuple.left + " : " + tuple.right).collect(new Joiner(", ")).orElse("");
+		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + this.returns;
 	}
 	isFunctional(): boolean {
@@ -791,28 +711,28 @@ export class Main  {
 	}
 	static compileRoot(input: string, namespace: List<string>): string {
 		let compiled = Main.compileStatements(CompileState.createInitial(namespace), input, Main.compileRootSegment);
-		let compiledState = compiled.left;
-		return compiledState.imports + compiledState.output + compiled.right;
+		let compiledState = compiled.left();
+		return compiledState.imports + compiledState.output + compiled.right();
 	}
-	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple<CompileState, string>): Tuple<CompileState, string> {
+	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
-	static compileAll(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, mapper: (arg0 : CompileState, arg1 : string) => Tuple<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple<CompileState, string> {
-		let folded = Main.parseAll(state, input, folder, (state1: CompileState, s: string) => new Some<Tuple<CompileState, string>>(mapper(state1, s))).orElse(new Tuple<CompileState, List<string>>(state, Lists.empty()));
-		return new Tuple<CompileState, string>(folded.left, Main.generateAll(folded.right, merger));
+	static compileAll(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple2<CompileState, string> {
+		let folded = Main.parseAll(state, input, folder, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, string>>(mapper(state1, s))).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()));
+		return new Tuple2Impl<CompileState, string>(folded.left(), Main.generateAll(folded.right(), merger));
 	}
 	static generateAll(elements: List<string>, merger: (arg0 : string, arg1 : string) => string): string {
 		return elements.query().foldWithInitial("", merger);
 	}
-	static parseAll<T>(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, List<T>>> {
-		return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple<CompileState, List<T>>>(new Tuple<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple<CompileState, List<T>>>, segment: string) => {
-			return maybeCurrent.flatMap((current: Tuple<CompileState, List<T>>) => {
-				let currentState = current.left;
-				let currentElement = current.right;
-				return biFunction(currentState, segment).map((mappedTuple: Tuple<CompileState, T>) => {
-					let mappedState = mappedTuple.left;
-					let mappedElement = mappedTuple.right;
-					return new Tuple<CompileState, List<T>>(mappedState, currentElement.add(mappedElement));
+	static parseAll<T>(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
+		return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
+			return maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
+				let currentState = current.left();
+				let currentElement = current.right();
+				return biFunction(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
+					let mappedState = mappedTuple.left();
+					let mappedElement = mappedTuple.right();
+					return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.add(mappedElement));
 				});
 			});
 		});
@@ -823,13 +743,13 @@ export class Main  {
 	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): List<string> {
 		let current = DivideState.createInitial(input);
 		while (true){
-			let poppedTuple0 = current.pop().toTuple(new Tuple<DivideState, string>(current, "\0"));
-			if (!poppedTuple0.left){
+			let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, string>(current, "\0"));
+			if (!poppedTuple0.left()){
 				break;
 			}
-			let poppedTuple = poppedTuple0.right;
-			let poppedState = poppedTuple.left;
-			let popped = poppedTuple.right;
+			let poppedTuple = poppedTuple0.right();
+			let poppedState = poppedTuple.left();
+			let popped = poppedTuple.right();
 			current = Main.foldSingleQuotes(poppedState, popped).or(() => Main.foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder(poppedState, popped));
 		}
 		return current.advance().segments;
@@ -840,16 +760,16 @@ export class Main  {
 		}
 		let appended = state.append(c);
 		while (true){
-			let maybeTuple = appended.popAndAppendToTuple().toTuple(new Tuple<DivideState, string>(appended, "\0"));
-			if (!maybeTuple.left){
+			let maybeTuple = appended.popAndAppendToTuple().toTuple(new Tuple2Impl<DivideState, string>(appended, "\0"));
+			if (!maybeTuple.left()){
 				break;
 			}
-			let tuple = maybeTuple.right;
-			appended = tuple.left;
-			if ("\\" === tuple.right){
+			let tuple = maybeTuple.right();
+			appended = tuple.left();
+			if ("\\" === tuple.right()){
 				appended = appended.popAndAppendToOption().orElse(appended);
 			}
-			if ("\"" === tuple.right){
+			if ("\"" === tuple.right()){
 				break;
 			}
 		}
@@ -861,9 +781,9 @@ export class Main  {
 		}
 		return state.append(c).popAndAppendToTuple().flatMap(Main.foldEscaped).flatMap((state1: DivideState) => state1.popAndAppendToOption());
 	}
-	static foldEscaped(tuple: Tuple<DivideState, string>): Option<DivideState> {
-		let state = tuple.left;
-		let c = tuple.right;
+	static foldEscaped(tuple: Tuple2<DivideState, string>): Option<DivideState> {
+		let state = tuple.left();
+		let c = tuple.right();
 		if ("\\" === c){
 			return state.popAndAppendToOption();
 		}
@@ -885,10 +805,10 @@ export class Main  {
 		}
 		return appended;
 	}
-	static compileRootSegment(state: CompileState, input: string): Tuple<CompileState, string> {
+	static compileRootSegment(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return Main.compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileNamespaced, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class ")));
 	}
-	static createStructureRule(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>> {
+	static createStructureRule(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
 		return (state: CompileState, input1: string) => {
 			return Main.compileFirst(input1, sourceInfix, (beforeInfix: string, afterInfix: string) => {
 				return Main.compileFirst(afterInfix, "{", (beforeContent: string, withEnd: string) => {
@@ -905,22 +825,22 @@ export class Main  {
 			});
 		};
 	}
-	static compileStructureWithImplementing(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, content: string): Option<Tuple<CompileState, string>> {
+	static compileStructureWithImplementing(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, content: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileLast(beforeContent, " implements ", (s: string, s2: string) => {
-			return Main.parseType(state, s2).flatMap((implementingTuple: Tuple<CompileState, Type>) => {
-				return Main.compileStructureWithParameters(implementingTuple.left, annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right), content);
+			return Main.parseType(state, s2).flatMap((implementingTuple: Tuple2<CompileState, Type>) => {
+				return Main.compileStructureWithParameters(implementingTuple.left(), annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right()), content);
 			});
 		}).or(() => {
 			return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<Type>(), content);
 		});
 	}
-	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple<CompileState, string>> {
+	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(beforeContent, "(", (rawName: string, withParameters: string) => {
 			return Main.compileFirst(withParameters, ")", (parametersString: string, _: string) => {
 				let name = Strings.strip(rawName);
 				let parametersTuple = Main.parseParameters(state, parametersString);
-				let parameters = Main.retainDefinitionsFromParameters(parametersTuple.right);
-				return Main.assembleStructureWithTypeParams(parametersTuple.left, targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers);
+				let parameters = Main.retainDefinitionsFromParameters(parametersTuple.right());
+				return Main.assembleStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers);
 			});
 		}).or(() => {
 			return Main.assembleStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers);
@@ -929,7 +849,7 @@ export class Main  {
 	static retainDefinitionsFromParameters(parameters: List<Parameter>): List<Definition> {
 		return parameters.query().map((parameter: Parameter) => parameter.asDefinition()).flatMap(Iterators.fromOption).collect(new ListCollector<Definition>());
 	}
-	static assembleStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>): Option<Tuple<CompileState, string>> {
+	static assembleStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => {
 			return Main.compileFirst(withoutTypeParamEnd, "<", (name: string, typeParamsString: string) => {
 				let typeParams = Main.divideValues(typeParamsString);
@@ -939,13 +859,13 @@ export class Main  {
 			return Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content);
 		});
 	}
-	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, name: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string): Option<Tuple<CompileState, string>> {
+	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, name: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string): Option<Tuple2<CompileState, string>> {
 		if (annotations.contains("Actual")){
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 		}
 		let outputContentTuple = Main.compileStatements(state.withStructureName(name), content, Main.compileClassSegment);
-		let outputContentState = outputContentTuple.left;
-		let outputContent = outputContentTuple.right;
+		let outputContentState = outputContentTuple.left();
+		let outputContent = outputContentTuple.right();
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
 		let joinedTypeParams = Main.joinTypeParams(typeParams);
 		let implementingString = Main.generateImplementing(maybeImplementing);
@@ -955,7 +875,7 @@ export class Main  {
 		}
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
 		let generated = joinedModifiers + infix + name + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-		return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(outputContentState.append(generated), ""));
+		return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""));
 	}
 	static generateImplementing(maybeImplementing: Option<Type>): string {
 		return maybeImplementing.map((type: Type) => type.generate()).map((inner: string) => " implements " + inner).orElse("");
@@ -976,14 +896,14 @@ export class Main  {
 	static joinParameters(parameters: List<Definition>): string {
 		return parameters.query().map((definition: Definition) => definition.generate()).map((generated: string) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");
 	}
-	static compileNamespaced(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileNamespaced(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		let stripped = Strings.strip(input);
 		if (stripped.startsWith("package ")){
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ""));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 		}
 		return Main.compileImport(state, stripped);
 	}
-	static compileImport(state: CompileState, stripped: string): Option<Tuple<CompileState, string>> {
+	static compileImport(state: CompileState, stripped: string): Option<Tuple2<CompileState, string>> {
 		return Main.compilePrefix(stripped, "import ", (s: string) => {
 			return Main.compileSuffix(s, ";", (s1: string) => {
 				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
@@ -997,92 +917,92 @@ export class Main  {
                     parent = parent.addFirst("..");
                 }*/
 				let s2 = parent.add(child).query().collect(new Joiner("/")).orElse("");
-				return new Some<>(new Tuple<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
+				return new Some<>(new Tuple2Impl<>(state.addImport("import { " + child + " } from \"" + s2 + "\";\n"), ""));
 			});
 		});
 	}
-	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>>>): Tuple<CompileState, string> {
-		return Main.or(state, input, rules).orElseGet(() => new Tuple<CompileState, string>(state, Main.generatePlaceholder(input)));
+	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>>>): Tuple2<CompileState, string> {
+		return Main.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(input)));
 	}
-	static or<T>(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>>): Option<Tuple<CompileState, T>> {
-		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>) => Main.getApply(state, input, rule)).flatMap(Iterators.fromOption).next();
+	static or<T>(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>>): Option<Tuple2<CompileState, T>> {
+		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>) => Main.getApply(state, input, rule)).flatMap(Iterators.fromOption).next();
 	}
-	static getApply<T>(state: CompileState, input: string, rule: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, T>> {
+	static getApply<T>(state: CompileState, input: string, rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		return rule(state, input);
 	}
-	static compileClassSegment(state1: CompileState, input1: string): Tuple<CompileState, string> {
+	static compileClassSegment(state1: CompileState, input1: string): Tuple2<CompileState, string> {
 		return Main.compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class "), Main.compileMethod, Main.compileFieldDefinition));
 	}
-	static compileMethod(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileMethod(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams);
 			return Main.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
 				if (state.maybeStructureName.filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent()){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
-				return new None<Tuple<CompileState, string>>();
+				return new None<Tuple2<CompileState, string>>();
 			}).or(() => {
 				if (state.maybeStructureName.filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
-				return new None<Tuple<CompileState, string>>();
+				return new None<Tuple2<CompileState, string>>();
 			}).or(() => {
-				return Main.parseDefinition(state, beforeParams).flatMap((tuple: Tuple<CompileState, Definition>) => Main.compileMethodWithBeforeParams(tuple.left, tuple.right, withParams));
+				return Main.parseDefinition(state, beforeParams).flatMap((tuple: Tuple2<CompileState, Definition>) => Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams));
 			});
 		});
 	}
-	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple<CompileState, string>> {
+	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(withParams, ")", (params: string, afterParams: string) => {
 			let parametersTuple = Main.parseParameters(state, params);
-			let parametersState = parametersTuple.left;
-			let parameters = parametersTuple.right;
+			let parametersState = parametersTuple.left();
+			let parameters = parametersTuple.right();
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
 			if (header.hasAnnotation("Actual")){
-				return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
 			}
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {
 				return Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
 					let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
-					return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(statementsTuple.left.exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right + "\n\t}"));
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"));
 				});
 			}).or(() => {
 				if (Strings.equalsTo(";", Strings.strip(afterParams))){
-					return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
 				}
-				return new None<Tuple<CompileState, string>>();
+				return new None<Tuple2<CompileState, string>>();
 			});
 		});
 	}
-	static parseParameters(state: CompileState, params: string): Tuple<CompileState, List<Parameter>> {
-		return Main.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => new Some<Tuple<CompileState, Parameter>>(Main.parseParameterOrPlaceholder(state1, s)));
+	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
+		return Main.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, Parameter>>(Main.parseParameterOrPlaceholder(state1, s)));
 	}
-	static compileFunctionStatements(state: CompileState, input: string): Tuple<CompileState, string> {
+	static compileFunctionStatements(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return Main.compileStatements(state, input, Main.compileFunctionSegment);
 	}
-	static compileFunctionSegment(state: CompileState, input: string): Tuple<CompileState, string> {
+	static compileFunctionSegment(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return Main.compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileEmptySegment, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
 	}
-	static compileEmptySegment(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileEmptySegment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		if (Strings.equalsTo(";", Strings.strip(input))){
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, ";"));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ";"));
 		}
 		else {
-			return new None<Tuple<CompileState, string>>();
+			return new None<Tuple2<CompileState, string>>();
 		}
 	}
-	static compileReturnWithoutSuffix(state1: CompileState, input1: string): Option<Tuple<CompileState, string>> {
-		return Main.compileReturn(input1, (withoutPrefix: string) => Main.compileValue(state1, withoutPrefix)).map((tuple: Tuple<CompileState, string>) => new Tuple<CompileState, string>(tuple.left, Main.generateIndent(state1.depth) + tuple.right));
+	static compileReturnWithoutSuffix(state1: CompileState, input1: string): Option<Tuple2<CompileState, string>> {
+		return Main.compileReturn(input1, (withoutPrefix: string) => Main.compileValue(state1, withoutPrefix)).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), Main.generateIndent(state1.depth) + tuple.right()));
 	}
-	static compileBlock(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => {
 			return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd: string, content: string) => {
 				return Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => {
-					return Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple<CompileState, string>) => {
-						let contentTuple = Main.compileFunctionStatements(headerTuple.left.enterDepth(), content);
+					return Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
+						let contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 						let indent = Main.generateIndent(state.depth);
-						return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(contentTuple.left.exitDepth(), indent + headerTuple.right + "{" + contentTuple.right + indent + "}"));
+						return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 					});
 				});
 			});
@@ -1104,98 +1024,98 @@ export class Main  {
 		}
 		return appended;
 	}
-	static compileBlockHeader(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileBlockHeader(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.or(state, input, Lists.of(Main.createConditionalRule("if"), Main.createConditionalRule("while"), Main.compileElse));
 	}
-	static createConditionalRule(prefix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>> {
+	static createConditionalRule(prefix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
 		return (state1: CompileState, input1: string) => Main.compilePrefix(Strings.strip(input1), prefix, (withoutPrefix: string) => {
 			let strippedCondition = Strings.strip(withoutPrefix);
 			return Main.compilePrefix(strippedCondition, "(", (withoutConditionStart: string) => {
 				return Main.compileSuffix(withoutConditionStart, ")", (withoutConditionEnd: string) => {
 					let tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
-					return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(tuple.left, prefix + " (" + tuple.right + ")"));
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), prefix + " (" + tuple.right() + ")"));
 				});
 			});
 		});
 	}
-	static compileElse(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileElse(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		if (Strings.equalsTo("else", Strings.strip(input))){
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, "else "));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, "else "));
 		}
 		else {
-			return new None<Tuple<CompileState, string>>();
+			return new None<Tuple2<CompileState, string>>();
 		}
 	}
-	static compileFunctionStatement(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileFunctionStatement(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
 			let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(valueTuple.left, Main.generateIndent(state.depth) + valueTuple.right + ";"));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(valueTuple.left(), Main.generateIndent(state.depth) + valueTuple.right() + ";"));
 		});
 	}
 	static generateIndent(indent: number): string {
 		return "\n" + "\t".repeat(indent);
 	}
-	static compileFunctionStatementValue(state: CompileState, withoutEnd: string): Tuple<CompileState, string> {
-		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (state1: CompileState, input: string) => Main.parseInvokable(state1, input).map((tuple: Tuple<CompileState, Value>) => new Tuple<CompileState, string>(tuple.left, tuple.right.generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
+	static compileFunctionStatementValue(state: CompileState, withoutEnd: string): Tuple2<CompileState, string> {
+		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (state1: CompileState, input: string) => Main.parseInvokable(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
 	}
-	static compileBreak(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileBreak(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		if (Strings.equalsTo("break", Strings.strip(input))){
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(state, "break"));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, "break"));
 		}
 		else {
-			return new None<Tuple<CompileState, string>>();
+			return new None<Tuple2<CompileState, string>>();
 		}
 	}
-	static createPostRule(suffix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>> {
+	static createPostRule(suffix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
 		return (state1: CompileState, input: string) => Main.compileSuffix(Strings.strip(input), suffix, (child: string) => {
 			let tuple = Main.compileValueOrPlaceholder(state1, child);
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(tuple.left, tuple.right + suffix));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right() + suffix));
 		});
 	}
-	static compileReturnWithValue(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileReturnWithValue(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileReturn(input, (value1: string) => Main.compileValue(state, value1));
 	}
-	static compileReturn(input: string, mapper: (arg0 : string) => Option<Tuple<CompileState, string>>): Option<Tuple<CompileState, string>> {
+	static compileReturn(input: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, string>>): Option<Tuple2<CompileState, string>> {
 		return Main.compilePrefix(Strings.strip(input), "return ", (value: string) => {
-			return mapper(value).flatMap((tuple: Tuple<CompileState, string>) => {
-				return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(tuple.left, "return " + tuple.right));
+			return mapper(value).flatMap((tuple: Tuple2<CompileState, string>) => {
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), "return " + tuple.right()));
 			});
 		});
 	}
-	static parseInvokable(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
+	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return Main.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => {
 			return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart: string, args: string) => {
 				return Main.compileSuffix(callerWithArgStart, "(", (callerString: string) => {
 					return Main.compilePrefix(Strings.strip(callerString), "new ", (type: string) => {
-						return Main.compileType(state, type).flatMap((callerTuple: Tuple<CompileState, string>) => {
-							let callerState = callerTuple.right;
-							let caller = callerTuple.left;
+						return Main.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, string>) => {
+							let callerState = callerTuple.right();
+							let caller = callerTuple.left();
 							return Main.assembleInvokable(caller, new ConstructionCaller(callerState), args);
 						});
 					}).or(() => {
-						return Main.parseValue(state, callerString).flatMap((callerTuple: Tuple<CompileState, Value>) => {
-							return Main.assembleInvokable(callerTuple.left, callerTuple.right, args);
+						return Main.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => {
+							return Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args);
 						});
 					});
 				});
 			});
 		});
 	}
-	static splitFoldedLast(input: string, delimiter: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Option<Tuple<string, string>> {
+	static splitFoldedLast(input: string, delimiter: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Option<Tuple2<string, string>> {
 		return Main.splitFolded(input, folder, (divisions1: List<string>) => Main.selectLast(divisions1, delimiter));
 	}
-	static splitFolded(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, selector: (arg0 : List<string>) => Option<Tuple<string, string>>): Option<Tuple<string, string>> {
+	static splitFolded(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, selector: (arg0 : List<string>) => Option<Tuple2<string, string>>): Option<Tuple2<string, string>> {
 		let divisions = Main.divide(input, folder);
 		if (2 > divisions.size()){
-			return new None<Tuple<string, string>>();
+			return new None<Tuple2<string, string>>();
 		}
 		return selector(divisions);
 	}
-	static selectLast(divisions: List<string>, delimiter: string): Option<Tuple<string, string>> {
+	static selectLast(divisions: List<string>, delimiter: string): Option<Tuple2<string, string>> {
 		let beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
 		let last = divisions.findLast().orElse("");
 		let joined = beforeLast.query().collect(new Joiner(delimiter)).orElse("");
-		return new Some<Tuple<string, string>>(new Tuple<string, string>(joined, last));
+		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(joined, last));
 	}
 	static foldInvocationStarts(state: DivideState, c: string): DivideState {
 		let appended = state.append(c);
@@ -1213,12 +1133,12 @@ export class Main  {
 		}
 		return appended;
 	}
-	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple<CompileState, Value>> {
-		return Main.parseValues(state, argsString, (state1: CompileState, s: string) => Main.parseArgument(state1, s)).flatMap((argsTuple: Tuple<CompileState, List<Argument>>) => {
-			let argsState = argsTuple.left;
-			let args = Main.retain(argsTuple.right, (argument: Argument) => argument.toValue());
+	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple2<CompileState, Value>> {
+		return Main.parseValues(state, argsString, (state1: CompileState, s: string) => Main.parseArgument(state1, s)).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
+			let argsState = argsTuple.left();
+			let args = Main.retain(argsTuple.right(), (argument: Argument) => argument.toValue());
 			let newCaller = Main.transformCaller(argsState, oldCaller);
-			return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(argsState, new Invokable(newCaller, args)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new Invokable(newCaller, args)));
 		});
 	}
 	static transformCaller(state: CompileState, oldCaller: Caller): Caller {
@@ -1233,108 +1153,108 @@ export class Main  {
 	static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
 		return args.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<R>());
 	}
-	static parseArgumentOrPlaceholder(state1: CompileState, input: string): Tuple<CompileState, Argument> {
-		return Main.parseArgument(state1, input).orElseGet(() => new Tuple<CompileState, Argument>(state1, new Placeholder(input)));
+	static parseArgumentOrPlaceholder(state1: CompileState, input: string): Tuple2<CompileState, Argument> {
+		return Main.parseArgument(state1, input).orElseGet(() => new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
 	}
-	static parseArgument(state1: CompileState, input: string): Option<Tuple<CompileState, Argument>> {
-		return Main.parseValue(state1, input).map((tuple: Tuple<CompileState, Value>) => new Tuple<CompileState, Argument>(tuple.left, tuple.right));
+	static parseArgument(state1: CompileState, input: string): Option<Tuple2<CompileState, Argument>> {
+		return Main.parseValue(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right()));
 	}
-	static compileAssignment(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileAssignment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(input, "=", (destination: string, source: string) => {
 			let sourceTuple = Main.compileValueOrPlaceholder(state, source);
-			let destinationTuple = Main.compileValue(sourceTuple.left, destination).or(() => Main.parseDefinition(sourceTuple.left, destination).map((tuple: Tuple<CompileState, Definition>) => new Tuple<CompileState, string>(tuple.left, "let " + tuple.right.generate()))).orElseGet(() => new Tuple<CompileState, string>(sourceTuple.left, Main.generatePlaceholder(destination)));
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(destinationTuple.left, destinationTuple.right + " = " + sourceTuple.right));
+			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, string>(tuple.left(), "let " + tuple.right().generate()))).orElseGet(() => new Tuple2Impl<CompileState, string>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 		});
 	}
-	static compileValueOrPlaceholder(state: CompileState, input: string): Tuple<CompileState, string> {
-		return Main.compileValue(state, input).orElseGet(() => new Tuple<CompileState, string>(state, Main.generatePlaceholder(input)));
+	static compileValueOrPlaceholder(state: CompileState, input: string): Tuple2<CompileState, string> {
+		return Main.compileValue(state, input).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(input)));
 	}
-	static compileValue(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
-		return Main.parseValue(state, input).map((tuple: Tuple<CompileState, Value>) => new Tuple<CompileState, string>(tuple.left, tuple.right.generate()));
+	static compileValue(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
+		return Main.parseValue(state, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate()));
 	}
-	static parseValue(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
+	static parseValue(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return Main.or(state, input, Lists.of(Main.parseLambda, Main.createOperatorRule("+"), Main.createOperatorRule("-"), Main.createOperatorRule("<="), Main.createOperatorRule("<"), Main.createOperatorRule("&&"), Main.createOperatorRule("||"), Main.createOperatorRule(">"), Main.createOperatorRule(">="), Main.parseInvokable, Main.createAccessRule("."), Main.createAccessRule("::"), Main.parseSymbol, Main.parseNot, Main.parseNumber, Main.createOperatorRuleWithDifferentInfix("==", "==="), Main.createOperatorRuleWithDifferentInfix("!=", "!=="), Main.createTextRule("\""), Main.createTextRule("'")));
 	}
-	static createTextRule(slice: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
+	static createTextRule(slice: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: string) => {
 			let stripped = Strings.strip(input1);
 			return Main.compilePrefix(stripped, slice, (s: string) => {
-				return Main.compileSuffix(s, slice, (s1: string) => new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(state1, new StringValue(s1))));
+				return Main.compileSuffix(s, slice, (s1: string) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1))));
 			});
 		};
 	}
-	static parseNot(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
+	static parseNot(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return Main.compilePrefix(Strings.strip(input), "!", (withoutPrefix: string) => {
 			let childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
-			let childState = childTuple.left;
-			let child = "!" + childTuple.right;
-			return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(childState, new Not(child)));
+			let childState = childTuple.left();
+			let child = "!" + childTuple.right();
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new Not(child)));
 		});
 	}
-	static parseLambda(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
+	static parseLambda(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return Main.compileFirst(input, "->", (beforeArrow: string, afterArrow: string) => {
 			let strippedBeforeArrow = Strings.strip(beforeArrow);
 			return Main.compilePrefix(strippedBeforeArrow, "(", (withoutStart: string) => {
 				return Main.compileSuffix(withoutStart, ")", (withoutEnd: string) => {
-					return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => Main.parseParameter(state1, s)).flatMap((paramNames: Tuple<CompileState, List<Parameter>>) => {
-						return Main.compileLambdaWithParameterNames(paramNames.left, Main.retainDefinitionsFromParameters(paramNames.right), afterArrow);
+					return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => Main.parseParameter(state1, s)).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => {
+						return Main.compileLambdaWithParameterNames(paramNames.left(), Main.retainDefinitionsFromParameters(paramNames.right()), afterArrow);
 					});
 				});
 			});
 		});
 	}
-	static compileLambdaWithParameterNames(state: CompileState, paramNames: List<Definition>, afterArrow: string): Option<Tuple<CompileState, Value>> {
+	static compileLambdaWithParameterNames(state: CompileState, paramNames: List<Definition>, afterArrow: string): Option<Tuple2<CompileState, Value>> {
 		let strippedAfterArrow = Strings.strip(afterArrow);
 		return Main.compilePrefix(strippedAfterArrow, "{", (withoutContentStart: string) => {
 			return Main.compileSuffix(withoutContentStart, "}", (withoutContentEnd: string) => {
 				let statementsTuple = Main.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
-				let statementsState = statementsTuple.left;
-				let statements = statementsTuple.right;
+				let statementsState = statementsTuple.left();
+				let statements = statementsTuple.right();
 				let exited = statementsState.exitDepth();
 				return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth) + "}");
 			});
 		}).or(() => {
-			return Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple<CompileState, string>) => {
-				return Main.assembleLambda(tuple.left, paramNames, tuple.right);
+			return Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => {
+				return Main.assembleLambda(tuple.left(), paramNames, tuple.right());
 			});
 		});
 	}
-	static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: string): Option<Tuple<CompileState, Value>> {
-		return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(exited, new Lambda(paramNames, content)));
+	static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)));
 	}
-	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
+	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);
 	}
-	static createAccessRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
+	static createAccessRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state: CompileState, input: string) => Main.compileLast(input, infix, (childString: string, rawProperty: string) => {
 			let property = Strings.strip(rawProperty);
 			if (!Main.isSymbol(property)){
-				return new None<Tuple<CompileState, Value>>();
+				return new None<Tuple2<CompileState, Value>>();
 			}
-			return Main.parseValue(state, childString).flatMap((childTuple: Tuple<CompileState, Value>) => {
-				let childState = childTuple.left;
-				let child = childTuple.right;
-				return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(childState, new Access(child, property)));
+			return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
+				let childState = childTuple.left();
+				let child = childTuple.right();
+				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new Access(child, property)));
 			});
 		});
 	}
-	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, Value>> {
+	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: string) => {
 			return Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), (divisions: List<string>) => Main.selectFirst(divisions, sourceInfix)), (leftString: string, rightString: string) => {
-				return Main.parseValue(state1, leftString).flatMap((leftTuple: Tuple<CompileState, Value>) => {
-					return Main.parseValue(leftTuple.left, rightString).flatMap((rightTuple: Tuple<CompileState, Value>) => {
-						let left = leftTuple.right;
-						let right = rightTuple.right;
-						return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(rightTuple.left, new Operation(left, targetInfix, right)));
+				return Main.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => {
+					return Main.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
+						let left = leftTuple.right();
+						let right = rightTuple.right();
+						return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)));
 					});
 				});
 			});
 		};
 	}
-	static selectFirst(divisions: List<string>, delimiter: string): Option<Tuple<string, string>> {
+	static selectFirst(divisions: List<string>, delimiter: string): Option<Tuple2<string, string>> {
 		let first = divisions.findFirst().orElse("");
 		let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("");
-		return new Some<Tuple<string, string>>(new Tuple<string, string>(first, afterFirst));
+		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(first, afterFirst));
 	}
 	static foldOperator(infix: string): (arg0 : DivideState, arg1 : string) => DivideState {
 		return (state: DivideState, c: string) => {
@@ -1344,33 +1264,33 @@ export class Main  {
 				let current = state;
 				while (counter < length){
 					counter++;
-					current = current.pop().map((tuple: Tuple<DivideState, string>) => tuple.left).orElse(current);
+					current = current.pop().map((tuple: Tuple2<DivideState, string>) => tuple.left()).orElse(current);
 				}
 				return current.advance();
 			}
 			return state.append(c);
 		};
 	}
-	static parseNumber(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
+	static parseNumber(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
 		if (Main.isNumber(stripped)){
-			return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(state, new SymbolNode(stripped)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
 		}
 		else {
-			return new None<Tuple<CompileState, Value>>();
+			return new None<Tuple2<CompileState, Value>>();
 		}
 	}
 	static isNumber(input: string): boolean {
 		let query = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
 		return query.map(input.charAt).allMatch((c: string) => Characters.isDigit(c));
 	}
-	static parseSymbol(state: CompileState, input: string): Option<Tuple<CompileState, Value>> {
+	static parseSymbol(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
 		if (Main.isSymbol(stripped)){
-			return new Some<Tuple<CompileState, Value>>(new Tuple<CompileState, Value>(state, new SymbolNode(stripped)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
 		}
 		else {
-			return new None<Tuple<CompileState, Value>>();
+			return new None<Tuple2<CompileState, Value>>();
 		}
 	}
 	static isSymbol(input: string): boolean {
@@ -1380,51 +1300,54 @@ export class Main  {
 	static isSymbolChar(index: number, c: string): boolean {
 		return "_" === c || Characters.isLetter(c) || (0 !== index && Characters.isDigit(c));
 	}
-	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, T>> {
+	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		if (!input.startsWith(infix)){
-			return new None<Tuple<CompileState, T>>();
+			return new None<Tuple2<CompileState, T>>();
 		}
 		let slice = Strings.sliceFrom(input, Strings.length(infix));
 		return mapper(slice);
 	}
-	static compileWhitespace(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
-		return Main.parseWhitespace(state, input).map((tuple: Tuple<CompileState, Whitespace>) => new Tuple<CompileState, string>(tuple.left, tuple.right.generate()));
+	static compileWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
+		return Main.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate()));
 	}
-	static parseWhitespace(state: CompileState, input: string): Option<Tuple<CompileState, Whitespace>> {
+	static parseWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, Whitespace>> {
 		if (Strings.isBlank(input)){
-			return new Some<Tuple<CompileState, Whitespace>>(new Tuple<CompileState, Whitespace>(state, new Whitespace()));
+			return new Some<Tuple2<CompileState, Whitespace>>(new Tuple2Impl<CompileState, Whitespace>(state, new Whitespace()));
 		}
-		return new None<Tuple<CompileState, Whitespace>>();
+		return new None<Tuple2<CompileState, Whitespace>>();
 	}
-	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
 			return Main.getTupleOption(state, withoutEnd).or(() => Main.compileEnumValues(state, withoutEnd));
 		});
 	}
-	static getTupleOption(state: CompileState, withoutEnd: string): Option<Tuple<CompileState, string>> {
-		return Main.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple<CompileState, Parameter>) => {
-			return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(definitionTuple.left, "\n\t" + definitionTuple.right.generate() + ";"));
+	static getTupleOption(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
+		return Main.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple2<CompileState, Parameter>) => {
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(definitionTuple.left(), "\n\t" + definitionTuple.right().generate() + ";"));
 		});
 	}
-	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple<CompileState, string>> {
+	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
-			return Main.parseInvokable(state1, s).flatMap((tuple: Tuple<CompileState, Value>) => {
+			return Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
 				let structureName = state.maybeStructureName.orElse("");
-				return tuple.right.generateAsEnumValue(structureName).map((stringOption: string) => {
-					return new Tuple<CompileState, string>(tuple.left, stringOption);
+				return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => {
+					return new Tuple2Impl<CompileState, string>(tuple.left(), stringOption);
 				});
 			});
-		}).map((tuple: Tuple<CompileState, List<string>>) => {
-			return new Tuple<CompileState, string>(tuple.left, tuple.right.query().collect(new Joiner("")).orElse(""));
+		}).map((tuple: Tuple2<CompileState, List<string>>) => {
+			return new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse(""));
 		});
 	}
-	static parseParameterOrPlaceholder(state: CompileState, input: string): Tuple<CompileState, Parameter> {
-		return Main.parseParameter(state, input).orElseGet(() => new Tuple<CompileState, Parameter>(state, new Placeholder(input)));
+	static parseParameterOrPlaceholder(state: CompileState, input: string): Tuple2<CompileState, Parameter> {
+		return Main.parseParameter(state, input).orElseGet(() => new Tuple2Impl<CompileState, Parameter>(state, new Placeholder(input)));
 	}
-	static parseParameter(state: CompileState, input: string): Option<Tuple<CompileState, Parameter>> {
-		return Main.parseWhitespace(state, input).map((tuple: Tuple<CompileState, Whitespace>) => new Tuple<CompileState, Parameter>(tuple.left, tuple.right)).or(() => Main.parseDefinition(state, input).map((tuple: Tuple<CompileState, Definition>) => new Tuple<CompileState, Parameter>(tuple.left, tuple.right)));
+	static parseParameter(state: CompileState, input: string): Option<Tuple2<CompileState, Parameter>> {
+		return Main.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => Main.getCompileStateParameterTuple2(tuple)).or(() => Main.parseDefinition(state, input).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right())));
 	}
-	static parseDefinition(state: CompileState, input: string): Option<Tuple<CompileState, Definition>> {
+	static getCompileStateParameterTuple2(tuple: Tuple2<CompileState, Whitespace>): Tuple2<CompileState, Parameter> {
+		return new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right());
+	}
+	static parseDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, Definition>> {
 		return Main.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => {
 			return Main.compileSplit(Main.splitFoldedLast(Strings.strip(beforeName), " ", Main.foldTypeSeparators), (beforeType: string, type: string) => {
 				return Main.compileLast(Strings.strip(beforeType), "\n", (annotationsString: string, afterAnnotations: string) => {
@@ -1441,7 +1364,7 @@ export class Main  {
 	static parseAnnotations(s: string): List<string> {
 		return Main.divide(s, (state1: DivideState, c: string) => Main.foldDelimited(state1, c, "\n")).query().map((s2: string) => Strings.strip(s2)).filter((value: string) => !Strings.isEmpty(value)).filter((value: string) => 1 <= Strings.length(value)).map((value: string) => Strings.sliceFrom(value, 1)).map((s1: string) => Strings.strip(s1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
-	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple<CompileState, Definition>> {
+	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
 		return Main.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: string) => {
 			return Main.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams: string, typeParamsString: string) => {
 				let typeParams = Main.divideValues(typeParamsString);
@@ -1477,11 +1400,11 @@ export class Main  {
 		}
 		return appended;
 	}
-	static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<string>, typeParams: List<string>, oldModifiers: List<string>, type: string, name: string): Option<Tuple<CompileState, Definition>> {
-		return Main.parseType(state, type).flatMap((typeTuple: Tuple<CompileState, Type>) => {
+	static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<string>, typeParams: List<string>, oldModifiers: List<string>, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
+		return Main.parseType(state, type).flatMap((typeTuple: Tuple2<CompileState, Type>) => {
 			let newModifiers = Main.modifyModifiers(oldModifiers);
-			let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right, name);
-			return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
+			let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
+			return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
 		});
 	}
 	static modifyModifiers(oldModifiers: List<string>): List<string> {
@@ -1490,34 +1413,34 @@ export class Main  {
 		}
 		return Lists.empty();
 	}
-	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple<CompileState, Type> {
-		return Main.parseType(state, type).map((tuple: Tuple<CompileState, Type>) => new Tuple<CompileState, Type>(tuple.left, tuple.right)).orElseGet(() => new Tuple<CompileState, Type>(state, new Placeholder(type)));
+	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, Type> {
+		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right())).orElseGet(() => new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
 	}
-	static compileTypeOrPlaceholder(state: CompileState, type: string): Tuple<CompileState, string> {
-		return Main.compileType(state, type).orElseGet(() => new Tuple<CompileState, string>(state, Main.generatePlaceholder(type)));
+	static compileTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, string> {
+		return Main.compileType(state, type).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(type)));
 	}
-	static compileType(state: CompileState, type: string): Option<Tuple<CompileState, string>> {
-		return Main.parseType(state, type).map((tuple: Tuple<CompileState, Type>) => new Tuple<CompileState, string>(tuple.left, tuple.right.generate()));
+	static compileType(state: CompileState, type: string): Option<Tuple2<CompileState, string>> {
+		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate()));
 	}
-	static parseType(state: CompileState, type: string): Option<Tuple<CompileState, Type>> {
+	static parseType(state: CompileState, type: string): Option<Tuple2<CompileState, Type>> {
 		return Main.or(state, type, Lists.of(Main.parseVarArgs, Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
 	}
-	static parseVarArgs(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
+	static parseVarArgs(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input);
 		return Main.compileSuffix(stripped, "...", (s: string) => {
 			let child = Main.parseTypeOrPlaceholder(state, s);
-			return new Some<Tuple<CompileState, Type>>(new Tuple<CompileState, Type>(child.left, new VarArgs(child.right)));
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VarArgs(child.right())));
 		});
 	}
-	static parseSymbolType(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
+	static parseSymbolType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input);
 		if (Main.isSymbol(stripped)){
-			return new Some<Tuple<CompileState, Type>>(new Tuple<CompileState, Type>(state, new SymbolNode(stripped)));
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state, new SymbolNode(stripped)));
 		}
-		return new None<Tuple<CompileState, Type>>();
+		return new None<Tuple2<CompileState, Type>>();
 	}
-	static parsePrimitive(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
-		return Main.findPrimitiveValue(Strings.strip(input)).map((result: Type) => new Tuple<CompileState, Type>(state, result));
+	static parsePrimitive(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
+		return Main.findPrimitiveValue(Strings.strip(input)).map((result: Type) => new Tuple2Impl<CompileState, Type>(state, result));
 	}
 	static findPrimitiveValue(input: string): Option<Type> {
 		let stripped = Strings.strip(input);
@@ -1538,28 +1461,28 @@ export class Main  {
 		}
 		return new None<Type>();
 	}
-	static parseGeneric(state: CompileState, input: string): Option<Tuple<CompileState, Type>> {
+	static parseGeneric(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		return Main.compileSuffix(Strings.strip(input), ">", (withoutEnd: string) => {
 			return Main.compileFirst(withoutEnd, "<", (baseString: string, argsString: string) => {
 				let argsTuple = Main.parseValuesOrEmpty(state, argsString, (state1: CompileState, s: string) => Main.compileTypeArgument(state1, s));
-				let argsState = argsTuple.left;
-				let args = argsTuple.right;
+				let argsState = argsTuple.left();
+				let args = argsTuple.right();
 				let base = Strings.strip(baseString);
 				return Main.assembleFunctionType(argsState, base, args).or(() => {
-					return new Some<Tuple<CompileState, Type>>(new Tuple<CompileState, Type>(argsState, new Generic(base, args)));
+					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(argsState, new Generic(base, args)));
 				});
 			});
 		});
 	}
-	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple<CompileState, Type>> {
-		return Main.mapFunctionType(base, args).map((generated: Type) => new Tuple<CompileState, Type>(state, generated));
+	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple2<CompileState, Type>> {
+		return Main.mapFunctionType(base, args).map((generated: Type) => new Tuple2Impl<CompileState, Type>(state, generated));
 	}
 	static mapFunctionType(base: string, args: List<string>): Option<Type> {
 		if (Strings.equalsTo("Function", base)){
-			return args.findFirst().and(() => args.find(1)).map((tuple: Tuple<string, string>) => new FunctionType(Lists.of(tuple.left), tuple.right));
+			return args.findFirst().and(() => args.find(1)).map((tuple: Tuple2<string, string>) => new FunctionType(Lists.of(tuple.left()), tuple.right()));
 		}
 		if (Strings.equalsTo("BiFunction", base)){
-			return args.find(0).and(() => args.find(1)).and(() => args.find(2)).map((tuple: Tuple<Tuple<string, string>, string>) => new FunctionType(Lists.of(tuple.left.left, tuple.left.right), tuple.right));
+			return args.find(0).and(() => args.find(1)).and(() => args.find(2)).map((tuple: Tuple2<Tuple2<string, string>, string>) => new FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right()));
 		}
 		if (Strings.equalsTo("Supplier", base)){
 			return args.findFirst().map((first: string) => {
@@ -1578,16 +1501,16 @@ export class Main  {
 		}
 		return new None<Type>();
 	}
-	static compileTypeArgument(state: CompileState, input: string): Option<Tuple<CompileState, string>> {
+	static compileTypeArgument(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.or(state, input, Lists.of((state2: CompileState, input1: string) => Main.compileWhitespace(state2, input1), (state1: CompileState, type: string) => Main.compileType(state1, type)));
 	}
 	static generateValueStrings(values: List<string>): string {
 		return Main.generateAll(values, Main.mergeValues);
 	}
-	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Tuple<CompileState, List<T>> {
-		return Main.parseValues(state, input, mapper).orElse(new Tuple<CompileState, List<T>>(state, Lists.empty()));
+	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Tuple2<CompileState, List<T>> {
+		return Main.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()));
 	}
-	static parseValues<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, T>>): Option<Tuple<CompileState, List<T>>> {
+	static parseValues<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 		return Main.parseAll(state, input, Main.foldValues, mapper);
 	}
 	static mergeValues(cache: string, element: string): string {
@@ -1639,18 +1562,18 @@ export class Main  {
 	static compileInfix<T>(input: string, infix: string, locator: (arg0 : string, arg1 : string) => number, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return Main.compileSplit(Main.split(input, infix, locator), mapper);
 	}
-	static compileSplit<T>(splitter: Option<Tuple<string, string>>, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return splitter.flatMap((tuple: Tuple<string, string>) => mapper(tuple.left, tuple.right));
+	static compileSplit<T>(splitter: Option<Tuple2<string, string>>, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
+		return splitter.flatMap((tuple: Tuple2<string, string>) => mapper(tuple.left(), tuple.right()));
 	}
-	static split(input: string, infix: string, locator: (arg0 : string, arg1 : string) => number): Option<Tuple<string, string>> {
+	static split(input: string, infix: string, locator: (arg0 : string, arg1 : string) => number): Option<Tuple2<string, string>> {
 		let index = locator(input, infix);
 		if (0 > index){
-			return new None<Tuple<string, string>>();
+			return new None<Tuple2<string, string>>();
 		}
 		let left = Strings.sliceBetween(input, 0, index);
 		let length = Strings.length(infix);
 		let right = Strings.sliceFrom(input, index + length);
-		return new Some<Tuple<string, string>>(new Tuple<string, string>(left, right));
+		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(left, right));
 	}
 	static findFirst(input: string, infix: string): number {
 		return input.indexOf(infix);

@@ -1,12 +1,12 @@
 package magma.api.collect;
 
+import magma.api.Tuple2;
 import magma.api.option.Option;
-import magma.app.Main;
 
 public interface List<T> {
     List<T> add(T element);
 
-    Main.Query<T> query();
+    Query<T> query();
 
     int size();
 
@@ -18,13 +18,13 @@ public interface List<T> {
 
     Option<T> find(int index);
 
-    Main.Query<Main.Tuple<Integer, T>> queryWithIndices();
+    Query<Tuple2<Integer,T>> queryWithIndices();
 
     List<T> addAll(List<T> others);
 
     boolean contains(T element);
 
-    Main.Query<T> queryReversed();
+    Query<T> queryReversed();
 
     List<T> addFirst(T element);
 
