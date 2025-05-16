@@ -19,24 +19,24 @@ interface Option<T> {
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R>;
 	filter(predicate : (arg0 : T) => boolean): Option<T>;
 }
-interface Iterator<T> {
+interface Query<T> {
 	collect<C>(collector : Collector<T, C>): C;
-	map<R>(mapper : (arg0 : T) => R): Iterator<R>;
+	map<R>(mapper : (arg0 : T) => R): Query<R>;
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R): R;
-	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R>;
+	flatMap<R>(mapper : (arg0 : T) => Query<R>): Query<R>;
 	next(): Option<T>;
 	allMatch(predicate : (arg0 : T) => boolean): boolean;
-	filter(predicate : (arg0 : T) => boolean): Iterator<T>;
+	filter(predicate : (arg0 : T) => boolean): Query<T>;
 }
 interface List<T> {
 	add(element : T): List<T>;
-	iterate(): Iterator<T>;
+	query(): Query<T>;
 	size(): number;
 	subList(startInclusive : number, endExclusive : number): Option<List<T>>;
 	findLast(): Option<T>;
 	findFirst(): Option<T>;
 	find(index : number): Option<T>;
-	iterateWithIndices(): Iterator<Tuple<number, T>>;
+	queryWithIndices(): Query<Tuple<number, T>>;
 }
 interface Head<T> {
 	next(): Option<T>;
@@ -45,7 +45,7 @@ interface Parameter {
 	generate(): string;
 	asDefinition(): Option<Definition>;
 }
-class HeadedIterator<T> {
+class HeadedQuery<T> {
 	head : Head<T>;
 	constructor (head : Head<T>) {
 		this.head = head;
@@ -56,8 +56,8 @@ class HeadedIterator<T> {
 	collect<C>(collector : Collector<T, C>): C {
 		return this.fold(collector.createInitial(), collector.fold);
 	}
-	map<R>(mapper : (arg0 : T) => R): Iterator<R> {
-		return new HeadedIterator<>(() => this.next().map(mapper));
+	map<R>(mapper : (arg0 : T) => R): Query<R> {
+		return new HeadedQuery<>(new MapHead<>(this.head, mapper));
 	}
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R): R {
 		let result : R = initial;
@@ -69,19 +69,19 @@ class HeadedIterator<T> {
 			result = folder.apply(result, maybeNext.orElse(null));
 		}
 	}
-	flatMap<R>(mapper : (arg0 : T) => Iterator<R>): Iterator<R> {
-		return new HeadedIterator<>(new FlatMapHead<T, R>(this.head, mapper));
+	flatMap<R>(mapper : (arg0 : T) => Query<R>): Query<R> {
+		return new HeadedQuery<>(new FlatMapHead<T, R>(this.head, mapper));
 	}
 	allMatch(predicate : (arg0 : T) => boolean): boolean {
 		return this.fold(true, (maybeAllTrue, element) => maybeAllTrue && predicate.test(element));
 	}
-	filter(predicate : (arg0 : T) => boolean): Iterator<T> {
+	filter(predicate : (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element) => {
 			if (predicate.test(element)){
-				return new HeadedIterator<>(new SingleHead<>(element));
+				return new HeadedQuery<>(new SingleHead<>(element));
 			}
 			else {
-				return new HeadedIterator<>(new EmptyHead<>());
+				return new HeadedQuery<>(new EmptyHead<>());
 			}
 		});
 	}
@@ -113,8 +113,8 @@ class JVMList<T> {
 		this.list.add(element);
 		return this;
 	}
-	iterate(): Iterator<T> {
-		return this.iterateWithIndices().map(Tuple.right);
+	query(): Query<T> {
+		return this.queryWithIndices().map(Tuple.right);
 	}
 	size(): number {
 		return this.list.size();
@@ -131,8 +131,8 @@ class JVMList<T> {
 	get(index : number): T {
 		return this.list.get(index);
 	}
-	iterateWithIndices(): Iterator<Tuple<number, T>> {
-		return new /*HeadedIterator<>(new RangeHead(this.list.size()))
+	queryWithIndices(): Query<Tuple<number, T>> {
+		return new /*HeadedQuery<>(new RangeHead(this.list.size()))
                         .map*/((index) => new Tuple<>(index, this.list.get(index)));
 	}
 	subList(startInclusive : number, endExclusive : number): Option<List<T>> {
@@ -289,7 +289,7 @@ class Definition {
 		return this.name + joinedTypeParams + afterName + ": " + this.type();
 	}
 	joinTypeParams(): string {
-		return this.typeParams.iterate().collect(new Joiner(", ")).map((joined) => "<" + joined + ">").orElse("");
+		return this.typeParams.query().collect(new Joiner(", ")).map((joined) => "<" + joined + ">").orElse("");
 	}
 }
 class ConstructorHeader implements MethodHeader {
@@ -316,8 +316,8 @@ class Err<T, X> {
 	}
 }
 class Iterators {
-	fromOption<T>(option : Option<T>): Iterator<T> {
-		return new HeadedIterator<>(option. < Head < /*T>>map*/(SingleHead.new).orElseGet(EmptyHead.new));
+	fromOption<T>(option : Option<T>): Query<T> {
+		return new HeadedQuery<>(option. < Head < /*T>>map*/(SingleHead.new).orElseGet(EmptyHead.new));
 	}
 }
 class SingleHead<T> implements Head<T> {
@@ -348,27 +348,27 @@ class ListCollector<T> implements Collector<T, List<T>> {
 	}
 }
 class FlatMapHead<T, R> implements Head<R> {
-	mapper : (arg0 : T) => Iterator<R>;
+	mapper : (arg0 : T) => Query<R>;
 	head : Head<T>;
-	maybeCurrent : Option<Iterator<R>>;
-	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Iterator<R>): public {
+	maybeCurrent : Option<Query<R>>;
+	FlatMapHead(head : Head<T>, mapper : (arg0 : T) => Query<R>): public {
 		this.mapper = mapper;
-		this.maybeCurrent = new None<Iterator<R>>();
+		this.maybeCurrent = new None<Query<R>>();
 		this.head = head;
 	}
 	next(): Option<R> {
 		while (true){
 			if (this.maybeCurrent.isPresent()){
-				Iterator < /*R> it */ = this.maybeCurrent.orElse(null);
+				Query < /*R> it */ = this.maybeCurrent.orElse(null);
 				let next : unknown = it.next();
 				if (next.isPresent()){
 					return next;
 				}
-				this.maybeCurrent = new None<Iterator<R>>();
+				this.maybeCurrent = new None<Query<R>>();
 			}
 			Option < /*T> outer */ = this.head.next();
 			if (outer.isPresent()){
-				this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.orElse(null)));
+				this.maybeCurrent = new Some<Query<R>>(this.mapper.apply(outer.orElse(null)));
 			}
 			else {
 				return new None<R>();
@@ -455,6 +455,17 @@ class Placeholder {
 		return new None<>();
 	}
 }
+class MapHead<T, R> {
+	head : Head<T>;
+	mapper : (arg0 : T) => R;
+	constructor (head : Head<T>, mapper : (arg0 : T) => R) {
+		this.head = head;
+		this.mapper = mapper;
+	}
+	next(): Option<R> {
+		return this.head.next().map(this.mapper);
+	}
+}
 class Main {
 	main(): void {
 		let source : unknown = Paths.get(".", "src", "java", "magma", "Main.java");
@@ -490,10 +501,10 @@ class Main {
 		return new Tuple<>(folded.left, generateAll(folded.right, merger));
 	}
 	generateAll(elements : List<string>, merger : (arg0 : StringBuilder, arg1 : string) => StringBuilder): string {
-		return elements.iterate().fold(new StringBuilder(), merger).toString();
+		return elements.query().fold(new StringBuilder(), merger).toString();
 	}
 	parseAll<T>(state : CompileState, input : string, folder : (arg0 : DivideState, arg1 : string) => DivideState, mapper : (arg0 : CompileState, arg1 : string) => Tuple<CompileState, T>): Tuple<CompileState, List<T>> {
-		return divide(input, folder).iterate().fold(new Tuple<CompileState, List<T>>(state, Lists.empty()), (current, segment) => {
+		return divide(input, folder).query().fold(new Tuple<CompileState, List<T>>(state, Lists.empty()), (current, segment) => {
 			let currentState : unknown = current.left;
 			let currentElement : unknown = current.right;
 			let mappedTuple : unknown = mapper.apply(currentState, segment);
@@ -583,7 +594,7 @@ class Main {
 						return compileFirst(withParameters, ")", (parametersString, _) => {
 							let name : unknown = rawName.strip();
 							let parametersTuple : unknown = parseValues(state, parametersString, Main.parseParameter);
-							let parameters : unknown = parametersTuple.right.iterate().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
+							let parameters : unknown = parametersTuple.right.query().map(Parameter.asDefinition).flatMap(Iterators.fromOption).collect(new ListCollector<>());
 							return assembleStructure(parametersTuple.left, targetInfix, inputContent, name, parameters);
 						});
 					}).or(() => {
@@ -603,17 +614,17 @@ class Main {
 		return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(outputContentState.append(generated), ""));
 	}
 	generateConstructorFromRecordParameters(parameters : List<Definition>): string {
-		return parameters.iterate().map(Definition.generate).collect(new Joiner(", ")).map((generatedParameters) => generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
+		return parameters.query().map(Definition.generate).collect(new Joiner(", ")).map((generatedParameters) => generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
 	}
 	generateConstructorWithParameterString(parameters : List<Definition>, parametersString : string): string {
 		let constructorAssignments : unknown = generateConstructorAssignments(parameters);
 		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 	}
 	generateConstructorAssignments(parameters : List<Definition>): string {
-		return parameters.iterate().map((definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(new Joiner()).orElse("");
+		return parameters.query().map((definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(new Joiner()).orElse("");
 	}
 	joinParameters(parameters : List<Definition>): string {
-		return parameters.iterate().map(Definition.generate).map((generated) => "\n\t" + generated + ";").collect(new Joiner()).orElse("");
+		return parameters.query().map(Definition.generate).map((generated) => "\n\t" + generated + ";").collect(new Joiner()).orElse("");
 	}
 	compileNamespaced(state : CompileState, input : string): Option<Tuple<CompileState, string>> {
 		let stripped : unknown = input.strip();
@@ -628,7 +639,7 @@ class Main {
 		return compileOr(state, input, rules).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
 	}
 	compileOr(state : CompileState, input : string, rules : List<(arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>>>): Option<Tuple<CompileState, string>> {
-		return rules.iterate().map((rule) => rule.apply(state, input)).flatMap(Iterators.fromOption).next();
+		return rules.query().map((rule) => rule.apply(state, input)).flatMap(Iterators.fromOption).next();
 	}
 	compileClassSegment(state1 : CompileState, input1 : string): Tuple<CompileState, string> {
 		return compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, createStructureRule("class ", "class "), createStructureRule("interface ", "interface "), createStructureRule("record ", "class "), Main.compileMethod, Main.compileFieldDefinition));
@@ -792,7 +803,7 @@ class Main {
 	selectLast(divisions : List<string>, delimiter : string): Option<Tuple<string, string>> {
 		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1).orElse(divisions);
 		let last : unknown = divisions.findLast().orElse(null);
-		let joined : unknown = beforeLast.iterate().collect(new Joiner(delimiter)).orElse("");
+		let joined : unknown = beforeLast.query().collect(new Joiner(delimiter)).orElse("");
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(joined, last));
 	}
 	foldInvocationStarts(state : DivideState, c : string): DivideState {
@@ -853,7 +864,7 @@ class Main {
 			return compilePrefix(strippedBeforeArrow, "(", (withoutStart) => {
 				return compileSuffix(withoutStart, ")", (withoutEnd) => {
 					let paramNames : unknown = divideValues(withoutEnd);
-					if (paramNames.iterate().allMatch(Main.isSymbol)){
+					if (paramNames.query().allMatch(Main.isSymbol)){
 						return getCompileStateStringTuple(state, paramNames, afterArrow);
 					}
 					else {
@@ -879,7 +890,7 @@ class Main {
 		});
 	}
 	assembleLambda(exited : CompileState, paramNames : List<string>, content : string): Option<Tuple<CompileState, string>> {
-		let joinedParamNames : unknown = paramNames.iterate().collect(new Joiner(", ")).orElse("");
+		let joinedParamNames : unknown = paramNames.query().collect(new Joiner(", ")).orElse("");
 		return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(exited, "(" + joinedParamNames + ")" + " => " + content));
 	}
 	createOperatorRule(infix : string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>> {
@@ -908,7 +919,7 @@ class Main {
 	}
 	selectFirst(divisions : List<string>, delimiter : string): Option<Tuple<string, string>> {
 		let first : unknown = divisions.findFirst().orElse(null);
-		let afterFirst : unknown = divisions.subList(1, divisions.size()).orElse(divisions).iterate().collect(new Joiner(delimiter)).orElse("");
+		let afterFirst : unknown = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("");
 		return new Some<Tuple<string, string>>(new Tuple<string, string>(first, afterFirst));
 	}
 	foldOperator(infix : string): (arg0 : DivideState, arg1 : string) => DivideState {
@@ -1001,7 +1012,7 @@ class Main {
 		});
 	}
 	divideValues(input : string): List<string> {
-		return divide(input, Main.foldValues).iterate().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector<>());
+		return divide(input, Main.foldValues).query().map(String.strip).filter((value) => !value.isEmpty()).collect(new ListCollector<>());
 	}
 	foldTypeSeparators(state : DivideState, c : string): DivideState {
 		if (c === " " && state.isLevel()){
@@ -1091,7 +1102,7 @@ class Main {
 		return new None<string>();
 	}
 	generateFunctionType(arguments : List<string>, returns : string): string {
-		let joinedArguments : unknown = arguments.iterateWithIndices().map((tuple) => "arg" + tuple.left + " : " + tuple.right).collect(new Joiner(", ")).orElse("");
+		let joinedArguments : unknown = arguments.queryWithIndices().map((tuple) => "arg" + tuple.left + " : " + tuple.right).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + returns;
 	}
 	compileTypeArgument(state : CompileState, input : string): Tuple<CompileState, string> {

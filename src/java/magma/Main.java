@@ -48,26 +48,26 @@ public class Main {
         Option<T> filter(Predicate<T> predicate);
     }
 
-    private interface Iterator<T> {
+    private interface Query<T> {
         <C> C collect(Collector<T, C> collector);
 
-        <R> Iterator<R> map(Function<T, R> mapper);
+        <R> Query<R> map(Function<T, R> mapper);
 
         <R> R fold(R initial, BiFunction<R, T, R> folder);
 
-        <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+        <R> Query<R> flatMap(Function<T, Query<R>> mapper);
 
         Option<T> next();
 
         boolean allMatch(Predicate<T> predicate);
 
-        Iterator<T> filter(Predicate<T> predicate);
+        Query<T> filter(Predicate<T> predicate);
     }
 
     private interface List<T> {
         List<T> add(T element);
 
-        Iterator<T> iterate();
+        Query<T> query();
 
         int size();
 
@@ -79,7 +79,7 @@ public class Main {
 
         Option<T> find(int index);
 
-        Iterator<Tuple<Integer, T>> iterateWithIndices();
+        Query<Tuple<Integer, T>> queryWithIndices();
     }
 
     private interface Head<T> {
@@ -92,7 +92,7 @@ public class Main {
         Option<Definition> asDefinition();
     }
 
-    private record HeadedIterator<T>(Head<T> head) implements Iterator<T> {
+    private record HeadedQuery<T>(Head<T> head) implements Query<T> {
         @Override
         public Option<T> next() {
             return this.head.next();
@@ -104,8 +104,8 @@ public class Main {
         }
 
         @Override
-        public <R> Iterator<R> map(Function<T, R> mapper) {
-            return new HeadedIterator<>(() -> this.next().map(mapper));
+        public <R> Query<R> map(Function<T, R> mapper) {
+            return new HeadedQuery<>(new MapHead<>(this.head, mapper));
         }
 
         @Override
@@ -122,8 +122,8 @@ public class Main {
         }
 
         @Override
-        public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-            return new HeadedIterator<>(new FlatMapHead<T, R>(this.head, mapper));
+        public <R> Query<R> flatMap(Function<T, Query<R>> mapper) {
+            return new HeadedQuery<>(new FlatMapHead<T, R>(this.head, mapper));
         }
 
         @Override
@@ -132,13 +132,13 @@ public class Main {
         }
 
         @Override
-        public Iterator<T> filter(Predicate<T> predicate) {
+        public Query<T> filter(Predicate<T> predicate) {
             return this.flatMap(element -> {
                 if (predicate.test(element)) {
-                    return new HeadedIterator<>(new SingleHead<>(element));
+                    return new HeadedQuery<>(new SingleHead<>(element));
                 }
                 else {
-                    return new HeadedIterator<>(new EmptyHead<>());
+                    return new HeadedQuery<>(new EmptyHead<>());
                 }
             });
         }
@@ -176,8 +176,8 @@ public class Main {
             }
 
             @Override
-            public Iterator<T> iterate() {
-                return this.iterateWithIndices().map(Tuple::right);
+            public Query<T> query() {
+                return this.queryWithIndices().map(Tuple::right);
             }
 
             @Override
@@ -202,8 +202,8 @@ public class Main {
             }
 
             @Override
-            public Iterator<Tuple<Integer, T>> iterateWithIndices() {
-                return new HeadedIterator<>(new RangeHead(this.list.size()))
+            public Query<Tuple<Integer, T>> queryWithIndices() {
+                return new HeadedQuery<>(new RangeHead(this.list.size()))
                         .map(index -> new Tuple<>(index, this.list.get(index)));
             }
 
@@ -380,7 +380,7 @@ public class Main {
         }
 
         private String joinTypeParams() {
-            return this.typeParams.iterate()
+            return this.typeParams.query()
                     .collect(new Joiner(", "))
                     .map(joined -> "<" + joined + ">")
                     .orElse("");
@@ -409,8 +409,8 @@ public class Main {
     }
 
     private static class Iterators {
-        public static <T> Iterator<T> fromOption(Option<T> option) {
-            return new HeadedIterator<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
+        public static <T> Query<T> fromOption(Option<T> option) {
+            return new HeadedQuery<>(option.<Head<T>>map(SingleHead::new).orElseGet(EmptyHead::new));
         }
     }
 
@@ -453,13 +453,13 @@ public class Main {
     }
 
     private static class FlatMapHead<T, R> implements Head<R> {
-        private final Function<T, Iterator<R>> mapper;
+        private final Function<T, Query<R>> mapper;
         private final Head<T> head;
-        private Option<Iterator<R>> maybeCurrent;
+        private Option<Query<R>> maybeCurrent;
 
-        public FlatMapHead(Head<T> head, Function<T, Iterator<R>> mapper) {
+        public FlatMapHead(Head<T> head, Function<T, Query<R>> mapper) {
             this.mapper = mapper;
-            this.maybeCurrent = new None<Iterator<R>>();
+            this.maybeCurrent = new None<Query<R>>();
             this.head = head;
         }
 
@@ -467,17 +467,17 @@ public class Main {
         public Option<R> next() {
             while (true) {
                 if (this.maybeCurrent.isPresent()) {
-                    Iterator<R> it = this.maybeCurrent.orElse(null);
+                    Query<R> it = this.maybeCurrent.orElse(null);
                     var next = it.next();
                     if (next.isPresent()) {
                         return next;
                     }
 
-                    this.maybeCurrent = new None<Iterator<R>>();
+                    this.maybeCurrent = new None<Query<R>>();
                 }
                 Option<T> outer = this.head.next();
                 if (outer.isPresent()) {
-                    this.maybeCurrent = new Some<Iterator<R>>(this.mapper.apply(outer.orElse(null)));
+                    this.maybeCurrent = new Some<Query<R>>(this.mapper.apply(outer.orElse(null)));
                 }
                 else {
                     return new None<R>();
@@ -599,6 +599,13 @@ public class Main {
         }
     }
 
+    private record MapHead<T, R>(Head<T> head, Function<T, R> mapper) implements Head<R> {
+        @Override
+        public Option<R> next() {
+            return this.head.next().map(this.mapper);
+        }
+    }
+
     public static void main() {
         var source = Paths.get(".", "src", "java", "magma", "Main.java");
         var target = source.resolveSibling("main.ts");
@@ -645,7 +652,7 @@ public class Main {
     }
 
     private static String generateAll(List<String> elements, BiFunction<StringBuilder, String, StringBuilder> merger) {
-        return elements.iterate()
+        return elements.query()
                 .fold(new StringBuilder(), merger)
                 .toString();
     }
@@ -656,7 +663,7 @@ public class Main {
             BiFunction<DivideState, Character, DivideState> folder,
             BiFunction<CompileState, String, Tuple<CompileState, T>> mapper
     ) {
-        return divide(input, folder).iterate().fold(new Tuple<CompileState, List<T>>(state, Lists.empty()), (current, segment) -> {
+        return divide(input, folder).query().fold(new Tuple<CompileState, List<T>>(state, Lists.empty()), (current, segment) -> {
             var currentState = current.left;
             var currentElement = current.right;
 
@@ -781,7 +788,7 @@ public class Main {
 
                             var parametersTuple = parseValues(state, parametersString, Main::parseParameter);
                             var parameters = parametersTuple.right
-                                    .iterate()
+                                    .query()
                                     .map(Parameter::asDefinition)
                                     .flatMap(Iterators::fromOption)
                                     .collect(new ListCollector<>());
@@ -809,7 +816,7 @@ public class Main {
     }
 
     private static String generateConstructorFromRecordParameters(List<Definition> parameters) {
-        return parameters.iterate()
+        return parameters.query()
                 .map(Definition::generate)
                 .collect(new Joiner(", "))
                 .map(generatedParameters -> generateConstructorWithParameterString(parameters, generatedParameters))
@@ -825,14 +832,14 @@ public class Main {
     }
 
     private static String generateConstructorAssignments(List<Definition> parameters) {
-        return parameters.iterate()
+        return parameters.query()
                 .map(definition -> "\n\t\tthis." + definition.name + " = " + definition.name + ";")
                 .collect(new Joiner())
                 .orElse("");
     }
 
     private static String joinParameters(List<Definition> parameters) {
-        return parameters.iterate()
+        return parameters.query()
                 .map(Definition::generate)
                 .map(generated -> "\n\t" + generated + ";")
                 .collect(new Joiner())
@@ -858,7 +865,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> compileOr(CompileState state, String input, List<BiFunction<CompileState, String, Option<Tuple<CompileState, String>>>> rules) {
-        return rules.iterate()
+        return rules.query()
                 .map(rule -> rule.apply(state, input))
                 .flatMap(Iterators::fromOption)
                 .next();
@@ -1086,7 +1093,7 @@ public class Main {
         var beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
         var last = divisions.findLast().orElse(null);
 
-        var joined = beforeLast.iterate()
+        var joined = beforeLast.query()
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
@@ -1186,7 +1193,7 @@ public class Main {
                 return compileSuffix(withoutStart, ")", withoutEnd -> {
                     var paramNames = divideValues(withoutEnd);
 
-                    if (paramNames.iterate().allMatch(Main::isSymbol)) {
+                    if (paramNames.query().allMatch(Main::isSymbol)) {
                         return getCompileStateStringTuple(state, paramNames, afterArrow);
                     }
                     else {
@@ -1215,7 +1222,7 @@ public class Main {
     }
 
     private static Option<Tuple<CompileState, String>> assembleLambda(CompileState exited, List<String> paramNames, String content) {
-        var joinedParamNames = paramNames.iterate()
+        var joinedParamNames = paramNames.query()
                 .collect(new Joiner(", "))
                 .orElse("");
 
@@ -1252,7 +1259,7 @@ public class Main {
     private static Option<Tuple<String, String>> selectFirst(List<String> divisions, String delimiter) {
         var first = divisions.findFirst().orElse(null);
         var afterFirst = divisions.subList(1, divisions.size()).orElse(divisions)
-                .iterate()
+                .query()
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
@@ -1374,7 +1381,7 @@ public class Main {
 
     private static List<String> divideValues(String input) {
         return divide(input, Main::foldValues)
-                .iterate()
+                .query()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .collect(new ListCollector<>());
@@ -1496,7 +1503,7 @@ public class Main {
 
     private static String generateFunctionType(List<String> arguments, String returns) {
         var joinedArguments = arguments
-                .iterateWithIndices()
+                .queryWithIndices()
                 .map(tuple -> "arg" + tuple.left + " : " + tuple.right)
                 .collect(new Joiner(", "))
                 .orElse("");
