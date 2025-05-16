@@ -559,8 +559,20 @@ public class Main {
         return compileFirst(input, "->", (beforeArrow, afterArrow) -> {
             var strippedBeforeArrow = beforeArrow.strip();
             if (isSymbol(strippedBeforeArrow)) {
-                var tuple = compileValueOrPlaceholder(state, afterArrow);
-                return Optional.of(new Tuple<>(tuple.left, strippedBeforeArrow + " => " + tuple.right));
+                var strippedAfterArrow = afterArrow.strip();
+                return compilePrefix(strippedAfterArrow, "{", withoutContentStart -> {
+                    return compileSuffix(withoutContentStart, "}", withoutContentEnd -> {
+                        var statementsTuple = compileFunctionStatements(state.enterDepth(), withoutContentEnd);
+                        var statementsState = statementsTuple.left;
+                        var statements = statementsTuple.right;
+
+                        var exited = statementsState.exitDepth();
+                        return Optional.of(new Tuple<>(exited, strippedBeforeArrow + " => {" + statements + generateIndent(exited.depth) + "}"));
+                    });
+                }).or(() -> {
+                    var tuple = compileValueOrPlaceholder(state, strippedAfterArrow);
+                    return Optional.of(new Tuple<>(tuple.left, strippedBeforeArrow + " => " + tuple.right));
+                });
             }
             else {
                 return Optional.empty();
