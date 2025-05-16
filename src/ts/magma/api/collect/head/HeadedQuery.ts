@@ -52,7 +52,7 @@ export class HeadedQuery<T> implements Query<T> {
 		return this.head.next();
 	}
 	collect<C>(collector: Collector<T, C>): C {
-		return this.foldWithInitial(collector.createInitial(), collector.fold);
+		return this.foldWithInitial(collector.createInitial(), (current: C, element: T) => collector.fold(current, element));
 	}
 	map<R>(mapper: (arg0 : T) => R): Query<R> {
 		return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));

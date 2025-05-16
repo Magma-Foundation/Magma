@@ -17,7 +17,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return this.foldWithInitial(collector.createInitial(), collector::fold);
+        return this.foldWithInitial(collector.createInitial(), (C current, T element) -> collector.fold(current, element));
     }
 
     @Override
