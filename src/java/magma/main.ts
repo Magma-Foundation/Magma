@@ -62,7 +62,7 @@ class HeadedQuery<T> {
 	fold<R>(initial : R, folder : (arg0 : R, arg1 : T) => R): R {
 		let result : R = initial;
 		while (true){
-			Option < /*T> maybeNext */ = this.head.next();
+			let maybeNext : Option<T> = this.head.next();
 			if (maybeNext.isEmpty()){
 				return result;
 			}
@@ -317,7 +317,7 @@ class Err<T, X> {
 }
 class Iterators {
 	fromOption<T>(option : Option<T>): Query<T> {
-		return new HeadedQuery<>(option. < Head < /*T>>map*/(SingleHead.new).orElseGet(EmptyHead.new));
+		return new HeadedQuery<>(/*option.<Head<T>>map*/(SingleHead.new).orElseGet(EmptyHead.new));
 	}
 }
 class SingleHead<T> implements Head<T> {
@@ -359,14 +359,14 @@ class FlatMapHead<T, R> implements Head<R> {
 	next(): Option<R> {
 		while (true){
 			if (this.maybeCurrent.isPresent()){
-				Query < /*R> it */ = this.maybeCurrent.orElse(null);
+				let it : Query<R> = this.maybeCurrent.orElse(null);
 				let next : unknown = it.next();
 				if (next.isPresent()){
 					return next;
 				}
 				this.maybeCurrent = new None<Query<R>>();
 			}
-			Option < /*T> outer */ = this.head.next();
+			let outer : Option<T> = this.head.next();
 			if (outer.isPresent()){
 				this.maybeCurrent = new Some<Query<R>>(this.mapper.apply(outer.orElse(null)));
 			}
@@ -409,7 +409,7 @@ class Some<T> {
 		return mapper.apply(this.value);
 	}
 	filter(predicate : (arg0 : T) => boolean): Option<T> {
-		return /*predicate.test(this.value) ? this : new None*/ < /*>*/();
+		return /*predicate.test(this.value) ? this : new None<>*/();
 	}
 }
 class None<T> {
@@ -911,9 +911,11 @@ class Main {
 	createOperatorRuleWithDifferentInfix(sourceInfix : string, targetInfix : string): (arg0 : CompileState, arg1 : string) => Option<Tuple<CompileState, string>> {
 		return (state1, input1) => {
 			return compileSplit(splitFolded(input1, foldOperator(sourceInfix), (divisions) => selectFirst(divisions, sourceInfix)), (left, right) => {
-				let leftTuple : unknown = compileValueOrPlaceholder(state1, left);
-				let rightTuple : unknown = compileValueOrPlaceholder(leftTuple.left, right);
-				return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+				return compileValue(state1, left).flatMap((leftTuple) => {
+					return compileValue(leftTuple.left, right).flatMap((rightTuple) => {
+						return new Some<Tuple<CompileState, string>>(new Tuple<CompileState, string>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+					});
+				});
 			});
 		};
 	}
@@ -993,7 +995,8 @@ class Main {
 		return new Tuple<>(tuple.left, tuple.right.generate());
 	}
 	parseParameter(state : CompileState, input : string): Tuple<CompileState, Parameter> {
-		return parseDefinition(state, input). < Tuple < /*CompileState, Parameter>>map*/((tuple) => new Tuple<>(tuple.left, tuple.right)).orElseGet(() => new Tuple<>(state, new Placeholder(input)));
+		return /*parseDefinition(state, input)
+                .<Tuple<CompileState, Parameter>>map*/((tuple) => new Tuple<>(tuple.left, tuple.right)).orElseGet(() => new Tuple<>(state, new Placeholder(input)));
 	}
 	parseDefinition(state : CompileState, input : string): Option<Tuple<CompileState, Definition>> {
 		return compileLast(input.strip(), " ", (beforeName, name) => {

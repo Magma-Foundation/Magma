@@ -1249,9 +1249,11 @@ public class Main {
     private static BiFunction<CompileState, String, Option<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (state1, input1) -> {
             return compileSplit(splitFolded(input1, foldOperator(sourceInfix), divisions -> selectFirst(divisions, sourceInfix)), (left, right) -> {
-                var leftTuple = compileValueOrPlaceholder(state1, left);
-                var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
-                return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+                return compileValue(state1, left).flatMap(leftTuple -> {
+                    return compileValue(leftTuple.left, right).flatMap(rightTuple -> {
+                        return new Some<Tuple<CompileState, String>>(new Tuple<CompileState, String>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+                    });
+                });
             });
         };
     }
