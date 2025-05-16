@@ -50,9 +50,6 @@ interface Parameter {
 }
 interface Value extends Argument, Caller {
 	generate(): string;
-	toValue(): Option<Value> {
-		return new Some<>(this);
-	}
 }
 interface Argument {
 	toValue(): Option<Value>;
@@ -522,6 +519,9 @@ class Access implements Value {
 	generate(): string {
 		return this.child + "." + this.property;
 	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
+	}
 }
 class Symbol {
 	value : string;
@@ -530,6 +530,9 @@ class Symbol {
 	}
 	generate(): string {
 		return this.value;
+	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
 	}
 }
 class StringValue implements Value {
@@ -540,6 +543,9 @@ class StringValue implements Value {
 	generate(): string {
 		return "\"" + this.value + "\"";
 	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
+	}
 }
 class Not implements Value {
 	child : string;
@@ -548,6 +554,9 @@ class Not implements Value {
 	}
 	generate(): string {
 		return this.child;
+	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
 	}
 }
 class Lambda implements Value {
@@ -561,6 +570,9 @@ class Lambda implements Value {
 		let joinedParamNames : var = this.paramNames.query().collect(new Joiner(", ")).orElse("");
 		return "(" + joinedParamNames + ")" + " => " + this.content;
 	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
+	}
 }
 class Invokable {
 	caller : Caller;
@@ -572,6 +584,9 @@ class Invokable {
 	generate(): string {
 		let joinedArguments : var = generateValues(this.arguments);
 		return this.caller.generate() + "(" + joinedArguments + ")";
+	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
 	}
 }
 class Operation implements Value {
@@ -585,6 +600,9 @@ class Operation implements Value {
 	}
 	generate(): string {
 		return this.left + " " + this.targetInfix + " " + this.right;
+	}
+	toValue(): Option<Value> {
+		return new Some<>(this);
 	}
 }
 class ConstructionCaller implements Caller {

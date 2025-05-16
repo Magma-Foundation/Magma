@@ -100,11 +100,6 @@ public class Main {
 
     private interface Value extends Argument, Caller {
         String generate();
-
-        @Override
-        default Option<Value> toValue() {
-            return new Some<>(this);
-        }
     }
 
     private interface Argument {
@@ -689,12 +684,22 @@ public class Main {
         public String generate() {
             return this.child + "." + this.property;
         }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
+        }
     }
 
     private record Symbol(String value) implements Value, Type {
         @Override
         public String generate() {
             return this.value;
+        }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
         }
     }
 
@@ -709,6 +714,11 @@ public class Main {
         public String generate() {
             return "\"" + this.value + "\"";
         }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
+        }
     }
 
     private static class Not implements Value {
@@ -721,6 +731,11 @@ public class Main {
         @Override
         public String generate() {
             return this.child;
+        }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
         }
     }
 
@@ -741,6 +756,11 @@ public class Main {
 
             return "(" + joinedParamNames + ")" + " => " + this.content;
         }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
+        }
     }
 
     private record Invokable(Caller caller, List<Value> arguments) implements Value {
@@ -748,6 +768,11 @@ public class Main {
         public String generate() {
             var joinedArguments = generateValues(this.arguments);
             return this.caller.generate() + "(" + joinedArguments + ")";
+        }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
         }
     }
 
@@ -765,6 +790,11 @@ public class Main {
         @Override
         public String generate() {
             return this.left + " " + this.targetInfix + " " + this.right;
+        }
+
+        @Override
+        public Option<Value> toValue() {
+            return new Some<>(this);
         }
     }
 
