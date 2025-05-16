@@ -70,16 +70,6 @@ interface Type  {
 	isVar(): boolean;
 	generateBeforeName(): string;
 }
-interface Actual  {
-}
-interface Path  {
-	writeString(output: string): Option<IOError>;
-	readString(): Result<string, IOError>;
-	resolveSibling(siblingName: string): Path;
-	walk(): Result<List<Path>, IOError>;
-	findFileName(): string;
-	endsWith(suffix: string): boolean;
-}
 class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
@@ -755,9 +745,6 @@ class VarArgs implements Type {
 	generateBeforeName(): string {
 		return "...";
 	}
-}
-class Files  {
-	static get(first: string, ...more: string[]): Path;
 }
 class Console  {
 	static printErrLn(message: string): void;

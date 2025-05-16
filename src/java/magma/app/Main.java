@@ -1,9 +1,9 @@
-package magma;
+package magma.app;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.file.Paths;
+import magma.Actual;
+import magma.api.io.Path;
+import magma.jvm.Files;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BiFunction;
@@ -11,10 +11,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class Main {
-    private interface IOError {
+    public interface IOError {
         String display();
     }
 
@@ -24,7 +23,7 @@ public final class Main {
         boolean hasAnnotation(String annotation);
     }
 
-    private interface Result<T, X> {
+    public interface Result<T, X> {
         <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
     }
 
@@ -34,7 +33,7 @@ public final class Main {
         C fold(C current, T element);
     }
 
-    private interface Option<T> {
+    public interface Option<T> {
         <R> Option<R> map(Function<T, R> mapper);
 
         T orElse(T other);
@@ -72,7 +71,7 @@ public final class Main {
         Query<T> filter(Predicate<T> predicate);
     }
 
-    private interface List<T> {
+    public interface List<T> {
         List<T> add(T element);
 
         Query<T> query();
@@ -130,23 +129,6 @@ public final class Main {
         boolean isVar();
 
         String generateBeforeName();
-    }
-
-    private @interface Actual {
-    }
-
-    private interface Path {
-        Option<IOError> writeString(String output);
-
-        Result<String, IOError> readString();
-
-        Path resolveSibling(String siblingName);
-
-        Result<List<Path>, IOError> walk();
-
-        String findFileName();
-
-        boolean endsWith(String suffix);
     }
 
     private record HeadedQuery<T>(Head<T> head) implements Query<T> {
@@ -397,14 +379,14 @@ public final class Main {
         }
     }
 
-    private record Ok<T, X>(T value) implements Result<T, X> {
+    public record Ok<T, X>(T value) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenOk.apply(this.value);
         }
     }
 
-    private record Err<T, X>(X error) implements Result<T, X> {
+    public record Err<T, X>(X error) implements Result<T, X> {
         @Override
         public <R> R match(Function<T, R> whenOk, Function<X, R> whenErr) {
             return whenErr.apply(this.error);
@@ -483,7 +465,7 @@ public final class Main {
         }
     }
 
-    private record Some<T>(T value) implements Option<T> {
+    public record Some<T>(T value) implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new Some<R>(mapper.apply(this.value));
@@ -538,7 +520,7 @@ public final class Main {
         }
     }
 
-    private record None<T>() implements Option<T> {
+    public record None<T>() implements Option<T> {
         @Override
         public <R> Option<R> map(Function<T, R> mapper) {
             return new None<R>();
@@ -939,9 +921,9 @@ public final class Main {
         }
     }
 
-    private static final class Lists {
+    public static final class Lists {
         @Actual
-        private record JVMList<T>(java.util.List<T> list) implements List<T> {
+        public record JVMList<T>(java.util.List<T> list) implements List<T> {
             @Override
             public List<T> add(T element) {
                 this.list.add(element);
@@ -1096,68 +1078,6 @@ public final class Main {
         @Override
         public String generateBeforeName() {
             return "...";
-        }
-    }
-
-    private static class Files {
-        @Actual
-        private record JVMPath(java.nio.file.Path path) implements Path {
-            private record JVMIOError(IOException error) implements IOError {
-                @Override
-                public String display() {
-                    var writer = new StringWriter();
-                    this.error.printStackTrace(new PrintWriter(writer));
-                    return writer.toString();
-                }
-            }
-
-            @Override
-            public Option<IOError> writeString(String output) {
-                try {
-                    java.nio.file.Files.writeString(this.path, output);
-                    return new None<IOError>();
-                } catch (IOException e) {
-                    return new Some<IOError>(new JVMIOError(e));
-                }
-            }
-
-            @Override
-            public Result<String, IOError> readString() {
-                try {
-                    return new Ok<String, IOError>(java.nio.file.Files.readString(this.path));
-                } catch (IOException e) {
-                    return new Err<String, IOError>(new JVMIOError(e));
-                }
-            }
-
-            @Override
-            public Path resolveSibling(String siblingName) {
-                return new JVMPath(this.path.resolveSibling(siblingName));
-            }
-
-            @Override
-            public Result<List<Path>, IOError> walk() {
-                try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-                    return new Ok<>(new Lists.JVMList<>(stream.<Path>map(JVMPath::new).toList()));
-                } catch (IOException e) {
-                    return new Err<>(new JVMIOError(e));
-                }
-            }
-
-            @Override
-            public String findFileName() {
-                return this.path.getFileName().toString();
-            }
-
-            @Override
-            public boolean endsWith(String suffix) {
-                return this.path.toString().endsWith(suffix);
-            }
-        }
-
-        @Actual
-        private static Path get(String first, String... more) {
-            return new JVMPath(Paths.get(first, more));
         }
     }
 
