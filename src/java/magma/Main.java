@@ -311,10 +311,7 @@ public final class Main {
     }
 
     private record Definition(
-            Option<String> maybeBeforeType,
-            String name,
-            List<String> typeParams,
-            Type type
+            List<String> annotations, List<String> modifiers, List<String> typeParams, Type type, String name
     ) implements MethodHeader, Parameter {
         @Override
         public String generate() {
@@ -329,7 +326,12 @@ public final class Main {
         @Override
         public String generateWithAfterName(String afterName) {
             var joinedTypeParams = this.joinTypeParams();
-            return this.name + joinedTypeParams + afterName + this.generateType();
+            var joinedModifiers = this.modifiers.query()
+                    .map(value -> value + " ")
+                    .collect(new Joiner(""))
+                    .orElse("");
+
+            return joinedModifiers + this.name + joinedTypeParams + afterName + this.generateType();
         }
 
         private String generateType() {
@@ -1798,18 +1800,54 @@ public final class Main {
     private static Option<Tuple<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return Main.compileLast(input.strip(), " ", (beforeName, name) -> {
             return Main.compileSplit(Main.splitFoldedLast(beforeName.strip(), " ", Main::foldTypeSeparators), (beforeType, type) -> {
-                return Main.compileSuffix(beforeType.strip(), ">", withoutTypeParamEnd -> {
-                    return Main.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams, typeParamsString) -> {
-                        var typeParams = Main.divideValues(typeParamsString);
-                        return Main.assembleDefinition(state, new Some<String>(beforeTypeParams), name, typeParams, type);
-                    });
+                return Main.compileLast(beforeType.strip(), "\n", (annotationsString, afterAnnotations) -> {
+                    var annotations = Main.parseAnnotations(annotationsString);
+                    return Main.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
                 }).or(() -> {
-                    return Main.assembleDefinition(state, new Some<String>(beforeType), name, Lists.empty(), type);
+                    return Main.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name);
                 });
             }).or(() -> {
-                return Main.assembleDefinition(state, new None<String>(), name, Lists.empty(), beforeName);
+                return Main.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name);
             });
         });
+    }
+
+    private static List<String> parseAnnotations(String s) {
+        return Main.divide(s, (state1, c) -> Main.foldDelimited(state1, c, '\n')).query()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .filter(value -> 1 <= value.length())
+                .map(value -> value.substring(1))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
+    }
+
+    private static Option<Tuple<CompileState, Definition>> parseDefinitionWithAnnotations(CompileState state, List<String> annotations, String beforeType, String type, String name) {
+        return Main.compileSuffix(beforeType.strip(), ">", withoutTypeParamEnd -> {
+            return Main.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams, typeParamsString) -> {
+                var typeParams = Main.divideValues(typeParamsString);
+                return Main.parseDefinitionWithTypeParameters(state, annotations, typeParams, Main.parseModifiers(beforeTypeParams), type, name);
+            });
+        }).or(() -> {
+            var divided = Main.parseModifiers(beforeType);
+            return Main.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name);
+        });
+    }
+
+    private static List<String> parseModifiers(String beforeType) {
+        return Main.divide(beforeType.strip(), (state1, c) -> Main.foldDelimited(state1, c, ' '))
+                .query()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(new ListCollector<>());
+    }
+
+    private static DivideState foldDelimited(DivideState state1, char c, char delimiter) {
+        if (delimiter == c) {
+            return state1.advance();
+        }
+        return state1.append(c);
     }
 
     private static List<String> divideValues(String input) {
@@ -1835,9 +1873,16 @@ public final class Main {
         return appended;
     }
 
-    private static Option<Tuple<CompileState, Definition>> assembleDefinition(CompileState state, Option<String> maybeBeforeType, String name, List<String> typeParams, String type) {
+    private static Option<Tuple<CompileState, Definition>> parseDefinitionWithTypeParameters(
+            CompileState state,
+            List<String> annotations,
+            List<String> typeParams,
+            List<String> modifiers,
+            String type,
+            String name
+    ) {
         var typeTuple = Main.parseTypeOrPlaceholder(state, type);
-        var generated = new Definition(maybeBeforeType, name, typeParams, typeTuple.right);
+        var generated = new Definition(annotations, modifiers, typeParams, typeTuple.right, name);
         return new Some<Tuple<CompileState, Definition>>(new Tuple<CompileState, Definition>(typeTuple.left, generated));
     }
 
