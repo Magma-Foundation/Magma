@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -641,14 +640,7 @@ public class Main {
     }
 
     private static boolean isNumber(String input) {
-        for (var i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (Character.isDigit(c)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
+        return IntStream.range(0, input.length()).allMatch(Character::isDigit);
     }
 
     private static Optional<Tuple<CompileState, String>> compileSymbol(CompileState state, String input) {

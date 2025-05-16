@@ -15,7 +15,7 @@
 		this.index = index;
 	}
 	constructor (input : string) {
-		this(new /*ArrayList*/<>(), new /*StringBuilder*/(), 0, input, 0);
+		this(new /*ArrayList*/<>(), new /*StringBuilder*/(), /* 0*/, input, /* 0*/);
 	}
 	/*private*/advance(): /*DivideState*/ {
 		this.segments.add(this.buffer.toString());
@@ -27,7 +27,7 @@
 		return this;
 	}
 	/*public*/isLevel(): boolean {
-		return this.depth === 0;
+		return this.depth === /* 0*/;
 	}
 	/*public*/enter(): /*DivideState*/ {
 		this.depth++;
@@ -38,7 +38,7 @@
 		return this;
 	}
 	/*public*/isShallow(): boolean {
-		return this.depth === 1;
+		return this.depth === /* 1*/;
 	}
 	/*public*/pop(): /*Optional*/</*Tuple*/</*DivideState*/, string>> {
 		if (/*this.index >= this*/.input.length()){
@@ -62,7 +62,7 @@
 }
 /*private*/class CompileState {
 	constructor () {
-		this("", Optional.empty(), 0);
+		this("", Optional.empty(), /* 0*/);
 	}
 	/*public*/append(element : string): /*CompileState*/ {
 		return new /*CompileState*/(this.output + element, this.structureName, this.depth);
@@ -74,10 +74,10 @@
 		return this.depth;
 	}
 	/*public*/enterDepth(): /*CompileState*/ {
-		return new /*CompileState*/(this.output, this.structureName, this.depth + 1);
+		return new /*CompileState*/(this.output, this.structureName, this.depth + /* 1*/);
 	}
 	/*public*/exitDepth(): /*CompileState*/ {
-		return new /*CompileState*/(this.output, this.structureName, this.depth - 1);
+		return new /*CompileState*/(this.output, this.structureName, this.depth - /* 1*/);
 	}
 }
 /*private*/class Definition {
@@ -346,10 +346,10 @@
 	}
 	/*private static*/splitFolded(input : string, delimiter : string, folder : /*BiFunction*/</*DivideState*/, string, /* DivideState*/>): /*Optional*/</*Tuple*/<string, string>> {
 		let divisions : unknown = divide(input, folder);
-		if (divisions.size() < 2){
+		if (divisions.size() < /* 2*/){
 			return Optional.empty();
 		}
-		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1);
+		let beforeLast : unknown = divisions.subList(/*0*/, divisions.size() - /* 1*/);
 		let last : unknown = divisions.getLast();
 		let joined : unknown = String.join(delimiter, beforeLast);
 		return Optional.of(new /*Tuple*/<>(joined, last));
@@ -473,14 +473,7 @@
 		}
 	}
 	/*private static*/isNumber(input : string): boolean {
-		/*for (var i = 0; i < input.length(); i++) */{
-			let c : unknown = input.charAt(i);
-			if (Character.isDigit(c)){
-				/*continue*/;
-			}
-			return false;
-		}
-		return true;
+		return IntStream.range(/*0*/, input.length()).allMatch(Character.isDigit);
 	}
 	/*private static*/compileSymbol(state : /*CompileState*/, input : string): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		let stripped : unknown = input.strip();
@@ -492,10 +485,10 @@
 		}
 	}
 	/*private static*/isSymbol(input : string): boolean {
-		return IntStream.range(0, input.length()).allMatch((index) => isSymbolChar(index, input.charAt(index)));
+		return IntStream.range(/*0*/, input.length()).allMatch((index) => isSymbolChar(index, input.charAt(index)));
 	}
 	/*private static*/isSymbolChar(index : number, c : string): boolean {
-		return Character.isLetter(c) || (index !== 0 && Character.isDigit(c));
+		return Character.isLetter(c) || (index !== /* 0 */ && Character.isDigit(c));
 	}
 	/*private static*/compilePrefix(input : string, infix : string, mapper : /*Function*/<string, /*Optional*/</*Tuple*/</*CompileState*/, string>>>): /*Optional*/</*Tuple*/</*CompileState*/, string>> {
 		if (!input.startsWith(infix)){
@@ -624,7 +617,7 @@
 		if (!input.endsWith(suffix)){
 			return Optional.empty();
 		}
-		let content : unknown = input.substring(0, input.length() - suffix.length());
+		let content : unknown = input.substring(/*0*/, input.length() - suffix.length());
 		return mapper.apply(content);
 	}
 	/*private static <T>*/compileFirst(input : string, infix : string, mapper : /*BiFunction*/<string, string, /*Optional*/</*T*/>>): /*Optional*/</*T*/> {
@@ -638,10 +631,10 @@
 	}
 	/*private static*/split(input : string, infix : string, locator : /*BiFunction*/<string, string, number>): /*Optional*/</*Tuple*/<string, string>> {
 		let index : unknown = locator.apply(input, infix);
-		if (index < 0){
+		if (index < /* 0*/){
 			return Optional.empty();
 		}
-		let left : unknown = input.substring(0, index);
+		let left : unknown = input.substring(/*0*/, index);
 		let right : unknown = input.substring(index + infix.length());
 		return Optional.of(new /*Tuple*/<>(left, right));
 	}
