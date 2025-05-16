@@ -526,12 +526,13 @@ public class Main {
                 Main::compileInvokable,
                 Main::compileNumber,
                 createOperatorRuleWithDifferentInfixes("==", "==="),
+                createTextRule("\""),
+                createTextRule("'"),
                 createOperatorRule("+"),
                 createOperatorRule("-"),
                 createOperatorRule("<"),
-                createOperatorRule("||"),
-                createTextRule("\""),
-                createTextRule("'")
+                createOperatorRule("&&"),
+                createOperatorRule("||")
         ));
     }
 
