@@ -57,6 +57,9 @@ class DivideState {
 	peek(): string {
 		return this.input.charAt(this.index);
 	}
+	startsWith(slice : string): boolean {
+		return this.input.substring(this.index).startsWith(slice);
+	}
 }
 class Tuple<A, B> {
 }
@@ -192,7 +195,7 @@ class Main {
 		return appended;
 	}
 	compileRootSegment(state : CompileState, input : string): Tuple<CompileState, string> {
-		return compileOrPlaceholder(state, input, List.of(Main.compileNamespaced, createStructureRule("class ", "class ")));
+		return compileOrPlaceholder(state, input, List.of(Main.compileWhitespace, Main.compileNamespaced, createStructureRule("class ", "class ")));
 	}
 	createStructureRule(sourceInfix : string, targetInfix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => compileFirst(input1, sourceInfix, (beforeKeyword, right1) => {
@@ -282,7 +285,7 @@ class Main {
 	}
 	compileBlock(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		return compileSuffix(input.strip(), "}", (withoutEnd) => {
-			return compileSplit(splitFolded(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd, content) => {
+			return compileSplit(splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd, content) => {
 				return compileSuffix(beforeContentWithEnd, "{", (beforeContent) => {
 					return compileBlockHeader(state, beforeContent).flatMap((headerTuple) => {
 						let contentTuple : unknown = compileFunctionStatements(headerTuple.left.enterDepth(), content);
@@ -369,7 +372,7 @@ class Main {
 	}
 	compileInvokable(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		return compileSuffix(input.strip(), ")", (withoutEnd) => {
-			return compileSplit(splitFolded(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart, arguments) => {
+			return compileSplit(splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart, arguments) => {
 				return compileSuffix(callerWithArgStart, "(", (caller) => compilePrefix(caller.strip(), "new ", (type) => {
 					let callerTuple : unknown = compileTypeOrPlaceholder(state, type);
 					return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
@@ -380,11 +383,17 @@ class Main {
 			});
 		});
 	}
-	splitFolded(input : string, delimiter : string, folder : BiFunction<DivideState, string, DivideState>): Optional<Tuple<string, string>> {
+	splitFoldedLast(input : string, delimiter : string, folder : BiFunction<DivideState, string, DivideState>): Optional<Tuple<string, string>> {
+		return splitFolded(input, folder, (divisions1) => selectLast(divisions1, delimiter));
+	}
+	splitFolded(input : string, folder : BiFunction<DivideState, string, DivideState>, selector : Function<List<string>, Optional<Tuple<string, string>>>): Optional<Tuple<string, string>> {
 		let divisions : unknown = divide(input, folder);
 		if (divisions.size() < 2){
 			return Optional.empty();
 		}
+		return selector.apply(divisions);
+	}
+	selectLast(divisions : List<string>, delimiter : string): Optional<Tuple<string, string>> {
 		let beforeLast : unknown = divisions.subList(0, divisions.size() - 1);
 		let last : unknown = divisions.getLast();
 		let joined : unknown = String.join(delimiter, beforeLast);
@@ -421,7 +430,7 @@ class Main {
 		return compileValue(state, input).orElseGet(() => new Tuple<>(state, generatePlaceholder(input)));
 	}
 	compileValue(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
-		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfixes(/*"*/ === /*"*/, /* "*/ === /*="*/), createOperatorRuleWithDifferentInfixes(/*"*/ !== /*"*/, /* "!*/ === /*"*/), createTextRule("\""), createTextRule("'"), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">=")));
+		return compileOr(state, input, List.of(createAccessRule("."), createAccessRule("::"), Main.compileSymbol, Main.compileLambda, Main.compileNot, Main.compileInvokable, Main.compileNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">="), createTextRule("\""), createTextRule("'")));
 	}
 	createTextRule(slice : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state1, input1) => {
@@ -477,13 +486,13 @@ class Main {
 		return Optional.of(new Tuple<>(exited, "(" + String.join(", ", paramNames) + ")" + " => " + content));
 	}
 	createOperatorRule(infix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
-		return createOperatorRuleWithDifferentInfixes(infix, infix);
+		return createOperatorRuleWithDifferentInfix(infix, infix);
 	}
 	createAccessRule(infix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
 		return (state, input) => compileLast(input, infix, (child, rawProperty) => {
-			let tuple : unknown = compileValueOrPlaceholder(state, child);
 			let property : unknown = rawProperty.strip();
 			if (isSymbol(property)){
+				let tuple : unknown = compileValueOrPlaceholder(state, child);
 				return Optional.of(new Tuple<>(tuple.left, tuple.right + "." + property));
 			}
 			else {
@@ -491,12 +500,37 @@ class Main {
 			}
 		});
 	}
-	createOperatorRuleWithDifferentInfixes(sourceInfix : string, targetInfix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
-		return (state1, input1) => compileFirst(input1, sourceInfix, (left, right) => {
-			let leftTuple : unknown = compileValueOrPlaceholder(state1, left);
-			let rightTuple : unknown = compileValueOrPlaceholder(leftTuple.left, right);
-			return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
-		});
+	createOperatorRuleWithDifferentInfix(sourceInfix : string, targetInfix : string): BiFunction<CompileState, string, Optional<Tuple<CompileState, string>>> {
+		return (state1, input1) => {
+			return compileSplit(splitFolded(input1, foldOperator(sourceInfix), (divisions) => {
+				return selectFirst(divisions, sourceInfix);
+			}), (left, right) => {
+				let leftTuple : unknown = compileValueOrPlaceholder(state1, left);
+				let rightTuple : unknown = compileValueOrPlaceholder(leftTuple.left, right);
+				return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
+			});
+		};
+	}
+	selectFirst(divisions : List<string>, delimiter : string): Optional<Tuple<string, string>> {
+		let first : unknown = divisions.getFirst();
+		let afterFirst : unknown = divisions.subList(1, divisions.size());
+		let joined : unknown = String.join(delimiter, afterFirst);
+		return Optional.of(new Tuple<>(first, joined));
+	}
+	foldOperator(infix : string): BiFunction<DivideState, string, DivideState> {
+		return (state, c) => {
+			if (c === infix.charAt(0) && state.startsWith(infix.substring(1))){
+				let length : unknown = infix.length() - 1;
+				let counter : unknown = 0;
+				let current : unknown = state;
+				while (counter < length){
+					counter++;
+					current = current.pop().map(Tuple.left).orElse(current);
+				}
+				return current.advance();
+			}
+			return state.append(c);
+		};
 	}
 	compileNumber(state : CompileState, input : string): Optional<Tuple<CompileState, string>> {
 		let stripped : unknown = input.strip();
@@ -554,7 +588,7 @@ class Main {
 	}
 	compileDefinition(state : CompileState, input : string): Optional<Tuple<CompileState, Definition>> {
 		return compileLast(input.strip(), " ", (beforeName, name) => {
-			let splits : unknown = splitFolded(beforeName.strip(), " ", Main.foldTypeSeparators);
+			let splits : unknown = splitFoldedLast(beforeName.strip(), " ", Main.foldTypeSeparators);
 			return compileSplit(splits, (beforeType, type) => {
 				return assembleDefinition(state, Optional.of(beforeType), name, type);
 			}).or(() => {
@@ -640,7 +674,7 @@ class Main {
 				return appended;
 			}
 		}
-		if (c === /* '*/ < /*' */ || c === "("){
+		if (c === "<" || c === "("){
 			return appended.enter();
 		}
 		if (c === ">" || c === ")"){
@@ -687,4 +721,3 @@ class Main {
 		return "/*" + replaced + "*/";
 	}
 }
-/**/

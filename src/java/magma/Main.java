@@ -84,6 +84,10 @@ public class Main {
         public char peek() {
             return this.input.charAt(this.index);
         }
+
+        public boolean startsWith(String slice) {
+            return this.input.substring(this.index).startsWith(slice);
+        }
     }
 
     private record Tuple<A, B>(A left, B right) {
@@ -398,7 +402,7 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileBlock(CompileState state, String input) {
         return compileSuffix(input.strip(), "}", withoutEnd -> {
-            return compileSplit(splitFolded(withoutEnd, "", Main::foldBlockStarts), (beforeContentWithEnd, content) -> {
+            return compileSplit(splitFoldedLast(withoutEnd, "", Main::foldBlockStarts), (beforeContentWithEnd, content) -> {
                 return compileSuffix(beforeContentWithEnd, "{", beforeContent -> {
                     return compileBlockHeader(state, beforeContent).flatMap(headerTuple -> {
                         var contentTuple = compileFunctionStatements(headerTuple.left.enterDepth(), content);
@@ -510,7 +514,7 @@ public class Main {
 
     private static Optional<Tuple<CompileState, String>> compileInvokable(CompileState state, String input) {
         return compileSuffix(input.strip(), ")", withoutEnd -> {
-            return compileSplit(splitFolded(withoutEnd, "", Main::foldInvocationStarts), (callerWithArgStart, arguments) -> {
+            return compileSplit(splitFoldedLast(withoutEnd, "", Main::foldInvocationStarts), (callerWithArgStart, arguments) -> {
                 return compileSuffix(callerWithArgStart, "(", caller -> compilePrefix(caller.strip(), "new ", type -> {
                     var callerTuple = compileTypeOrPlaceholder(state, type);
                     return assembleInvokable(callerTuple.left, "new " + callerTuple.right, arguments);
@@ -522,12 +526,24 @@ public class Main {
         });
     }
 
-    private static Optional<Tuple<String, String>> splitFolded(String input, String delimiter, BiFunction<DivideState, Character, DivideState> folder) {
+    private static Optional<Tuple<String, String>> splitFoldedLast(String input, String delimiter, BiFunction<DivideState, Character, DivideState> folder) {
+        return splitFolded(input, folder, divisions1 -> selectLast(divisions1, delimiter));
+    }
+
+    private static Optional<Tuple<String, String>> splitFolded(
+            String input,
+            BiFunction<DivideState, Character, DivideState> folder,
+            Function<List<String>, Optional<Tuple<String, String>>> selector
+    ) {
         var divisions = divide(input, folder);
         if (divisions.size() < 2) {
             return Optional.empty();
         }
 
+        return selector.apply(divisions);
+    }
+
+    private static Optional<Tuple<String, String>> selectLast(List<String> divisions, String delimiter) {
         var beforeLast = divisions.subList(0, divisions.size() - 1);
         var last = divisions.getLast();
 
@@ -683,11 +699,37 @@ public class Main {
 
     private static BiFunction<CompileState, String, Optional<Tuple<CompileState, String>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (state1, input1) -> {
-            return compileSplit(split(input1, sourceInfix, Main::findFirst), (left, right) -> {
+            return compileSplit(splitFolded(input1, foldOperator(sourceInfix), divisions -> selectFirst(divisions, sourceInfix)), (left, right) -> {
                 var leftTuple = compileValueOrPlaceholder(state1, left);
                 var rightTuple = compileValueOrPlaceholder(leftTuple.left, right);
                 return Optional.of(new Tuple<>(rightTuple.left, leftTuple.right + " " + targetInfix + " " + rightTuple.right));
             });
+        };
+    }
+
+    private static Optional<Tuple<String, String>> selectFirst(List<String> divisions, String delimiter) {
+        var first = divisions.getFirst();
+        var afterFirst = divisions.subList(1, divisions.size());
+
+        var joined = String.join(delimiter, afterFirst);
+        return Optional.of(new Tuple<>(first, joined));
+    }
+
+    private static BiFunction<DivideState, Character, DivideState> foldOperator(String infix) {
+        return (state, c) -> {
+            if (c == infix.charAt(0) && state.startsWith(infix.substring(1))) {
+                var length = infix.length() - 1;
+                var counter = 0;
+                var current = state;
+                while (counter < length) {
+                    counter++;
+
+                    current = current.pop().map(Tuple::left).orElse(current);
+                }
+                return current.advance();
+            }
+
+            return state.append(c);
         };
     }
 
@@ -766,7 +808,7 @@ public class Main {
 
     private static Optional<Tuple<CompileState, Definition>> compileDefinition(CompileState state, String input) {
         return compileLast(input.strip(), " ", (beforeName, name) -> {
-            var splits = splitFolded(beforeName.strip(), " ", Main::foldTypeSeparators);
+            var splits = splitFoldedLast(beforeName.strip(), " ", Main::foldTypeSeparators);
             return compileSplit(splits, (beforeType, type) -> {
                 return assembleDefinition(state, Optional.of(beforeType), name, type);
             }).or(() -> {
