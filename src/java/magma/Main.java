@@ -1401,6 +1401,10 @@ public class Main {
             return arguments.findFirst().map(first -> generateFunctionType(Lists.empty(), first));
         }
 
+        if (base.equals("Consumer")) {
+            return arguments.findFirst().map(first -> generateFunctionType(Lists.of(first), "void"));
+        }
+
         return new None<String>();
     }
 

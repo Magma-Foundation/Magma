@@ -14,7 +14,7 @@ interface Option<T> {
 	orElse(other : T): T;
 	orElseGet(supplier : () => T): T;
 	isPresent(): boolean;
-	ifPresent(consumer : Consumer<T>): void;
+	ifPresent(consumer : (arg0 : T) => void): void;
 	or(other : () => Option<T>): Option<T>;
 	flatMap<R>(mapper : (arg0 : T) => Option<R>): Option<R>;
 	filter(predicate : Predicate<T>): Option<T>;
@@ -341,7 +341,7 @@ class Some<T> {
 	isPresent(): boolean {
 		return true;
 	}
-	ifPresent(consumer : Consumer<T>): void {
+	ifPresent(consumer : (arg0 : T) => void): void {
 		consumer.accept(this.value);
 	}
 	or(other : () => Option<T>): Option<T> {
@@ -373,7 +373,7 @@ class None<T> {
 	isPresent(): boolean {
 		return false;
 	}
-	ifPresent(consumer : Consumer<T>): void {
+	ifPresent(consumer : (arg0 : T) => void): void {
 	}
 	or(other : () => Option<T>): Option<T> {
 		return other.get();
@@ -988,6 +988,9 @@ class Main {
 		}
 		if (base.equals("Supplier")){
 			return arguments.findFirst().map((first) => generateFunctionType(Lists.empty(), first));
+		}
+		if (base.equals("Consumer")){
+			return arguments.findFirst().map((first) => generateFunctionType(Lists.of(first), "void"));
 		}
 		return new None<string>();
 	}
