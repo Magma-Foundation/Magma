@@ -21,12 +21,12 @@ public final class FlatMapHead<T, R> implements Head<R> {
     @Override
     public Option<R> next() {
         while (true) {
-            final Option<R> next = this.current.next();
+            final var next = this.current.next();
             if (next.isPresent()) {
                 return next;
             }
 
-            final Tuple2<Boolean, Query<R>> tuple = this.head.next()
+            final var tuple = this.head.next()
                     .map(this.mapper)
                     .toTuple(this.current);
 

@@ -18,7 +18,7 @@ import java.util.function.BiFunction;
 public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public List<T> addLast(final T element) {
-        final ArrayList<T> copy = new ArrayList<>(this.list);
+        final var copy = new ArrayList<T>(this.list);
         copy.add(element);
         return new JVMList<>(copy);
     }
@@ -43,7 +43,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
 
     @Override
     public Query<Tuple2<Integer, T>> queryWithIndices() {
-        final HeadedQuery<Integer> query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
+        final var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
         return query.map((Integer index) -> new Tuple2Impl<Integer, T>(index, this.list.get(index)));
     }
 
@@ -63,13 +63,13 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
 
     @Override
     public Query<T> queryReversed() {
-        final HeadedQuery<Integer> query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
+        final var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
         return query.map((Integer index) -> this.list.size() - index - 1).map((Integer index1) -> this.list.get(index1));
     }
 
     @Override
     public List<T> addFirst(final T element) {
-        final ArrayList<T> copy = new ArrayList<T>();
+        final var copy = new ArrayList<T>();
         copy.addFirst(element);
         copy.addAll(this.list);
         return new JVMList<>(copy);
@@ -87,7 +87,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
 
     @Override
     public List<T> removeValue(final T element, final BiFunction<T, T, Boolean> equator) {
-        final ArrayList<T> copy = new ArrayList<T>(this.list);
+        final var copy = new ArrayList<T>(this.list);
         copy.remove(element);
         return new JVMList<>(copy);
     }
@@ -98,7 +98,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
             return new None<>();
         }
 
-        final ArrayList<T> copy = new ArrayList<T>(this.list);
+        final var copy = new ArrayList<T>(this.list);
         copy.removeLast();
         return new Some<>(new JVMList<>(copy));
     }

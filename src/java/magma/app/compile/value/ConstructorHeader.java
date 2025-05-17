@@ -32,7 +32,7 @@ public class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 
     @Override
     public String generateWithDefinitions(final Platform platform, final List<Definition> definitions) {
-        final String joinedDefinitions = definitions.query()
+        final var joinedDefinitions = definitions.query()
                 .map((Definition definition) -> definition.generate(platform))
                 .collect(new Joiner(", "))
                 .orElse("");

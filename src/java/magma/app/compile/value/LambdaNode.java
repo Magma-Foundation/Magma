@@ -13,7 +13,7 @@ import magma.app.io.Platform;
 public record LambdaNode(List<Definition> paramNames, String content) implements Value {
     @Override
     public String generate(Platform platform) {
-        final String joinedParamNames = this.paramNames.query()
+        final var joinedParamNames = this.paramNames.query()
                 .map((Definition definition) -> definition.generate(platform))
                 .collect(new Joiner(", "))
                 .orElse("");

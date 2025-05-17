@@ -43,8 +43,8 @@ public record DivideState(List<String> segments, String buffer, int depth, Strin
             return new None<Tuple2<DivideState, Character>>();
         }
 
-        final char c = Strings.charAt(this.input, this.index);
-        final DivideState nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
+        final var c = Strings.charAt(this.input, this.index);
+        final var nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
         return new Some<Tuple2<DivideState, Character>>(new Tuple2Impl<DivideState, Character>(nextState, c));
     }
 

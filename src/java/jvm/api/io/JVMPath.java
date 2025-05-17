@@ -26,7 +26,7 @@ record JVMPath(java.nio.file.Path path) implements Path {
     private record JVMIOError(IOException error) implements IOError {
         @Override
         public String display() {
-            final StringWriter writer = new StringWriter();
+            final var writer = new StringWriter();
             this.error.printStackTrace(new PrintWriter(writer));
             return writer.toString();
         }
@@ -64,7 +64,7 @@ record JVMPath(java.nio.file.Path path) implements Path {
 
     @Override
     public Result<List<Path>, IOError> walk() {
-        try (final Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
+        try (final var stream = java.nio.file.Files.walk(this.path)) {
             return new Ok<>(new JVMList<>(stream.<Path>map(JVMPath::new).toList()));
         } catch (final IOException e) {
             return new Err<>(new JVMIOError(e));

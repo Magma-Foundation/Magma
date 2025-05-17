@@ -12,7 +12,7 @@ import magma.app.io.Platform;
 public record InvokableNode(Caller caller, List<Value> args) implements Value {
     @Override
     public String generate(final Platform platform) {
-        final String joinedArguments = this.joinArgs(platform);
+        final var joinedArguments = this.joinArgs(platform);
         return this.caller.generate(platform) + "(" + joinedArguments + ")";
     }
 

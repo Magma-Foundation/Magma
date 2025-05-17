@@ -12,8 +12,8 @@ public record Source(Path sourceDirectory, Path source) {
     }
 
     public String computeName() {
-        final String fileName = this.source.findFileName();
-        final int separator = fileName.lastIndexOf('.');
+        final var fileName = this.source.findFileName();
+        final var separator = fileName.lastIndexOf('.');
         return fileName.substring(0, separator);
     }
 

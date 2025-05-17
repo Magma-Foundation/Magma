@@ -145,18 +145,18 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState addResolvedImportWithNamespace(final List<String> oldParent, final String child) {
-        final List<String> namespace = this.findCurrentLocation
+        final var namespace = this.findCurrentLocation
                 .map((Location location) -> location.namespace())
                 .orElse(Lists.empty());
 
-        List<String> newParent = oldParent;
+        var newParent = oldParent;
         if (Platform.TypeScript == this.platform) {
             if (namespace.isEmpty()) {
                 newParent = newParent.addFirst(".");
             }
 
-            int i = 0;
-            final int size = namespace.size();
+            var i = 0;
+            final var size = namespace.size();
             while (i < size) {
                 newParent = newParent.addFirst("..");
                 i++;
@@ -171,7 +171,7 @@ public record ImmutableCompileState(
             return this;
         }
 
-        final Import importString = new Import(newParent, child);
+        final var importString = new Import(newParent, child);
         return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 
@@ -189,7 +189,7 @@ public record ImmutableCompileState(
 
     @Override
     public String createIndent() {
-        final int indent = this.depth();
+        final var indent = this.depth();
         return "\n" + "\t".repeat(indent);
     }
 

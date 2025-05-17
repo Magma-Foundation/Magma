@@ -31,8 +31,8 @@ public record Definition(
     }
 
     private String generateWithAfterName(final Platform platform, final String afterName) {
-        final String joinedTypeParams = this.joinTypeParams();
-        final String joinedModifiers = this.joinModifiers();
+        final var joinedTypeParams = this.joinTypeParams();
+        final var joinedModifiers = this.joinModifiers();
 
         if (Platform.Windows == platform) {
             return joinedModifiers + this.type.generateBeforeName() + this.type.generate() + " " + this.name + afterName;
@@ -77,7 +77,7 @@ public record Definition(
 
     @Override
     public String generateWithDefinitions(final Platform platform, final List<Definition> definitions) {
-        final String joinedDefinitions = definitions.query()
+        final var joinedDefinitions = definitions.query()
                 .map((Definition definition) -> definition.generate(platform))
                 .collect(new Joiner(", "))
                 .orElse("");

@@ -12,7 +12,7 @@ public record FunctionSegment<S extends FunctionHeader<S>>(
         Option<String> maybeContent
 ) {
     public String generate(final Platform platform, final String indent) {
-        final String content = this.maybeContent()
+        final var content = this.maybeContent()
                 .map((String inner) -> " {" + inner + indent + "}")
                 .orElse(";");
 

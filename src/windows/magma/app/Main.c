@@ -9,7 +9,7 @@ auto temp(IOError value) {
 	return new Some<IOError>(value/*&[I8]*/);
 }
 auto temp(IOError error) {
-	return error/*auto*/.display(/*auto*/);
+	return error/*auto*/.display(/*auto*/);j
 }
 auto temp(&[I8] displayed) {
 	return Console/*auto*/.printErrLn(displayed/*auto*/);

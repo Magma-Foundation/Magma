@@ -27,10 +27,10 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <R> R foldWithInitial(final R initial, final BiFunction<R, T, R> folder) {
-        R result = initial;
+        var result = initial;
         while (true) {
-            final R finalResult = result;
-            final Tuple2<Boolean, R> maybeNext = this.head.next()
+            final var finalResult = result;
+            final var maybeNext = this.head.next()
                     .map((T inner) -> folder.apply(finalResult, inner))
                     .toTuple(finalResult);
 

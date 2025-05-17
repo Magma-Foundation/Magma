@@ -19,7 +19,7 @@ public final class RangeHead implements Head<Integer> {
             return new None<Integer>();
         }
 
-        final int value = this.counter;
+        final var value = this.counter;
         this.counter++;
         return new Some<Integer>(value);
     }
