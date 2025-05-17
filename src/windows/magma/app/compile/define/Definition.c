@@ -43,6 +43,6 @@ Bool hasAnnotation(&[I8] annotation) {
 Definition removeModifier(&[I8] modifier) {
 	return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 }
-Definition addModifier(&[I8] modifier) {
-	return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
+Definition addModifierLast(&[I8] modifier) {
+	return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
 }

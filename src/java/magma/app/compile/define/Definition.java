@@ -62,7 +62,7 @@ public record Definition(
     }
 
     @Override
-    public Definition addModifier(final String modifier) {
-        return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
+    public Definition addModifierLast(final String modifier) {
+        return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
     }
 }

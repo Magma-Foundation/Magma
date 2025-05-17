@@ -9,5 +9,5 @@ public interface FunctionHeader<S extends FunctionHeader<S>> {
 
     S removeModifier(String modifier);
 
-    S addModifier(String modifier);
+    S addModifierLast(String modifier);
 }

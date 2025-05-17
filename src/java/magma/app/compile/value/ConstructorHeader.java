@@ -20,7 +20,7 @@ public class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
     }
 
     @Override
-    public ConstructorHeader addModifier(final String modifier) {
+    public ConstructorHeader addModifierLast(final String modifier) {
         return this;
     }
 }

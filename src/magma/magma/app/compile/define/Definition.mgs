@@ -47,7 +47,7 @@ export struct Definition {
 	def removeModifier(modifier: &[I8]): Definition {
 		return Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 	}
-	def addModifier(modifier: &[I8]): Definition {
-		return Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
+	def addModifierLast(modifier: &[I8]): Definition {
+		return Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
 	}
 }

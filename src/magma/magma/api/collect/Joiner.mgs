@@ -8,10 +8,10 @@ export struct Joiner implements Collector<&[I8], Option<&[I8]>> {
 	constructor (mut delimiter: &[I8]) {
 		this.delimiter = delimiter;
 	}
-	def static empty(): Joiner {
+	static def empty(): Joiner {
 		return Joiner("");
 	}
-	def static joinOrEmpty(items: List<&[I8]>, delimiter: &[I8], prefix: &[I8], suffix: &[I8]): &[I8] {
+	static def joinOrEmpty(items: List<&[I8]>, delimiter: &[I8], prefix: &[I8], suffix: &[I8]): &[I8] {
 		return items.query().collect(Joiner(delimiter)).map((mut inner: &[I8]) => prefix + inner + suffix).orElse("");
 	}
 	def createInitial(): Option<&[I8]> {

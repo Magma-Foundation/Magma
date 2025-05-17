@@ -23,7 +23,7 @@ export struct HeadedQuery<T> implements Query<T> {
 		return HeadedQuery<R>(MapHead<T, R>(this.head, mapper));
 	}
 	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-		let mut result: R = initial;
+		mut let result: R = initial;
 		while (true) {
 			let finalResult: R = result;
 			let maybeNext: Tuple2<Bool, R> = this.head.next().map((mut inner: T) => folder(finalResult, inner)).toTuple(finalResult);

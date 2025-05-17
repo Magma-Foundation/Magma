@@ -11,7 +11,7 @@ export class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	removeModifier(modifier: string): ConstructorHeader {
 		return this;
 	}
-	addModifier(modifier: string): ConstructorHeader {
+	addModifierLast(modifier: string): ConstructorHeader {
 		return this;
 	}
 }

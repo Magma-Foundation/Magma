@@ -32,7 +32,7 @@ export struct ImmutableCompileState implements CompileState {
 		this.definitions = definitions;
 		this.depth = depth;
 	}
-	def static createInitial(): CompileState {
+	static def createInitial(): CompileState {
 		return ImmutableCompileState(Platform.Magma, None<Location>(), Lists.empty(), Lists.empty(), Lists.empty(), "", "", Lists.empty(), 0);
 	}
 	def hasLastStructureNameOf(name: &[I8]): Bool {
@@ -96,7 +96,7 @@ export struct ImmutableCompileState implements CompileState {
 			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
-			let mut i: I32 = 0;
+			mut let i: I32 = 0;
 			let size: I32 = namespace.size();
 			while (i < size) {
 				newParent = newParent.addFirst("..");

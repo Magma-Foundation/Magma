@@ -47,7 +47,7 @@ export class Definition {
 	removeModifier(modifier: string): Definition {
 		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 	}
-	addModifier(modifier: string): Definition {
-		return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
+	addModifierLast(modifier: string): Definition {
+		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
 	}
 }

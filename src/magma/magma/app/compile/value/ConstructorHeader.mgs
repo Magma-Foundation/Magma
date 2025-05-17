@@ -11,7 +11,7 @@ export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	def removeModifier(modifier: &[I8]): ConstructorHeader {
 		return this;
 	}
-	def addModifier(modifier: &[I8]): ConstructorHeader {
+	def addModifierLast(modifier: &[I8]): ConstructorHeader {
 		return this;
 	}
 }

@@ -328,7 +328,7 @@ static Option<Tuple2<CompileState, &[I8]>> compileMethodWithBeforeParams(Compile
 }
 static FunctionHeader<S> retainDef(FunctionHeader<S> header, CompileState parametersState) {
 	if (parametersState.isPlatform(Platform.Magma)) {
-		return header.addModifier("def").removeModifier("mut");
+		return header.addModifierLast("def").removeModifier("mut");
 	}
 	return header;
 }
@@ -505,7 +505,7 @@ static Definition attachLet(CompileState definitionState, Definition definition)
 		let = definition;
 	}
 	else {
-		let = definition.addModifier("let");
+		let = definition.addModifierLast("let");
 	}
 	return let;
 }

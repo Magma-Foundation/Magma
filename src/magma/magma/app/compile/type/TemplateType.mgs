@@ -9,10 +9,10 @@ export struct TemplateType implements Type {
 		this.base = base;
 		this.args = args;
 	}
-	def static generateValueStrings(values: List<&[I8]>): &[I8] {
+	static def generateValueStrings(values: List<&[I8]>): &[I8] {
 		return Main.generateAll(values, TemplateType.mergeValues);
 	}
-	def static mergeValues(cache: &[I8], element: &[I8]): &[I8] {
+	static def mergeValues(cache: &[I8], element: &[I8]): &[I8] {
 		if (Strings.isEmpty(cache)) {
 			return cache + element;
 		}

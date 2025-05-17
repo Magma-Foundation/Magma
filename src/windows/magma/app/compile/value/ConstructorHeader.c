@@ -11,6 +11,6 @@ Bool hasAnnotation(&[I8] annotation) {
 ConstructorHeader removeModifier(&[I8] modifier) {
 	return this;
 }
-ConstructorHeader addModifier(&[I8] modifier) {
+ConstructorHeader addModifierLast(&[I8] modifier) {
 	return this;
 }

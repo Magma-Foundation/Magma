@@ -375,7 +375,7 @@ export class Main {
 	}
 	static retainDef<S extends FunctionHeader<S>>(header: FunctionHeader<S>, parametersState: CompileState): FunctionHeader<S> {
 		if (parametersState.isPlatform(Platform.Magma)) {
-			return header.addModifier("def").removeModifier("mut");
+			return header.addModifierLast("def").removeModifier("mut");
 		}
 		return header;
 	}
@@ -552,7 +552,7 @@ export class Main {
 			let = definition;
 		}
 		else {
-			let = definition.addModifier("let");
+			let = definition.addModifierLast("let");
 		}
 		return let;
 	}
