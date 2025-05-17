@@ -84,13 +84,12 @@ static Option<IOError> writeOutputEntry(Path targetParent, Location location, Ma
 }
 static Result<Path, IOError> ensureTargetParent(Path directory, List<&[I8]> namespace) {
 	var targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<&[I8]>*/);
-	if (!targetParent/*Path*/.exists(/*auto*/)) {
-		var maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
-		if (maybeError/*auto*/.isPresent(/*auto*/)) {
-			return new Err<>(maybeError/*auto*/.orElse(null/*auto*/));
-		}
+	if (targetParent/*Path*/.exists(/*auto*/)) {
+		return new Ok<>(targetParent/*Path*/);
 	}
-	return new Ok<>(targetParent/*Path*/);
+	/*return targetParent.createDirectories()
+                .<Result<Path, IOError>>map((IOError error) -> new Err<>(error))
+                .orElseGet(() -> new Ok<>(targetParent))*/;
 }
 auto temp(&[I8] value) {
 	return "\n\t" + value/*&[I8]*/;

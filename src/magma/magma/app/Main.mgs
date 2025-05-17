@@ -72,7 +72,7 @@ import magma.api.option.{ Some, Option, None };
 import magma.app.io.{ Source, Platform, Location };
 import magma.api.collect.{ Queries, Joiner };
 import magma.app.compile.{ CompileState, ImmutableCompileState, Import, FunctionSegment };
-import magma.api.result.{ Result, Err, Ok };
+import magma.api.result.{ Result, Ok };
 import jvm.api.collect.list.{ Lists };
 import magma.api.{ Tuple2, Tuple2Impl, Type };
 import jvm.api.text.{ Strings, Characters };
@@ -125,13 +125,12 @@ export struct Main {
 	}
 	static def ensureTargetParent(directory: Path, namespace: List<&[I8]>): Result<Path, IOError> {
 		let targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<&[I8]>*/);
-		if (!targetParent/*Path*/.exists(/*auto*/)) {
-			let maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
-			if (maybeError/*auto*/.isPresent(/*auto*/)) {
-				return Err<>(maybeError/*auto*/.orElse(null/*auto*/));
-			}
+		if (targetParent/*Path*/.exists(/*auto*/)) {
+			return Ok<>(targetParent/*Path*/);
 		}
-		return Ok<>(targetParent/*Path*/);
+		/*return targetParent.createDirectories()
+                .<Result<Path, IOError>>map((IOError error) -> new Err<>(error))
+                .orElseGet(() -> new Ok<>(targetParent))*/;
 	}
 	static def compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2<CompileState, Map<&[I8], &[I8]>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*&[I8]*/, Main/*auto*/.compileRootSegment);

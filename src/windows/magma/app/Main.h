@@ -84,7 +84,6 @@ import { ListCollector } from "magma/api/collect/list/ListCollector";
 import { Location } from "magma/app/io/Location";
 import { Lists } from "jvm/api/collect/list/Lists";
 import { None } from "magma/api/option/None";
-import { Err } from "magma/api/result/Err";
 import { Ok } from "magma/api/result/Ok";
 import { Tuple2 } from "magma/api/Tuple2";
 import { Joiner } from "magma/api/collect/Joiner";

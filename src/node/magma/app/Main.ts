@@ -82,7 +82,6 @@ import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Location } from "../../magma/app/io/Location";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { None } from "../../magma/api/option/None";
-import { Err } from "../../magma/api/result/Err";
 import { Ok } from "../../magma/api/result/Ok";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Joiner } from "../../magma/api/collect/Joiner";
@@ -163,13 +162,12 @@ export class Main {
 	}
 	static ensureTargetParent(directory: Path, namespace: List<string>): Result<Path, IOError> {
 		let targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<string>*/);
-		if (!targetParent/*Path*/.exists(/*auto*/)) {
-			let maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
-			if (maybeError/*auto*/.isPresent(/*auto*/)) {
-				return new Err<>(maybeError/*auto*/.orElse(null/*auto*/));
-			}
+		if (targetParent/*Path*/.exists(/*auto*/)) {
+			return new Ok<>(targetParent/*Path*/);
 		}
-		return new Ok<>(targetParent/*Path*/);
+		/*return targetParent.createDirectories()
+                .<Result<Path, IOError>>map((IOError error) -> new Err<>(error))
+                .orElseGet(() -> new Ok<>(targetParent))*/;
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2<CompileState, Map<string, string>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*string*/, Main/*auto*/.compileRootSegment);
