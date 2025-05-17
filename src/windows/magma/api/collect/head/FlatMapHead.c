@@ -2,7 +2,7 @@
 export class FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;
-	mut current: Query<R>;
+	current: Query<R>;
 }
 
 constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
@@ -10,7 +10,7 @@ constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
 	this.current = initial;
 	this.mapper = mapper;
 }
-mut next(): Option<R> {
+next(): Option<R> {
 	while (true) {
 		let next: Option<R> = this.current.next();
 		if (next.isPresent()) {

@@ -1,7 +1,7 @@
 #include "./Type.h"
 export interface Type {
-	mut generate(): &[I8];
-	mut isFunctional(): Bool;
-	mut isVar(): Bool;
-	mut generateBeforeName(): &[I8];
+	generate(): &[I8];
+	isFunctional(): Bool;
+	isVar(): Bool;
+	generateBeforeName(): &[I8];
 }

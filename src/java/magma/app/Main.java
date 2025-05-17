@@ -1108,7 +1108,7 @@ public final class Main {
     }
 
     private static List<String> retainFinal(final List<String> oldModifiers, final Platform platform) {
-        if (oldModifiers.contains("final", Strings::equalsTo) || Platform.TypeScript == platform) {
+        if (oldModifiers.contains("final", Strings::equalsTo) || Platform.Magma != platform) {
             return Lists.empty();
         }
 

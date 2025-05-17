@@ -13,15 +13,15 @@ export class PrimitiveType implements Type {
 constructor (value: &[I8]) {
 	this.value = value;
 }
-mut generate(): &[I8] {
+generate(): &[I8] {
 	return this.value;
 }
-mut isFunctional(): Bool {
+isFunctional(): Bool {
 	return false;
 }
-mut isVar(): Bool {
+isVar(): Bool {
 	return PrimitiveType.Var === this;
 }
-mut generateBeforeName(): &[I8] {
+generateBeforeName(): &[I8] {
 	return "";
 }

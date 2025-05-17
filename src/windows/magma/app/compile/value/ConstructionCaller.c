@@ -1,19 +1,19 @@
 #include "./ConstructionCaller.h"
 export class ConstructionCaller implements Caller {
-	mut right: &[I8];
-	mut platform: Platform;
-	constructor (mut right: &[I8], mut platform: Platform) {
+	right: &[I8];
+	platform: Platform;
+	constructor (right: &[I8], platform: Platform) {
 		this.right = right;
 		this.platform = platform;
 	}
 }
 
-mut generate(): &[I8] {
+generate(): &[I8] {
 	if (Platform.Magma === this.platform) {
 		return this.right;
 	}
 	return "new " + this.right;
 }
-mut findChild(): Option<Value> {
+findChild(): Option<Value> {
 	return new None<Value>();
 }

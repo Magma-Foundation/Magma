@@ -749,7 +749,7 @@ export class Main {
 		return list;
 	}
 	static retainFinal(oldModifiers: List<string>, platform: Platform): List<string> {
-		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform) {
+		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.Magma !== platform) {
 			return Lists.empty();
 		}
 		return Lists.of("mut");

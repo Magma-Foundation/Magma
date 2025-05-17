@@ -1,20 +1,20 @@
 #include "./ArrayType.h"
 export class ArrayType implements Type {
-	mut child: Type;
-	constructor (mut child: Type) {
+	child: Type;
+	constructor (child: Type) {
 		this.child = child;
 	}
 }
 
-mut generate(): &[I8] {
+generate(): &[I8] {
 	return this.child.generate() + "[]";
 }
-mut isFunctional(): Bool {
+isFunctional(): Bool {
 	return false;
 }
-mut isVar(): Bool {
+isVar(): Bool {
 	return false;
 }
-mut generateBeforeName(): &[I8] {
+generateBeforeName(): &[I8] {
 	return "";
 }

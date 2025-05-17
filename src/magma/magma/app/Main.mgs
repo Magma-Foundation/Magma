@@ -749,7 +749,7 @@ export struct Main {
 		return list;
 	}
 	def static retainFinal(oldModifiers: List<&[I8]>, platform: Platform): List<&[I8]> {
-		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform) {
+		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.Magma !== platform) {
 			return Lists.empty();
 		}
 		return Lists.of("mut");

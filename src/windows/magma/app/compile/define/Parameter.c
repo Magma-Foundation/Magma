@@ -1,5 +1,5 @@
 #include "./Parameter.h"
 export interface Parameter {
-	mut generate(): &[I8];
-	mut asDefinition(): Option<Definition>;
+	generate(): &[I8];
+	asDefinition(): Option<Definition>;
 }

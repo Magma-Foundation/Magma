@@ -1,19 +1,19 @@
 #include "./Strings.h"
 export interface StringsInstance {
-	mut length(stripped: &[I8]): number;
+	length(stripped: &[I8]): number;
 
-	mut sliceBetween(input: &[I8], startInclusive: number, endExclusive: number): &[I8];
+	sliceBetween(input: &[I8], startInclusive: number, endExclusive: number): &[I8];
 
-	mut sliceFrom(input: &[I8], startInclusive: number): &[I8];
+	sliceFrom(input: &[I8], startInclusive: number): &[I8];
 
-	mut isEmpty(cache: &[I8]): Bool;
+	isEmpty(cache: &[I8]): Bool;
 
-	mut equalsTo(left: &[I8], right: &[I8]): Bool;
+	equalsTo(left: &[I8], right: &[I8]): Bool;
 
-	mut strip(input: &[I8]): &[I8];
+	strip(input: &[I8]): &[I8];
 
-	mut isBlank(value: &[I8]): Bool;
+	isBlank(value: &[I8]): Bool;
 
-	mut charAt(input: &[I8], index: number): I8;
+	charAt(input: &[I8], index: number): I8;
 
 }

@@ -1,8 +1,8 @@
 #include "./Location.h"
 export class Location {
-	mut namespace: List<&[I8]>;
-	mut name: &[I8];
-	constructor (mut namespace: List<&[I8]>, mut name: &[I8]) {
+	namespace: List<&[I8]>;
+	name: &[I8];
+	constructor (namespace: List<&[I8]>, name: &[I8]) {
 		this.namespace = namespace;
 		this.name = name;
 	}

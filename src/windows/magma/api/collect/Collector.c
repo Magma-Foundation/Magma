@@ -1,5 +1,5 @@
 #include "./Collector.h"
 export interface Collector<T, C> {
-	mut createInitial(): C;
-	mut fold(mut current: C, mut element: T): C;
+	createInitial(): C;
+	fold(current: C, element: T): C;
 }

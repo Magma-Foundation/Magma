@@ -1,5 +1,5 @@
 #include "./Caller.h"
 export interface Caller {
-	mut generate(): &[I8];
-	mut findChild(): Option<Value>;
+	generate(): &[I8];
+	findChild(): Option<Value>;
 }

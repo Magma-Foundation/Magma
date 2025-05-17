@@ -1,14 +1,14 @@
 #include "./RangeHead.h"
 export class RangeHead implements Head<number> {
 	length: number;
-	mut counter: number;
+	counter: number;
 }
 
 constructor (length: number) {
 	this.length = length;
 	this.counter = 0;
 }
-mut next(): Option<number> {
+next(): Option<number> {
 	if (this.counter >= this.length) {
 		return new None<number>();
 	}

@@ -1,20 +1,20 @@
 #include "./VariadicType.h"
 export class VariadicType implements Type {
-	mut type: Type;
-	constructor (mut type: Type) {
+	type: Type;
+	constructor (type: Type) {
 		this.type = type;
 	}
 }
 
-mut generate(): &[I8] {
+generate(): &[I8] {
 	return this.type.generate() + "[]";
 }
-mut isFunctional(): Bool {
+isFunctional(): Bool {
 	return false;
 }
-mut isVar(): Bool {
+isVar(): Bool {
 	return false;
 }
-mut generateBeforeName(): &[I8] {
+generateBeforeName(): &[I8] {
 	return "...";
 }
