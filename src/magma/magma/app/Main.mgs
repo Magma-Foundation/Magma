@@ -1,15 +1,15 @@
 import magma.api.Type;
+import magma.app.compile.CompileState;
 import magma.api.option.Option;
-import magma.api.collect.list.List;
-import magma.app.Definition;
-import jvm.api.collect.list.Lists;
-import magma.api.option.None;
-import jvm.api.text.Strings;
-import magma.api.option.Some;
 import magma.app.MethodHeader;
+import magma.api.option.None;
+import magma.app.Definition;
 import magma.app.Parameter;
+import magma.api.option.Some;
+import magma.api.collect.list.List;
 import magma.api.collect.Joiner;
 import magma.api.Tuple2;
+import jvm.api.text.Strings;
 import magma.api.io.Path;
 import magma.api.io.IOError;
 import magma.api.result.Result;
@@ -17,6 +17,7 @@ import magma.api.collect.list.ListCollector;
 import jvm.api.io.Files;
 import jvm.api.io.Console;
 import magma.api.Tuple2Impl;
+import jvm.api.collect.list.Lists;
 import magma.api.collect.Queries;
 import magma.app.DivideState;
 import magma.api.collect.head.HeadedQuery;
@@ -32,100 +33,6 @@ struct Argument {
 struct Caller {
 	def generate(): &[I8];
 	def findChild(): Option<Value>;
-}
-struct CompileState {
-	mut imports: List<Import>;
-	mut output: &[I8];
-	mut structureNames: List<&[I8]>;
-	mut depth: I32;
-	mut definitions: List<Definition>;
-	mut maybeLocation: Option<Location>;
-	mut sources: List<Source>;
-	mut platform: Platform;
-	constructor (mut imports: List<Import>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: I32, mut definitions: List<Definition>, mut maybeLocation: Option<Location>, mut sources: List<Source>, mut platform: Platform) {
-		this.imports = imports;
-		this.output = output;
-		this.structureNames = structureNames;
-		this.depth = depth;
-		this.definitions = definitions;
-		this.maybeLocation = maybeLocation;
-		this.sources = sources;
-		this.platform = platform;
-	}
-	def static createInitial(): CompileState {
-		return CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), None<Location>(), Lists.empty(), Platform.Magma);
-	}
-	def isLastWithin(name: &[I8]): Bool {
-		return this.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(name, anObject)).isPresent();
-	}
-	def addResolvedImport(oldParent: List<&[I8]>, child: &[I8]): CompileState {
-		let namespace = this.maybeLocation.map((mut location: Location) => location.namespace).orElse(Lists.empty());
-		let mut newParent = oldParent;
-		if (Platform.TypeScript === this.platform) {
-			if (namespace.isEmpty()) {
-				newParent = newParent.addFirst(".");
-			}
-			let mut i = 0;
-			let size = namespace.size();
-			while (i < size) {
-				newParent = newParent.addFirst("..");
-				i++;
-			}
-		}
-		if (this.imports.query().filter((mut node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()) {
-			return this;
-		}
-		let importString = Import(newParent, child);
-		return CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def withLocation(namespace: Location): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, Some<Location>(namespace), this.sources, this.platform);
-	}
-	def append(element: &[I8]): CompileState {
-		return CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def pushStructureName(name: &[I8]): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def enterDepth(): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def exitDepth(): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def defineAll(definitions: List<Definition>): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
-	}
-	def resolve(name: &[I8]): Option<Type> {
-		return this.definitions.queryReversed().filter((mut definition: Definition) => Strings.equalsTo(definition.name(), name)).map((mut definition1: Definition) => definition1.type()).next();
-	}
-	def clearImports(): CompileState {
-		return CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def clearOutput(): CompileState {
-		return CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def addSource(source: Source): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
-	}
-	def findSource(name: &[I8]): Option<Source> {
-		return this.sources.query().filter((mut source: Source) => Strings.equalsTo(source.computeName(), name)).next();
-	}
-	def addResolvedImportFromCache(base: &[I8]): CompileState {
-		if (this.structureNames.query().anyMatch((mut inner: &[I8]) => Strings.equalsTo(inner, base))) {
-			return this;
-		}
-		return this.findSource(base).map((mut source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
-	}
-	def popStructureName(): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	def mapLocation(mapper: (arg0 : Location) => Location): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
-	}
-	def withPlatform(platform: Platform): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
-	}
 }
 struct ConstructorHeader implements MethodHeader<ConstructorHeader> {
 	def generateWithAfterName(afterName: &[I8]): &[I8] {
@@ -438,7 +345,7 @@ struct VarArgs implements Type {
 		return "...";
 	}
 }
-struct Import {
+export struct Import {
 	mut namespace: List<&[I8]>;
 	mut child: &[I8];
 	constructor (mut namespace: List<&[I8]>, mut child: &[I8]) {
@@ -454,7 +361,7 @@ struct Import {
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }
-struct Source {
+export struct Source {
 	mut sourceDirectory: Path;
 	mut source: Path;
 	constructor (mut sourceDirectory: Path, mut source: Path) {
@@ -476,7 +383,7 @@ struct Source {
 		return Location(this.computeNamespace(), this.computeName());
 	}
 }
-struct Location {
+export struct Location {
 	mut namespace: List<&[I8]>;
 	mut name: &[I8];
 	constructor (mut namespace: List<&[I8]>, mut name: &[I8]) {
@@ -541,7 +448,7 @@ struct BooleanType implements Type {
 		return "";
 	}
 }
-struct Platform {
+export struct Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
 	static Windows: Platform = new Platform("windows", "h", "c");
@@ -608,7 +515,7 @@ export struct Main {
 	def static compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
 		let output = Main.compileRoot(state1, source, input);
-		let location = output.left().maybeLocation.orElse(Location(Lists.empty(), ""));
+		let location = output.left().maybeLocation().orElse(Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
 		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
 		if (!targetParent.exists()) {
@@ -627,17 +534,18 @@ export struct Main {
 	def static compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Map<&[I8], &[I8]>> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
 		let statementsState = statementsTuple.left();
-		let imports = statementsState.imports.query().map((mut anImport: Import) => anImport.generate(state.platform)).collect(Joiner("")).orElse("");
+		let imports = statementsState.imports().query().map((mut anImport: Import) => anImport.generate(state.platform())).collect(Joiner("")).orElse("");
 		let compileState = statementsState.clearImports().clearOutput();
 		let withMain = Main.createMain(source);
 		let entries = HashMap<&[I8], &[I8]>();
-		if (Platform.Windows === state.platform) {
+		let mut platform = state.platform();
+		if (Platform.Windows === platform) {
 			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
-			/*entries.put(state.platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(state.platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output + statementsTuple.right() + withMain)*/;
+			/*entries.put(platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
-			/*entries.put(state.platform.extension[0], imports + statementsState.output + statementsTuple.right() + withMain)*/;
+			/*entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		return Tuple2Impl<>(compileState, entries);
 	}
@@ -805,7 +713,7 @@ export struct Main {
 		}
 	}
 	def static retainStruct(infix: &[I8], outputContentState: CompileState): &[I8] {
-		if (Platform.Magma === outputContentState.platform) {
+		if (Platform.Magma === outputContentState.platform()) {
 			return "struct ";
 		}
 		return infix;
@@ -860,7 +768,7 @@ export struct Main {
 				}
 				return None<Tuple2<CompileState, &[I8]>>();
 			}).or(() => {
-				if (state.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+				if (state.structureNames().findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
 					return Main.compileMethodWithBeforeParams(state, ConstructorHeader(), withParams);
 				}
 				return None<Tuple2<CompileState, &[I8]>>();
@@ -892,7 +800,7 @@ export struct Main {
 		});
 	}
 	def static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
-		if (Platform.Magma === parametersState.platform) {
+		if (Platform.Magma === parametersState.platform()) {
 			return header.addModifier("def").removeModifier("mut");
 		}
 		return header;
@@ -915,12 +823,12 @@ export struct Main {
 		}
 	}
 	def static compileReturnWithoutSuffix(state1: CompileState, input1: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		return Main.compileReturn(input1, (mut withoutPrefix: &[I8]) => Main.compileValue(state1, withoutPrefix)).map((mut tuple: Tuple2<CompileState, &[I8]>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), Main.generateIndent(state1.depth) + tuple.right()));
+		return Main.compileReturn(input1, (mut withoutPrefix: &[I8]) => Main.compileValue(state1, withoutPrefix)).map((mut tuple: Tuple2<CompileState, &[I8]>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), Main.generateIndent(state1.depth()) + tuple.right()));
 	}
 	def static compileBlock(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileSuffix(Strings.strip(input), "}", (withoutEnd: &[I8]) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd: &[I8], content: &[I8]) => Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: &[I8]) => Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, &[I8]>) => {
 			let contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
-			let indent = Main.generateIndent(state.depth);
+			let indent = Main.generateIndent(state.depth());
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 		}))));
 	}
@@ -963,7 +871,7 @@ export struct Main {
 	def static compileFunctionStatement(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: &[I8]) => {
 			let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(valueTuple.left(), Main.generateIndent(state.depth) + valueTuple.right() + ";"));
+			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(valueTuple.left(), Main.generateIndent(state.depth()) + valueTuple.right() + ";"));
 		});
 	}
 	def static generateIndent(indent: I32): &[I8] {
@@ -996,7 +904,7 @@ export struct Main {
 		return Main.compileSuffix(Strings.strip(input), ")", (withoutEnd: &[I8]) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart: &[I8], args: &[I8]) => Main.compileSuffix(callerWithArgStart, "(", (callerString: &[I8]) => Main.compilePrefix(Strings.strip(callerString), "new ", (type: &[I8]) => Main.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, &[I8]>) => {
 			let callerState = callerTuple.left();
 			let caller = callerTuple.right();
-			return Main.assembleInvokable(callerState, ConstructionCaller(caller, callerState.platform), args);
+			return Main.assembleInvokable(callerState, ConstructionCaller(caller, callerState.platform()), args);
 		})).or(() => Main.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args))))));
 	}
 	def static splitFoldedLast(input: &[I8], delimiter: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState): Option<Tuple2<&[I8], &[I8]>> {
@@ -1102,7 +1010,7 @@ export struct Main {
 			let statementsState = statementsTuple.left();
 			let statements = statementsTuple.right();
 			let exited = statementsState.exitDepth();
-			return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth) + "}");
+			return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth()) + "}");
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
 	def static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: &[I8]): Option<Tuple2<CompileState, Value>> {
@@ -1205,7 +1113,7 @@ export struct Main {
 	}
 	def static compileEnumValues(state: CompileState, withoutEnd: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: &[I8]) => Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
-			let structureName = state.structureNames.findLast().orElse("");
+			let structureName = state.structureNames().findLast().orElse("");
 			return tuple.right().generateAsEnumValue(structureName).map((stringOption: &[I8]) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption));
 		})).map((tuple: Tuple2<CompileState, List<&[I8]>>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().query().collect(Joiner("")).orElse("")));
 	}
@@ -1263,7 +1171,7 @@ export struct Main {
 	}
 	def static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<&[I8]>, typeParams: List<&[I8]>, oldModifiers: List<&[I8]>, type: &[I8], name: &[I8]): Option<Tuple2<CompileState, Definition>> {
 		return Main.parseType(state, type).flatMap((typeTuple: Tuple2<CompileState, Type>) => {
-			let newModifiers = Main.modifyModifiers(oldModifiers, state.platform);
+			let newModifiers = Main.modifyModifiers(oldModifiers, state.platform());
 			let generated = Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
 			return Some<Tuple2<CompileState, Definition>>(Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
 		});
@@ -1312,7 +1220,7 @@ export struct Main {
 		return None<Tuple2<CompileState, Type>>();
 	}
 	def static parsePrimitive(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
-		return Main.findPrimitiveValue(Strings.strip(input), state.platform).map((mut result: Type) => Tuple2Impl<CompileState, Type>(state, result));
+		return Main.findPrimitiveValue(Strings.strip(input), state.platform()).map((mut result: Type) => Tuple2Impl<CompileState, Type>(state, result));
 	}
 	def static findPrimitiveValue(input: &[I8], platform: Platform): Option<Type> {
 		let stripped = Strings.strip(input);

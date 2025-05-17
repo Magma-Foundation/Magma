@@ -1,15 +1,15 @@
 import { Type } from "../../magma/api/Type";
+import { CompileState } from "../../magma/app/compile/CompileState";
 import { Option } from "../../magma/api/option/Option";
-import { List } from "../../magma/api/collect/list/List";
-import { Definition } from "../../magma/app/Definition";
-import { Lists } from "../../jvm/api/collect/list/Lists";
-import { None } from "../../magma/api/option/None";
-import { Strings } from "../../jvm/api/text/Strings";
-import { Some } from "../../magma/api/option/Some";
 import { MethodHeader } from "../../magma/app/MethodHeader";
+import { None } from "../../magma/api/option/None";
+import { Definition } from "../../magma/app/Definition";
 import { Parameter } from "../../magma/app/Parameter";
+import { Some } from "../../magma/api/option/Some";
+import { List } from "../../magma/api/collect/list/List";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Tuple2 } from "../../magma/api/Tuple2";
+import { Strings } from "../../jvm/api/text/Strings";
 import { Path } from "../../magma/api/io/Path";
 import { IOError } from "../../magma/api/io/IOError";
 import { Result } from "../../magma/api/result/Result";
@@ -17,6 +17,7 @@ import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Files } from "../../jvm/api/io/Files";
 import { Console } from "../../jvm/api/io/Console";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Queries } from "../../magma/api/collect/Queries";
 import { DivideState } from "../../magma/app/DivideState";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
@@ -32,100 +33,6 @@ interface Argument {
 interface Caller {
 	generate(): string;
 	findChild(): Option<Value>;
-}
-class CompileState {
-	imports: List<Import>;
-	output: string;
-	structureNames: List<string>;
-	depth: number;
-	definitions: List<Definition>;
-	maybeLocation: Option<Location>;
-	sources: List<Source>;
-	platform: Platform;
-	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform) {
-		this.imports = imports;
-		this.output = output;
-		this.structureNames = structureNames;
-		this.depth = depth;
-		this.definitions = definitions;
-		this.maybeLocation = maybeLocation;
-		this.sources = sources;
-		this.platform = platform;
-	}
-	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
-	}
-	isLastWithin(name: string): boolean {
-		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
-	}
-	addResolvedImport(oldParent: List<string>, child: string): CompileState {
-		let namespace = this.maybeLocation.map((location: Location) => location.namespace).orElse(Lists.empty());
-		let newParent = oldParent;
-		if (Platform.TypeScript === this.platform) {
-			if (namespace.isEmpty()) {
-				newParent = newParent.addFirst(".");
-			}
-			let i = 0;
-			let size = namespace.size();
-			while (i < size) {
-				newParent = newParent.addFirst("..");
-				i++;
-			}
-		}
-		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()) {
-			return this;
-		}
-		let importString = new Import(newParent, child);
-		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	withLocation(namespace: Location): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
-	}
-	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	pushStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
-	}
-	resolve(name: string): Option<Type> {
-		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name(), name)).map((definition1: Definition) => definition1.type()).next();
-	}
-	clearImports(): CompileState {
-		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	clearOutput(): CompileState {
-		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	addSource(source: Source): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
-	}
-	findSource(name: string): Option<Source> {
-		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
-	}
-	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base))) {
-			return this;
-		}
-		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
-	}
-	popStructureName(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-	}
-	mapLocation(mapper: (arg0 : Location) => Location): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
-	}
-	withPlatform(platform: Platform): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
-	}
 }
 class ConstructorHeader implements MethodHeader<ConstructorHeader> {
 	generateWithAfterName(afterName: string): string {
@@ -438,7 +345,7 @@ class VarArgs implements Type {
 		return "...";
 	}
 }
-class Import {
+export class Import {
 	namespace: List<string>;
 	child: string;
 	constructor (namespace: List<string>, child: string) {
@@ -454,7 +361,7 @@ class Import {
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }
-class Source {
+export class Source {
 	sourceDirectory: Path;
 	source: Path;
 	constructor (sourceDirectory: Path, source: Path) {
@@ -476,7 +383,7 @@ class Source {
 		return new Location(this.computeNamespace(), this.computeName());
 	}
 }
-class Location {
+export class Location {
 	namespace: List<string>;
 	name: string;
 	constructor (namespace: List<string>, name: string) {
@@ -541,7 +448,7 @@ class BooleanType implements Type {
 		return "";
 	}
 }
-class Platform {
+export class Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
 	static Windows: Platform = new Platform("windows", "h", "c");
@@ -608,7 +515,7 @@ export class Main {
 	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
 		let output = Main.compileRoot(state1, source, input);
-		let location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
+		let location = output.left().maybeLocation().orElse(new Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
 		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
 		if (!targetParent.exists()) {
@@ -627,17 +534,18 @@ export class Main {
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Map<string, string>> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
 		let statementsState = statementsTuple.left();
-		let imports = statementsState.imports.query().map((anImport: Import) => anImport.generate(state.platform)).collect(new Joiner("")).orElse("");
+		let imports = statementsState.imports().query().map((anImport: Import) => anImport.generate(state.platform())).collect(new Joiner("")).orElse("");
 		let compileState = statementsState.clearImports().clearOutput();
 		let withMain = Main.createMain(source);
 		let entries = new HashMap<string, string>();
-		if (Platform.Windows === state.platform) {
+		let platform = state.platform();
+		if (Platform.Windows === platform) {
 			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
-			/*entries.put(state.platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(state.platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output + statementsTuple.right() + withMain)*/;
+			/*entries.put(platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
-			/*entries.put(state.platform.extension[0], imports + statementsState.output + statementsTuple.right() + withMain)*/;
+			/*entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		return new Tuple2Impl<>(compileState, entries);
 	}
@@ -805,7 +713,7 @@ export class Main {
 		}
 	}
 	static retainStruct(infix: string, outputContentState: CompileState): string {
-		if (Platform.Magma === outputContentState.platform) {
+		if (Platform.Magma === outputContentState.platform()) {
 			return "struct ";
 		}
 		return infix;
@@ -860,7 +768,7 @@ export class Main {
 				}
 				return new None<Tuple2<CompileState, string>>();
 			}).or(() => {
-				if (state.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+				if (state.structureNames().findLast().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, string>>();
@@ -892,7 +800,7 @@ export class Main {
 		});
 	}
 	static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
-		if (Platform.Magma === parametersState.platform) {
+		if (Platform.Magma === parametersState.platform()) {
 			return header.addModifier("def").removeModifier("mut");
 		}
 		return header;
@@ -915,12 +823,12 @@ export class Main {
 		}
 	}
 	static compileReturnWithoutSuffix(state1: CompileState, input1: string): Option<Tuple2<CompileState, string>> {
-		return Main.compileReturn(input1, (withoutPrefix: string) => Main.compileValue(state1, withoutPrefix)).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), Main.generateIndent(state1.depth) + tuple.right()));
+		return Main.compileReturn(input1, (withoutPrefix: string) => Main.compileValue(state1, withoutPrefix)).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), Main.generateIndent(state1.depth()) + tuple.right()));
 	}
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd: string, content: string) => Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
 			let contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
-			let indent = Main.generateIndent(state.depth);
+			let indent = Main.generateIndent(state.depth());
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 		}))));
 	}
@@ -963,7 +871,7 @@ export class Main {
 	static compileFunctionStatement(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
 			let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(valueTuple.left(), Main.generateIndent(state.depth) + valueTuple.right() + ";"));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(valueTuple.left(), Main.generateIndent(state.depth()) + valueTuple.right() + ";"));
 		});
 	}
 	static generateIndent(indent: number): string {
@@ -996,7 +904,7 @@ export class Main {
 		return Main.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart: string, args: string) => Main.compileSuffix(callerWithArgStart, "(", (callerString: string) => Main.compilePrefix(Strings.strip(callerString), "new ", (type: string) => Main.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, string>) => {
 			let callerState = callerTuple.left();
 			let caller = callerTuple.right();
-			return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform), args);
+			return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform()), args);
 		})).or(() => Main.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args))))));
 	}
 	static splitFoldedLast(input: string, delimiter: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Option<Tuple2<string, string>> {
@@ -1102,7 +1010,7 @@ export class Main {
 			let statementsState = statementsTuple.left();
 			let statements = statementsTuple.right();
 			let exited = statementsState.exitDepth();
-			return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth) + "}");
+			return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth()) + "}");
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
 	static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
@@ -1205,7 +1113,7 @@ export class Main {
 	}
 	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
-			let structureName = state.structureNames.findLast().orElse("");
+			let structureName = state.structureNames().findLast().orElse("");
 			return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => new Tuple2Impl<CompileState, string>(tuple.left(), stringOption));
 		})).map((tuple: Tuple2<CompileState, List<string>>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
 	}
@@ -1263,7 +1171,7 @@ export class Main {
 	}
 	static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<string>, typeParams: List<string>, oldModifiers: List<string>, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
 		return Main.parseType(state, type).flatMap((typeTuple: Tuple2<CompileState, Type>) => {
-			let newModifiers = Main.modifyModifiers(oldModifiers, state.platform);
+			let newModifiers = Main.modifyModifiers(oldModifiers, state.platform());
 			let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
 			return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
 		});
@@ -1312,7 +1220,7 @@ export class Main {
 		return new None<Tuple2<CompileState, Type>>();
 	}
 	static parsePrimitive(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
-		return Main.findPrimitiveValue(Strings.strip(input), state.platform).map((result: Type) => new Tuple2Impl<CompileState, Type>(state, result));
+		return Main.findPrimitiveValue(Strings.strip(input), state.platform()).map((result: Type) => new Tuple2Impl<CompileState, Type>(state, result));
 	}
 	static findPrimitiveValue(input: string, platform: Platform): Option<Type> {
 		let stripped = Strings.strip(input);
