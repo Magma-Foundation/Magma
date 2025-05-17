@@ -38,7 +38,7 @@ import { Option } from "../../../magma/api/option/Option";
 import { Result } from "../../../magma/api/result/Result";
 import { List } from "../../../magma/api/collect/list/List";
 import { Query } from "../../../magma/api/collect/Query";
-export interface Path {
+export struct Path {
 	asString(): string;
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;

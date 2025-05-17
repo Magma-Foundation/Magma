@@ -33,5 +33,5 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface Actual {
+export struct Actual {
 }

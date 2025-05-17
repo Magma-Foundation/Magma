@@ -33,7 +33,7 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface Tuple2<A, B> {
+export struct Tuple2<A, B> {
 	left(): A;
 	right(): B;
 }

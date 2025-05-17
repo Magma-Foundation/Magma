@@ -33,6 +33,6 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface IOError {
+export struct IOError {
 	display(): string;
 }

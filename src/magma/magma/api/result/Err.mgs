@@ -37,7 +37,7 @@ import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
 import { Some } from "../../../magma/api/option/Some";
 import { None } from "../../../magma/api/option/None";
-export class Err<T, X> implements Result<T, X> {
+export struct Err<T, X> implements Result<T, X> {
 	error: X;
 	constructor (error: X) {
 		this.error = error;

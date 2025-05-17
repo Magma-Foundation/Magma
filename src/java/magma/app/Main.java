@@ -1084,7 +1084,9 @@ public final class Main {
         }
         else {
             var extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
-            var generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            var infix1 = Platform.Magma == outputContentState.platform ? "struct " : infix;
+
+            var generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
         }
     }

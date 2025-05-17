@@ -36,7 +36,7 @@
 import { List } from "../../../../magma/api/collect/list/List";
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { Lists } from "../../../../jvm/api/collect/list/Lists";
-export class ListCollector<T> implements Collector<T, List<T>> {
+export struct ListCollector<T> implements Collector<T, List<T>> {
 	createInitial(): List<T> {
 		return Lists.empty();
 	}

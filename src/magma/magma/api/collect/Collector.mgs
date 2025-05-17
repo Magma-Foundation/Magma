@@ -33,7 +33,7 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-export interface Collector<T, C> {
+export struct Collector<T, C> {
 	createInitial(): C;
 	fold(current: C, element: T): C;
 }

@@ -34,7 +34,7 @@
 	Main: magma.app
 ]*/
 import { Tuple2 } from "../../magma/api/Tuple2";
-export class Tuple2Impl<A, B> implements Tuple2<A, B> {
+export struct Tuple2Impl<A, B> implements Tuple2<A, B> {
 	leftValue: A;
 	rightValue: B;
 	constructor (leftValue: A, rightValue: B) {

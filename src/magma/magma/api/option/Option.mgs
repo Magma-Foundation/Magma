@@ -34,7 +34,7 @@
 	Main: magma.app
 ]*/
 import { Tuple2 } from "../../../magma/api/Tuple2";
-export interface Option<T> {
+export struct Option<T> {
 	map<R>(mapper: (arg0 : T) => R): Option<R>;
 	orElse(other: T): T;
 	orElseGet(supplier: () => T): T;

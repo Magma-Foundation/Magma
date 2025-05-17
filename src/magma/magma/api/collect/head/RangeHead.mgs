@@ -37,7 +37,7 @@ import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";
 import { Some } from "../../../../magma/api/option/Some";
-export class RangeHead implements Head<number> {
+export struct RangeHead implements Head<number> {
 	length: number;
 	counter: number;
 	constructor (length: number) {

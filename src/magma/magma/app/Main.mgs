@@ -52,33 +52,33 @@ import { Queries } from "../../magma/api/collect/Queries";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
-interface MethodHeader {
+struct MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
 	removeModifier(modifier: string): MethodHeader;
 }
-interface Parameter {
+struct Parameter {
 	generate(): string;
 	asDefinition(): Option<Definition>;
 }
-interface Value extends Argument, Caller  {
+struct Value extends Argument, Caller  {
 	resolve(state: CompileState): Type;
 	generateAsEnumValue(structureName: string): Option<string>;
 }
-interface Argument {
+struct Argument {
 	toValue(): Option<Value>;
 }
-interface Caller {
+struct Caller {
 	generate(): string;
 	findChild(): Option<Value>;
 }
-interface Type {
+struct Type {
 	generate(): string;
 	isFunctional(): boolean;
 	isVar(): boolean;
 	generateBeforeName(): string;
 }
-class DivideState {
+struct DivideState {
 	segments: List<string>;
 	buffer: string;
 	depth: number;
@@ -133,7 +133,7 @@ class DivideState {
 		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
 	}
 }
-class CompileState {
+struct CompileState {
 	imports: List<Import>;
 	output: string;
 	structureNames: List<string>;
@@ -226,7 +226,7 @@ class CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
 	}
 }
-class Joiner implements Collector<string, Option<string>> {
+struct Joiner implements Collector<string, Option<string>> {
 	delimiter: string;
 	constructor (delimiter: string) {
 		this.delimiter = delimiter;
@@ -241,7 +241,7 @@ class Joiner implements Collector<string, Option<string>> {
 		return new Some<string>(maybe.map((inner: string) => inner + this.delimiter + element).orElse(element));
 	}
 }
-class Definition {
+struct Definition {
 	annotations: List<string>;
 	modifiers: List<string>;
 	typeParams: List<string>;
@@ -281,7 +281,7 @@ class Definition {
 		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 	}
 }
-class ConstructorHeader implements MethodHeader {
+struct ConstructorHeader implements MethodHeader {
 	generateWithAfterName(afterName: string): string {
 		return "constructor " + afterName;
 	}
@@ -292,7 +292,7 @@ class ConstructorHeader implements MethodHeader {
 		return this;
 	}
 }
-class Placeholder {
+struct Placeholder {
 	input: string;
 	constructor (input: string) {
 		this.input = input;
@@ -325,7 +325,7 @@ class Placeholder {
 		return new None<string>();
 	}
 }
-class Whitespace implements Parameter {
+struct Whitespace implements Parameter {
 	generate(): string {
 		return "";
 	}
@@ -333,7 +333,7 @@ class Whitespace implements Parameter {
 		return new None<Definition>();
 	}
 }
-class Access implements Value {
+struct Access implements Value {
 	child: Value;
 	property: string;
 	constructor (child: Value, property: string) {
@@ -356,7 +356,7 @@ class Access implements Value {
 		return new None<string>();
 	}
 }
-class SymbolNode {
+struct SymbolNode {
 	value: string;
 	constructor (value: string) {
 		this.value = value;
@@ -386,7 +386,7 @@ class SymbolNode {
 		return new None<string>();
 	}
 }
-class StringValue implements Value {
+struct StringValue implements Value {
 	value: string;
 	constructor (value: string) {
 		this.value = value;
@@ -407,7 +407,7 @@ class StringValue implements Value {
 		return new None<string>();
 	}
 }
-class Not implements Value {
+struct Not implements Value {
 	child: string;
 	constructor (child: string) {
 		this.child = child;
@@ -428,7 +428,7 @@ class Not implements Value {
 		return new None<string>();
 	}
 }
-class Lambda implements Value {
+struct Lambda implements Value {
 	paramNames: List<Definition>;
 	content: string;
 	constructor (paramNames: List<Definition>, content: string) {
@@ -452,7 +452,7 @@ class Lambda implements Value {
 		return new None<string>();
 	}
 }
-class Invokable implements Value {
+struct Invokable implements Value {
 	caller: Caller;
 	args: List<Value>;
 	constructor (caller: Caller, args: List<Value>) {
@@ -479,7 +479,7 @@ class Invokable implements Value {
 		return new Some<string>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
 	}
 }
-class Operation implements Value {
+struct Operation implements Value {
 	left: Value;
 	targetInfix: string;
 	right: Value;
@@ -504,7 +504,7 @@ class Operation implements Value {
 		return new None<string>();
 	}
 }
-class ConstructionCaller implements Caller {
+struct ConstructionCaller implements Caller {
 	right: string;
 	constructor (right: string) {
 		this.right = right;
@@ -516,7 +516,7 @@ class ConstructionCaller implements Caller {
 		return new None<Value>();
 	}
 }
-class FunctionType implements Type {
+struct FunctionType implements Type {
 	args: List<string>;
 	returns: string;
 	constructor (args: List<string>, returns: string) {
@@ -537,7 +537,7 @@ class FunctionType implements Type {
 		return "";
 	}
 }
-class Generic implements Type {
+struct Generic implements Type {
 	base: string;
 	args: List<string>;
 	constructor (base: string, args: List<string>) {
@@ -557,7 +557,7 @@ class Generic implements Type {
 		return "";
 	}
 }
-class VarArgs implements Type {
+struct VarArgs implements Type {
 	type: Type;
 	constructor (type: Type) {
 		this.type = type;
@@ -575,7 +575,7 @@ class VarArgs implements Type {
 		return "...";
 	}
 }
-class Import {
+struct Import {
 	namespace: List<string>;
 	child: string;
 	constructor (namespace: List<string>, child: string) {
@@ -587,7 +587,7 @@ class Import {
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }
-class Source {
+struct Source {
 	sourceDirectory: Path;
 	source: Path;
 	constructor (sourceDirectory: Path, source: Path) {
@@ -609,7 +609,7 @@ class Source {
 		return new Location(this.computeNamespace(), this.computeName());
 	}
 }
-class Location {
+struct Location {
 	namespace: List<string>;
 	name: string;
 	constructor (namespace: List<string>, name: string) {
@@ -617,7 +617,7 @@ class Location {
 		this.name = name;
 	}
 }
-class ArrayType implements Type {
+struct ArrayType implements Type {
 	child: Type;
 	constructor (child: Type) {
 		this.child = child;
@@ -635,7 +635,7 @@ class ArrayType implements Type {
 		return "";
 	}
 }
-class Platform {
+struct Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
 	root: string;
@@ -645,7 +645,7 @@ class Platform {
 		this.extension = extension;
 	}
 }
-class Primitive implements Type {
+struct Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
 	static Boolean: Primitive = new Primitive("boolean");
@@ -669,7 +669,7 @@ class Primitive implements Type {
 		return "";
 	}
 }
-export class Main {
+export struct Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
 		sourceDirectory.walk().match((children: List<Path>) => Main.runWithChildren(children, sourceDirectory), (value: IOError) => new Some<IOError>(value)).map((error: IOError) => error.display()).ifPresent((displayed: string) => Console.printErrLn(displayed));
@@ -906,7 +906,8 @@ export class Main {
 		}
 		else {
 			let extendsString = maybeSuperType.map((inner: string) => " extends " + inner).orElse("");
-			let generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+			let infix1 = /* Platform.Magma == outputContentState.platform ? "struct " : infix*/;
+			let generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""));
 		}
 	}

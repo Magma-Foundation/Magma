@@ -906,7 +906,8 @@ export class Main {
 		}
 		else {
 			let extendsString = maybeSuperType.map((inner: string) => " extends " + inner).orElse("");
-			let generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+			let infix1 = /* Platform.Magma == outputContentState.platform ? "struct " : infix*/;
+			let generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""));
 		}
 	}

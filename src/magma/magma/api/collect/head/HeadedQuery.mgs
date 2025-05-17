@@ -43,7 +43,7 @@ import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
 import { ZipHead } from "../../../../magma/api/collect/head/ZipHead";
 import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
-export class HeadedQuery<T> implements Query<T> {
+export struct HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
 	constructor (head: Head<T>) {
 		this.head = head;

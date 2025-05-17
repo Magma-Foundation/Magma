@@ -39,7 +39,7 @@ import { HeadedQuery } from "../../../magma/api/collect/head/HeadedQuery";
 import { EmptyHead } from "../../../magma/api/collect/head/EmptyHead";
 import { Head } from "../../../magma/api/collect/head/Head";
 import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
-export class Queries {
+export struct Queries {
 	static fromOption<T>(option: Option<T>): Query<T> {
 		return new HeadedQuery<T>(option.map((element: T) => Queries.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));
 	}

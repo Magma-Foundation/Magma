@@ -36,7 +36,7 @@
 import { Collector } from "../../../magma/api/collect/Collector";
 import { Option } from "../../../magma/api/option/Option";
 import { Tuple2 } from "../../../magma/api/Tuple2";
-export interface Query<T> {
+export struct Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;
 	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
