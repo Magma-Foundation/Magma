@@ -17,6 +17,7 @@
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
 	ZipHead: magma.api.collect.head, 
+	Joiner: magma.api.collect, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Queries: magma.api.collect, 
@@ -31,7 +32,10 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
-	Main: magma.app
+	Definition: magma.app, 
+	Main: magma.app, 
+	MethodHeader: magma.app, 
+	Parameter: magma.app
 ]*/
 import magma.api.option.Option;
 import magma.api.collect.list.List;
@@ -41,7 +45,10 @@ import jvm.api.text.Strings;
 import magma.api.option.None;
 import magma.api.option.Some;
 import magma.api.Tuple2Impl;
-import magma.api.collect.Collector;
+import magma.app.Definition;
+import magma.app.MethodHeader;
+import magma.app.Parameter;
+import magma.api.collect.Joiner;
 import magma.api.io.Path;
 import magma.api.io.IOError;
 import magma.api.result.Result;
@@ -52,16 +59,6 @@ import magma.api.collect.Queries;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import jvm.api.text.Characters;
-struct MethodHeader<S extends MethodHeader<S>> {
-	def generateWithAfterName(mut afterName: &[I8]): &[I8];
-	def hasAnnotation(mut annotation: &[I8]): Bool;
-	def removeModifier(mut modifier: &[I8]): S;
-	def addModifier(mut modifier: &[I8]): S;
-}
-struct Parameter {
-	def generate(): &[I8];
-	def asDefinition(): Option<Definition>;
-}
 struct Value extends Argument, Caller  {
 	def resolve(mut state: CompileState): Type;
 	def generateAsEnumValue(mut structureName: &[I8]): Option<&[I8]>;
@@ -73,7 +70,7 @@ struct Caller {
 	def generate(): &[I8];
 	def findChild(): Option<Value>;
 }
-struct Type {
+export struct Type {
 	def generate(): &[I8];
 	def isFunctional(): Bool;
 	def isVar(): Bool;
@@ -198,7 +195,7 @@ struct CompileState {
 		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
 	}
 	def resolve(name: &[I8]): Option<Type> {
-		return this.definitions.queryReversed().filter((mut definition: Definition) => Strings.equalsTo(definition.name, name)).map((mut definition1: Definition) => definition1.type).next();
+		return this.definitions.queryReversed().filter((mut definition: Definition) => Strings.equalsTo(definition.name(), name)).map((mut definition1: Definition) => definition1.type()).next();
 	}
 	def clearImports(): CompileState {
 		return CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
@@ -226,64 +223,6 @@ struct CompileState {
 	}
 	def withPlatform(platform: Platform): CompileState {
 		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
-	}
-}
-struct Joiner implements Collector<&[I8], Option<&[I8]>> {
-	mut delimiter: &[I8];
-	constructor (mut delimiter: &[I8]) {
-		this.delimiter = delimiter;
-	}
-	def static empty(): Joiner {
-		return Joiner("");
-	}
-	def createInitial(): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-	def fold(maybe: Option<&[I8]>, element: &[I8]): Option<&[I8]> {
-		return Some<&[I8]>(maybe.map((mut inner: &[I8]) => inner + this.delimiter + element).orElse(element));
-	}
-}
-struct Definition {
-	mut annotations: List<&[I8]>;
-	mut modifiers: List<&[I8]>;
-	mut typeParams: List<&[I8]>;
-	mut type: Type;
-	mut name: &[I8];
-	constructor (mut annotations: List<&[I8]>, mut modifiers: List<&[I8]>, mut typeParams: List<&[I8]>, mut type: Type, mut name: &[I8]) {
-		this.annotations = annotations;
-		this.modifiers = modifiers;
-		this.typeParams = typeParams;
-		this.type = type;
-		this.name = name;
-	}
-	def generate(): &[I8] {
-		return this.generateWithAfterName("");
-	}
-	def asDefinition(): Option<Definition> {
-		return Some<Definition>(this);
-	}
-	def generateWithAfterName(afterName: &[I8]): &[I8] {
-		let joinedTypeParams = this.joinTypeParams();
-		let joinedModifiers = this.modifiers.query().map((mut value: &[I8]) => value + " ").collect(Joiner("")).orElse("");
-		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
-	}
-	def generateType(): &[I8] {
-		if (this.type.isVar()) {
-			return "";
-		}
-		return ": " + this.type.generate();
-	}
-	def joinTypeParams(): &[I8] {
-		return Main.joinTypeParams(this.typeParams);
-	}
-	def hasAnnotation(annotation: &[I8]): Bool {
-		return this.annotations.contains(annotation, Strings.equalsTo);
-	}
-	def removeModifier(modifier: &[I8]): Definition {
-		return Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
-	}
-	def addModifier(modifier: &[I8]): Definition {
-		return Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
 	}
 }
 struct ConstructorHeader implements MethodHeader<ConstructorHeader> {
@@ -704,10 +643,10 @@ struct Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
 	root: &[I8];
-	extension: &[I8];
-	constructor (root: &[I8], extension: &[I8]) {
+	extension: &[I8][];
+	constructor (root: &[I8], ...extensions: &[I8][]) {
 		this.root = root;
-		this.extension = extension;
+		this.extension = extensions;
 	}
 }
 struct Primitive implements Type {
@@ -774,8 +713,12 @@ export struct Main {
 				return Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
-		let target = targetParent.resolveChild(location.name + "." + platform.extension);
-		return Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
+		let initial: Option<IOError> = None<IOError>();
+		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (mut ioErrorOption: Option<IOError>, mut extension: &[I8]) => {
+			let target = targetParent.resolveChild(location.name + "." + extension);
+			return ioErrorOption.or(() => target.writeString(output.right()));
+		});
+		return Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
 	}
 	def static compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, &[I8]> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
@@ -933,7 +876,7 @@ export struct Main {
 		let outputContentState = outputContentTuple.left().popStructureName();
 		let outputContent = outputContentTuple.right();
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
-		let joinedTypeParams = Main.joinTypeParams(typeParams);
+		let joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
 		let implementingString = Main.generateImplementing(maybeImplementing);
 		let newModifiers = Main.modifyModifiers0(oldModifiers);
 		let joinedModifiers = newModifiers.query().map((mut value: &[I8]) => value + " ").collect(Joiner.empty()).orElse("");
@@ -966,9 +909,6 @@ export struct Main {
 	def static generateImplementing(maybeImplementing: Option<Type>): &[I8] {
 		return maybeImplementing.map((mut type: Type) => type.generate()).map((mut inner: &[I8]) => " implements " + inner).orElse("");
 	}
-	def static joinTypeParams(typeParams: List<&[I8]>): &[I8] {
-		return typeParams.query().collect(Joiner(", ")).map((mut inner: &[I8]) => "<" + inner + ">").orElse("");
-	}
 	def static generateConstructorFromRecordParameters(parameters: List<Definition>): &[I8] {
 		return parameters.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).map((mut generatedParameters: &[I8]) => Main.generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
 	}
@@ -977,7 +917,7 @@ export struct Main {
 		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 	}
 	def static generateConstructorAssignments(parameters: List<Definition>): &[I8] {
-		return parameters.query().map((mut definition: Definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(Joiner.empty()).orElse("");
+		return parameters.query().map((mut definition: Definition) => "\n\t\tthis." + definition.name() + " = " + definition.name() + ";").collect(Joiner.empty()).orElse("");
 	}
 	def static joinParameters(parameters: List<Definition>): &[I8] {
 		return parameters.query().map((mut definition: Definition) => definition.generate()).map((mut generated: &[I8]) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");

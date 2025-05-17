@@ -17,6 +17,7 @@
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
 	ZipHead: magma.api.collect.head, 
+	Joiner: magma.api.collect, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Queries: magma.api.collect, 
@@ -31,7 +32,10 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
-	Main: magma.app
+	Definition: magma.app, 
+	Main: magma.app, 
+	MethodHeader: magma.app, 
+	Parameter: magma.app
 ]*/
 import { Option } from "../../magma/api/option/Option";
 import { List } from "../../magma/api/collect/list/List";
@@ -41,7 +45,10 @@ import { Strings } from "../../jvm/api/text/Strings";
 import { None } from "../../magma/api/option/None";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Collector } from "../../magma/api/collect/Collector";
+import { Definition } from "../../magma/app/Definition";
+import { MethodHeader } from "../../magma/app/MethodHeader";
+import { Parameter } from "../../magma/app/Parameter";
+import { Joiner } from "../../magma/api/collect/Joiner";
 import { Path } from "../../magma/api/io/Path";
 import { IOError } from "../../magma/api/io/IOError";
 import { Result } from "../../magma/api/result/Result";
@@ -52,16 +59,6 @@ import { Queries } from "../../magma/api/collect/Queries";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
-interface MethodHeader<S extends MethodHeader<S>> {
-	generateWithAfterName(afterName: string): string;
-	hasAnnotation(annotation: string): boolean;
-	removeModifier(modifier: string): S;
-	addModifier(modifier: string): S;
-}
-interface Parameter {
-	generate(): string;
-	asDefinition(): Option<Definition>;
-}
 interface Value extends Argument, Caller  {
 	resolve(state: CompileState): Type;
 	generateAsEnumValue(structureName: string): Option<string>;
@@ -73,7 +70,7 @@ interface Caller {
 	generate(): string;
 	findChild(): Option<Value>;
 }
-interface Type {
+export interface Type {
 	generate(): string;
 	isFunctional(): boolean;
 	isVar(): boolean;
@@ -198,7 +195,7 @@ class CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
 	}
 	resolve(name: string): Option<Type> {
-		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
+		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name(), name)).map((definition1: Definition) => definition1.type()).next();
 	}
 	clearImports(): CompileState {
 		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
@@ -226,64 +223,6 @@ class CompileState {
 	}
 	withPlatform(platform: Platform): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
-	}
-}
-class Joiner implements Collector<string, Option<string>> {
-	delimiter: string;
-	constructor (delimiter: string) {
-		this.delimiter = delimiter;
-	}
-	static empty(): Joiner {
-		return new Joiner("");
-	}
-	createInitial(): Option<string> {
-		return new None<string>();
-	}
-	fold(maybe: Option<string>, element: string): Option<string> {
-		return new Some<string>(maybe.map((inner: string) => inner + this.delimiter + element).orElse(element));
-	}
-}
-class Definition {
-	annotations: List<string>;
-	modifiers: List<string>;
-	typeParams: List<string>;
-	type: Type;
-	name: string;
-	constructor (annotations: List<string>, modifiers: List<string>, typeParams: List<string>, type: Type, name: string) {
-		this.annotations = annotations;
-		this.modifiers = modifiers;
-		this.typeParams = typeParams;
-		this.type = type;
-		this.name = name;
-	}
-	generate(): string {
-		return this.generateWithAfterName("");
-	}
-	asDefinition(): Option<Definition> {
-		return new Some<Definition>(this);
-	}
-	generateWithAfterName(afterName: string): string {
-		let joinedTypeParams = this.joinTypeParams();
-		let joinedModifiers = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
-		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
-	}
-	generateType(): string {
-		if (this.type.isVar()) {
-			return "";
-		}
-		return ": " + this.type.generate();
-	}
-	joinTypeParams(): string {
-		return Main.joinTypeParams(this.typeParams);
-	}
-	hasAnnotation(annotation: string): boolean {
-		return this.annotations.contains(annotation, Strings.equalsTo);
-	}
-	removeModifier(modifier: string): Definition {
-		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
-	}
-	addModifier(modifier: string): Definition {
-		return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
 	}
 }
 class ConstructorHeader implements MethodHeader<ConstructorHeader> {
@@ -704,10 +643,10 @@ class Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
 	root: string;
-	extension: string;
-	constructor (root: string, extension: string) {
+	extension: string[];
+	constructor (root: string, ...extensions: string[]) {
 		this.root = root;
-		this.extension = extension;
+		this.extension = extensions;
 	}
 }
 class Primitive implements Type {
@@ -774,8 +713,12 @@ export class Main {
 				return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
-		let target = targetParent.resolveChild(location.name + "." + platform.extension);
-		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
+		let initial: Option<IOError> = new None<IOError>();
+		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: string) => {
+			let target = targetParent.resolveChild(location.name + "." + extension);
+			return ioErrorOption.or(() => target.writeString(output.right()));
+		});
+		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
@@ -933,7 +876,7 @@ export class Main {
 		let outputContentState = outputContentTuple.left().popStructureName();
 		let outputContent = outputContentTuple.right();
 		let constructorString = Main.generateConstructorFromRecordParameters(parameters);
-		let joinedTypeParams = Main.joinTypeParams(typeParams);
+		let joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
 		let implementingString = Main.generateImplementing(maybeImplementing);
 		let newModifiers = Main.modifyModifiers0(oldModifiers);
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
@@ -966,9 +909,6 @@ export class Main {
 	static generateImplementing(maybeImplementing: Option<Type>): string {
 		return maybeImplementing.map((type: Type) => type.generate()).map((inner: string) => " implements " + inner).orElse("");
 	}
-	static joinTypeParams(typeParams: List<string>): string {
-		return typeParams.query().collect(new Joiner(", ")).map((inner: string) => "<" + inner + ">").orElse("");
-	}
 	static generateConstructorFromRecordParameters(parameters: List<Definition>): string {
 		return parameters.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).map((generatedParameters: string) => Main.generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
 	}
@@ -977,7 +917,7 @@ export class Main {
 		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 	}
 	static generateConstructorAssignments(parameters: List<Definition>): string {
-		return parameters.query().map((definition: Definition) => "\n\t\tthis." + definition.name + " = " + definition.name + ";").collect(Joiner.empty()).orElse("");
+		return parameters.query().map((definition: Definition) => "\n\t\tthis." + definition.name() + " = " + definition.name() + ";").collect(Joiner.empty()).orElse("");
 	}
 	static joinParameters(parameters: List<Definition>): string {
 		return parameters.query().map((definition: Definition) => definition.generate()).map((generated: string) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");

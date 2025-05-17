@@ -3,6 +3,7 @@ package magma.api.collect;
 import magma.api.collect.head.EmptyHead;
 import magma.api.collect.head.Head;
 import magma.api.collect.head.HeadedQuery;
+import magma.api.collect.head.RangeHead;
 import magma.api.collect.head.SingleHead;
 import magma.api.option.Option;
 
@@ -13,5 +14,9 @@ public final class Queries {
 
     private static <T> Head<T> getTSingleHead(final T element) {
         return new SingleHead<T>(element);
+    }
+
+    public static <T> Query<T> fromArray(final T[] elements) {
+        return new HeadedQuery<Integer>(new RangeHead(elements.length)).map((Integer index) -> elements[index]);
     }
 }

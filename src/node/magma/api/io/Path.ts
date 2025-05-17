@@ -17,6 +17,7 @@
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
 	ZipHead: magma.api.collect.head, 
+	Joiner: magma.api.collect, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Queries: magma.api.collect, 
@@ -31,7 +32,10 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
-	Main: magma.app
+	Definition: magma.app, 
+	Main: magma.app, 
+	MethodHeader: magma.app, 
+	Parameter: magma.app
 ]*/
 import { IOError } from "../../../magma/api/io/IOError";
 import { Option } from "../../../magma/api/option/Option";

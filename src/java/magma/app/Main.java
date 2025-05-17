@@ -7,7 +7,7 @@ import jvm.api.text.Characters;
 import jvm.api.text.Strings;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.api.collect.Collector;
+import magma.api.collect.Joiner;
 import magma.api.collect.Queries;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
@@ -24,22 +24,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
-    private interface MethodHeader<S extends MethodHeader<S>> {
-        String generateWithAfterName(String afterName);
-
-        boolean hasAnnotation(String annotation);
-
-        S removeModifier(String modifier);
-
-        S addModifier(String modifier);
-    }
-
-    private interface Parameter {
-        String generate();
-
-        Option<Definition> asDefinition();
-    }
-
     private interface Value extends Argument, Caller {
         Type resolve(CompileState state);
 
@@ -56,7 +40,7 @@ public final class Main {
         Option<Value> findChild();
     }
 
-    private interface Type {
+    public interface Type {
         String generate();
 
         boolean isFunctional();
@@ -199,8 +183,8 @@ public final class Main {
 
         Option<Type> resolve(final String name) {
             return this.definitions.queryReversed()
-                    .filter((Definition definition) -> Strings.equalsTo(definition.name, name))
-                    .map((Definition definition1) -> definition1.type)
+                    .filter((Definition definition) -> Strings.equalsTo(definition.name(), name))
+                    .map((Definition definition1) -> definition1.type())
                     .next();
         }
 
@@ -242,78 +226,6 @@ public final class Main {
 
         CompileState withPlatform(final Platform platform) {
             return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
-        }
-    }
-
-    private record Joiner(String delimiter) implements Collector<String, Option<String>> {
-        private static Joiner empty() {
-            return new Joiner("");
-        }
-
-        @Override
-        public Option<String> createInitial() {
-            return new None<String>();
-        }
-
-        @Override
-        public Option<String> fold(final Option<String> maybe, final String element) {
-            return new Some<String>(maybe.map((String inner) -> inner + this.delimiter + element).orElse(element));
-        }
-    }
-
-    private record Definition(
-            List<String> annotations,
-            List<String> modifiers,
-            List<String> typeParams,
-            Type type,
-            String name
-    ) implements MethodHeader<Definition>, Parameter {
-        @Override
-        public String generate() {
-            return this.generateWithAfterName("");
-        }
-
-        @Override
-        public Option<Definition> asDefinition() {
-            return new Some<Definition>(this);
-        }
-
-        @Override
-        public String generateWithAfterName(final String afterName) {
-            final var joinedTypeParams = this.joinTypeParams();
-            final var joinedModifiers = this.modifiers.query()
-                    .map((String value) -> value + " ")
-                    .collect(new Joiner(""))
-                    .orElse("");
-
-            return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
-        }
-
-        private String generateType() {
-            if (this.type.isVar()) {
-                return "";
-            }
-
-            return ": " + this.type.generate();
-        }
-
-        private String joinTypeParams() {
-            return Main.joinTypeParams(this.typeParams);
-        }
-
-        @Override
-        public boolean hasAnnotation(final String annotation) {
-            return this.annotations.contains(annotation, Strings::equalsTo);
-        }
-
-        @Override
-        public Definition removeModifier(final String modifier) {
-            return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings::equalsTo), this.typeParams, this.type, this.name);
-        }
-
-        @Override
-        public Definition addModifier(final String modifier) {
-            return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
         }
     }
 
@@ -885,8 +797,13 @@ public final class Main {
             }
         }
 
-        final var target = targetParent.resolveChild(location.name + "." + platform.extension);
-        return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
+        final Option<IOError> initial = new None<IOError>();
+        final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (Option<IOError> ioErrorOption, String extension) -> {
+            final var target = targetParent.resolveChild(location.name + "." + extension);
+            return ioErrorOption.or(() -> target.writeString(output.right()));
+        });
+
+        return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
     }
 
     private static Tuple2Impl<CompileState, String> compileRoot(final CompileState state, final Source source, final String input) {
@@ -1124,7 +1041,7 @@ public final class Main {
         final var outputContent = outputContentTuple.right();
 
         final var constructorString = Main.generateConstructorFromRecordParameters(parameters);
-        final var joinedTypeParams = Main.joinTypeParams(typeParams);
+        final var joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
         final var implementingString = Main.generateImplementing(maybeImplementing);
         final var newModifiers = Main.modifyModifiers0(oldModifiers);
 
@@ -1171,13 +1088,6 @@ public final class Main {
                 .orElse("");
     }
 
-    private static String joinTypeParams(final List<String> typeParams) {
-        return typeParams.query()
-                .collect(new Joiner(", "))
-                .map((String inner) -> "<" + inner + ">")
-                .orElse("");
-    }
-
     private static String generateConstructorFromRecordParameters(final List<Definition> parameters) {
         return parameters.query()
                 .map((Definition definition) -> definition.generate())
@@ -1196,7 +1106,7 @@ public final class Main {
 
     private static String generateConstructorAssignments(final List<Definition> parameters) {
         return parameters.query()
-                .map((Definition definition) -> "\n\t\tthis." + definition.name + " = " + definition.name + ";")
+                .map((Definition definition) -> "\n\t\tthis." + definition.name() + " = " + definition.name() + ";")
                 .collect(Joiner.empty())
                 .orElse("");
     }
@@ -2134,12 +2044,13 @@ public final class Main {
     private enum Platform {
         TypeScript("node", "ts"),
         Magma("magma", "mgs");
-        final String root;
-        final String extension;
 
-        Platform(final String root, final String extension) {
+        final String root;
+        final String[] extension;
+
+        Platform(final String root, final String... extensions) {
             this.root = root;
-            this.extension = extension;
+            this.extension = extensions;
         }
     }
 

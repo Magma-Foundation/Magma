@@ -37,18 +37,9 @@
 	MethodHeader: magma.app, 
 	Parameter: magma.app
 ]*/
-import magma.api.Tuple2;
-import magma.api.collect.head.Head;
-import magma.api.collect.Query;
-import magma.api.option.Option;
-export struct ZipHead<T, R> implements Head<Tuple2<T, R>> {
-	mut head: Head<T>;
-	mut other: Query<R>;
-	constructor (mut head: Head<T>, mut other: Query<R>) {
-		this.head = head;
-		this.other = other;
-	}
-	def next(): Option<Tuple2<T, R>> {
-		return this.head.next().and(() => this.other.next());
-	}
+import { Definition } from "../../magma/app/Definition";
+import { Option } from "../../magma/api/option/Option";
+interface Parameter {
+	generate(): string;
+	asDefinition(): Option<Definition>;
 }
