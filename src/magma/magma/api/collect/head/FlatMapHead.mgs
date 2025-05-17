@@ -1,7 +1,6 @@
-import magma.api.collect.head.Head;
-import magma.api.collect.Query;
-import magma.api.option.Option;
-import magma.api.option.None;
+import magma.api.collect.head.{ Head };
+import magma.api.collect.{ Query };
+import magma.api.option.{ Option, None };
 export struct FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;

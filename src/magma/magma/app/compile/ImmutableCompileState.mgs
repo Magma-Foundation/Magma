@@ -1,16 +1,11 @@
-import magma.app.compile.CompileState;
-import magma.app.io.Platform;
-import magma.app.io.Location;
-import magma.api.option.Option;
-import magma.app.io.Source;
-import magma.api.collect.list.List;
-import magma.app.compile.Import;
-import magma.app.compile.define.Definition;
-import magma.api.option.None;
-import jvm.api.collect.list.Lists;
-import jvm.api.text.Strings;
-import magma.api.option.Some;
-import magma.api.Type;
+import magma.app.compile.{ CompileState, Import };
+import magma.app.io.{ Platform, Location, Source };
+import magma.api.option.{ Option, None, Some };
+import magma.api.collect.list.{ List };
+import magma.app.compile.define.{ Definition };
+import jvm.api.collect.list.{ Lists };
+import jvm.api.text.{ Strings };
+import magma.api.{ Type };
 export struct ImmutableCompileState implements CompileState {
 	mut platform: Platform;
 	mut findCurrentLocation: Option<Location>;

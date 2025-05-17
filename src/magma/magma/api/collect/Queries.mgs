@@ -1,9 +1,6 @@
-import magma.api.collect.Query;
-import magma.api.option.Option;
-import magma.api.collect.head.HeadedQuery;
-import magma.api.collect.head.EmptyHead;
-import magma.api.collect.head.Head;
-import magma.api.collect.head.SingleHead;
+import magma.api.collect.{ Query };
+import magma.api.option.{ Option };
+import magma.api.collect.head.{ HeadedQuery, EmptyHead, Head, SingleHead };
 export struct Queries {
 	static def fromOption<T>(option: Option<T>): Query<T> {
 		return HeadedQuery<T>(option/*Option<T>*/.map((mut element: T) => Queries/*auto*/.getTSingleHead(element/*T*/)).orElseGet(() => EmptyHead<T>(/*auto*/)));

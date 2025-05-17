@@ -1,11 +1,10 @@
-import magma.api.collect.list.List;
-import magma.api.Type;
-import jvm.api.collect.list.Lists;
-import magma.app.io.Platform;
-import magma.api.option.Option;
-import magma.api.option.Some;
-import magma.api.collect.Joiner;
-import jvm.api.text.Strings;
+import magma.api.collect.list.{ List };
+import magma.api.{ Type };
+import jvm.api.collect.list.{ Lists };
+import magma.app.io.{ Platform };
+import magma.api.option.{ Option, Some };
+import magma.api.collect.{ Joiner };
+import jvm.api.text.{ Strings };
 export struct Definition {
 	mut annotations: List<&[I8]>;
 	mut modifiers: List<&[I8]>;

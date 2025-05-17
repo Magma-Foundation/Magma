@@ -1,7 +1,6 @@
-import magma.api.Type;
-import magma.api.collect.list.List;
-import magma.api.Tuple2;
-import magma.api.collect.Joiner;
+import magma.api.{ Type, Tuple2 };
+import magma.api.collect.list.{ List };
+import magma.api.collect.{ Joiner };
 export struct FunctionType implements Type {
 	mut args: List<&[I8]>;
 	mut returns: &[I8];

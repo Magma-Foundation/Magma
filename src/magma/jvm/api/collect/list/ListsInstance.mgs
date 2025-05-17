@@ -1,4 +1,4 @@
-import magma.api.collect.list.List;
+import magma.api.collect.list.{ List };
 export interface ListsInstance {
 	static def fromArray<T>(elements: T[]): List<T>;
 	static def empty<T>(): List<T>;

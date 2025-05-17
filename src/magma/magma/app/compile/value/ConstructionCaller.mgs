@@ -1,8 +1,6 @@
-import magma.app.compile.value.Caller;
-import magma.app.io.Platform;
-import magma.app.compile.value.Value;
-import magma.api.option.Option;
-import magma.api.option.None;
+import magma.app.compile.value.{ Caller, Value };
+import magma.app.io.{ Platform };
+import magma.api.option.{ Option, None };
 export struct ConstructionCaller implements Caller {
 	mut right: &[I8];
 	mut platform: Platform;

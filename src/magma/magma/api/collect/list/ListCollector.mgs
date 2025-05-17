@@ -1,6 +1,6 @@
-import magma.api.collect.list.List;
-import magma.api.collect.Collector;
-import jvm.api.collect.list.Lists;
+import magma.api.collect.list.{ List };
+import magma.api.collect.{ Collector };
+import jvm.api.collect.list.{ Lists };
 export struct ListCollector<T> implements Collector<T, List<T>> {
 	def createInitial(): List<T> {
 		return Lists/*auto*/.empty(/*auto*/);

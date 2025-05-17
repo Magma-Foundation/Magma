@@ -1,7 +1,5 @@
-import magma.api.result.Result;
-import magma.api.option.Option;
-import magma.api.option.Some;
-import magma.api.option.None;
+import magma.api.result.{ Result };
+import magma.api.option.{ Option, Some, None };
 export struct Err<T, X> implements Result<T, X> {
 	mut error: X;
 	constructor (mut error: X) {

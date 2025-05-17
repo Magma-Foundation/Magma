@@ -1,6 +1,6 @@
-import magma.api.collect.Query;
-import magma.api.option.Option;
-import magma.api.Tuple2;
+import magma.api.collect.{ Query };
+import magma.api.option.{ Option };
+import magma.api.{ Tuple2 };
 export struct List<T> {
 	def addLast(mut element: T): List<T>;
 	def query(): Query<T>;

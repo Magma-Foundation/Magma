@@ -1,6 +1,5 @@
-import magma.api.option.Option;
-import magma.api.Tuple2;
-import magma.api.Tuple2Impl;
+import magma.api.option.{ Option };
+import magma.api.{ Tuple2, Tuple2Impl };
 export struct None<T> implements Option<T> {
 	def map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return None<R>(/*auto*/);

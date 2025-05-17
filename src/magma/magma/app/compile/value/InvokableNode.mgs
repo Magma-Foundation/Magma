@@ -1,13 +1,10 @@
-import magma.app.compile.value.Value;
-import magma.app.compile.value.Caller;
-import magma.api.collect.list.List;
-import magma.app.io.Platform;
-import magma.api.collect.Joiner;
-import magma.api.option.Option;
-import magma.api.option.Some;
-import magma.api.option.None;
-import magma.api.Type;
-import magma.app.compile.type.PrimitiveType;
+import magma.app.compile.value.{ Value, Caller };
+import magma.api.collect.list.{ List };
+import magma.app.io.{ Platform };
+import magma.api.collect.{ Joiner };
+import magma.api.option.{ Option, Some, None };
+import magma.api.{ Type };
+import magma.app.compile.type.{ PrimitiveType };
 export struct InvokableNode implements Value {
 	mut caller: Caller;
 	mut args: List<Value>;

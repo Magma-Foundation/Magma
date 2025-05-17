@@ -136,10 +136,7 @@ public final class Main {
         final var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
         final var statementsState = statementsTuple.left();
 
-        final var imports = statementsState.imports().query()
-                .map((Import anImport) -> anImport.generate(state.platform()))
-                .collect(new Joiner(""))
-                .orElse("");
+        final var imports = Main.generateOrFoldImports(statementsState);
 
         final var compileState = statementsState.clearImports().clear();
         final var withMain = Main.createMain(source);
@@ -156,6 +153,71 @@ public final class Main {
         }
 
         return new Tuple2Impl<>(compileState, entries);
+    }
+
+    private static String generateOrFoldImports(final CompileState state) {
+        if (state.isPlatform(Platform.Magma)) {
+            return Main.foldImports(state);
+        }
+
+        return Main.generateImports(state);
+    }
+
+    private static String generateImports(final CompileState state) {
+        return state.imports()
+                .query()
+                .map((Import anImport) -> anImport.generate(state.platform()))
+                .collect(new Joiner(""))
+                .orElse("");
+    }
+
+    private static String foldImports(final CompileState statementsState) {
+        return statementsState.imports()
+                .query()
+                .foldWithInitial(Lists.empty(), Main::foldImport)
+                .query()
+                .foldWithInitial("", Main::generateEntry);
+    }
+
+    private static String generateEntry(final String current, final Tuple2<List<String>, List<String>> entry) {
+        final var joinedNamespace = entry.left().query().collect(new Joiner(".")).orElse("");
+        final var joinedChildren = entry.right().query().collect(new Joiner(", ")).orElse("");
+        return current + "import " + joinedNamespace + ".{ " + joinedChildren + " };\n";
+    }
+
+    private static List<Tuple2<List<String>, List<String>>> foldImport(final List<Tuple2<List<String>, List<String>>> current, final Import anImport) {
+        final var namespace = anImport.namespace();
+        final var child = anImport.child();
+
+        if (Main.hasNamespace(current, namespace)) {
+            return Main.attachChildToMapEntries(current, namespace, child);
+        }
+        else {
+            return current.addLast(new Tuple2Impl<>(namespace, Lists.of(child)));
+        }
+    }
+
+    private static boolean hasNamespace(final List<Tuple2<List<String>, List<String>>> map, final List<String> namespace) {
+        return map.query()
+                .map(Tuple2::left)
+                .anyMatch((List<String> stringList) -> namespace.equalsTo(stringList, String::equals));
+    }
+
+    private static List<Tuple2<List<String>, List<String>>> attachChildToMapEntries(final List<Tuple2<List<String>, List<String>>> map, final List<String> namespace, final String child) {
+        return map.query()
+                .map((final Tuple2<List<String>, List<String>> tuple) -> Main.attachChildToMapEntry(namespace, child, tuple))
+                .collect(new ListCollector<>());
+    }
+
+    private static Tuple2<List<String>, List<String>> attachChildToMapEntry(final List<String> namespace, final String child, final Tuple2<List<String>, List<String>> tuple) {
+        final var entryNamespace = tuple.left();
+        final var entryValues = tuple.right();
+        if (entryNamespace.equalsTo(namespace, String::equals)) {
+            return new Tuple2Impl<>(entryNamespace, entryValues.addLast(child));
+        }
+        else {
+            return tuple;
+        }
     }
 
     private static String generateDirective(final String content) {

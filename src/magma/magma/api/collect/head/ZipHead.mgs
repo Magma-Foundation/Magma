@@ -1,7 +1,7 @@
-import magma.api.Tuple2;
-import magma.api.collect.head.Head;
-import magma.api.collect.Query;
-import magma.api.option.Option;
+import magma.api.{ Tuple2 };
+import magma.api.collect.head.{ Head };
+import magma.api.collect.{ Query };
+import magma.api.option.{ Option };
 export struct ZipHead<T, R> implements Head<Tuple2<T, R>> {
 	mut head: Head<T>;
 	mut other: Query<R>;

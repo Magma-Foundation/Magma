@@ -1,11 +1,10 @@
-import magma.app.Main;
-import magma.app.io.Platform;
-import magma.app.compile.value.Value;
-import magma.api.option.Option;
-import magma.api.option.None;
-import magma.app.compile.define.Definition;
-import magma.api.Type;
-import magma.app.compile.type.PrimitiveType;
+import magma.app.{ Main };
+import magma.app.io.{ Platform };
+import magma.app.compile.value.{ Value };
+import magma.api.option.{ Option, None };
+import magma.app.compile.define.{ Definition };
+import magma.api.{ Type };
+import magma.app.compile.type.{ PrimitiveType };
 export struct Placeholder {
 	mut input: &[I8];
 	constructor (mut input: &[I8]) {

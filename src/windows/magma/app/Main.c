@@ -89,14 +89,11 @@ static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state,
 	var ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*R*/, lambdaDefinition/*auto*/);
 	return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
 }
-auto temp(Import anImport) {
-	return anImport/*auto*/.generate(state/*CompileState*/.platform(/*auto*/));
-}
 static Tuple2Impl<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, Source source, &[I8] input) {
 	var statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*&[I8]*/, Main/*auto*/.compileRootSegment);
 	var statementsState = statementsTuple/*auto*/.left(/*auto*/);
-	var imports = statementsState/*auto*/.imports(/*auto*/).query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner("")).orElse("");
-	var compileState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
+	var imports = Main/*auto*/.generateOrFoldImports(statementsState/*CompileState*/);
+	var compileState = statementsState/*CompileState*/.clearImports(/*auto*/).clear(/*auto*/);
 	var withMain = Main/*auto*/.createMain(source/*Source*/);
 	var entries = new HashMap<&[I8], &[I8]>(/*auto*/);
 	var platform = state/*CompileState*/.platform(/*auto*/);
@@ -109,6 +106,58 @@ static Tuple2Impl<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState stat
 		/*entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain)*/;
 	}
 	return new Tuple2Impl<>(compileState/*auto*/, entries/*auto*/);
+}
+static &[I8] generateOrFoldImports(CompileState state) {
+	if (state/*CompileState*/.isPlatform(Platform/*auto*/.Magma)) {
+		return Main/*auto*/.foldImports(state/*CompileState*/);
+	}
+	return Main/*auto*/.generateImports(state/*CompileState*/);
+}
+auto temp(Import anImport) {
+	return anImport/*Import*/.generate(state/*CompileState*/.platform(/*auto*/));
+}
+static &[I8] generateImports(CompileState state) {
+	return state/*CompileState*/.imports(/*auto*/).query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner("")).orElse("");
+}
+static &[I8] foldImports(CompileState statementsState) {
+	return statementsState/*CompileState*/.imports(/*auto*/).query(/*auto*/).foldWithInitial(Lists/*auto*/.empty(/*auto*/), Main/*auto*/.foldImport).query(/*auto*/).foldWithInitial("", Main/*auto*/.generateEntry);
+}
+static &[I8] generateEntry(&[I8] current, Tuple2<List<&[I8]>, List<&[I8]>> entry) {
+	var joinedNamespace = entry/*Tuple2<List<&[I8]>, List<&[I8]>>*/.left(/*auto*/).query(/*auto*/).collect(new Joiner(".")).orElse("");
+	var joinedChildren = entry/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/).query(/*auto*/).collect(new Joiner(", ")).orElse("");
+	return current/*&[I8]*/ + "import " + joinedNamespace/*auto*/ + ".{ " + joinedChildren/*auto*/ + " };\n";
+}
+static List<Tuple2<List<&[I8]>, List<&[I8]>>> foldImport(List<Tuple2<List<&[I8]>, List<&[I8]>>> current, Import anImport) {
+	var namespace = anImport/*Import*/.namespace(/*auto*/);
+	var child = anImport/*Import*/.child(/*auto*/);
+	if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/)) {
+		return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/, child/*&[I8]*/);
+	}
+	else {
+		return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(new Tuple2Impl<>(namespace/*List<&[I8]>*/, Lists/*auto*/.of(child/*&[I8]*/)));
+	}
+}
+auto temp(List<&[I8]> stringList) {
+	return namespace/*List<&[I8]>*/.equalsTo(stringList/*auto*/, String/*auto*/.equals);
+}
+static Bool hasNamespace(List<Tuple2<List<&[I8]>, List<&[I8]>>> map, List<&[I8]> namespace) {
+	return map/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.query(/*auto*/).map(Tuple2/*auto*/.left).anyMatch(lambdaDefinition/*auto*/);
+}
+auto temp(Tuple2<List<&[I8]>, List<&[I8]>> tuple) {
+	return Main/*auto*/.attachChildToMapEntry(namespace/*List<&[I8]>*/, child/*&[I8]*/, tuple/*Tuple2<CompileState, Whitespace>*/);
+}
+static List<Tuple2<List<&[I8]>, List<&[I8]>>> attachChildToMapEntries(List<Tuple2<List<&[I8]>, List<&[I8]>>> map, List<&[I8]> namespace, &[I8] child) {
+	return map/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<>(/*auto*/));
+}
+static Tuple2<List<&[I8]>, List<&[I8]>> attachChildToMapEntry(List<&[I8]> namespace, &[I8] child, Tuple2<List<&[I8]>, List<&[I8]>> tuple) {
+	var entryNamespace = tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.left(/*auto*/);
+	var entryValues = tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/);
+	if (entryNamespace/*auto*/.equalsTo(namespace/*List<&[I8]>*/, String/*auto*/.equals)) {
+		return new Tuple2Impl<>(entryNamespace/*auto*/, entryValues/*auto*/.addLast(child/*&[I8]*/));
+	}
+	else {
+		return tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/;
+	}
 }
 static &[I8] generateDirective(&[I8] content) {
 	return "#" + content/*&[I8]*/ + "\n";
@@ -184,11 +233,11 @@ static Option<DivideState> foldDoubleQuotes(DivideState state, I8 c) {
 			break;
 		}
 		var tuple = maybeTuple/*auto*/.right(/*auto*/);
-		appended/*auto*/ = tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/);
-		if ("\\" === tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/)) {
+		appended/*auto*/ = tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.left(/*auto*/);
+		if ("\\" === tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/)) {
 			appended/*auto*/ = appended/*auto*/.popAndAppendToOption(/*auto*/).orElse(appended/*auto*/);
 		}
-		if ("\"" === tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/)) {
+		if ("\"" === tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/)) {
 			break;
 		}
 	}
@@ -844,7 +893,7 @@ auto temp(&[I8] withoutContentEnd) {{
 		var statementsTuple = Main/*auto*/.compileFunctionStatements(state/*CompileState*/.enterDepth(/*auto*/).defineAll(paramNames/*List<Definition>*/), withoutContentEnd/*&[I8]*/);
 		var statementsState = statementsTuple/*auto*/.left(/*auto*/);
 		var statements = statementsTuple/*auto*/.right(/*auto*/);
-		var exited = statementsState/*auto*/.exitDepth(/*auto*/);
+		var exited = statementsState/*CompileState*/.exitDepth(/*auto*/);
 		var content = "{" + statements/*auto*/ + exited/*auto*/.createIndent(/*auto*/) + "}";
 		if (exited/*auto*/.isPlatform(Platform/*auto*/.Windows)) {
 			return Main/*auto*/.assembleLambdaWithContent(exited/*auto*/, paramNames/*List<Definition>*/, content/*&[I8]*/);

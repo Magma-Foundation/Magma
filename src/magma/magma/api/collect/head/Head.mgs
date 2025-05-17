@@ -1,4 +1,4 @@
-import magma.api.option.Option;
+import magma.api.option.{ Option };
 export struct Head<T> {
 	def next(): Option<T>;
 }

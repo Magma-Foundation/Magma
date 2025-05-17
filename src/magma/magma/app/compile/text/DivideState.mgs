@@ -1,11 +1,8 @@
-import magma.api.collect.list.List;
-import jvm.api.collect.list.Lists;
-import magma.api.Tuple2;
-import magma.api.option.Option;
-import jvm.api.text.Strings;
-import magma.api.option.None;
-import magma.api.option.Some;
-import magma.api.Tuple2Impl;
+import magma.api.collect.list.{ List };
+import jvm.api.collect.list.{ Lists };
+import magma.api.{ Tuple2, Tuple2Impl };
+import magma.api.option.{ Option, None, Some };
+import jvm.api.text.{ Strings };
 export struct DivideState {
 	mut segments: List<&[I8]>;
 	mut buffer: &[I8];

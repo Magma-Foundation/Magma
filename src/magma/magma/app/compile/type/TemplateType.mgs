@@ -1,7 +1,7 @@
-import magma.api.Type;
-import magma.api.collect.list.List;
-import magma.app.Main;
-import jvm.api.text.Strings;
+import magma.api.{ Type };
+import magma.api.collect.list.{ List };
+import magma.app.{ Main };
+import jvm.api.text.{ Strings };
 export struct TemplateType implements Type {
 	mut base: &[I8];
 	mut args: List<&[I8]>;

@@ -99,7 +99,7 @@ export class Main {
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Map<string, string>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*string*/, Main/*auto*/.compileRootSegment);
 		let statementsState = statementsTuple/*auto*/.left(/*auto*/);
-		let imports = statementsState/*auto*/.imports(/*auto*/).query(/*auto*/).map((anImport: Import) => anImport/*auto*/.generate(state/*CompileState*/.platform(/*auto*/))).collect(new Joiner("")).orElse("");
+		let imports = Main/*auto*/.generateOrFoldImports(statementsState/*auto*/);
 		let compileState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
 		let withMain = Main/*auto*/.createMain(source/*Source*/);
 		let entries = new HashMap<string, string>(/*auto*/);
@@ -113,6 +113,49 @@ export class Main {
 			/*entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain)*/;
 		}
 		return new Tuple2Impl<>(compileState/*auto*/, entries/*auto*/);
+	}
+	static generateOrFoldImports(state: CompileState): string {
+		if (state/*CompileState*/.isPlatform(Platform/*auto*/.Magma)) {
+			return Main/*auto*/.foldImports(state/*CompileState*/);
+		}
+		return Main/*auto*/.generateImports(state/*CompileState*/);
+	}
+	static generateImports(state: CompileState): string {
+		return state/*CompileState*/.imports(/*auto*/).query(/*auto*/).map((anImport: Import) => anImport/*auto*/.generate(state/*CompileState*/.platform(/*auto*/))).collect(new Joiner("")).orElse("");
+	}
+	static foldImports(statementsState: CompileState): string {
+		return statementsState/*CompileState*/.imports(/*auto*/).query(/*auto*/).foldWithInitial(Lists/*auto*/.empty(/*auto*/), Main/*auto*/.foldImport).query(/*auto*/).foldWithInitial("", Main/*auto*/.generateEntry);
+	}
+	static generateEntry(current: string, entry: Tuple2<List<string>, List<string>>): string {
+		let joinedNamespace = entry/*Tuple2<List<string>, List<string>>*/.left(/*auto*/).query(/*auto*/).collect(new Joiner(".")).orElse("");
+		let joinedChildren = entry/*Tuple2<List<string>, List<string>>*/.right(/*auto*/).query(/*auto*/).collect(new Joiner(", ")).orElse("");
+		return current/*string*/ + "import " + joinedNamespace/*auto*/ + ".{ " + joinedChildren/*auto*/ + " };\n";
+	}
+	static foldImport(current: List<Tuple2<List<string>, List<string>>>, anImport: Import): List<Tuple2<List<string>, List<string>>> {
+		let namespace = anImport/*Import*/.namespace(/*auto*/);
+		let child = anImport/*Import*/.child(/*auto*/);
+		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<string>, List<string>>>*/, namespace/*Location*/)) {
+			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<string>, List<string>>>*/, namespace/*Location*/, child/*&[I8]*/);
+		}
+		else {
+			return current/*List<Tuple2<List<string>, List<string>>>*/.addLast(new Tuple2Impl<>(namespace/*Location*/, Lists/*auto*/.of(child/*&[I8]*/)));
+		}
+	}
+	static hasNamespace(map: List<Tuple2<List<string>, List<string>>>, namespace: List<string>): boolean {
+		return map/*List<Tuple2<List<string>, List<string>>>*/.query(/*auto*/).map(Tuple2/*auto*/.left).anyMatch((stringList: List<string>) => namespace/*List<string>*/.equalsTo(stringList/*auto*/, String/*auto*/.equals));
+	}
+	static attachChildToMapEntries(map: List<Tuple2<List<string>, List<string>>>, namespace: List<string>, child: string): List<Tuple2<List<string>, List<string>>> {
+		return map/*List<Tuple2<List<string>, List<string>>>*/.query(/*auto*/).map((tuple: Tuple2<List<string>, List<string>>) => Main/*auto*/.attachChildToMapEntry(namespace/*List<string>*/, child/*string*/, tuple/*auto*/)).collect(new ListCollector<>(/*auto*/));
+	}
+	static attachChildToMapEntry(namespace: List<string>, child: string, tuple: Tuple2<List<string>, List<string>>): Tuple2<List<string>, List<string>> {
+		let entryNamespace = tuple/*Tuple2<List<string>, List<string>>*/.left(/*auto*/);
+		let entryValues = tuple/*Tuple2<List<string>, List<string>>*/.right(/*auto*/);
+		if (entryNamespace/*auto*/.equalsTo(namespace/*List<string>*/, String/*auto*/.equals)) {
+			return new Tuple2Impl<>(entryNamespace/*auto*/, entryValues/*auto*/.addLast(child/*string*/));
+		}
+		else {
+			return tuple/*Tuple2<List<string>, List<string>>*/;
+		}
 	}
 	static generateDirective(content: string): string {
 		return "#" + content/*string*/ + "\n";
@@ -172,11 +215,11 @@ export class Main {
 				break;
 			}
 			let tuple = maybeTuple/*auto*/.right(/*auto*/);
-			appended/*auto*/ = tuple/*auto*/.left(/*auto*/);
-			if ("\\" === tuple/*auto*/.right(/*auto*/)) {
+			appended/*auto*/ = tuple/*Tuple2<List<string>, List<string>>*/.left(/*auto*/);
+			if ("\\" === tuple/*Tuple2<List<string>, List<string>>*/.right(/*auto*/)) {
 				appended/*auto*/ = appended/*auto*/.popAndAppendToOption(/*auto*/).orElse(appended/*auto*/);
 			}
-			if ("\"" === tuple/*auto*/.right(/*auto*/)) {
+			if ("\"" === tuple/*Tuple2<List<string>, List<string>>*/.right(/*auto*/)) {
 				break;
 			}
 		}
@@ -597,7 +640,7 @@ export class Main {
 			let statementsTuple = Main/*auto*/.compileFunctionStatements(state/*CompileState*/.enterDepth(/*auto*/).defineAll(paramNames/*List<Definition>*/), withoutContentEnd/*string*/);
 			let statementsState = statementsTuple/*auto*/.left(/*auto*/);
 			let statements = statementsTuple/*auto*/.right(/*auto*/);
-			let exited = statementsState/*auto*/.exitDepth(/*auto*/);
+			let exited = statementsState/*CompileState*/.exitDepth(/*auto*/);
 			let content = "{" + statements/*auto*/ + exited/*auto*/.createIndent(/*auto*/) + "}";
 			if (exited/*auto*/.isPlatform(Platform/*auto*/.Windows)) {
 				return Main/*auto*/.assembleLambdaWithContent(exited/*auto*/, paramNames/*List<Definition>*/, content/*string*/);

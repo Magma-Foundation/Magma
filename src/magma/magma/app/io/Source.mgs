@@ -1,9 +1,7 @@
-import magma.api.io.Path;
-import magma.api.io.IOError;
-import magma.api.result.Result;
-import magma.api.collect.list.List;
-import magma.api.collect.list.ListCollector;
-import magma.app.io.Location;
+import magma.api.io.{ Path, IOError };
+import magma.api.result.{ Result };
+import magma.api.collect.list.{ List, ListCollector };
+import magma.app.io.{ Location };
 export struct Source {
 	mut sourceDirectory: Path;
 	mut source: Path;

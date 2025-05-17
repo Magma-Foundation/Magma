@@ -1,7 +1,5 @@
-import magma.api.collect.head.Head;
-import magma.api.option.Option;
-import magma.api.option.None;
-import magma.api.option.Some;
+import magma.api.collect.head.{ Head };
+import magma.api.option.{ Option, None, Some };
 export struct SingleHead<T> implements Head<T> {
 	element: T;
 	mut retrieved: Bool;

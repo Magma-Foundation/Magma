@@ -1,6 +1,6 @@
-import magma.api.collect.list.List;
-import magma.app.io.Platform;
-import magma.api.collect.Joiner;
+import magma.api.collect.list.{ List };
+import magma.app.io.{ Platform };
+import magma.api.collect.{ Joiner };
 export struct Import {
 	mut namespace: List<&[I8]>;
 	mut child: &[I8];

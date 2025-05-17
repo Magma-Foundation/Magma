@@ -1,8 +1,7 @@
-import magma.app.compile.define.FunctionHeader;
-import magma.app.compile.define.Definition;
-import magma.api.collect.list.List;
-import magma.api.option.Option;
-import magma.app.io.Platform;
+import magma.app.compile.define.{ FunctionHeader, Definition };
+import magma.api.collect.list.{ List };
+import magma.api.option.{ Option };
+import magma.app.io.{ Platform };
 export struct FunctionSegment<S extends FunctionHeader<S>> {
 	mut header: FunctionHeader<S>;
 	mut definitions: List<Definition>;

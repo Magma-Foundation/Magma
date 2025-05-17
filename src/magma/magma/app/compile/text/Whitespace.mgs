@@ -1,8 +1,6 @@
-import magma.app.compile.define.Parameter;
-import magma.app.io.Platform;
-import magma.app.compile.define.Definition;
-import magma.api.option.Option;
-import magma.api.option.None;
+import magma.app.compile.define.{ Parameter, Definition };
+import magma.app.io.{ Platform };
+import magma.api.option.{ Option, None };
 export struct Whitespace implements Parameter {
 	def generate(mut platform: Platform): &[I8] {
 		return "";

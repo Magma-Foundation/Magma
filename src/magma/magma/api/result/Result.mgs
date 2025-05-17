@@ -1,4 +1,4 @@
-import magma.api.option.Option;
+import magma.api.option.{ Option };
 export struct Result<T, X> {
 	def findError(): Option<X>;
 	def findValue(): Option<T>;

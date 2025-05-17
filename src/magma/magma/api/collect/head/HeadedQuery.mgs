@@ -1,13 +1,7 @@
-import magma.api.collect.Query;
-import magma.api.collect.head.Head;
-import magma.api.option.Option;
-import magma.api.collect.Collector;
-import magma.api.collect.head.MapHead;
-import magma.api.collect.head.FlatMapHead;
-import magma.api.collect.head.EmptyHead;
-import magma.api.Tuple2;
-import magma.api.collect.head.ZipHead;
-import magma.api.collect.head.SingleHead;
+import magma.api.collect.{ Query, Collector };
+import magma.api.collect.head.{ Head, MapHead, FlatMapHead, EmptyHead, ZipHead, SingleHead };
+import magma.api.option.{ Option };
+import magma.api.{ Tuple2 };
 export struct HeadedQuery<T> implements Query<T> {
 	mut head: Head<T>;
 	constructor (mut head: Head<T>) {

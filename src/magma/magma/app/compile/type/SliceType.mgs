@@ -1,4 +1,4 @@
-import magma.api.Type;
+import magma.api.{ Type };
 export struct SliceType implements Type {
 	mut type: Type;
 	constructor (mut type: Type) {

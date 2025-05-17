@@ -1,11 +1,9 @@
-import magma.api.option.Option;
-import magma.app.io.Platform;
-import magma.api.collect.list.List;
-import magma.app.io.Location;
-import magma.app.compile.define.Definition;
-import magma.api.Type;
-import magma.app.io.Source;
-import magma.app.compile.Import;
+import magma.api.option.{ Option };
+import magma.app.io.{ Platform, Location, Source };
+import magma.api.collect.list.{ List };
+import magma.app.compile.define.{ Definition };
+import magma.api.{ Type };
+import magma.app.compile.{ Import };
 export struct CompileState {
 	def functionName(): &[I8];
 	def findLastStructureName(): Option<&[I8]>;

@@ -1,5 +1,5 @@
-import magma.api.collect.head.Head;
-import magma.api.option.Option;
+import magma.api.collect.head.{ Head };
+import magma.api.option.{ Option };
 export struct MapHead<T, R> implements Head<R> {
 	mut head: Head<T>;
 	mut mapper: (arg0 : T) => R;

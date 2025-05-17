@@ -1,8 +1,6 @@
-import magma.api.option.Option;
-import magma.api.collect.Collector;
-import magma.api.collect.list.List;
-import magma.api.option.None;
-import magma.api.option.Some;
+import magma.api.option.{ Option, None, Some };
+import magma.api.collect.{ Collector };
+import magma.api.collect.list.{ List };
 export struct Joiner implements Collector<&[I8], Option<&[I8]>> {
 	mut delimiter: &[I8];
 	constructor (mut delimiter: &[I8]) {

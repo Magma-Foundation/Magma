@@ -1,54 +1,18 @@
-import jvm.api.io.Files;
-import magma.api.io.Path;
-import magma.api.collect.list.List;
-import magma.api.io.IOError;
-import magma.api.option.Some;
-import jvm.api.io.Console;
-import magma.api.option.Option;
-import magma.app.io.Source;
-import magma.api.collect.list.ListCollector;
-import magma.app.compile.ImmutableCompileState;
-import magma.app.compile.CompileState;
-import magma.api.Tuple2;
-import magma.api.Tuple2Impl;
-import magma.api.option.None;
-import magma.app.io.Platform;
-import magma.app.io.Location;
-import jvm.api.collect.list.Lists;
-import magma.api.collect.Queries;
-import magma.app.compile.Import;
-import magma.api.collect.Joiner;
-import jvm.api.text.Strings;
-import magma.app.compile.text.DivideState;
-import magma.api.Type;
-import magma.app.compile.define.Definition;
-import magma.app.compile.define.Parameter;
-import magma.app.compile.value.ConstructorHeader;
-import magma.app.compile.define.FunctionHeader;
-import magma.app.compile.FunctionSegment;
-import magma.app.compile.value.Value;
-import magma.app.compile.value.ConstructionCaller;
-import magma.app.compile.value.Caller;
-import magma.app.compile.value.Argument;
-import magma.app.compile.value.InvokableNode;
-import magma.app.compile.value.StringNode;
-import magma.app.compile.value.NotNode;
-import magma.app.compile.value.LambdaNode;
-import magma.app.compile.type.PrimitiveType;
-import magma.app.compile.value.SymbolNode;
-import magma.app.compile.value.AccessNode;
-import magma.app.compile.value.OperationNode;
-import magma.api.collect.head.HeadedQuery;
-import magma.api.collect.head.RangeHead;
-import jvm.api.text.Characters;
-import magma.app.compile.text.Whitespace;
-import magma.app.compile.text.Placeholder;
-import magma.app.compile.type.ArrayType;
-import magma.app.compile.type.VariadicType;
-import magma.app.compile.type.SliceType;
-import magma.app.compile.type.BooleanType;
-import magma.app.compile.type.TemplateType;
-import magma.app.compile.type.FunctionType;
+import jvm.api.io.{ Files, Console };
+import magma.api.io.{ Path, IOError };
+import magma.api.collect.list.{ List, ListCollector };
+import magma.api.option.{ Some, Option, None };
+import magma.app.io.{ Source, Platform, Location };
+import magma.app.compile.{ ImmutableCompileState, CompileState, Import, FunctionSegment };
+import magma.api.{ Tuple2, Tuple2Impl, Type };
+import jvm.api.collect.list.{ Lists };
+import magma.api.collect.{ Queries, Joiner };
+import jvm.api.text.{ Strings, Characters };
+import magma.app.compile.text.{ DivideState, Whitespace, Placeholder };
+import magma.app.compile.define.{ Definition, Parameter, FunctionHeader };
+import magma.app.compile.value.{ ConstructorHeader, Value, ConstructionCaller, Caller, Argument, InvokableNode, StringNode, NotNode, LambdaNode, SymbolNode, AccessNode, OperationNode };
+import magma.app.compile.type.{ PrimitiveType, ArrayType, VariadicType, SliceType, BooleanType, TemplateType, FunctionType };
+import magma.api.collect.head.{ HeadedQuery, RangeHead };
 export struct Main {
 	static def main(): void {
 		let sourceDirectory = Files/*auto*/.get(".", "src", "java");
@@ -99,8 +63,8 @@ export struct Main {
 	static def compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Map<&[I8], &[I8]>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*&[I8]*/, Main/*auto*/.compileRootSegment);
 		let statementsState = statementsTuple/*auto*/.left(/*auto*/);
-		let imports = statementsState/*auto*/.imports(/*auto*/).query(/*auto*/).map((mut anImport: Import) => anImport/*auto*/.generate(state/*CompileState*/.platform(/*auto*/))).collect(Joiner("")).orElse("");
-		let compileState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
+		let imports = Main/*auto*/.generateOrFoldImports(statementsState/*CompileState*/);
+		let compileState = statementsState/*CompileState*/.clearImports(/*auto*/).clear(/*auto*/);
 		let withMain = Main/*auto*/.createMain(source/*Source*/);
 		let entries = HashMap<&[I8], &[I8]>(/*auto*/);
 		let platform = state/*CompileState*/.platform(/*auto*/);
@@ -113,6 +77,49 @@ export struct Main {
 			/*entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain)*/;
 		}
 		return Tuple2Impl<>(compileState/*auto*/, entries/*auto*/);
+	}
+	static def generateOrFoldImports(state: CompileState): &[I8] {
+		if (state/*CompileState*/.isPlatform(Platform/*auto*/.Magma)) {
+			return Main/*auto*/.foldImports(state/*CompileState*/);
+		}
+		return Main/*auto*/.generateImports(state/*CompileState*/);
+	}
+	static def generateImports(state: CompileState): &[I8] {
+		return state/*CompileState*/.imports(/*auto*/).query(/*auto*/).map((mut anImport: Import) => anImport/*Import*/.generate(state/*CompileState*/.platform(/*auto*/))).collect(Joiner("")).orElse("");
+	}
+	static def foldImports(statementsState: CompileState): &[I8] {
+		return statementsState/*CompileState*/.imports(/*auto*/).query(/*auto*/).foldWithInitial(Lists/*auto*/.empty(/*auto*/), Main/*auto*/.foldImport).query(/*auto*/).foldWithInitial("", Main/*auto*/.generateEntry);
+	}
+	static def generateEntry(current: &[I8], entry: Tuple2<List<&[I8]>, List<&[I8]>>): &[I8] {
+		let joinedNamespace = entry/*Tuple2<List<&[I8]>, List<&[I8]>>*/.left(/*auto*/).query(/*auto*/).collect(Joiner(".")).orElse("");
+		let joinedChildren = entry/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/).query(/*auto*/).collect(Joiner(", ")).orElse("");
+		return current/*&[I8]*/ + "import " + joinedNamespace/*auto*/ + ".{ " + joinedChildren/*auto*/ + " };\n";
+	}
+	static def foldImport(current: List<Tuple2<List<&[I8]>, List<&[I8]>>>, anImport: Import): List<Tuple2<List<&[I8]>, List<&[I8]>>> {
+		let namespace = anImport/*Import*/.namespace(/*auto*/);
+		let child = anImport/*Import*/.child(/*auto*/);
+		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<string>*/)) {
+			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<string>*/, child/*string*/);
+		}
+		else {
+			return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(Tuple2Impl<>(namespace/*List<string>*/, Lists/*auto*/.of(child/*string*/)));
+		}
+	}
+	static def hasNamespace(map: List<Tuple2<List<&[I8]>, List<&[I8]>>>, namespace: List<&[I8]>): Bool {
+		return map/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.query(/*auto*/).map(Tuple2/*auto*/.left).anyMatch((mut stringList: List<&[I8]>) => namespace/*List<&[I8]>*/.equalsTo(stringList/*auto*/, String/*auto*/.equals));
+	}
+	static def attachChildToMapEntries(map: List<Tuple2<List<&[I8]>, List<&[I8]>>>, namespace: List<&[I8]>, child: &[I8]): List<Tuple2<List<&[I8]>, List<&[I8]>>> {
+		return map/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.query(/*auto*/).map((tuple: Tuple2<List<&[I8]>, List<&[I8]>>) => Main/*auto*/.attachChildToMapEntry(namespace/*List<&[I8]>*/, child/*&[I8]*/, tuple/*Tuple2<CompileState, Whitespace>*/)).collect(ListCollector<>(/*auto*/));
+	}
+	static def attachChildToMapEntry(namespace: List<&[I8]>, child: &[I8], tuple: Tuple2<List<&[I8]>, List<&[I8]>>): Tuple2<List<&[I8]>, List<&[I8]>> {
+		let entryNamespace = tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.left(/*auto*/);
+		let entryValues = tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/);
+		if (entryNamespace/*auto*/.equalsTo(namespace/*List<&[I8]>*/, String/*auto*/.equals)) {
+			return Tuple2Impl<>(entryNamespace/*auto*/, entryValues/*auto*/.addLast(child/*&[I8]*/));
+		}
+		else {
+			return tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/;
+		}
 	}
 	static def generateDirective(content: &[I8]): &[I8] {
 		return "#" + content/*&[I8]*/ + "\n";
@@ -172,11 +179,11 @@ export struct Main {
 				break;
 			}
 			let tuple = maybeTuple/*auto*/.right(/*auto*/);
-			appended/*auto*/ = tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/);
-			if ("\\" === tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/)) {
+			appended/*auto*/ = tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.left(/*auto*/);
+			if ("\\" === tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/)) {
 				appended/*auto*/ = appended/*auto*/.popAndAppendToOption(/*auto*/).orElse(appended/*auto*/);
 			}
-			if ("\"" === tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/)) {
+			if ("\"" === tuple/*Tuple2<List<&[I8]>, List<&[I8]>>*/.right(/*auto*/)) {
 				break;
 			}
 		}
@@ -597,7 +604,7 @@ export struct Main {
 			let statementsTuple = Main/*auto*/.compileFunctionStatements(state/*CompileState*/.enterDepth(/*auto*/).defineAll(paramNames/*List<Definition>*/), withoutContentEnd/*&[I8]*/);
 			let statementsState = statementsTuple/*auto*/.left(/*auto*/);
 			let statements = statementsTuple/*auto*/.right(/*auto*/);
-			let exited = statementsState/*auto*/.exitDepth(/*auto*/);
+			let exited = statementsState/*CompileState*/.exitDepth(/*auto*/);
 			let content = "{" + statements/*auto*/ + exited/*auto*/.createIndent(/*auto*/) + "}";
 			if (exited/*auto*/.isPlatform(Platform/*auto*/.Windows)) {
 				return Main/*auto*/.assembleLambdaWithContent(exited/*auto*/, paramNames/*List<Definition>*/, content/*&[I8]*/);
