@@ -27,12 +27,12 @@ Option<Definition> asDefinition() {
 	var joinedTypeParams = this/*auto*/.joinTypeParams(/*auto*/);
 	var joinedModifiers = this/*auto*/.joinModifiers(/*auto*/);
 	if (Platform/*auto*/.Windows === platform/*Platform*/) {
-		return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*&[I8]*/;
+		return joinedModifiers/*&[I8]*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*&[I8]*/;
 	}
-	return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.name + joinedTypeParams/*auto*/ + afterName/*&[I8]*/ + this/*auto*/.generateType(/*auto*/);
+	return joinedModifiers/*&[I8]*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.name + joinedTypeParams/*&[I8]*/ + afterName/*&[I8]*/ + this/*auto*/.generateType(/*auto*/);
 }
 auto temp(&[I8] value) {
-	return value/*auto*/ + " ";
+	return value/*&[I8]*/ + " ";
 }
 &[I8] joinModifiers() {
 	return this/*auto*/.modifiers.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner("")).orElse("");
@@ -56,7 +56,7 @@ Definition addModifierLast(&[I8] modifier) {
 	return new Definition(this/*auto*/.annotations, this/*auto*/.modifiers.addLast(modifier/*&[I8]*/), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
 }
 auto temp(Definition definition) {
-	return definition/*auto*/.generate(platform/*Platform*/);
+	return definition/*Definition*/.generate(platform/*Platform*/);
 }
 &[I8] generateWithDefinitions(Platform platform, List<Definition> definitions) {
 	var joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");

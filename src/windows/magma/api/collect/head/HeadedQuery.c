@@ -10,7 +10,7 @@ Option<T> next() {
 	return this/*auto*/.head.next(/*auto*/);
 }
 auto temp(C current, T element) {
-	return collector/*Collector<T, C>*/.fold(current/*auto*/, element/*T*/);
+	return collector/*Collector<T, C>*/.fold(current/*Tuple2<CompileState, List<T>>*/, element/*&[I8]*/);
 }
 C collect(Collector<T, C> collector) {
 	return this/*auto*/.foldWithInitial(collector/*Collector<T, C>*/.createInitial(/*auto*/), lambdaDefinition/*auto*/);
@@ -50,7 +50,7 @@ Query<R> flatMap((arg0 : T) => Query<R> mapper) {
 	return this/*auto*/.head.next(/*auto*/).map(mapper/*(arg0 : T) => Query<R>*/).map(lambdaDefinition/*auto*/).orElseGet(lambdaDefinition/*auto*/);
 }
 auto temp(Bool maybeAllTrue, T element) {
-	return maybeAllTrue/*auto*/ && predicate/*(arg0 : T) => boolean*/(element/*T*/);
+	return maybeAllTrue/*auto*/ && predicate/*(arg0 : T) => boolean*/(element/*&[I8]*/);
 }
 Bool allMatch((arg0 : T) => boolean predicate) {
 	return this/*auto*/.foldWithInitial(true/*auto*/, lambdaDefinition/*auto*/);

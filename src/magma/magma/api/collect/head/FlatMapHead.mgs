@@ -1,4 +1,4 @@
-// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings, Strings, Strings, Actual, Actual, Actual, Namespace, Namespace, Namespace, Collector, Collector, Collector, EmptyHead, EmptyHead, EmptyHead, FlatMapHead, FlatMapHead]
+// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main, Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead]
 import magma.api.collect.head.{ Head };
 import magma.api.collect.{ Query };
 import magma.api.option.{ Option, None };
@@ -14,12 +14,12 @@ export struct FlatMapHead<T, R> implements Head<R> {
 	def next(): Option<R> {
 		while (true/*auto*/) {
 			let next = this/*auto*/.current.next(/*auto*/);
-			if (next/*auto*/.isPresent(/*auto*/)) {
-				return next/*auto*/;
+			if (next/*(arg0 : T) => R*/(/*auto*/)) {
+				return next/*(arg0 : T) => R*/;
 			}
 			let tuple = this/*auto*/.head.next(/*auto*/).map(this/*auto*/.mapper).toTuple(this/*auto*/.current);
-			if (tuple/*auto*/.left(/*auto*/)) {
-				this/*auto*/.current = tuple/*auto*/.right(/*auto*/);
+			if (tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/)) {
+				this/*auto*/.current = tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/);
 			}
 			else {
 				return None<R>(/*auto*/);

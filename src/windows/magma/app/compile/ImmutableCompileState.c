@@ -52,7 +52,7 @@ CompileState defineAll(List<Definition> definitions) {
 	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions.addAll(definitions/*List<Definition>*/), this/*auto*/.depth, this/*auto*/.definedTypes);
 }
 auto temp(Definition definition) {
-	return Strings/*auto*/.equalsTo(definition/*auto*/.name(/*auto*/), name/*&[I8]*/);
+	return Strings/*auto*/.equalsTo(definition/*Definition*/.name(/*auto*/), name/*&[I8]*/);
 }
 auto temp(Definition definition1) {
 	return definition1/*auto*/.type(/*auto*/);

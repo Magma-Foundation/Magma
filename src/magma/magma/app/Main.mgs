@@ -1,13 +1,13 @@
-// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings, Strings, Strings, Actual, Actual, Actual, Namespace, Namespace, Namespace, Collector, Collector, Collector, EmptyHead, EmptyHead, EmptyHead, FlatMapHead, FlatMapHead, FlatMapHead, Head, Head, Head, HeadedQuery, HeadedQuery, HeadedQuery, MapHead, MapHead, MapHead, RangeHead, RangeHead, RangeHead, SingleHead, SingleHead, SingleHead, ZipHead, ZipHead, ZipHead, Joiner, Joiner, Joiner, List, List, List, ListCollector, ListCollector, ListCollector, Queries, Queries, Queries, Query, Query, Query, IOError, IOError, IOError, Path, Path, Path, None, None, None, Option, Option, Option, Some, Some, Some, Err, Err, Err, Ok, Ok, Ok, Result, Result, Result, Tuple2, Tuple2, Tuple2, Tuple2Impl, Tuple2Impl, Tuple2Impl, Type, Type, Type, CompileState, CompileState, CompileState, Definition, Definition, Definition, FunctionHeader, FunctionHeader, FunctionHeader, Parameter, Parameter, Parameter, FunctionSegment, FunctionSegment, FunctionSegment, ImmutableCompileState, ImmutableCompileState, ImmutableCompileState, Import, Import, Import, DivideState, DivideState, DivideState, Placeholder, Placeholder, Placeholder, Whitespace, Whitespace, Whitespace, ArrayType, ArrayType, ArrayType, BooleanType, BooleanType, BooleanType, FunctionType, FunctionType, FunctionType, PrimitiveType, PrimitiveType, PrimitiveType, SliceType, SliceType, SliceType, TemplateType, TemplateType, TemplateType, VariadicType, VariadicType, VariadicType, AccessNode, AccessNode, AccessNode, Argument, Argument, Argument, Caller, Caller, Caller, ConstructionCaller, ConstructionCaller, ConstructionCaller, ConstructorHeader, ConstructorHeader, ConstructorHeader, InvokableNode, InvokableNode, InvokableNode, LambdaNode, LambdaNode, LambdaNode, NotNode, NotNode, NotNode, OperationNode, OperationNode, OperationNode, StringNode, StringNode, StringNode, SymbolNode, SymbolNode, SymbolNode, Value, Value, Value, Location, Location, Location, Platform, Platform, Platform, Source, Source, Source, Main, Main]
+// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main, Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main]
 import jvm.api.io.{ Files, Console };
 import magma.api.io.{ Path, IOError };
 import magma.api.collect.list.{ List, ListCollector };
 import magma.api.option.{ Some, Option, None };
+import magma.api.collect.{ Queries, Joiner };
+import magma.app.io.{ Platform, Source, Location };
 import magma.app.compile.{ CompileState, ImmutableCompileState, Import, FunctionSegment };
 import magma.api.{ Tuple2, Tuple2Impl, Type };
-import magma.app.io.{ Source, Platform, Location };
 import jvm.api.collect.list.{ Lists };
-import magma.api.collect.{ Queries, Joiner };
 import jvm.api.text.{ Strings, Characters };
 import magma.app.compile.text.{ DivideState, Whitespace, Placeholder };
 import magma.app.compile.define.{ Definition, Parameter, FunctionHeader };
@@ -20,35 +20,28 @@ export struct Main {
 		sourceDirectory/*Path*/.walk(/*auto*/).match((mut children: List<Path>) => Main/*auto*/.runWithChildren(children/*List<Path>*/, sourceDirectory/*Path*/), (mut value: IOError) => Some<IOError>(value/*&[I8]*/)).map((mut error: IOError) => error/*auto*/.display(/*auto*/)).ifPresent((mut displayed: &[I8]) => Console/*auto*/.printErrLn(displayed/*auto*/));
 	}
 	static def runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
-		let sources = Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/);
-		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(Main/*auto*/.createInitialStateToTuple(sources/*List<Source>*/), (mut current: Tuple2<CompileState, Option<IOError>>, mut source1: Source) => Main/*auto*/.foldChild(current/*Tuple2<CompileState, List<T>>*/.left(/*auto*/), current/*Tuple2<CompileState, List<T>>*/.right(/*auto*/), source1/*auto*/)).right(/*auto*/);
+		let initial = Main/*auto*/.createInitialStateToTuple(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
+		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, (current1: Tuple2<CompileState, Option<IOError>>, platform: Platform) => Main/*auto*/.runWithPlatformAndSources(children/*List<Path>*/, sourceDirectory/*Path*/, current1/*Tuple2<CompileState, Option<IOError>>*/, platform/*Platform*/)).right(/*auto*/);
+	}
+	static def runWithPlatformAndSources(children: List<Path>, sourceDirectory: Path, current1: Tuple2<CompileState, Option<IOError>>, platform: Platform): Tuple2<CompileState, Option<IOError>> {
+		return Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/).query(/*auto*/).foldWithInitial(current1/*Tuple2<CompileState, Option<IOError>>*/, (current: Tuple2<CompileState, Option<IOError>>, source1: Source) => Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source1/*auto*/));
+	}
+	static def runWithPlatformAndSource(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source): Tuple2<CompileState, Option<IOError>> {
+		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
+			return Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, maybeError/*Option<IOError>*/);
+		}
+		return source/*Source*/.read(/*auto*/).match((input: &[I8]) => Main/*auto*/.compileAndWritePlatform(state/*CompileState*/, maybeError/*Option<IOError>*/, platform/*Platform*/, source/*Source*/, input/*&[I8]*/), (mut value: IOError) => Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, Some<IOError>(value/*&[I8]*/)));
 	}
 	static def createInitialStateToTuple(sources: List<Source>): Tuple2<CompileState, Option<IOError>> {
 		return Tuple2Impl<CompileState, Option<IOError>>(Main/*auto*/.createInitialState(sources/*List<Source>*/), None<IOError>(/*auto*/));
 	}
 	static def createInitialState(sources: List<Source>): CompileState {
-		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), (mut state: CompileState, mut source: Source) => state/*DivideState*/.addSource(source/*string*/));
+		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), (mut state: CompileState, mut source: Source) => state/*CompileState*/.addSource(source/*Source*/));
 	}
 	static def findSources(children: List<Path>, sourceDirectory: Path): List<Source> {
-		return children/*List<Path>*/.query(/*auto*/).filter((mut source: Path) => source/*string*/.endsWith(".java")).map((mut child: Path) => Source(sourceDirectory/*Path*/, child/*string*/)).collect(ListCollector<Source>(/*auto*/));
+		return children/*List<Path>*/.query(/*auto*/).filter((mut source: Path) => source/*Source*/.endsWith(".java")).map((mut child: Path) => Source(sourceDirectory/*Path*/, child/*&[I8]*/)).collect(ListCollector<Source>(/*auto*/));
 	}
-	static def foldChild(state: CompileState, maybeError: Option<IOError>, source: Source): Tuple2<CompileState, Option<IOError>> {
-		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-			return Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, maybeError/*Option<IOError>*/);
-		}
-		return Main/*auto*/.runWithSource(state/*CompileState*/, source/*Source*/);
-	}
-	static def runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
-		return source/*Source*/.read(/*auto*/).match((mut input: &[I8]) => Main/*auto*/.compileAndWritePlatforms(state/*CompileState*/, source/*Source*/, input/*string*/), (mut value: IOError) => Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, Some<IOError>(value/*&[I8]*/)));
-	}
-	static def compileAndWritePlatforms(state: CompileState, source: Source, input: &[I8]): Tuple2<CompileState, Option<IOError>> {
-		mut let current: Tuple2<CompileState, Option<IOError>> = Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, None<>(/*auto*/));/*
-        for (final var platform : Platform.values()) {
-            current = Main.foldPlatform(current.left(), current.right(), platform, source, input);
-        }*/
-		return current/*Tuple2<CompileState, List<T>>*/;
-	}
-	static def foldPlatform(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source, input: &[I8]): Tuple2<CompileState, Option<IOError>> {
+	static def compileAndWritePlatform(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source, input: &[I8]): Tuple2<CompileState, Option<IOError>> {
 		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
 			return Tuple2Impl<>(state/*CompileState*/, maybeError/*Option<IOError>*/);
 		}
@@ -115,11 +108,11 @@ export struct Main {
 	static def foldImport(current: List<Tuple2<List<&[I8]>, List<&[I8]>>>, anImport: Import): List<Tuple2<List<&[I8]>, List<&[I8]>>> {
 		let namespace = anImport/*Import*/.namespace(/*auto*/);
 		let child = anImport/*Import*/.child(/*auto*/);
-		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<string>*/)) {
-			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<string>*/, child/*string*/);
+		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/)) {
+			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/, child/*&[I8]*/);
 		}
 		else {
-			return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(Tuple2Impl<>(namespace/*List<string>*/, Lists/*auto*/.of(child/*string*/)));
+			return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(Tuple2Impl<>(namespace/*Location*/, Lists/*auto*/.of(child/*&[I8]*/)));
 		}
 	}
 	static def hasNamespace(map: List<Tuple2<List<&[I8]>, List<&[I8]>>>, namespace: List<&[I8]>): Bool {
@@ -262,7 +255,7 @@ export struct Main {
 			let name = Strings/*auto*/.strip(rawName/*string*/);
 			let parametersTuple = Main/*auto*/.parseParameters(state/*CompileState*/, parametersString/*&[I8]*/);
 			let parameters = Main/*auto*/.retainDefinitionsFromParameters(parametersTuple/*auto*/.right(/*auto*/));
-			return Main/*auto*/.compileStructureWithTypeParams(parametersTuple/*auto*/.left(/*auto*/), targetInfix/*&[I8]*/, inputContent/*&[I8]*/, name/*string*/, parameters/*List<Definition>*/, maybeImplementing/*Option<Type>*/, annotations/*List<&[I8]>*/, modifiers/*List<&[I8]>*/, maybeSuperType/*Option<&[I8]>*/);
+			return Main/*auto*/.compileStructureWithTypeParams(parametersTuple/*auto*/.left(/*auto*/), targetInfix/*&[I8]*/, inputContent/*&[I8]*/, name/*&[I8]*/, parameters/*List<Definition>*/, maybeImplementing/*Option<Type>*/, annotations/*List<&[I8]>*/, modifiers/*List<&[I8]>*/, maybeSuperType/*Option<&[I8]>*/);
 		})).or(() => Main/*auto*/.compileStructureWithTypeParams(state/*CompileState*/, targetInfix/*&[I8]*/, inputContent/*&[I8]*/, beforeContent/*&[I8]*/, Lists/*auto*/.empty(/*auto*/), maybeImplementing/*Option<Type>*/, annotations/*List<&[I8]>*/, modifiers/*List<&[I8]>*/, maybeSuperType/*Option<&[I8]>*/));
 	}
 	static def retainDefinitionsFromParameters(parameters: List<Parameter>): List<Definition> {
@@ -318,7 +311,7 @@ export struct Main {
 		return Lists/*auto*/.empty(/*auto*/);
 	}
 	static def generateImplementing(maybeImplementing: Option<Type>): &[I8] {
-		return maybeImplementing/*Option<Type>*/.map((mut type: Type) => type/*string*/.generate(/*auto*/)).map((mut inner: &[I8]) => " implements " + inner/*auto*/).orElse("");
+		return maybeImplementing/*Option<Type>*/.map((mut type: Type) => type/*Type*/.generate(/*auto*/)).map((mut inner: &[I8]) => " implements " + inner/*auto*/).orElse("");
 	}
 	static def generateConstructorFromRecordParameters(parameters: List<Definition>, platform: Platform): &[I8] {
 		return parameters/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*Definition*/.generate(platform/*Platform*/)).collect(Joiner(", ")).map((mut generatedParameters: &[I8]) => Main/*auto*/.generateConstructorWithParameterString(parameters/*List<Definition>*/, generatedParameters/*auto*/)).orElse("");
@@ -502,7 +495,7 @@ export struct Main {
 		return Main/*auto*/.compilePrefix(Strings/*auto*/.strip(input/*&[I8]*/), "return ", (value: &[I8]) => mapper/*(arg0 : &[I8]) => Option<Tuple2<CompileState, &[I8]>>*/(value/*&[I8]*/).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(tuple/*Tuple2<DivideState, I8>*/.left(/*auto*/), "return " + tuple/*Tuple2<DivideState, I8>*/.right(/*auto*/)))));
 	}
 	static def parseInvokable(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
-		return Main/*auto*/.compileSuffix(Strings/*auto*/.strip(input/*&[I8]*/), ")", (withoutEnd: &[I8]) => Main/*auto*/.compileSplit(Main/*auto*/.splitFoldedLast(withoutEnd/*&[I8]*/, "", Main/*auto*/.foldInvocationStarts), (callerWithArgStart: &[I8], args: &[I8]) => Main/*auto*/.compileSuffix(callerWithArgStart/*auto*/, "(", (callerString: &[I8]) => Main/*auto*/.compilePrefix(Strings/*auto*/.strip(callerString/*auto*/), "new ", (type: &[I8]) => Main/*auto*/.compileType(state/*CompileState*/, type/*string*/).flatMap((callerTuple: Tuple2<CompileState, &[I8]>) => {
+		return Main/*auto*/.compileSuffix(Strings/*auto*/.strip(input/*&[I8]*/), ")", (withoutEnd: &[I8]) => Main/*auto*/.compileSplit(Main/*auto*/.splitFoldedLast(withoutEnd/*&[I8]*/, "", Main/*auto*/.foldInvocationStarts), (callerWithArgStart: &[I8], args: &[I8]) => Main/*auto*/.compileSuffix(callerWithArgStart/*auto*/, "(", (callerString: &[I8]) => Main/*auto*/.compilePrefix(Strings/*auto*/.strip(callerString/*auto*/), "new ", (type: &[I8]) => Main/*auto*/.compileType(state/*CompileState*/, type/*Type*/).flatMap((callerTuple: Tuple2<CompileState, &[I8]>) => {
 			let callerState = callerTuple/*Tuple2<CompileState, &[I8]>*/.left(/*auto*/);
 			let caller = callerTuple/*Tuple2<CompileState, &[I8]>*/.right(/*auto*/);
 			return Main/*auto*/.assembleInvokable(callerState/*auto*/, ConstructionCaller(caller/*auto*/, callerState/*auto*/.platform(/*auto*/)), args/*List<string>*/);
@@ -681,7 +674,7 @@ export struct Main {
 				let length = Strings/*auto*/.length(infix/*&[I8]*/) - 1/*auto*/;
 				mut let counter = 0/*auto*/;
 				mut let current = state/*DivideState*/;
-				while (counter/*auto*/ < length/*number*/) {
+				while (counter/*auto*/ < length/*I32*/) {
 					counter/*auto*/++;
 					current/*Tuple2<CompileState, List<T>>*/ = current/*Tuple2<CompileState, List<T>>*/.pop(/*auto*/).map((mut tuple: Tuple2<DivideState, I8>) => tuple/*Tuple2<CompileState, &[I8]>*/.left(/*auto*/)).orElse(current/*Tuple2<CompileState, List<T>>*/);
 				}
@@ -767,8 +760,8 @@ export struct Main {
 	static def parseDefinition(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Definition>> {
 		return Main/*auto*/.compileLast(Strings/*auto*/.strip(input/*&[I8]*/), " ", (beforeName: &[I8], name: &[I8]) => Main/*auto*/.compileSplit(Main/*auto*/.splitFoldedLast(Strings/*auto*/.strip(beforeName/*auto*/), " ", Main/*auto*/.foldTypeSeparators), (beforeType: &[I8], type: &[I8]) => Main/*auto*/.compileLast(Strings/*auto*/.strip(beforeType/*string*/), "\n", (annotationsString: &[I8], afterAnnotations: &[I8]) => {
 			let annotations = Main/*auto*/.parseAnnotations(annotationsString/*&[I8]*/);
-			return Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, annotations/*List<&[I8]>*/, afterAnnotations/*&[I8]*/, type/*string*/, name/*&[I8]*/);
-		}).or(() => Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, Lists/*auto*/.empty(/*auto*/), beforeType/*string*/, type/*string*/, name/*&[I8]*/))).or(() => Main/*auto*/.parseDefinitionWithTypeParameters(state/*CompileState*/, Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), beforeName/*auto*/, name/*&[I8]*/)));
+			return Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, annotations/*List<&[I8]>*/, afterAnnotations/*&[I8]*/, type/*Type*/, name/*&[I8]*/);
+		}).or(() => Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, Lists/*auto*/.empty(/*auto*/), beforeType/*string*/, type/*Type*/, name/*&[I8]*/))).or(() => Main/*auto*/.parseDefinitionWithTypeParameters(state/*CompileState*/, Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), beforeName/*auto*/, name/*&[I8]*/)));
 	}
 	static def parseAnnotations(s: &[I8]): List<&[I8]> {
 		return Main/*auto*/.divide(s/*&[I8]*/, (mut state1: DivideState, mut c: I8) => Main/*auto*/.foldDelimited(state1/*CompileState*/, c/*I8*/, "\n")).query(/*auto*/).map((mut s2: &[I8]) => Strings/*auto*/.strip(s2/*&[I8]*/)).filter((mut value: &[I8]) => !Strings/*auto*/.isEmpty(value/*&[I8]*/)).filter((mut value: &[I8]) => 1/*auto*/ <= Strings/*auto*/.length(value/*&[I8]*/)).map((mut value: &[I8]) => Strings/*auto*/.sliceFrom(value/*&[I8]*/, 1/*auto*/)).map((mut s1: &[I8]) => Strings/*auto*/.strip(s1/*auto*/)).filter((mut value: &[I8]) => !Strings/*auto*/.isEmpty(value/*&[I8]*/)).collect(ListCollector<&[I8]>(/*auto*/));
@@ -904,9 +897,9 @@ export struct Main {
 			let argsState = argsTuple/*Tuple2<CompileState, List<Argument>>*/.left(/*auto*/);
 			let args = argsTuple/*Tuple2<CompileState, List<Argument>>*/.right(/*auto*/);
 			let base = Strings/*auto*/.strip(baseString/*&[I8]*/);
-			return Main/*auto*/.assembleFunctionType(argsState/*auto*/, base/*string*/, args/*List<T>*/).or(() => {
-				let compileState = argsState/*auto*/.addResolvedImportFromCache(base/*string*/);
-				return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(compileState/*auto*/, TemplateType(base/*string*/, args/*List<T>*/)));
+			return Main/*auto*/.assembleFunctionType(argsState/*auto*/, base/*&[I8]*/, args/*List<T>*/).or(() => {
+				let compileState = argsState/*auto*/.addResolvedImportFromCache(base/*&[I8]*/);
+				return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(compileState/*auto*/, TemplateType(base/*&[I8]*/, args/*List<T>*/)));
 			});
 		}));
 	}
@@ -974,7 +967,7 @@ export struct Main {
 		}
 		let length = Strings/*auto*/.length(input/*&[I8]*/);
 		let length1 = Strings/*auto*/.length(suffix/*&[I8]*/);
-		let content = Strings/*auto*/.sliceBetween(input/*&[I8]*/, 0/*auto*/, length/*number*/ - length1/*auto*/);
+		let content = Strings/*auto*/.sliceBetween(input/*&[I8]*/, 0/*auto*/, length/*I32*/ - length1/*auto*/);
 		return mapper/*(arg0 : &[I8]) => Option<T>*/(content/*&[I8]*/);
 	}
 	static def compileFirst<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
@@ -993,7 +986,7 @@ export struct Main {
 		}
 		let left = Strings/*auto*/.sliceBetween(input/*&[I8]*/, 0/*auto*/, index/*I32*/);
 		let length = Strings/*auto*/.length(infix/*&[I8]*/);
-		let right = Strings/*auto*/.sliceFrom(input/*&[I8]*/, index/*I32*/ + length/*number*/);
+		let right = Strings/*auto*/.sliceFrom(input/*&[I8]*/, index/*I32*/ + length/*I32*/);
 		return Some<Tuple2<&[I8], &[I8]>>(Tuple2Impl<&[I8], &[I8]>(left/*auto*/, right/*auto*/));
 	}
 	static def findFirst(input: &[I8], infix: &[I8]): I32 {

@@ -1,4 +1,4 @@
-// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings, Strings, Strings, Actual, Actual, Actual, Namespace, Namespace, Namespace, Collector, Collector, Collector, EmptyHead, EmptyHead, EmptyHead, FlatMapHead, FlatMapHead, FlatMapHead, Head, Head, Head, HeadedQuery, HeadedQuery]
+// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main, Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery]
 import magma.api.collect.{ Query, Collector };
 import magma.api.collect.head.{ Head, MapHead, FlatMapHead, EmptyHead, ZipHead, SingleHead };
 import magma.api.option.{ Option };
@@ -12,7 +12,7 @@ export struct HeadedQuery<T> implements Query<T> {
 		return this/*auto*/.head.next(/*auto*/);
 	}
 	def collect<C>(collector: Collector<T, C>): C {
-		return this/*auto*/.foldWithInitial(collector/*Collector<T, C>*/.createInitial(/*auto*/), (mut current: C, mut element: T) => collector/*Collector<T, C>*/.fold(current/*auto*/, element/*T*/));
+		return this/*auto*/.foldWithInitial(collector/*Collector<T, C>*/.createInitial(/*auto*/), (mut current: C, mut element: T) => collector/*Collector<T, C>*/.fold(current/*Tuple2<CompileState, List<T>>*/, element/*string*/));
 	}
 	def map<R>(mapper: (arg0 : T) => R): Query<R> {
 		return HeadedQuery<R>(MapHead<T, R>(this/*auto*/.head, mapper/*(arg0 : T) => R*/));
@@ -37,7 +37,7 @@ export struct HeadedQuery<T> implements Query<T> {
 		return this/*auto*/.head.next(/*auto*/).map(mapper/*(arg0 : T) => Query<R>*/).map((mut initial: Query<R>) => HeadedQuery<R>(FlatMapHead<T, R>(this/*auto*/.head, initial/*R*/, mapper/*(arg0 : T) => Query<R>*/))).orElseGet(() => HeadedQuery<R>(EmptyHead<R>(/*auto*/)));
 	}
 	def allMatch(predicate: (arg0 : T) => boolean): Bool {
-		return this/*auto*/.foldWithInitial(true/*auto*/, (mut maybeAllTrue: Bool, mut element: T) => maybeAllTrue/*auto*/ && predicate/*(arg0 : T) => boolean*/(element/*T*/));
+		return this/*auto*/.foldWithInitial(true/*auto*/, (mut maybeAllTrue: Bool, mut element: T) => maybeAllTrue/*auto*/ && predicate/*(arg0 : T) => boolean*/(element/*string*/));
 	}
 	def anyMatch(predicate: (arg0 : T) => boolean): Bool {
 		return this/*auto*/.foldWithInitial(false/*auto*/, (mut aBoolean: Bool, mut t: T) => aBoolean/*auto*/ || predicate/*(arg0 : T) => boolean*/(t/*auto*/));

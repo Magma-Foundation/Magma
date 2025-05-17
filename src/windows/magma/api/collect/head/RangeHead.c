@@ -14,5 +14,5 @@ Option<number> next() {
 	}
 	var value = this/*auto*/.counter;
 	this/*auto*/.counter++;
-	return new Some<number>(value/*auto*/);
+	return new Some<number>(value/*&[I8]*/);
 }

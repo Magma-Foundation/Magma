@@ -1,4 +1,4 @@
-// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings]
+// [Lists, Console, Files, Characters, Strings]
 export interface StringsInstance {
 	static length(stripped: string): number;
 	static sliceBetween(input: string, startInclusive: number, endExclusive: number): string;

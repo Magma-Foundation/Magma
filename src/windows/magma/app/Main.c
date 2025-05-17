@@ -18,24 +18,42 @@ static void main() {
 	var sourceDirectory = Files/*auto*/.get(".", "src", "java");
 	sourceDirectory/*Path*/.walk(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).ifPresent(lambdaDefinition/*auto*/);
 }
-auto temp(Tuple2<CompileState, Option<IOError>> current, Source source1) {
-	return Main/*auto*/.foldChild(current/*Tuple2<CompileState, List<T>>*/.left(/*auto*/), current/*Tuple2<CompileState, List<T>>*/.right(/*auto*/), source1/*auto*/);
+auto temp(Tuple2<CompileState, Option<IOError>> current1, Platform platform) {
+	return Main/*auto*/.runWithPlatformAndSources(children/*List<Path>*/, sourceDirectory/*Path*/, current1/*Tuple2<CompileState, Option<IOError>>*/, platform/*Platform*/);
 }
 static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
-	var sources = Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/);
-	return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(Main/*auto*/.createInitialStateToTuple(sources/*List<Source>*/), lambdaDefinition/*auto*/).right(/*auto*/);
+	var initial = Main/*auto*/.createInitialStateToTuple(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
+	return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, lambdaDefinition/*auto*/).right(/*auto*/);
+}
+auto temp(Tuple2<CompileState, Option<IOError>> current, Source source1) {
+	return Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source1/*auto*/);
+}
+static Tuple2<CompileState, Option<IOError>> runWithPlatformAndSources(List<Path> children, Path sourceDirectory, Tuple2<CompileState, Option<IOError>> current1, Platform platform) {
+	return Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/).query(/*auto*/).foldWithInitial(current1/*Tuple2<CompileState, Option<IOError>>*/, lambdaDefinition/*auto*/);
+}
+auto temp(&[I8] input) {
+	return Main/*auto*/.compileAndWritePlatform(state/*CompileState*/, maybeError/*Option<IOError>*/, platform/*Platform*/, source/*Source*/, input/*&[I8]*/);
+}
+auto temp(IOError value) {
+	return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new Some<IOError>(value/*&[I8]*/));
+}
+static Tuple2<CompileState, Option<IOError>> runWithPlatformAndSource(CompileState state, Option<IOError> maybeError, Platform platform, Source source) {
+	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
+		return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, maybeError/*Option<IOError>*/);
+	}
+	return source/*Source*/.read(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/);
 }
 static Tuple2<CompileState, Option<IOError>> createInitialStateToTuple(List<Source> sources) {
 	return new Tuple2Impl<CompileState, Option<IOError>>(Main/*auto*/.createInitialState(sources/*List<Source>*/), new None<IOError>(/*auto*/));
 }
 auto temp(CompileState state, Source source) {
-	return state/*DivideState*/.addSource(source/*&[I8]*/);
+	return state/*CompileState*/.addSource(source/*Source*/);
 }
 static CompileState createInitialState(List<Source> sources) {
 	return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), lambdaDefinition/*auto*/);
 }
 auto temp(Path source) {
-	return source/*&[I8]*/.endsWith(".java");
+	return source/*Source*/.endsWith(".java");
 }
 auto temp(Path child) {
 	return new Source(sourceDirectory/*Path*/, child/*&[I8]*/);
@@ -43,32 +61,10 @@ auto temp(Path child) {
 static List<Source> findSources(List<Path> children, Path sourceDirectory) {
 	return children/*List<Path>*/.query(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<Source>(/*auto*/));
 }
-static Tuple2<CompileState, Option<IOError>> foldChild(CompileState state, Option<IOError> maybeError, Source source) {
-	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-		return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, maybeError/*Option<IOError>*/);
-	}
-	return Main/*auto*/.runWithSource(state/*CompileState*/, source/*Source*/);
-}
-auto temp(&[I8] input) {
-	return Main/*auto*/.compileAndWritePlatforms(state/*CompileState*/, source/*Source*/, input/*&[I8]*/);
-}
-auto temp(IOError value) {
-	return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new Some<IOError>(value/*&[I8]*/));
-}
-static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
-	return source/*Source*/.read(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/);
-}
-static Tuple2<CompileState, Option<IOError>> compileAndWritePlatforms(CompileState state, Source source, &[I8] input) {
-	Tuple2<CompileState, Option<IOError>> current = new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new None<>(/*auto*/));/*
-        for (final var platform : Platform.values()) {
-            current = Main.foldPlatform(current.left(), current.right(), platform, source, input);
-        }*/
-	return current/*Tuple2<CompileState, List<T>>*/;
-}
 auto temp() {
 	return otherValue/*auto*/;
 }
-static Tuple2<CompileState, Option<IOError>> foldPlatform(CompileState state, Option<IOError> maybeError, Platform platform, Source source, &[I8] input) {
+static Tuple2<CompileState, Option<IOError>> compileAndWritePlatform(CompileState state, Option<IOError> maybeError, Platform platform, Source source, &[I8] input) {
 	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
 		return new Tuple2Impl<>(state/*CompileState*/, maybeError/*Option<IOError>*/);
 	}
@@ -143,11 +139,11 @@ static &[I8] generateEntry(&[I8] current, Tuple2<List<&[I8]>, List<&[I8]>> entry
 static List<Tuple2<List<&[I8]>, List<&[I8]>>> foldImport(List<Tuple2<List<&[I8]>, List<&[I8]>>> current, Import anImport) {
 	var namespace = anImport/*Import*/.namespace(/*auto*/);
 	var child = anImport/*Import*/.child(/*auto*/);
-	if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/)) {
-		return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/, child/*&[I8]*/);
+	if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/)) {
+		return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/, child/*&[I8]*/);
 	}
 	else {
-		return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(new Tuple2Impl<>(namespace/*List<&[I8]>*/, Lists/*auto*/.of(child/*&[I8]*/)));
+		return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(new Tuple2Impl<>(namespace/*Location*/, Lists/*auto*/.of(child/*&[I8]*/)));
 	}
 }
 auto temp(List<&[I8]> stringList) {
@@ -430,7 +426,7 @@ static List<&[I8]> modifyModifiers0(List<&[I8]> oldModifiers) {
 	return Lists/*auto*/.empty(/*auto*/);
 }
 auto temp(Type type) {
-	return type/*&[I8]*/.generate(/*auto*/);
+	return type/*Type*/.generate(/*auto*/);
 }
 auto temp(&[I8] inner) {
 	return " implements " + inner/*auto*/;
@@ -720,7 +716,7 @@ auto temp(Tuple2<CompileState, &[I8]> callerTuple) {{
 	}
 }
 auto temp(&[I8] type) {
-	return Main/*auto*/.compileType(state/*CompileState*/, type/*&[I8]*/).flatMap(lambdaDefinition/*auto*/);
+	return Main/*auto*/.compileType(state/*CompileState*/, type/*Type*/).flatMap(lambdaDefinition/*auto*/);
 }
 auto temp(Tuple2<CompileState, Value> callerTuple) {
 	return Main/*auto*/.assembleInvokable(callerTuple/*Tuple2<CompileState, &[I8]>*/.left(/*auto*/), callerTuple/*Tuple2<CompileState, &[I8]>*/.right(/*auto*/), args/*List<&[I8]>*/);
@@ -1131,11 +1127,11 @@ static Tuple2<CompileState, Parameter> getCompileStateParameterTuple2(Tuple2<Com
 }
 auto temp(&[I8] annotationsString, &[I8] afterAnnotations) {{
 		var annotations = Main/*auto*/.parseAnnotations(annotationsString/*&[I8]*/);
-		return Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, annotations/*List<&[I8]>*/, afterAnnotations/*&[I8]*/, type/*&[I8]*/, name/*&[I8]*/);
+		return Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, annotations/*List<&[I8]>*/, afterAnnotations/*&[I8]*/, type/*Type*/, name/*&[I8]*/);
 	}
 }
 auto temp() {
-	return Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, Lists/*auto*/.empty(/*auto*/), beforeType/*&[I8]*/, type/*&[I8]*/, name/*&[I8]*/);
+	return Main/*auto*/.parseDefinitionWithAnnotations(state/*CompileState*/, Lists/*auto*/.empty(/*auto*/), beforeType/*&[I8]*/, type/*Type*/, name/*&[I8]*/);
 }
 auto temp(&[I8] beforeType, &[I8] type) {
 	return Main/*auto*/.compileLast(Strings/*auto*/.strip(beforeType/*&[I8]*/), "\n", lambdaDefinition/*auto*/).or(lambdaDefinition/*auto*/);

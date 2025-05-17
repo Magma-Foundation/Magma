@@ -50,7 +50,7 @@ Option<Tuple2<DivideState, I8>> popAndAppendToTuple() {
 	return this/*auto*/.pop(/*auto*/).map(lambdaDefinition/*auto*/);
 }
 auto temp(Tuple2<DivideState, I8> tuple) {
-	return tuple/*auto*/.left(/*auto*/);
+	return tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/);
 }
 Option<DivideState> popAndAppendToOption() {
 	return this/*auto*/.popAndAppendToTuple(/*auto*/).map(lambdaDefinition/*auto*/);
