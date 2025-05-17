@@ -1,12 +1,8 @@
 package magma.app.compile;
 
-import jvm.api.collect.list.Lists;
-import jvm.api.text.Strings;
 import magma.api.Type;
 import magma.api.collect.list.List;
-import magma.api.option.None;
 import magma.api.option.Option;
-import magma.api.option.Some;
 import magma.app.compile.define.Definition;
 import magma.app.io.Location;
 import magma.app.io.Platform;
@@ -14,125 +10,54 @@ import magma.app.io.Source;
 
 import java.util.function.Function;
 
-public record CompileState(
-        List<Import> imports,
-        String output,
-        List<String> structureNames,
-        int depth,
-        List<Definition> definitions,
-        Option<Location> maybeLocation,
-        List<Source> sources,
-        Platform platform
-) {
-    public static CompileState createInitial() {
-        return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
-    }
+public interface CompileState {
+    boolean isLastWithin(String name);
 
-    public boolean isLastWithin(final String name) {
-        return this.structureNames.findLast()
-                .filter((String anObject) -> Strings.equalsTo(name, anObject))
-                .isPresent();
-    }
+    CompileState addResolvedImport(List<String> oldParent, String child);
 
-    private CompileState addResolvedImport(final List<String> oldParent, final String child) {
-        final var namespace = this.maybeLocation
-                .map((Location location) -> location.namespace())
-                .orElse(Lists.empty());
+    CompileState withLocation(Location namespace);
 
-        var newParent = oldParent;
-        if (Platform.TypeScript == this.platform) {
-            if (namespace.isEmpty()) {
-                newParent = newParent.addFirst(".");
-            }
+    CompileState append(String element);
 
-            var i = 0;
-            final var size = namespace.size();
-            while (i < size) {
-                newParent = newParent.addFirst("..");
-                i++;
-            }
-        }
+    CompileState pushStructureName(String name);
 
-        if (this.imports
-                .query()
-                .filter((Import node) -> Strings.equalsTo(node.child(), child))
-                .next()
-                .isPresent()) {
-            return this;
-        }
+    CompileState enterDepth();
 
-        final var importString = new Import(newParent, child);
-        return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    CompileState exitDepth();
 
-    public CompileState withLocation(final Location namespace) {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
-    }
+    CompileState defineAll(List<Definition> definitions);
 
-    public CompileState append(final String element) {
-        return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    Option<Type> resolve(String name);
 
-    public CompileState pushStructureName(final String name) {
-        return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    CompileState clearImports();
 
-    public CompileState enterDepth() {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    CompileState clearOutput();
 
-    public CompileState exitDepth() {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    CompileState addSource(Source source);
 
-    public CompileState defineAll(final List<Definition> definitions) {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
-    }
+    Option<Source> findSource(String name);
 
-    public Option<Type> resolve(final String name) {
-        return this.definitions.queryReversed()
-                .filter((Definition definition) -> Strings.equalsTo(definition.name(), name))
-                .map((Definition definition1) -> definition1.type())
-                .next();
-    }
+    CompileState addResolvedImportFromCache(String base);
 
-    public CompileState clearImports() {
-        return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    CompileState popStructureName();
 
-    public CompileState clearOutput() {
-        return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    CompileState mapLocation(Function<Location, Location> mapper);
 
-    public CompileState addSource(final Source source) {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
-    }
+    CompileState withPlatform(Platform platform);
 
-    private Option<Source> findSource(final String name) {
-        return this.sources.query()
-                .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
-                .next();
-    }
+    List<Import> imports();
 
-    public CompileState addResolvedImportFromCache(final String base) {
-        if (this.structureNames.query().anyMatch((String inner) -> Strings.equalsTo(inner, base))) {
-            return this;
-        }
+    String output();
 
-        return this.findSource(base)
-                .map((Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
-                .orElse(this);
-    }
+    List<String> structureNames();
 
-    public CompileState popStructureName() {
-        return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
-    }
+    int depth();
 
-    public CompileState mapLocation(final Function<Location, Location> mapper) {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
-    }
+    List<Definition> definitions();
 
-    public CompileState withPlatform(final Platform platform) {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
-    }
+    Option<Location> maybeLocation();
+
+    List<Source> sources();
+
+    Platform platform();
 }

@@ -7,6 +7,7 @@ import jvm.api.io.Console;
 import magma.api.option.Option;
 import magma.app.io.Source;
 import magma.api.collect.list.ListCollector;
+import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.CompileState;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
@@ -29,7 +30,6 @@ import magma.app.compile.value.ConstructionCaller;
 import magma.app.compile.value.Caller;
 import magma.app.compile.value.Argument;
 import magma.app.compile.value.InvokableNode;
-import magma.app.compile.text.Placeholder;
 import magma.app.compile.value.StringNode;
 import magma.app.compile.value.NotNode;
 import magma.app.compile.value.LambdaNode;
@@ -40,6 +40,7 @@ import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import jvm.api.text.Characters;
 import magma.app.compile.text.Whitespace;
+import magma.app.compile.text.Placeholder;
 import magma.app.compile.type.ArrayType;
 import magma.app.compile.type.VariadicType;
 import magma.app.compile.type.PrimitiveType;
@@ -54,7 +55,7 @@ export struct Main {
 	}
 	def static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let sources = children.query().filter((mut source: Path) => source.endsWith(".java")).map((mut child: Path) => Source(sourceDirectory, child)).collect(ListCollector<Source>());
-		let initial = sources.query().foldWithInitial(CompileState.createInitial(), (mut state: CompileState, mut source: Source) => state.addSource(source));
+		let initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (mut state: CompileState, mut source: Source) => state.addSource(source));
 		return sources.query().foldWithInitial(Main.createInitialState(initial), (mut current: Tuple2<CompileState, Option<IOError>>, mut source1: Source) => Main.foldChild(current.left(), current.right(), source1)).right();
 	}
 	def static createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
@@ -521,9 +522,6 @@ export struct Main {
 	}
 	def static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
 		return args.query().map(mapper).flatMap(Queries.fromOption).collect(ListCollector<R>());
-	}
-	def static parseArgumentOrPlaceholder(state1: CompileState, input: &[I8]): Tuple2<CompileState, Argument> {
-		return Main.parseArgument(state1, input).orElseGet(() => Tuple2Impl<CompileState, Argument>(state1, Placeholder(input)));
 	}
 	def static parseArgument(state1: CompileState, input: &[I8]): Option<Tuple2<CompileState, Argument>> {
 		return Main.parseValue(state1, input).map((mut tuple: Tuple2<CompileState, Value>) => Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right()));

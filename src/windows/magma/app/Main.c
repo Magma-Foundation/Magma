@@ -6,7 +6,7 @@ export class Main {
 	}
 	mut static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let sources = children.query().filter((mut source: Path) => source.endsWith(".java")).map((mut child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<Source>());
-		let initial = sources.query().foldWithInitial(CompileState.createInitial(), (mut state: CompileState, mut source: Source) => state.addSource(source));
+		let initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (mut state: CompileState, mut source: Source) => state.addSource(source));
 		return sources.query().foldWithInitial(Main.createInitialState(initial), (mut current: Tuple2<CompileState, Option<IOError>>, mut source1: Source) => Main.foldChild(current.left(), current.right(), source1)).right();
 	}
 	mut static createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
@@ -473,9 +473,6 @@ export class Main {
 	}
 	mut static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
 		return args.query().map(mapper).flatMap(Queries.fromOption).collect(new ListCollector<R>());
-	}
-	mut static parseArgumentOrPlaceholder(state1: CompileState, input: &[I8]): Tuple2<CompileState, Argument> {
-		return Main.parseArgument(state1, input).orElseGet(() => new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
 	}
 	mut static parseArgument(state1: CompileState, input: &[I8]): Option<Tuple2<CompileState, Argument>> {
 		return Main.parseValue(state1, input).map((mut tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right()));

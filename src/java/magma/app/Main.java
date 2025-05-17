@@ -19,12 +19,13 @@ import magma.api.io.Path;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.app.compile.CompileState;
+import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.value.AccessNode;
 import magma.app.compile.value.Argument;
 import magma.app.compile.type.ArrayType;
 import magma.app.compile.type.BooleanType;
 import magma.app.compile.value.Caller;
-import magma.app.compile.CompileState;
 import magma.app.compile.value.StringNode;
 import magma.app.compile.value.ConstructionCaller;
 import magma.app.compile.value.ConstructorHeader;
@@ -72,7 +73,7 @@ public final class Main {
                 .map((Path child) -> new Source(sourceDirectory, child))
                 .collect(new ListCollector<Source>());
 
-        final var initial = sources.query().foldWithInitial(CompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
+        final var initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
 
         return sources.query()
                 .foldWithInitial(Main.createInitialState(initial), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
@@ -774,10 +775,6 @@ public final class Main {
                 .map(mapper)
                 .flatMap(Queries::fromOption)
                 .collect(new ListCollector<R>());
-    }
-
-    private static Tuple2<CompileState, Argument> parseArgumentOrPlaceholder(final CompileState state1, final String input) {
-        return Main.parseArgument(state1, input).orElseGet(() -> new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
     }
 
     private static Option<Tuple2<CompileState, Argument>> parseArgument(final CompileState state1, final String input) {

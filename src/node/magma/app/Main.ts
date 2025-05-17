@@ -7,6 +7,7 @@ import { Console } from "../../jvm/api/io/Console";
 import { Option } from "../../magma/api/option/Option";
 import { Source } from "../../magma/app/io/Source";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
@@ -29,7 +30,6 @@ import { ConstructionCaller } from "../../magma/app/compile/value/ConstructionCa
 import { Caller } from "../../magma/app/compile/value/Caller";
 import { Argument } from "../../magma/app/compile/value/Argument";
 import { InvokableNode } from "../../magma/app/compile/value/InvokableNode";
-import { Placeholder } from "../../magma/app/compile/text/Placeholder";
 import { StringNode } from "../../magma/app/compile/value/StringNode";
 import { NotNode } from "../../magma/app/compile/value/NotNode";
 import { LambdaNode } from "../../magma/app/compile/value/LambdaNode";
@@ -40,6 +40,7 @@ import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
+import { Placeholder } from "../../magma/app/compile/text/Placeholder";
 import { ArrayType } from "../../magma/app/compile/type/ArrayType";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
@@ -54,7 +55,7 @@ export class Main {
 	}
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let sources = children.query().filter((source: Path) => source.endsWith(".java")).map((child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<Source>());
-		let initial = sources.query().foldWithInitial(CompileState.createInitial(), (state: CompileState, source: Source) => state.addSource(source));
+		let initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (state: CompileState, source: Source) => state.addSource(source));
 		return sources.query().foldWithInitial(Main.createInitialState(initial), (current: Tuple2<CompileState, Option<IOError>>, source1: Source) => Main.foldChild(current.left(), current.right(), source1)).right();
 	}
 	static createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
@@ -521,9 +522,6 @@ export class Main {
 	}
 	static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
 		return args.query().map(mapper).flatMap(Queries.fromOption).collect(new ListCollector<R>());
-	}
-	static parseArgumentOrPlaceholder(state1: CompileState, input: string): Tuple2<CompileState, Argument> {
-		return Main.parseArgument(state1, input).orElseGet(() => new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
 	}
 	static parseArgument(state1: CompileState, input: string): Option<Tuple2<CompileState, Argument>> {
 		return Main.parseValue(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right()));
