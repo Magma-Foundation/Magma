@@ -64,7 +64,7 @@ export class Some<T> implements Option<T> {
 		return mapper(this.value);
 	}
 	filter(predicate: (arg0 : T) => boolean): Option<T> {
-		if (predicate(this.value)){
+		if (predicate(this.value)) {
 			return this;
 		}
 		return new None<T>();

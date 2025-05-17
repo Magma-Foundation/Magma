@@ -114,7 +114,7 @@ class DivideState {
 		return 1 === this.depth;
 	}
 	pop(): Option<Tuple2<DivideState, string>> {
-		if (this.index >= Strings.length(this.input)){
+		if (this.index >= Strings.length(this.input)) {
 			return new None<Tuple2<DivideState, string>>();
 		}
 		let c = Strings.charAt(this.input, this.index);
@@ -162,18 +162,18 @@ class CompileState {
 	addResolvedImport(oldParent: List<string>, child: string): CompileState {
 		let namespace = this.maybeLocation.map((location: Location) => location.namespace).orElse(Lists.empty());
 		let newParent = oldParent;
-		if (Platform.TypeScript === this.platform){
-			if (namespace.isEmpty()){
+		if (Platform.TypeScript === this.platform) {
+			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
 			let i = 0;
 			let size = namespace.size();
-			while (i < size){
+			while (i < size) {
 				newParent = newParent.addFirst("..");
 				i++;
 			}
 		}
-		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()){
+		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()) {
 			return this;
 		}
 		let importString = new Import(newParent, child);
@@ -213,7 +213,7 @@ class CompileState {
 		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base))){
+		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base))) {
 			return this;
 		}
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
@@ -268,7 +268,7 @@ class Definition {
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 	}
 	generateType(): string {
-		if (this.type.isVar()){
+		if (this.type.isVar()) {
 			return "";
 		}
 		return ": " + this.type.generate();
@@ -520,7 +520,7 @@ class ConstructionCaller implements Caller {
 		this.platform = platform;
 	}
 	generate(): string {
-		if (Platform.Magma === this.platform){
+		if (Platform.Magma === this.platform) {
 			return this.right;
 		}
 		return "new " + this.right;
@@ -561,7 +561,7 @@ class Generic implements Type {
 		return Main.generateAll(values, Generic.mergeValues);
 	}
 	static mergeValues(cache: string, element: string): string {
-		if (Strings.isEmpty(cache)){
+		if (Strings.isEmpty(cache)) {
 			return cache + element;
 		}
 		return cache + ", " + element;
@@ -605,7 +605,7 @@ class Import {
 		this.child = child;
 	}
 	generate(platform: Platform): string {
-		if (Platform.Magma === platform){
+		if (Platform.Magma === platform) {
 			let joinedNamespace = this.namespace.query().collect(new Joiner(".")).orElse("");
 			return "import " + joinedNamespace + "." + this.child + ";\n";
 		}
@@ -685,7 +685,7 @@ class BooleanType implements Type {
 		this.platform = platform;
 	}
 	generate(): string {
-		if (Platform.TypeScript === this.platform){
+		if (Platform.TypeScript === this.platform) {
 			return "boolean";
 		}
 		return "Bool";
@@ -749,7 +749,7 @@ export class Main {
 		return new Tuple2Impl<CompileState, Option<IOError>>(state, new None<IOError>());
 	}
 	static foldChild(state: CompileState, maybeError: Option<IOError>, source: Source): Tuple2<CompileState, Option<IOError>> {
-		if (maybeError.isPresent()){
+		if (maybeError.isPresent()) {
 			return new Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
 		}
 		return Main.runWithSource(state, source);
@@ -768,9 +768,9 @@ export class Main {
 		let location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
 		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
-		if (!targetParent.exists()){
+		if (!targetParent.exists()) {
 			let maybeError = targetParent.createDirectories();
-			if (maybeError.isPresent()){
+			if (maybeError.isPresent()) {
 				return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
@@ -788,7 +788,7 @@ export class Main {
 		return new Tuple2Impl<CompileState, string>(compileState, output);
 	}
 	static createMain(source: Source): string {
-		if (Strings.equalsTo(source.computeName(), "Main")){
+		if (Strings.equalsTo(source.computeName(), "Main")) {
 			return "Main.main();";
 		}
 		return "";
@@ -823,9 +823,9 @@ export class Main {
 	}
 	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): List<string> {
 		let current = DivideState.createInitial(input);
-		while (true){
+		while (true) {
 			let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, string>(current, "\0"));
-			if (!poppedTuple0.left()){
+			if (!poppedTuple0.left()) {
 				break;
 			}
 			let poppedTuple = poppedTuple0.right();
@@ -836,28 +836,28 @@ export class Main {
 		return current.advance().segments;
 	}
 	static foldDoubleQuotes(state: DivideState, c: string): Option<DivideState> {
-		if ("\"" !== c){
+		if ("\"" !== c) {
 			return new None<DivideState>();
 		}
 		let appended = state.append(c);
-		while (true){
+		while (true) {
 			let maybeTuple = appended.popAndAppendToTuple().toTuple(new Tuple2Impl<DivideState, string>(appended, "\0"));
-			if (!maybeTuple.left()){
+			if (!maybeTuple.left()) {
 				break;
 			}
 			let tuple = maybeTuple.right();
 			appended = tuple.left();
-			if ("\\" === tuple.right()){
+			if ("\\" === tuple.right()) {
 				appended = appended.popAndAppendToOption().orElse(appended);
 			}
-			if ("\"" === tuple.right()){
+			if ("\"" === tuple.right()) {
 				break;
 			}
 		}
 		return new Some<DivideState>(appended);
 	}
 	static foldSingleQuotes(state: DivideState, c: string): Option<DivideState> {
-		if ("\'" !== c){
+		if ("\'" !== c) {
 			return new None<DivideState>();
 		}
 		return state.append(c).popAndAppendToTuple().flatMap(Main.foldEscaped).flatMap((state1: DivideState) => state1.popAndAppendToOption());
@@ -865,23 +865,23 @@ export class Main {
 	static foldEscaped(tuple: Tuple2<DivideState, string>): Option<DivideState> {
 		let state = tuple.left();
 		let c = tuple.right();
-		if ("\\" === c){
+		if ("\\" === c) {
 			return state.popAndAppendToOption();
 		}
 		return new Some<DivideState>(state);
 	}
 	static foldStatements(state: DivideState, c: string): DivideState {
 		let appended = state.append(c);
-		if (";" === c && appended.isLevel()){
+		if (";" === c && appended.isLevel()) {
 			return appended.advance();
 		}
-		if ("}" === c && appended.isShallow()){
+		if ("}" === c && appended.isShallow()) {
 			return appended.advance().exit();
 		}
-		if ("{" === c || "(" === c){
+		if ("{" === c || "(" === c) {
 			return appended.enter();
 		}
-		if ("}" === c || ")" === c){
+		if ("}" === c || ")" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -892,7 +892,7 @@ export class Main {
 	static createStructureRule(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
 		return (state: CompileState, input1: string) => Main.compileFirst(input1, sourceInfix, (beforeInfix: string, afterInfix: string) => Main.compileFirst(afterInfix, "{", (beforeContent: string, withEnd: string) => Main.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => Main.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 			let annotations = Main.parseAnnotations(s);
-			if (annotations.contains("Actual", Strings.equalsTo)){
+			if (annotations.contains("Actual", Strings.equalsTo)) {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 			}
 			return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
@@ -926,7 +926,7 @@ export class Main {
 	}
 	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, rawName: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string, maybeSuperType: Option<string>): Option<Tuple2<CompileState, string>> {
 		let name = Strings.strip(rawName);
-		if (!Main.isSymbol(name)){
+		if (!Main.isSymbol(name)) {
 			return new None<Tuple2<CompileState, string>>();
 		}
 		let outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main.compileClassSegment);
@@ -937,7 +937,7 @@ export class Main {
 		let implementingString = Main.generateImplementing(maybeImplementing);
 		let newModifiers = Main.modifyModifiers0(oldModifiers);
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " ").collect(Joiner.empty()).orElse("");
-		if (annotations.contains("Namespace", Strings.equalsTo)){
+		if (annotations.contains("Namespace", Strings.equalsTo)) {
 			let actualInfix: string = "interface ";
 			let newName: string = name + "Instance";
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
@@ -952,13 +952,13 @@ export class Main {
 		}
 	}
 	static retainStruct(infix: string, outputContentState: CompileState): string {
-		if (Platform.Magma === outputContentState.platform){
+		if (Platform.Magma === outputContentState.platform) {
 			return "struct ";
 		}
 		return infix;
 	}
 	static modifyModifiers0(oldModifiers: List<string>): List<string> {
-		if (oldModifiers.contains("public", Strings.equalsTo)){
+		if (oldModifiers.contains("public", Strings.equalsTo)) {
 			return Lists.of("export");
 		}
 		return Lists.empty();
@@ -984,7 +984,7 @@ export class Main {
 	}
 	static compileNamespaced(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		let stripped = Strings.strip(input);
-		if (stripped.startsWith("package ")){
+		if (stripped.startsWith("package ")) {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 		}
 		return Main.compileImport(state, stripped);
@@ -994,7 +994,7 @@ export class Main {
 			let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
 			let child = Strings.strip(divisions.findLast().orElse(""));
 			let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)){
+			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)) {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 			}
 			let compileState = state.addResolvedImport(parent, child);
@@ -1017,12 +1017,12 @@ export class Main {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams);
 			return Main.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
-				if (state.isLastWithin(name)){
+				if (state.isLastWithin(name)) {
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, string>>();
 			}).or(() => {
-				if (state.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
+				if (state.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, string>>();
@@ -1037,7 +1037,7 @@ export class Main {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			let newHeader = Main.retainDef(header, parametersState);
-			if (newHeader.hasAnnotation("Actual")){
+			if (newHeader.hasAnnotation("Actual")) {
 				let headerGenerated = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"));
 			}
@@ -1046,7 +1046,7 @@ export class Main {
 				let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"));
 			})).or(() => {
-				if (Strings.equalsTo(";", Strings.strip(afterParams))){
+				if (Strings.equalsTo(";", Strings.strip(afterParams))) {
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
 				}
 				return new None<Tuple2<CompileState, string>>();
@@ -1054,7 +1054,7 @@ export class Main {
 		});
 	}
 	static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
-		if (Platform.Magma === parametersState.platform){
+		if (Platform.Magma === parametersState.platform) {
 			return header.addModifier("def").removeModifier("mut");
 		}
 		return header;
@@ -1069,7 +1069,7 @@ export class Main {
 		return Main.compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileEmptySegment, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
 	}
 	static compileEmptySegment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		if (Strings.equalsTo(";", Strings.strip(input))){
+		if (Strings.equalsTo(";", Strings.strip(input))) {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ";"));
 		}
 		else {
@@ -1088,16 +1088,16 @@ export class Main {
 	}
 	static foldBlockStarts(state: DivideState, c: string): DivideState {
 		let appended = state.append(c);
-		if ("{" === c){
+		if ("{" === c) {
 			let entered = appended.enter();
-			if (entered.isShallow()){
+			if (entered.isShallow()) {
 				return entered.advance();
 			}
 			else {
 				return entered;
 			}
 		}
-		if ("}" === c){
+		if ("}" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1110,12 +1110,12 @@ export class Main {
 			let strippedCondition = Strings.strip(withoutPrefix);
 			return Main.compilePrefix(strippedCondition, "(", (withoutConditionStart: string) => Main.compileSuffix(withoutConditionStart, ")", (withoutConditionEnd: string) => {
 				let tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), prefix + " (" + tuple.right() + ")"));
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), prefix + " (" + tuple.right() + ") "));
 			}));
 		});
 	}
 	static compileElse(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		if (Strings.equalsTo("else", Strings.strip(input))){
+		if (Strings.equalsTo("else", Strings.strip(input))) {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, "else "));
 		}
 		else {
@@ -1135,7 +1135,7 @@ export class Main {
 		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (state1: CompileState, input: string) => Main.parseInvokable(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
 	}
 	static compileBreak(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		if (Strings.equalsTo("break", Strings.strip(input))){
+		if (Strings.equalsTo("break", Strings.strip(input))) {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, "break"));
 		}
 		else {
@@ -1166,7 +1166,7 @@ export class Main {
 	}
 	static splitFolded(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, selector: (arg0 : List<string>) => Option<Tuple2<string, string>>): Option<Tuple2<string, string>> {
 		let divisions = Main.divide(input, folder);
-		if (2 > divisions.size()){
+		if (2 > divisions.size()) {
 			return new None<Tuple2<string, string>>();
 		}
 		return selector(divisions);
@@ -1179,16 +1179,16 @@ export class Main {
 	}
 	static foldInvocationStarts(state: DivideState, c: string): DivideState {
 		let appended = state.append(c);
-		if ("(" === c){
+		if ("(" === c) {
 			let entered = appended.enter();
-			if (entered.isShallow()){
+			if (entered.isShallow()) {
 				return entered.advance();
 			}
 			else {
 				return entered;
 			}
 		}
-		if (")" === c){
+		if (")" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1204,7 +1204,7 @@ export class Main {
 	static transformCaller(state: CompileState, oldCaller: Caller): Caller {
 		return oldCaller.findChild().flatMap((parent: Value) => {
 			let parentType = parent.resolve(state);
-			if (parentType.isFunctional()){
+			if (parentType.isFunctional()) {
 				return new Some<Caller>(parent);
 			}
 			return new None<Caller>();
@@ -1276,7 +1276,7 @@ export class Main {
 	static createAccessRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state: CompileState, input: string) => Main.compileLast(input, infix, (childString: string, rawProperty: string) => {
 			let property = Strings.strip(rawProperty);
-			if (!Main.isSymbol(property)){
+			if (!Main.isSymbol(property)) {
 				return new None<Tuple2<CompileState, Value>>();
 			}
 			return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
@@ -1300,11 +1300,11 @@ export class Main {
 	}
 	static foldOperator(infix: string): (arg0 : DivideState, arg1 : string) => DivideState {
 		return (state: DivideState, c: string) => {
-			if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))){
+			if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
 				let length = Strings.length(infix) - 1;
 				let counter = 0;
 				let current = state;
-				while (counter < length){
+				while (counter < length) {
 					counter++;
 					current = current.pop().map((tuple: Tuple2<DivideState, string>) => tuple.left()).orElse(current);
 				}
@@ -1315,7 +1315,7 @@ export class Main {
 	}
 	static parseNumber(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
-		if (Main.isNumber(stripped)){
+		if (Main.isNumber(stripped)) {
 			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
 		}
 		else {
@@ -1328,7 +1328,7 @@ export class Main {
 	}
 	static parseSymbol(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
-		if (Main.isSymbol(stripped)){
+		if (Main.isSymbol(stripped)) {
 			let withImport = state.addResolvedImportFromCache(stripped);
 			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped)));
 		}
@@ -1344,7 +1344,7 @@ export class Main {
 		return "_" === c || Characters.isLetter(c) || (0 !== index && Characters.isDigit(c));
 	}
 	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
-		if (!input.startsWith(infix)){
+		if (!input.startsWith(infix)) {
 			return new None<Tuple2<CompileState, T>>();
 		}
 		let slice = Strings.sliceFrom(input, Strings.length(infix));
@@ -1354,7 +1354,7 @@ export class Main {
 		return Main.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate()));
 	}
 	static parseWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, Whitespace>> {
-		if (Strings.isBlank(input)){
+		if (Strings.isBlank(input)) {
 			return new Some<Tuple2<CompileState, Whitespace>>(new Tuple2Impl<CompileState, Whitespace>(state, new Whitespace()));
 		}
 		return new None<Tuple2<CompileState, Whitespace>>();
@@ -1402,7 +1402,7 @@ export class Main {
 		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => Main.foldDelimited(state1, c, " ")).query().map((s: string) => Strings.strip(s)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static foldDelimited(state1: DivideState, c: string, delimiter: string): DivideState {
-		if (delimiter === c){
+		if (delimiter === c) {
 			return state1.advance();
 		}
 		return state1.append(c);
@@ -1411,14 +1411,14 @@ export class Main {
 		return Main.divide(input, Main.foldValues).query().map((input1: string) => Strings.strip(input1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static foldTypeSeparators(state: DivideState, c: string): DivideState {
-		if (" " === c && state.isLevel()){
+		if (" " === c && state.isLevel()) {
 			return state.advance();
 		}
 		let appended = state.append(c);
-		if ("<" === c){
+		if ("<" === c) {
 			return appended.enter();
 		}
-		if (">" === c){
+		if (">" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1432,13 +1432,13 @@ export class Main {
 	}
 	static modifyModifiers(oldModifiers: List<string>, platform: Platform): List<string> {
 		let list: List<string> = Main.retainFinal(oldModifiers, platform);
-		if (oldModifiers.contains("static", Strings.equalsTo)){
+		if (oldModifiers.contains("static", Strings.equalsTo)) {
 			return list.addLast("static");
 		}
 		return list;
 	}
 	static retainFinal(oldModifiers: List<string>, platform: Platform): List<string> {
-		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform){
+		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform) {
 			return Lists.empty();
 		}
 		return Lists.of("mut");
@@ -1468,7 +1468,7 @@ export class Main {
 	}
 	static parseSymbolType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input);
-		if (Main.isSymbol(stripped)){
+		if (Main.isSymbol(stripped)) {
 			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped)));
 		}
 		return new None<Tuple2<CompileState, Type>>();
@@ -1478,37 +1478,37 @@ export class Main {
 	}
 	static findPrimitiveValue(input: string, platform: Platform): Option<Type> {
 		let stripped = Strings.strip(input);
-		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)){
-			if (Platform.TypeScript === platform){
+		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
+			if (Platform.TypeScript === platform) {
 				return new Some<Type>(Primitive.String);
 			}
 			else {
 				return new Some<Type>(Primitive.I8);
 			}
 		}
-		if (Strings.equalsTo("String", stripped)){
-			if (Platform.TypeScript === platform){
+		if (Strings.equalsTo("String", stripped)) {
+			if (Platform.TypeScript === platform) {
 				return new Some<Type>(Primitive.String);
 			}
 			else {
 				return new Some<Type>(new Slice(Primitive.I8));
 			}
 		}
-		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)){
-			if (Platform.Magma === platform){
+		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
+			if (Platform.Magma === platform) {
 				return new Some<Type>(Primitive.I32);
 			}
 			else {
 				return new Some<Type>(Primitive.Number);
 			}
 		}
-		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
+		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
 			return new Some<Type>(new BooleanType(platform));
 		}
-		if (Strings.equalsTo("var", stripped)){
+		if (Strings.equalsTo("var", stripped)) {
 			return new Some<Type>(Primitive.Var);
 		}
-		if (Strings.equalsTo("void", stripped)){
+		if (Strings.equalsTo("void", stripped)) {
 			return new Some<Type>(Primitive.Void);
 		}
 		return new None<Type>();
@@ -1529,19 +1529,19 @@ export class Main {
 		return Main.mapFunctionType(base, args).map((generated: Type) => new Tuple2Impl<CompileState, Type>(state, generated));
 	}
 	static mapFunctionType(base: string, args: List<string>): Option<Type> {
-		if (Strings.equalsTo("Function", base)){
+		if (Strings.equalsTo("Function", base)) {
 			return args.findFirst().and(() => args.find(1)).map((tuple: Tuple2<string, string>) => new FunctionType(Lists.of(tuple.left()), tuple.right()));
 		}
-		if (Strings.equalsTo("BiFunction", base)){
+		if (Strings.equalsTo("BiFunction", base)) {
 			return args.find(0).and(() => args.find(1)).and(() => args.find(2)).map((tuple: Tuple2<Tuple2<string, string>, string>) => new FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right()));
 		}
-		if (Strings.equalsTo("Supplier", base)){
+		if (Strings.equalsTo("Supplier", base)) {
 			return args.findFirst().map((first: string) => new FunctionType(Lists.empty(), first));
 		}
-		if (Strings.equalsTo("Consumer", base)){
+		if (Strings.equalsTo("Consumer", base)) {
 			return args.findFirst().map((first: string) => new FunctionType(Lists.of(first), "void"));
 		}
-		if (Strings.equalsTo("Predicate", base)){
+		if (Strings.equalsTo("Predicate", base)) {
 			return args.findFirst().map((first: string) => new FunctionType(Lists.of(first), "boolean"));
 		}
 		return new None<Type>();
@@ -1556,23 +1556,23 @@ export class Main {
 		return Main.parseAll(state, input, Main.foldValues, mapper);
 	}
 	static foldValues(state: DivideState, c: string): DivideState {
-		if ("," === c && state.isLevel()){
+		if ("," === c && state.isLevel()) {
 			return state.advance();
 		}
 		let appended = state.append(c);
-		if ("-" === c){
+		if ("-" === c) {
 			let peeked = appended.peek();
-			if (">" === peeked){
+			if (">" === peeked) {
 				return appended.popAndAppendToOption().orElse(appended);
 			}
 			else {
 				return appended;
 			}
 		}
-		if ("<" === c || "(" === c){
+		if ("<" === c || "(" === c) {
 			return appended.enter();
 		}
-		if (">" === c || ")" === c){
+		if (">" === c || ")" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1584,7 +1584,7 @@ export class Main {
 		return input.lastIndexOf(infix);
 	}
 	static compileSuffix<T>(input: string, suffix: string, mapper: (arg0 : string) => Option<T>): Option<T> {
-		if (!input.endsWith(suffix)){
+		if (!input.endsWith(suffix)) {
 			return new None<T>();
 		}
 		let length = Strings.length(input);
@@ -1603,7 +1603,7 @@ export class Main {
 	}
 	static split(input: string, infix: string, locator: (arg0 : string, arg1 : string) => number): Option<Tuple2<string, string>> {
 		let index = locator(input, infix);
-		if (0 > index){
+		if (0 > index) {
 			return new None<Tuple2<string, string>>();
 		}
 		let left = Strings.sliceBetween(input, 0, index);

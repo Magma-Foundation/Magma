@@ -59,10 +59,10 @@ export struct HeadedQuery<T> implements Query<T> {
 	}
 	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		let mut result: R = initial;
-		while (true){
+		while (true) {
 			let finalResult: R = result;
 			let maybeNext: Tuple2<Bool, R> = this.head.next().map((mut inner: T) => folder(finalResult, inner)).toTuple(finalResult);
-			if (maybeNext.left()){
+			if (maybeNext.left()) {
 				result = maybeNext.right();
 			}
 			else {
@@ -87,7 +87,7 @@ export struct HeadedQuery<T> implements Query<T> {
 	}
 	def filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
-			if (predicate(element)){
+			if (predicate(element)) {
 				return HeadedQuery<T>(SingleHead<T>(element));
 			}
 			else {

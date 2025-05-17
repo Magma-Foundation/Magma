@@ -47,13 +47,13 @@ export class FlatMapHead<T, R> implements Head<R> {
 		this.mapper = mapper;
 	}
 	next(): Option<R> {
-		while (true){
+		while (true) {
 			let next = this.current.next();
-			if (next.isPresent()){
+			if (next.isPresent()) {
 				return next;
 			}
 			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
-			if (tuple.left()){
+			if (tuple.left()) {
 				this.current = tuple.right();
 			}
 			else {

@@ -1411,7 +1411,7 @@ public final class Main {
             final var strippedCondition = Strings.strip(withoutPrefix);
             return Main.compilePrefix(strippedCondition, "(", (final String withoutConditionStart) -> Main.compileSuffix(withoutConditionStart, ")", (final String withoutConditionEnd) -> {
                 final var tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), prefix + " (" + tuple.right() + ")"));
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), prefix + " (" + tuple.right() + ") "));
             }));
         });
     }

@@ -45,7 +45,7 @@ export class RangeHead implements Head<number> {
 		this.counter = 0;
 	}
 	next(): Option<number> {
-		if (this.counter >= this.length){
+		if (this.counter >= this.length) {
 			return new None<number>();
 		}
 		let value = this.counter;

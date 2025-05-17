@@ -45,7 +45,7 @@ export class SingleHead<T> implements Head<T> {
 		this.retrieved = false;
 	}
 	next(): Option<T> {
-		if (this.retrieved){
+		if (this.retrieved) {
 			return new None<T>();
 		}
 		this.retrieved = true;

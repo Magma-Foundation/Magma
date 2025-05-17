@@ -59,10 +59,10 @@ export class HeadedQuery<T> implements Query<T> {
 	}
 	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		let result: R = initial;
-		while (true){
+		while (true) {
 			let finalResult: R = result;
 			let maybeNext: Tuple2<boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)).toTuple(finalResult);
-			if (maybeNext.left()){
+			if (maybeNext.left()) {
 				result = maybeNext.right();
 			}
 			else {
@@ -87,7 +87,7 @@ export class HeadedQuery<T> implements Query<T> {
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
-			if (predicate(element)){
+			if (predicate(element)) {
 				return new HeadedQuery<T>(new SingleHead<T>(element));
 			}
 			else {

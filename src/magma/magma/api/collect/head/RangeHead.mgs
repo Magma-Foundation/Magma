@@ -45,7 +45,7 @@ export struct RangeHead implements Head<I32> {
 		this.counter = 0;
 	}
 	def next(): Option<I32> {
-		if (this.counter >= this.length){
+		if (this.counter >= this.length) {
 			return None<I32>();
 		}
 		let value = this.counter;

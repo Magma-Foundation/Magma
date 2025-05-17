@@ -45,7 +45,7 @@ export struct SingleHead<T> implements Head<T> {
 		this.retrieved = false;
 	}
 	def next(): Option<T> {
-		if (this.retrieved){
+		if (this.retrieved) {
 			return None<T>();
 		}
 		this.retrieved = true;

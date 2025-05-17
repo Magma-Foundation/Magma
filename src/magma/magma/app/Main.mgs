@@ -114,7 +114,7 @@ struct DivideState {
 		return 1 === this.depth;
 	}
 	def pop(): Option<Tuple2<DivideState, I8>> {
-		if (this.index >= Strings.length(this.input)){
+		if (this.index >= Strings.length(this.input)) {
 			return None<Tuple2<DivideState, I8>>();
 		}
 		let c = Strings.charAt(this.input, this.index);
@@ -162,18 +162,18 @@ struct CompileState {
 	def addResolvedImport(oldParent: List<&[I8]>, child: &[I8]): CompileState {
 		let namespace = this.maybeLocation.map((mut location: Location) => location.namespace).orElse(Lists.empty());
 		let mut newParent = oldParent;
-		if (Platform.TypeScript === this.platform){
-			if (namespace.isEmpty()){
+		if (Platform.TypeScript === this.platform) {
+			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
 			let mut i = 0;
 			let size = namespace.size();
-			while (i < size){
+			while (i < size) {
 				newParent = newParent.addFirst("..");
 				i++;
 			}
 		}
-		if (this.imports.query().filter((mut node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()){
+		if (this.imports.query().filter((mut node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()) {
 			return this;
 		}
 		let importString = Import(newParent, child);
@@ -213,7 +213,7 @@ struct CompileState {
 		return this.sources.query().filter((mut source: Source) => Strings.equalsTo(source.computeName(), name)).next();
 	}
 	def addResolvedImportFromCache(base: &[I8]): CompileState {
-		if (this.structureNames.query().anyMatch((mut inner: &[I8]) => Strings.equalsTo(inner, base))){
+		if (this.structureNames.query().anyMatch((mut inner: &[I8]) => Strings.equalsTo(inner, base))) {
 			return this;
 		}
 		return this.findSource(base).map((mut source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
@@ -268,7 +268,7 @@ struct Definition {
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 	}
 	def generateType(): &[I8] {
-		if (this.type.isVar()){
+		if (this.type.isVar()) {
 			return "";
 		}
 		return ": " + this.type.generate();
@@ -520,7 +520,7 @@ struct ConstructionCaller implements Caller {
 		this.platform = platform;
 	}
 	def generate(): &[I8] {
-		if (Platform.Magma === this.platform){
+		if (Platform.Magma === this.platform) {
 			return this.right;
 		}
 		return "new " + this.right;
@@ -561,7 +561,7 @@ struct Generic implements Type {
 		return Main.generateAll(values, Generic.mergeValues);
 	}
 	def static mergeValues(cache: &[I8], element: &[I8]): &[I8] {
-		if (Strings.isEmpty(cache)){
+		if (Strings.isEmpty(cache)) {
 			return cache + element;
 		}
 		return cache + ", " + element;
@@ -605,7 +605,7 @@ struct Import {
 		this.child = child;
 	}
 	def generate(platform: Platform): &[I8] {
-		if (Platform.Magma === platform){
+		if (Platform.Magma === platform) {
 			let joinedNamespace = this.namespace.query().collect(Joiner(".")).orElse("");
 			return "import " + joinedNamespace + "." + this.child + ";\n";
 		}
@@ -685,7 +685,7 @@ struct BooleanType implements Type {
 		this.platform = platform;
 	}
 	def generate(): &[I8] {
-		if (Platform.TypeScript === this.platform){
+		if (Platform.TypeScript === this.platform) {
 			return "boolean";
 		}
 		return "Bool";
@@ -749,7 +749,7 @@ export struct Main {
 		return Tuple2Impl<CompileState, Option<IOError>>(state, None<IOError>());
 	}
 	def static foldChild(state: CompileState, maybeError: Option<IOError>, source: Source): Tuple2<CompileState, Option<IOError>> {
-		if (maybeError.isPresent()){
+		if (maybeError.isPresent()) {
 			return Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
 		}
 		return Main.runWithSource(state, source);
@@ -768,9 +768,9 @@ export struct Main {
 		let location = output.left().maybeLocation.orElse(Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
 		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
-		if (!targetParent.exists()){
+		if (!targetParent.exists()) {
 			let maybeError = targetParent.createDirectories();
-			if (maybeError.isPresent()){
+			if (maybeError.isPresent()) {
 				return Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
@@ -788,7 +788,7 @@ export struct Main {
 		return Tuple2Impl<CompileState, &[I8]>(compileState, output);
 	}
 	def static createMain(source: Source): &[I8] {
-		if (Strings.equalsTo(source.computeName(), "Main")){
+		if (Strings.equalsTo(source.computeName(), "Main")) {
 			return "Main.main();";
 		}
 		return "";
@@ -823,9 +823,9 @@ export struct Main {
 	}
 	def static divide(input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState): List<&[I8]> {
 		let mut current = DivideState.createInitial(input);
-		while (true){
+		while (true) {
 			let poppedTuple0 = current.pop().toTuple(Tuple2Impl<DivideState, I8>(current, "\0"));
-			if (!poppedTuple0.left()){
+			if (!poppedTuple0.left()) {
 				break;
 			}
 			let poppedTuple = poppedTuple0.right();
@@ -836,28 +836,28 @@ export struct Main {
 		return current.advance().segments;
 	}
 	def static foldDoubleQuotes(state: DivideState, c: I8): Option<DivideState> {
-		if ("\"" !== c){
+		if ("\"" !== c) {
 			return None<DivideState>();
 		}
 		let mut appended = state.append(c);
-		while (true){
+		while (true) {
 			let maybeTuple = appended.popAndAppendToTuple().toTuple(Tuple2Impl<DivideState, I8>(appended, "\0"));
-			if (!maybeTuple.left()){
+			if (!maybeTuple.left()) {
 				break;
 			}
 			let tuple = maybeTuple.right();
 			appended = tuple.left();
-			if ("\\" === tuple.right()){
+			if ("\\" === tuple.right()) {
 				appended = appended.popAndAppendToOption().orElse(appended);
 			}
-			if ("\"" === tuple.right()){
+			if ("\"" === tuple.right()) {
 				break;
 			}
 		}
 		return Some<DivideState>(appended);
 	}
 	def static foldSingleQuotes(state: DivideState, c: I8): Option<DivideState> {
-		if ("\'" !== c){
+		if ("\'" !== c) {
 			return None<DivideState>();
 		}
 		return state.append(c).popAndAppendToTuple().flatMap(Main.foldEscaped).flatMap((mut state1: DivideState) => state1.popAndAppendToOption());
@@ -865,23 +865,23 @@ export struct Main {
 	def static foldEscaped(tuple: Tuple2<DivideState, I8>): Option<DivideState> {
 		let state = tuple.left();
 		let c = tuple.right();
-		if ("\\" === c){
+		if ("\\" === c) {
 			return state.popAndAppendToOption();
 		}
 		return Some<DivideState>(state);
 	}
 	def static foldStatements(state: DivideState, c: I8): DivideState {
 		let appended = state.append(c);
-		if (";" === c && appended.isLevel()){
+		if (";" === c && appended.isLevel()) {
 			return appended.advance();
 		}
-		if ("}" === c && appended.isShallow()){
+		if ("}" === c && appended.isShallow()) {
 			return appended.advance().exit();
 		}
-		if ("{" === c || "(" === c){
+		if ("{" === c || "(" === c) {
 			return appended.enter();
 		}
-		if ("}" === c || ")" === c){
+		if ("}" === c || ")" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -892,7 +892,7 @@ export struct Main {
 	def static createStructureRule(sourceInfix: &[I8], targetInfix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> {
 		return (state: CompileState, input1: &[I8]) => Main.compileFirst(input1, sourceInfix, (beforeInfix: &[I8], afterInfix: &[I8]) => Main.compileFirst(afterInfix, "{", (beforeContent: &[I8], withEnd: &[I8]) => Main.compileSuffix(Strings.strip(withEnd), "}", (inputContent: &[I8]) => Main.compileLast(beforeInfix, "\n", (s: &[I8], s2: &[I8]) => {
 			let annotations = Main.parseAnnotations(s);
-			if (annotations.contains("Actual", Strings.equalsTo)){
+			if (annotations.contains("Actual", Strings.equalsTo)) {
 				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(state, ""));
 			}
 			return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
@@ -926,7 +926,7 @@ export struct Main {
 	}
 	def static assembleStructure(state: CompileState, annotations: List<&[I8]>, oldModifiers: List<&[I8]>, infix: &[I8], rawName: &[I8], typeParams: List<&[I8]>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: &[I8], maybeSuperType: Option<&[I8]>): Option<Tuple2<CompileState, &[I8]>> {
 		let name = Strings.strip(rawName);
-		if (!Main.isSymbol(name)){
+		if (!Main.isSymbol(name)) {
 			return None<Tuple2<CompileState, &[I8]>>();
 		}
 		let outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main.compileClassSegment);
@@ -937,7 +937,7 @@ export struct Main {
 		let implementingString = Main.generateImplementing(maybeImplementing);
 		let newModifiers = Main.modifyModifiers0(oldModifiers);
 		let joinedModifiers = newModifiers.query().map((mut value: &[I8]) => value + " ").collect(Joiner.empty()).orElse("");
-		if (annotations.contains("Namespace", Strings.equalsTo)){
+		if (annotations.contains("Namespace", Strings.equalsTo)) {
 			let actualInfix: &[I8] = "interface ";
 			let newName: &[I8] = name + "Instance";
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
@@ -952,13 +952,13 @@ export struct Main {
 		}
 	}
 	def static retainStruct(infix: &[I8], outputContentState: CompileState): &[I8] {
-		if (Platform.Magma === outputContentState.platform){
+		if (Platform.Magma === outputContentState.platform) {
 			return "struct ";
 		}
 		return infix;
 	}
 	def static modifyModifiers0(oldModifiers: List<&[I8]>): List<&[I8]> {
-		if (oldModifiers.contains("public", Strings.equalsTo)){
+		if (oldModifiers.contains("public", Strings.equalsTo)) {
 			return Lists.of("export");
 		}
 		return Lists.empty();
@@ -984,7 +984,7 @@ export struct Main {
 	}
 	def static compileNamespaced(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		let stripped = Strings.strip(input);
-		if (stripped.startsWith("package ")){
+		if (stripped.startsWith("package ")) {
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(state, ""));
 		}
 		return Main.compileImport(state, stripped);
@@ -994,7 +994,7 @@ export struct Main {
 			let divisions = Main.divide(s1, (mut divideState: DivideState, mut c: I8) => Main.foldDelimited(divideState, c, "."));
 			let child = Strings.strip(divisions.findLast().orElse(""));
 			let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)){
+			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)) {
 				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(state, ""));
 			}
 			let compileState = state.addResolvedImport(parent, child);
@@ -1017,12 +1017,12 @@ export struct Main {
 		return Main.compileFirst(input, "(", (beforeParams: &[I8], withParams: &[I8]) => {
 			let strippedBeforeParams = Strings.strip(beforeParams);
 			return Main.compileLast(strippedBeforeParams, " ", (_: &[I8], name: &[I8]) => {
-				if (state.isLastWithin(name)){
+				if (state.isLastWithin(name)) {
 					return Main.compileMethodWithBeforeParams(state, ConstructorHeader(), withParams);
 				}
 				return None<Tuple2<CompileState, &[I8]>>();
 			}).or(() => {
-				if (state.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
+				if (state.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
 					return Main.compileMethodWithBeforeParams(state, ConstructorHeader(), withParams);
 				}
 				return None<Tuple2<CompileState, &[I8]>>();
@@ -1037,7 +1037,7 @@ export struct Main {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).orElse("");
 			let newHeader = Main.retainDef(header, parametersState);
-			if (newHeader.hasAnnotation("Actual")){
+			if (newHeader.hasAnnotation("Actual")) {
 				let headerGenerated = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
 				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";\n"));
 			}
@@ -1046,7 +1046,7 @@ export struct Main {
 				let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
 				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"));
 			})).or(() => {
-				if (Strings.equalsTo(";", Strings.strip(afterParams))){
+				if (Strings.equalsTo(";", Strings.strip(afterParams))) {
 					return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";"));
 				}
 				return None<Tuple2<CompileState, &[I8]>>();
@@ -1054,7 +1054,7 @@ export struct Main {
 		});
 	}
 	def static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
-		if (Platform.Magma === parametersState.platform){
+		if (Platform.Magma === parametersState.platform) {
 			return header.addModifier("def").removeModifier("mut");
 		}
 		return header;
@@ -1069,7 +1069,7 @@ export struct Main {
 		return Main.compileOrPlaceholder(state, input, Lists.of(Main.compileWhitespace, Main.compileEmptySegment, Main.compileBlock, Main.compileFunctionStatement, Main.compileReturnWithoutSuffix));
 	}
 	def static compileEmptySegment(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		if (Strings.equalsTo(";", Strings.strip(input))){
+		if (Strings.equalsTo(";", Strings.strip(input))) {
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(state, ";"));
 		}
 		else {
@@ -1088,16 +1088,16 @@ export struct Main {
 	}
 	def static foldBlockStarts(state: DivideState, c: I8): DivideState {
 		let appended = state.append(c);
-		if ("{" === c){
+		if ("{" === c) {
 			let entered = appended.enter();
-			if (entered.isShallow()){
+			if (entered.isShallow()) {
 				return entered.advance();
 			}
 			else {
 				return entered;
 			}
 		}
-		if ("}" === c){
+		if ("}" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1110,12 +1110,12 @@ export struct Main {
 			let strippedCondition = Strings.strip(withoutPrefix);
 			return Main.compilePrefix(strippedCondition, "(", (withoutConditionStart: &[I8]) => Main.compileSuffix(withoutConditionStart, ")", (withoutConditionEnd: &[I8]) => {
 				let tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
-				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(tuple.left(), prefix + " (" + tuple.right() + ")"));
+				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(tuple.left(), prefix + " (" + tuple.right() + ") "));
 			}));
 		});
 	}
 	def static compileElse(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		if (Strings.equalsTo("else", Strings.strip(input))){
+		if (Strings.equalsTo("else", Strings.strip(input))) {
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(state, "else "));
 		}
 		else {
@@ -1135,7 +1135,7 @@ export struct Main {
 		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (mut state1: CompileState, mut input: &[I8]) => Main.parseInvokable(state1, input).map((mut tuple: Tuple2<CompileState, Value>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
 	}
 	def static compileBreak(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		if (Strings.equalsTo("break", Strings.strip(input))){
+		if (Strings.equalsTo("break", Strings.strip(input))) {
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(state, "break"));
 		}
 		else {
@@ -1166,7 +1166,7 @@ export struct Main {
 	}
 	def static splitFolded(input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, selector: (arg0 : List<&[I8]>) => Option<Tuple2<&[I8], &[I8]>>): Option<Tuple2<&[I8], &[I8]>> {
 		let divisions = Main.divide(input, folder);
-		if (2 > divisions.size()){
+		if (2 > divisions.size()) {
 			return None<Tuple2<&[I8], &[I8]>>();
 		}
 		return selector(divisions);
@@ -1179,16 +1179,16 @@ export struct Main {
 	}
 	def static foldInvocationStarts(state: DivideState, c: I8): DivideState {
 		let appended = state.append(c);
-		if ("(" === c){
+		if ("(" === c) {
 			let entered = appended.enter();
-			if (entered.isShallow()){
+			if (entered.isShallow()) {
 				return entered.advance();
 			}
 			else {
 				return entered;
 			}
 		}
-		if (")" === c){
+		if (")" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1204,7 +1204,7 @@ export struct Main {
 	def static transformCaller(state: CompileState, oldCaller: Caller): Caller {
 		return oldCaller.findChild().flatMap((parent: Value) => {
 			let parentType = parent.resolve(state);
-			if (parentType.isFunctional()){
+			if (parentType.isFunctional()) {
 				return Some<Caller>(parent);
 			}
 			return None<Caller>();
@@ -1276,7 +1276,7 @@ export struct Main {
 	def static createAccessRule(infix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 		return (mut state: CompileState, mut input: &[I8]) => Main.compileLast(input, infix, (childString: &[I8], rawProperty: &[I8]) => {
 			let property = Strings.strip(rawProperty);
-			if (!Main.isSymbol(property)){
+			if (!Main.isSymbol(property)) {
 				return None<Tuple2<CompileState, Value>>();
 			}
 			return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
@@ -1300,11 +1300,11 @@ export struct Main {
 	}
 	def static foldOperator(infix: &[I8]): (arg0 : DivideState, arg1 : I8) => DivideState {
 		return (state: DivideState, c: I8) => {
-			if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))){
+			if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
 				let length = Strings.length(infix) - 1;
 				let mut counter = 0;
 				let mut current = state;
-				while (counter < length){
+				while (counter < length) {
 					counter++;
 					current = current.pop().map((mut tuple: Tuple2<DivideState, I8>) => tuple.left()).orElse(current);
 				}
@@ -1315,7 +1315,7 @@ export struct Main {
 	}
 	def static parseNumber(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
-		if (Main.isNumber(stripped)){
+		if (Main.isNumber(stripped)) {
 			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(state, SymbolNode(stripped)));
 		}
 		else {
@@ -1328,7 +1328,7 @@ export struct Main {
 	}
 	def static parseSymbol(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
-		if (Main.isSymbol(stripped)){
+		if (Main.isSymbol(stripped)) {
 			let withImport = state.addResolvedImportFromCache(stripped);
 			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(withImport, SymbolNode(stripped)));
 		}
@@ -1344,7 +1344,7 @@ export struct Main {
 		return "_" === c || Characters.isLetter(c) || (0 !== index && Characters.isDigit(c));
 	}
 	def static compilePrefix<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
-		if (!input.startsWith(infix)){
+		if (!input.startsWith(infix)) {
 			return None<Tuple2<CompileState, T>>();
 		}
 		let slice = Strings.sliceFrom(input, Strings.length(infix));
@@ -1354,7 +1354,7 @@ export struct Main {
 		return Main.parseWhitespace(state, input).map((mut tuple: Tuple2<CompileState, Whitespace>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate()));
 	}
 	def static parseWhitespace(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Whitespace>> {
-		if (Strings.isBlank(input)){
+		if (Strings.isBlank(input)) {
 			return Some<Tuple2<CompileState, Whitespace>>(Tuple2Impl<CompileState, Whitespace>(state, Whitespace()));
 		}
 		return None<Tuple2<CompileState, Whitespace>>();
@@ -1402,7 +1402,7 @@ export struct Main {
 		return Main.divide(Strings.strip(beforeType), (mut state1: DivideState, mut c: I8) => Main.foldDelimited(state1, c, " ")).query().map((mut s: &[I8]) => Strings.strip(s)).filter((mut value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
 	}
 	def static foldDelimited(state1: DivideState, c: I8, delimiter: I8): DivideState {
-		if (delimiter === c){
+		if (delimiter === c) {
 			return state1.advance();
 		}
 		return state1.append(c);
@@ -1411,14 +1411,14 @@ export struct Main {
 		return Main.divide(input, Main.foldValues).query().map((mut input1: &[I8]) => Strings.strip(input1)).filter((mut value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
 	}
 	def static foldTypeSeparators(state: DivideState, c: I8): DivideState {
-		if (" " === c && state.isLevel()){
+		if (" " === c && state.isLevel()) {
 			return state.advance();
 		}
 		let appended = state.append(c);
-		if ("<" === c){
+		if ("<" === c) {
 			return appended.enter();
 		}
-		if (">" === c){
+		if (">" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1432,13 +1432,13 @@ export struct Main {
 	}
 	def static modifyModifiers(oldModifiers: List<&[I8]>, platform: Platform): List<&[I8]> {
 		let list: List<&[I8]> = Main.retainFinal(oldModifiers, platform);
-		if (oldModifiers.contains("static", Strings.equalsTo)){
+		if (oldModifiers.contains("static", Strings.equalsTo)) {
 			return list.addLast("static");
 		}
 		return list;
 	}
 	def static retainFinal(oldModifiers: List<&[I8]>, platform: Platform): List<&[I8]> {
-		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform){
+		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform) {
 			return Lists.empty();
 		}
 		return Lists.of("mut");
@@ -1468,7 +1468,7 @@ export struct Main {
 	}
 	def static parseSymbolType(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input);
-		if (Main.isSymbol(stripped)){
+		if (Main.isSymbol(stripped)) {
 			return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), SymbolNode(stripped)));
 		}
 		return None<Tuple2<CompileState, Type>>();
@@ -1478,37 +1478,37 @@ export struct Main {
 	}
 	def static findPrimitiveValue(input: &[I8], platform: Platform): Option<Type> {
 		let stripped = Strings.strip(input);
-		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)){
-			if (Platform.TypeScript === platform){
+		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
+			if (Platform.TypeScript === platform) {
 				return Some<Type>(Primitive.String);
 			}
 			else {
 				return Some<Type>(Primitive.I8);
 			}
 		}
-		if (Strings.equalsTo("String", stripped)){
-			if (Platform.TypeScript === platform){
+		if (Strings.equalsTo("String", stripped)) {
+			if (Platform.TypeScript === platform) {
 				return Some<Type>(Primitive.String);
 			}
 			else {
 				return Some<Type>(Slice(Primitive.I8));
 			}
 		}
-		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)){
-			if (Platform.Magma === platform){
+		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
+			if (Platform.Magma === platform) {
 				return Some<Type>(Primitive.I32);
 			}
 			else {
 				return Some<Type>(Primitive.Number);
 			}
 		}
-		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
+		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
 			return Some<Type>(BooleanType(platform));
 		}
-		if (Strings.equalsTo("var", stripped)){
+		if (Strings.equalsTo("var", stripped)) {
 			return Some<Type>(Primitive.Var);
 		}
-		if (Strings.equalsTo("void", stripped)){
+		if (Strings.equalsTo("void", stripped)) {
 			return Some<Type>(Primitive.Void);
 		}
 		return None<Type>();
@@ -1529,19 +1529,19 @@ export struct Main {
 		return Main.mapFunctionType(base, args).map((mut generated: Type) => Tuple2Impl<CompileState, Type>(state, generated));
 	}
 	def static mapFunctionType(base: &[I8], args: List<&[I8]>): Option<Type> {
-		if (Strings.equalsTo("Function", base)){
+		if (Strings.equalsTo("Function", base)) {
 			return args.findFirst().and(() => args.find(1)).map((mut tuple: Tuple2<&[I8], &[I8]>) => FunctionType(Lists.of(tuple.left()), tuple.right()));
 		}
-		if (Strings.equalsTo("BiFunction", base)){
+		if (Strings.equalsTo("BiFunction", base)) {
 			return args.find(0).and(() => args.find(1)).and(() => args.find(2)).map((mut tuple: Tuple2<Tuple2<&[I8], &[I8]>, &[I8]>) => FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right()));
 		}
-		if (Strings.equalsTo("Supplier", base)){
+		if (Strings.equalsTo("Supplier", base)) {
 			return args.findFirst().map((first: &[I8]) => FunctionType(Lists.empty(), first));
 		}
-		if (Strings.equalsTo("Consumer", base)){
+		if (Strings.equalsTo("Consumer", base)) {
 			return args.findFirst().map((first: &[I8]) => FunctionType(Lists.of(first), "void"));
 		}
-		if (Strings.equalsTo("Predicate", base)){
+		if (Strings.equalsTo("Predicate", base)) {
 			return args.findFirst().map((first: &[I8]) => FunctionType(Lists.of(first), "boolean"));
 		}
 		return None<Type>();
@@ -1556,23 +1556,23 @@ export struct Main {
 		return Main.parseAll(state, input, Main.foldValues, mapper);
 	}
 	def static foldValues(state: DivideState, c: I8): DivideState {
-		if ("," === c && state.isLevel()){
+		if ("," === c && state.isLevel()) {
 			return state.advance();
 		}
 		let appended = state.append(c);
-		if ("-" === c){
+		if ("-" === c) {
 			let peeked = appended.peek();
-			if (">" === peeked){
+			if (">" === peeked) {
 				return appended.popAndAppendToOption().orElse(appended);
 			}
 			else {
 				return appended;
 			}
 		}
-		if ("<" === c || "(" === c){
+		if ("<" === c || "(" === c) {
 			return appended.enter();
 		}
-		if (">" === c || ")" === c){
+		if (">" === c || ")" === c) {
 			return appended.exit();
 		}
 		return appended;
@@ -1584,7 +1584,7 @@ export struct Main {
 		return input.lastIndexOf(infix);
 	}
 	def static compileSuffix<T>(input: &[I8], suffix: &[I8], mapper: (arg0 : &[I8]) => Option<T>): Option<T> {
-		if (!input.endsWith(suffix)){
+		if (!input.endsWith(suffix)) {
 			return None<T>();
 		}
 		let length = Strings.length(input);
@@ -1603,7 +1603,7 @@ export struct Main {
 	}
 	def static split(input: &[I8], infix: &[I8], locator: (arg0 : &[I8], arg1 : &[I8]) => I32): Option<Tuple2<&[I8], &[I8]>> {
 		let index = locator(input, infix);
-		if (0 > index){
+		if (0 > index) {
 			return None<Tuple2<&[I8], &[I8]>>();
 		}
 		let left = Strings.sliceBetween(input, 0, index);
