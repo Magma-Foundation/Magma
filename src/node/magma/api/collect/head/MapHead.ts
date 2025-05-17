@@ -1,4 +1,18 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	Strings
+]*/
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";
 export class MapHead<T, R> implements Head<R> {

@@ -1,4 +1,6 @@
-// [Lists]
+/*[
+	Lists
+]*/
 import { List } from "../../../../magma/api/collect/list/List";
 export interface ListsInstance {
 	static fromArray<T>(elements: T[]): List<T>;

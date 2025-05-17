@@ -1,4 +1,19 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	Strings
+]*/
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";

@@ -1,4 +1,23 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Joiner, 
+	List, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 import { Query } from "../../../../magma/api/collect/Query";
 import { Option } from "../../../../magma/api/option/Option";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
@@ -19,4 +38,5 @@ export interface List<T> {
 	equalsTo(other: List<T>, equator: (arg0 : T, arg1 : T) => boolean): boolean;
 	removeValue(element: T, equator: (arg0 : T, arg1 : T) => boolean): List<T>;
 	removeLast(): Option<List<T>>;
+	sort(sorter: (arg0 : T, arg1 : T) => number): List<T>;
 }

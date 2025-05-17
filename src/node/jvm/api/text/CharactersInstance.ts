@@ -1,4 +1,9 @@
-// [Lists, Console, Files, Characters]
+/*[
+	Characters, 
+	Console, 
+	Files, 
+	Lists
+]*/
 export interface CharactersInstance {
 	static isDigit(c: string): boolean;
 	static isLetter(c: string): boolean;

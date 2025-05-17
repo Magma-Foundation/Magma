@@ -104,6 +104,13 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
+    public List<T> sort(final BiFunction<T, T, Integer> sorter) {
+        final var copy = new ArrayList<T>(this.list);
+        copy.sort(sorter::apply);
+        return new JVMList<>(copy);
+    }
+
+    @Override
     public Option<List<T>> subList(final int startInclusive, final int endExclusive) {
         return new Some<List<T>>(new JVMList<T>(this.list.subList(startInclusive, endExclusive)));
     }

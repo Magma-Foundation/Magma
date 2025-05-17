@@ -1,4 +1,24 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Joiner, 
+	List, 
+	ListCollector, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 #ifndef magma_api_collect_list_ListCollector
 #define magma_api_collect_list_ListCollector
 import { List } from "magma/api/collect/list/List";

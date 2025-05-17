@@ -1,4 +1,24 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Joiner, 
+	List, 
+	ListCollector, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 import { List } from "../../../../magma/api/collect/list/List";
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { Lists } from "../../../../jvm/api/collect/list/Lists";

@@ -1,4 +1,20 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	SingleHead, 
+	Strings
+]*/
 #ifndef magma_api_collect_head_SingleHead
 #define magma_api_collect_head_SingleHead
 import { Head } from "magma/api/collect/head/Head";

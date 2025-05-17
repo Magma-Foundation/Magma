@@ -1,4 +1,21 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 #ifndef magma_api_collect_head_ZipHead
 #define magma_api_collect_head_ZipHead
 import { Tuple2 } from "magma/api/Tuple2";

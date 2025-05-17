@@ -1,4 +1,13 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	Files, 
+	Lists, 
+	Namespace, 
+	Strings
+]*/
 export struct Collector<T, C> {
 	def createInitial(): C;
 	def fold(mut current: C, mut element: T): C;

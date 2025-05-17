@@ -1,4 +1,70 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main]
+/*[
+	AccessNode, 
+	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
+	Characters, 
+	Collector, 
+	CompileState, 
+	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
+	EmptyHead, 
+	Err, 
+	Files, 
+	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	InvokableNode, 
+	Joiner, 
+	LambdaNode, 
+	List, 
+	ListCollector, 
+	Lists, 
+	Location, 
+	Main, 
+	MapHead, 
+	Namespace, 
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
+	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
+	ZipHead
+]*/
 import { Files } from "../../jvm/api/io/Files";
 import { Path } from "../../magma/api/io/Path";
 import { List } from "../../magma/api/collect/list/List";
@@ -113,8 +179,8 @@ export class Main {
 		let entries = new HashMap<string, string>(/*auto*/);
 		let generatedMain = Main/*auto*/.createMain(source/*Source*/);
 		let clearedState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
-		let joinedDefinedTypes = clearedState/*auto*/.findDefinedTypes(/*auto*/).query(/*auto*/).collect(new Joiner(", ")).orElse("");
-		let temp = "// [" + joinedDefinedTypes/*auto*/ + "]\n";
+		let joinedDefinedTypes = clearedState/*auto*/.findDefinedTypes(/*auto*/).sort(String/*auto*/.compareTo).query(/*auto*/).map((value: string) => "\n\t" + value/*string*/).collect(new Joiner(", ")).orElse("");
+		let temp = "/*[" + joinedDefinedTypes/*auto*/ + "\n]*/\n";
 		if (!statementsState/*auto*/.isPlatform(Platform/*auto*/.Windows)) {
 			/*entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain)*/;
 			return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);

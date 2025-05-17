@@ -2,6 +2,7 @@ package magma.api.collect.list;
 
 import magma.api.Tuple2;
 import magma.api.collect.Query;
+import magma.api.io.Path;
 import magma.api.option.Option;
 
 import java.util.function.BiFunction;
@@ -38,4 +39,6 @@ public interface List<T> {
     List<T> removeValue(T element, BiFunction<T, T, Boolean> equator);
 
     Option<List<T>> removeLast();
+
+    List<T> sort(BiFunction<T, T, Integer> sorter);
 }

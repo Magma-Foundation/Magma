@@ -16,4 +16,5 @@ export interface List<T> {
 	Bool equalsTo(List<T> other, (arg0 : T, arg1 : T) => Bool equator);
 	List<T> removeValue(T element, (arg0 : T, arg1 : T) => Bool equator);
 	Option<List<T>> removeLast();
+	List<T> sort((arg0 : T, arg1 : T) => number sorter);
 }

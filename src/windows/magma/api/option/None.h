@@ -1,4 +1,29 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	Joiner, 
+	List, 
+	ListCollector, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	None, 
+	Path, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 #ifndef magma_api_option_None
 #define magma_api_option_None
 import { Option } from "magma/api/option/Option";

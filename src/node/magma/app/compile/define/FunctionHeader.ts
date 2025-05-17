@@ -1,4 +1,40 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	CompileState, 
+	Console, 
+	Definition, 
+	EmptyHead, 
+	Err, 
+	Files, 
+	FlatMapHead, 
+	FunctionHeader, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	Joiner, 
+	List, 
+	ListCollector, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	None, 
+	Ok, 
+	Option, 
+	Path, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	Some, 
+	Strings, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	ZipHead
+]*/
 import { Platform } from "../../../../magma/app/io/Platform";
 import { Definition } from "../../../../magma/app/compile/define/Definition";
 import { List } from "../../../../magma/api/collect/list/List";

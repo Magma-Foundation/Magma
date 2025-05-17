@@ -1,4 +1,28 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	Joiner, 
+	List, 
+	ListCollector, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	Path, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 #ifndef magma_api_io_Path
 #define magma_api_io_Path
 import { IOError } from "magma/api/io/IOError";

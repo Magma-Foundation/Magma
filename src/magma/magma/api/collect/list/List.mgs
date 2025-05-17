@@ -1,4 +1,23 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Joiner, 
+	List, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	RangeHead, 
+	SingleHead, 
+	Strings, 
+	ZipHead
+]*/
 import magma.api.collect.{ Query };
 import magma.api.option.{ Option };
 import magma.api.{ Tuple2 };
@@ -19,4 +38,5 @@ export struct List<T> {
 	def equalsTo(mut other: List<T>, mut equator: (arg0 : T, arg1 : T) => Bool): Bool;
 	def removeValue(mut element: T, mut equator: (arg0 : T, arg1 : T) => Bool): List<T>;
 	def removeLast(): Option<List<T>>;
+	def sort(mut sorter: (arg0 : T, arg1 : T) => I32): List<T>;
 }

@@ -1,4 +1,32 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Err, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	Joiner, 
+	List, 
+	ListCollector, 
+	Lists, 
+	MapHead, 
+	Namespace, 
+	None, 
+	Option, 
+	Path, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	SingleHead, 
+	Some, 
+	Strings, 
+	ZipHead
+]*/
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
 import { Some } from "../../../magma/api/option/Some";

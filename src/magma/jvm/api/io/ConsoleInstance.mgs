@@ -1,4 +1,7 @@
-// [Lists, Console]
+/*[
+	Console, 
+	Lists
+]*/
 export interface ConsoleInstance {
 	static def printErrLn(message: &[I8]): void;
 }

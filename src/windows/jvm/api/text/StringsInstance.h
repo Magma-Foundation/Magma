@@ -1,4 +1,10 @@
-// [Lists, Console, Files, Characters, Strings]
+/*[
+	Characters, 
+	Console, 
+	Files, 
+	Lists, 
+	Strings
+]*/
 #ifndef jvm_api_text_Strings
 #define jvm_api_text_Strings
 #endif

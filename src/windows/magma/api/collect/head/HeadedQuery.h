@@ -1,4 +1,17 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery]
+/*[
+	Actual, 
+	Characters, 
+	Collector, 
+	Console, 
+	EmptyHead, 
+	Files, 
+	FlatMapHead, 
+	Head, 
+	HeadedQuery, 
+	Lists, 
+	Namespace, 
+	Strings
+]*/
 #ifndef magma_api_collect_head_HeadedQuery
 #define magma_api_collect_head_HeadedQuery
 import { Query } from "magma/api/collect/Query";

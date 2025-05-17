@@ -97,6 +97,9 @@ static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state,
 	var ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, lambdaDefinition/*auto*/);
 	return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
 }
+auto temp(&[I8] value) {
+	return "\n\t" + value/*&[I8]*/;
+}
 static Tuple2<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, Source source, &[I8] input) {
 	var statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*&[I8]*/, Main/*auto*/.compileRootSegment);
 	var statementsState = statementsTuple/*auto*/.left(/*auto*/);
@@ -105,8 +108,8 @@ static Tuple2<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, S
 	var entries = new HashMap<&[I8], &[I8]>(/*auto*/);
 	var generatedMain = Main/*auto*/.createMain(source/*Source*/);
 	var clearedState = statementsState/*CompileState*/.clearImports(/*auto*/).clear(/*auto*/);
-	var joinedDefinedTypes = clearedState/*auto*/.findDefinedTypes(/*auto*/).query(/*auto*/).collect(new Joiner(", ")).orElse("");
-	var temp = "// [" + joinedDefinedTypes/*auto*/ + "]\n";
+	var joinedDefinedTypes = clearedState/*auto*/.findDefinedTypes(/*auto*/).sort(String/*auto*/.compareTo).query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
+	var temp = "/*[" + joinedDefinedTypes/*auto*/ + "\n]*/\n";
 	if (!statementsState/*CompileState*/.isPlatform(Platform/*auto*/.Windows)) {
 		/*entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain)*/;
 		return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);

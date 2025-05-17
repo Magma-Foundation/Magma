@@ -167,13 +167,15 @@ public final class Main {
         final var clearedState = statementsState.clearImports().clear();
 
         final var joinedDefinedTypes = clearedState.findDefinedTypes()
+                .sort(String::compareTo)
                 .query()
+                .map((String value) -> "\n\t" + value)
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        final var temp = "// [" +
+        final var temp = "/*[" +
                 joinedDefinedTypes +
-                "]\n";
+                "\n]*/\n";
 
         if (!statementsState.isPlatform(Platform.Windows)) {
             entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain);

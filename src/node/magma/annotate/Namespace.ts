@@ -1,3 +1,11 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace]
+/*[
+	Actual, 
+	Characters, 
+	Console, 
+	Files, 
+	Lists, 
+	Namespace, 
+	Strings
+]*/
 export interface Namespace {
 }
