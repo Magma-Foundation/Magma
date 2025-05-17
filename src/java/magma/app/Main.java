@@ -69,9 +69,10 @@ public final class Main {
     }
 
     private static Option<IOError> runWithChildren(final List<Path> children, final Path sourceDirectory) {
-        final var sources = Main.findSources(children, sourceDirectory);
-        return sources.query()
-                .foldWithInitial(Main.createInitialStateToTuple(sources), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
+        return Main.findSources(children, sourceDirectory).query()
+                .foldWithInitial(Main.createInitialStateToTuple(Main.findSources(children, sourceDirectory)), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> {
+                    return Main.runWithSource(current.left(), current.right(), source1);
+                })
                 .right();
     }
 
@@ -90,30 +91,31 @@ public final class Main {
                 .collect(new ListCollector<Source>());
     }
 
-    private static Tuple2<CompileState, Option<IOError>> foldChild(final CompileState state, final Option<IOError> maybeError, final Source source) {
-        if (maybeError.isPresent()) {
-            return new Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
-        }
-
-        return Main.runWithSource(state, source);
-    }
-
-    private static Tuple2<CompileState, Option<IOError>> runWithSource(final CompileState state, final Source source) {
-        return source.read().match(
-                (String input) -> Main.compileAndWritePlatforms(state, source, input),
-                (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
-    }
-
-    private static Tuple2<CompileState, Option<IOError>> compileAndWritePlatforms(final CompileState state, final Source source, final String input) {
+    private static Tuple2<CompileState, Option<IOError>> runWithSource(final CompileState state, final Option<IOError> maybeError, final Source source) {
         Tuple2<CompileState, Option<IOError>> current = new Tuple2Impl<CompileState, Option<IOError>>(state, new None<>());
         for (final var platform : Platform.values()) {
-            current = Main.foldPlatform(current.left(), current.right(), platform, source, input);
+            current = Main.runWithSourceAndPlatform(current.left(), current.right(), platform, source);
         }
 
         return current;
     }
 
-    private static Tuple2<CompileState, Option<IOError>> foldPlatform(
+    private static Tuple2<CompileState, Option<IOError>> runWithSourceAndPlatform(
+            final CompileState state,
+            final Option<IOError> maybeError,
+            final Platform platform,
+            final Source source
+    ) {
+        if (maybeError.isPresent()) {
+            return new Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
+        }
+
+        return source.read().match(
+                (final String input) -> Main.compileAndWritePlatform(state, maybeError, platform, source, input),
+                (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
+    }
+
+    private static Tuple2<CompileState, Option<IOError>> compileAndWritePlatform(
             final CompileState state,
             final Option<IOError> maybeError,
             final Platform platform,
