@@ -642,6 +642,7 @@ struct BooleanType implements Type {
 struct Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
+	static Windows: Platform = new Platform("windows", "h", "c");
 	root: &[I8];
 	extension: &[I8][];
 	constructor (root: &[I8], ...extensions: &[I8][]) {
@@ -697,9 +698,10 @@ export struct Main {
 		return source.read().match((mut input: &[I8]) => Main.getCompileStateOptionTuple2(state, source, input), (mut value: IOError) => Tuple2Impl<CompileState, Option<IOError>>(state, Some<IOError>(value)));
 	}
 	def static getCompileStateOptionTuple2(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Option<IOError>> {
-		let result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
-		let compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
-		return Tuple2Impl<CompileState, Option<IOError>>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
+		let typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+		let magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
+		let windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
+		return Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right().or(() => magmaTuple.right()).or(() => windowsTuple.right()));
 	}
 	def static compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);

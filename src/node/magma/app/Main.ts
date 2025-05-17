@@ -642,6 +642,7 @@ class BooleanType implements Type {
 class Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
+	static Windows: Platform = new Platform("windows", "h", "c");
 	root: string;
 	extension: string[];
 	constructor (root: string, ...extensions: string[]) {
@@ -697,9 +698,10 @@ export class Main {
 		return source.read().match((input: string) => Main.getCompileStateOptionTuple2(state, source, input), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
 	}
 	static getCompileStateOptionTuple2(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Option<IOError>> {
-		let result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
-		let compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
-		return new Tuple2Impl<CompileState, Option<IOError>>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
+		let typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+		let magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
+		let windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
+		return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right().or(() => magmaTuple.right()).or(() => windowsTuple.right()));
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);

@@ -778,9 +778,13 @@ public final class Main {
     }
 
     private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(final CompileState state, final Source source, final String input) {
-        final var result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
-        final var compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
-        return new Tuple2Impl<CompileState, Option<IOError>>(compileStateOptionTuple2.left(), result.right().or(() -> compileStateOptionTuple2.right()));
+        final var typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+        final var magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
+        final var windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
+
+        return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right()
+                .or(() -> magmaTuple.right())
+                .or(() -> windowsTuple.right()));
     }
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(final CompileState state, final Source source, final String input, final Platform platform) {
@@ -2043,7 +2047,8 @@ public final class Main {
 
     private enum Platform {
         TypeScript("node", "ts"),
-        Magma("magma", "mgs");
+        Magma("magma", "mgs"),
+        Windows("windows", "h", "c");
 
         final String root;
         final String[] extension;
