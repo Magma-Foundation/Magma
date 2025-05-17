@@ -44,8 +44,8 @@ export struct DivideState {
 		if (this.index >= Strings.length(this.input)) {
 			return None<Tuple2<DivideState, I8>>();
 		}
-		let c = Strings.charAt(this.input, this.index);
-		let nextState = DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
+		let c: I8 = Strings.charAt(this.input, this.index);
+		let nextState: DivideState = DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
 		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState, c));
 	}
 	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {

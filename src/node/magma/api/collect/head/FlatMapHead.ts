@@ -1,6 +1,7 @@
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Query } from "../../../../magma/api/collect/Query";
 import { Option } from "../../../../magma/api/option/Option";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { None } from "../../../../magma/api/option/None";
 export class FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
@@ -13,11 +14,11 @@ export class FlatMapHead<T, R> implements Head<R> {
 	}
 	next(): Option<R> {
 		while (true) {
-			let next = this.current.next();
+			let next: Option<R> = this.current.next();
 			if (next.isPresent()) {
 				return next;
 			}
-			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
+			let tuple: Tuple2<boolean, Query<R>> = this.head.next().map(this.mapper).toTuple(this.current);
 			if (tuple.left()) {
 				this.current = tuple.right();
 			}

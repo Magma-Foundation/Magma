@@ -145,18 +145,18 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState addResolvedImportWithNamespace(final List<String> oldParent, final String child) {
-        final var namespace = this.findCurrentLocation
+        final List<String> namespace = this.findCurrentLocation
                 .map((Location location) -> location.namespace())
                 .orElse(Lists.empty());
 
-        var newParent = oldParent;
+        List<String> newParent = oldParent;
         if (Platform.TypeScript == this.platform) {
             if (namespace.isEmpty()) {
                 newParent = newParent.addFirst(".");
             }
 
-            var i = 0;
-            final var size = namespace.size();
+            int i = 0;
+            final int size = namespace.size();
             while (i < size) {
                 newParent = newParent.addFirst("..");
                 i++;
@@ -171,7 +171,7 @@ public record ImmutableCompileState(
             return this;
         }
 
-        final var importString = new Import(newParent, child);
+        final Import importString = new Import(newParent, child);
         return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 

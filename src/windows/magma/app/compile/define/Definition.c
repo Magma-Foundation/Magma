@@ -21,8 +21,8 @@ mut asDefinition(): Option<Definition> {
 	return new Some<Definition>(this);
 }
 mut generateWithAfterName(afterName: &[I8]): &[I8] {
-	let joinedTypeParams = this.joinTypeParams();
-	let joinedModifiers = this.modifiers.query().map((mut value: &[I8]) => value + " ").collect(new Joiner("")).orElse("");
+	let joinedTypeParams: &[I8] = this.joinTypeParams();
+	let joinedModifiers: &[I8] = this.modifiers.query().map((mut value: &[I8]) => value + " ").collect(new Joiner("")).orElse("");
 	return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 }
 mut generateType(): &[I8] {

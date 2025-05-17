@@ -13,7 +13,7 @@ export struct RangeHead implements Head<I32> {
 		if (this.counter >= this.length) {
 			return None<I32>();
 		}
-		let value = this.counter;
+		let value: I32 = this.counter;
 		this.counter++;
 		return Some<I32>(value);
 	}

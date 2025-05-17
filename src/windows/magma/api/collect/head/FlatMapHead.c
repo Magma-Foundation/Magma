@@ -12,11 +12,11 @@ constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
 }
 mut next(): Option<R> {
 	while (true) {
-		let next = this.current.next();
+		let next: Option<R> = this.current.next();
 		if (next.isPresent()) {
 			return next;
 		}
-		let tuple = this.head.next().map(this.mapper).toTuple(this.current);
+		let tuple: Tuple2<Bool, Query<R>> = this.head.next().map(this.mapper).toTuple(this.current);
 		if (tuple.left()) {
 			this.current = tuple.right();
 		}

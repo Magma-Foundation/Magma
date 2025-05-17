@@ -8,7 +8,7 @@ import magma.api.collect.list.List;
 public record FunctionType(List<String> args, String returns) implements Type {
     @Override
     public String generate() {
-        final var joinedArguments = this.args
+        final String joinedArguments = this.args
                 .queryWithIndices()
                 .map((Tuple2<Integer, String> tuple) -> "arg" + tuple.left() + " : " + tuple.right())
                 .collect(new Joiner(", "))

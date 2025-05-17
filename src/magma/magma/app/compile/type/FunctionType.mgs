@@ -10,7 +10,7 @@ export struct FunctionType implements Type {
 		this.returns = returns;
 	}
 	def generate(): &[I8] {
-		let joinedArguments = this.args.queryWithIndices().map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
+		let joinedArguments: &[I8] = this.args.queryWithIndices().map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + this.returns;
 	}
 	def isFunctional(): Bool {

@@ -1,6 +1,7 @@
 import magma.api.collect.head.Head;
 import magma.api.collect.Query;
 import magma.api.option.Option;
+import magma.api.Tuple2;
 import magma.api.option.None;
 export struct FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
@@ -13,11 +14,11 @@ export struct FlatMapHead<T, R> implements Head<R> {
 	}
 	def next(): Option<R> {
 		while (true) {
-			let next = this.current.next();
+			let next: Option<R> = this.current.next();
 			if (next.isPresent()) {
 				return next;
 			}
-			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
+			let tuple: Tuple2<Bool, Query<R>> = this.head.next().map(this.mapper).toTuple(this.current);
 			if (tuple.left()) {
 				this.current = tuple.right();
 			}

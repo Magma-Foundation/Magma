@@ -26,7 +26,7 @@ record JVMPath(java.nio.file.Path path) implements Path {
     private record JVMIOError(IOException error) implements IOError {
         @Override
         public String display() {
-            final var writer = new StringWriter();
+            final StringWriter writer = new StringWriter();
             this.error.printStackTrace(new PrintWriter(writer));
             return writer.toString();
         }

@@ -9,7 +9,7 @@ export class FunctionType implements Type {
 }
 
 mut generate(): &[I8] {
-	let joinedArguments = this.args.queryWithIndices().map((mut tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
+	let joinedArguments: &[I8] = this.args.queryWithIndices().map((mut tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedArguments + ") => " + this.returns;
 }
 mut isFunctional(): Bool {

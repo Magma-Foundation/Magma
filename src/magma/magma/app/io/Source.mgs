@@ -15,8 +15,8 @@ export struct Source {
 		return this.source.readString();
 	}
 	def computeName(): &[I8] {
-		let fileName = this.source.findFileName();
-		let separator = fileName.lastIndexOf(".");
+		let fileName: &[I8] = this.source.findFileName();
+		let separator: I32 = fileName.lastIndexOf(".");
 		return fileName.substring(0, separator);
 	}
 	def computeNamespace(): List<&[I8]> {

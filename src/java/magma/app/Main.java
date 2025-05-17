@@ -58,7 +58,7 @@ import java.util.function.Function;
 
 public final class Main {
     public static void main() {
-        final var sourceDirectory = Files.get(".", "src", "java");
+        final Path sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
                 .match(
                         (List<Path> children) -> Main.runWithChildren(children, sourceDirectory),
@@ -68,12 +68,12 @@ public final class Main {
     }
 
     private static Option<IOError> runWithChildren(final List<Path> children, final Path sourceDirectory) {
-        final var sources = children.query()
+        final List<Source> sources = children.query()
                 .filter((Path source) -> source.endsWith(".java"))
                 .map((Path child) -> new Source(sourceDirectory, child))
                 .collect(new ListCollector<Source>());
 
-        final var initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
+        final CompileState initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
 
         return sources.query()
                 .foldWithInitial(Main.createInitialState(initial), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
@@ -99,9 +99,9 @@ public final class Main {
     }
 
     private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(final CompileState state, final Source source, final String input) {
-        final var typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
-        final var magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
-        final var windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
+        final Tuple2<CompileState, Option<IOError>> typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+        final Tuple2<CompileState, Option<IOError>> magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
+        final Tuple2<CompileState, Option<IOError>> windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
 
         return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right()
                 .or(() -> magmaTuple.right())
@@ -109,22 +109,22 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(final CompileState state, final Source source, final String input, final Platform platform) {
-        final var state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
-        final var output = Main.compileRoot(state1, source, input);
+        final CompileState state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
+        final Tuple2Impl<CompileState, Map<String, String>> output = Main.compileRoot(state1, source, input);
 
-        final var location = output.left().findCurrentLocation().orElse(new Location(Lists.empty(), ""));
-        final var targetDirectory = Files.get(".", "src", platform.root);
-        final var targetParent = targetDirectory.resolveChildSegments(location.namespace());
+        final Location location = output.left().findCurrentLocation().orElse(new Location(Lists.empty(), ""));
+        final Path targetDirectory = Files.get(".", "src", platform.root);
+        final Path targetParent = targetDirectory.resolveChildSegments(location.namespace());
         if (!targetParent.exists()) {
-            final var maybeError = targetParent.createDirectories();
+            final Option<IOError> maybeError = targetParent.createDirectories();
             if (maybeError.isPresent()) {
                 return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
             }
         }
 
         final Option<IOError> initial = new None<IOError>();
-        final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> ioErrorOption, final String extension) -> {
-            final var target = targetParent.resolveChild(location.name() + "." + extension);
+        final Option<IOError> ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> ioErrorOption, final String extension) -> {
+            final Path target = targetParent.resolveChild(location.name() + "." + extension);
             return ioErrorOption.or(() -> target.writeString(output.right().get(extension)));
         });
 
@@ -132,21 +132,21 @@ public final class Main {
     }
 
     private static Tuple2Impl<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {
-        final var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
-        final var statementsState = statementsTuple.left();
+        final Tuple2<CompileState, String> statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
+        final CompileState statementsState = statementsTuple.left();
 
-        final var imports = statementsState.imports().query()
+        final String imports = statementsState.imports().query()
                 .map((Import anImport) -> anImport.generate(state.platform()))
                 .collect(new Joiner(""))
                 .orElse("");
 
-        final var compileState = statementsState.clearImports().clear();
-        final var withMain = Main.createMain(source);
+        final CompileState compileState = statementsState.clearImports().clear();
+        final String withMain = Main.createMain(source);
 
-        final var entries = new HashMap<String, String>();
-        final var platform = state.platform();
+        final HashMap<String, String> entries = new HashMap<String, String>();
+        final Platform platform = state.platform();
         if (Platform.Windows == platform) {
-            final var value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
+            final String value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
             entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
             entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain);
         }
@@ -173,7 +173,7 @@ public final class Main {
     }
 
     private static Tuple2<CompileState, String> compileAll(final CompileState state, final String input, final BiFunction<DivideState, Character, DivideState> folder, final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, final BiFunction<String, String, String> merger) {
-        final var folded = Main.parseAll(state, input, folder, (CompileState state1, String s) -> new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s))).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
+        final Tuple2<CompileState, List<String>> folded = Main.parseAll(state, input, folder, (CompileState state1, String s) -> new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s))).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
         return new Tuple2Impl<CompileState, String>(folded.left(), Main.generateAll(folded.right(), merger));
     }
 
@@ -184,12 +184,12 @@ public final class Main {
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(final CompileState state, final String input, final BiFunction<DivideState, Character, DivideState> folder, final BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> biFunction) {
         return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (final Option<Tuple2<CompileState, List<T>>> maybeCurrent, final String segment) -> maybeCurrent.flatMap((final Tuple2<CompileState, List<T>> current) -> {
-            final var currentState = current.left();
-            final var currentElement = current.right();
+            final CompileState currentState = current.left();
+            final List<T> currentElement = current.right();
 
             return biFunction.apply(currentState, segment).map((final Tuple2<CompileState, T> mappedTuple) -> {
-                final var mappedState = mappedTuple.left();
-                final var mappedElement = mappedTuple.right();
+                final CompileState mappedState = mappedTuple.left();
+                final T mappedElement = mappedTuple.right();
                 return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
             });
         }));
@@ -200,17 +200,17 @@ public final class Main {
     }
 
     private static List<String> divide(final String input, final BiFunction<DivideState, Character, DivideState> folder) {
-        var current = DivideState.createInitial(input);
+        DivideState current = DivideState.createInitial(input);
 
         while (true) {
-            final var poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
+            final Tuple2<Boolean, Tuple2<DivideState, Character>> poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
             if (!poppedTuple0.left()) {
                 break;
             }
 
-            final var poppedTuple = poppedTuple0.right();
-            final var poppedState = poppedTuple.left();
-            final var popped = poppedTuple.right();
+            final Tuple2<DivideState, Character> poppedTuple = poppedTuple0.right();
+            final DivideState poppedState = poppedTuple.left();
+            final Character popped = poppedTuple.right();
 
             current = Main.foldSingleQuotes(poppedState, popped)
                     .or(() -> Main.foldDoubleQuotes(poppedState, popped))
@@ -225,16 +225,16 @@ public final class Main {
             return new None<DivideState>();
         }
 
-        var appended = state.append(c);
+        DivideState appended = state.append(c);
         while (true) {
-            final var maybeTuple = appended.popAndAppendToTuple()
+            final Tuple2<Boolean, Tuple2<DivideState, Character>> maybeTuple = appended.popAndAppendToTuple()
                     .toTuple(new Tuple2Impl<DivideState, Character>(appended, '\0'));
 
             if (!maybeTuple.left()) {
                 break;
             }
 
-            final var tuple = maybeTuple.right();
+            final Tuple2<DivideState, Character> tuple = maybeTuple.right();
             appended = tuple.left();
 
             if ('\\' == tuple.right()) {
@@ -259,8 +259,8 @@ public final class Main {
     }
 
     private static Option<DivideState> foldEscaped(final Tuple2<DivideState, Character> tuple) {
-        final var state = tuple.left();
-        final var c = tuple.right();
+        final DivideState state = tuple.left();
+        final Character c = tuple.right();
 
         if ('\\' == c) {
             return state.popAndAppendToOption();
@@ -270,7 +270,7 @@ public final class Main {
     }
 
     private static DivideState foldStatements(final DivideState state, final char c) {
-        final var appended = state.append(c);
+        final DivideState appended = state.append(c);
         if (';' == c && appended.isLevel()) {
             return appended.advance();
         }
@@ -303,14 +303,14 @@ public final class Main {
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createStructureRule(final String sourceInfix, final String targetInfix) {
         return (final CompileState state, final String input1) -> Main.compileFirst(input1, sourceInfix, (final String beforeInfix, final String afterInfix) -> Main.compileFirst(afterInfix, "{", (final String beforeContent, final String withEnd) -> Main.compileSuffix(Strings.strip(withEnd), "}", (final String inputContent) -> Main.compileLast(beforeInfix, "\n", (final String s, final String s2) -> {
-            final var annotations = Main.parseAnnotations(s);
+            final List<String> annotations = Main.parseAnnotations(s);
             if (annotations.contains("Actual", Strings::equalsTo)) {
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
             }
 
             return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
         }).or(() -> {
-            final var modifiers = Main.parseModifiers(beforeContent);
+            final List<String> modifiers = Main.parseModifiers(beforeContent);
             return Main.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
         }))));
     }
@@ -325,10 +325,10 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithParameters(final CompileState state, final List<String> annotations, final List<String> modifiers, final String targetInfix, final String beforeContent, final Option<String> maybeSuperType, final Option<Type> maybeImplementing, final String inputContent) {
         return Main.compileFirst(beforeContent, "(", (final String rawName, final String withParameters) -> Main.compileFirst(withParameters, ")", (final String parametersString, final String _) -> {
-            final var name = Strings.strip(rawName);
+            final String name = Strings.strip(rawName);
 
-            final var parametersTuple = Main.parseParameters(state, parametersString);
-            final var parameters = Main.retainDefinitionsFromParameters(parametersTuple.right());
+            final Tuple2<CompileState, List<Parameter>> parametersTuple = Main.parseParameters(state, parametersString);
+            final List<Definition> parameters = Main.retainDefinitionsFromParameters(parametersTuple.right());
 
             return Main.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType);
         })).or(() -> Main.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType));
@@ -343,7 +343,7 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithTypeParams(final CompileState state, final String infix, final String content, final String beforeParams, final List<Definition> parameters, final Option<Type> maybeImplementing, final List<String> annotations, final List<String> modifiers, final Option<String> maybeSuperType) {
         return Main.compileSuffix(Strings.strip(beforeParams), ">", (final String withoutTypeParamEnd) -> Main.compileFirst(withoutTypeParamEnd, "<", (final String name, final String typeParamsString) -> {
-            final var typeParams = Main.divideValues(typeParamsString);
+            final List<String> typeParams = Main.divideValues(typeParamsString);
             return Main.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
         })).or(() -> Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType));
     }
@@ -360,21 +360,21 @@ public final class Main {
             final String content,
             final Option<String> maybeSuperType
     ) {
-        final var name = Strings.strip(rawName);
+        final String name = Strings.strip(rawName);
         if (!Main.isSymbol(name)) {
             return new None<Tuple2<CompileState, String>>();
         }
 
-        final var outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main::compileClassSegment);
-        final var outputContentState = outputContentTuple.left().popStructureName();
-        final var outputContent = outputContentTuple.right();
+        final Tuple2<CompileState, String> outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main::compileClassSegment);
+        final CompileState outputContentState = outputContentTuple.left().popStructureName();
+        final String outputContent = outputContentTuple.right();
 
-        final var constructorString = Main.generateConstructorFromRecordParameters(parameters);
-        final var joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
-        final var implementingString = Main.generateImplementing(maybeImplementing);
-        final var newModifiers = Main.modifyModifiers0(oldModifiers);
+        final String constructorString = Main.generateConstructorFromRecordParameters(parameters);
+        final String joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
+        final String implementingString = Main.generateImplementing(maybeImplementing);
+        final List<String> newModifiers = Main.modifyModifiers0(oldModifiers);
 
-        final var joinedModifiers = newModifiers.query()
+        final String joinedModifiers = newModifiers.query()
                 .map((String value) -> value + " ")
                 .collect(Joiner.empty())
                 .orElse("");
@@ -383,16 +383,16 @@ public final class Main {
             final String actualInfix = "interface ";
             final String newName = name + "Instance";
 
-            final var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-            final var withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace(), location.name() + "Instance"));
+            final String generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            final CompileState withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace(), location.name() + "Instance"));
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(withNewLocation, ""));
         }
         else {
-            final var extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
-            final var infix1 = Main.retainStruct(infix, outputContentState);
+            final String extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
+            final String infix1 = Main.retainStruct(infix, outputContentState);
 
-            final var generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            final String generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
         }
     }
@@ -426,7 +426,7 @@ public final class Main {
     }
 
     private static String generateConstructorWithParameterString(final List<Definition> parameters, final String parametersString) {
-        final var constructorAssignments = Main.generateConstructorAssignments(parameters);
+        final String constructorAssignments = Main.generateConstructorAssignments(parameters);
 
         return "\n\tconstructor (" + parametersString + ") {" +
                 constructorAssignments +
@@ -449,7 +449,7 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileNamespaced(final CompileState state, final String input) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
         }
@@ -494,7 +494,7 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileMethod(final CompileState state, final String input) {
         return Main.compileFirst(input, "(", (final String beforeParams, final String withParams) -> {
-            final var strippedBeforeParams = Strings.strip(beforeParams);
+            final String strippedBeforeParams = Strings.strip(beforeParams);
             return Main.compileLast(strippedBeforeParams, " ", (final String _, final String name) -> {
                 if (state.hasLastStructureNameOf(name)) {
                     return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
@@ -518,38 +518,38 @@ public final class Main {
             final String withParams
     ) {
         return Main.compileFirst(withParams, ")", (final String params, final String afterParams) -> {
-            final var parametersTuple = Main.parseParameters(state, params);
+            final Tuple2<CompileState, List<Parameter>> parametersTuple = Main.parseParameters(state, params);
 
-            final var parametersState = parametersTuple.left();
-            final var parameters = parametersTuple.right();
-            final var definitions = Main.retainDefinitionsFromParameters(parameters);
+            final CompileState parametersState = parametersTuple.left();
+            final List<Parameter> parameters = parametersTuple.right();
+            final List<Definition> definitions = Main.retainDefinitionsFromParameters(parameters);
 
-            final var joinedDefinitions = definitions.query()
+            final String joinedDefinitions = definitions.query()
                     .map((Definition definition) -> definition.generate())
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            final var newHeader = Main.retainDef(header, parametersState);
+            final FunctionHeader<S> newHeader = Main.retainDef(header, parametersState);
 
             if (newHeader.hasAnnotation("Actual")) {
-                final var headerGenerated = newHeader
+                final String headerGenerated = newHeader
                         .removeModifier("static")
                         .generateWithAfterName("(" + joinedDefinitions + ")");
 
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";\n"));
             }
 
-            final var headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
+            final String headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
             return Main.compilePrefix(Strings.strip(afterParams), "{", (final String withoutContentStart) -> Main.compileSuffix(Strings.strip(withoutContentStart), "}", (final String withoutContentEnd) -> {
-                final var compileState1 = parametersState.enterDepth();
-                final var compileState = compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth();
+                final CompileState compileState1 = parametersState.enterDepth();
+                final CompileState compileState = compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth();
 
-                final var statementsTuple = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
-                final var compileState2 = statementsTuple.left().exitDepth();
-                final var indent = compileState2.createIndent();
-                final var exited = compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth();
+                final Tuple2<CompileState, String> statementsTuple = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
+                final CompileState compileState2 = statementsTuple.left().exitDepth();
+                final String indent = compileState2.createIndent();
+                final CompileState exited = compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth();
 
-                final var generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
+                final String generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
                 if (exited.isPlatform(Platform.Windows)) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(exited.addFunction(generated), ""));
                 }
@@ -607,17 +607,17 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileBlock(final CompileState state, final String input) {
         return Main.compileSuffix(Strings.strip(input), "}", (final String withoutEnd) -> Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main::foldBlockStarts), (final String beforeContentWithEnd, final String content) -> Main.compileSuffix(beforeContentWithEnd, "{", (final String beforeContent) -> Main.compileBlockHeader(state, beforeContent).flatMap((final Tuple2<CompileState, String> headerTuple) -> {
-            final var contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
+            final Tuple2<CompileState, String> contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
-            final var indent = state.createIndent();
+            final String indent = state.createIndent();
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
         }))));
     }
 
     private static DivideState foldBlockStarts(final DivideState state, final char c) {
-        final var appended = state.append(c);
+        final DivideState appended = state.append(c);
         if ('{' == c) {
-            final var entered = appended.enter();
+            final DivideState entered = appended.enter();
             if (entered.isShallow()) {
                 return entered.advance();
             }
@@ -642,9 +642,9 @@ public final class Main {
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createConditionalRule(final String prefix) {
         return (CompileState state1, String input1) -> Main.compilePrefix(Strings.strip(input1), prefix, (final String withoutPrefix) -> {
-            final var strippedCondition = Strings.strip(withoutPrefix);
+            final String strippedCondition = Strings.strip(withoutPrefix);
             return Main.compilePrefix(strippedCondition, "(", (final String withoutConditionStart) -> Main.compileSuffix(withoutConditionStart, ")", (final String withoutConditionEnd) -> {
-                final var tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
+                final Tuple2<CompileState, String> tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), prefix + " (" + tuple.right() + ") "));
             }));
         });
@@ -661,7 +661,7 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileFunctionStatement(final CompileState state, final String input) {
         return Main.compileSuffix(Strings.strip(input), ";", (final String withoutEnd) -> {
-            final var valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
+            final Tuple2<CompileState, String> valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
         });
     }
@@ -688,7 +688,7 @@ public final class Main {
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createPostRule(final String suffix) {
         return (CompileState state1, String input) -> Main.compileSuffix(Strings.strip(input), suffix, (final String child) -> {
-            final var tuple = Main.compileValueOrPlaceholder(state1, child);
+            final Tuple2<CompileState, String> tuple = Main.compileValueOrPlaceholder(state1, child);
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right() + suffix));
         });
     }
@@ -703,8 +703,8 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, Value>> parseInvokable(final CompileState state, final String input) {
         return Main.compileSuffix(Strings.strip(input), ")", (final String withoutEnd) -> Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main::foldInvocationStarts), (final String callerWithArgStart, final String args) -> Main.compileSuffix(callerWithArgStart, "(", (final String callerString) -> Main.compilePrefix(Strings.strip(callerString), "new ", (final String type) -> Main.compileType(state, type).flatMap((final Tuple2<CompileState, String> callerTuple) -> {
-            final var callerState = callerTuple.left();
-            final var caller = callerTuple.right();
+            final CompileState callerState = callerTuple.left();
+            final String caller = callerTuple.right();
             return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform()), args);
         })).or(() -> Main.parseValue(state, callerString).flatMap((final Tuple2<CompileState, Value> callerTuple) -> Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args))))));
     }
@@ -718,7 +718,7 @@ public final class Main {
             final BiFunction<DivideState, Character, DivideState> folder,
             final Function<List<String>, Option<Tuple2<String, String>>> selector
     ) {
-        final var divisions = Main.divide(input, folder);
+        final List<String> divisions = Main.divide(input, folder);
         if (2 > divisions.size()) {
             return new None<Tuple2<String, String>>();
         }
@@ -727,10 +727,10 @@ public final class Main {
     }
 
     private static Option<Tuple2<String, String>> selectLast(final List<String> divisions, final String delimiter) {
-        final var beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
-        final var last = divisions.findLast().orElse("");
+        final List<String> beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
+        final String last = divisions.findLast().orElse("");
 
-        final var joined = beforeLast.query()
+        final String joined = beforeLast.query()
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
@@ -738,9 +738,9 @@ public final class Main {
     }
 
     private static DivideState foldInvocationStarts(final DivideState state, final char c) {
-        final var appended = state.append(c);
+        final DivideState appended = state.append(c);
         if ('(' == c) {
-            final var entered = appended.enter();
+            final DivideState entered = appended.enter();
             if (entered.isShallow()) {
                 return entered.advance();
             }
@@ -758,17 +758,17 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, Value>> assembleInvokable(final CompileState state, final Caller oldCaller, final String argsString) {
         return Main.parseValues(state, argsString, (CompileState state1, String s) -> Main.parseArgument(state1, s)).flatMap((final Tuple2<CompileState, List<Argument>> argsTuple) -> {
-            final var argsState = argsTuple.left();
-            final var args = Main.retain(argsTuple.right(), (Argument argument) -> argument.toValue());
+            final CompileState argsState = argsTuple.left();
+            final List<Value> args = Main.retain(argsTuple.right(), (Argument argument) -> argument.toValue());
 
-            final var newCaller = Main.transformCaller(argsState, oldCaller);
+            final Caller newCaller = Main.transformCaller(argsState, oldCaller);
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new InvokableNode(newCaller, args)));
         });
     }
 
     private static Caller transformCaller(final CompileState state, final Caller oldCaller) {
         return oldCaller.findChild().flatMap((final Value parent) -> {
-            final var parentType = parent.resolve(state);
+            final Type parentType = parent.resolve(state);
             if (parentType.isFunctional()) {
                 return new Some<Caller>(parent);
             }
@@ -791,9 +791,9 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileAssignment(final CompileState state, final String input) {
         return Main.compileFirst(input, "=", (final String destination, final String source) -> {
-            final var sourceTuple = Main.compileValueOrPlaceholder(state, source);
+            final Tuple2<CompileState, String> sourceTuple = Main.compileValueOrPlaceholder(state, source);
 
-            final var destinationTuple = Main.compileValue(sourceTuple.left(), destination)
+            final Tuple2<CompileState, String> destinationTuple = Main.compileValue(sourceTuple.left(), destination)
                     .or(() -> Main.parseDefinition(sourceTuple.left(), destination).map((final Tuple2<CompileState, Definition> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().addModifier("let").generate())))
                     .orElseGet(() -> new Tuple2Impl<CompileState, String>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 
@@ -835,35 +835,35 @@ public final class Main {
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createTextRule(final String slice) {
         return (final CompileState state1, final String input1) -> {
-            final var stripped = Strings.strip(input1);
+            final String stripped = Strings.strip(input1);
             return Main.compilePrefix(stripped, slice, (final String s) -> Main.compileSuffix(s, slice, (String s1) -> new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringNode(s1)))));
         };
     }
 
     private static Option<Tuple2<CompileState, Value>> parseNot(final CompileState state, final String input) {
         return Main.compilePrefix(Strings.strip(input), "!", (final String withoutPrefix) -> {
-            final var childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
-            final var childState = childTuple.left();
-            final var child = "!" + childTuple.right();
+            final Tuple2<CompileState, String> childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
+            final CompileState childState = childTuple.left();
+            final String child = "!" + childTuple.right();
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new NotNode(child)));
         });
     }
 
     private static Option<Tuple2<CompileState, Value>> parseLambda(final CompileState state, final String input) {
         return Main.compileFirst(input, "->", (final String beforeArrow, final String afterArrow) -> {
-            final var strippedBeforeArrow = Strings.strip(beforeArrow);
+            final String strippedBeforeArrow = Strings.strip(beforeArrow);
             return Main.compilePrefix(strippedBeforeArrow, "(", (final String withoutStart) -> Main.compileSuffix(withoutStart, ")", (final String withoutEnd) -> Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> Main.parseParameter(state1, s)).flatMap((final Tuple2<CompileState, List<Parameter>> paramNames) -> Main.compileLambdaWithParameterNames(paramNames.left(), Main.retainDefinitionsFromParameters(paramNames.right()), afterArrow))));
         });
     }
 
     private static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(final CompileState state, final List<Definition> paramNames, final String afterArrow) {
-        final var strippedAfterArrow = Strings.strip(afterArrow);
+        final String strippedAfterArrow = Strings.strip(afterArrow);
         return Main.compilePrefix(strippedAfterArrow, "{", (final String withoutContentStart) -> Main.compileSuffix(withoutContentStart, "}", (final String withoutContentEnd) -> {
-            final var statementsTuple = Main.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
-            final var statementsState = statementsTuple.left();
-            final var statements = statementsTuple.right();
+            final Tuple2<CompileState, String> statementsTuple = Main.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
+            final CompileState statementsState = statementsTuple.left();
+            final String statements = statementsTuple.right();
 
-            final var exited = statementsState.exitDepth();
+            final CompileState exited = statementsState.exitDepth();
             return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
         })).or(() -> Main.compileValue(state, strippedAfterArrow).flatMap((final Tuple2<CompileState, String> tuple) -> Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
     }
@@ -878,14 +878,14 @@ public final class Main {
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createAccessRule(final String infix) {
         return (CompileState state, String input) -> Main.compileLast(input, infix, (final String childString, final String rawProperty) -> {
-            final var property = Strings.strip(rawProperty);
+            final String property = Strings.strip(rawProperty);
             if (!Main.isSymbol(property)) {
                 return new None<Tuple2<CompileState, Value>>();
             }
 
             return Main.parseValue(state, childString).flatMap((final Tuple2<CompileState, Value> childTuple) -> {
-                final var childState = childTuple.left();
-                final var child = childTuple.right();
+                final CompileState childState = childTuple.left();
+                final Value child = childTuple.right();
                 return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new AccessNode(child, property)));
             });
         });
@@ -893,15 +893,15 @@ public final class Main {
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRuleWithDifferentInfix(final String sourceInfix, final String targetInfix) {
         return (final CompileState state1, final String input1) -> Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), (List<String> divisions) -> Main.selectFirst(divisions, sourceInfix)), (final String leftString, final String rightString) -> Main.parseValue(state1, leftString).flatMap((final Tuple2<CompileState, Value> leftTuple) -> Main.parseValue(leftTuple.left(), rightString).flatMap((final Tuple2<CompileState, Value> rightTuple) -> {
-            final var left = leftTuple.right();
-            final var right = rightTuple.right();
+            final Value left = leftTuple.right();
+            final Value right = rightTuple.right();
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new OperationNode(left, targetInfix, right)));
         })));
     }
 
     private static Option<Tuple2<String, String>> selectFirst(final List<String> divisions, final String delimiter) {
-        final var first = divisions.findFirst().orElse("");
-        final var afterFirst = divisions.subList(1, divisions.size()).orElse(divisions)
+        final String first = divisions.findFirst().orElse("");
+        final String afterFirst = divisions.subList(1, divisions.size()).orElse(divisions)
                 .query()
                 .collect(new Joiner(delimiter))
                 .orElse("");
@@ -912,9 +912,9 @@ public final class Main {
     private static BiFunction<DivideState, Character, DivideState> foldOperator(final String infix) {
         return (final DivideState state, final Character c) -> {
             if (c == Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
-                final var length = Strings.length(infix) - 1;
-                var counter = 0;
-                var current = state;
+                final int length = Strings.length(infix) - 1;
+                int counter = 0;
+                DivideState current = state;
                 while (counter < length) {
                     counter++;
 
@@ -928,7 +928,7 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, Value>> parseNumber(final CompileState state, final String input) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         if (Main.isNumber(stripped)) {
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
         }
@@ -938,14 +938,14 @@ public final class Main {
     }
 
     private static boolean isNumber(final String input) {
-        final var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
+        final HeadedQuery<Integer> query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
         return query.map((Integer index) -> input.charAt(index)).allMatch((Character c) -> Characters.isDigit(c));
     }
 
     private static Option<Tuple2<CompileState, Value>> parseSymbol(final CompileState state, final String input) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
-            final var withImport = state.addResolvedImportFromCache(stripped);
+            final CompileState withImport = state.addResolvedImportFromCache(stripped);
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped)));
         }
         else {
@@ -954,7 +954,7 @@ public final class Main {
     }
 
     private static boolean isSymbol(final String input) {
-        final var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
+        final HeadedQuery<Integer> query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
         return query.allMatch((Integer index) -> Main.isSymbolChar(index, Strings.charAt(input, index)));
     }
 
@@ -973,7 +973,7 @@ public final class Main {
             return new None<Tuple2<CompileState, T>>();
         }
 
-        final var slice = Strings.sliceFrom(input, Strings.length(infix));
+        final String slice = Strings.sliceFrom(input, Strings.length(infix));
         return mapper.apply(slice);
     }
 
@@ -998,7 +998,7 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileEnumValues(final CompileState state, final String withoutEnd) {
         return Main.parseValues(state, withoutEnd, (final CompileState state1, final String s) -> Main.parseInvokable(state1, s).flatMap((final Tuple2<CompileState, Value> tuple) -> {
-            final var structureName = state.findLastStructureName().orElse("");
+            final String structureName = state.findLastStructureName().orElse("");
             return tuple.right().generateAsEnumValue(structureName).map((final String stringOption) -> new Tuple2Impl<CompileState, String>(tuple.left(), stringOption));
         })).map((final Tuple2<CompileState, List<String>> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
     }
@@ -1018,7 +1018,7 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, Definition>> parseDefinition(final CompileState state, final String input) {
         return Main.compileLast(Strings.strip(input), " ", (final String beforeName, final String name) -> Main.compileSplit(Main.splitFoldedLast(Strings.strip(beforeName), " ", Main::foldTypeSeparators), (final String beforeType, final String type) -> Main.compileLast(Strings.strip(beforeType), "\n", (final String annotationsString, final String afterAnnotations) -> {
-            final var annotations = Main.parseAnnotations(annotationsString);
+            final List<String> annotations = Main.parseAnnotations(annotationsString);
             return Main.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
         }).or(() -> Main.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() -> Main.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)));
     }
@@ -1036,10 +1036,10 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, Definition>> parseDefinitionWithAnnotations(final CompileState state, final List<String> annotations, final String beforeType, final String type, final String name) {
         return Main.compileSuffix(Strings.strip(beforeType), ">", (final String withoutTypeParamEnd) -> Main.compileFirst(withoutTypeParamEnd, "<", (final String beforeTypeParams, final String typeParamsString) -> {
-            final var typeParams = Main.divideValues(typeParamsString);
+            final List<String> typeParams = Main.divideValues(typeParamsString);
             return Main.parseDefinitionWithTypeParameters(state, annotations, typeParams, Main.parseModifiers(beforeTypeParams), type, name);
         })).or(() -> {
-            final var divided = Main.parseModifiers(beforeType);
+            final List<String> divided = Main.parseModifiers(beforeType);
             return Main.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name);
         });
     }
@@ -1072,7 +1072,7 @@ public final class Main {
             return state.advance();
         }
 
-        final var appended = state.append(c);
+        final DivideState appended = state.append(c);
         if ('<' == c) {
             return appended.enter();
         }
@@ -1091,8 +1091,8 @@ public final class Main {
             final String name
     ) {
         return Main.parseType(state, type).flatMap((final Tuple2<CompileState, Type> typeTuple) -> {
-            final var newModifiers = Main.modifyModifiers(oldModifiers, state.platform());
-            final var generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
+            final List<String> newModifiers = Main.modifyModifiers(oldModifiers, state.platform());
+            final Definition generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
             return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
         });
     }
@@ -1136,23 +1136,23 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, Type>> parseArrayType(final CompileState state, final String input) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         return Main.compileSuffix(stripped, "[]", (final String s) -> {
-            final var child = Main.parseTypeOrPlaceholder(state, s);
+            final Tuple2<CompileState, Type> child = Main.parseTypeOrPlaceholder(state, s);
             return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new ArrayType(child.right())));
         });
     }
 
     private static Option<Tuple2<CompileState, Type>> parseVarArgs(final CompileState state, final String input) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         return Main.compileSuffix(stripped, "...", (final String s) -> {
-            final var child = Main.parseTypeOrPlaceholder(state, s);
+            final Tuple2<CompileState, Type> child = Main.parseTypeOrPlaceholder(state, s);
             return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())));
         });
     }
 
     private static Option<Tuple2<CompileState, Type>> parseSymbolType(final CompileState state, final String input) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
             return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped)));
         }
@@ -1164,7 +1164,7 @@ public final class Main {
     }
 
     private static Option<Type> findPrimitiveValue(final String input, final Platform platform) {
-        final var stripped = Strings.strip(input);
+        final String stripped = Strings.strip(input);
         if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
             if (Platform.TypeScript == platform) {
                 return new Some<Type>(PrimitiveType.String);
@@ -1209,13 +1209,13 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, Type>> parseGeneric(final CompileState state, final String input) {
         return Main.compileSuffix(Strings.strip(input), ">", (final String withoutEnd) -> Main.compileFirst(withoutEnd, "<", (final String baseString, final String argsString) -> {
-            final var argsTuple = Main.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> Main.compileTypeArgument(state1, s));
-            final var argsState = argsTuple.left();
-            final var args = argsTuple.right();
+            final Tuple2<CompileState, List<String>> argsTuple = Main.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> Main.compileTypeArgument(state1, s));
+            final CompileState argsState = argsTuple.left();
+            final List<String> args = argsTuple.right();
 
-            final var base = Strings.strip(baseString);
+            final String base = Strings.strip(baseString);
             return Main.assembleFunctionType(argsState, base, args).or(() -> {
-                final var compileState = argsState.addResolvedImportFromCache(base);
+                final CompileState compileState = argsState.addResolvedImportFromCache(base);
                 return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
             });
         }));
@@ -1277,9 +1277,9 @@ public final class Main {
             return state.advance();
         }
 
-        final var appended = state.append(c);
+        final DivideState appended = state.append(c);
         if ('-' == c) {
-            final var peeked = appended.peek();
+            final char peeked = appended.peek();
             if ('>' == peeked) {
                 return appended.popAndAppendToOption().orElse(appended);
             }
@@ -1312,9 +1312,9 @@ public final class Main {
             return new None<T>();
         }
 
-        final var length = Strings.length(input);
-        final var length1 = Strings.length(suffix);
-        final var content = Strings.sliceBetween(input, 0, length - length1);
+        final int length = Strings.length(input);
+        final int length1 = Strings.length(suffix);
+        final String content = Strings.sliceBetween(input, 0, length - length1);
         return mapper.apply(content);
     }
 
@@ -1331,15 +1331,15 @@ public final class Main {
     }
 
     private static Option<Tuple2<String, String>> split(final String input, final String infix, final BiFunction<String, String, Integer> locator) {
-        final var index = locator.apply(input, infix);
+        final Integer index = locator.apply(input, infix);
         if (0 > index) {
             return new None<Tuple2<String, String>>();
         }
 
-        final var left = Strings.sliceBetween(input, 0, index);
+        final String left = Strings.sliceBetween(input, 0, index);
 
-        final var length = Strings.length(infix);
-        final var right = Strings.sliceFrom(input, index + length);
+        final int length = Strings.length(infix);
+        final String right = Strings.sliceFrom(input, index + length);
         return new Some<Tuple2<String, String>>(new Tuple2Impl<String, String>(left, right));
     }
 
@@ -1348,7 +1348,7 @@ public final class Main {
     }
 
     public static String generatePlaceholder(final String input) {
-        final var replaced = input
+        final String replaced = input
                 .replace("/*", "start")
                 .replace("*/", "end");
 

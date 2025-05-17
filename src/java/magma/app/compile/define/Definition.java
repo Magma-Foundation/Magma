@@ -26,8 +26,8 @@ public record Definition(
 
     @Override
     public String generateWithAfterName(final String afterName) {
-        final var joinedTypeParams = this.joinTypeParams();
-        final var joinedModifiers = this.modifiers.query()
+        final String joinedTypeParams = this.joinTypeParams();
+        final String joinedModifiers = this.modifiers.query()
                 .map((String value) -> value + " ")
                 .collect(new Joiner(""))
                 .orElse("");

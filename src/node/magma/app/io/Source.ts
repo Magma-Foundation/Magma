@@ -15,8 +15,8 @@ export class Source {
 		return this.source.readString();
 	}
 	computeName(): string {
-		let fileName = this.source.findFileName();
-		let separator = fileName.lastIndexOf(".");
+		let fileName: string = this.source.findFileName();
+		let separator: number = fileName.lastIndexOf(".");
 		return fileName.substring(0, separator);
 	}
 	computeNamespace(): List<string> {

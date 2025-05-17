@@ -9,7 +9,7 @@ export class LambdaNode implements Value {
 }
 
 mut generate(): &[I8] {
-	let joinedParamNames = this.paramNames.query().map((mut definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
+	let joinedParamNames: &[I8] = this.paramNames.query().map((mut definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedParamNames + ")" + " => " + this.content;
 }
 mut toValue(): Option<Value> {

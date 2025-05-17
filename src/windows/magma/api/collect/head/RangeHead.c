@@ -12,7 +12,7 @@ mut next(): Option<number> {
 	if (this.counter >= this.length) {
 		return new None<number>();
 	}
-	let value = this.counter;
+	let value: number = this.counter;
 	this.counter++;
 	return new Some<number>(value);
 }

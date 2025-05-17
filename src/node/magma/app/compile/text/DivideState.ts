@@ -44,8 +44,8 @@ export class DivideState {
 		if (this.index >= Strings.length(this.input)) {
 			return new None<Tuple2<DivideState, string>>();
 		}
-		let c = Strings.charAt(this.input, this.index);
-		let nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
+		let c: string = Strings.charAt(this.input, this.index);
+		let nextState: DivideState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
 		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c));
 	}
 	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {

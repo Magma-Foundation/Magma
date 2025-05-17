@@ -39,8 +39,8 @@ mut pop(): Option<Tuple2<DivideState, I8>> {
 	if (this.index >= Strings.length(this.input)) {
 		return new None<Tuple2<DivideState, I8>>();
 	}
-	let c = Strings.charAt(this.input, this.index);
-	let nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
+	let c: I8 = Strings.charAt(this.input, this.index);
+	let nextState: DivideState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
 	return new Some<Tuple2<DivideState, I8>>(new Tuple2Impl<DivideState, I8>(nextState, c));
 }
 mut popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {

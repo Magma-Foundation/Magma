@@ -10,10 +10,10 @@ export class Import {
 	}
 	generate(platform: Platform): string {
 		if (Platform.Magma === platform) {
-			let joinedNamespace = this.namespace.query().collect(new Joiner(".")).orElse("");
+			let joinedNamespace: string = this.namespace.query().collect(new Joiner(".")).orElse("");
 			return "import " + joinedNamespace + "." + this.child + ";\n";
 		}
-		let joinedNamespace = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
+		let joinedNamespace: string = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }

@@ -24,8 +24,8 @@ export class Definition {
 		return new Some<Definition>(this);
 	}
 	generateWithAfterName(afterName: string): string {
-		let joinedTypeParams = this.joinTypeParams();
-		let joinedModifiers = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
+		let joinedTypeParams: string = this.joinTypeParams();
+		let joinedModifiers: string = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 	}
 	generateType(): string {

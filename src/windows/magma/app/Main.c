@@ -3,12 +3,12 @@ export class Main {
 }
 
 mut static main(): void {
-	let sourceDirectory = Files.get(".", "src", "java");
+	let sourceDirectory: Path = Files.get(".", "src", "java");
 	sourceDirectory.walk().match((mut children: List<Path>) => Main.runWithChildren(children, sourceDirectory), (mut value: IOError) => new Some<IOError>(value)).map((mut error: IOError) => error.display()).ifPresent((mut displayed: &[I8]) => Console.printErrLn(displayed));
 }
 mut static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
-	let sources = children.query().filter((mut source: Path) => source.endsWith(".java")).map((mut child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<Source>());
-	let initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (mut state: CompileState, mut source: Source) => state.addSource(source));
+	let sources: List<Source> = children.query().filter((mut source: Path) => source.endsWith(".java")).map((mut child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<Source>());
+	let initial: CompileState = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (mut state: CompileState, mut source: Source) => state.addSource(source));
 	return sources.query().foldWithInitial(Main.createInitialState(initial), (mut current: Tuple2<CompileState, Option<IOError>>, mut source1: Source) => Main.foldChild(current.left(), current.right(), source1)).right();
 }
 mut static createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
@@ -24,40 +24,40 @@ mut static runWithSource(state: CompileState, source: Source): Tuple2<CompileSta
 	return source.read().match((mut input: &[I8]) => Main.getCompileStateOptionTuple2(state, source, input), (mut value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
 }
 mut static getCompileStateOptionTuple2(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Option<IOError>> {
-	let typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
-	let magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
-	let windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
+	let typeScriptTuple: Tuple2<CompileState, Option<IOError>> = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+	let magmaTuple: Tuple2<CompileState, Option<IOError>> = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
+	let windowsTuple: Tuple2<CompileState, Option<IOError>> = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
 	return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right().or(() => magmaTuple.right()).or(() => windowsTuple.right()));
 }
 mut static compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
-	let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
-	let output = Main.compileRoot(state1, source, input);
-	let location = output.left().findCurrentLocation().orElse(new Location(Lists.empty(), ""));
-	let targetDirectory = Files.get(".", "src", platform.root);
-	let targetParent = targetDirectory.resolveChildSegments(location.namespace());
+	let state1: CompileState = state.withLocation(source.computeLocation()).withPlatform(platform);
+	let output: Tuple2Impl<CompileState, Map<&[I8], &[I8]>> = Main.compileRoot(state1, source, input);
+	let location: Location = output.left().findCurrentLocation().orElse(new Location(Lists.empty(), ""));
+	let targetDirectory: Path = Files.get(".", "src", platform.root);
+	let targetParent: Path = targetDirectory.resolveChildSegments(location.namespace());
 	if (!targetParent.exists()) {
-		let maybeError = targetParent.createDirectories();
+		let maybeError: Option<IOError> = targetParent.createDirectories();
 		if (maybeError.isPresent()) {
 			return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 		}
 	}
 	let initial: Option<IOError> = new None<IOError>();
-	let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
-		let target = targetParent.resolveChild(location.name() + "." + extension);
+	let ioErrorOption1: Option<IOError> = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
+		let target: Path = targetParent.resolveChild(location.name() + "." + extension);
 		return ioErrorOption.or(() => target.writeString(output.right().get(extension)));
 	});
 	return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
 }
 mut static compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Map<&[I8], &[I8]>> {
-	let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
-	let statementsState = statementsTuple.left();
-	let imports = statementsState.imports().query().map((mut anImport: Import) => anImport.generate(state.platform())).collect(new Joiner("")).orElse("");
-	let compileState = statementsState.clearImports().clear();
-	let withMain = Main.createMain(source);
-	let entries = new HashMap<&[I8], &[I8]>();
-	let platform = state.platform();
+	let statementsTuple: Tuple2<CompileState, &[I8]> = Main.compileStatements(state, input, Main.compileRootSegment);
+	let statementsState: CompileState = statementsTuple.left();
+	let imports: &[I8] = statementsState.imports().query().map((mut anImport: Import) => anImport.generate(state.platform())).collect(new Joiner("")).orElse("");
+	let compileState: CompileState = statementsState.clearImports().clear();
+	let withMain: &[I8] = Main.createMain(source);
+	let entries: HashMap<&[I8], &[I8]> = new HashMap<&[I8], &[I8]>();
+	let platform: Platform = state.platform();
 	if (Platform.Windows === platform) {
-		let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
+		let value: &[I8] = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
 		/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
 		/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain)*/;
 	}
@@ -79,7 +79,7 @@ mut static compileStatements(state: CompileState, input: &[I8], mapper: (arg0 : 
 	return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 }
 mut static compileAll(state: CompileState, input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, mapper: (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]>, merger: (arg0 : &[I8], arg1 : &[I8]) => &[I8]): Tuple2<CompileState, &[I8]> {
-	let folded = Main.parseAll(state, input, folder, (mut state1: CompileState, mut s: &[I8]) => new Some<Tuple2<CompileState, &[I8]>>(mapper(state1, s))).orElse(new Tuple2Impl<CompileState, List<&[I8]>>(state, Lists.empty()));
+	let folded: Tuple2<CompileState, List<&[I8]>> = Main.parseAll(state, input, folder, (mut state1: CompileState, mut s: &[I8]) => new Some<Tuple2<CompileState, &[I8]>>(mapper(state1, s))).orElse(new Tuple2Impl<CompileState, List<&[I8]>>(state, Lists.empty()));
 	return new Tuple2Impl<CompileState, &[I8]>(folded.left(), Main.generateAll(folded.right(), merger));
 }
 mut static generateAll(elements: List<&[I8]>, merger: (arg0 : &[I8], arg1 : &[I8]) => &[I8]): &[I8] {
@@ -87,11 +87,11 @@ mut static generateAll(elements: List<&[I8]>, merger: (arg0 : &[I8], arg1 : &[I8
 }
 mut static parseAll<T>(state: CompileState, input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, biFunction: (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 	return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: &[I8]) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
-		let currentState = current.left();
-		let currentElement = current.right();
+		let currentState: CompileState = current.left();
+		let currentElement: List<T> = current.right();
 		return biFunction(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
-			let mappedState = mappedTuple.left();
-			let mappedElement = mappedTuple.right();
+			let mappedState: CompileState = mappedTuple.left();
+			let mappedElement: T = mappedTuple.right();
 			return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
 		});
 	}));
@@ -100,15 +100,15 @@ mut static mergeStatements(cache: &[I8], element: &[I8]): &[I8] {
 	return cache + element;
 }
 mut static divide(input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState): List<&[I8]> {
-	let mut current = DivideState.createInitial(input);
+	let mut current: DivideState = DivideState.createInitial(input);
 	while (true) {
-		let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, I8>(current, "\0"));
+		let poppedTuple0: Tuple2<Bool, Tuple2<DivideState, I8>> = current.pop().toTuple(new Tuple2Impl<DivideState, I8>(current, "\0"));
 		if (!poppedTuple0.left()) {
 			break;
 		}
-		let poppedTuple = poppedTuple0.right();
-		let poppedState = poppedTuple.left();
-		let popped = poppedTuple.right();
+		let poppedTuple: Tuple2<DivideState, I8> = poppedTuple0.right();
+		let poppedState: DivideState = poppedTuple.left();
+		let popped: I8 = poppedTuple.right();
 		current = Main.foldSingleQuotes(poppedState, popped).or(() => Main.foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder(poppedState, popped));
 	}
 	return current.advance().segments();
@@ -117,13 +117,13 @@ mut static foldDoubleQuotes(state: DivideState, c: I8): Option<DivideState> {
 	if ("\"" !== c) {
 		return new None<DivideState>();
 	}
-	let mut appended = state.append(c);
+	let mut appended: DivideState = state.append(c);
 	while (true) {
-		let maybeTuple = appended.popAndAppendToTuple().toTuple(new Tuple2Impl<DivideState, I8>(appended, "\0"));
+		let maybeTuple: Tuple2<Bool, Tuple2<DivideState, I8>> = appended.popAndAppendToTuple().toTuple(new Tuple2Impl<DivideState, I8>(appended, "\0"));
 		if (!maybeTuple.left()) {
 			break;
 		}
-		let tuple = maybeTuple.right();
+		let tuple: Tuple2<DivideState, I8> = maybeTuple.right();
 		appended = tuple.left();
 		if ("\\" === tuple.right()) {
 			appended = appended.popAndAppendToOption().orElse(appended);
@@ -141,15 +141,15 @@ mut static foldSingleQuotes(state: DivideState, c: I8): Option<DivideState> {
 	return state.append(c).popAndAppendToTuple().flatMap(Main.foldEscaped).flatMap((mut state1: DivideState) => state1.popAndAppendToOption());
 }
 mut static foldEscaped(tuple: Tuple2<DivideState, I8>): Option<DivideState> {
-	let state = tuple.left();
-	let c = tuple.right();
+	let state: DivideState = tuple.left();
+	let c: I8 = tuple.right();
 	if ("\\" === c) {
 		return state.popAndAppendToOption();
 	}
 	return new Some<DivideState>(state);
 }
 mut static foldStatements(state: DivideState, c: I8): DivideState {
-	let appended = state.append(c);
+	let appended: DivideState = state.append(c);
 	if (";" === c && appended.isLevel()) {
 		return appended.advance();
 	}
@@ -169,13 +169,13 @@ mut static compileRootSegment(state: CompileState, input: &[I8]): Tuple2<Compile
 }
 mut static createStructureRule(sourceInfix: &[I8], targetInfix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> {
 	return (state: CompileState, input1: &[I8]) => Main.compileFirst(input1, sourceInfix, (beforeInfix: &[I8], afterInfix: &[I8]) => Main.compileFirst(afterInfix, "{", (beforeContent: &[I8], withEnd: &[I8]) => Main.compileSuffix(Strings.strip(withEnd), "}", (inputContent: &[I8]) => Main.compileLast(beforeInfix, "\n", (s: &[I8], s2: &[I8]) => {
-		let annotations = Main.parseAnnotations(s);
+		let annotations: List<&[I8]> = Main.parseAnnotations(s);
 		if (annotations.contains("Actual", Strings.equalsTo)) {
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(state, ""));
 		}
 		return Main.compileStructureWithImplementing(state, annotations, Main.parseModifiers(s2), targetInfix, beforeContent, inputContent);
 	}).or(() => {
-		let modifiers = Main.parseModifiers(beforeContent);
+		let modifiers: List<&[I8]> = Main.parseModifiers(beforeContent);
 		return Main.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
 	}))));
 }
@@ -187,9 +187,9 @@ mut static compileStructureWithExtends(state: CompileState, annotations: List<&[
 }
 mut static compileStructureWithParameters(state: CompileState, annotations: List<&[I8]>, modifiers: List<&[I8]>, targetInfix: &[I8], beforeContent: &[I8], maybeSuperType: Option<&[I8]>, maybeImplementing: Option<Type>, inputContent: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileFirst(beforeContent, "(", (rawName: &[I8], withParameters: &[I8]) => Main.compileFirst(withParameters, ")", (parametersString: &[I8], _: &[I8]) => {
-		let name = Strings.strip(rawName);
-		let parametersTuple = Main.parseParameters(state, parametersString);
-		let parameters = Main.retainDefinitionsFromParameters(parametersTuple.right());
+		let name: &[I8] = Strings.strip(rawName);
+		let parametersTuple: Tuple2<CompileState, List<Parameter>> = Main.parseParameters(state, parametersString);
+		let parameters: List<Definition> = Main.retainDefinitionsFromParameters(parametersTuple.right());
 		return Main.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType);
 	})).or(() => Main.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType));
 }
@@ -198,34 +198,34 @@ mut static retainDefinitionsFromParameters(parameters: List<Parameter>): List<De
 }
 mut static compileStructureWithTypeParams(state: CompileState, infix: &[I8], content: &[I8], beforeParams: &[I8], parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<&[I8]>, modifiers: List<&[I8]>, maybeSuperType: Option<&[I8]>): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: &[I8]) => Main.compileFirst(withoutTypeParamEnd, "<", (name: &[I8], typeParamsString: &[I8]) => {
-		let typeParams = Main.divideValues(typeParamsString);
+		let typeParams: List<&[I8]> = Main.divideValues(typeParamsString);
 		return Main.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
 	})).or(() => Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType));
 }
 mut static assembleStructure(state: CompileState, annotations: List<&[I8]>, oldModifiers: List<&[I8]>, infix: &[I8], rawName: &[I8], typeParams: List<&[I8]>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: &[I8], maybeSuperType: Option<&[I8]>): Option<Tuple2<CompileState, &[I8]>> {
-	let name = Strings.strip(rawName);
+	let name: &[I8] = Strings.strip(rawName);
 	if (!Main.isSymbol(name)) {
 		return new None<Tuple2<CompileState, &[I8]>>();
 	}
-	let outputContentTuple = Main.compileStatements(state.pushStructureName(name), content, Main.compileClassSegment);
-	let outputContentState = outputContentTuple.left().popStructureName();
-	let outputContent = outputContentTuple.right();
-	let constructorString = Main.generateConstructorFromRecordParameters(parameters);
-	let joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
-	let implementingString = Main.generateImplementing(maybeImplementing);
-	let newModifiers = Main.modifyModifiers0(oldModifiers);
-	let joinedModifiers = newModifiers.query().map((mut value: &[I8]) => value + " ").collect(Joiner.empty()).orElse("");
+	let outputContentTuple: Tuple2<CompileState, &[I8]> = Main.compileStatements(state.pushStructureName(name), content, Main.compileClassSegment);
+	let outputContentState: CompileState = outputContentTuple.left().popStructureName();
+	let outputContent: &[I8] = outputContentTuple.right();
+	let constructorString: &[I8] = Main.generateConstructorFromRecordParameters(parameters);
+	let joinedTypeParams: &[I8] = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
+	let implementingString: &[I8] = Main.generateImplementing(maybeImplementing);
+	let newModifiers: List<&[I8]> = Main.modifyModifiers0(oldModifiers);
+	let joinedModifiers: &[I8] = newModifiers.query().map((mut value: &[I8]) => value + " ").collect(Joiner.empty()).orElse("");
 	if (annotations.contains("Namespace", Strings.equalsTo)) {
 		let actualInfix: &[I8] = "interface ";
 		let newName: &[I8] = name + "Instance";
-		let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-		let withNewLocation = outputContentState.append(generated).mapLocation((mut location: Location) => new Location(location.namespace(), location.name() + "Instance"));
+		let generated: &[I8] = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+		let withNewLocation: CompileState = outputContentState.append(generated).mapLocation((mut location: Location) => new Location(location.namespace(), location.name() + "Instance"));
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(withNewLocation, ""));
 	}
 	else {
-		let extendsString = maybeSuperType.map((mut inner: &[I8]) => " extends " + inner).orElse("");
-		let infix1 = Main.retainStruct(infix, outputContentState);
-		let generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+		let extendsString: &[I8] = maybeSuperType.map((mut inner: &[I8]) => " extends " + inner).orElse("");
+		let infix1: &[I8] = Main.retainStruct(infix, outputContentState);
+		let generated: &[I8] = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(outputContentState.append(generated), ""));
 	}
 }
@@ -248,7 +248,7 @@ mut static generateConstructorFromRecordParameters(parameters: List<Definition>)
 	return parameters.query().map((mut definition: Definition) => definition.generate()).collect(new Joiner(", ")).map((mut generatedParameters: &[I8]) => Main.generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
 }
 mut static generateConstructorWithParameterString(parameters: List<Definition>, parametersString: &[I8]): &[I8] {
-	let constructorAssignments = Main.generateConstructorAssignments(parameters);
+	let constructorAssignments: &[I8] = Main.generateConstructorAssignments(parameters);
 	return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 }
 mut static generateConstructorAssignments(parameters: List<Definition>): &[I8] {
@@ -258,7 +258,7 @@ mut static joinParameters(parameters: List<Definition>): &[I8] {
 	return parameters.query().map((mut definition: Definition) => definition.generate()).map((mut generated: &[I8]) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");
 }
 mut static compileNamespaced(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(state, ""));
 	}
@@ -278,7 +278,7 @@ mut static compileClassSegment(state1: CompileState, input1: &[I8]): Tuple2<Comp
 }
 mut static compileMethod(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileFirst(input, "(", (beforeParams: &[I8], withParams: &[I8]) => {
-		let strippedBeforeParams = Strings.strip(beforeParams);
+		let strippedBeforeParams: &[I8] = Strings.strip(beforeParams);
 		return Main.compileLast(strippedBeforeParams, " ", (_: &[I8], name: &[I8]) => {
 			if (state.hasLastStructureNameOf(name)) {
 				return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
@@ -294,25 +294,25 @@ mut static compileMethod(state: CompileState, input: &[I8]): Option<Tuple2<Compi
 }
 mut static compileMethodWithBeforeParams<S extends FunctionHeader<S>>(state: CompileState, header: FunctionHeader<S>, withParams: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileFirst(withParams, ")", (params: &[I8], afterParams: &[I8]) => {
-		let parametersTuple = Main.parseParameters(state, params);
-		let parametersState = parametersTuple.left();
-		let parameters = parametersTuple.right();
-		let definitions = Main.retainDefinitionsFromParameters(parameters);
-		let joinedDefinitions = definitions.query().map((mut definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
-		let newHeader = Main.retainDef(header, parametersState);
+		let parametersTuple: Tuple2<CompileState, List<Parameter>> = Main.parseParameters(state, params);
+		let parametersState: CompileState = parametersTuple.left();
+		let parameters: List<Parameter> = parametersTuple.right();
+		let definitions: List<Definition> = Main.retainDefinitionsFromParameters(parameters);
+		let joinedDefinitions: &[I8] = definitions.query().map((mut definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
+		let newHeader: FunctionHeader<S> = Main.retainDef(header, parametersState);
 		if (newHeader.hasAnnotation("Actual")) {
-			let headerGenerated = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
+			let headerGenerated: &[I8] = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";\n"));
 		}
-		let headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
+		let headerGenerated: &[I8] = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
 		return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: &[I8]) => Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: &[I8]) => {
-			let compileState1 = parametersState.enterDepth();
-			let compileState = /* compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth()*/;
-			let statementsTuple = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
-			let compileState2 = statementsTuple.left().exitDepth();
-			let indent = compileState2.createIndent();
-			let exited = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
-			let generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
+			let compileState1: CompileState = parametersState.enterDepth();
+			let compileState: CompileState = /* compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth()*/;
+			let statementsTuple: Tuple2<CompileState, &[I8]> = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
+			let compileState2: CompileState = statementsTuple.left().exitDepth();
+			let indent: &[I8] = compileState2.createIndent();
+			let exited: CompileState = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
+			let generated: &[I8] = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
 			if (exited.isPlatform(Platform.Windows)) {
 				return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(exited.addFunction(generated), ""));
 			}
@@ -353,15 +353,15 @@ mut static compileReturnWithoutSuffix(state1: CompileState, input1: &[I8]): Opti
 }
 mut static compileBlock(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileSuffix(Strings.strip(input), "}", (withoutEnd: &[I8]) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd: &[I8], content: &[I8]) => Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: &[I8]) => Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, &[I8]>) => {
-		let contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
-		let indent = state.createIndent();
+		let contentTuple: Tuple2<CompileState, &[I8]> = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
+		let indent: &[I8] = state.createIndent();
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 	}))));
 }
 mut static foldBlockStarts(state: DivideState, c: I8): DivideState {
-	let appended = state.append(c);
+	let appended: DivideState = state.append(c);
 	if ("{" === c) {
-		let entered = appended.enter();
+		let entered: DivideState = appended.enter();
 		if (entered.isShallow()) {
 			return entered.advance();
 		}
@@ -379,9 +379,9 @@ mut static compileBlockHeader(state: CompileState, input: &[I8]): Option<Tuple2<
 }
 mut static createConditionalRule(prefix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> {
 	return (mut state1: CompileState, mut input1: &[I8]) => Main.compilePrefix(Strings.strip(input1), prefix, (withoutPrefix: &[I8]) => {
-		let strippedCondition = Strings.strip(withoutPrefix);
+		let strippedCondition: &[I8] = Strings.strip(withoutPrefix);
 		return Main.compilePrefix(strippedCondition, "(", (withoutConditionStart: &[I8]) => Main.compileSuffix(withoutConditionStart, ")", (withoutConditionEnd: &[I8]) => {
-			let tuple = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
+			let tuple: Tuple2<CompileState, &[I8]> = Main.compileValueOrPlaceholder(state1, withoutConditionEnd);
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(tuple.left(), prefix + " (" + tuple.right() + ") "));
 		}));
 	});
@@ -396,7 +396,7 @@ mut static compileElse(state: CompileState, input: &[I8]): Option<Tuple2<Compile
 }
 mut static compileFunctionStatement(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: &[I8]) => {
-		let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
+		let valueTuple: Tuple2<CompileState, &[I8]> = Main.compileFunctionStatementValue(state, withoutEnd);
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
 	});
 }
@@ -413,7 +413,7 @@ mut static compileBreak(state: CompileState, input: &[I8]): Option<Tuple2<Compil
 }
 mut static createPostRule(suffix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> {
 	return (mut state1: CompileState, mut input: &[I8]) => Main.compileSuffix(Strings.strip(input), suffix, (child: &[I8]) => {
-		let tuple = Main.compileValueOrPlaceholder(state1, child);
+		let tuple: Tuple2<CompileState, &[I8]> = Main.compileValueOrPlaceholder(state1, child);
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right() + suffix));
 	});
 }
@@ -425,8 +425,8 @@ mut static compileReturn(input: &[I8], mapper: (arg0 : &[I8]) => Option<Tuple2<C
 }
 mut static parseInvokable(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 	return Main.compileSuffix(Strings.strip(input), ")", (withoutEnd: &[I8]) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), (callerWithArgStart: &[I8], args: &[I8]) => Main.compileSuffix(callerWithArgStart, "(", (callerString: &[I8]) => Main.compilePrefix(Strings.strip(callerString), "new ", (type: &[I8]) => Main.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, &[I8]>) => {
-		let callerState = callerTuple.left();
-		let caller = callerTuple.right();
+		let callerState: CompileState = callerTuple.left();
+		let caller: &[I8] = callerTuple.right();
 		return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform()), args);
 	})).or(() => Main.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args))))));
 }
@@ -434,22 +434,22 @@ mut static splitFoldedLast(input: &[I8], delimiter: &[I8], folder: (arg0 : Divid
 	return Main.splitFolded(input, folder, (mut divisions1: List<&[I8]>) => Main.selectLast(divisions1, delimiter));
 }
 mut static splitFolded(input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, selector: (arg0 : List<&[I8]>) => Option<Tuple2<&[I8], &[I8]>>): Option<Tuple2<&[I8], &[I8]>> {
-	let divisions = Main.divide(input, folder);
+	let divisions: List<&[I8]> = Main.divide(input, folder);
 	if (2 > divisions.size()) {
 		return new None<Tuple2<&[I8], &[I8]>>();
 	}
 	return selector(divisions);
 }
 mut static selectLast(divisions: List<&[I8]>, delimiter: &[I8]): Option<Tuple2<&[I8], &[I8]>> {
-	let beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
-	let last = divisions.findLast().orElse("");
-	let joined = beforeLast.query().collect(new Joiner(delimiter)).orElse("");
+	let beforeLast: List<&[I8]> = divisions.subList(0, divisions.size() - 1).orElse(divisions);
+	let last: &[I8] = divisions.findLast().orElse("");
+	let joined: &[I8] = beforeLast.query().collect(new Joiner(delimiter)).orElse("");
 	return new Some<Tuple2<&[I8], &[I8]>>(new Tuple2Impl<&[I8], &[I8]>(joined, last));
 }
 mut static foldInvocationStarts(state: DivideState, c: I8): DivideState {
-	let appended = state.append(c);
+	let appended: DivideState = state.append(c);
 	if ("(" === c) {
-		let entered = appended.enter();
+		let entered: DivideState = appended.enter();
 		if (entered.isShallow()) {
 			return entered.advance();
 		}
@@ -464,15 +464,15 @@ mut static foldInvocationStarts(state: DivideState, c: I8): DivideState {
 }
 mut static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: &[I8]): Option<Tuple2<CompileState, Value>> {
 	return Main.parseValues(state, argsString, (mut state1: CompileState, mut s: &[I8]) => Main.parseArgument(state1, s)).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
-		let argsState = argsTuple.left();
-		let args = Main.retain(argsTuple.right(), (mut argument: Argument) => argument.toValue());
-		let newCaller = Main.transformCaller(argsState, oldCaller);
+		let argsState: CompileState = argsTuple.left();
+		let args: List<Value> = Main.retain(argsTuple.right(), (mut argument: Argument) => argument.toValue());
+		let newCaller: Caller = Main.transformCaller(argsState, oldCaller);
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new InvokableNode(newCaller, args)));
 	});
 }
 mut static transformCaller(state: CompileState, oldCaller: Caller): Caller {
 	return oldCaller.findChild().flatMap((parent: Value) => {
-		let parentType = parent.resolve(state);
+		let parentType: Type = parent.resolve(state);
 		if (parentType.isFunctional()) {
 			return new Some<Caller>(parent);
 		}
@@ -487,8 +487,8 @@ mut static parseArgument(state1: CompileState, input: &[I8]): Option<Tuple2<Comp
 }
 mut static compileAssignment(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.compileFirst(input, "=", (destination: &[I8], source: &[I8]) => {
-		let sourceTuple = Main.compileValueOrPlaceholder(state, source);
-		let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate()))).orElseGet(() => new Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+		let sourceTuple: Tuple2<CompileState, &[I8]> = Main.compileValueOrPlaceholder(state, source);
+		let destinationTuple: Tuple2<CompileState, &[I8]> = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate()))).orElseGet(() => new Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 	});
 }
@@ -503,31 +503,31 @@ mut static parseValue(state: CompileState, input: &[I8]): Option<Tuple2<CompileS
 }
 mut static createTextRule(slice: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 	return (state1: CompileState, input1: &[I8]) => {
-		let stripped = Strings.strip(input1);
+		let stripped: &[I8] = Strings.strip(input1);
 		return Main.compilePrefix(stripped, slice, (s: &[I8]) => Main.compileSuffix(s, slice, (mut s1: &[I8]) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringNode(s1)))));
 	};
 }
 mut static parseNot(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 	return Main.compilePrefix(Strings.strip(input), "!", (withoutPrefix: &[I8]) => {
-		let childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
-		let childState = childTuple.left();
-		let child = "!" + childTuple.right();
+		let childTuple: Tuple2<CompileState, &[I8]> = Main.compileValueOrPlaceholder(state, withoutPrefix);
+		let childState: CompileState = childTuple.left();
+		let child: &[I8] = "!" + childTuple.right();
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new NotNode(child)));
 	});
 }
 mut static parseLambda(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 	return Main.compileFirst(input, "->", (beforeArrow: &[I8], afterArrow: &[I8]) => {
-		let strippedBeforeArrow = Strings.strip(beforeArrow);
+		let strippedBeforeArrow: &[I8] = Strings.strip(beforeArrow);
 		return Main.compilePrefix(strippedBeforeArrow, "(", (withoutStart: &[I8]) => Main.compileSuffix(withoutStart, ")", (withoutEnd: &[I8]) => Main.parseValues(state, withoutEnd, (mut state1: CompileState, mut s: &[I8]) => Main.parseParameter(state1, s)).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => Main.compileLambdaWithParameterNames(paramNames.left(), Main.retainDefinitionsFromParameters(paramNames.right()), afterArrow))));
 	});
 }
 mut static compileLambdaWithParameterNames(state: CompileState, paramNames: List<Definition>, afterArrow: &[I8]): Option<Tuple2<CompileState, Value>> {
-	let strippedAfterArrow = Strings.strip(afterArrow);
+	let strippedAfterArrow: &[I8] = Strings.strip(afterArrow);
 	return Main.compilePrefix(strippedAfterArrow, "{", (withoutContentStart: &[I8]) => Main.compileSuffix(withoutContentStart, "}", (withoutContentEnd: &[I8]) => {
-		let statementsTuple = Main.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
-		let statementsState = statementsTuple.left();
-		let statements = statementsTuple.right();
-		let exited = statementsState.exitDepth();
+		let statementsTuple: Tuple2<CompileState, &[I8]> = Main.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
+		let statementsState: CompileState = statementsTuple.left();
+		let statements: &[I8] = statementsTuple.right();
+		let exited: CompileState = statementsState.exitDepth();
 		return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
 	})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 }
@@ -539,35 +539,35 @@ mut static createOperatorRule(infix: &[I8]): (arg0 : CompileState, arg1 : &[I8])
 }
 mut static createAccessRule(infix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 	return (mut state: CompileState, mut input: &[I8]) => Main.compileLast(input, infix, (childString: &[I8], rawProperty: &[I8]) => {
-		let property = Strings.strip(rawProperty);
+		let property: &[I8] = Strings.strip(rawProperty);
 		if (!Main.isSymbol(property)) {
 			return new None<Tuple2<CompileState, Value>>();
 		}
 		return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
-			let childState = childTuple.left();
-			let child = childTuple.right();
+			let childState: CompileState = childTuple.left();
+			let child: Value = childTuple.right();
 			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new AccessNode(child, property)));
 		});
 	});
 }
 mut static createOperatorRuleWithDifferentInfix(sourceInfix: &[I8], targetInfix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 	return (state1: CompileState, input1: &[I8]) => Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), (mut divisions: List<&[I8]>) => Main.selectFirst(divisions, sourceInfix)), (leftString: &[I8], rightString: &[I8]) => Main.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => Main.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
-		let left = leftTuple.right();
-		let right = rightTuple.right();
+		let left: Value = leftTuple.right();
+		let right: Value = rightTuple.right();
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new OperationNode(left, targetInfix, right)));
 	})));
 }
 mut static selectFirst(divisions: List<&[I8]>, delimiter: &[I8]): Option<Tuple2<&[I8], &[I8]>> {
-	let first = divisions.findFirst().orElse("");
-	let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("");
+	let first: &[I8] = divisions.findFirst().orElse("");
+	let afterFirst: &[I8] = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("");
 	return new Some<Tuple2<&[I8], &[I8]>>(new Tuple2Impl<&[I8], &[I8]>(first, afterFirst));
 }
 mut static foldOperator(infix: &[I8]): (arg0 : DivideState, arg1 : I8) => DivideState {
 	return (state: DivideState, c: I8) => {
 		if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
-			let length = Strings.length(infix) - 1;
-			let mut counter = 0;
-			let mut current = state;
+			let length: number = Strings.length(infix) - 1;
+			let mut counter: number = 0;
+			let mut current: DivideState = state;
 			while (counter < length) {
 				counter++;
 				current = current.pop().map((mut tuple: Tuple2<DivideState, I8>) => tuple.left()).orElse(current);
@@ -578,7 +578,7 @@ mut static foldOperator(infix: &[I8]): (arg0 : DivideState, arg1 : I8) => Divide
 	};
 }
 mut static parseNumber(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	if (Main.isNumber(stripped)) {
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
 	}
@@ -587,13 +587,13 @@ mut static parseNumber(state: CompileState, input: &[I8]): Option<Tuple2<Compile
 	}
 }
 mut static isNumber(input: &[I8]): Bool {
-	let query = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
+	let query: HeadedQuery<number> = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
 	return query.map((mut index: number) => input.charAt(index)).allMatch((mut c: I8) => Characters.isDigit(c));
 }
 mut static parseSymbol(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	if (Main.isSymbol(stripped)) {
-		let withImport = state.addResolvedImportFromCache(stripped);
+		let withImport: CompileState = state.addResolvedImportFromCache(stripped);
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped)));
 	}
 	else {
@@ -601,7 +601,7 @@ mut static parseSymbol(state: CompileState, input: &[I8]): Option<Tuple2<Compile
 	}
 }
 mut static isSymbol(input: &[I8]): Bool {
-	let query = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
+	let query: HeadedQuery<number> = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
 	return query.allMatch((mut index: number) => Main.isSymbolChar(index, Strings.charAt(input, index)));
 }
 mut static isSymbolChar(index: number, c: I8): Bool {
@@ -611,7 +611,7 @@ mut static compilePrefix<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8]) =
 	if (!input.startsWith(infix)) {
 		return new None<Tuple2<CompileState, T>>();
 	}
-	let slice = Strings.sliceFrom(input, Strings.length(infix));
+	let slice: &[I8] = Strings.sliceFrom(input, Strings.length(infix));
 	return mapper(slice);
 }
 mut static compileWhitespace(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
@@ -631,7 +631,7 @@ mut static getTupleOption(state: CompileState, withoutEnd: &[I8]): Option<Tuple2
 }
 mut static compileEnumValues(state: CompileState, withoutEnd: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 	return Main.parseValues(state, withoutEnd, (state1: CompileState, s: &[I8]) => Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
-		let structureName = state.findLastStructureName().orElse("");
+		let structureName: &[I8] = state.findLastStructureName().orElse("");
 		return tuple.right().generateAsEnumValue(structureName).map((stringOption: &[I8]) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption));
 	})).map((tuple: Tuple2<CompileState, List<&[I8]>>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
 }
@@ -646,7 +646,7 @@ mut static getCompileStateParameterTuple2(tuple: Tuple2<CompileState, Whitespace
 }
 mut static parseDefinition(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Definition>> {
 	return Main.compileLast(Strings.strip(input), " ", (beforeName: &[I8], name: &[I8]) => Main.compileSplit(Main.splitFoldedLast(Strings.strip(beforeName), " ", Main.foldTypeSeparators), (beforeType: &[I8], type: &[I8]) => Main.compileLast(Strings.strip(beforeType), "\n", (annotationsString: &[I8], afterAnnotations: &[I8]) => {
-		let annotations = Main.parseAnnotations(annotationsString);
+		let annotations: List<&[I8]> = Main.parseAnnotations(annotationsString);
 		return Main.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
 	}).or(() => Main.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() => Main.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)));
 }
@@ -655,10 +655,10 @@ mut static parseAnnotations(s: &[I8]): List<&[I8]> {
 }
 mut static parseDefinitionWithAnnotations(state: CompileState, annotations: List<&[I8]>, beforeType: &[I8], type: &[I8], name: &[I8]): Option<Tuple2<CompileState, Definition>> {
 	return Main.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: &[I8]) => Main.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams: &[I8], typeParamsString: &[I8]) => {
-		let typeParams = Main.divideValues(typeParamsString);
+		let typeParams: List<&[I8]> = Main.divideValues(typeParamsString);
 		return Main.parseDefinitionWithTypeParameters(state, annotations, typeParams, Main.parseModifiers(beforeTypeParams), type, name);
 	})).or(() => {
-		let divided = Main.parseModifiers(beforeType);
+		let divided: List<&[I8]> = Main.parseModifiers(beforeType);
 		return Main.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name);
 	});
 }
@@ -678,7 +678,7 @@ mut static foldTypeSeparators(state: DivideState, c: I8): DivideState {
 	if (" " === c && state.isLevel()) {
 		return state.advance();
 	}
-	let appended = state.append(c);
+	let appended: DivideState = state.append(c);
 	if ("<" === c) {
 		return appended.enter();
 	}
@@ -689,8 +689,8 @@ mut static foldTypeSeparators(state: DivideState, c: I8): DivideState {
 }
 mut static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<&[I8]>, typeParams: List<&[I8]>, oldModifiers: List<&[I8]>, type: &[I8], name: &[I8]): Option<Tuple2<CompileState, Definition>> {
 	return Main.parseType(state, type).flatMap((typeTuple: Tuple2<CompileState, Type>) => {
-		let newModifiers = Main.modifyModifiers(oldModifiers, state.platform());
-		let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
+		let newModifiers: List<&[I8]> = Main.modifyModifiers(oldModifiers, state.platform());
+		let generated: Definition = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
 		return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
 	});
 }
@@ -717,21 +717,21 @@ mut static parseType(state: CompileState, type: &[I8]): Option<Tuple2<CompileSta
 	return Main.or(state, type, Lists.of(Main.parseArrayType, Main.parseVarArgs, Main.parseGeneric, Main.parsePrimitive, Main.parseSymbolType));
 }
 mut static parseArrayType(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	return Main.compileSuffix(stripped, "[]", (s: &[I8]) => {
-		let child = Main.parseTypeOrPlaceholder(state, s);
+		let child: Tuple2<CompileState, Type> = Main.parseTypeOrPlaceholder(state, s);
 		return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new ArrayType(child.right())));
 	});
 }
 mut static parseVarArgs(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	return Main.compileSuffix(stripped, "...", (s: &[I8]) => {
-		let child = Main.parseTypeOrPlaceholder(state, s);
+		let child: Tuple2<CompileState, Type> = Main.parseTypeOrPlaceholder(state, s);
 		return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())));
 	});
 }
 mut static parseSymbolType(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	if (Main.isSymbol(stripped)) {
 		return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped)));
 	}
@@ -741,7 +741,7 @@ mut static parsePrimitive(state: CompileState, input: &[I8]): Option<Tuple2<Comp
 	return Main.findPrimitiveValue(Strings.strip(input), state.platform()).map((mut result: Type) => new Tuple2Impl<CompileState, Type>(state, result));
 }
 mut static findPrimitiveValue(input: &[I8], platform: Platform): Option<Type> {
-	let stripped = Strings.strip(input);
+	let stripped: &[I8] = Strings.strip(input);
 	if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
 		if (Platform.TypeScript === platform) {
 			return new Some<Type>(PrimitiveType.String);
@@ -779,12 +779,12 @@ mut static findPrimitiveValue(input: &[I8], platform: Platform): Option<Type> {
 }
 mut static parseGeneric(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
 	return Main.compileSuffix(Strings.strip(input), ">", (withoutEnd: &[I8]) => Main.compileFirst(withoutEnd, "<", (baseString: &[I8], argsString: &[I8]) => {
-		let argsTuple = Main.parseValuesOrEmpty(state, argsString, (mut state1: CompileState, mut s: &[I8]) => Main.compileTypeArgument(state1, s));
-		let argsState = argsTuple.left();
-		let args = argsTuple.right();
-		let base = Strings.strip(baseString);
+		let argsTuple: Tuple2<CompileState, List<&[I8]>> = Main.parseValuesOrEmpty(state, argsString, (mut state1: CompileState, mut s: &[I8]) => Main.compileTypeArgument(state1, s));
+		let argsState: CompileState = argsTuple.left();
+		let args: List<&[I8]> = argsTuple.right();
+		let base: &[I8] = Strings.strip(baseString);
 		return Main.assembleFunctionType(argsState, base, args).or(() => {
-			let compileState = argsState.addResolvedImportFromCache(base);
+			let compileState: CompileState = argsState.addResolvedImportFromCache(base);
 			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
 		});
 	}));
@@ -823,9 +823,9 @@ mut static foldValues(state: DivideState, c: I8): DivideState {
 	if ("," === c && state.isLevel()) {
 		return state.advance();
 	}
-	let appended = state.append(c);
+	let appended: DivideState = state.append(c);
 	if ("-" === c) {
-		let peeked = appended.peek();
+		let peeked: I8 = appended.peek();
 		if (">" === peeked) {
 			return appended.popAndAppendToOption().orElse(appended);
 		}
@@ -851,9 +851,9 @@ mut static compileSuffix<T>(input: &[I8], suffix: &[I8], mapper: (arg0 : &[I8]) 
 	if (!input.endsWith(suffix)) {
 		return new None<T>();
 	}
-	let length = Strings.length(input);
-	let length1 = Strings.length(suffix);
-	let content = Strings.sliceBetween(input, 0, length - length1);
+	let length: number = Strings.length(input);
+	let length1: number = Strings.length(suffix);
+	let content: &[I8] = Strings.sliceBetween(input, 0, length - length1);
 	return mapper(content);
 }
 mut static compileFirst<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
@@ -866,19 +866,19 @@ mut static compileSplit<T>(splitter: Option<Tuple2<&[I8], &[I8]>>, mapper: (arg0
 	return splitter.flatMap((mut tuple: Tuple2<&[I8], &[I8]>) => mapper(tuple.left(), tuple.right()));
 }
 mut static split(input: &[I8], infix: &[I8], locator: (arg0 : &[I8], arg1 : &[I8]) => number): Option<Tuple2<&[I8], &[I8]>> {
-	let index = locator(input, infix);
+	let index: number = locator(input, infix);
 	if (0 > index) {
 		return new None<Tuple2<&[I8], &[I8]>>();
 	}
-	let left = Strings.sliceBetween(input, 0, index);
-	let length = Strings.length(infix);
-	let right = Strings.sliceFrom(input, index + length);
+	let left: &[I8] = Strings.sliceBetween(input, 0, index);
+	let length: number = Strings.length(infix);
+	let right: &[I8] = Strings.sliceFrom(input, index + length);
 	return new Some<Tuple2<&[I8], &[I8]>>(new Tuple2Impl<&[I8], &[I8]>(left, right));
 }
 mut static findFirst(input: &[I8], infix: &[I8]): number {
 	return input.indexOf(infix);
 }
 mut static generatePlaceholder(input: &[I8]): &[I8] {
-	let replaced = input.replace("/*", "start").replace("*/", "end");
+	let replaced: &[I8] = input.replace("/*", "start").replace("*/", "end");
 	return "/*" + replaced + "*/";
 }Main.main();

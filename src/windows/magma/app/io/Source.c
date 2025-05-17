@@ -12,8 +12,8 @@ mut read(): Result<&[I8], IOError> {
 	return this.source.readString();
 }
 mut computeName(): &[I8] {
-	let fileName = this.source.findFileName();
-	let separator = fileName.lastIndexOf(".");
+	let fileName: &[I8] = this.source.findFileName();
+	let separator: number = fileName.lastIndexOf(".");
 	return fileName.substring(0, separator);
 }
 mut computeNamespace(): List<&[I8]> {

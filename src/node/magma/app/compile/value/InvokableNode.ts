@@ -16,7 +16,7 @@ export class InvokableNode implements Value {
 		this.args = args;
 	}
 	generate(): string {
-		let joinedArguments = this.joinArgs();
+		let joinedArguments: string = this.joinArgs();
 		return this.caller.generate() + "(" + joinedArguments + ")";
 	}
 	joinArgs(): string {

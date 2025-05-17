@@ -16,7 +16,7 @@ export struct InvokableNode implements Value {
 		this.args = args;
 	}
 	def generate(): &[I8] {
-		let joinedArguments = this.joinArgs();
+		let joinedArguments: &[I8] = this.joinArgs();
 		return this.caller.generate() + "(" + joinedArguments + ")";
 	}
 	def joinArgs(): &[I8] {

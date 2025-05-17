@@ -90,14 +90,14 @@ export class ImmutableCompileState implements CompileState {
 		return this.structures + this.functions;
 	}
 	addResolvedImportWithNamespace(oldParent: List<string>, child: string): CompileState {
-		let namespace = this.findCurrentLocation.map((location: Location) => location.namespace()).orElse(Lists.empty());
-		let newParent = oldParent;
+		let namespace: List<string> = this.findCurrentLocation.map((location: Location) => location.namespace()).orElse(Lists.empty());
+		List < String > newParent = oldParent;
 		if (Platform.TypeScript === this.platform) {
 			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
-			let i = 0;
-			let size = namespace.size();
+			let i: number = 0;
+			let size: number = namespace.size();
 			while (i < size) {
 				newParent = newParent.addFirst("..");
 				i++;
@@ -106,7 +106,7 @@ export class ImmutableCompileState implements CompileState {
 		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child(), child)).next().isPresent()) {
 			return this;
 		}
-		let importString = new Import(newParent, child);
+		let importString: Import = new Import(newParent, child);
 		return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
 	}
 	findSource(name: string): Option<Source> {

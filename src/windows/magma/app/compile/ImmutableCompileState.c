@@ -80,14 +80,14 @@ mut join(): &[I8] {
 	return this.structures + this.functions;
 }
 mut addResolvedImportWithNamespace(oldParent: List<&[I8]>, child: &[I8]): CompileState {
-	let namespace = this.findCurrentLocation.map((mut location: Location) => location.namespace()).orElse(Lists.empty());
-	let mut newParent = oldParent;
+	let namespace: List<&[I8]> = this.findCurrentLocation.map((mut location: Location) => location.namespace()).orElse(Lists.empty());
+	List < String > newParent = oldParent;
 	if (Platform.TypeScript === this.platform) {
 		if (namespace.isEmpty()) {
 			newParent = newParent.addFirst(".");
 		}
-		let mut i = 0;
-		let size = namespace.size();
+		let mut i: number = 0;
+		let size: number = namespace.size();
 		while (i < size) {
 			newParent = newParent.addFirst("..");
 			i++;
@@ -96,7 +96,7 @@ mut addResolvedImportWithNamespace(oldParent: List<&[I8]>, child: &[I8]): Compil
 	if (this.imports.query().filter((mut node: Import) => Strings.equalsTo(node.child(), child)).next().isPresent()) {
 		return this;
 	}
-	let importString = new Import(newParent, child);
+	let importString: Import = new Import(newParent, child);
 	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
 }
 mut findSource(name: &[I8]): Option<Source> {

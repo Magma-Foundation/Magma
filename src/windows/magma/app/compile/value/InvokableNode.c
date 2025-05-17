@@ -9,7 +9,7 @@ export class InvokableNode implements Value {
 }
 
 mut generate(): &[I8] {
-	let joinedArguments = this.joinArgs();
+	let joinedArguments: &[I8] = this.joinArgs();
 	return this.caller.generate() + "(" + joinedArguments + ")";
 }
 mut joinArgs(): &[I8] {
