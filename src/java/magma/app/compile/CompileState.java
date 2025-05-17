@@ -11,6 +11,8 @@ import magma.app.io.Source;
 import java.util.function.Function;
 
 public interface CompileState {
+    String functionName();
+
     Option<String> findLastStructureName();
 
     String createIndent();
