@@ -10,8 +10,8 @@ import { Queries } from "../../magma/api/collect/Queries";
 import { Platform } from "../../magma/app/io/Platform";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { Source } from "../../magma/app/io/Source";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Source } from "../../magma/app/io/Source";
 import { None } from "../../magma/api/option/None";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
@@ -57,10 +57,10 @@ export class Main {
 	}
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let initial = Main/*auto*/.createInitialStateToTuple(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
-		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, (current1: Tuple2<CompileState, Option<IOError>>, platform: Platform) => Main/*auto*/.runWithPlatformAndSources(children/*List<Path>*/, sourceDirectory/*Path*/, current1/*auto*/, platform/*Platform*/)).right(/*auto*/);
+		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, (current1: Tuple2<CompileState, Option<IOError>>, platform: Platform) => Main/*auto*/.runWithPlatformAndSources(current1/*auto*/, platform/*Platform*/, sourceDirectory/*Path*/, children/*List<Path>*/)).right(/*auto*/);
 	}
-	static runWithPlatformAndSources(children: List<Path>, sourceDirectory: Path, current1: Tuple2<CompileState, Option<IOError>>, platform: Platform): Tuple2<CompileState, Option<IOError>> {
-		return Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/).query(/*auto*/).foldWithInitial(current1/*Tuple2<CompileState, Option<IOError>>*/, (current: Tuple2<CompileState, Option<IOError>>, source1: Source) => Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source1/*auto*/));
+	static runWithPlatformAndSources(initial: Tuple2<CompileState, Option<IOError>>, platform: Platform, root: Path, children: List<Path>): Tuple2<CompileState, Option<IOError>> {
+		return Main/*auto*/.findSources(children/*List<Path>*/, root/*Path*/).query(/*auto*/).foldWithInitial(new Tuple2Impl<>(initial/*Tuple2<CompileState, Option<IOError>>*/.left(/*auto*/).clearDefinedTypes(/*auto*/), initial/*Tuple2<CompileState, Option<IOError>>*/.right(/*auto*/)), (current: Tuple2<CompileState, Option<IOError>>, source: Source) => Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source/*Source*/));
 	}
 	static runWithPlatformAndSource(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source): Tuple2<CompileState, Option<IOError>> {
 		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
@@ -99,7 +99,7 @@ export class Main {
 			}
 		}
 		let initial: Option<IOError> = new None<IOError>(/*auto*/);
-		let ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*R*/, (ioErrorOption: Option<IOError>, extension: string) => {
+		let ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (ioErrorOption: Option<IOError>, extension: string) => {
 			let target = targetParent/*auto*/.resolveChild(location/*auto*/.name(/*auto*/) + "." + extension/*string*/);
 			return ioErrorOption/*Option<IOError>*/.or(() => target/*auto*/.writeString(output/*auto*/.right(/*auto*/).get(extension/*string*/)));
 		});

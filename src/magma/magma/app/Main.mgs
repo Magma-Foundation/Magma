@@ -1,4 +1,4 @@
-// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main, Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main]
+// [Lists, Console, Files, Characters, Strings, Actual, Namespace, Collector, EmptyHead, FlatMapHead, Head, HeadedQuery, MapHead, RangeHead, SingleHead, ZipHead, Joiner, List, ListCollector, Queries, Query, IOError, Path, None, Option, Some, Err, Ok, Result, Tuple2, Tuple2Impl, Type, CompileState, Definition, FunctionHeader, Parameter, FunctionSegment, ImmutableCompileState, Import, DivideState, Placeholder, Whitespace, ArrayType, BooleanType, FunctionType, PrimitiveType, SliceType, TemplateType, VariadicType, AccessNode, Argument, Caller, ConstructionCaller, ConstructorHeader, InvokableNode, LambdaNode, NotNode, OperationNode, StringNode, SymbolNode, Value, Location, Platform, Source, Main]
 import jvm.api.io.{ Files, Console };
 import magma.api.io.{ Path, IOError };
 import magma.api.collect.list.{ List, ListCollector };
@@ -21,10 +21,10 @@ export struct Main {
 	}
 	static def runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let initial = Main/*auto*/.createInitialStateToTuple(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
-		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, (current1: Tuple2<CompileState, Option<IOError>>, platform: Platform) => Main/*auto*/.runWithPlatformAndSources(children/*List<Path>*/, sourceDirectory/*Path*/, current1/*Tuple2<CompileState, Option<IOError>>*/, platform/*Platform*/)).right(/*auto*/);
+		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, (current1: Tuple2<CompileState, Option<IOError>>, platform: Platform) => Main/*auto*/.runWithPlatformAndSources(current1/*auto*/, platform/*Platform*/, sourceDirectory/*Path*/, children/*List<Path>*/)).right(/*auto*/);
 	}
-	static def runWithPlatformAndSources(children: List<Path>, sourceDirectory: Path, current1: Tuple2<CompileState, Option<IOError>>, platform: Platform): Tuple2<CompileState, Option<IOError>> {
-		return Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/).query(/*auto*/).foldWithInitial(current1/*Tuple2<CompileState, Option<IOError>>*/, (current: Tuple2<CompileState, Option<IOError>>, source1: Source) => Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source1/*auto*/));
+	static def runWithPlatformAndSources(initial: Tuple2<CompileState, Option<IOError>>, platform: Platform, root: Path, children: List<Path>): Tuple2<CompileState, Option<IOError>> {
+		return Main/*auto*/.findSources(children/*List<Path>*/, root/*Path*/).query(/*auto*/).foldWithInitial(Tuple2Impl<>(initial/*Tuple2<CompileState, Option<IOError>>*/.left(/*auto*/).clearDefinedTypes(/*auto*/), initial/*Tuple2<CompileState, Option<IOError>>*/.right(/*auto*/)), (current: Tuple2<CompileState, Option<IOError>>, source: Source) => Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source/*Source*/));
 	}
 	static def runWithPlatformAndSource(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source): Tuple2<CompileState, Option<IOError>> {
 		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
@@ -63,7 +63,7 @@ export struct Main {
 			}
 		}
 		let initial: Option<IOError> = None<IOError>(/*auto*/);
-		let ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*R*/, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
+		let ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
 			let target = targetParent/*auto*/.resolveChild(location/*auto*/.name(/*auto*/) + "." + extension/*&[I8]*/);
 			return ioErrorOption/*Option<IOError>*/.or(() => target/*auto*/.writeString(output/*auto*/.right(/*auto*/).get(extension/*&[I8]*/)));
 		});

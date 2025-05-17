@@ -28,4 +28,5 @@ export interface CompileState {
 	CompileState addFunction(&[I8] function);
 	List<&[I8]> findDefinedTypes();
 	CompileState defineType(&[I8] name);
+	CompileState clearDefinedTypes();
 }

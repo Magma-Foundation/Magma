@@ -150,6 +150,11 @@ public record ImmutableCompileState(
     }
 
     @Override
+    public CompileState clearDefinedTypes() {
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth, Lists.empty());
+    }
+
+    @Override
     public String join() {
         return this.structures + this.functions;
     }

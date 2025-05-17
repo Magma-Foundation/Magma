@@ -36,4 +36,5 @@ export interface CompileState {
 	addFunction(function: string): CompileState;
 	findDefinedTypes(): List<string>;
 	defineType(name: string): CompileState;
+	clearDefinedTypes(): CompileState;
 }

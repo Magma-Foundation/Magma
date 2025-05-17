@@ -95,6 +95,9 @@ export class ImmutableCompileState implements CompileState {
 	defineType(name: string): CompileState {
 		return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes.addLast(name/*string*/));
 	}
+	clearDefinedTypes(): CompileState {
+		return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, Lists/*auto*/.empty(/*auto*/));
+	}
 	join(): string {
 		return this/*auto*/.structures + this/*auto*/.functions;
 	}

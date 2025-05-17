@@ -99,6 +99,9 @@ List<&[I8]> findDefinedTypes() {
 CompileState defineType(&[I8] name) {
 	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes.addLast(name/*&[I8]*/));
 }
+CompileState clearDefinedTypes() {
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, Lists/*auto*/.empty(/*auto*/));
+}
 &[I8] join() {
 	return this/*auto*/.structures + this/*auto*/.functions;
 }

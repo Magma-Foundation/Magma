@@ -71,19 +71,19 @@ public final class Main {
     private static Option<IOError> runWithChildren(final List<Path> children, final Path sourceDirectory) {
         final var initial = Main.createInitialStateToTuple(Main.findSources(children, sourceDirectory));
         return Queries.fromArray(Platform.values())
-                .foldWithInitial(initial, (final Tuple2<CompileState, Option<IOError>> current1, final Platform platform) -> Main.runWithPlatformAndSources(children, sourceDirectory, current1, platform))
+                .foldWithInitial(initial, (final Tuple2<CompileState, Option<IOError>> current1, final Platform platform) -> Main.runWithPlatformAndSources(current1, platform, sourceDirectory, children))
                 .right();
     }
 
     private static Tuple2<CompileState, Option<IOError>> runWithPlatformAndSources(
-            final List<Path> children,
-            final Path sourceDirectory,
-            final Tuple2<CompileState, Option<IOError>> current1,
-            final Platform platform
+            final Tuple2<CompileState, Option<IOError>> initial,
+            final Platform platform,
+            final Path root,
+            final List<Path> children
     ) {
-        return Main.findSources(children, sourceDirectory)
+        return Main.findSources(children, root)
                 .query()
-                .foldWithInitial(current1, (final Tuple2<CompileState, Option<IOError>> current, final Source source1) -> Main.runWithPlatformAndSource(current.left(), current.right(), platform, source1));
+                .foldWithInitial(new Tuple2Impl<>(initial.left().clearDefinedTypes(), initial.right()), (final Tuple2<CompileState, Option<IOError>> current, final Source source) -> Main.runWithPlatformAndSource(current.left(), current.right(), platform, source));
     }
 
     private static Tuple2<CompileState, Option<IOError>> runWithPlatformAndSource(

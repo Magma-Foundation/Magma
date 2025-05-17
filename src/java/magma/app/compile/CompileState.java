@@ -66,4 +66,6 @@ public interface CompileState {
     List<String> findDefinedTypes();
 
     CompileState defineType(String name);
+
+    CompileState clearDefinedTypes();
 }
