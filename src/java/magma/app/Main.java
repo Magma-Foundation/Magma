@@ -1144,11 +1144,18 @@ public final class Main {
         }
         else {
             final var extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
-            final var infix1 = Platform.Magma == outputContentState.platform ? "struct " : infix;
+            final var infix1 = Main.retainStruct(infix, outputContentState);
 
             final var generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
         }
+    }
+
+    private static String retainStruct(final String infix, final CompileState outputContentState) {
+        if (Platform.Magma == outputContentState.platform) {
+            return "struct ";
+        }
+        return infix;
     }
 
     private static List<String> modifyModifiers0(final List<String> oldModifiers) {
@@ -1299,9 +1306,7 @@ public final class Main {
                     .collect(new Joiner(", "))
                     .orElse("");
 
-            final var newHeader = Platform.Magma == parametersState.platform
-                    ? header.addModifier("def").removeModifier("mut")
-                    : header;
+            final var newHeader = Main.retainDef(header, parametersState);
 
             if (newHeader.hasAnnotation("Actual")) {
                 final var headerGenerated = newHeader
@@ -1324,6 +1329,14 @@ public final class Main {
                 return new None<Tuple2<CompileState, String>>();
             });
         });
+    }
+
+    private static <S extends MethodHeader<S>> MethodHeader<S> retainDef(final MethodHeader<S> header, final CompileState parametersState) {
+        if (Platform.Magma == parametersState.platform) {
+            return header.addModifier("def").removeModifier("mut");
+        }
+
+        return header;
     }
 
     private static Tuple2<CompileState, List<Parameter>> parseParameters(final CompileState state, final String params) {
@@ -1860,7 +1873,7 @@ public final class Main {
         });
     }
 
-    private static List<String> modifyModifiers(final List<String> oldModifiers, Platform platform) {
+    private static List<String> modifyModifiers(final List<String> oldModifiers, final Platform platform) {
         final List<String> list = Main.retainFinal(oldModifiers, platform);
 
         if (oldModifiers.contains("static", Strings::equalsTo)) {
@@ -1870,8 +1883,8 @@ public final class Main {
         return list;
     }
 
-    private static List<String> retainFinal(final List<String> oldModifiers, Platform platform) {
-        if (oldModifiers.contains("final", Strings::equalsTo) || platform == Platform.TypeScript) {
+    private static List<String> retainFinal(final List<String> oldModifiers, final Platform platform) {
+        if (oldModifiers.contains("final", Strings::equalsTo) || Platform.TypeScript == platform) {
             return Lists.empty();
         }
 

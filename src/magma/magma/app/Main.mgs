@@ -946,10 +946,16 @@ export struct Main {
 		}
 		else {
 			let extendsString = maybeSuperType.map((mut inner: &[I8]) => " extends " + inner).orElse("");
-			let infix1 = /* Platform.Magma == outputContentState.platform ? "struct " : infix*/;
+			let infix1 = Main.retainStruct(infix, outputContentState);
 			let generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(outputContentState.append(generated), ""));
 		}
+	}
+	def static retainStruct(infix: &[I8], outputContentState: CompileState): &[I8] {
+		if (Platform.Magma === outputContentState.platform){
+			return "struct ";
+		}
+		return infix;
 	}
 	def static modifyModifiers0(oldModifiers: List<&[I8]>): List<&[I8]> {
 		if (oldModifiers.contains("public", Strings.equalsTo)){
@@ -1030,9 +1036,7 @@ export struct Main {
 			let parameters = parametersTuple.right();
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).orElse("");
-			let newHeader = /* Platform.Magma == parametersState.platform
-                    ? header.addModifier("def").removeModifier("mut")
-                    : header*/;
+			let newHeader = Main.retainDef(header, parametersState);
 			if (newHeader.hasAnnotation("Actual")){
 				let headerGenerated = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
 				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";\n"));
@@ -1048,6 +1052,12 @@ export struct Main {
 				return None<Tuple2<CompileState, &[I8]>>();
 			});
 		});
+	}
+	def static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
+		if (Platform.Magma === parametersState.platform){
+			return header.addModifier("def").removeModifier("mut");
+		}
+		return header;
 	}
 	def static parseParameters(state: CompileState, params: &[I8]): Tuple2<CompileState, List<Parameter>> {
 		return Main.parseValuesOrEmpty(state, params, (mut state1: CompileState, mut s: &[I8]) => Some<Tuple2<CompileState, Parameter>>(Main.parseParameterOrPlaceholder(state1, s)));
@@ -1420,15 +1430,15 @@ export struct Main {
 			return Some<Tuple2<CompileState, Definition>>(Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
 		});
 	}
-	def static modifyModifiers(oldModifiers: List<&[I8]>, mut platform: Platform): List<&[I8]> {
+	def static modifyModifiers(oldModifiers: List<&[I8]>, platform: Platform): List<&[I8]> {
 		let list: List<&[I8]> = Main.retainFinal(oldModifiers, platform);
 		if (oldModifiers.contains("static", Strings.equalsTo)){
 			return list.addLast("static");
 		}
 		return list;
 	}
-	def static retainFinal(oldModifiers: List<&[I8]>, mut platform: Platform): List<&[I8]> {
-		if (oldModifiers.contains("final", Strings.equalsTo) || platform === Platform.TypeScript){
+	def static retainFinal(oldModifiers: List<&[I8]>, platform: Platform): List<&[I8]> {
+		if (oldModifiers.contains("final", Strings.equalsTo) || Platform.TypeScript === platform){
 			return Lists.empty();
 		}
 		return Lists.of("mut");
