@@ -133,6 +133,7 @@ public final class Main {
         final var otherTuple = Main.compileAndWrite(state, source, input, platform);
         final var otherState = otherTuple.left();
         final var otherValue = otherTuple.right();
+
         return new Tuple2Impl<>(otherState, maybeError.or(() -> otherValue));
     }
 
@@ -142,7 +143,8 @@ public final class Main {
             final String input,
             final Platform platform
     ) {
-        final var initialized = state.withPlatform(platform)
+        final var initialized = state
+                .withPlatform(platform)
                 .withLocation(source.computeLocation());
 
         final var output = Main.compileRoot(initialized, source, input);
