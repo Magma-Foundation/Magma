@@ -545,7 +545,7 @@ public final class Main {
                 final String indent = compileState2.createIndent();
                 final CompileState exited = compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth();
                 final FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new Some<>(statementsTuple.right()));
-                final String generated = indent + sFunctionSegment.generate(parametersState.platform(), indent);
+                final String generated = sFunctionSegment.generate(parametersState.platform(), indent);
 
                 if (exited.isPlatform(Platform.Windows)) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(exited.addFunction(generated), ""));

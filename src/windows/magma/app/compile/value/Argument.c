@@ -1,3 +1,4 @@
 #include "./Argument.h"
-export interface Argument {Option<Value> toValue();
+export interface Argument {
+	Option<Value> toValue();
 }

@@ -1,2 +1,6 @@
-export struct Type {def generate(): &[I8];def isFunctional(): Bool;def isVar(): Bool;def generateBeforeName(): &[I8];
+export struct Type {
+	def generate(): &[I8];
+	def isFunctional(): Bool;
+	def isVar(): Bool;
+	def generateBeforeName(): &[I8];
 }

@@ -362,7 +362,7 @@ export class Main {
 				let indent: string = compileState2.createIndent();
 				let exited: CompileState = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
 				let sFunctionSegment: FunctionSegment<S> = new FunctionSegment<S>(newHeader, definitions, new Some<>(statementsTuple.right()));
-				let generated: string = indent + sFunctionSegment.generate(parametersState.platform(), indent);
+				let generated: string = sFunctionSegment.generate(parametersState.platform(), indent);
 				if (exited.isPlatform(Platform.Windows)) {
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(exited.addFunction(generated), ""));
 				}

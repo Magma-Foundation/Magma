@@ -1,5 +1,21 @@
 import magma.api.collect.Query;
 import magma.api.option.Option;
 import magma.api.Tuple2;
-export struct List<T> {def addLast(mut element: T): List<T>;def query(): Query<T>;def size(): I32;def subList(mut startInclusive: I32, mut endExclusive: I32): Option<List<T>>;def findLast(): Option<T>;def findFirst(): Option<T>;def find(mut index: I32): Option<T>;def queryWithIndices(): Query<Tuple2<I32, T>>;def addAll(mut others: List<T>): List<T>;def contains(mut element: T, mut equator: (arg0 : T, arg1 : T) => Bool): Bool;def queryReversed(): Query<T>;def addFirst(mut element: T): List<T>;def isEmpty(): Bool;def equalsTo(mut other: List<T>, mut equator: (arg0 : T, arg1 : T) => Bool): Bool;def removeValue(mut element: T, mut equator: (arg0 : T, arg1 : T) => Bool): List<T>;def removeLast(): Option<List<T>>;
+export struct List<T> {
+	def addLast(mut element: T): List<T>;
+	def query(): Query<T>;
+	def size(): I32;
+	def subList(mut startInclusive: I32, mut endExclusive: I32): Option<List<T>>;
+	def findLast(): Option<T>;
+	def findFirst(): Option<T>;
+	def find(mut index: I32): Option<T>;
+	def queryWithIndices(): Query<Tuple2<I32, T>>;
+	def addAll(mut others: List<T>): List<T>;
+	def contains(mut element: T, mut equator: (arg0 : T, arg1 : T) => Bool): Bool;
+	def queryReversed(): Query<T>;
+	def addFirst(mut element: T): List<T>;
+	def isEmpty(): Bool;
+	def equalsTo(mut other: List<T>, mut equator: (arg0 : T, arg1 : T) => Bool): Bool;
+	def removeValue(mut element: T, mut equator: (arg0 : T, arg1 : T) => Bool): List<T>;
+	def removeLast(): Option<List<T>>;
 }

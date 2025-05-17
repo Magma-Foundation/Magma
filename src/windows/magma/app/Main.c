@@ -314,7 +314,7 @@ static Option<Tuple2<CompileState, &[I8]>> compileMethodWithBeforeParams(Compile
 			&[I8] indent = compileState2.createIndent();
 			CompileState exited = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
 			FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new Some<>(statementsTuple.right()));
-			&[I8] generated = indent + sFunctionSegment.generate(parametersState.platform(), indent);
+			&[I8] generated = sFunctionSegment.generate(parametersState.platform(), indent);
 			if (exited.isPlatform(Platform.Windows)) {
 				return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(exited.addFunction(generated), ""));
 			}

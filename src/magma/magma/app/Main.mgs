@@ -362,7 +362,7 @@ export struct Main {
 				let indent: &[I8] = compileState2.createIndent();
 				let exited: CompileState = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
 				let sFunctionSegment: FunctionSegment<S> = FunctionSegment<S>(newHeader, definitions, Some<>(statementsTuple.right()));
-				let generated: &[I8] = indent + sFunctionSegment.generate(parametersState.platform(), indent);
+				let generated: &[I8] = sFunctionSegment.generate(parametersState.platform(), indent);
 				if (exited.isPlatform(Platform.Windows)) {
 					return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(exited.addFunction(generated), ""));
 				}

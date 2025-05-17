@@ -1,5 +1,7 @@
 import magma.app.io.Platform;
 import magma.app.compile.define.Definition;
 import magma.api.option.Option;
-export struct Parameter {def generate(mut platform: Platform): &[I8];def asDefinition(): Option<Definition>;
+export struct Parameter {
+	def generate(mut platform: Platform): &[I8];
+	def asDefinition(): Option<Definition>;
 }

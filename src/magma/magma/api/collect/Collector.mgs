@@ -1,2 +1,4 @@
-export struct Collector<T, C> {def createInitial(): C;def fold(mut current: C, mut element: T): C;
+export struct Collector<T, C> {
+	def createInitial(): C;
+	def fold(mut current: C, mut element: T): C;
 }

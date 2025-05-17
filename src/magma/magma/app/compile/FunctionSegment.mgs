@@ -1,0 +1,19 @@
+import magma.app.compile.define.FunctionHeader;
+import magma.app.compile.define.Definition;
+import magma.api.collect.list.List;
+import magma.api.option.Option;
+import magma.app.io.Platform;
+export struct FunctionSegment<S extends FunctionHeader<S>> {
+	mut header: FunctionHeader<S>;
+	mut definitions: List<Definition>;
+	mut maybeContent: Option<&[I8]>;
+	constructor (mut header: FunctionHeader<S>, mut definitions: List<Definition>, mut maybeContent: Option<&[I8]>) {
+		this.header = header;
+		this.definitions = definitions;
+		this.maybeContent = maybeContent;
+	}
+	def generate(platform: Platform, indent: &[I8]): &[I8] {
+		let content: &[I8] = this.maybeContent().map((mut inner: &[I8]) => " {" + inner + indent + "}").orElse(";");
+		return indent + this.header.generateWithDefinitions(platform, this.definitions()) + content;
+	}
+}

@@ -2,7 +2,6 @@ package magma.app.compile;
 
 import magma.api.collect.list.List;
 import magma.api.option.Option;
-import magma.api.option.Some;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.FunctionHeader;
 import magma.app.io.Platform;
@@ -17,6 +16,6 @@ public record FunctionSegment<S extends FunctionHeader<S>>(
                 .map((String inner) -> " {" + inner + indent + "}")
                 .orElse(";");
 
-        return this.header.generateWithDefinitions(platform, this.definitions()) + content;
+        return indent + this.header.generateWithDefinitions(platform, this.definitions()) + content;
     }
 }
