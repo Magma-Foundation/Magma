@@ -141,7 +141,8 @@ class CompileState {
 	definitions: List<Definition>;
 	maybeLocation: Option<Location>;
 	sources: List<Source>;
-	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>) {
+	platform: Platform;
+	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
@@ -149,9 +150,10 @@ class CompileState {
 		this.definitions = definitions;
 		this.maybeLocation = maybeLocation;
 		this.sources = sources;
+		this.platform = platform;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty());
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
 	}
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
@@ -173,37 +175,37 @@ class CompileState {
 			return this;
 		}
 		let importString = new Import(stringList, child);
-		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	withLocation(namespace: Location): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	pushStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
 	}
 	resolve(name: string): Option<Type> {
 		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name, name)).map((definition1: Definition) => definition1.type).next();
 	}
 	clearImports(): CompileState {
-		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	clearOutput(): CompileState {
-		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	addSource(source: Source): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source));
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
 	}
 	findSource(name: string): Option<Source> {
 		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
@@ -215,10 +217,13 @@ class CompileState {
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 	popStructureName(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	mapLocation(mapper: (arg0 : Location) => Location): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
+	}
+	withPlatform(platform: Platform): CompileState {
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
 	}
 }
 class Joiner implements Collector<string, Option<string>> {
@@ -630,6 +635,16 @@ class ArrayType implements Type {
 		return "";
 	}
 }
+class Platform {
+	static TypeScript: Platform = new Platform("node", "ts");
+	static Magma: Platform = new Platform("magma", "mgs");
+	root: string;
+	extension: string;
+	constructor (root: string, extension: string) {
+		this.root = root;
+		this.extension = extension;
+	}
+}
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
@@ -674,16 +689,18 @@ export class Main {
 		return Main.runWithSource(state, source);
 	}
 	static runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
-		return source.read().match((input: string) => Main.compileAndWrite(state, source, input), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
+		return source.read().match((input: string) => Main.getCompileStateOptionTuple2(state, source, input), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
 	}
-	static compileAndWrite(state: CompileState, source: Source, input: string): Tuple2<CompileState, Option<IOError>> {
-		let output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
-		let ts = Main.getCompileStateOptionTuple2(output, "ts");
-		return Main.getCompileStateOptionTuple2(new Tuple2Impl<>(ts.left(), output.right()), "magma");
+	static getCompileStateOptionTuple2(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Option<IOError>> {
+		let result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+		let compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
+		return new Tuple2Impl<>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
 	}
-	static getCompileStateOptionTuple2(output: Tuple2Impl<CompileState, string>, extension: string): Tuple2Impl<CompileState, Option<IOError>> {
+	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Tuple2<CompileState, Option<IOError>> {
+		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
+		let output = Main.compileRoot(state1, source, input);
 		let location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
-		let targetDirectory = Files.get(".", "src", extension);
+		let targetDirectory = Files.get(".", "src", platform.root);
 		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
 		if (!targetParent.exists()){
 			let maybeError = targetParent.createDirectories();
@@ -691,7 +708,7 @@ export class Main {
 				return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
 			}
 		}
-		let target = targetParent.resolveChild(location.name + "." + extension);
+		let target = targetParent.resolveChild(location.name + "." + platform.extension);
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {

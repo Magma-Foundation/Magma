@@ -127,10 +127,11 @@ public final class Main {
             int depth,
             List<Definition> definitions,
             Option<Location> maybeLocation,
-            List<Source> sources
+            List<Source> sources,
+            Platform platform
     ) {
         private static CompileState createInitial() {
-            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty());
+            return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
         }
 
         private boolean isLastWithin(String name) {
@@ -166,31 +167,31 @@ public final class Main {
             }
 
             var importString = new Import(stringList, child);
-            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         private CompileState withLocation(Location namespace) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
         }
 
         CompileState append(String element) {
-            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         CompileState pushStructureName(String name) {
-            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         CompileState enterDepth() {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         CompileState exitDepth() {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         CompileState defineAll(List<Definition> definitions) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
         }
 
         Option<Type> resolve(String name) {
@@ -201,15 +202,15 @@ public final class Main {
         }
 
         CompileState clearImports() {
-            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         CompileState clearOutput() {
-            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         CompileState addSource(Source source) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source));
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
         }
 
         Option<Source> findSource(String name) {
@@ -229,11 +230,15 @@ public final class Main {
         }
 
         CompileState popStructureName() {
-            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
         public CompileState mapLocation(Function<Location, Location> mapper) {
-            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources);
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
+        }
+
+        public CompileState withPlatform(Platform platform) {
+            return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
         }
     }
 
@@ -771,19 +776,22 @@ public final class Main {
 
     private static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
         return source.read().match(
-                (String input) -> Main.compileAndWrite(state, source, input),
+                (String input) -> Main.getCompileStateOptionTuple2(state, source, input),
                 (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input) {
-        var output = Main.compileRoot(state.withLocation(source.computeLocation()), source, input);
-        var ts = Main.getCompileStateOptionTuple2(output, "ts");
-        return Main.getCompileStateOptionTuple2(new Tuple2Impl<>(ts.left(), output.right()), "magma");
+    private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(CompileState state, Source source, String input) {
+        var result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
+        var compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
+        return new Tuple2Impl<>(compileStateOptionTuple2.left(), result.right().or(() -> compileStateOptionTuple2.right()));
     }
 
-    private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(Tuple2Impl<CompileState, String> output, String extension) {
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, String input, Platform platform) {
+        var state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
+        var output = Main.compileRoot(state1, source, input);
+
         var location = output.left().maybeLocation.orElse(new Location(Lists.empty(), ""));
-        var targetDirectory = Files.get(".", "src", extension);
+        var targetDirectory = Files.get(".", "src", platform.root);
         var targetParent = targetDirectory.resolveChildSegments(location.namespace);
         if (!targetParent.exists()) {
             var maybeError = targetParent.createDirectories();
@@ -792,7 +800,7 @@ public final class Main {
             }
         }
 
-        var target = targetParent.resolveChild(location.name + "." + extension);
+        var target = targetParent.resolveChild(location.name + "." + platform.extension);
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
     }
 
@@ -2095,6 +2103,18 @@ public final class Main {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
+    }
+
+    private enum Platform {
+        TypeScript("node", "ts"),
+        Magma("magma", "mgs");
+        String root;
+        String extension;
+
+        Platform(String root, String extension) {
+            this.root = root;
+            this.extension = extension;
+        }
     }
 
     private enum Primitive implements Type {
