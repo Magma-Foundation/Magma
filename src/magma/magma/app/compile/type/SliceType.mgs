@@ -1,0 +1,19 @@
+import magma.api.Type;
+export struct SliceType implements Type {
+	mut type: Type;
+	constructor (mut type: Type) {
+		this.type = type;
+	}
+	def generate(): &[I8] {
+		return "&[" + this.type.generate() + "]";
+	}
+	def isFunctional(): Bool {
+		return false;
+	}
+	def isVar(): Bool {
+		return false;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+}

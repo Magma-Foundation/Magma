@@ -1,0 +1,19 @@
+import magma.api.Type;
+export struct ArrayType implements Type {
+	mut child: Type;
+	constructor (mut child: Type) {
+		this.child = child;
+	}
+	def generate(): &[I8] {
+		return this.child.generate() + "[]";
+	}
+	def isFunctional(): Bool {
+		return false;
+	}
+	def isVar(): Bool {
+		return false;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+}

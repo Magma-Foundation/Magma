@@ -7,10 +7,10 @@ import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.app.Definition;
-import magma.app.Location;
-import magma.app.Platform;
-import magma.app.Source;
+import magma.app.compile.define.Definition;
+import magma.app.io.Location;
+import magma.app.io.Platform;
+import magma.app.io.Source;
 
 import java.util.function.Function;
 
@@ -108,7 +108,7 @@ public record CompileState(
         return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
     }
 
-    Option<Source> findSource(final String name) {
+    private Option<Source> findSource(final String name) {
         return this.sources.query()
                 .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
                 .next();

@@ -10,7 +10,7 @@ public record Joiner(String delimiter) implements Collector<String, Option<Strin
         return new Joiner("");
     }
 
-    public static String joinOrEmpty(final List<String> items, String delimiter, String prefix, String suffix) {
+    public static String joinOrEmpty(final List<String> items, final String delimiter, final String prefix, final String suffix) {
         return items.query()
                 .collect(new Joiner(delimiter))
                 .map((String inner) -> prefix + inner + suffix)

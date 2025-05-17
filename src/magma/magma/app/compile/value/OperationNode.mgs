@@ -1,0 +1,32 @@
+import magma.app.compile.value.Value;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.option.None;
+import magma.api.Type;
+import magma.app.compile.CompileState;
+import magma.app.compile.type.PrimitiveType;
+export struct OperationNode implements Value {
+	mut left: Value;
+	mut targetInfix: &[I8];
+	mut right: Value;
+	constructor (mut left: Value, mut targetInfix: &[I8], mut right: Value) {
+		this.left = left;
+		this.targetInfix = targetInfix;
+		this.right = right;
+	}
+	def generate(): &[I8] {
+		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
+	}
+	def toValue(): Option<Value> {
+		return Some<Value>(this);
+	}
+	def findChild(): Option<Value> {
+		return None<Value>();
+	}
+	def resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown;
+	}
+	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+		return None<&[I8]>();
+	}
+}

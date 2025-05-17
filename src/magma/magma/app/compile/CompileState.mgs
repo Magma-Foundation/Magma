@@ -1,10 +1,10 @@
 import magma.app.compile.Import;
 import magma.api.collect.list.List;
-import magma.app.Definition;
-import magma.app.Location;
+import magma.app.compile.define.Definition;
+import magma.app.io.Location;
 import magma.api.option.Option;
-import magma.app.Source;
-import magma.app.Platform;
+import magma.app.io.Source;
+import magma.app.io.Platform;
 import jvm.api.collect.list.Lists;
 import magma.api.option.None;
 import jvm.api.text.Strings;

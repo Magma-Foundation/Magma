@@ -1,0 +1,41 @@
+import magma.app.Main;
+import magma.app.compile.value.Value;
+import magma.api.option.Option;
+import magma.api.option.None;
+import magma.app.compile.define.Definition;
+import magma.api.Type;
+import magma.app.compile.CompileState;
+import magma.app.compile.type.PrimitiveType;
+export struct Placeholder {
+	mut input: &[I8];
+	constructor (mut input: &[I8]) {
+		this.input = input;
+	}
+	def generate(): &[I8] {
+		return Main.generatePlaceholder(this.input);
+	}
+	def isFunctional(): Bool {
+		return false;
+	}
+	def findChild(): Option<Value> {
+		return None<Value>();
+	}
+	def asDefinition(): Option<Definition> {
+		return None<Definition>();
+	}
+	def toValue(): Option<Value> {
+		return None<Value>();
+	}
+	def resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown;
+	}
+	def isVar(): Bool {
+		return false;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+		return None<&[I8]>();
+	}
+}

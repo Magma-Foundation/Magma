@@ -5,48 +5,48 @@ import { IOError } from "../../magma/api/io/IOError";
 import { Some } from "../../magma/api/option/Some";
 import { Console } from "../../jvm/api/io/Console";
 import { Option } from "../../magma/api/option/Option";
-import { Source } from "../../magma/app/Source";
+import { Source } from "../../magma/app/io/Source";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { None } from "../../magma/api/option/None";
-import { Platform } from "../../magma/app/Platform";
-import { Location } from "../../magma/app/Location";
+import { Platform } from "../../magma/app/io/Platform";
+import { Location } from "../../magma/app/io/Location";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Queries } from "../../magma/api/collect/Queries";
 import { Import } from "../../magma/app/compile/Import";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Strings } from "../../jvm/api/text/Strings";
-import { DivideState } from "../../magma/app/DivideState";
+import { DivideState } from "../../magma/app/compile/text/DivideState";
 import { Type } from "../../magma/api/Type";
-import { Definition } from "../../magma/app/Definition";
-import { Parameter } from "../../magma/app/Parameter";
-import { ConstructorHeader } from "../../magma/app/compile/ConstructorHeader";
-import { MethodHeader } from "../../magma/app/MethodHeader";
-import { Value } from "../../magma/app/Value";
-import { ConstructionCaller } from "../../magma/app/ConstructionCaller";
-import { Caller } from "../../magma/app/compile/Caller";
-import { Argument } from "../../magma/app/compile/Argument";
-import { Invokable } from "../../magma/app/Invokable";
-import { Placeholder } from "../../magma/app/compile/Placeholder";
-import { StringValue } from "../../magma/app/StringValue";
-import { Not } from "../../magma/app/Not";
-import { Lambda } from "../../magma/app/Lambda";
-import { Access } from "../../magma/app/Access";
-import { Operation } from "../../magma/app/Operation";
-import { SymbolNode } from "../../magma/app/SymbolNode";
+import { Definition } from "../../magma/app/compile/define/Definition";
+import { Parameter } from "../../magma/app/compile/define/Parameter";
+import { ConstructorHeader } from "../../magma/app/compile/value/ConstructorHeader";
+import { FunctionHeader } from "../../magma/app/compile/define/FunctionHeader";
+import { Value } from "../../magma/app/compile/value/Value";
+import { ConstructionCaller } from "../../magma/app/compile/value/ConstructionCaller";
+import { Caller } from "../../magma/app/compile/value/Caller";
+import { Argument } from "../../magma/app/compile/value/Argument";
+import { InvokableNode } from "../../magma/app/compile/value/InvokableNode";
+import { Placeholder } from "../../magma/app/compile/text/Placeholder";
+import { StringNode } from "../../magma/app/compile/value/StringNode";
+import { NotNode } from "../../magma/app/compile/value/NotNode";
+import { LambdaNode } from "../../magma/app/compile/value/LambdaNode";
+import { AccessNode } from "../../magma/app/compile/value/AccessNode";
+import { OperationNode } from "../../magma/app/compile/value/OperationNode";
+import { SymbolNode } from "../../magma/app/compile/value/SymbolNode";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
-import { Whitespace } from "../../magma/app/Whitespace";
-import { ArrayType } from "../../magma/app/ArrayType";
-import { VarArgs } from "../../magma/app/VarArgs";
-import { Primitive } from "../../magma/app/Primitive";
-import { Slice } from "../../magma/app/Slice";
-import { BooleanType } from "../../magma/app/BooleanType";
-import { Generic } from "../../magma/app/Generic";
-import { FunctionType } from "../../magma/app/FunctionType";
+import { Whitespace } from "../../magma/app/compile/text/Whitespace";
+import { ArrayType } from "../../magma/app/compile/type/ArrayType";
+import { VariadicType } from "../../magma/app/compile/type/VariadicType";
+import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
+import { SliceType } from "../../magma/app/compile/type/SliceType";
+import { BooleanType } from "../../magma/app/compile/type/BooleanType";
+import { TemplateType } from "../../magma/app/compile/type/TemplateType";
+import { FunctionType } from "../../magma/app/compile/type/FunctionType";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
@@ -103,9 +103,9 @@ export class Main {
 		let entries = new HashMap<string, string>();
 		let platform = state.platform();
 		if (Platform.Windows === platform) {
-			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
+			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
 			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
+			/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
 			/*entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain)*/;
@@ -338,7 +338,7 @@ export class Main {
 			}).or(() => Main.parseDefinition(state, beforeParams).flatMap((tuple: Tuple2<CompileState, Definition>) => Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)));
 		});
 	}
-	static compileMethodWithBeforeParams<S extends MethodHeader<S>>(state: CompileState, header: MethodHeader<S>, withParams: string): Option<Tuple2<CompileState, string>> {
+	static compileMethodWithBeforeParams<S extends FunctionHeader<S>>(state: CompileState, header: FunctionHeader<S>, withParams: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(withParams, ")", (params: string, afterParams: string) => {
 			let parametersTuple = Main.parseParameters(state, params);
 			let parametersState = parametersTuple.left();
@@ -362,7 +362,7 @@ export class Main {
 			});
 		});
 	}
-	static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
+	static retainDef<S extends FunctionHeader<S>>(header: FunctionHeader<S>, parametersState: CompileState): FunctionHeader<S> {
 		if (Platform.Magma === parametersState.platform()) {
 			return header.addModifier("def").removeModifier("mut");
 		}
@@ -507,7 +507,7 @@ export class Main {
 			let argsState = argsTuple.left();
 			let args = Main.retain(argsTuple.right(), (argument: Argument) => argument.toValue());
 			let newCaller = Main.transformCaller(argsState, oldCaller);
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new Invokable(newCaller, args)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new InvokableNode(newCaller, args)));
 		});
 	}
 	static transformCaller(state: CompileState, oldCaller: Caller): Caller {
@@ -531,9 +531,7 @@ export class Main {
 	static compileAssignment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(input, "=", (destination: string, source: string) => {
 			let sourceTuple = Main.compileValueOrPlaceholder(state, source);
-			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => {
-				return new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().addModifier("let").generate());
-			})).orElseGet(() => new Tuple2Impl<CompileState, string>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().addModifier("let").generate()))).orElseGet(() => new Tuple2Impl<CompileState, string>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 		});
 	}
@@ -549,7 +547,7 @@ export class Main {
 	static createTextRule(slice: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: string) => {
 			let stripped = Strings.strip(input1);
-			return Main.compilePrefix(stripped, slice, (s: string) => Main.compileSuffix(s, slice, (s1: string) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1)))));
+			return Main.compilePrefix(stripped, slice, (s: string) => Main.compileSuffix(s, slice, (s1: string) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringNode(s1)))));
 		};
 	}
 	static parseNot(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
@@ -557,7 +555,7 @@ export class Main {
 			let childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
 			let childState = childTuple.left();
 			let child = "!" + childTuple.right();
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new Not(child)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new NotNode(child)));
 		});
 	}
 	static parseLambda(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
@@ -577,7 +575,7 @@ export class Main {
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
 	static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
-		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)));
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new LambdaNode(paramNames, content)));
 	}
 	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);
@@ -591,7 +589,7 @@ export class Main {
 			return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
 				let childState = childTuple.left();
 				let child = childTuple.right();
-				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new Access(child, property)));
+				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new AccessNode(child, property)));
 			});
 		});
 	}
@@ -599,7 +597,7 @@ export class Main {
 		return (state1: CompileState, input1: string) => Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), (divisions: List<string>) => Main.selectFirst(divisions, sourceInfix)), (leftString: string, rightString: string) => Main.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => Main.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 			let left = leftTuple.right();
 			let right = rightTuple.right();
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new OperationNode(left, targetInfix, right)));
 		})));
 	}
 	static selectFirst(divisions: List<string>, delimiter: string): Option<Tuple2<string, string>> {
@@ -772,7 +770,7 @@ export class Main {
 		let stripped = Strings.strip(input);
 		return Main.compileSuffix(stripped, "...", (s: string) => {
 			let child = Main.parseTypeOrPlaceholder(state, s);
-			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VarArgs(child.right())));
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())));
 		});
 	}
 	static parseSymbolType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
@@ -789,36 +787,36 @@ export class Main {
 		let stripped = Strings.strip(input);
 		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
 			if (Platform.TypeScript === platform) {
-				return new Some<Type>(Primitive.String);
+				return new Some<Type>(PrimitiveType.String);
 			}
 			else {
-				return new Some<Type>(Primitive.I8);
+				return new Some<Type>(PrimitiveType.I8);
 			}
 		}
 		if (Strings.equalsTo("String", stripped)) {
 			if (Platform.TypeScript === platform) {
-				return new Some<Type>(Primitive.String);
+				return new Some<Type>(PrimitiveType.String);
 			}
 			else {
-				return new Some<Type>(new Slice(Primitive.I8));
+				return new Some<Type>(new SliceType(PrimitiveType.I8));
 			}
 		}
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
 			if (Platform.Magma === platform) {
-				return new Some<Type>(Primitive.I32);
+				return new Some<Type>(PrimitiveType.I32);
 			}
 			else {
-				return new Some<Type>(Primitive.Number);
+				return new Some<Type>(PrimitiveType.Number);
 			}
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
 			return new Some<Type>(new BooleanType(platform));
 		}
 		if (Strings.equalsTo("var", stripped)) {
-			return new Some<Type>(Primitive.Var);
+			return new Some<Type>(PrimitiveType.Var);
 		}
 		if (Strings.equalsTo("void", stripped)) {
-			return new Some<Type>(Primitive.Void);
+			return new Some<Type>(PrimitiveType.Void);
 		}
 		return new None<Type>();
 	}
@@ -830,7 +828,7 @@ export class Main {
 			let base = Strings.strip(baseString);
 			return Main.assembleFunctionType(argsState, base, args).or(() => {
 				let compileState = argsState.addResolvedImportFromCache(base);
-				return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
+				return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
 			});
 		}));
 	}

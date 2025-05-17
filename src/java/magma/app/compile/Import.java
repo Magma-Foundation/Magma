@@ -2,7 +2,7 @@ package magma.app.compile;
 
 import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
-import magma.app.Platform;
+import magma.app.io.Platform;
 
 public record Import(List<String> namespace, String child) {
     public String generate(final Platform platform) {

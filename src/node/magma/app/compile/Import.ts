@@ -1,5 +1,5 @@
 import { List } from "../../../magma/api/collect/list/List";
-import { Platform } from "../../../magma/app/Platform";
+import { Platform } from "../../../magma/app/io/Platform";
 import { Joiner } from "../../../magma/api/collect/Joiner";
 export class Import {
 	namespace: List<string>;

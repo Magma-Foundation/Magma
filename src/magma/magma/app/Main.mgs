@@ -5,48 +5,48 @@ import magma.api.io.IOError;
 import magma.api.option.Some;
 import jvm.api.io.Console;
 import magma.api.option.Option;
-import magma.app.Source;
+import magma.app.io.Source;
 import magma.api.collect.list.ListCollector;
 import magma.app.compile.CompileState;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.option.None;
-import magma.app.Platform;
-import magma.app.Location;
+import magma.app.io.Platform;
+import magma.app.io.Location;
 import jvm.api.collect.list.Lists;
 import magma.api.collect.Queries;
 import magma.app.compile.Import;
 import magma.api.collect.Joiner;
 import jvm.api.text.Strings;
-import magma.app.DivideState;
+import magma.app.compile.text.DivideState;
 import magma.api.Type;
-import magma.app.Definition;
-import magma.app.Parameter;
-import magma.app.compile.ConstructorHeader;
-import magma.app.MethodHeader;
-import magma.app.Value;
-import magma.app.ConstructionCaller;
-import magma.app.compile.Caller;
-import magma.app.compile.Argument;
-import magma.app.Invokable;
-import magma.app.compile.Placeholder;
-import magma.app.StringValue;
-import magma.app.Not;
-import magma.app.Lambda;
-import magma.app.Access;
-import magma.app.Operation;
-import magma.app.SymbolNode;
+import magma.app.compile.define.Definition;
+import magma.app.compile.define.Parameter;
+import magma.app.compile.value.ConstructorHeader;
+import magma.app.compile.define.FunctionHeader;
+import magma.app.compile.value.Value;
+import magma.app.compile.value.ConstructionCaller;
+import magma.app.compile.value.Caller;
+import magma.app.compile.value.Argument;
+import magma.app.compile.value.InvokableNode;
+import magma.app.compile.text.Placeholder;
+import magma.app.compile.value.StringNode;
+import magma.app.compile.value.NotNode;
+import magma.app.compile.value.LambdaNode;
+import magma.app.compile.value.AccessNode;
+import magma.app.compile.value.OperationNode;
+import magma.app.compile.value.SymbolNode;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import jvm.api.text.Characters;
-import magma.app.Whitespace;
-import magma.app.ArrayType;
-import magma.app.VarArgs;
-import magma.app.Primitive;
-import magma.app.Slice;
-import magma.app.BooleanType;
-import magma.app.Generic;
-import magma.app.FunctionType;
+import magma.app.compile.text.Whitespace;
+import magma.app.compile.type.ArrayType;
+import magma.app.compile.type.VariadicType;
+import magma.app.compile.type.PrimitiveType;
+import magma.app.compile.type.SliceType;
+import magma.app.compile.type.BooleanType;
+import magma.app.compile.type.TemplateType;
+import magma.app.compile.type.FunctionType;
 export struct Main {
 	def static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
@@ -103,9 +103,9 @@ export struct Main {
 		let entries = HashMap<&[I8], &[I8]>();
 		let platform = state.platform();
 		if (Platform.Windows === platform) {
-			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
+			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
 			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
+			/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
 			/*entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain)*/;
@@ -338,7 +338,7 @@ export struct Main {
 			}).or(() => Main.parseDefinition(state, beforeParams).flatMap((mut tuple: Tuple2<CompileState, Definition>) => Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)));
 		});
 	}
-	def static compileMethodWithBeforeParams<S extends MethodHeader<S>>(state: CompileState, header: MethodHeader<S>, withParams: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
+	def static compileMethodWithBeforeParams<S extends FunctionHeader<S>>(state: CompileState, header: FunctionHeader<S>, withParams: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileFirst(withParams, ")", (params: &[I8], afterParams: &[I8]) => {
 			let parametersTuple = Main.parseParameters(state, params);
 			let parametersState = parametersTuple.left();
@@ -362,7 +362,7 @@ export struct Main {
 			});
 		});
 	}
-	def static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
+	def static retainDef<S extends FunctionHeader<S>>(header: FunctionHeader<S>, parametersState: CompileState): FunctionHeader<S> {
 		if (Platform.Magma === parametersState.platform()) {
 			return header.addModifier("def").removeModifier("mut");
 		}
@@ -507,7 +507,7 @@ export struct Main {
 			let argsState = argsTuple.left();
 			let args = Main.retain(argsTuple.right(), (mut argument: Argument) => argument.toValue());
 			let newCaller = Main.transformCaller(argsState, oldCaller);
-			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(argsState, Invokable(newCaller, args)));
+			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(argsState, InvokableNode(newCaller, args)));
 		});
 	}
 	def static transformCaller(state: CompileState, oldCaller: Caller): Caller {
@@ -531,9 +531,7 @@ export struct Main {
 	def static compileAssignment(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileFirst(input, "=", (destination: &[I8], source: &[I8]) => {
 			let sourceTuple = Main.compileValueOrPlaceholder(state, source);
-			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => {
-				return Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate());
-			})).orElseGet(() => Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate()))).orElseGet(() => Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 		});
 	}
@@ -549,7 +547,7 @@ export struct Main {
 	def static createTextRule(slice: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: &[I8]) => {
 			let stripped = Strings.strip(input1);
-			return Main.compilePrefix(stripped, slice, (s: &[I8]) => Main.compileSuffix(s, slice, (mut s1: &[I8]) => Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(state1, StringValue(s1)))));
+			return Main.compilePrefix(stripped, slice, (s: &[I8]) => Main.compileSuffix(s, slice, (mut s1: &[I8]) => Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(state1, StringNode(s1)))));
 		};
 	}
 	def static parseNot(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
@@ -557,7 +555,7 @@ export struct Main {
 			let childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
 			let childState = childTuple.left();
 			let child = "!" + childTuple.right();
-			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(childState, Not(child)));
+			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(childState, NotNode(child)));
 		});
 	}
 	def static parseLambda(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
@@ -577,7 +575,7 @@ export struct Main {
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
 	def static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: &[I8]): Option<Tuple2<CompileState, Value>> {
-		return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(exited, Lambda(paramNames, content)));
+		return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(exited, LambdaNode(paramNames, content)));
 	}
 	def static createOperatorRule(infix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);
@@ -591,7 +589,7 @@ export struct Main {
 			return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
 				let childState = childTuple.left();
 				let child = childTuple.right();
-				return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(childState, Access(child, property)));
+				return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(childState, AccessNode(child, property)));
 			});
 		});
 	}
@@ -599,7 +597,7 @@ export struct Main {
 		return (state1: CompileState, input1: &[I8]) => Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), (mut divisions: List<&[I8]>) => Main.selectFirst(divisions, sourceInfix)), (leftString: &[I8], rightString: &[I8]) => Main.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => Main.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 			let left = leftTuple.right();
 			let right = rightTuple.right();
-			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(rightTuple.left(), Operation(left, targetInfix, right)));
+			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(rightTuple.left(), OperationNode(left, targetInfix, right)));
 		})));
 	}
 	def static selectFirst(divisions: List<&[I8]>, delimiter: &[I8]): Option<Tuple2<&[I8], &[I8]>> {
@@ -772,7 +770,7 @@ export struct Main {
 		let stripped = Strings.strip(input);
 		return Main.compileSuffix(stripped, "...", (s: &[I8]) => {
 			let child = Main.parseTypeOrPlaceholder(state, s);
-			return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(child.left(), VarArgs(child.right())));
+			return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(child.left(), VariadicType(child.right())));
 		});
 	}
 	def static parseSymbolType(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
@@ -789,36 +787,36 @@ export struct Main {
 		let stripped = Strings.strip(input);
 		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
 			if (Platform.TypeScript === platform) {
-				return Some<Type>(Primitive.String);
+				return Some<Type>(PrimitiveType.String);
 			}
 			else {
-				return Some<Type>(Primitive.I8);
+				return Some<Type>(PrimitiveType.I8);
 			}
 		}
 		if (Strings.equalsTo("String", stripped)) {
 			if (Platform.TypeScript === platform) {
-				return Some<Type>(Primitive.String);
+				return Some<Type>(PrimitiveType.String);
 			}
 			else {
-				return Some<Type>(Slice(Primitive.I8));
+				return Some<Type>(SliceType(PrimitiveType.I8));
 			}
 		}
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
 			if (Platform.Magma === platform) {
-				return Some<Type>(Primitive.I32);
+				return Some<Type>(PrimitiveType.I32);
 			}
 			else {
-				return Some<Type>(Primitive.Number);
+				return Some<Type>(PrimitiveType.Number);
 			}
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
 			return Some<Type>(BooleanType(platform));
 		}
 		if (Strings.equalsTo("var", stripped)) {
-			return Some<Type>(Primitive.Var);
+			return Some<Type>(PrimitiveType.Var);
 		}
 		if (Strings.equalsTo("void", stripped)) {
-			return Some<Type>(Primitive.Void);
+			return Some<Type>(PrimitiveType.Void);
 		}
 		return None<Type>();
 	}
@@ -830,7 +828,7 @@ export struct Main {
 			let base = Strings.strip(baseString);
 			return Main.assembleFunctionType(argsState, base, args).or(() => {
 				let compileState = argsState.addResolvedImportFromCache(base);
-				return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(compileState, Generic(base, args)));
+				return Some<Tuple2<CompileState, Type>>(Tuple2Impl<CompileState, Type>(compileState, TemplateType(base, args)));
 			});
 		}));
 	}

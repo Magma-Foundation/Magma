@@ -1,0 +1,12 @@
+import magma.app.compile.define.Parameter;
+import magma.app.compile.define.Definition;
+import magma.api.option.Option;
+import magma.api.option.None;
+export struct Whitespace implements Parameter {
+	def generate(): &[I8] {
+		return "";
+	}
+	def asDefinition(): Option<Definition> {
+		return None<Definition>();
+	}
+}

@@ -1,0 +1,22 @@
+import magma.app.compile.value.Caller;
+import magma.app.io.Platform;
+import magma.app.compile.value.Value;
+import magma.api.option.Option;
+import magma.api.option.None;
+export struct ConstructionCaller implements Caller {
+	mut right: &[I8];
+	mut platform: Platform;
+	constructor (mut right: &[I8], mut platform: Platform) {
+		this.right = right;
+		this.platform = platform;
+	}
+	def generate(): &[I8] {
+		if (Platform.Magma === this.platform) {
+			return this.right;
+		}
+		return "new " + this.right;
+	}
+	def findChild(): Option<Value> {
+		return None<Value>();
+	}
+}

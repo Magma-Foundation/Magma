@@ -55,9 +55,9 @@ export class Main {
 		let entries = new HashMap<&[I8], &[I8]>();
 		let platform = state.platform();
 		if (Platform.Windows === platform) {
-			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
+			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
 			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
+			/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
 			/*entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain)*/;
@@ -290,7 +290,7 @@ export class Main {
 			}).or(() => Main.parseDefinition(state, beforeParams).flatMap((mut tuple: Tuple2<CompileState, Definition>) => Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)));
 		});
 	}
-	mut static compileMethodWithBeforeParams<S extends MethodHeader<S>>(state: CompileState, header: MethodHeader<S>, withParams: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
+	mut static compileMethodWithBeforeParams<S extends FunctionHeader<S>>(state: CompileState, header: FunctionHeader<S>, withParams: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileFirst(withParams, ")", (params: &[I8], afterParams: &[I8]) => {
 			let parametersTuple = Main.parseParameters(state, params);
 			let parametersState = parametersTuple.left();
@@ -314,7 +314,7 @@ export class Main {
 			});
 		});
 	}
-	mut static retainDef<S extends MethodHeader<S>>(header: MethodHeader<S>, parametersState: CompileState): MethodHeader<S> {
+	mut static retainDef<S extends FunctionHeader<S>>(header: FunctionHeader<S>, parametersState: CompileState): FunctionHeader<S> {
 		if (Platform.Magma === parametersState.platform()) {
 			return header.addModifier("def").removeModifier("mut");
 		}
@@ -459,7 +459,7 @@ export class Main {
 			let argsState = argsTuple.left();
 			let args = Main.retain(argsTuple.right(), (mut argument: Argument) => argument.toValue());
 			let newCaller = Main.transformCaller(argsState, oldCaller);
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new Invokable(newCaller, args)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new InvokableNode(newCaller, args)));
 		});
 	}
 	mut static transformCaller(state: CompileState, oldCaller: Caller): Caller {
@@ -483,9 +483,7 @@ export class Main {
 	mut static compileAssignment(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileFirst(input, "=", (destination: &[I8], source: &[I8]) => {
 			let sourceTuple = Main.compileValueOrPlaceholder(state, source);
-			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => {
-				return new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate());
-			})).orElseGet(() => new Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate()))).orElseGet(() => new Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 		});
 	}
@@ -501,7 +499,7 @@ export class Main {
 	mut static createTextRule(slice: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: &[I8]) => {
 			let stripped = Strings.strip(input1);
-			return Main.compilePrefix(stripped, slice, (s: &[I8]) => Main.compileSuffix(s, slice, (mut s1: &[I8]) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1)))));
+			return Main.compilePrefix(stripped, slice, (s: &[I8]) => Main.compileSuffix(s, slice, (mut s1: &[I8]) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringNode(s1)))));
 		};
 	}
 	mut static parseNot(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
@@ -509,7 +507,7 @@ export class Main {
 			let childTuple = Main.compileValueOrPlaceholder(state, withoutPrefix);
 			let childState = childTuple.left();
 			let child = "!" + childTuple.right();
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new Not(child)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new NotNode(child)));
 		});
 	}
 	mut static parseLambda(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
@@ -529,7 +527,7 @@ export class Main {
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
 	mut static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: &[I8]): Option<Tuple2<CompileState, Value>> {
-		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)));
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new LambdaNode(paramNames, content)));
 	}
 	mut static createOperatorRule(infix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);
@@ -543,7 +541,7 @@ export class Main {
 			return Main.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
 				let childState = childTuple.left();
 				let child = childTuple.right();
-				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new Access(child, property)));
+				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new AccessNode(child, property)));
 			});
 		});
 	}
@@ -551,7 +549,7 @@ export class Main {
 		return (state1: CompileState, input1: &[I8]) => Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), (mut divisions: List<&[I8]>) => Main.selectFirst(divisions, sourceInfix)), (leftString: &[I8], rightString: &[I8]) => Main.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => Main.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 			let left = leftTuple.right();
 			let right = rightTuple.right();
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new OperationNode(left, targetInfix, right)));
 		})));
 	}
 	mut static selectFirst(divisions: List<&[I8]>, delimiter: &[I8]): Option<Tuple2<&[I8], &[I8]>> {
@@ -724,7 +722,7 @@ export class Main {
 		let stripped = Strings.strip(input);
 		return Main.compileSuffix(stripped, "...", (s: &[I8]) => {
 			let child = Main.parseTypeOrPlaceholder(state, s);
-			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VarArgs(child.right())));
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())));
 		});
 	}
 	mut static parseSymbolType(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Type>> {
@@ -741,36 +739,36 @@ export class Main {
 		let stripped = Strings.strip(input);
 		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
 			if (Platform.TypeScript === platform) {
-				return new Some<Type>(Primitive.String);
+				return new Some<Type>(PrimitiveType.String);
 			}
 			else {
-				return new Some<Type>(Primitive.I8);
+				return new Some<Type>(PrimitiveType.I8);
 			}
 		}
 		if (Strings.equalsTo("String", stripped)) {
 			if (Platform.TypeScript === platform) {
-				return new Some<Type>(Primitive.String);
+				return new Some<Type>(PrimitiveType.String);
 			}
 			else {
-				return new Some<Type>(new Slice(Primitive.I8));
+				return new Some<Type>(new SliceType(PrimitiveType.I8));
 			}
 		}
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
 			if (Platform.Magma === platform) {
-				return new Some<Type>(Primitive.I32);
+				return new Some<Type>(PrimitiveType.I32);
 			}
 			else {
-				return new Some<Type>(Primitive.Number);
+				return new Some<Type>(PrimitiveType.Number);
 			}
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
 			return new Some<Type>(new BooleanType(platform));
 		}
 		if (Strings.equalsTo("var", stripped)) {
-			return new Some<Type>(Primitive.Var);
+			return new Some<Type>(PrimitiveType.Var);
 		}
 		if (Strings.equalsTo("void", stripped)) {
-			return new Some<Type>(Primitive.Void);
+			return new Some<Type>(PrimitiveType.Void);
 		}
 		return new None<Type>();
 	}
@@ -782,7 +780,7 @@ export class Main {
 			let base = Strings.strip(baseString);
 			return Main.assembleFunctionType(argsState, base, args).or(() => {
 				let compileState = argsState.addResolvedImportFromCache(base);
-				return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new Generic(base, args)));
+				return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
 			});
 		}));
 	}
