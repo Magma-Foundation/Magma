@@ -49,4 +49,7 @@ export class Ok<T, X> implements Result<T, X> {
 	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
 		return mapper/*(arg0 : T) => Result<R, X>*/(this/*auto*/.value);
 	}
+	mapValue<R>(mapper: (arg0 : T) => R): Result<R, X> {
+		return new Ok<>(mapper/*(arg0 : T) => R*/(this/*auto*/.value));
+	}
 }

@@ -25,6 +25,7 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -65,6 +66,7 @@
 	Whitespace, 
 	ZipHead
 ]*/
+import { Location } from "../../magma/app/io/Location";
 import { Files } from "../../jvm/api/io/Files";
 import { Path } from "../../magma/api/io/Path";
 import { List } from "../../magma/api/collect/list/List";
@@ -77,15 +79,14 @@ import { Queries } from "../../magma/api/collect/Queries";
 import { Platform } from "../../magma/app/io/Platform";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Result } from "../../magma/api/result/Result";
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Tuple2 } from "../../magma/api/Tuple2";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
-import { Location } from "../../magma/app/io/Location";
-import { Lists } from "../../jvm/api/collect/list/Lists";
 import { None } from "../../magma/api/option/None";
 import { Ok } from "../../magma/api/result/Ok";
-import { Tuple2 } from "../../magma/api/Tuple2";
 import { Joiner } from "../../magma/api/collect/Joiner";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Import } from "../../magma/app/compile/Import";
 import { Strings } from "../../jvm/api/text/Strings";
 import { DivideState } from "../../magma/app/compile/text/DivideState";
@@ -118,6 +119,14 @@ import { SliceType } from "../../magma/app/compile/type/SliceType";
 import { BooleanType } from "../../magma/app/compile/type/BooleanType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
+class IncompleteRoot {
+	location: Location;
+	outputsByExtensions: Map<string, string>;
+	constructor (location: Location, outputsByExtensions: Map<string, string>) {
+		this.location = location;
+		this.outputsByExtensions = outputsByExtensions;
+	}
+}
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files/*auto*/.get(".", "src", "java");
@@ -127,10 +136,22 @@ export class Main {
 		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitialToResult(Main/*auto*/.createInitialState(sources/*List<Source>*/), (current1: CompileState, platform: Platform) => Main/*auto*/.runWithPlatform(current1/*auto*/, platform/*Platform*/, sources/*List<Source>*/)).findError(/*auto*/);
 	}
 	static runWithPlatform(initial: CompileState, platform: Platform, sources: List<Source>): Result<CompileState, IOError> {
-		return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(initial/*CompileState*/.clearDefinedTypes(/*auto*/), (state: CompileState, source: Source) => Main/*auto*/.runWithInput(state/*auto*/, platform/*Platform*/, source/*Source*/));
+		/*final Tuple2<CompileState, List<IncompleteRoot>> compileStateListTuple2*/;
+		compileStateListTuple2/*auto*/ = new Tuple2Impl<CompileState, List<IncompleteRoot>>(initial/*CompileState*/.clearDefinedTypes(/*auto*/), Lists/*auto*/.empty(/*auto*/));
+		return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(compileStateListTuple2/*auto*/, (tuple: Tuple2<CompileState, List<IncompleteRoot>>, source: Source) => Main/*auto*/.foldWithInput(platform/*Platform*/, tuple/*auto*/.left(/*auto*/), tuple/*auto*/.right(/*auto*/), source/*Source*/)).flatMapValue((result: Tuple2<CompileState, List<IncompleteRoot>>) => Main/*auto*/.getCompileStateIOErrorResult(platform/*Platform*/, result/*auto*/.left(/*auto*/), result/*auto*/.right(/*auto*/)));
 	}
-	static runWithInput(state: CompileState, platform: Platform, source: Source): Result<CompileState, IOError> {
-		return source/*Source*/.read(/*auto*/).flatMapValue((input: string) => Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*string*/, platform/*Platform*/));
+	static getCompileStateIOErrorResult(platform: Platform, state: CompileState, incomplete: List<IncompleteRoot>): Result<CompileState, IOError> {
+		return incomplete/*List<IncompleteRoot>*/.query(/*auto*/).foldWithInitialToResult(state/*CompileState*/, (current: CompileState, incompleteRoot: IncompleteRoot) => Main/*auto*/.complete(current/*List<T>*/, incompleteRoot/*auto*/, platform/*Platform*/));
+	}
+	static foldWithInput(platform: Platform, state: CompileState, incomplete: List<IncompleteRoot>, source: Source): Result<Tuple2<CompileState, List<IncompleteRoot>>, IOError> {
+		return Main/*auto*/.runWithInput(state/*CompileState*/, platform/*Platform*/, source/*Source*/).mapValue((result: Tuple2<CompileState, IncompleteRoot>) => {
+			return new Tuple2Impl<>(result/*Tuple2<CompileState, IncompleteRoot>*/.left(/*auto*/), incomplete/*List<IncompleteRoot>*/.addLast(result/*Tuple2<CompileState, IncompleteRoot>*/.right(/*auto*/)));
+		});
+	}
+	static runWithInput(state: CompileState, platform: Platform, source: Source): Result<Tuple2<CompileState, IncompleteRoot>, IOError> {
+		return source/*Source*/.read(/*auto*/).mapValue((input: string) => {
+			return Main/*auto*/.prepareRoot(state/*CompileState*/, source/*Source*/, input/*string*/, platform/*Platform*/);
+		});
 	}
 	static createInitialState(sources: List<Source>): CompileState {
 		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), (state: CompileState, source: Source) => state/*CompileState*/.addSource(source/*Source*/));
@@ -138,15 +159,19 @@ export class Main {
 	static findSources(children: List<Path>, sourceDirectory: Path): List<Source> {
 		return children/*List<Path>*/.query(/*auto*/).filter((source: Path) => source/*Source*/.endsWith(".java")).map((child: Path) => new Source(sourceDirectory/*Path*/, child/*string*/)).collect(new ListCollector<Source>(/*auto*/));
 	}
-	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Result<CompileState, IOError> {
+	static prepareRoot(state: CompileState, source: Source, input: string, platform: Platform): Tuple2Impl<CompileState, IncompleteRoot> {
 		let initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
 		let outputTuple = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*string*/);
 		let outputState = outputTuple/*auto*/.left(/*auto*/);
 		let outputsByExtensions = outputTuple/*auto*/.right(/*auto*/);
 		let location = outputState/*auto*/.findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
-		/*return Main.writeOutputEntries(platform, location, outputsByExtensions)
+		let incomplete = new IncompleteRoot(location/*auto*/, outputsByExtensions/*auto*/);
+		return new Tuple2Impl<CompileState, IncompleteRoot>(outputState/*auto*/, incomplete/*List<IncompleteRoot>*/);
+	}
+	static complete(state: CompileState, incomplete: IncompleteRoot, platform: Platform): Result<CompileState, IOError> {
+		/*return Main.writeOutputEntries(platform, incomplete.location(), incomplete.outputsByExtensions())
                 .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
-                .orElseGet(() -> new Ok<>(outputState))*/;
+                .orElseGet(() -> new Ok<>(state))*/;
 	}
 	static writeOutputEntries(platform: Platform, location: Location, outputsByExtensions: Map<string, string>): Option<IOError> {
 		let initial: Option<IOError> = new None<IOError>(/*auto*/);
@@ -952,7 +977,7 @@ export class Main {
 		return new None<Tuple2<CompileState, Type>>(/*auto*/);
 	}
 	static parsePrimitive(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
-		return Main/*auto*/.findPrimitiveValue(Strings/*auto*/.strip(input/*string*/), state/*CompileState*/.platform(/*auto*/)).map((result: Type) => new Tuple2Impl<CompileState, Type>(state/*CompileState*/, result/*auto*/));
+		return Main/*auto*/.findPrimitiveValue(Strings/*auto*/.strip(input/*string*/), state/*CompileState*/.platform(/*auto*/)).map((result: Type) => new Tuple2Impl<CompileState, Type>(state/*CompileState*/, result/*Tuple2<CompileState, IncompleteRoot>*/));
 	}
 	static findPrimitiveValue(input: string, platform: Platform): Option<Type> {
 		let stripped = Strings/*auto*/.strip(input/*string*/);

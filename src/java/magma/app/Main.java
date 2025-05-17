@@ -61,6 +61,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
+    private record IncompleteRoot(Location location, Map<String, String> outputsByExtensions) {
+    }
+
     public static void main() {
         final var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -84,15 +87,33 @@ public final class Main {
             final Platform platform,
             final List<Source> sources
     ) {
-        return sources.query().foldWithInitialToResult(initial.clearDefinedTypes(),
-                (CompileState state, Source source) -> Main.runWithInput(state, platform, source));
+        final Tuple2<CompileState, List<IncompleteRoot>> compileStateListTuple2;
+        compileStateListTuple2 = new Tuple2Impl<CompileState, List<IncompleteRoot>>(initial.clearDefinedTypes(), Lists.empty());
+
+        return sources.query()
+                .foldWithInitialToResult(compileStateListTuple2, (Tuple2<CompileState, List<IncompleteRoot>> tuple, Source source) -> Main.foldWithInput(platform, tuple.left(), tuple.right(), source))
+                .flatMapValue((Tuple2<CompileState, List<IncompleteRoot>> result) -> Main.getCompileStateIOErrorResult(platform, result.left(), result.right()));
     }
 
-    private static Result<CompileState, IOError> runWithInput(
-            final CompileState state,
+    private static Result<CompileState, IOError> getCompileStateIOErrorResult(final Platform platform, final CompileState state, final List<IncompleteRoot> incomplete) {
+        return incomplete.query().foldWithInitialToResult(state, (CompileState current, IncompleteRoot incompleteRoot) -> Main.complete(current, incompleteRoot, platform));
+    }
+
+    private static Result<Tuple2<CompileState, List<IncompleteRoot>>, IOError> foldWithInput(
             final Platform platform,
-            final Source source) {
-        return source.read().flatMapValue((String input) -> Main.compileAndWrite(state, source, input, platform));
+            final CompileState state,
+            final List<IncompleteRoot> incomplete,
+            final Source source
+    ) {
+        return Main.runWithInput(state, platform, source).mapValue((final Tuple2<CompileState, IncompleteRoot> result) -> {
+            return new Tuple2Impl<>(result.left(), incomplete.addLast(result.right()));
+        });
+    }
+
+    private static Result<Tuple2<CompileState, IncompleteRoot>, IOError> runWithInput(final CompileState state, final Platform platform, final Source source) {
+        return source.read().mapValue((final String input) -> {
+            return Main.prepareRoot(state, source, input, platform);
+        });
     }
 
     private static CompileState createInitialState(final List<Source> sources) {
@@ -106,12 +127,7 @@ public final class Main {
                 .collect(new ListCollector<Source>());
     }
 
-    private static Result<CompileState, IOError> compileAndWrite(
-            final CompileState state,
-            final Source source,
-            final String input,
-            final Platform platform
-    ) {
+    private static Tuple2Impl<CompileState, IncompleteRoot> prepareRoot(final CompileState state, final Source source, final String input, final Platform platform) {
         final var initialized = state
                 .withPlatform(platform)
                 .withLocation(source.computeLocation());
@@ -121,10 +137,15 @@ public final class Main {
         final var outputsByExtensions = outputTuple.right();
 
         final var location = outputState.findCurrentLocation().orElse(new Location(Lists.empty(), ""));
+        final var incomplete = new IncompleteRoot(location, outputsByExtensions);
 
-        return Main.writeOutputEntries(platform, location, outputsByExtensions)
+        return new Tuple2Impl<CompileState, IncompleteRoot>(outputState, incomplete);
+    }
+
+    private static Result<CompileState, IOError> complete(final CompileState state, final IncompleteRoot incomplete, final Platform platform) {
+        return Main.writeOutputEntries(platform, incomplete.location(), incomplete.outputsByExtensions())
                 .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
-                .orElseGet(() -> new Ok<>(outputState));
+                .orElseGet(() -> new Ok<>(state));
     }
 
     private static Option<IOError> writeOutputEntries(

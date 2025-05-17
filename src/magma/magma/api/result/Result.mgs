@@ -35,4 +35,5 @@ export struct Result<T, X> {
 	def findValue(): Option<T>;
 	def match<R>(mut whenOk: (arg0 : T) => R, mut whenErr: (arg0 : X) => R): R;
 	def flatMapValue<R>(mut mapper: (arg0 : T) => Result<R, X>): Result<R, X>;
+	def mapValue<R>(mut mapper: (arg0 : T) => R): Result<R, X>;
 }

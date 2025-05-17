@@ -48,4 +48,7 @@ export class Err<T, X> implements Result<T, X> {
 	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
 		return new Err<>(this/*auto*/.error);
 	}
+	mapValue<R>(mapper: (arg0 : T) => R): Result<R, X> {
+		return new Err<>(this/*auto*/.error);
+	}
 }

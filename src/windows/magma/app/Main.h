@@ -25,6 +25,7 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -67,6 +68,7 @@
 ]*/
 #ifndef magma_app_Main
 #define magma_app_Main
+import { Location } from "magma/app/io/Location";
 import { Files } from "jvm/api/io/Files";
 import { Path } from "magma/api/io/Path";
 import { List } from "magma/api/collect/list/List";
@@ -79,15 +81,14 @@ import { Queries } from "magma/api/collect/Queries";
 import { Platform } from "magma/app/io/Platform";
 import { CompileState } from "magma/app/compile/CompileState";
 import { Result } from "magma/api/result/Result";
+import { Tuple2Impl } from "magma/api/Tuple2Impl";
+import { Lists } from "jvm/api/collect/list/Lists";
+import { Tuple2 } from "magma/api/Tuple2";
 import { ImmutableCompileState } from "magma/app/compile/ImmutableCompileState";
 import { ListCollector } from "magma/api/collect/list/ListCollector";
-import { Location } from "magma/app/io/Location";
-import { Lists } from "jvm/api/collect/list/Lists";
 import { None } from "magma/api/option/None";
 import { Ok } from "magma/api/result/Ok";
-import { Tuple2 } from "magma/api/Tuple2";
 import { Joiner } from "magma/api/collect/Joiner";
-import { Tuple2Impl } from "magma/api/Tuple2Impl";
 import { Import } from "magma/app/compile/Import";
 import { Strings } from "jvm/api/text/Strings";
 import { DivideState } from "magma/app/compile/text/DivideState";

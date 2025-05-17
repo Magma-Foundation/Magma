@@ -35,4 +35,5 @@ export interface Result<T, X> {
 	findValue(): Option<T>;
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
 	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X>;
+	mapValue<R>(mapper: (arg0 : T) => R): Result<R, X>;
 }

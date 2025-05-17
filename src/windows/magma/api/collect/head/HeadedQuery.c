@@ -24,13 +24,13 @@ auto temp(T inner) {
 R foldWithInitial(R initial, (arg0 : R, arg1 : T) => R folder) {
 	var result = initial/*R*/;
 	while (true/*auto*/) {
-		var finalResult = result/*auto*/;
+		var finalResult = result/*Tuple2<CompileState, IncompleteRoot>*/;
 		var maybeNext = this/*auto*/.head.next(/*auto*/).map(lambdaDefinition/*auto*/).toTuple(finalResult/*auto*/);
 		if (maybeNext/*auto*/.left(/*auto*/)) {
-			result/*auto*/ = maybeNext/*auto*/.right(/*auto*/);
+			result/*Tuple2<CompileState, IncompleteRoot>*/ = maybeNext/*auto*/.right(/*auto*/);
 		}
 		else {
-			return result/*auto*/;
+			return result/*Tuple2<CompileState, IncompleteRoot>*/;
 		}
 	}
 }

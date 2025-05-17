@@ -18,3 +18,6 @@ R match((arg0 : T) => R whenOk, (arg0 : X) => R whenErr) {
 Result<R, X> flatMapValue((arg0 : T) => Result<R, X> mapper) {
 	return mapper/*(arg0 : T) => Result<R, X>*/(this/*auto*/.value);
 }
+Result<R, X> mapValue((arg0 : T) => R mapper) {
+	return new Ok<>(mapper/*(arg0 : T) => R*/(this/*auto*/.value));
+}

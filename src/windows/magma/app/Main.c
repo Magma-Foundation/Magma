@@ -1,4 +1,12 @@
 #include "./Main.h"
+class IncompleteRoot {
+	Location location;
+	Map<&[I8], &[I8]> outputsByExtensions;
+	constructor (Location location, Map<&[I8], &[I8]> outputsByExtensions) {
+		this.location = location;
+		this.outputsByExtensions = outputsByExtensions;
+	}
+}
 export class Main {
 }
 
@@ -24,17 +32,36 @@ auto temp(CompileState current1, Platform platform) {
 static Option<IOError> runWithSources(List<Source> sources) {
 	return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitialToResult(Main/*auto*/.createInitialState(sources/*List<Source>*/), lambdaDefinition/*auto*/).findError(/*auto*/);
 }
-auto temp(CompileState state, Source source) {
-	return Main/*auto*/.runWithInput(state/*DivideState*/, platform/*Platform*/, source/*Source*/);
+auto temp(Tuple2<CompileState, List<IncompleteRoot>> tuple, Source source) {
+	return Main/*auto*/.foldWithInput(platform/*Platform*/, tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/), tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/), source/*Source*/);
+}
+auto temp(Tuple2<CompileState, List<IncompleteRoot>> result) {
+	return Main/*auto*/.getCompileStateIOErrorResult(platform/*Platform*/, result/*Tuple2<CompileState, IncompleteRoot>*/.left(/*auto*/), result/*Tuple2<CompileState, IncompleteRoot>*/.right(/*auto*/));
 }
 static Result<CompileState, IOError> runWithPlatform(CompileState initial, Platform platform, List<Source> sources) {
-	return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(initial/*CompileState*/.clearDefinedTypes(/*auto*/), lambdaDefinition/*auto*/);
+	/*final Tuple2<CompileState, List<IncompleteRoot>> compileStateListTuple2*/;
+	compileStateListTuple2/*auto*/ = new Tuple2Impl<CompileState, List<IncompleteRoot>>(initial/*CompileState*/.clearDefinedTypes(/*auto*/), Lists/*auto*/.empty(/*auto*/));
+	return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(compileStateListTuple2/*auto*/, lambdaDefinition/*auto*/).flatMapValue(lambdaDefinition/*auto*/);
 }
-auto temp(&[I8] input) {
-	return Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, platform/*Platform*/);
+auto temp(CompileState current, IncompleteRoot incompleteRoot) {
+	return Main/*auto*/.complete(current/*List<T>*/, incompleteRoot/*auto*/, platform/*Platform*/);
 }
-static Result<CompileState, IOError> runWithInput(CompileState state, Platform platform, Source source) {
-	return source/*Source*/.read(/*auto*/).flatMapValue(lambdaDefinition/*auto*/);
+static Result<CompileState, IOError> getCompileStateIOErrorResult(Platform platform, CompileState state, List<IncompleteRoot> incomplete) {
+	return incomplete/*List<IncompleteRoot>*/.query(/*auto*/).foldWithInitialToResult(state/*CompileState*/, lambdaDefinition/*auto*/);
+}
+auto temp(Tuple2<CompileState, IncompleteRoot> result) {{
+		return new Tuple2Impl<>(result/*Tuple2<CompileState, IncompleteRoot>*/.left(/*auto*/), incomplete/*List<IncompleteRoot>*/.addLast(result/*Tuple2<CompileState, IncompleteRoot>*/.right(/*auto*/)));
+	}
+}
+static Result<Tuple2<CompileState, List<IncompleteRoot>>, IOError> foldWithInput(Platform platform, CompileState state, List<IncompleteRoot> incomplete, Source source) {
+	return Main/*auto*/.runWithInput(state/*CompileState*/, platform/*Platform*/, source/*Source*/).mapValue(lambdaDefinition/*auto*/);
+}
+auto temp(&[I8] input) {{
+		return Main/*auto*/.prepareRoot(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, platform/*Platform*/);
+	}
+}
+static Result<Tuple2<CompileState, IncompleteRoot>, IOError> runWithInput(CompileState state, Platform platform, Source source) {
+	return source/*Source*/.read(/*auto*/).mapValue(lambdaDefinition/*auto*/);
 }
 auto temp(CompileState state, Source source) {
 	return state/*CompileState*/.addSource(source/*Source*/);
@@ -51,15 +78,19 @@ auto temp(Path child) {
 static List<Source> findSources(List<Path> children, Path sourceDirectory) {
 	return children/*List<Path>*/.query(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<Source>(/*auto*/));
 }
-static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, &[I8] input, Platform platform) {
+static Tuple2Impl<CompileState, IncompleteRoot> prepareRoot(CompileState state, Source source, &[I8] input, Platform platform) {
 	var initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
 	var outputTuple = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*&[I8]*/);
 	var outputState = outputTuple/*auto*/.left(/*auto*/);
 	var outputsByExtensions = outputTuple/*auto*/.right(/*auto*/);
 	var location = outputState/*auto*/.findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
-	/*return Main.writeOutputEntries(platform, location, outputsByExtensions)
+	var incomplete = new IncompleteRoot(location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/);
+	return new Tuple2Impl<CompileState, IncompleteRoot>(outputState/*auto*/, incomplete/*List<IncompleteRoot>*/);
+}
+static Result<CompileState, IOError> complete(CompileState state, IncompleteRoot incomplete, Platform platform) {
+	/*return Main.writeOutputEntries(platform, incomplete.location(), incomplete.outputsByExtensions())
                 .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
-                .orElseGet(() -> new Ok<>(outputState))*/;
+                .orElseGet(() -> new Ok<>(state))*/;
 }
 auto temp() {
 	return Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*&[I8]*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/);
@@ -1289,7 +1320,7 @@ static Option<Tuple2<CompileState, Type>> parseSymbolType(CompileState state, &[
 	return new None<Tuple2<CompileState, Type>>(/*auto*/);
 }
 auto temp(Type result) {
-	return new Tuple2Impl<CompileState, Type>(state/*CompileState*/, result/*auto*/);
+	return new Tuple2Impl<CompileState, Type>(state/*CompileState*/, result/*Tuple2<CompileState, IncompleteRoot>*/);
 }
 static Option<Tuple2<CompileState, Type>> parsePrimitive(CompileState state, &[I8] input) {
 	return Main/*auto*/.findPrimitiveValue(Strings/*auto*/.strip(input/*&[I8]*/), state/*CompileState*/.platform(/*auto*/)).map(lambdaDefinition/*auto*/);

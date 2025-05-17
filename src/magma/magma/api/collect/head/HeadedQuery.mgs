@@ -34,13 +34,13 @@ export struct HeadedQuery<T> implements Query<T> {
 	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		mut let result = initial/*R*/;
 		while (true/*auto*/) {
-			let finalResult = result/*auto*/;
+			let finalResult = result/*Tuple2<CompileState, IncompleteRoot>*/;
 			let maybeNext = this/*auto*/.head.next(/*auto*/).map((mut inner: T) => folder/*(arg0 : R, arg1 : T) => R*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
 			if (maybeNext/*auto*/.left(/*auto*/)) {
-				result/*auto*/ = maybeNext/*auto*/.right(/*auto*/);
+				result/*Tuple2<CompileState, IncompleteRoot>*/ = maybeNext/*auto*/.right(/*auto*/);
 			}
 			else {
-				return result/*auto*/;
+				return result/*Tuple2<CompileState, IncompleteRoot>*/;
 			}
 		}
 	}

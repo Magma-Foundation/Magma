@@ -26,4 +26,9 @@ public record Ok<T, X>(T value) implements Result<T, X> {
     public <R> Result<R, X> flatMapValue(final Function<T, Result<R, X>> mapper) {
         return mapper.apply(this.value);
     }
+
+    @Override
+    public <R> Result<R, X> mapValue(final Function<T, R> mapper) {
+        return new Ok<>(mapper.apply(this.value));
+    }
 }

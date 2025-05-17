@@ -46,4 +46,7 @@ export struct Err<T, X> implements Result<T, X> {
 	def flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
 		return Err<>(this/*auto*/.error);
 	}
+	def mapValue<R>(mapper: (arg0 : T) => R): Result<R, X> {
+		return Err<>(this/*auto*/.error);
+	}
 }
