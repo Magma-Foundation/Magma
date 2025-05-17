@@ -776,6 +776,28 @@ public final class Main {
         }
     }
 
+    private record Slice(Type type) implements Type {
+        @Override
+        public String generate() {
+            return "&[" + this.type.generate() + "]";
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
+    }
+
     public static void main() {
         final var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -1858,13 +1880,22 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, Type>> parsePrimitive(final CompileState state, final String input) {
-        return Main.findPrimitiveValue(Strings.strip(input)).map((Type result) -> new Tuple2Impl<CompileState, Type>(state, result));
+        return Main.findPrimitiveValue(Strings.strip(input), state.platform).map((Type result) -> new Tuple2Impl<CompileState, Type>(state, result));
     }
 
-    private static Option<Type> findPrimitiveValue(final String input) {
+    private static Option<Type> findPrimitiveValue(final String input, final Platform platform) {
         final var stripped = Strings.strip(input);
-        if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped) || Strings.equalsTo("String", stripped)) {
+        if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
             return new Some<Type>(Primitive.String);
+        }
+
+        if (Strings.equalsTo("String", stripped)) {
+            if (Platform.TypeScript == platform) {
+                return new Some<Type>(Primitive.String);
+            }
+            else {
+                return new Some<>(new Slice(Primitive.I8));
+            }
         }
 
         if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
@@ -2052,7 +2083,8 @@ public final class Main {
         Boolean("boolean"),
         Var("var"),
         Void("void"),
-        Unknown("unknown");
+        Unknown("unknown"),
+        I8("I8");
 
         private final String value;
 

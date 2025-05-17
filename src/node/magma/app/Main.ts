@@ -661,6 +661,24 @@ class ArrayType implements Type {
 		return "";
 	}
 }
+class Slice implements Type {
+	type: Type;
+	constructor (type: Type) {
+		this.type = type;
+	}
+	generate(): string {
+		return "&[" + this.type.generate() + "]";
+	}
+	isFunctional(): boolean {
+		return false;
+	}
+	isVar(): boolean {
+		return false;
+	}
+	generateBeforeName(): string {
+		return "";
+	}
+}
 class Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
@@ -678,6 +696,7 @@ class Primitive implements Type {
 	static Var: Primitive = new Primitive("var");
 	static Void: Primitive = new Primitive("void");
 	static Unknown: Primitive = new Primitive("unknown");
+	static I8: Primitive = new Primitive("I8");
 	value: string;
 	constructor (value: string) {
 		this.value = value;
@@ -1415,12 +1434,20 @@ export class Main {
 		return new None<Tuple2<CompileState, Type>>();
 	}
 	static parsePrimitive(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
-		return Main.findPrimitiveValue(Strings.strip(input)).map((result: Type) => new Tuple2Impl<CompileState, Type>(state, result));
+		return Main.findPrimitiveValue(Strings.strip(input), state.platform).map((result: Type) => new Tuple2Impl<CompileState, Type>(state, result));
 	}
-	static findPrimitiveValue(input: string): Option<Type> {
+	static findPrimitiveValue(input: string, platform: Platform): Option<Type> {
 		let stripped = Strings.strip(input);
-		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped) || Strings.equalsTo("String", stripped)){
+		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)){
 			return new Some<Type>(Primitive.String);
+		}
+		if (Strings.equalsTo("String", stripped)){
+			if (Platform.TypeScript === platform){
+				return new Some<Type>(Primitive.String);
+			}
+			else {
+				return new Some<>(new Slice(Primitive.I8));
+			}
 		}
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)){
 			return new Some<Type>(Primitive.Number);

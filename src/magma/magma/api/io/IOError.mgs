@@ -34,5 +34,5 @@
 	Main: magma.app
 ]*/
 export struct IOError {
-	def display(): string;
+	def display(): &[I8];
 }

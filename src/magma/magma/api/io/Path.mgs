@@ -39,17 +39,17 @@ import magma.api.result.Result;
 import magma.api.collect.list.List;
 import magma.api.collect.Query;
 export struct Path {
-	def asString(): string;
-	def writeString(output: string): Option<IOError>;
-	def readString(): Result<string, IOError>;
+	def asString(): &[I8];
+	def writeString(output: &[I8]): Option<IOError>;
+	def readString(): Result<&[I8], IOError>;
 	def walk(): Result<List<Path>, IOError>;
-	def findFileName(): string;
-	def endsWith(suffix: string): boolean;
+	def findFileName(): &[I8];
+	def endsWith(suffix: &[I8]): boolean;
 	def relativize(source: Path): Path;
 	def getParent(): Path;
-	def query(): Query<string>;
-	def resolveChildSegments(children: List<string>): Path;
-	def resolveChild(name: string): Path;
+	def query(): Query<&[I8]>;
+	def resolveChildSegments(children: List<&[I8]>): Path;
+	def resolveChild(name: &[I8]): Path;
 	def exists(): boolean;
 	def createDirectories(): Option<IOError>;
 }
