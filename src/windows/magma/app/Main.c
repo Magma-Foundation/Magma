@@ -2,25 +2,33 @@
 export class Main {
 }
 
-auto temp(List<Path> children) {Main.runWithChildren(children, sourceDirectory)
+auto temp(List<Path> children) {
+	return Main.runWithChildren(children, sourceDirectory);
 }
-auto temp(IOError value) {new Some<IOError>(value)
+auto temp(IOError value) {
+	return new Some<IOError>(value);
 }
-auto temp(IOError error) {error.display()
+auto temp(IOError error) {
+	return error.display();
 }
-auto temp(&[I8] displayed) {Console.printErrLn(displayed)
+auto temp(&[I8] displayed) {
+	return Console.printErrLn(displayed);
 }
 static void main() {
 	Path sourceDirectory = Files.get(".", "src", "java");
 	sourceDirectory.walk().match(temp, temp).map(temp).ifPresent(temp);
 }
-auto temp(Path source) {source.endsWith(".java")
+auto temp(Path source) {
+	return source.endsWith(".java");
 }
-auto temp(Path child) {new Source(sourceDirectory, child)
+auto temp(Path child) {
+	return new Source(sourceDirectory, child);
 }
-auto temp(CompileState state, Source source) {state.addSource(source)
+auto temp(CompileState state, Source source) {
+	return state.addSource(source);
 }
-auto temp(Tuple2<CompileState, Option<IOError>> current, Source source1) {Main.foldChild(current.left(), current.right(), source1)
+auto temp(Tuple2<CompileState, Option<IOError>> current, Source source1) {
+	return Main.foldChild(current.left(), current.right(), source1);
 }
 static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
 	List<Source> sources = children.query().filter(temp).map(temp).collect(new ListCollector<Source>());
@@ -36,16 +44,20 @@ static Tuple2<CompileState, Option<IOError>> foldChild(CompileState state, Optio
 	}
 	return Main.runWithSource(state, source);
 }
-auto temp(&[I8] input) {Main.getCompileStateOptionTuple2(state, source, input)
+auto temp(&[I8] input) {
+	return Main.getCompileStateOptionTuple2(state, source, input);
 }
-auto temp(IOError value) {new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value))
+auto temp(IOError value) {
+	return new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value));
 }
 static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
 	return source.read().match(temp, temp);
 }
-auto temp() {magmaTuple.right()
+auto temp() {
+	return magmaTuple.right();
 }
-auto temp() {windowsTuple.right()
+auto temp() {
+	return windowsTuple.right();
 }
 static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(CompileState state, Source source, &[I8] input) {
 	Tuple2<CompileState, Option<IOError>> typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
@@ -53,7 +65,8 @@ static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(Com
 	Tuple2<CompileState, Option<IOError>> windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
 	return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right().or(temp).or(temp));
 }
-auto temp() {target.writeString(output.right().get(extension))
+auto temp() {
+	return target.writeString(output.right().get(extension));
 }
 auto temp(Option<IOError> ioErrorOption, &[I8] extension) {{
 		Path target = targetParent.resolveChild(location.name() + "." + extension);
@@ -76,7 +89,8 @@ static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state,
 	Option<IOError> ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, temp);
 	return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
 }
-auto temp(Import anImport) {anImport.generate(state.platform())
+auto temp(Import anImport) {
+	return anImport.generate(state.platform());
 }
 static Tuple2Impl<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, Source source, &[I8] input) {
 	Tuple2<CompileState, &[I8]> statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
@@ -108,7 +122,8 @@ static &[I8] createMain(Source source) {
 static Tuple2<CompileState, &[I8]> compileStatements(CompileState state, &[I8] input, (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]> mapper) {
 	return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 }
-auto temp(CompileState state1, &[I8] s) {new Some<Tuple2<CompileState, &[I8]>>(mapper(state1, s))
+auto temp(CompileState state1, &[I8] s) {
+	return new Some<Tuple2<CompileState, &[I8]>>(mapper(state1, s));
 }
 static Tuple2<CompileState, &[I8]> compileAll(CompileState state, &[I8] input, (arg0 : DivideState, arg1 : I8) => DivideState folder, (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]> mapper, (arg0 : &[I8], arg1 : &[I8]) => &[I8] merger) {
 	Tuple2<CompileState, List<&[I8]>> folded = Main.parseAll(state, input, folder, temp).orElse(new Tuple2Impl<CompileState, List<&[I8]>>(state, Lists.empty()));
@@ -129,7 +144,8 @@ auto temp(Tuple2<CompileState, List<T>> current) {{
 		return biFunction(currentState, segment).map(temp);
 	}
 }
-auto temp(Option<Tuple2<CompileState, List<T>>> maybeCurrent, &[I8] segment) {maybeCurrent.flatMap(temp)
+auto temp(Option<Tuple2<CompileState, List<T>>> maybeCurrent, &[I8] segment) {
+	return maybeCurrent.flatMap(temp);
 }
 static Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, &[I8] input, (arg0 : DivideState, arg1 : I8) => DivideState folder, (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>> biFunction) {
 	return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), temp);
@@ -137,9 +153,11 @@ static Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, &[I8] 
 static &[I8] mergeStatements(&[I8] cache, &[I8] element) {
 	return cache + element;
 }
-auto temp() {Main.foldDoubleQuotes(poppedState, popped)
+auto temp() {
+	return Main.foldDoubleQuotes(poppedState, popped);
 }
-auto temp() {folder(poppedState, popped)
+auto temp() {
+	return folder(poppedState, popped);
 }
 static List<&[I8]> divide(&[I8] input, (arg0 : DivideState, arg1 : I8) => DivideState folder) {
 	DivideState current = DivideState.createInitial(input);
@@ -176,7 +194,8 @@ static Option<DivideState> foldDoubleQuotes(DivideState state, I8 c) {
 	}
 	return new Some<DivideState>(appended);
 }
-auto temp(DivideState state1) {state1.popAndAppendToOption()
+auto temp(DivideState state1) {
+	return state1.popAndAppendToOption();
 }
 static Option<DivideState> foldSingleQuotes(DivideState state, I8 c) {
 	if ("\'" !== c) {
@@ -224,29 +243,38 @@ auto temp() {{
 		return Main.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
 	}
 }
-auto temp(&[I8] inputContent) {Main.compileLast(beforeInfix, "\n", temp).or(temp)
+auto temp(&[I8] inputContent) {
+	return Main.compileLast(beforeInfix, "\n", temp).or(temp);
 }
-auto temp(&[I8] beforeContent, &[I8] withEnd) {Main.compileSuffix(Strings.strip(withEnd), "}", temp)
+auto temp(&[I8] beforeContent, &[I8] withEnd) {
+	return Main.compileSuffix(Strings.strip(withEnd), "}", temp);
 }
-auto temp(&[I8] beforeInfix, &[I8] afterInfix) {Main.compileFirst(afterInfix, "{", temp)
+auto temp(&[I8] beforeInfix, &[I8] afterInfix) {
+	return Main.compileFirst(afterInfix, "{", temp);
 }
-auto temp(CompileState state, &[I8] input1) {Main.compileFirst(input1, sourceInfix, temp)
+auto temp(CompileState state, &[I8] input1) {
+	return Main.compileFirst(input1, sourceInfix, temp);
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> createStructureRule(&[I8] sourceInfix, &[I8] targetInfix) {
 	return temp;
 }
-auto temp(Tuple2<CompileState, Type> implementingTuple) {Main.compileStructureWithExtends(implementingTuple.left(), annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right()), content)
+auto temp(Tuple2<CompileState, Type> implementingTuple) {
+	return Main.compileStructureWithExtends(implementingTuple.left(), annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right()), content);
 }
-auto temp(&[I8] s, &[I8] s2) {Main.parseType(state, s2).flatMap(temp)
+auto temp(&[I8] s, &[I8] s2) {
+	return Main.parseType(state, s2).flatMap(temp);
 }
-auto temp() {Main.compileStructureWithExtends(state, annotations, modifiers, targetInfix, beforeContent, new None<Type>(), content)
+auto temp() {
+	return Main.compileStructureWithExtends(state, annotations, modifiers, targetInfix, beforeContent, new None<Type>(), content);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileStructureWithImplementing(CompileState state, List<&[I8]> annotations, List<&[I8]> modifiers, &[I8] targetInfix, &[I8] beforeContent, &[I8] content) {
 	return Main.compileLast(beforeContent, " implements ", temp).or(temp);
 }
-auto temp(&[I8] beforeExtends, &[I8] afterExtends) {Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeExtends, new Some<&[I8]>(afterExtends), maybeImplementing, inputContent)
+auto temp(&[I8] beforeExtends, &[I8] afterExtends) {
+	return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeExtends, new Some<&[I8]>(afterExtends), maybeImplementing, inputContent);
 }
-auto temp() {Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<&[I8]>(), maybeImplementing, inputContent)
+auto temp() {
+	return Main.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, new None<&[I8]>(), maybeImplementing, inputContent);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileStructureWithExtends(CompileState state, List<&[I8]> annotations, List<&[I8]> modifiers, &[I8] targetInfix, &[I8] beforeContent, Option<Type> maybeImplementing, &[I8] inputContent) {
 	return Main.compileFirst(beforeContent, " extends ", temp).or(temp);
@@ -258,14 +286,17 @@ auto temp(&[I8] parametersString, &[I8] _) {{
 		return Main.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType);
 	}
 }
-auto temp(&[I8] rawName, &[I8] withParameters) {Main.compileFirst(withParameters, ")", temp)
+auto temp(&[I8] rawName, &[I8] withParameters) {
+	return Main.compileFirst(withParameters, ")", temp);
 }
-auto temp() {Main.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType)
+auto temp() {
+	return Main.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileStructureWithParameters(CompileState state, List<&[I8]> annotations, List<&[I8]> modifiers, &[I8] targetInfix, &[I8] beforeContent, Option<&[I8]> maybeSuperType, Option<Type> maybeImplementing, &[I8] inputContent) {
 	return Main.compileFirst(beforeContent, "(", temp).or(temp);
 }
-auto temp(Parameter parameter) {parameter.asDefinition()
+auto temp(Parameter parameter) {
+	return parameter.asDefinition();
 }
 static List<Definition> retainDefinitionsFromParameters(List<Parameter> parameters) {
 	return parameters.query().map(temp).flatMap(Queries.fromOption).collect(new ListCollector<Definition>());
@@ -275,18 +306,23 @@ auto temp(&[I8] name, &[I8] typeParamsString) {{
 		return Main.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
 	}
 }
-auto temp(&[I8] withoutTypeParamEnd) {Main.compileFirst(withoutTypeParamEnd, "<", temp)
+auto temp(&[I8] withoutTypeParamEnd) {
+	return Main.compileFirst(withoutTypeParamEnd, "<", temp);
 }
-auto temp() {Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType)
+auto temp() {
+	return Main.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileStructureWithTypeParams(CompileState state, &[I8] infix, &[I8] content, &[I8] beforeParams, List<Definition> parameters, Option<Type> maybeImplementing, List<&[I8]> annotations, List<&[I8]> modifiers, Option<&[I8]> maybeSuperType) {
 	return Main.compileSuffix(Strings.strip(beforeParams), ">", temp).or(temp);
 }
-auto temp(&[I8] value) {value + " "
+auto temp(&[I8] value) {
+	return value + " ";
 }
-auto temp(Location location) {new Location(location.namespace(), location.name() + "Instance")
+auto temp(Location location) {
+	return new Location(location.namespace(), location.name() + "Instance");
 }
-auto temp(&[I8] inner) {" extends " + inner
+auto temp(&[I8] inner) {
+	return " extends " + inner;
 }
 static Option<Tuple2<CompileState, &[I8]>> assembleStructure(CompileState state, List<&[I8]> annotations, List<&[I8]> oldModifiers, &[I8] infix, &[I8] rawName, List<&[I8]> typeParams, List<Definition> parameters, Option<Type> maybeImplementing, &[I8] content, Option<&[I8]> maybeSuperType) {
 	&[I8] name = Strings.strip(rawName);
@@ -328,16 +364,20 @@ static List<&[I8]> modifyModifiers0(List<&[I8]> oldModifiers) {
 	}
 	return Lists.empty();
 }
-auto temp(Type type) {type.generate()
+auto temp(Type type) {
+	return type.generate();
 }
-auto temp(&[I8] inner) {" implements " + inner
+auto temp(&[I8] inner) {
+	return " implements " + inner;
 }
 static &[I8] generateImplementing(Option<Type> maybeImplementing) {
 	return maybeImplementing.map(temp).map(temp).orElse("");
 }
-auto temp(Definition definition) {definition.generate(platform)
+auto temp(Definition definition) {
+	return definition.generate(platform);
 }
-auto temp(&[I8] generatedParameters) {Main.generateConstructorWithParameterString(parameters, generatedParameters)
+auto temp(&[I8] generatedParameters) {
+	return Main.generateConstructorWithParameterString(parameters, generatedParameters);
 }
 static &[I8] generateConstructorFromRecordParameters(List<Definition> parameters, Platform platform) {
 	return parameters.query().map(temp).collect(new Joiner(", ")).map(temp).orElse("");
@@ -346,14 +386,17 @@ static &[I8] generateConstructorWithParameterString(List<Definition> parameters,
 	&[I8] constructorAssignments = Main.generateConstructorAssignments(parameters);
 	return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 }
-auto temp(Definition definition) {"\n\t\tthis." + definition.name() + " = " + definition.name() + ";"
+auto temp(Definition definition) {
+	return "\n\t\tthis." + definition.name() + " = " + definition.name() + ";";
 }
 static &[I8] generateConstructorAssignments(List<Definition> parameters) {
 	return parameters.query().map(temp).collect(Joiner.empty()).orElse("");
 }
-auto temp(Definition definition) {definition.generate(platform)
+auto temp(Definition definition) {
+	return definition.generate(platform);
 }
-auto temp(&[I8] generated) {"\n\t" + generated + ";"
+auto temp(&[I8] generated) {
+	return "\n\t" + generated + ";";
 }
 static &[I8] joinParameters(List<Definition> parameters, Platform platform) {
 	return parameters.query().map(temp).map(temp).collect(Joiner.empty()).orElse("");
@@ -365,12 +408,14 @@ static Option<Tuple2<CompileState, &[I8]>> compileNamespaced(CompileState state,
 	}
 	return new None<>();
 }
-auto temp() {new Tuple2Impl<CompileState, &[I8]>(state, Main.generatePlaceholder(input))
+auto temp() {
+	return new Tuple2Impl<CompileState, &[I8]>(state, Main.generatePlaceholder(input));
 }
 static Tuple2<CompileState, &[I8]> compileOrPlaceholder(CompileState state, &[I8] input, List<(arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>>> rules) {
 	return Main.or(state, input, rules).orElseGet(temp);
 }
-auto temp((arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>> rule) {Main.getApply(state, input, rule)
+auto temp((arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>> rule) {
+	return Main.getApply(state, input, rule);
 }
 static Option<Tuple2<CompileState, T>> or(CompileState state, &[I8] input, List<(arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>>> rules) {
 	return rules.query().map(temp).flatMap(Queries.fromOption).next();
@@ -395,9 +440,11 @@ auto temp() {{
 			return new None<Tuple2<CompileState, &[I8]>>();
 		}
 }
-auto temp(Tuple2<CompileState, Definition> tuple) {Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)
+auto temp(Tuple2<CompileState, Definition> tuple) {
+	return Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams);
 }
-auto temp() {Main.parseDefinition(state, beforeParams).flatMap(temp)
+auto temp() {
+	return Main.parseDefinition(state, beforeParams).flatMap(temp);
 }
 auto temp(&[I8] beforeParams, &[I8] withParams) {{
 		&[I8] strippedBeforeParams = Strings.strip(beforeParams);
@@ -422,7 +469,8 @@ auto temp(&[I8] withoutContentEnd) {{
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(exited, generated));
 		}
 }
-auto temp(&[I8] withoutContentStart) {Main.compileSuffix(Strings.strip(withoutContentStart), "}", temp)
+auto temp(&[I8] withoutContentStart) {
+	return Main.compileSuffix(Strings.strip(withoutContentStart), "}", temp);
 }
 auto temp() {{
 			if (Strings.equalsTo(";", Strings.strip(afterParams))) {
@@ -457,7 +505,8 @@ static FunctionHeader<S> retainDef(FunctionHeader<S> header, CompileState parame
 	}
 	return header;
 }
-auto temp(CompileState state1, &[I8] s) {new Some<Tuple2<CompileState, Parameter>>(Main.parseParameterOrPlaceholder(state1, s))
+auto temp(CompileState state1, &[I8] s) {
+	return new Some<Tuple2<CompileState, Parameter>>(Main.parseParameterOrPlaceholder(state1, s));
 }
 static Tuple2<CompileState, List<Parameter>> parseParameters(CompileState state, &[I8] params) {
 	return Main.parseValuesOrEmpty(state, params, temp);
@@ -476,9 +525,11 @@ static Option<Tuple2<CompileState, &[I8]>> compileEmptySegment(CompileState stat
 		return new None<Tuple2<CompileState, &[I8]>>();
 	}
 }
-auto temp(&[I8] withoutPrefix) {Main.compileValue(state1, withoutPrefix)
+auto temp(&[I8] withoutPrefix) {
+	return Main.compileValue(state1, withoutPrefix);
 }
-auto temp(Tuple2<CompileState, &[I8]> tuple) {new Tuple2Impl<CompileState, &[I8]>(tuple.left(), state1.createIndent() + tuple.right())
+auto temp(Tuple2<CompileState, &[I8]> tuple) {
+	return new Tuple2Impl<CompileState, &[I8]>(tuple.left(), state1.createIndent() + tuple.right());
 }
 static Option<Tuple2<CompileState, &[I8]>> compileReturnWithoutSuffix(CompileState state1, &[I8] input1) {
 	return Main.compileReturn(input1, temp).map(temp);
@@ -489,11 +540,14 @@ auto temp(Tuple2<CompileState, &[I8]> headerTuple) {{
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 	}
 }
-auto temp(&[I8] beforeContent) {Main.compileBlockHeader(state, beforeContent).flatMap(temp)
+auto temp(&[I8] beforeContent) {
+	return Main.compileBlockHeader(state, beforeContent).flatMap(temp);
 }
-auto temp(&[I8] beforeContentWithEnd, &[I8] content) {Main.compileSuffix(beforeContentWithEnd, "{", temp)
+auto temp(&[I8] beforeContentWithEnd, &[I8] content) {
+	return Main.compileSuffix(beforeContentWithEnd, "{", temp);
 }
-auto temp(&[I8] withoutEnd) {Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), temp)
+auto temp(&[I8] withoutEnd) {
+	return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), temp);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileBlock(CompileState state, &[I8] input) {
 	return Main.compileSuffix(Strings.strip(input), "}", temp);
@@ -522,14 +576,16 @@ auto temp(&[I8] withoutConditionEnd) {{
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(tuple.left(), prefix + " (" + tuple.right() + ") "));
 		}
 }
-auto temp(&[I8] withoutConditionStart) {Main.compileSuffix(withoutConditionStart, ")", temp)
+auto temp(&[I8] withoutConditionStart) {
+	return Main.compileSuffix(withoutConditionStart, ")", temp);
 }
 auto temp(&[I8] withoutPrefix) {{
 		&[I8] strippedCondition = Strings.strip(withoutPrefix);
 		return Main.compilePrefix(strippedCondition, "(", temp);
 	}
 }
-auto temp(CompileState state1, &[I8] input1) {Main.compilePrefix(Strings.strip(input1), prefix, temp)
+auto temp(CompileState state1, &[I8] input1) {
+	return Main.compilePrefix(Strings.strip(input1), prefix, temp);
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> createConditionalRule(&[I8] prefix) {
 	return temp;
@@ -550,9 +606,11 @@ auto temp(&[I8] withoutEnd) {{
 static Option<Tuple2<CompileState, &[I8]>> compileFunctionStatement(CompileState state, &[I8] input) {
 	return Main.compileSuffix(Strings.strip(input), ";", temp);
 }
-auto temp(Tuple2<CompileState, Value> tuple) {new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate(tuple.left().platform()))
+auto temp(Tuple2<CompileState, Value> tuple) {
+	return new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate(tuple.left().platform()));
 }
-auto temp(CompileState state1, &[I8] input) {Main.parseInvokable(state1, input).map(temp)
+auto temp(CompileState state1, &[I8] input) {
+	return Main.parseInvokable(state1, input).map(temp);
 }
 static Tuple2<CompileState, &[I8]> compileFunctionStatementValue(CompileState state, &[I8] withoutEnd) {
 	return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, temp, Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
@@ -570,19 +628,23 @@ auto temp(&[I8] child) {{
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right() + suffix));
 	}
 }
-auto temp(CompileState state1, &[I8] input) {Main.compileSuffix(Strings.strip(input), suffix, temp)
+auto temp(CompileState state1, &[I8] input) {
+	return Main.compileSuffix(Strings.strip(input), suffix, temp);
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> createPostRule(&[I8] suffix) {
 	return temp;
 }
-auto temp(&[I8] value1) {Main.compileValue(state, value1)
+auto temp(&[I8] value1) {
+	return Main.compileValue(state, value1);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileReturnWithValue(CompileState state, &[I8] input) {
 	return Main.compileReturn(input, temp);
 }
-auto temp(Tuple2<CompileState, &[I8]> tuple) {new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(tuple.left(), "return " + tuple.right()))
+auto temp(Tuple2<CompileState, &[I8]> tuple) {
+	return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(tuple.left(), "return " + tuple.right()));
 }
-auto temp(&[I8] value) {mapper(value).flatMap(temp)
+auto temp(&[I8] value) {
+	return mapper(value).flatMap(temp);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileReturn(&[I8] input, (arg0 : &[I8]) => Option<Tuple2<CompileState, &[I8]>> mapper) {
 	return Main.compilePrefix(Strings.strip(input), "return ", temp);
@@ -593,22 +655,29 @@ auto temp(Tuple2<CompileState, &[I8]> callerTuple) {{
 		return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform()), args);
 	}
 }
-auto temp(&[I8] type) {Main.compileType(state, type).flatMap(temp)
+auto temp(&[I8] type) {
+	return Main.compileType(state, type).flatMap(temp);
 }
-auto temp(Tuple2<CompileState, Value> callerTuple) {Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args)
+auto temp(Tuple2<CompileState, Value> callerTuple) {
+	return Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args);
 }
-auto temp() {Main.parseValue(state, callerString).flatMap(temp)
+auto temp() {
+	return Main.parseValue(state, callerString).flatMap(temp);
 }
-auto temp(&[I8] callerString) {Main.compilePrefix(Strings.strip(callerString), "new ", temp).or(temp)
+auto temp(&[I8] callerString) {
+	return Main.compilePrefix(Strings.strip(callerString), "new ", temp).or(temp);
 }
-auto temp(&[I8] callerWithArgStart, &[I8] args) {Main.compileSuffix(callerWithArgStart, "(", temp)
+auto temp(&[I8] callerWithArgStart, &[I8] args) {
+	return Main.compileSuffix(callerWithArgStart, "(", temp);
 }
-auto temp(&[I8] withoutEnd) {Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), temp)
+auto temp(&[I8] withoutEnd) {
+	return Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldInvocationStarts), temp);
 }
 static Option<Tuple2<CompileState, Value>> parseInvokable(CompileState state, &[I8] input) {
 	return Main.compileSuffix(Strings.strip(input), ")", temp);
 }
-auto temp(List<&[I8]> divisions1) {Main.selectLast(divisions1, delimiter)
+auto temp(List<&[I8]> divisions1) {
+	return Main.selectLast(divisions1, delimiter);
 }
 static Option<Tuple2<&[I8], &[I8]>> splitFoldedLast(&[I8] input, &[I8] delimiter, (arg0 : DivideState, arg1 : I8) => DivideState folder) {
 	return Main.splitFolded(input, folder, temp);
@@ -642,9 +711,11 @@ static DivideState foldInvocationStarts(DivideState state, I8 c) {
 	}
 	return appended;
 }
-auto temp(CompileState state1, &[I8] s) {Main.parseArgument(state1, s)
+auto temp(CompileState state1, &[I8] s) {
+	return Main.parseArgument(state1, s);
 }
-auto temp(Argument argument) {argument.toValue()
+auto temp(Argument argument) {
+	return argument.toValue();
 }
 auto temp(Tuple2<CompileState, List<Argument>> argsTuple) {{
 		CompileState argsState = argsTuple.left();
@@ -670,7 +741,8 @@ static Caller transformCaller(CompileState state, Caller oldCaller) {
 static List<R> retain(List<T> args, (arg0 : T) => Option<R> mapper) {
 	return args.query().map(mapper).flatMap(Queries.fromOption).collect(new ListCollector<R>());
 }
-auto temp(Tuple2<CompileState, Value> tuple) {new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right())
+auto temp(Tuple2<CompileState, Value> tuple) {
+	return new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right());
 }
 static Option<Tuple2<CompileState, Argument>> parseArgument(CompileState state1, &[I8] input) {
 	return Main.parseValue(state1, input).map(temp);
@@ -683,9 +755,11 @@ auto temp(Tuple2<CompileState, Definition> definitionTuple) {{
 			return new Tuple2Impl<CompileState, &[I8]>(definitionState, generate);
 		}
 }
-auto temp() {Main.parseDefinition(sourceTuple.left(), destination).map(temp)
+auto temp() {
+	return Main.parseDefinition(sourceTuple.left(), destination).map(temp);
 }
-auto temp() {new Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination))
+auto temp() {
+	return new Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination));
 }
 auto temp(&[I8] destination, &[I8] source) {{
 		Tuple2<CompileState, &[I8]> sourceTuple = Main.compileValueOrPlaceholder(state, source);
@@ -706,7 +780,8 @@ static Definition attachLet(CompileState definitionState, Definition definition)
 	}
 	return let;
 }
-auto temp() {new Tuple2Impl<CompileState, &[I8]>(state, Main.generatePlaceholder(input))
+auto temp() {
+	return new Tuple2Impl<CompileState, &[I8]>(state, Main.generatePlaceholder(input));
 }
 static Tuple2<CompileState, &[I8]> compileValueOrPlaceholder(CompileState state, &[I8] input) {
 	return Main.compileValue(state, input).orElseGet(temp);
@@ -722,9 +797,11 @@ static Option<Tuple2<CompileState, &[I8]>> compileValue(CompileState state, &[I8
 static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, &[I8] input) {
 	return Main.or(state, input, Lists.of(Main.parseLambda, Main.createOperatorRule("+"), Main.createOperatorRule("-"), Main.createOperatorRule("<="), Main.createOperatorRule("<"), Main.createOperatorRule("&&"), Main.createOperatorRule("||"), Main.createOperatorRule(">"), Main.createOperatorRule(">="), Main.parseInvokable, Main.createAccessRule("."), Main.createAccessRule("::"), Main.parseSymbol, Main.parseNot, Main.parseNumber, Main.createOperatorRuleWithDifferentInfix("==", "==="), Main.createOperatorRuleWithDifferentInfix("!=", "!=="), Main.createTextRule("\""), Main.createTextRule("'")));
 }
-auto temp(&[I8] s1) {new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringNode(s1)))
+auto temp(&[I8] s1) {
+	return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringNode(s1)));
 }
-auto temp(&[I8] s) {Main.compileSuffix(s, slice, temp)
+auto temp(&[I8] s) {
+	return Main.compileSuffix(s, slice, temp);
 }
 auto temp(CompileState state1, &[I8] input1) {{
 		&[I8] stripped = Strings.strip(input1);
@@ -744,13 +821,17 @@ auto temp(&[I8] withoutPrefix) {{
 static Option<Tuple2<CompileState, Value>> parseNot(CompileState state, &[I8] input) {
 	return Main.compilePrefix(Strings.strip(input), "!", temp);
 }
-auto temp(CompileState state1, &[I8] s) {Main.parseParameter(state1, s)
+auto temp(CompileState state1, &[I8] s) {
+	return Main.parseParameter(state1, s);
 }
-auto temp(Tuple2<CompileState, List<Parameter>> paramNames) {Main.compileLambdaWithParameterNames(paramNames.left(), Main.retainDefinitionsFromParameters(paramNames.right()), afterArrow)
+auto temp(Tuple2<CompileState, List<Parameter>> paramNames) {
+	return Main.compileLambdaWithParameterNames(paramNames.left(), Main.retainDefinitionsFromParameters(paramNames.right()), afterArrow);
 }
-auto temp(&[I8] withoutEnd) {Main.parseValues(state, withoutEnd, temp).flatMap(temp)
+auto temp(&[I8] withoutEnd) {
+	return Main.parseValues(state, withoutEnd, temp).flatMap(temp);
 }
-auto temp(&[I8] withoutStart) {Main.compileSuffix(withoutStart, ")", temp)
+auto temp(&[I8] withoutStart) {
+	return Main.compileSuffix(withoutStart, ")", temp);
 }
 auto temp(&[I8] beforeArrow, &[I8] afterArrow) {{
 		&[I8] strippedBeforeArrow = Strings.strip(beforeArrow);
@@ -765,25 +846,38 @@ auto temp(&[I8] withoutContentEnd) {{
 		CompileState statementsState = statementsTuple.left();
 		&[I8] statements = statementsTuple.right();
 		CompileState exited = statementsState.exitDepth();
-		return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
+		&[I8] content = "{" + statements + exited.createIndent() + "}";
+		if (exited.isPlatform(Platform.Windows)) {
+			return getTuple2Some(exited, paramNames, content);
+		}
+		return getSome(exited, paramNames, content);
 	}
 }
-auto temp(&[I8] withoutContentStart) {Main.compileSuffix(withoutContentStart, "}", temp)
+auto temp(&[I8] withoutContentStart) {
+	return Main.compileSuffix(withoutContentStart, "}", temp);
 }
-auto temp(Tuple2<CompileState, &[I8]> tuple) {Main.assembleLambda(tuple.left(), paramNames, tuple.right())
+auto temp(Tuple2<CompileState, &[I8]> tuple) {{
+		CompileState state1 = tuple.left();
+		&[I8] content = tuple.right();
+		if (state1.isPlatform(Platform.Windows)) {
+			return getTuple2Some(state1, paramNames, "\n\treturn " + content + ";");
+		}
+		return getSome(state1, paramNames, content);
+	}
 }
-auto temp() {Main.compileValue(state, strippedAfterArrow).flatMap(temp)
+auto temp() {
+	return Main.compileValue(state, strippedAfterArrow).flatMap(temp);
 }
 static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(CompileState state, List<Definition> paramNames, &[I8] afterArrow) {
 	&[I8] strippedAfterArrow = Strings.strip(afterArrow);
 	return Main.compilePrefix(strippedAfterArrow, "{", temp).or(temp);
 }
-static Option<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<Definition> parameters, &[I8] content) {
-	if (state.isPlatform(Platform.Windows)) {
-		FunctionSegment<Definition> value = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
-		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
-	}
+static Some<Tuple2<CompileState, Value>> getSome(CompileState state, List<Definition> parameters, &[I8] content) {
 	return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(parameters, content)));
+}
+static Some<Tuple2<CompileState, Value>> getTuple2Some(CompileState state, List<Definition> parameters, &[I8] content) {
+	FunctionSegment<Definition> value = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
+	return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> createOperatorRule(&[I8] infix) {
 	return Main.createOperatorRuleWithDifferentInfix(infix, infix);
@@ -802,12 +896,14 @@ auto temp(&[I8] childString, &[I8] rawProperty) {{
 		return Main.parseValue(state, childString).flatMap(temp);
 	}
 }
-auto temp(CompileState state, &[I8] input) {Main.compileLast(input, infix, temp)
+auto temp(CompileState state, &[I8] input) {
+	return Main.compileLast(input, infix, temp);
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> createAccessRule(&[I8] infix) {
 	return temp;
 }
-auto temp(List<&[I8]> divisions) {Main.selectFirst(divisions, sourceInfix)
+auto temp(List<&[I8]> divisions) {
+	return Main.selectFirst(divisions, sourceInfix);
 }
 auto temp(Tuple2<CompileState, Value> rightTuple) {{
 		Value left = leftTuple.right();
@@ -815,11 +911,14 @@ auto temp(Tuple2<CompileState, Value> rightTuple) {{
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new OperationNode(left, targetInfix, right)));
 	}
 }
-auto temp(Tuple2<CompileState, Value> leftTuple) {Main.parseValue(leftTuple.left(), rightString).flatMap(temp)
+auto temp(Tuple2<CompileState, Value> leftTuple) {
+	return Main.parseValue(leftTuple.left(), rightString).flatMap(temp);
 }
-auto temp(&[I8] leftString, &[I8] rightString) {Main.parseValue(state1, leftString).flatMap(temp)
+auto temp(&[I8] leftString, &[I8] rightString) {
+	return Main.parseValue(state1, leftString).flatMap(temp);
 }
-auto temp(CompileState state1, &[I8] input1) {Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), temp), temp)
+auto temp(CompileState state1, &[I8] input1) {
+	return Main.compileSplit(Main.splitFolded(input1, Main.foldOperator(sourceInfix), temp), temp);
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> createOperatorRuleWithDifferentInfix(&[I8] sourceInfix, &[I8] targetInfix) {
 	return temp;
@@ -829,7 +928,8 @@ static Option<Tuple2<&[I8], &[I8]>> selectFirst(List<&[I8]> divisions, &[I8] del
 	&[I8] afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("");
 	return new Some<Tuple2<&[I8], &[I8]>>(new Tuple2Impl<&[I8], &[I8]>(first, afterFirst));
 }
-auto temp(Tuple2<DivideState, I8> tuple) {tuple.left()
+auto temp(Tuple2<DivideState, I8> tuple) {
+	return tuple.left();
 }
 auto temp(DivideState state, I8 c) {{
 		if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
@@ -857,9 +957,11 @@ static Option<Tuple2<CompileState, Value>> parseNumber(CompileState state, &[I8]
 		return new None<Tuple2<CompileState, Value>>();
 	}
 }
-auto temp(number index) {input.charAt(index)
+auto temp(number index) {
+	return input.charAt(index);
 }
-auto temp(I8 c) {Characters.isDigit(c)
+auto temp(I8 c) {
+	return Characters.isDigit(c);
 }
 static Bool isNumber(&[I8] input) {
 	HeadedQuery<number> query = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
@@ -875,7 +977,8 @@ static Option<Tuple2<CompileState, Value>> parseSymbol(CompileState state, &[I8]
 		return new None<Tuple2<CompileState, Value>>();
 	}
 }
-auto temp(number index) {Main.isSymbolChar(index, Strings.charAt(input, index))
+auto temp(number index) {
+	return Main.isSymbolChar(index, Strings.charAt(input, index));
 }
 static Bool isSymbol(&[I8] input) {
 	HeadedQuery<number> query = new HeadedQuery<number>(new RangeHead(Strings.length(input)));
@@ -905,9 +1008,11 @@ static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(CompileState sta
 	}
 	return new None<Tuple2<CompileState, Whitespace>>();
 }
-auto temp() {Main.compileEnumValues(state, withoutEnd)
+auto temp() {
+	return Main.compileEnumValues(state, withoutEnd);
 }
-auto temp(&[I8] withoutEnd) {Main.getTupleOption(state, withoutEnd).or(temp)
+auto temp(&[I8] withoutEnd) {
+	return Main.getTupleOption(state, withoutEnd).or(temp);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileFieldDefinition(CompileState state, &[I8] input) {
 	return Main.compileSuffix(Strings.strip(input), ";", temp);
@@ -920,30 +1025,37 @@ auto temp(Tuple2<CompileState, Parameter> definitionTuple) {{
 static Option<Tuple2<CompileState, &[I8]>> getTupleOption(CompileState state, &[I8] withoutEnd) {
 	return Main.parseParameter(state, withoutEnd).flatMap(temp);
 }
-auto temp(&[I8] stringOption) {new Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption)
+auto temp(&[I8] stringOption) {
+	return new Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption);
 }
 auto temp(Tuple2<CompileState, Value> tuple) {{
 		&[I8] structureName = state.findLastStructureName().orElse("");
 		return tuple.right().generateAsEnumValue(structureName, state.platform()).map(temp);
 	}
 }
-auto temp(CompileState state1, &[I8] s) {Main.parseInvokable(state1, s).flatMap(temp)
+auto temp(CompileState state1, &[I8] s) {
+	return Main.parseInvokable(state1, s).flatMap(temp);
 }
-auto temp(Tuple2<CompileState, List<&[I8]>> tuple) {new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse(""))
+auto temp(Tuple2<CompileState, List<&[I8]>> tuple) {
+	return new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse(""));
 }
 static Option<Tuple2<CompileState, &[I8]>> compileEnumValues(CompileState state, &[I8] withoutEnd) {
 	return Main.parseValues(state, withoutEnd, temp).map(temp);
 }
-auto temp() {new Tuple2Impl<CompileState, Parameter>(state, new Placeholder(input))
+auto temp() {
+	return new Tuple2Impl<CompileState, Parameter>(state, new Placeholder(input));
 }
 static Tuple2<CompileState, Parameter> parseParameterOrPlaceholder(CompileState state, &[I8] input) {
 	return Main.parseParameter(state, input).orElseGet(temp);
 }
-auto temp(Tuple2<CompileState, Whitespace> tuple) {Main.getCompileStateParameterTuple2(tuple)
+auto temp(Tuple2<CompileState, Whitespace> tuple) {
+	return Main.getCompileStateParameterTuple2(tuple);
 }
-auto temp(Tuple2<CompileState, Definition> tuple) {new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right())
+auto temp(Tuple2<CompileState, Definition> tuple) {
+	return new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right());
 }
-auto temp() {Main.parseDefinition(state, input).map(temp)
+auto temp() {
+	return Main.parseDefinition(state, input).map(temp);
 }
 static Option<Tuple2<CompileState, Parameter>> parseParameter(CompileState state, &[I8] input) {
 	return Main.parseWhitespace(state, input).map(temp).or(temp);
@@ -956,30 +1068,41 @@ auto temp(&[I8] annotationsString, &[I8] afterAnnotations) {{
 		return Main.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
 	}
 }
-auto temp() {Main.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name)
+auto temp() {
+	return Main.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name);
 }
-auto temp(&[I8] beforeType, &[I8] type) {Main.compileLast(Strings.strip(beforeType), "\n", temp).or(temp)
+auto temp(&[I8] beforeType, &[I8] type) {
+	return Main.compileLast(Strings.strip(beforeType), "\n", temp).or(temp);
 }
-auto temp() {Main.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)
+auto temp() {
+	return Main.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name);
 }
-auto temp(&[I8] beforeName, &[I8] name) {Main.compileSplit(Main.splitFoldedLast(Strings.strip(beforeName), " ", Main.foldTypeSeparators), temp).or(temp)
+auto temp(&[I8] beforeName, &[I8] name) {
+	return Main.compileSplit(Main.splitFoldedLast(Strings.strip(beforeName), " ", Main.foldTypeSeparators), temp).or(temp);
 }
 static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, &[I8] input) {
 	return Main.compileLast(Strings.strip(input), " ", temp);
 }
-auto temp(DivideState state1, I8 c) {Main.foldDelimited(state1, c, "\n")
+auto temp(DivideState state1, I8 c) {
+	return Main.foldDelimited(state1, c, "\n");
 }
-auto temp(&[I8] s2) {Strings.strip(s2)
+auto temp(&[I8] s2) {
+	return Strings.strip(s2);
 }
-auto temp(&[I8] value) {!Strings.isEmpty(value)
+auto temp(&[I8] value) {
+	return !Strings.isEmpty(value);
 }
-auto temp(&[I8] value) {1 <= Strings.length(value)
+auto temp(&[I8] value) {
+	return 1 <= Strings.length(value);
 }
-auto temp(&[I8] value) {Strings.sliceFrom(value, 1)
+auto temp(&[I8] value) {
+	return Strings.sliceFrom(value, 1);
 }
-auto temp(&[I8] s1) {Strings.strip(s1)
+auto temp(&[I8] s1) {
+	return Strings.strip(s1);
 }
-auto temp(&[I8] value) {!Strings.isEmpty(value)
+auto temp(&[I8] value) {
+	return !Strings.isEmpty(value);
 }
 static List<&[I8]> parseAnnotations(&[I8] s) {
 	return Main.divide(s, temp).query().map(temp).filter(temp).filter(temp).map(temp).map(temp).filter(temp).collect(new ListCollector<&[I8]>());
@@ -989,7 +1112,8 @@ auto temp(&[I8] beforeTypeParams, &[I8] typeParamsString) {{
 		return Main.parseDefinitionWithTypeParameters(state, annotations, typeParams, Main.parseModifiers(beforeTypeParams), type, name);
 	}
 }
-auto temp(&[I8] withoutTypeParamEnd) {Main.compileFirst(withoutTypeParamEnd, "<", temp)
+auto temp(&[I8] withoutTypeParamEnd) {
+	return Main.compileFirst(withoutTypeParamEnd, "<", temp);
 }
 auto temp() {{
 		List<&[I8]> divided = Main.parseModifiers(beforeType);
@@ -999,11 +1123,14 @@ auto temp() {{
 static Option<Tuple2<CompileState, Definition>> parseDefinitionWithAnnotations(CompileState state, List<&[I8]> annotations, &[I8] beforeType, &[I8] type, &[I8] name) {
 	return Main.compileSuffix(Strings.strip(beforeType), ">", temp).or(temp);
 }
-auto temp(DivideState state1, I8 c) {Main.foldDelimited(state1, c, " ")
+auto temp(DivideState state1, I8 c) {
+	return Main.foldDelimited(state1, c, " ");
 }
-auto temp(&[I8] s) {Strings.strip(s)
+auto temp(&[I8] s) {
+	return Strings.strip(s);
 }
-auto temp(&[I8] value) {!Strings.isEmpty(value)
+auto temp(&[I8] value) {
+	return !Strings.isEmpty(value);
 }
 static List<&[I8]> parseModifiers(&[I8] beforeType) {
 	return Main.divide(Strings.strip(beforeType), temp).query().map(temp).filter(temp).collect(new ListCollector<&[I8]>());
@@ -1014,9 +1141,11 @@ static DivideState foldDelimited(DivideState state1, I8 c, I8 delimiter) {
 	}
 	return state1.append(c);
 }
-auto temp(&[I8] input1) {Strings.strip(input1)
+auto temp(&[I8] input1) {
+	return Strings.strip(input1);
 }
-auto temp(&[I8] value) {!Strings.isEmpty(value)
+auto temp(&[I8] value) {
+	return !Strings.isEmpty(value);
 }
 static List<&[I8]> divideValues(&[I8] input) {
 	return Main.divide(input, Main.foldValues).query().map(temp).filter(temp).collect(new ListCollector<&[I8]>());
@@ -1056,14 +1185,17 @@ static List<&[I8]> retainFinal(List<&[I8]> oldModifiers, Platform platform) {
 	}
 	return Lists.of("mut");
 }
-auto temp(Tuple2<CompileState, Type> tuple) {new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right())
+auto temp(Tuple2<CompileState, Type> tuple) {
+	return new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right());
 }
-auto temp() {new Tuple2Impl<CompileState, Type>(state, new Placeholder(type))
+auto temp() {
+	return new Tuple2Impl<CompileState, Type>(state, new Placeholder(type));
 }
 static Tuple2<CompileState, Type> parseTypeOrPlaceholder(CompileState state, &[I8] type) {
 	return Main.parseType(state, type).map(temp).orElseGet(temp);
 }
-auto temp(Tuple2<CompileState, Type> tuple) {new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate())
+auto temp(Tuple2<CompileState, Type> tuple) {
+	return new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate());
 }
 static Option<Tuple2<CompileState, &[I8]>> compileType(CompileState state, &[I8] type) {
 	return Main.parseType(state, type).map(temp);
@@ -1096,7 +1228,8 @@ static Option<Tuple2<CompileState, Type>> parseSymbolType(CompileState state, &[
 	}
 	return new None<Tuple2<CompileState, Type>>();
 }
-auto temp(Type result) {new Tuple2Impl<CompileState, Type>(state, result)
+auto temp(Type result) {
+	return new Tuple2Impl<CompileState, Type>(state, result);
 }
 static Option<Tuple2<CompileState, Type>> parsePrimitive(CompileState state, &[I8] input) {
 	return Main.findPrimitiveValue(Strings.strip(input), state.platform()).map(temp);
@@ -1138,7 +1271,8 @@ static Option<Type> findPrimitiveValue(&[I8] input, Platform platform) {
 	}
 	return new None<Type>();
 }
-auto temp(CompileState state1, &[I8] s) {Main.compileTypeArgument(state1, s)
+auto temp(CompileState state1, &[I8] s) {
+	return Main.compileTypeArgument(state1, s);
 }
 auto temp() {{
 			CompileState compileState = argsState.addResolvedImportFromCache(base);
@@ -1153,31 +1287,41 @@ auto temp(&[I8] baseString, &[I8] argsString) {{
 		return Main.assembleFunctionType(argsState, base, args).or(temp);
 	}
 }
-auto temp(&[I8] withoutEnd) {Main.compileFirst(withoutEnd, "<", temp)
+auto temp(&[I8] withoutEnd) {
+	return Main.compileFirst(withoutEnd, "<", temp);
 }
 static Option<Tuple2<CompileState, Type>> parseGeneric(CompileState state, &[I8] input) {
 	return Main.compileSuffix(Strings.strip(input), ">", temp);
 }
-auto temp(Type generated) {new Tuple2Impl<CompileState, Type>(state, generated)
+auto temp(Type generated) {
+	return new Tuple2Impl<CompileState, Type>(state, generated);
 }
 static Option<Tuple2<CompileState, Type>> assembleFunctionType(CompileState state, &[I8] base, List<&[I8]> args) {
 	return Main.mapFunctionType(base, args).map(temp);
 }
-auto temp() {args.find(1)
+auto temp() {
+	return args.find(1);
 }
-auto temp(Tuple2<&[I8], &[I8]> tuple) {new FunctionType(Lists.of(tuple.left()), tuple.right())
+auto temp(Tuple2<&[I8], &[I8]> tuple) {
+	return new FunctionType(Lists.of(tuple.left()), tuple.right());
 }
-auto temp() {args.find(1)
+auto temp() {
+	return args.find(1);
 }
-auto temp() {args.find(2)
+auto temp() {
+	return args.find(2);
 }
-auto temp(Tuple2<Tuple2<&[I8], &[I8]>, &[I8]> tuple) {new FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right())
+auto temp(Tuple2<Tuple2<&[I8], &[I8]>, &[I8]> tuple) {
+	return new FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right());
 }
-auto temp(&[I8] first) {new FunctionType(Lists.empty(), first)
+auto temp(&[I8] first) {
+	return new FunctionType(Lists.empty(), first);
 }
-auto temp(&[I8] first) {new FunctionType(Lists.of(first), "void")
+auto temp(&[I8] first) {
+	return new FunctionType(Lists.of(first), "void");
 }
-auto temp(&[I8] first) {new FunctionType(Lists.of(first), "boolean")
+auto temp(&[I8] first) {
+	return new FunctionType(Lists.of(first), "boolean");
 }
 static Option<Type> mapFunctionType(&[I8] base, List<&[I8]> args) {
 	if (Strings.equalsTo("Function", base)) {
@@ -1197,9 +1341,11 @@ static Option<Type> mapFunctionType(&[I8] base, List<&[I8]> args) {
 	}
 	return new None<Type>();
 }
-auto temp(CompileState state2, &[I8] input1) {Main.compileWhitespace(state2, input1)
+auto temp(CompileState state2, &[I8] input1) {
+	return Main.compileWhitespace(state2, input1);
 }
-auto temp(CompileState state1, &[I8] type) {Main.compileType(state1, type)
+auto temp(CompileState state1, &[I8] type) {
+	return Main.compileType(state1, type);
 }
 static Option<Tuple2<CompileState, &[I8]>> compileTypeArgument(CompileState state, &[I8] input) {
 	return Main.or(state, input, Lists.of(temp, temp));
@@ -1253,7 +1399,8 @@ static Option<T> compileFirst(&[I8] input, &[I8] infix, (arg0 : &[I8], arg1 : &[
 static Option<T> compileInfix(&[I8] input, &[I8] infix, (arg0 : &[I8], arg1 : &[I8]) => number locator, (arg0 : &[I8], arg1 : &[I8]) => Option<T> mapper) {
 	return Main.compileSplit(Main.split(input, infix, locator), mapper);
 }
-auto temp(Tuple2<&[I8], &[I8]> tuple) {mapper(tuple.left(), tuple.right())
+auto temp(Tuple2<&[I8], &[I8]> tuple) {
+	return mapper(tuple.left(), tuple.right());
 }
 static Option<T> compileSplit(Option<Tuple2<&[I8], &[I8]>> splitter, (arg0 : &[I8], arg1 : &[I8]) => Option<T> mapper) {
 	return splitter.flatMap(temp);

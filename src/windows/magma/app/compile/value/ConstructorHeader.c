@@ -17,7 +17,8 @@ ConstructorHeader addModifierLast(&[I8] modifier) {
 &[I8] generateWithDefinitions0(Platform platform, &[I8] definitions) {
 	return generateWithAfterName(platform, "(" + definitions + ")");
 }
-auto temp(Definition definition) {definition.generate(platform)
+auto temp(Definition definition) {
+	return definition.generate(platform);
 }
 &[I8] generateWithDefinitions(Platform platform, List<Definition> definitions) {
 	&[I8] joinedDefinitions = definitions.query().map(temp).collect(new Joiner(", ")).orElse("");

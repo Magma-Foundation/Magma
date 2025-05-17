@@ -12,7 +12,8 @@ export class InvokableNode implements Value {
 	&[I8] joinedArguments = this.joinArgs(platform);
 	return this.caller.generate(platform) + "(" + joinedArguments + ")";
 }
-auto temp(Value value) {value.generate(platform)
+auto temp(Value value) {
+	return value.generate(platform);
 }
 &[I8] joinArgs(Platform platform) {
 	return this.args.query().map(temp).collect(new Joiner(", ")).orElse("");

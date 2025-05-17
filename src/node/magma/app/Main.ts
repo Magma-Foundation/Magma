@@ -33,9 +33,9 @@ import { Argument } from "../../magma/app/compile/value/Argument";
 import { InvokableNode } from "../../magma/app/compile/value/InvokableNode";
 import { StringNode } from "../../magma/app/compile/value/StringNode";
 import { NotNode } from "../../magma/app/compile/value/NotNode";
+import { LambdaNode } from "../../magma/app/compile/value/LambdaNode";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
 import { SymbolNode } from "../../magma/app/compile/value/SymbolNode";
-import { LambdaNode } from "../../magma/app/compile/value/LambdaNode";
 import { AccessNode } from "../../magma/app/compile/value/AccessNode";
 import { OperationNode } from "../../magma/app/compile/value/OperationNode";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
@@ -599,15 +599,26 @@ export class Main {
 			let statementsState: CompileState = statementsTuple.left();
 			let statements: string = statementsTuple.right();
 			let exited: CompileState = statementsState.exitDepth();
-			return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
-		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
+			let content: string = "{" + statements + exited.createIndent() + "}";
+			if (exited.isPlatform(Platform.Windows)) {
+				return getTuple2Some(exited, paramNames, content);
+			}
+			return getSome(exited, paramNames, content);
+		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => {
+			let state1: CompileState = tuple.left();
+			let content: string = tuple.right();
+			if (state1.isPlatform(Platform.Windows)) {
+				return getTuple2Some(state1, paramNames, "\n\treturn " + content + ";");
+			}
+			return getSome(state1, paramNames, content);
+		}));
 	}
-	static assembleLambda(state: CompileState, parameters: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
-		if (state.isPlatform(Platform.Windows)) {
-			let value: FunctionSegment<Definition> = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
-		}
+	static getSome(state: CompileState, parameters: List<Definition>, content: string): Some<Tuple2<CompileState, Value>> {
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(parameters, content)));
+	}
+	static getTuple2Some(state: CompileState, parameters: List<Definition>, content: string): Some<Tuple2<CompileState, Value>> {
+		let value: FunctionSegment<Definition> = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
 	}
 	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);

@@ -31,7 +31,8 @@ Option<Definition> asDefinition() {
 	}
 	return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 }
-auto temp(&[I8] value) {value + " "
+auto temp(&[I8] value) {
+	return value + " ";
 }
 &[I8] joinModifiers() {
 	return this.modifiers.query().map(temp).collect(new Joiner("")).orElse("");
@@ -54,7 +55,8 @@ Definition removeModifier(&[I8] modifier) {
 Definition addModifierLast(&[I8] modifier) {
 	return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
 }
-auto temp(Definition definition) {definition.generate(platform)
+auto temp(Definition definition) {
+	return definition.generate(platform);
 }
 &[I8] generateWithDefinitions(Platform platform, List<Definition> definitions) {
 	&[I8] joinedDefinitions = definitions.query().map(temp).collect(new Joiner(", ")).orElse("");

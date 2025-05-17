@@ -9,7 +9,8 @@ export class HeadedQuery<T> implements Query<T> {
 Option<T> next() {
 	return this.head.next();
 }
-auto temp(C current, T element) {collector.fold(current, element)
+auto temp(C current, T element) {
+	return collector.fold(current, element);
 }
 C collect(Collector<T, C> collector) {
 	return this.foldWithInitial(collector.createInitial(), temp);
@@ -17,7 +18,8 @@ C collect(Collector<T, C> collector) {
 Query<R> map((arg0 : T) => R mapper) {
 	return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
 }
-auto temp(T inner) {folder(finalResult, inner)
+auto temp(T inner) {
+	return folder(finalResult, inner);
 }
 R foldWithInitial(R initial, (arg0 : R, arg1 : T) => R folder) {
 	R result = initial;
@@ -32,24 +34,29 @@ R foldWithInitial(R initial, (arg0 : R, arg1 : T) => R folder) {
 		}
 	}
 }
-auto temp(R maybeNext) {this.foldWithInitial(maybeNext, folder)
+auto temp(R maybeNext) {
+	return this.foldWithInitial(maybeNext, folder);
 }
 Option<R> foldWithMapper((arg0 : T) => R next, (arg0 : R, arg1 : T) => R folder) {
 	return this.head.next().map(next).map(temp);
 }
-auto temp(Query<R> initial) {new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))
+auto temp(Query<R> initial) {
+	return new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper));
 }
-auto temp() {new HeadedQuery<R>(new EmptyHead<R>())
+auto temp() {
+	return new HeadedQuery<R>(new EmptyHead<R>());
 }
 Query<R> flatMap((arg0 : T) => Query<R> mapper) {
 	return this.head.next().map(mapper).map(temp).orElseGet(temp);
 }
-auto temp(Bool maybeAllTrue, T element) {maybeAllTrue && predicate(element)
+auto temp(Bool maybeAllTrue, T element) {
+	return maybeAllTrue && predicate(element);
 }
 Bool allMatch((arg0 : T) => boolean predicate) {
 	return this.foldWithInitial(true, temp);
 }
-auto temp(Bool aBoolean, T t) {aBoolean || predicate(t)
+auto temp(Bool aBoolean, T t) {
+	return aBoolean || predicate(t);
 }
 Bool anyMatch((arg0 : T) => boolean predicate) {
 	return this.foldWithInitial(false, temp);

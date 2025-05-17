@@ -33,9 +33,9 @@ import magma.app.compile.value.Argument;
 import magma.app.compile.value.InvokableNode;
 import magma.app.compile.value.StringNode;
 import magma.app.compile.value.NotNode;
+import magma.app.compile.value.LambdaNode;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.value.SymbolNode;
-import magma.app.compile.value.LambdaNode;
 import magma.app.compile.value.AccessNode;
 import magma.app.compile.value.OperationNode;
 import magma.api.collect.head.HeadedQuery;
@@ -599,15 +599,26 @@ export struct Main {
 			let statementsState: CompileState = statementsTuple.left();
 			let statements: &[I8] = statementsTuple.right();
 			let exited: CompileState = statementsState.exitDepth();
-			return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
-		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
+			let content: &[I8] = "{" + statements + exited.createIndent() + "}";
+			if (exited.isPlatform(Platform.Windows)) {
+				return getTuple2Some(exited, paramNames, content);
+			}
+			return getSome(exited, paramNames, content);
+		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => {
+			let state1: CompileState = tuple.left();
+			let content: &[I8] = tuple.right();
+			if (state1.isPlatform(Platform.Windows)) {
+				return getTuple2Some(state1, paramNames, "\n\treturn " + content + ";");
+			}
+			return getSome(state1, paramNames, content);
+		}));
 	}
-	static def assembleLambda(state: CompileState, parameters: List<Definition>, content: &[I8]): Option<Tuple2<CompileState, Value>> {
-		if (state.isPlatform(Platform.Windows)) {
-			let value: FunctionSegment<Definition> = FunctionSegment<Definition>(Definition(PrimitiveType.Auto, "temp"), parameters, Some<>(content));
-			return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), SymbolNode("temp")));
-		}
+	static def getSome(mut state: CompileState, mut parameters: List<Definition>, mut content: &[I8]): Some<Tuple2<CompileState, Value>> {
 		return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(state, LambdaNode(parameters, content)));
+	}
+	static def getTuple2Some(mut state: CompileState, mut parameters: List<Definition>, mut content: &[I8]): Some<Tuple2<CompileState, Value>> {
+		let value: FunctionSegment<Definition> = FunctionSegment<Definition>(Definition(PrimitiveType.Auto, "temp"), parameters, Some<>(content));
+		return Some<Tuple2<CompileState, Value>>(Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), SymbolNode("temp")));
 	}
 	static def createOperatorRule(infix: &[I8]): (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);

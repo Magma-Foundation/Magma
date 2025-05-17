@@ -43,12 +43,14 @@ Option<Tuple2<DivideState, I8>> pop() {
 	DivideState nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
 	return new Some<Tuple2<DivideState, I8>>(new Tuple2Impl<DivideState, I8>(nextState, c));
 }
-auto temp(Tuple2<DivideState, I8> inner) {new Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right())
+auto temp(Tuple2<DivideState, I8> inner) {
+	return new Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right());
 }
 Option<Tuple2<DivideState, I8>> popAndAppendToTuple() {
 	return this.pop().map(temp);
 }
-auto temp(Tuple2<DivideState, I8> tuple) {tuple.left()
+auto temp(Tuple2<DivideState, I8> tuple) {
+	return tuple.left();
 }
 Option<DivideState> popAndAppendToOption() {
 	return this.popAndAppendToTuple().map(temp);

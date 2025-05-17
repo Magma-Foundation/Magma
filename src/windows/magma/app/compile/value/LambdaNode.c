@@ -8,7 +8,8 @@ export class LambdaNode implements Value {
 	}
 }
 
-auto temp(Definition definition) {definition.generate(platform)
+auto temp(Definition definition) {
+	return definition.generate(platform);
 }
 &[I8] generate(Platform platform) {
 	&[I8] joinedParamNames = this.paramNames.query().map(temp).collect(new Joiner(", ")).orElse("");

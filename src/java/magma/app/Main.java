@@ -883,17 +883,30 @@ public final class Main {
             final String statements = statementsTuple.right();
 
             final CompileState exited = statementsState.exitDepth();
-            return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
-        })).or(() -> Main.compileValue(state, strippedAfterArrow).flatMap((final Tuple2<CompileState, String> tuple) -> Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
+            final String content = "{" + statements + exited.createIndent() + "}";
+            if (exited.isPlatform(Platform.Windows)) {
+                return Main.getTuple2Some(exited, paramNames, content);
+            }
+
+            return Main.getSome(exited, paramNames, content);
+        })).or(() -> Main.compileValue(state, strippedAfterArrow).flatMap((final Tuple2<CompileState, String> tuple) -> {
+            final CompileState state1 = tuple.left();
+            final String content = tuple.right();
+            if (state1.isPlatform(Platform.Windows)) {
+                return Main.getTuple2Some(state1, paramNames, "\n\treturn " + content + ";");
+            }
+
+            return Main.getSome(state1, paramNames, content);
+        }));
     }
 
-    private static Option<Tuple2<CompileState, Value>> assembleLambda(final CompileState state, final List<Definition> parameters, final String content) {
-        if (state.isPlatform(Platform.Windows)) {
-            final FunctionSegment<Definition> value = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
-            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
-        }
-
+    private static Some<Tuple2<CompileState, Value>> getSome(final CompileState state, final List<Definition> parameters, final String content) {
         return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(parameters, content)));
+    }
+
+    private static Some<Tuple2<CompileState, Value>> getTuple2Some(final CompileState state, final List<Definition> parameters, final String content) {
+        final FunctionSegment<Definition> value = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
+        return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
     }
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRule(final String infix) {

@@ -36,7 +36,8 @@ Option<T> filter((arg0 : T) => boolean predicate) {
 Tuple2<Bool, T> toTuple(T other) {
 	return new Tuple2Impl<Bool, T>(true, this.value);
 }
-auto temp(R otherValue) {new Tuple2Impl<T, R>(this.value, otherValue)
+auto temp(R otherValue) {
+	return new Tuple2Impl<T, R>(this.value, otherValue);
 }
 Option<Tuple2<T, R>> and(() => Option<R> other) {
 	return other().map(temp);
