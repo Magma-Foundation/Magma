@@ -27,6 +27,7 @@ import { Parameter } from "magma/app/compile/define/Parameter";
 import { Definition } from "magma/app/compile/define/Definition";
 import { ConstructorHeader } from "magma/app/compile/value/ConstructorHeader";
 import { FunctionHeader } from "magma/app/compile/define/FunctionHeader";
+import { FunctionSegment } from "magma/app/compile/FunctionSegment";
 import { Value } from "magma/app/compile/value/Value";
 import { ConstructionCaller } from "magma/app/compile/value/ConstructionCaller";
 import { Caller } from "magma/app/compile/value/Caller";

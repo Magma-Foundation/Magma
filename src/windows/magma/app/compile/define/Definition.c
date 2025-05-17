@@ -22,11 +22,14 @@ Option<Definition> asDefinition() {
 }
 &[I8] generateWithAfterName(Platform platform, &[I8] afterName) {
 	&[I8] joinedTypeParams = this.joinTypeParams();
-	&[I8] joinedModifiers = this.modifiers.query().map((&[I8] value) => value + " ").collect(new Joiner("")).orElse("");
+	&[I8] joinedModifiers = this.joinModifiers();
 	if (Platform.Windows === platform) {
 		return joinedModifiers + this.type.generateBeforeName() + this.type.generate() + " " + this.name + afterName;
 	}
 	return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+}
+&[I8] joinModifiers() {
+	return this.modifiers.query().map((&[I8] value) => value + " ").collect(new Joiner("")).orElse("");
 }
 &[I8] generateType() {
 	if (this.type.isVar()) {
@@ -45,4 +48,8 @@ Definition removeModifier(&[I8] modifier) {
 }
 Definition addModifierLast(&[I8] modifier) {
 	return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+}
+&[I8] generateWithDefinitions(Platform platform, List<Definition> definitions) {
+	&[I8] joinedDefinitions = definitions.query().map((Definition definition) => definition.generate(platform)).collect(new Joiner(", ")).orElse("");
+	return this.generateWithAfterName(platform, "(" + joinedDefinitions + ")");
 }

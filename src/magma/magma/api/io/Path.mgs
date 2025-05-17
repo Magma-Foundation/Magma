@@ -3,18 +3,5 @@ import magma.api.option.Option;
 import magma.api.result.Result;
 import magma.api.collect.list.List;
 import magma.api.collect.Query;
-export struct Path {
-	def asString(): &[I8];
-	def writeString(mut output: &[I8]): Option<IOError>;
-	def readString(): Result<&[I8], IOError>;
-	def walk(): Result<List<Path>, IOError>;
-	def findFileName(): &[I8];
-	def endsWith(mut suffix: &[I8]): Bool;
-	def relativize(mut source: Path): Path;
-	def getParent(): Path;
-	def query(): Query<&[I8]>;
-	def resolveChildSegments(mut children: List<&[I8]>): Path;
-	def resolveChild(mut name: &[I8]): Path;
-	def exists(): Bool;
-	def createDirectories(): Option<IOError>;
+export struct Path {def asString(): &[I8];def writeString(mut output: &[I8]): Option<IOError>;def readString(): Result<&[I8], IOError>;def walk(): Result<List<Path>, IOError>;def findFileName(): &[I8];def endsWith(mut suffix: &[I8]): Bool;def relativize(mut source: Path): Path;def getParent(): Path;def query(): Query<&[I8]>;def resolveChildSegments(mut children: List<&[I8]>): Path;def resolveChild(mut name: &[I8]): Path;def exists(): Bool;def createDirectories(): Option<IOError>;
 }

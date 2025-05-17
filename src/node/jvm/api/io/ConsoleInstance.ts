@@ -1,4 +1,2 @@
-export interface ConsoleInstance {
-	printErrLn(message: string): void;
-
+export interface ConsoleInstance {static printErrLn(message: string): void;
 }

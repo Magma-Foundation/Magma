@@ -1,6 +1,2 @@
-export interface CharactersInstance {
-	isDigit(c: string): boolean;
-
-	isLetter(c: string): boolean;
-
+export interface CharactersInstance {static isDigit(c: string): boolean;static isLetter(c: string): boolean;
 }

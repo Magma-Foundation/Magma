@@ -1,7 +1,5 @@
 import { Platform } from "../../../../magma/app/io/Platform";
-export interface FunctionHeader<S extends FunctionHeader<S>> {
-	generateWithAfterName(platform: Platform, afterName: string): string;
-	hasAnnotation(annotation: string): boolean;
-	removeModifier(modifier: string): S;
-	addModifierLast(modifier: string): S;
+import { Definition } from "../../../../magma/app/compile/define/Definition";
+import { List } from "../../../../magma/api/collect/list/List";
+export interface FunctionHeader<S extends FunctionHeader<S>> {generateWithDefinitions(platform: Platform, definitions: List<Definition>): string;hasAnnotation(annotation: string): boolean;removeModifier(modifier: string): S;addModifierLast(modifier: string): S;
 }

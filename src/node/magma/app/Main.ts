@@ -25,6 +25,7 @@ import { Parameter } from "../../magma/app/compile/define/Parameter";
 import { Definition } from "../../magma/app/compile/define/Definition";
 import { ConstructorHeader } from "../../magma/app/compile/value/ConstructorHeader";
 import { FunctionHeader } from "../../magma/app/compile/define/FunctionHeader";
+import { FunctionSegment } from "../../magma/app/compile/FunctionSegment";
 import { Value } from "../../magma/app/compile/value/Value";
 import { ConstructionCaller } from "../../magma/app/compile/value/ConstructionCaller";
 import { Caller } from "../../magma/app/compile/value/Caller";
@@ -346,13 +347,13 @@ export class Main {
 			let parametersState: CompileState = parametersTuple.left();
 			let parameters: List<Parameter> = parametersTuple.right();
 			let definitions: List<Definition> = Main.retainDefinitionsFromParameters(parameters);
-			let joinedDefinitions: string = definitions.query().map((definition: Definition) => definition.generate(parametersState.platform())).collect(new Joiner(", ")).orElse("");
 			let newHeader: FunctionHeader<S> = Main.retainDef(header, parametersState);
 			if (newHeader.hasAnnotation("Actual")) {
-				let headerGenerated: string = newHeader.removeModifier("static").generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"));
+				let aStatic: S = newHeader.removeModifier("static");
+				let sFunctionSegment: FunctionSegment<S> = new FunctionSegment<S>(newHeader, definitions, new None<>());
+				let generate: string = sFunctionSegment.generate(parametersState.platform(), "\n\t");
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, generate));
 			}
-			let headerGenerated: string = newHeader.generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
 				let compileState1: CompileState = parametersState.enterDepth();
 				let compileState: CompileState = /* compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth()*/;
@@ -360,14 +361,17 @@ export class Main {
 				let compileState2: CompileState = statementsTuple.left().exitDepth();
 				let indent: string = compileState2.createIndent();
 				let exited: CompileState = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
-				let generated: string = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
+				let sFunctionSegment: FunctionSegment<S> = new FunctionSegment<S>(newHeader, definitions, new Some<>(statementsTuple.right()));
+				let generated: string = indent + sFunctionSegment.generate(parametersState.platform(), indent);
 				if (exited.isPlatform(Platform.Windows)) {
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(exited.addFunction(generated), ""));
 				}
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(exited, generated));
 			})).or(() => {
 				if (Strings.equalsTo(";", Strings.strip(afterParams))) {
-					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));
+					let sFunctionSegment: FunctionSegment<S> = new FunctionSegment<S>(newHeader, definitions, new None<>());
+					let generate: string = sFunctionSegment.generate(parametersState.platform(), "\n\t");
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, generate));
 				}
 				return new None<Tuple2<CompileState, string>>();
 			});
@@ -598,8 +602,11 @@ export class Main {
 			return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
-	static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
-		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new LambdaNode(paramNames, content)));
+	static assembleLambda(state: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
+		if (state.isPlatform(Platform.Windows)) {
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(""), new LambdaNode(paramNames, content)));
+		}
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(paramNames, content)));
 	}
 	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);

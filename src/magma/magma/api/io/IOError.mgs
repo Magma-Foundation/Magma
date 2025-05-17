@@ -1,3 +1,2 @@
-export struct IOError {
-	def display(): &[I8];
+export struct IOError {def display(): &[I8];
 }

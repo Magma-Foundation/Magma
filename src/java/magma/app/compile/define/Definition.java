@@ -16,7 +16,7 @@ public record Definition(
         String name
 ) implements FunctionHeader<Definition>, Parameter {
     @Override
-    public String generate(Platform platform) {
+    public String generate(final Platform platform) {
         return this.generateWithAfterName(platform, "");
     }
 
@@ -25,18 +25,22 @@ public record Definition(
         return new Some<Definition>(this);
     }
 
-    @Override
-    public String generateWithAfterName(final Platform platform, final String afterName) {
+    private String generateWithAfterName(final Platform platform, final String afterName) {
         final String joinedTypeParams = this.joinTypeParams();
-        final String joinedModifiers = this.modifiers.query()
+        final String joinedModifiers = this.joinModifiers();
+
+        if (Platform.Windows == platform) {
+            return joinedModifiers + this.type.generateBeforeName() + this.type.generate() + " " + this.name + afterName;
+        }
+
+        return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+    }
+
+    private String joinModifiers() {
+        return this.modifiers.query()
                 .map((String value) -> value + " ")
                 .collect(new Joiner(""))
                 .orElse("");
-
-        if (Platform.Windows == platform) {
-            return joinedModifiers + this.type.generateBeforeName() + this.type.generate() +  " " + this.name + afterName;
-        }
-        return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
     }
 
     private String generateType() {
@@ -64,5 +68,15 @@ public record Definition(
     @Override
     public Definition addModifierLast(final String modifier) {
         return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+    }
+
+    @Override
+    public String generateWithDefinitions(final Platform platform, final List<Definition> definitions) {
+        final String joinedDefinitions = definitions.query()
+                .map((Definition definition) -> definition.generate(platform))
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        return this.generateWithAfterName(platform, "(" + joinedDefinitions + ")");
     }
 }

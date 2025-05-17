@@ -26,11 +26,14 @@ export class Definition {
 	}
 	generateWithAfterName(platform: Platform, afterName: string): string {
 		let joinedTypeParams: string = this.joinTypeParams();
-		let joinedModifiers: string = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
+		let joinedModifiers: string = this.joinModifiers();
 		if (Platform.Windows === platform) {
 			return joinedModifiers + this.type.generateBeforeName() + this.type.generate() + " " + this.name + afterName;
 		}
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+	}
+	joinModifiers(): string {
+		return this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
 	}
 	generateType(): string {
 		if (this.type.isVar()) {
@@ -49,5 +52,9 @@ export class Definition {
 	}
 	addModifierLast(modifier: string): Definition {
 		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+	}
+	generateWithDefinitions(platform: Platform, definitions: List<Definition>): string {
+		let joinedDefinitions: string = definitions.query().map((definition: Definition) => definition.generate(platform)).collect(new Joiner(", ")).orElse("");
+		return this.generateWithAfterName(platform, "(" + joinedDefinitions + ")");
 	}
 }

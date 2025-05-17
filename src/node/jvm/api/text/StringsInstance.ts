@@ -1,18 +1,2 @@
-export interface StringsInstance {
-	length(stripped: string): number;
-
-	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
-
-	sliceFrom(input: string, startInclusive: number): string;
-
-	isEmpty(cache: string): boolean;
-
-	equalsTo(left: string, right: string): boolean;
-
-	strip(input: string): string;
-
-	isBlank(value: string): boolean;
-
-	charAt(input: string, index: number): string;
-
+export interface StringsInstance {static length(stripped: string): number;static sliceBetween(input: string, startInclusive: number, endExclusive: number): string;static sliceFrom(input: string, startInclusive: number): string;static isEmpty(cache: string): boolean;static equalsTo(left: string, right: string): boolean;static strip(input: string): string;static isBlank(value: string): boolean;static charAt(input: string, index: number): string;
 }

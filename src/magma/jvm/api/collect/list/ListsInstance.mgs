@@ -1,9 +1,3 @@
 import magma.api.collect.list.List;
-export interface ListsInstance {
-	def fromArray<T>(elements: T[]): List<T>;
-
-	def empty<T>(): List<T>;
-
-	def of<T>(...elements: T[]): List<T>;
-
+export interface ListsInstance {static def fromArray<T>(elements: T[]): List<T>;static def empty<T>(): List<T>;static def of<T>(...elements: T[]): List<T>;
 }

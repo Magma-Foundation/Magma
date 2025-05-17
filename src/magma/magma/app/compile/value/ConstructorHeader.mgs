@@ -1,6 +1,9 @@
 import magma.app.compile.value.ConstructorHeader;
 import magma.app.compile.define.FunctionHeader;
 import magma.app.io.Platform;
+import magma.app.compile.define.Definition;
+import magma.api.collect.list.List;
+import magma.api.collect.Joiner;
 export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	def generateWithAfterName(mut platform: Platform, afterName: &[I8]): &[I8] {
 		return "constructor " + afterName;
@@ -13,5 +16,12 @@ export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	}
 	def addModifierLast(modifier: &[I8]): ConstructorHeader {
 		return this;
+	}
+	def generateWithDefinitions0(mut platform: Platform, mut definitions: &[I8]): &[I8] {
+		return generateWithAfterName(platform, "(" + definitions + ")");
+	}
+	def generateWithDefinitions(platform: Platform, definitions: List<Definition>): &[I8] {
+		let joinedDefinitions: &[I8] = definitions.query().map((mut definition: Definition) => definition.generate(platform)).collect(Joiner(", ")).orElse("");
+		return this.generateWithDefinitions0(platform, joinedDefinitions);
 	}
 }

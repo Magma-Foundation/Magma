@@ -1,4 +1,2 @@
-export interface ConsoleInstance {
-	def printErrLn(message: &[I8]): void;
-
+export interface ConsoleInstance {static def printErrLn(message: &[I8]): void;
 }

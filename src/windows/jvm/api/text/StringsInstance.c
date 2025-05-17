@@ -1,19 +1,3 @@
 #include "./Strings.h"
-export interface StringsInstance {
-	number length(&[I8] stripped);
-
-	&[I8] sliceBetween(&[I8] input, number startInclusive, number endExclusive);
-
-	&[I8] sliceFrom(&[I8] input, number startInclusive);
-
-	Bool isEmpty(&[I8] cache);
-
-	Bool equalsTo(&[I8] left, &[I8] right);
-
-	&[I8] strip(&[I8] input);
-
-	Bool isBlank(&[I8] value);
-
-	I8 charAt(&[I8] input, number index);
-
+export interface StringsInstance {static number length(&[I8] stripped);static &[I8] sliceBetween(&[I8] input, number startInclusive, number endExclusive);static &[I8] sliceFrom(&[I8] input, number startInclusive);static Bool isEmpty(&[I8] cache);static Bool equalsTo(&[I8] left, &[I8] right);static &[I8] strip(&[I8] input);static Bool isBlank(&[I8] value);static I8 charAt(&[I8] input, number index);
 }

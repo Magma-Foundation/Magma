@@ -20,6 +20,7 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
+import magma.app.compile.FunctionSegment;
 import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.Import;
 import magma.app.compile.define.Definition;
@@ -525,32 +526,27 @@ public final class Main {
             final List<Parameter> parameters = parametersTuple.right();
             final List<Definition> definitions = Main.retainDefinitionsFromParameters(parameters);
 
-            final String joinedDefinitions = definitions.query()
-                    .map((Definition definition) -> definition.generate(parametersState.platform()))
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
             final FunctionHeader<S> newHeader = Main.retainDef(header, parametersState);
 
             if (newHeader.hasAnnotation("Actual")) {
-                final String headerGenerated = newHeader
-                        .removeModifier("static")
-                        .generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
-
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";\n"));
+                final S aStatic = newHeader.removeModifier("static");
+                final FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new None<>());
+                final String generate = sFunctionSegment.generate(parametersState.platform(), "\n\t");
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, generate));
             }
 
-            final String headerGenerated = newHeader.generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
             return Main.compilePrefix(Strings.strip(afterParams), "{", (final String withoutContentStart) -> Main.compileSuffix(Strings.strip(withoutContentStart), "}", (final String withoutContentEnd) -> {
                 final CompileState compileState1 = parametersState.enterDepth();
                 final CompileState compileState = compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth();
 
                 final Tuple2<CompileState, String> statementsTuple = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
                 final CompileState compileState2 = statementsTuple.left().exitDepth();
+
                 final String indent = compileState2.createIndent();
                 final CompileState exited = compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth();
+                final FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new Some<>(statementsTuple.right()));
+                final String generated = indent + sFunctionSegment.generate(parametersState.platform(), indent);
 
-                final String generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
                 if (exited.isPlatform(Platform.Windows)) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(exited.addFunction(generated), ""));
                 }
@@ -558,7 +554,9 @@ public final class Main {
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(exited, generated));
             })).or(() -> {
                 if (Strings.equalsTo(";", Strings.strip(afterParams))) {
-                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";"));
+                    final FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new None<>());
+                    final String generate = sFunctionSegment.generate(parametersState.platform(), "\n\t");
+                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, generate));
                 }
 
                 return new None<Tuple2<CompileState, String>>();
@@ -889,8 +887,12 @@ public final class Main {
         })).or(() -> Main.compileValue(state, strippedAfterArrow).flatMap((final Tuple2<CompileState, String> tuple) -> Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
     }
 
-    private static Option<Tuple2<CompileState, Value>> assembleLambda(final CompileState exited, final List<Definition> paramNames, final String content) {
-        return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new LambdaNode(paramNames, content)));
+    private static Option<Tuple2<CompileState, Value>> assembleLambda(final CompileState state, final List<Definition> paramNames, final String content) {
+        if (state.isPlatform(Platform.Windows)) {
+            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(""), new LambdaNode(paramNames, content)));
+        }
+
+        return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(paramNames, content)));
     }
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRule(final String infix) {

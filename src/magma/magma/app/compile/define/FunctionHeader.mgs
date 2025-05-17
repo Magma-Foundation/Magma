@@ -1,7 +1,5 @@
 import magma.app.io.Platform;
-export struct FunctionHeader<S extends FunctionHeader<S>> {
-	def generateWithAfterName(mut platform: Platform, mut afterName: &[I8]): &[I8];
-	def hasAnnotation(mut annotation: &[I8]): Bool;
-	def removeModifier(mut modifier: &[I8]): S;
-	def addModifierLast(mut modifier: &[I8]): S;
+import magma.app.compile.define.Definition;
+import magma.api.collect.list.List;
+export struct FunctionHeader<S extends FunctionHeader<S>> {def generateWithDefinitions(mut platform: Platform, mut definitions: List<Definition>): &[I8];def hasAnnotation(mut annotation: &[I8]): Bool;def removeModifier(mut modifier: &[I8]): S;def addModifierLast(mut modifier: &[I8]): S;
 }

@@ -299,13 +299,13 @@ static Option<Tuple2<CompileState, &[I8]>> compileMethodWithBeforeParams(Compile
 		CompileState parametersState = parametersTuple.left();
 		List<Parameter> parameters = parametersTuple.right();
 		List<Definition> definitions = Main.retainDefinitionsFromParameters(parameters);
-		&[I8] joinedDefinitions = definitions.query().map((Definition definition) => definition.generate(parametersState.platform())).collect(new Joiner(", ")).orElse("");
 		FunctionHeader<S> newHeader = Main.retainDef(header, parametersState);
 		if (newHeader.hasAnnotation("Actual")) {
-			&[I8] headerGenerated = newHeader.removeModifier("static").generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
-			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";\n"));
+			S aStatic = newHeader.removeModifier("static");
+			FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new None<>());
+			&[I8] generate = sFunctionSegment.generate(parametersState.platform(), "\n\t");
+			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(parametersState, generate));
 		}
-		&[I8] headerGenerated = newHeader.generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
 		return Main.compilePrefix(Strings.strip(afterParams), "{", (&[I8] withoutContentStart) => Main.compileSuffix(Strings.strip(withoutContentStart), "}", (&[I8] withoutContentEnd) => {
 			CompileState compileState1 = parametersState.enterDepth();
 			CompileState compileState = /* compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth()*/;
@@ -313,14 +313,17 @@ static Option<Tuple2<CompileState, &[I8]>> compileMethodWithBeforeParams(Compile
 			CompileState compileState2 = statementsTuple.left().exitDepth();
 			&[I8] indent = compileState2.createIndent();
 			CompileState exited = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
-			&[I8] generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
+			FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new Some<>(statementsTuple.right()));
+			&[I8] generated = indent + sFunctionSegment.generate(parametersState.platform(), indent);
 			if (exited.isPlatform(Platform.Windows)) {
 				return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(exited.addFunction(generated), ""));
 			}
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(exited, generated));
 		})).or(() => {
 			if (Strings.equalsTo(";", Strings.strip(afterParams))) {
-				return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";"));
+				FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new None<>());
+				&[I8] generate = sFunctionSegment.generate(parametersState.platform(), "\n\t");
+				return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(parametersState, generate));
 			}
 			return new None<Tuple2<CompileState, &[I8]>>();
 		});
@@ -551,8 +554,11 @@ static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(Compi
 		return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
 	})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((Tuple2<CompileState, &[I8]> tuple) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 }
-static Option<Tuple2<CompileState, Value>> assembleLambda(CompileState exited, List<Definition> paramNames, &[I8] content) {
-	return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new LambdaNode(paramNames, content)));
+static Option<Tuple2<CompileState, Value>> assembleLambda(CompileState state, List<Definition> paramNames, &[I8] content) {
+	if (state.isPlatform(Platform.Windows)) {
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(""), new LambdaNode(paramNames, content)));
+	}
+	return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(paramNames, content)));
 }
 static (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, Value>> createOperatorRule(&[I8] infix) {
 	return Main.createOperatorRuleWithDifferentInfix(infix, infix);

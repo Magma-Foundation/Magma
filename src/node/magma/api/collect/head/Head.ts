@@ -1,4 +1,3 @@
 import { Option } from "../../../../magma/api/option/Option";
-export interface Head<T> {
-	next(): Option<T>;
+export interface Head<T> {next(): Option<T>;
 }
