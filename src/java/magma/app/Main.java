@@ -129,17 +129,16 @@ public final class Main {
     }
 
     private static Tuple2Impl<CompileState, IncompleteRoot> prepareRoot(final CompileState state, final Source source, final String input, final Platform platform) {
+        final var location = source.computeLocation();
         final var initialized = state
                 .withPlatform(platform)
-                .withLocation(source.computeLocation());
+                .withLocation(location);
 
         final var outputTuple = Main.compileRoot(initialized, source, input);
         final var outputState = outputTuple.left();
         final var outputsByExtensions = outputTuple.right();
 
-        final var location = outputState.findCurrentLocation().orElse(new Location(Lists.empty(), ""));
         final var incomplete = new IncompleteRoot(location, outputsByExtensions);
-
         return new Tuple2Impl<CompileState, IncompleteRoot>(outputState, incomplete);
     }
 
