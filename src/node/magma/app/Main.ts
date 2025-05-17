@@ -679,6 +679,27 @@ class Slice implements Type {
 		return "";
 	}
 }
+class BooleanType implements Type {
+	platform: Platform;
+	constructor (platform: Platform) {
+		this.platform = platform;
+	}
+	generate(): string {
+		if (Platform.TypeScript === platform){
+			return "boolean";
+		}
+		return "Bool";
+	}
+	isFunctional(): boolean {
+		return false;
+	}
+	isVar(): boolean {
+		return false;
+	}
+	generateBeforeName(): string {
+		return "";
+	}
+}
 class Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
@@ -692,7 +713,6 @@ class Platform {
 class Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
-	static Boolean: Primitive = new Primitive("boolean");
 	static Var: Primitive = new Primitive("var");
 	static Void: Primitive = new Primitive("void");
 	static Unknown: Primitive = new Primitive("unknown");
@@ -1453,7 +1473,7 @@ export class Main {
 			return new Some<Type>(Primitive.Number);
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
-			return new Some<Type>(Primitive.Boolean);
+			return new Some<Type>(new BooleanType(platform));
 		}
 		if (Strings.equalsTo("var", stripped)){
 			return new Some<Type>(Primitive.Var);

@@ -798,6 +798,32 @@ public final class Main {
         }
     }
 
+    private record BooleanType(Platform platform) implements Type {
+        @Override
+        public String generate() {
+            if (Platform.TypeScript == platform) {
+                return "boolean";
+            }
+
+            return "Bool";
+        }
+
+        @Override
+        public boolean isFunctional() {
+            return false;
+        }
+
+        @Override
+        public boolean isVar() {
+            return false;
+        }
+
+        @Override
+        public String generateBeforeName() {
+            return "";
+        }
+    }
+
     public static void main() {
         final var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -1903,7 +1929,7 @@ public final class Main {
         }
 
         if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
-            return new Some<Type>(Primitive.Boolean);
+            return new Some<Type>(new BooleanType(platform));
         }
 
         if (Strings.equalsTo("var", stripped)) {
@@ -2080,7 +2106,6 @@ public final class Main {
     private enum Primitive implements Type {
         String("string"),
         Number("number"),
-        Boolean("boolean"),
         Var("var"),
         Void("void"),
         Unknown("unknown"),

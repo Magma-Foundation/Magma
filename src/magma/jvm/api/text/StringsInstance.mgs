@@ -40,13 +40,13 @@ export interface StringsInstance {
 
 	def sliceFrom(input: &[I8], startInclusive: number): &[I8];
 
-	def isEmpty(cache: &[I8]): boolean;
+	def isEmpty(cache: &[I8]): Bool;
 
-	def equalsTo(left: &[I8], right: &[I8]): boolean;
+	def equalsTo(left: &[I8], right: &[I8]): Bool;
 
 	def strip(input: &[I8]): &[I8];
 
-	def isBlank(value: &[I8]): boolean;
+	def isBlank(value: &[I8]): Bool;
 
 	def charAt(input: &[I8], index: number): string;
 

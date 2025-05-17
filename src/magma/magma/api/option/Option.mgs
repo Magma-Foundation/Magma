@@ -38,11 +38,11 @@ export struct Option<T> {
 	def map<R>(mapper: (arg0 : T) => R): Option<R>;
 	def orElse(other: T): T;
 	def orElseGet(supplier: () => T): T;
-	def isPresent(): boolean;
+	def isPresent(): Bool;
 	def ifPresent(consumer: (arg0 : T) => void): void;
 	def or(other: () => Option<T>): Option<T>;
 	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
 	def filter(predicate: (arg0 : T) => boolean): Option<T>;
-	def toTuple(other: T): Tuple2<boolean, T>;
+	def toTuple(other: T): Tuple2<Bool, T>;
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>>;
 }

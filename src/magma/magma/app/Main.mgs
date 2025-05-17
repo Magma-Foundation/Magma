@@ -54,7 +54,7 @@ import magma.api.collect.head.RangeHead;
 import jvm.api.text.Characters;
 struct MethodHeader {
 	def generateWithAfterName(afterName: &[I8]): &[I8];
-	def hasAnnotation(annotation: &[I8]): boolean;
+	def hasAnnotation(annotation: &[I8]): Bool;
 	def removeModifier(modifier: &[I8]): MethodHeader;
 	def addModifier(modifier: &[I8]): MethodHeader;
 }
@@ -75,8 +75,8 @@ struct Caller {
 }
 struct Type {
 	def generate(): &[I8];
-	def isFunctional(): boolean;
-	def isVar(): boolean;
+	def isFunctional(): Bool;
+	def isVar(): Bool;
 	def generateBeforeName(): &[I8];
 }
 struct DivideState {
@@ -101,7 +101,7 @@ struct DivideState {
 	def append(c: string): DivideState {
 		return DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
 	}
-	def isLevel(): boolean {
+	def isLevel(): Bool {
 		return 0 === this.depth;
 	}
 	def enter(): DivideState {
@@ -110,7 +110,7 @@ struct DivideState {
 	def exit(): DivideState {
 		return DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
 	}
-	def isShallow(): boolean {
+	def isShallow(): Bool {
 		return 1 === this.depth;
 	}
 	def pop(): Option<Tuple2<DivideState, string>> {
@@ -130,7 +130,7 @@ struct DivideState {
 	def peek(): string {
 		return Strings.charAt(this.input, this.index);
 	}
-	def startsWith(slice: &[I8]): boolean {
+	def startsWith(slice: &[I8]): Bool {
 		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
 	}
 }
@@ -156,7 +156,7 @@ struct CompileState {
 	static def createInitial(): CompileState {
 		return CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), None<Location>(), Lists.empty(), Platform.Magma);
 	}
-	def isLastWithin(name: &[I8]): boolean {
+	def isLastWithin(name: &[I8]): Bool {
 		return this.structureNames.findLast().filter((anObject: &[I8]) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	def addResolvedImport(oldParent: List<&[I8]>, child: &[I8]): CompileState {
@@ -276,7 +276,7 @@ struct Definition {
 	def joinTypeParams(): &[I8] {
 		return Main.joinTypeParams(this.typeParams);
 	}
-	def hasAnnotation(annotation: &[I8]): boolean {
+	def hasAnnotation(annotation: &[I8]): Bool {
 		return this.annotations.contains(annotation, Strings.equalsTo);
 	}
 	def removeModifier(modifier: &[I8]): MethodHeader {
@@ -290,7 +290,7 @@ struct ConstructorHeader implements MethodHeader {
 	def generateWithAfterName(afterName: &[I8]): &[I8] {
 		return "constructor " + afterName;
 	}
-	def hasAnnotation(annotation: &[I8]): boolean {
+	def hasAnnotation(annotation: &[I8]): Bool {
 		return false;
 	}
 	def removeModifier(modifier: &[I8]): MethodHeader {
@@ -308,7 +308,7 @@ struct Placeholder {
 	def generate(): &[I8] {
 		return Main.generatePlaceholder(this.input);
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
 	def findChild(): Option<Value> {
@@ -323,7 +323,7 @@ struct Placeholder {
 	def resolve(state: CompileState): Type {
 		return Primitive.Unknown;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -381,10 +381,10 @@ struct SymbolNode {
 	def findChild(): Option<Value> {
 		return None<Value>();
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -540,10 +540,10 @@ struct FunctionType implements Type {
 		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + this.returns;
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return true;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -569,10 +569,10 @@ struct Generic implements Type {
 	def generate(): &[I8] {
 		return this.base + "<" + Generic.generateValueStrings(this.args) + ">";
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -587,10 +587,10 @@ struct VarArgs implements Type {
 	def generate(): &[I8] {
 		return this.type.generate() + "[]";
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -651,10 +651,10 @@ struct ArrayType implements Type {
 	def generate(): &[I8] {
 		return this.child.generate() + "[]";
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -669,10 +669,31 @@ struct Slice implements Type {
 	def generate(): &[I8] {
 		return "&[" + this.type.generate() + "]";
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
+		return false;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+}
+struct BooleanType implements Type {
+	platform: Platform;
+	constructor (platform: Platform) {
+		this.platform = platform;
+	}
+	def generate(): &[I8] {
+		if (Platform.TypeScript === platform){
+			return "boolean";
+		}
+		return "Bool";
+	}
+	def isFunctional(): Bool {
+		return false;
+	}
+	def isVar(): Bool {
 		return false;
 	}
 	def generateBeforeName(): &[I8] {
@@ -692,7 +713,6 @@ struct Platform {
 struct Primitive implements Type {
 	static String: Primitive = new Primitive("string");
 	static Number: Primitive = new Primitive("number");
-	static Boolean: Primitive = new Primitive("boolean");
 	static Var: Primitive = new Primitive("var");
 	static Void: Primitive = new Primitive("void");
 	static Unknown: Primitive = new Primitive("unknown");
@@ -704,10 +724,10 @@ struct Primitive implements Type {
 	def generate(): &[I8] {
 		return this.value;
 	}
-	def isFunctional(): boolean {
+	def isFunctional(): Bool {
 		return false;
 	}
-	def isVar(): boolean {
+	def isVar(): Bool {
 		return Primitive.Var === this;
 	}
 	def generateBeforeName(): &[I8] {
@@ -1289,7 +1309,7 @@ export struct Main {
 			return None<Tuple2<CompileState, Value>>();
 		}
 	}
-	static def isNumber(input: &[I8]): boolean {
+	static def isNumber(input: &[I8]): Bool {
 		let query = HeadedQuery<number>(RangeHead(Strings.length(input)));
 		return query.map((index: number) => input.charAt(index)).allMatch((c: string) => Characters.isDigit(c));
 	}
@@ -1303,11 +1323,11 @@ export struct Main {
 			return None<Tuple2<CompileState, Value>>();
 		}
 	}
-	static def isSymbol(input: &[I8]): boolean {
+	static def isSymbol(input: &[I8]): Bool {
 		let query = HeadedQuery<number>(RangeHead(Strings.length(input)));
 		return query.allMatch((index: number) => Main.isSymbolChar(index, Strings.charAt(input, index)));
 	}
-	static def isSymbolChar(index: number, c: string): boolean {
+	static def isSymbolChar(index: number, c: string): Bool {
 		return "_" === c || Characters.isLetter(c) || (0 !== index && Characters.isDigit(c));
 	}
 	static def compilePrefix<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
@@ -1453,7 +1473,7 @@ export struct Main {
 			return Some<Type>(Primitive.Number);
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
-			return Some<Type>(Primitive.Boolean);
+			return Some<Type>(BooleanType(platform));
 		}
 		if (Strings.equalsTo("var", stripped)){
 			return Some<Type>(Primitive.Var);

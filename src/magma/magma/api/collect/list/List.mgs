@@ -46,11 +46,11 @@ export struct List<T> {
 	def find(index: number): Option<T>;
 	def queryWithIndices(): Query<Tuple2<number, T>>;
 	def addAll(others: List<T>): List<T>;
-	def contains(element: T, equator: (arg0 : T, arg1 : T) => boolean): boolean;
+	def contains(element: T, equator: (arg0 : T, arg1 : T) => Bool): Bool;
 	def queryReversed(): Query<T>;
 	def addFirst(element: T): List<T>;
-	def isEmpty(): boolean;
-	def equalsTo(other: List<T>, equator: (arg0 : T, arg1 : T) => boolean): boolean;
-	def removeValue(element: T, equator: (arg0 : T, arg1 : T) => boolean): List<T>;
+	def isEmpty(): Bool;
+	def equalsTo(other: List<T>, equator: (arg0 : T, arg1 : T) => Bool): Bool;
+	def removeValue(element: T, equator: (arg0 : T, arg1 : T) => Bool): List<T>;
 	def removeLast(): Option<List<T>>;
 }

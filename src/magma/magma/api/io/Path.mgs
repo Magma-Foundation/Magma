@@ -44,12 +44,12 @@ export struct Path {
 	def readString(): Result<&[I8], IOError>;
 	def walk(): Result<List<Path>, IOError>;
 	def findFileName(): &[I8];
-	def endsWith(suffix: &[I8]): boolean;
+	def endsWith(suffix: &[I8]): Bool;
 	def relativize(source: Path): Path;
 	def getParent(): Path;
 	def query(): Query<&[I8]>;
 	def resolveChildSegments(children: List<&[I8]>): Path;
 	def resolveChild(name: &[I8]): Path;
-	def exists(): boolean;
+	def exists(): Bool;
 	def createDirectories(): Option<IOError>;
 }

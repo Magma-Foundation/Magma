@@ -43,8 +43,8 @@ export struct Query<T> {
 	def foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
 	def flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R>;
 	def next(): Option<T>;
-	def allMatch(predicate: (arg0 : T) => boolean): boolean;
+	def allMatch(predicate: (arg0 : T) => boolean): Bool;
 	def filter(predicate: (arg0 : T) => boolean): Query<T>;
-	def anyMatch(predicate: (arg0 : T) => boolean): boolean;
+	def anyMatch(predicate: (arg0 : T) => boolean): Bool;
 	def zip<R>(other: Query<R>): Query<Tuple2<T, R>>;
 }
