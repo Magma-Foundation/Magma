@@ -1,14 +1,18 @@
+import magma.api.option.Option;
+import magma.app.io.Platform;
 import magma.api.collect.list.List;
 import magma.app.io.Location;
 import magma.app.compile.define.Definition;
 import magma.api.Type;
-import magma.api.option.Option;
 import magma.app.io.Source;
-import magma.app.io.Platform;
 import magma.app.compile.Import;
 export struct CompileState {
-	def isLastWithin(mut name: &[I8]): Bool;
-	def addResolvedImport(mut oldParent: List<&[I8]>, mut child: &[I8]): CompileState;
+	def findLastStructureName(): Option<&[I8]>;
+	def createIndent(): &[I8];
+	def isPlatform(mut platform: Platform): Bool;
+	def hasLastStructureNameOf(mut name: &[I8]): Bool;
+	def addResolvedImportFromCache(mut base: &[I8]): CompileState;
+	def addResolvedImportWithNamespace(mut namespace: List<&[I8]>, mut child: &[I8]): CompileState;
 	def withLocation(mut namespace: Location): CompileState;
 	def append(mut element: &[I8]): CompileState;
 	def pushStructureName(mut name: &[I8]): CompileState;
@@ -20,16 +24,11 @@ export struct CompileState {
 	def clearOutput(): CompileState;
 	def addSource(mut source: Source): CompileState;
 	def findSource(mut name: &[I8]): Option<Source>;
-	def addResolvedImportFromCache(mut base: &[I8]): CompileState;
 	def popStructureName(): CompileState;
 	def mapLocation(mut mapper: (arg0 : Location) => Location): CompileState;
 	def withPlatform(mut platform: Platform): CompileState;
 	def imports(): List<Import>;
 	def output(): &[I8];
-	def structureNames(): List<&[I8]>;
-	def depth(): I32;
-	def definitions(): List<Definition>;
-	def maybeLocation(): Option<Location>;
-	def sources(): List<Source>;
+	def findCurrentLocation(): Option<Location>;
 	def platform(): Platform;
 }

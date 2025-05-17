@@ -5,72 +5,72 @@ export class ImmutableCompileState implements CompileState {
 	mut structureNames: List<&[I8]>;
 	mut depth: number;
 	mut definitions: List<Definition>;
-	mut maybeLocation: Option<Location>;
+	mut findCurrentLocation: Option<Location>;
 	mut sources: List<Source>;
 	mut platform: Platform;
-	constructor (mut imports: List<Import>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: number, mut definitions: List<Definition>, mut maybeLocation: Option<Location>, mut sources: List<Source>, mut platform: Platform) {
+	constructor (mut imports: List<Import>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: number, mut definitions: List<Definition>, mut findCurrentLocation: Option<Location>, mut sources: List<Source>, mut platform: Platform) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
 		this.depth = depth;
 		this.definitions = definitions;
-		this.maybeLocation = maybeLocation;
+		this.findCurrentLocation = findCurrentLocation;
 		this.sources = sources;
 		this.platform = platform;
 	}
 	mut static createInitial(): CompileState {
 		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
 	}
-	mut isLastWithin(name: &[I8]): Bool {
+	mut hasLastStructureNameOf(name: &[I8]): Bool {
 		return this.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	mut withLocation(namespace: Location): CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
 	}
 	mut append(element: &[I8]): CompileState {
-		return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut pushStructureName(name: &[I8]): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut enterDepth(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut exitDepth(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut defineAll(definitions: List<Definition>): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut resolve(name: &[I8]): Option<Type> {
 		return this.definitions.queryReversed().filter((mut definition: Definition) => Strings.equalsTo(definition.name(), name)).map((mut definition1: Definition) => definition1.type()).next();
 	}
 	mut clearImports(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut clearOutput(): CompileState {
-		return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut addSource(source: Source): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources.addLast(source), this.platform);
 	}
 	mut addResolvedImportFromCache(base: &[I8]): CompileState {
 		if (this.structureNames.query().anyMatch((mut inner: &[I8]) => Strings.equalsTo(inner, base))) {
 			return this;
 		}
-		return this.findSource(base).map((mut source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
+		return this.findSource(base).map((mut source: Source) => this.addResolvedImportWithNamespace(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 	mut popStructureName(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
 	mut mapLocation(mapper: (arg0 : Location) => Location): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation.map(mapper), this.sources, this.platform);
 	}
 	mut withPlatform(platform: Platform): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, platform);
 	}
-	mut addResolvedImport(mut oldParent: List<&[I8]>, mut child: &[I8]): CompileState {
-		let namespace = this.maybeLocation.map((mut location: Location) => location.namespace()).orElse(Lists.empty());
+	mut addResolvedImportWithNamespace(oldParent: List<&[I8]>, child: &[I8]): CompileState {
+		let namespace = this.findCurrentLocation.map((mut location: Location) => location.namespace()).orElse(Lists.empty());
 		let mut newParent = oldParent;
 		if (Platform.TypeScript === this.platform) {
 			if (namespace.isEmpty()) {
@@ -87,9 +87,19 @@ export class ImmutableCompileState implements CompileState {
 			return this;
 		}
 		let importString = new Import(newParent, child);
-		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
+		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
 	}
-	mut findSource(mut name: &[I8]): Option<Source> {
+	mut findSource(name: &[I8]): Option<Source> {
 		return this.sources.query().filter((mut source: Source) => Strings.equalsTo(source.computeName(), name)).next();
+	}
+	mut isPlatform(platform: Platform): Bool {
+		return platform === this.platform();
+	}
+	mut createIndent(): &[I8] {
+		let indent: number = this.depth();
+		return "\n" + "\t".repeat(indent);
+	}
+	mut findLastStructureName(): Option<&[I8]> {
+		return this.structureNames().findLast();
 	}
 }

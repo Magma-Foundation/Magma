@@ -30,7 +30,7 @@ export class Main {
 	mut static compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
 		let output = Main.compileRoot(state1, source, input);
-		let location = output.left().maybeLocation().orElse(new Location(Lists.empty(), ""));
+		let location = output.left().findCurrentLocation().orElse(new Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
 		let targetParent = targetDirectory.resolveChildSegments(location.namespace());
 		if (!targetParent.exists()) {
@@ -228,7 +228,7 @@ export class Main {
 		}
 	}
 	mut static retainStruct(infix: &[I8], outputContentState: CompileState): &[I8] {
-		if (Platform.Magma === outputContentState.platform()) {
+		if (outputContentState.isPlatform(Platform.Magma)) {
 			return "struct ";
 		}
 		return infix;
@@ -278,12 +278,12 @@ export class Main {
 		return Main.compileFirst(input, "(", (beforeParams: &[I8], withParams: &[I8]) => {
 			let strippedBeforeParams = Strings.strip(beforeParams);
 			return Main.compileLast(strippedBeforeParams, " ", (_: &[I8], name: &[I8]) => {
-				if (state.isLastWithin(name)) {
+				if (state.hasLastStructureNameOf(name)) {
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, &[I8]>>();
 			}).or(() => {
-				if (state.structureNames().findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+				if (state.hasLastStructureNameOf(strippedBeforeParams)) {
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, &[I8]>>();
@@ -315,7 +315,7 @@ export class Main {
 		});
 	}
 	mut static retainDef<S extends FunctionHeader<S>>(header: FunctionHeader<S>, parametersState: CompileState): FunctionHeader<S> {
-		if (Platform.Magma === parametersState.platform()) {
+		if (parametersState.isPlatform(Platform.Magma)) {
 			return header.addModifier("def").removeModifier("mut");
 		}
 		return header;
@@ -338,12 +338,12 @@ export class Main {
 		}
 	}
 	mut static compileReturnWithoutSuffix(state1: CompileState, input1: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		return Main.compileReturn(input1, (mut withoutPrefix: &[I8]) => Main.compileValue(state1, withoutPrefix)).map((mut tuple: Tuple2<CompileState, &[I8]>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), Main.generateIndent(state1.depth()) + tuple.right()));
+		return Main.compileReturn(input1, (mut withoutPrefix: &[I8]) => Main.compileValue(state1, withoutPrefix)).map((mut tuple: Tuple2<CompileState, &[I8]>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), state1.createIndent() + tuple.right()));
 	}
 	mut static compileBlock(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileSuffix(Strings.strip(input), "}", (withoutEnd: &[I8]) => Main.compileSplit(Main.splitFoldedLast(withoutEnd, "", Main.foldBlockStarts), (beforeContentWithEnd: &[I8], content: &[I8]) => Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: &[I8]) => Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, &[I8]>) => {
 			let contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
-			let indent = Main.generateIndent(state.depth());
+			let indent = state.createIndent();
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 		}))));
 	}
@@ -386,11 +386,8 @@ export class Main {
 	mut static compileFunctionStatement(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: &[I8]) => {
 			let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(valueTuple.left(), Main.generateIndent(state.depth()) + valueTuple.right() + ";"));
+			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
 		});
-	}
-	mut static generateIndent(indent: number): &[I8] {
-		return "\n" + "\t".repeat(indent);
 	}
 	mut static compileFunctionStatementValue(state: CompileState, withoutEnd: &[I8]): Tuple2<CompileState, &[I8]> {
 		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (mut state1: CompileState, mut input: &[I8]) => Main.parseInvokable(state1, input).map((mut tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
@@ -520,7 +517,7 @@ export class Main {
 			let statementsState = statementsTuple.left();
 			let statements = statementsTuple.right();
 			let exited = statementsState.exitDepth();
-			return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth()) + "}");
+			return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, &[I8]>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
 	mut static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: &[I8]): Option<Tuple2<CompileState, Value>> {
@@ -623,7 +620,7 @@ export class Main {
 	}
 	mut static compileEnumValues(state: CompileState, withoutEnd: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: &[I8]) => Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
-			let structureName = state.structureNames().findLast().orElse("");
+			let structureName = state.findLastStructureName().orElse("");
 			return tuple.right().generateAsEnumValue(structureName).map((stringOption: &[I8]) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption));
 		})).map((tuple: Tuple2<CompileState, List<&[I8]>>) => new Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
 	}

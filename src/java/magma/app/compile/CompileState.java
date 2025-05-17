@@ -11,9 +11,17 @@ import magma.app.io.Source;
 import java.util.function.Function;
 
 public interface CompileState {
-    boolean isLastWithin(String name);
+    Option<String> findLastStructureName();
 
-    CompileState addResolvedImport(List<String> oldParent, String child);
+    String createIndent();
+
+    boolean isPlatform(Platform platform);
+
+    boolean hasLastStructureNameOf(String name);
+
+    CompileState addResolvedImportFromCache(String base);
+
+    CompileState addResolvedImportWithNamespace(List<String> namespace, String child);
 
     CompileState withLocation(Location namespace);
 
@@ -37,8 +45,6 @@ public interface CompileState {
 
     Option<Source> findSource(String name);
 
-    CompileState addResolvedImportFromCache(String base);
-
     CompileState popStructureName();
 
     CompileState mapLocation(Function<Location, Location> mapper);
@@ -49,11 +55,7 @@ public interface CompileState {
 
     String output();
 
-    List<String> structureNames();
-
-    int depth();
-
-    Option<Location> maybeLocation();
+    Option<Location> findCurrentLocation();
 
     Platform platform();
 }

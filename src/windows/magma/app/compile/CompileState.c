@@ -1,7 +1,11 @@
 #include "./CompileState.h"
 export interface CompileState {
-	mut isLastWithin(mut name: &[I8]): Bool;
-	mut addResolvedImport(mut oldParent: List<&[I8]>, mut child: &[I8]): CompileState;
+	mut findLastStructureName(): Option<&[I8]>;
+	mut createIndent(): &[I8];
+	mut isPlatform(mut platform: Platform): Bool;
+	mut hasLastStructureNameOf(mut name: &[I8]): Bool;
+	mut addResolvedImportFromCache(mut base: &[I8]): CompileState;
+	mut addResolvedImportWithNamespace(mut namespace: List<&[I8]>, mut child: &[I8]): CompileState;
 	mut withLocation(mut namespace: Location): CompileState;
 	mut append(mut element: &[I8]): CompileState;
 	mut pushStructureName(mut name: &[I8]): CompileState;
@@ -13,16 +17,11 @@ export interface CompileState {
 	mut clearOutput(): CompileState;
 	mut addSource(mut source: Source): CompileState;
 	mut findSource(mut name: &[I8]): Option<Source>;
-	mut addResolvedImportFromCache(mut base: &[I8]): CompileState;
 	mut popStructureName(): CompileState;
 	mut mapLocation(mut mapper: (arg0 : Location) => Location): CompileState;
 	mut withPlatform(mut platform: Platform): CompileState;
 	mut imports(): List<Import>;
 	mut output(): &[I8];
-	mut structureNames(): List<&[I8]>;
-	mut depth(): number;
-	mut definitions(): List<Definition>;
-	mut maybeLocation(): Option<Location>;
-	mut sources(): List<Source>;
+	mut findCurrentLocation(): Option<Location>;
 	mut platform(): Platform;
 }

@@ -1,14 +1,18 @@
+import { Option } from "../../../magma/api/option/Option";
+import { Platform } from "../../../magma/app/io/Platform";
 import { List } from "../../../magma/api/collect/list/List";
 import { Location } from "../../../magma/app/io/Location";
 import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Type } from "../../../magma/api/Type";
-import { Option } from "../../../magma/api/option/Option";
 import { Source } from "../../../magma/app/io/Source";
-import { Platform } from "../../../magma/app/io/Platform";
 import { Import } from "../../../magma/app/compile/Import";
 export interface CompileState {
-	isLastWithin(name: string): boolean;
-	addResolvedImport(oldParent: List<string>, child: string): CompileState;
+	findLastStructureName(): Option<string>;
+	createIndent(): string;
+	isPlatform(platform: Platform): boolean;
+	hasLastStructureNameOf(name: string): boolean;
+	addResolvedImportFromCache(base: string): CompileState;
+	addResolvedImportWithNamespace(namespace: List<string>, child: string): CompileState;
 	withLocation(namespace: Location): CompileState;
 	append(element: string): CompileState;
 	pushStructureName(name: string): CompileState;
@@ -20,16 +24,11 @@ export interface CompileState {
 	clearOutput(): CompileState;
 	addSource(source: Source): CompileState;
 	findSource(name: string): Option<Source>;
-	addResolvedImportFromCache(base: string): CompileState;
 	popStructureName(): CompileState;
 	mapLocation(mapper: (arg0 : Location) => Location): CompileState;
 	withPlatform(platform: Platform): CompileState;
 	imports(): List<Import>;
 	output(): string;
-	structureNames(): List<string>;
-	depth(): number;
-	definitions(): List<Definition>;
-	maybeLocation(): Option<Location>;
-	sources(): List<Source>;
+	findCurrentLocation(): Option<Location>;
 	platform(): Platform;
 }
