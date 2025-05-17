@@ -41,62 +41,6 @@ public final class Main {
         Option<Value> findChild();
     }
 
-    private record DivideState(List<String> segments, String buffer, int depth, String input, int index) {
-        static DivideState createInitial(final String input) {
-            return new DivideState(Lists.empty(), "", 0, input, 0);
-        }
-
-        private DivideState advance() {
-            return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
-        }
-
-        private DivideState append(final char c) {
-            return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
-        }
-
-        boolean isLevel() {
-            return 0 == this.depth;
-        }
-
-        DivideState enter() {
-            return new DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
-        }
-
-        DivideState exit() {
-            return new DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
-        }
-
-        boolean isShallow() {
-            return 1 == this.depth;
-        }
-
-        Option<Tuple2<DivideState, Character>> pop() {
-            if (this.index >= Strings.length(this.input)) {
-                return new None<Tuple2<DivideState, Character>>();
-            }
-
-            final var c = Strings.charAt(this.input, this.index);
-            final var nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-            return new Some<Tuple2<DivideState, Character>>(new Tuple2Impl<DivideState, Character>(nextState, c));
-        }
-
-        Option<Tuple2<DivideState, Character>> popAndAppendToTuple() {
-            return this.pop().map((Tuple2<DivideState, Character> inner) -> new Tuple2Impl<DivideState, Character>(inner.left().append(inner.right()), inner.right()));
-        }
-
-        Option<DivideState> popAndAppendToOption() {
-            return this.popAndAppendToTuple().map((Tuple2<DivideState, Character> tuple) -> tuple.left());
-        }
-
-        char peek() {
-            return Strings.charAt(this.input, this.index);
-        }
-
-        boolean startsWith(final String slice) {
-            return Strings.sliceFrom(this.input, this.index).startsWith(slice);
-        }
-    }
-
     private record CompileState(
             List<Import> imports,
             String output,
@@ -811,14 +755,8 @@ public final class Main {
                 .orElse("");
 
         final var compileState = statementsState.clearImports().clearOutput();
-        final var segment = compileState.sources
-                .query()
-                .map((Source source1) -> Main.formatSource(source1))
-                .collect(new Joiner(", "))
-                .orElse("");
-
         final var withMain = Main.createMain(source);
-        final var output = "/*[" + segment + "\n]*/\n" + imports + statementsState.output + statementsTuple.right() + withMain;
+        final var output = imports + statementsState.output + statementsTuple.right() + withMain;
         return new Tuple2Impl<CompileState, String>(compileState, output);
     }
 
@@ -883,7 +821,7 @@ public final class Main {
                     .orElseGet(() -> folder.apply(poppedState, popped));
         }
 
-        return current.advance().segments;
+        return current.advance().segments();
     }
 
     private static Option<DivideState> foldDoubleQuotes(final DivideState state, final char c) {

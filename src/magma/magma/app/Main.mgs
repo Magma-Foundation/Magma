@@ -1,63 +1,24 @@
-/*[
-	JVMList: jvm.api.collect.list, 
-	Lists: jvm.api.collect.list, 
-	Console: jvm.api.io, 
-	Files: jvm.api.io, 
-	JVMPath: jvm.api.io, 
-	Characters: jvm.api.text, 
-	Strings: jvm.api.text, 
-	Actual: magma.annotate, 
-	Namespace: magma.annotate, 
-	Collector: magma.api.collect, 
-	EmptyHead: magma.api.collect.head, 
-	FlatMapHead: magma.api.collect.head, 
-	Head: magma.api.collect.head, 
-	HeadedQuery: magma.api.collect.head, 
-	MapHead: magma.api.collect.head, 
-	RangeHead: magma.api.collect.head, 
-	SingleHead: magma.api.collect.head, 
-	ZipHead: magma.api.collect.head, 
-	Joiner: magma.api.collect, 
-	List: magma.api.collect.list, 
-	ListCollector: magma.api.collect.list, 
-	Queries: magma.api.collect, 
-	Query: magma.api.collect, 
-	IOError: magma.api.io, 
-	Path: magma.api.io, 
-	None: magma.api.option, 
-	Option: magma.api.option, 
-	Some: magma.api.option, 
-	Err: magma.api.result, 
-	Ok: magma.api.result, 
-	Result: magma.api.result, 
-	Tuple2: magma.api, 
-	Tuple2Impl: magma.api, 
-	Type: magma.api, 
-	Definition: magma.app, 
-	Main: magma.app, 
-	MethodHeader: magma.app, 
-	Parameter: magma.app
-]*/
 import magma.api.Type;
 import magma.api.option.Option;
 import magma.api.collect.list.List;
-import jvm.api.collect.list.Lists;
-import magma.api.Tuple2;
-import jvm.api.text.Strings;
-import magma.api.option.None;
-import magma.api.option.Some;
-import magma.api.Tuple2Impl;
 import magma.app.Definition;
+import jvm.api.collect.list.Lists;
+import magma.api.option.None;
+import jvm.api.text.Strings;
+import magma.api.option.Some;
 import magma.app.MethodHeader;
 import magma.app.Parameter;
 import magma.api.collect.Joiner;
+import magma.api.Tuple2;
 import magma.api.io.Path;
 import magma.api.io.IOError;
 import magma.api.result.Result;
 import magma.api.collect.list.ListCollector;
 import jvm.api.io.Files;
 import jvm.api.io.Console;
+import magma.api.Tuple2Impl;
 import magma.api.collect.Queries;
+import magma.app.DivideState;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import jvm.api.text.Characters;
@@ -71,61 +32,6 @@ struct Argument {
 struct Caller {
 	def generate(): &[I8];
 	def findChild(): Option<Value>;
-}
-struct DivideState {
-	mut segments: List<&[I8]>;
-	mut buffer: &[I8];
-	mut depth: I32;
-	mut input: &[I8];
-	mut index: I32;
-	constructor (mut segments: List<&[I8]>, mut buffer: &[I8], mut depth: I32, mut input: &[I8], mut index: I32) {
-		this.segments = segments;
-		this.buffer = buffer;
-		this.depth = depth;
-		this.input = input;
-		this.index = index;
-	}
-	def static createInitial(input: &[I8]): DivideState {
-		return DivideState(Lists.empty(), "", 0, input, 0);
-	}
-	def advance(): DivideState {
-		return DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
-	}
-	def append(c: I8): DivideState {
-		return DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
-	}
-	def isLevel(): Bool {
-		return 0 === this.depth;
-	}
-	def enter(): DivideState {
-		return DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
-	}
-	def exit(): DivideState {
-		return DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
-	}
-	def isShallow(): Bool {
-		return 1 === this.depth;
-	}
-	def pop(): Option<Tuple2<DivideState, I8>> {
-		if (this.index >= Strings.length(this.input)) {
-			return None<Tuple2<DivideState, I8>>();
-		}
-		let c = Strings.charAt(this.input, this.index);
-		let nextState = DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState, c));
-	}
-	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {
-		return this.pop().map((mut inner: Tuple2<DivideState, I8>) => Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right()));
-	}
-	def popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((mut tuple: Tuple2<DivideState, I8>) => tuple.left());
-	}
-	def peek(): I8 {
-		return Strings.charAt(this.input, this.index);
-	}
-	def startsWith(slice: &[I8]): Bool {
-		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
-	}
 }
 struct CompileState {
 	mut imports: List<Import>;
@@ -723,9 +629,8 @@ export struct Main {
 		let statementsState = statementsTuple.left();
 		let imports = statementsState.imports.query().map((mut anImport: Import) => anImport.generate(state.platform)).collect(Joiner("")).orElse("");
 		let compileState = statementsState.clearImports().clearOutput();
-		let segment = compileState.sources.query().map((mut source1: Source) => Main.formatSource(source1)).collect(Joiner(", ")).orElse("");
 		let withMain = Main.createMain(source);
-		let output = "/*[" + segment + "\n]*/\n" + imports + statementsState.output + statementsTuple.right() + withMain;
+		let output = imports + statementsState.output + statementsTuple.right() + withMain;
 		return Tuple2Impl<CompileState, &[I8]>(compileState, output);
 	}
 	def static createMain(source: Source): &[I8] {
@@ -774,7 +679,7 @@ export struct Main {
 			let popped = poppedTuple.right();
 			current = Main.foldSingleQuotes(poppedState, popped).or(() => Main.foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder(poppedState, popped));
 		}
-		return current.advance().segments;
+		return current.advance().segments();
 	}
 	def static foldDoubleQuotes(state: DivideState, c: I8): Option<DivideState> {
 		if ("\"" !== c) {
