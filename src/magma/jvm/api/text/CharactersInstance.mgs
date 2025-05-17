@@ -1,4 +1,4 @@
-// []
+// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters]
 export interface CharactersInstance {
 	static def isDigit(c: I8): Bool;
 	static def isLetter(c: I8): Bool;

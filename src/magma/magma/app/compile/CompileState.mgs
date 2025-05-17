@@ -1,4 +1,4 @@
-// []
+// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings, Strings, Strings, Actual, Actual, Actual, Namespace, Namespace, Namespace, Collector, Collector, Collector, EmptyHead, EmptyHead, EmptyHead, FlatMapHead, FlatMapHead, FlatMapHead, Head, Head, Head, HeadedQuery, HeadedQuery, HeadedQuery, MapHead, MapHead, MapHead, RangeHead, RangeHead, RangeHead, SingleHead, SingleHead, SingleHead, ZipHead, ZipHead, ZipHead, Joiner, Joiner, Joiner, List, List, List, ListCollector, ListCollector, ListCollector, Queries, Queries, Queries, Query, Query, Query, IOError, IOError, IOError, Path, Path, Path, None, None, None, Option, Option, Option, Some, Some, Some, Err, Err, Err, Ok, Ok, Ok, Result, Result, Result, Tuple2, Tuple2, Tuple2, Tuple2Impl, Tuple2Impl, Tuple2Impl, Type, Type, Type, CompileState, CompileState]
 import magma.api.option.{ Option };
 import magma.app.io.{ Platform, Location, Source };
 import magma.api.collect.list.{ List };
@@ -32,4 +32,6 @@ export struct CompileState {
 	def findCurrentLocation(): Option<Location>;
 	def platform(): Platform;
 	def addFunction(mut function: &[I8]): CompileState;
+	def findDefinedTypes(): List<&[I8]>;
+	def defineType(mut name: &[I8]): CompileState;
 }

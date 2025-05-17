@@ -142,7 +142,15 @@ public final class Main {
         final var generatedMain = Main.createMain(source);
         final var clearedState = statementsState.clearImports().clear();
 
-        final var temp = "// []\n";
+        final var joinedDefinedTypes = clearedState.findDefinedTypes()
+                .query()
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        final var temp = "// [" +
+                joinedDefinedTypes +
+                "]\n";
+
         if (!statementsState.isPlatform(Platform.Windows)) {
             entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain);
             return new Tuple2Impl<>(clearedState, entries);
@@ -442,21 +450,25 @@ public final class Main {
                 .collect(Joiner.empty())
                 .orElse("");
 
+        return Main.getTuple2Some(outputContentState.defineType(name), annotations, infix, parameters, maybeSuperType, name, joinedModifiers, joinedTypeParams, implementingString, platform, constructorString, outputContent);
+    }
+
+    private static Some<Tuple2<CompileState, String>> getTuple2Some(final CompileState state, final List<String> annotations, final String infix, final List<Definition> parameters, final Option<String> maybeSuperType, final String name, final String joinedModifiers, final String joinedTypeParams, final String implementingString, final Platform platform, final String constructorString, final String outputContent) {
         if (annotations.contains("Namespace", Strings::equalsTo)) {
             final var actualInfix = "interface ";
             final var newName = name + "Instance";
 
             final var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters, platform) + constructorString + outputContent + "\n}\n";
-            final var withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace(), location.name() + "Instance"));
+            final var withNewLocation = state.append(generated).mapLocation((Location location) -> new Location(location.namespace(), location.name() + "Instance"));
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(withNewLocation, ""));
         }
         else {
             final var extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
-            final var infix1 = Main.retainStruct(infix, outputContentState);
+            final var infix1 = Main.retainStruct(infix, state);
 
             final var generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters, platform) + constructorString + outputContent + "\n}\n";
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state.append(generated), ""));
         }
     }
 

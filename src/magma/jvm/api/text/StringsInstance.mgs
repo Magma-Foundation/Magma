@@ -1,4 +1,4 @@
-// []
+// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings, Strings]
 export interface StringsInstance {
 	static def length(stripped: &[I8]): I32;
 	static def sliceBetween(input: &[I8], startInclusive: I32, endExclusive: I32): &[I8];

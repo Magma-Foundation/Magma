@@ -62,4 +62,8 @@ public interface CompileState {
     Platform platform();
 
     CompileState addFunction(String function);
+
+    List<String> findDefinedTypes();
+
+    CompileState defineType(String name);
 }

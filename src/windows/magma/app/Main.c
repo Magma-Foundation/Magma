@@ -97,7 +97,8 @@ static Tuple2<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, S
 	var entries = new HashMap<&[I8], &[I8]>(/*auto*/);
 	var generatedMain = Main/*auto*/.createMain(source/*Source*/);
 	var clearedState = statementsState/*CompileState*/.clearImports(/*auto*/).clear(/*auto*/);
-	var temp = "// []\n";
+	var joinedDefinedTypes = clearedState/*auto*/.findDefinedTypes(/*auto*/).query(/*auto*/).collect(new Joiner(", ")).orElse("");
+	var temp = "// [" + joinedDefinedTypes/*auto*/ + "]\n";
 	if (!statementsState/*CompileState*/.isPlatform(Platform/*auto*/.Windows)) {
 		/*entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain)*/;
 		return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);
@@ -367,12 +368,6 @@ static Option<Tuple2<CompileState, &[I8]>> compileStructureWithTypeParams(Compil
 auto temp(&[I8] value) {
 	return value/*&[I8]*/ + " ";
 }
-auto temp(Location location) {
-	return new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance");
-}
-auto temp(&[I8] inner) {
-	return " extends " + inner/*auto*/;
-}
 static Option<Tuple2<CompileState, &[I8]>> assembleStructure(CompileState state, List<&[I8]> annotations, List<&[I8]> oldModifiers, &[I8] infix, &[I8] rawName, List<&[I8]> typeParams, List<Definition> parameters, Option<Type> maybeImplementing, &[I8] content, Option<&[I8]> maybeSuperType) {
 	var name = Strings/*auto*/.strip(rawName/*&[I8]*/);
 	if (!Main/*auto*/.isSymbol(name/*&[I8]*/)) {
@@ -387,18 +382,27 @@ static Option<Tuple2<CompileState, &[I8]>> assembleStructure(CompileState state,
 	var implementingString = Main/*auto*/.generateImplementing(maybeImplementing/*Option<Type>*/);
 	var newModifiers = Main/*auto*/.modifyModifiers0(oldModifiers/*List<&[I8]>*/);
 	var joinedModifiers = newModifiers/*auto*/.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(Joiner/*auto*/.empty(/*auto*/)).orElse("");
+	return getTuple2Some/*auto*/(outputContentState/*CompileState*/.defineType(name/*&[I8]*/), annotations/*List<&[I8]>*/, infix/*&[I8]*/, parameters/*List<Definition>*/, maybeSuperType/*Option<&[I8]>*/, name/*&[I8]*/, joinedModifiers/*&[I8]*/, joinedTypeParams/*&[I8]*/, implementingString/*&[I8]*/, platform/*Platform*/, constructorString/*&[I8]*/, outputContent/*&[I8]*/);
+}
+auto temp(Location location) {
+	return new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance");
+}
+auto temp(&[I8] inner) {
+	return " extends " + inner/*auto*/;
+}
+static Some<Tuple2<CompileState, &[I8]>> getTuple2Some(CompileState state, List<&[I8]> annotations, &[I8] infix, List<Definition> parameters, Option<&[I8]> maybeSuperType, &[I8] name, &[I8] joinedModifiers, &[I8] joinedTypeParams, &[I8] implementingString, Platform platform, &[I8] constructorString, &[I8] outputContent) {
 	if (annotations/*List<&[I8]>*/.contains("Namespace", Strings/*auto*/.equalsTo)) {
 		var actualInfix = "interface ";
 		var newName = name/*&[I8]*/ + "Instance";
-		var generated = joinedModifiers/*auto*/ + actualInfix/*auto*/ + newName/*auto*/ + joinedTypeParams/*auto*/ + implementingString/*auto*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*auto*/ + outputContent/*auto*/ + "\n}\n";
-		var withNewLocation = outputContentState/*CompileState*/.append(generated/*auto*/).mapLocation(lambdaDefinition/*auto*/);
+		var generated = joinedModifiers/*&[I8]*/ + actualInfix/*auto*/ + newName/*auto*/ + joinedTypeParams/*&[I8]*/ + implementingString/*&[I8]*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*&[I8]*/ + outputContent/*&[I8]*/ + "\n}\n";
+		var withNewLocation = state/*CompileState*/.append(generated/*auto*/).mapLocation(lambdaDefinition/*auto*/);
 		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(withNewLocation/*auto*/, ""));
 	}
 	else {
 		var extendsString = maybeSuperType/*Option<&[I8]>*/.map(lambdaDefinition/*auto*/).orElse("");
-		var infix1 = Main/*auto*/.retainStruct(infix/*&[I8]*/, outputContentState/*CompileState*/);
-		var generated = joinedModifiers/*auto*/ + infix1/*auto*/ + name/*&[I8]*/ + joinedTypeParams/*auto*/ + extendsString/*auto*/ + implementingString/*auto*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*auto*/ + outputContent/*auto*/ + "\n}\n";
-		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(outputContentState/*CompileState*/.append(generated/*auto*/), ""));
+		var infix1 = Main/*auto*/.retainStruct(infix/*&[I8]*/, state/*CompileState*/);
+		var generated = joinedModifiers/*&[I8]*/ + infix1/*auto*/ + name/*&[I8]*/ + joinedTypeParams/*&[I8]*/ + extendsString/*auto*/ + implementingString/*&[I8]*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*&[I8]*/ + outputContent/*&[I8]*/ + "\n}\n";
+		return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(state/*CompileState*/.append(generated/*auto*/), ""));
 	}
 }
 static &[I8] retainStruct(&[I8] infix, CompileState outputContentState) {

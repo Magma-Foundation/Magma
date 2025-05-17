@@ -26,4 +26,6 @@ export interface CompileState {
 	Option<Location> findCurrentLocation();
 	Platform platform();
 	CompileState addFunction(&[I8] function);
+	List<&[I8]> findDefinedTypes();
+	CompileState defineType(&[I8] name);
 }

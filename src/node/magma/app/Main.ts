@@ -1,4 +1,4 @@
-// []
+// [Lists, Lists, Lists, Console, Console, Console, Files, Files, Files, Characters, Characters, Characters, Strings, Strings, Strings, Actual, Actual, Actual, Namespace, Namespace, Namespace, Collector, Collector, Collector, EmptyHead, EmptyHead, EmptyHead, FlatMapHead, FlatMapHead, FlatMapHead, Head, Head, Head, HeadedQuery, HeadedQuery, HeadedQuery, MapHead, MapHead, MapHead, RangeHead, RangeHead, RangeHead, SingleHead, SingleHead, SingleHead, ZipHead, ZipHead, ZipHead, Joiner, Joiner, Joiner, List, List, List, ListCollector, ListCollector, ListCollector, Queries, Queries, Queries, Query, Query, Query, IOError, IOError, IOError, Path, Path, Path, None, None, None, Option, Option, Option, Some, Some, Some, Err, Err, Err, Ok, Ok, Ok, Result, Result, Result, Tuple2, Tuple2, Tuple2, Tuple2Impl, Tuple2Impl, Tuple2Impl, Type, Type, Type, CompileState, CompileState, CompileState, Definition, Definition, Definition, FunctionHeader, FunctionHeader, FunctionHeader, Parameter, Parameter, Parameter, FunctionSegment, FunctionSegment, FunctionSegment, ImmutableCompileState, ImmutableCompileState, ImmutableCompileState, Import, Import, Import, DivideState, DivideState, DivideState, Placeholder, Placeholder, Placeholder, Whitespace, Whitespace, Whitespace, ArrayType, ArrayType, ArrayType, BooleanType, BooleanType, BooleanType, FunctionType, FunctionType, FunctionType, PrimitiveType, PrimitiveType, PrimitiveType, SliceType, SliceType, SliceType, TemplateType, TemplateType, TemplateType, VariadicType, VariadicType, VariadicType, AccessNode, AccessNode, AccessNode, Argument, Argument, Argument, Caller, Caller, Caller, ConstructionCaller, ConstructionCaller, ConstructionCaller, ConstructorHeader, ConstructorHeader, ConstructorHeader, InvokableNode, InvokableNode, InvokableNode, LambdaNode, LambdaNode, LambdaNode, NotNode, NotNode, NotNode, OperationNode, OperationNode, OperationNode, StringNode, StringNode, StringNode, SymbolNode, SymbolNode, SymbolNode, Value, Value, Value, Location, Location, Location, Platform, Platform, Platform, Source, Source, Source, Main]
 import { Files } from "../../jvm/api/io/Files";
 import { Path } from "../../magma/api/io/Path";
 import { List } from "../../magma/api/collect/list/List";
@@ -17,8 +17,8 @@ import { Platform } from "../../magma/app/io/Platform";
 import { Location } from "../../magma/app/io/Location";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Queries } from "../../magma/api/collect/Queries";
-import { Import } from "../../magma/app/compile/Import";
 import { Joiner } from "../../magma/api/collect/Joiner";
+import { Import } from "../../magma/app/compile/Import";
 import { Strings } from "../../jvm/api/text/Strings";
 import { DivideState } from "../../magma/app/compile/text/DivideState";
 import { Type } from "../../magma/api/Type";
@@ -105,7 +105,8 @@ export class Main {
 		let entries = new HashMap<string, string>(/*auto*/);
 		let generatedMain = Main/*auto*/.createMain(source/*Source*/);
 		let clearedState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
-		let temp = "// []\n";
+		let joinedDefinedTypes = clearedState/*auto*/.findDefinedTypes(/*auto*/).query(/*auto*/).collect(new Joiner(", ")).orElse("");
+		let temp = "// [" + joinedDefinedTypes/*auto*/ + "]\n";
 		if (!statementsState/*auto*/.isPlatform(Platform/*auto*/.Windows)) {
 			/*entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain)*/;
 			return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);
@@ -308,18 +309,21 @@ export class Main {
 		let implementingString = Main/*auto*/.generateImplementing(maybeImplementing/*Option<Type>*/);
 		let newModifiers = Main/*auto*/.modifyModifiers0(oldModifiers/*List<string>*/);
 		let joinedModifiers = newModifiers/*auto*/.query(/*auto*/).map((value: string) => value/*&[I8]*/ + " ").collect(Joiner/*auto*/.empty(/*auto*/)).orElse("");
+		return getTuple2Some/*auto*/(outputContentState/*auto*/.defineType(name/*string*/), annotations/*List<string>*/, infix/*string*/, parameters/*List<Definition>*/, maybeSuperType/*Option<string>*/, name/*string*/, joinedModifiers/*auto*/, joinedTypeParams/*auto*/, implementingString/*auto*/, platform/*Platform*/, constructorString/*auto*/, outputContent/*auto*/);
+	}
+	static getTuple2Some(state: CompileState, annotations: List<string>, infix: string, parameters: List<Definition>, maybeSuperType: Option<string>, name: string, joinedModifiers: string, joinedTypeParams: string, implementingString: string, platform: Platform, constructorString: string, outputContent: string): Some<Tuple2<CompileState, string>> {
 		if (annotations/*List<string>*/.contains("Namespace", Strings/*auto*/.equalsTo)) {
 			let actualInfix = "interface ";
 			let newName = name/*string*/ + "Instance";
-			let generated = joinedModifiers/*auto*/ + actualInfix/*auto*/ + newName/*auto*/ + joinedTypeParams/*auto*/ + implementingString/*auto*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*auto*/ + outputContent/*auto*/ + "\n}\n";
-			let withNewLocation = outputContentState/*auto*/.append(generated/*auto*/).mapLocation((location: Location) => new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance"));
+			let generated = joinedModifiers/*string*/ + actualInfix/*auto*/ + newName/*auto*/ + joinedTypeParams/*string*/ + implementingString/*string*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*string*/ + outputContent/*string*/ + "\n}\n";
+			let withNewLocation = state/*CompileState*/.append(generated/*auto*/).mapLocation((location: Location) => new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance"));
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(withNewLocation/*auto*/, ""));
 		}
 		else {
 			let extendsString = maybeSuperType/*Option<string>*/.map((inner: string) => " extends " + inner/*auto*/).orElse("");
-			let infix1 = Main/*auto*/.retainStruct(infix/*string*/, outputContentState/*auto*/);
-			let generated = joinedModifiers/*auto*/ + infix1/*auto*/ + name/*string*/ + joinedTypeParams/*auto*/ + extendsString/*auto*/ + implementingString/*auto*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*auto*/ + outputContent/*auto*/ + "\n}\n";
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState/*auto*/.append(generated/*auto*/), ""));
+			let infix1 = Main/*auto*/.retainStruct(infix/*string*/, state/*CompileState*/);
+			let generated = joinedModifiers/*string*/ + infix1/*auto*/ + name/*string*/ + joinedTypeParams/*string*/ + extendsString/*auto*/ + implementingString/*string*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*string*/ + outputContent/*string*/ + "\n}\n";
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state/*CompileState*/.append(generated/*auto*/), ""));
 		}
 	}
 	static retainStruct(infix: string, outputContentState: CompileState): string {
