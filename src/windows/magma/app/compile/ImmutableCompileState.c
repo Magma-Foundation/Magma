@@ -106,7 +106,7 @@ CompileState clearDefinedTypes() {
 	return this/*auto*/.structures + this/*auto*/.functions;
 }
 auto temp(Location location) {
-	return location/*auto*/.namespace(/*auto*/);
+	return location/*Location*/.namespace(/*auto*/);
 }
 auto temp(Import node) {
 	return Strings/*auto*/.equalsTo(node/*auto*/.child(/*auto*/), child/*&[I8]*/);

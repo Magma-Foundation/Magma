@@ -74,6 +74,7 @@ import magma.app.io.{ Platform, Source, Location };
 import magma.app.compile.{ CompileState, ImmutableCompileState, Import, FunctionSegment };
 import magma.api.{ Tuple2, Tuple2Impl, Type };
 import jvm.api.collect.list.{ Lists };
+import magma.api.result.{ Result, Err, Ok };
 import jvm.api.text.{ Strings, Characters };
 import magma.app.compile.text.{ DivideState, Whitespace, Placeholder };
 import magma.app.compile.define.{ Definition, Parameter, FunctionHeader };
@@ -117,23 +118,33 @@ export struct Main {
 		return Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(() => otherValue/*auto*/));
 	}
 	static def compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
-		let state1 = state/*CompileState*/.withLocation(source/*Source*/.computeLocation(/*auto*/)).withPlatform(platform/*Platform*/);
-		let output = Main/*auto*/.compileRoot(state1/*DivideState*/, source/*Source*/, input/*&[I8]*/);
+		let initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
+		let output = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*&[I8]*/);
 		let location = output/*auto*/.left(/*auto*/).findCurrentLocation(/*auto*/).orElse(Location(Lists/*auto*/.empty(/*auto*/), ""));
-		let targetDirectory = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
-		let targetParent = targetDirectory/*auto*/.resolveChildSegments(location/*auto*/.namespace(/*auto*/));
-		if (!targetParent/*auto*/.exists(/*auto*/)) {
-			let maybeError = targetParent/*auto*/.createDirectories(/*auto*/);
+		let maybeError = Main/*auto*/.writeOutputEntries(platform/*Platform*/, location/*Location*/, output/*auto*/.right(/*auto*/));
+		return Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+	}
+	static def writeOutputEntries(platform: Platform, location: Location, outputsByExtensions: Map<&[I8], &[I8]>): Option<IOError> {
+		let initial: Option<IOError> = None<IOError>(/*auto*/);
+		let platformRoot = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
+		return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (maybeError0: Option<IOError>, extension: &[I8]) => maybeError0/*auto*/.or(() => Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*string*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/)));
+	}
+	static def writeOutputEntryWithParent(directory: Path, extension: &[I8], location: Location, outputsByExtensions: Map<&[I8], &[I8]>): Option<IOError> {
+		return Main/*auto*/.ensureTargetParent(directory/*Path*/, location/*Location*/.namespace(/*auto*/)).match((targetParent: Path) => Main/*auto*/.writeOutputEntry(targetParent/*Path*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/, extension/*&[I8]*/), Some/*auto*/.new);
+	}
+	static def writeOutputEntry(targetParent: Path, location: Location, outputsByExtensions: Map<&[I8], &[I8]>, extension: &[I8]): Option<IOError> {
+		let target = targetParent/*Path*/.resolveChild(location/*Location*/.name(/*auto*/) + "." + extension/*&[I8]*/);
+		return target/*auto*/.writeString(outputsByExtensions/*Map<&[I8], &[I8]>*/.get(extension/*&[I8]*/));
+	}
+	static def ensureTargetParent(directory: Path, namespace: List<&[I8]>): Result<Path, IOError> {
+		let targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<&[I8]>*/);
+		if (!targetParent/*Path*/.exists(/*auto*/)) {
+			let maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
 			if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-				return Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+				return Err<>(maybeError/*Option<IOError>*/.orElse(null/*auto*/));
 			}
 		}
-		let initial: Option<IOError> = None<IOError>(/*auto*/);
-		let ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
-			let target = targetParent/*auto*/.resolveChild(location/*auto*/.name(/*auto*/) + "." + extension/*&[I8]*/);
-			return ioErrorOption/*Option<IOError>*/.or(() => target/*auto*/.writeString(output/*auto*/.right(/*auto*/).get(extension/*&[I8]*/)));
-		});
-		return Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
+		return Ok<>(targetParent/*Path*/);
 	}
 	static def compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2<CompileState, Map<&[I8], &[I8]>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*&[I8]*/, Main/*auto*/.compileRootSegment);
@@ -174,11 +185,11 @@ export struct Main {
 	static def foldImport(current: List<Tuple2<List<&[I8]>, List<&[I8]>>>, anImport: Import): List<Tuple2<List<&[I8]>, List<&[I8]>>> {
 		let namespace = anImport/*Import*/.namespace(/*auto*/);
 		let child = anImport/*Import*/.child(/*auto*/);
-		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/)) {
-			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/, child/*&[I8]*/);
+		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/)) {
+			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/, child/*&[I8]*/);
 		}
 		else {
-			return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(Tuple2Impl<>(namespace/*Location*/, Lists/*auto*/.of(child/*&[I8]*/)));
+			return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(Tuple2Impl<>(namespace/*List<&[I8]>*/, Lists/*auto*/.of(child/*&[I8]*/)));
 		}
 	}
 	static def hasNamespace(map: List<Tuple2<List<&[I8]>, List<&[I8]>>>, namespace: List<&[I8]>): Bool {
@@ -354,7 +365,7 @@ export struct Main {
 			let actualInfix = "interface ";
 			let newName = name/*&[I8]*/ + "Instance";
 			let generated = joinedModifiers/*&[I8]*/ + actualInfix/*auto*/ + newName/*auto*/ + joinedTypeParams/*&[I8]*/ + implementingString/*&[I8]*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*&[I8]*/ + outputContent/*&[I8]*/ + "\n}\n";
-			let withNewLocation = state/*CompileState*/.append(generated/*auto*/).mapLocation((mut location: Location) => Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance"));
+			let withNewLocation = state/*CompileState*/.append(generated/*auto*/).mapLocation((mut location: Location) => Location(location/*Location*/.namespace(/*auto*/), location/*Location*/.name(/*auto*/) + "Instance"));
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(withNewLocation/*auto*/, ""));
 		}
 		else {

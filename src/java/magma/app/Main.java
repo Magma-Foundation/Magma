@@ -19,6 +19,9 @@ import magma.api.io.Path;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 import magma.app.compile.CompileState;
 import magma.app.compile.FunctionSegment;
 import magma.app.compile.ImmutableCompileState;
@@ -133,27 +136,66 @@ public final class Main {
         return new Tuple2Impl<>(otherState, maybeError.or(() -> otherValue));
     }
 
-    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(final CompileState state, final Source source, final String input, final Platform platform) {
-        final var state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
-        final var output = Main.compileRoot(state1, source, input);
+    private static Tuple2<CompileState, Option<IOError>> compileAndWrite(
+            final CompileState state,
+            final Source source,
+            final String input,
+            final Platform platform
+    ) {
+        final var initialized = state.withPlatform(platform)
+                .withLocation(source.computeLocation());
 
-        final var location = output.left().findCurrentLocation().orElse(new Location(Lists.empty(), ""));
-        final var targetDirectory = Files.get(".", "src", platform.root);
-        final var targetParent = targetDirectory.resolveChildSegments(location.namespace());
+        final var output = Main.compileRoot(initialized, source, input);
+        final var location = output.left()
+                .findCurrentLocation()
+                .orElse(new Location(Lists.empty(), ""));
+
+        final var maybeError = Main.writeOutputEntries(platform, location, output.right());
+        return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
+    }
+
+    private static Option<IOError> writeOutputEntries(
+            final Platform platform,
+            final Location location,
+            final Map<String, String> outputsByExtensions
+    ) {
+        final Option<IOError> initial = new None<IOError>();
+
+        final var platformRoot = Files.get(".", "src", platform.root);
+        return Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> maybeError0, final String extension) ->
+                maybeError0.or(() -> Main.writeOutputEntryWithParent(platformRoot, extension, location, outputsByExtensions)));
+    }
+
+    private static Option<IOError> writeOutputEntryWithParent(
+            final Path directory,
+            final String extension,
+            final Location location,
+            final Map<String, String> outputsByExtensions
+    ) {
+        return Main.ensureTargetParent(directory, location.namespace())
+                .match((final Path targetParent) -> Main.writeOutputEntry(targetParent, location, outputsByExtensions, extension), Some::new);
+    }
+
+    private static Option<IOError> writeOutputEntry(
+            final Path targetParent,
+            final Location location,
+            final Map<String, String> outputsByExtensions,
+            final String extension
+    ) {
+        final var target = targetParent.resolveChild(location.name() + "." + extension);
+        return target.writeString(outputsByExtensions.get(extension));
+    }
+
+    private static Result<Path, IOError> ensureTargetParent(final Path directory, final List<String> namespace) {
+        final var targetParent = directory.resolveChildSegments(namespace);
         if (!targetParent.exists()) {
             final var maybeError = targetParent.createDirectories();
             if (maybeError.isPresent()) {
-                return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), maybeError);
+                return new Err<>(maybeError.orElse(null));
             }
         }
 
-        final Option<IOError> initial = new None<IOError>();
-        final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> ioErrorOption, final String extension) -> {
-            final var target = targetParent.resolveChild(location.name() + "." + extension);
-            return ioErrorOption.or(() -> target.writeString(output.right().get(extension)));
-        });
-
-        return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
+        return new Ok<>(targetParent);
     }
 
     private static Tuple2<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {

@@ -83,6 +83,9 @@ import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileS
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Location } from "../../magma/app/io/Location";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Result } from "../../magma/api/result/Result";
+import { Err } from "../../magma/api/result/Err";
+import { Ok } from "../../magma/api/result/Ok";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Import } from "../../magma/app/compile/Import";
 import { Strings } from "../../jvm/api/text/Strings";
@@ -153,23 +156,33 @@ export class Main {
 		return new Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(() => otherValue/*auto*/));
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Tuple2<CompileState, Option<IOError>> {
-		let state1 = state/*CompileState*/.withLocation(source/*Source*/.computeLocation(/*auto*/)).withPlatform(platform/*Platform*/);
-		let output = Main/*auto*/.compileRoot(state1/*auto*/, source/*Source*/, input/*string*/);
+		let initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
+		let output = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*string*/);
 		let location = output/*auto*/.left(/*auto*/).findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
-		let targetDirectory = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
-		let targetParent = targetDirectory/*auto*/.resolveChildSegments(location/*auto*/.namespace(/*auto*/));
-		if (!targetParent/*auto*/.exists(/*auto*/)) {
-			let maybeError = targetParent/*auto*/.createDirectories(/*auto*/);
+		let maybeError = Main/*auto*/.writeOutputEntries(platform/*Platform*/, location/*auto*/, output/*auto*/.right(/*auto*/));
+		return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+	}
+	static writeOutputEntries(platform: Platform, location: Location, outputsByExtensions: Map<string, string>): Option<IOError> {
+		let initial: Option<IOError> = new None<IOError>(/*auto*/);
+		let platformRoot = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
+		return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (maybeError0: Option<IOError>, extension: string) => maybeError0/*auto*/.or(() => Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*auto*/, location/*Location*/, outputsByExtensions/*Map<string, string>*/)));
+	}
+	static writeOutputEntryWithParent(directory: Path, extension: string, location: Location, outputsByExtensions: Map<string, string>): Option<IOError> {
+		return Main/*auto*/.ensureTargetParent(directory/*Path*/, location/*Location*/.namespace(/*auto*/)).match((targetParent: Path) => Main/*auto*/.writeOutputEntry(targetParent/*auto*/, location/*Location*/, outputsByExtensions/*Map<string, string>*/, extension/*string*/), Some/*auto*/.new);
+	}
+	static writeOutputEntry(targetParent: Path, location: Location, outputsByExtensions: Map<string, string>, extension: string): Option<IOError> {
+		let target = targetParent/*Path*/.resolveChild(location/*Location*/.name(/*auto*/) + "." + extension/*string*/);
+		return target/*auto*/.writeString(outputsByExtensions/*Map<string, string>*/.get(extension/*string*/));
+	}
+	static ensureTargetParent(directory: Path, namespace: List<string>): Result<Path, IOError> {
+		let targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<string>*/);
+		if (!targetParent/*Path*/.exists(/*auto*/)) {
+			let maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
 			if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-				return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+				return new Err<>(maybeError/*Option<IOError>*/.orElse(null/*auto*/));
 			}
 		}
-		let initial: Option<IOError> = new None<IOError>(/*auto*/);
-		let ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (ioErrorOption: Option<IOError>, extension: string) => {
-			let target = targetParent/*auto*/.resolveChild(location/*auto*/.name(/*auto*/) + "." + extension/*string*/);
-			return ioErrorOption/*Option<IOError>*/.or(() => target/*auto*/.writeString(output/*auto*/.right(/*auto*/).get(extension/*string*/)));
-		});
-		return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
+		return new Ok<>(targetParent/*Path*/);
 	}
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2<CompileState, Map<string, string>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*string*/, Main/*auto*/.compileRootSegment);
@@ -210,11 +223,11 @@ export class Main {
 	static foldImport(current: List<Tuple2<List<string>, List<string>>>, anImport: Import): List<Tuple2<List<string>, List<string>>> {
 		let namespace = anImport/*Import*/.namespace(/*auto*/);
 		let child = anImport/*Import*/.child(/*auto*/);
-		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<string>, List<string>>>*/, namespace/*Location*/)) {
-			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<string>, List<string>>>*/, namespace/*Location*/, child/*string*/);
+		if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<string>, List<string>>>*/, namespace/*List<string>*/)) {
+			return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<string>, List<string>>>*/, namespace/*List<string>*/, child/*string*/);
 		}
 		else {
-			return current/*List<Tuple2<List<string>, List<string>>>*/.addLast(new Tuple2Impl<>(namespace/*Location*/, Lists/*auto*/.of(child/*string*/)));
+			return current/*List<Tuple2<List<string>, List<string>>>*/.addLast(new Tuple2Impl<>(namespace/*List<string>*/, Lists/*auto*/.of(child/*string*/)));
 		}
 	}
 	static hasNamespace(map: List<Tuple2<List<string>, List<string>>>, namespace: List<string>): boolean {
@@ -390,7 +403,7 @@ export class Main {
 			let actualInfix = "interface ";
 			let newName = name/*string*/ + "Instance";
 			let generated = joinedModifiers/*string*/ + actualInfix/*auto*/ + newName/*auto*/ + joinedTypeParams/*string*/ + implementingString/*string*/ + " {" + Main/*auto*/.joinParameters(parameters/*List<Definition>*/, platform/*Platform*/) + constructorString/*string*/ + outputContent/*string*/ + "\n}\n";
-			let withNewLocation = state/*CompileState*/.append(generated/*auto*/).mapLocation((location: Location) => new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance"));
+			let withNewLocation = state/*CompileState*/.append(generated/*auto*/).mapLocation((location: Location) => new Location(location/*Location*/.namespace(/*auto*/), location/*Location*/.name(/*auto*/) + "Instance"));
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(withNewLocation/*auto*/, ""));
 		}
 		else {

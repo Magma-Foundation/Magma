@@ -136,7 +136,7 @@ export struct ImmutableCompileState implements CompileState {
 		return this/*auto*/.structures + this/*auto*/.functions;
 	}
 	def addResolvedImportWithNamespace(oldParent: List<&[I8]>, child: &[I8]): CompileState {
-		let namespace = this/*auto*/.findCurrentLocation.map((mut location: Location) => location/*auto*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
+		let namespace = this/*auto*/.findCurrentLocation.map((mut location: Location) => location/*Location*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
 		mut let newParent = oldParent/*List<&[I8]>*/;
 		if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 			if (namespace/*Location*/.isEmpty(/*auto*/)) {

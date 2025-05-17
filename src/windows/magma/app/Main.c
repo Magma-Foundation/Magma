@@ -73,29 +73,43 @@ static Tuple2<CompileState, Option<IOError>> compileAndWritePlatform(CompileStat
 	var otherValue = otherTuple/*auto*/.right(/*auto*/);
 	return new Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(lambdaDefinition/*auto*/));
 }
-auto temp() {
-	return target/*auto*/.writeString(output/*auto*/.right(/*auto*/).get(extension/*&[I8]*/));
-}
-auto temp(Option<IOError> ioErrorOption, &[I8] extension) {{
-		var target = targetParent/*auto*/.resolveChild(location/*auto*/.name(/*auto*/) + "." + extension/*&[I8]*/);
-		return ioErrorOption/*Option<IOError>*/.or(lambdaDefinition/*auto*/);
-	}
-}
 static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, &[I8] input, Platform platform) {
-	var state1 = state/*CompileState*/.withLocation(source/*Source*/.computeLocation(/*auto*/)).withPlatform(platform/*Platform*/);
-	var output = Main/*auto*/.compileRoot(state1/*DivideState*/, source/*Source*/, input/*&[I8]*/);
+	var initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
+	var output = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*&[I8]*/);
 	var location = output/*auto*/.left(/*auto*/).findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
-	var targetDirectory = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
-	var targetParent = targetDirectory/*auto*/.resolveChildSegments(location/*auto*/.namespace(/*auto*/));
-	if (!targetParent/*auto*/.exists(/*auto*/)) {
-		var maybeError = targetParent/*auto*/.createDirectories(/*auto*/);
+	var maybeError = Main/*auto*/.writeOutputEntries(platform/*Platform*/, location/*Location*/, output/*auto*/.right(/*auto*/));
+	return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+}
+auto temp() {
+	return Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*&[I8]*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/);
+}
+auto temp(Option<IOError> maybeError0, &[I8] extension) {
+	return maybeError0/*auto*/.or(lambdaDefinition/*auto*/);
+}
+static Option<IOError> writeOutputEntries(Platform platform, Location location, Map<&[I8], &[I8]> outputsByExtensions) {
+	Option<IOError> initial = new None<IOError>(/*auto*/);
+	var platformRoot = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
+	return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, lambdaDefinition/*auto*/);
+}
+auto temp(Path targetParent) {
+	return Main/*auto*/.writeOutputEntry(targetParent/*Path*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/, extension/*&[I8]*/);
+}
+static Option<IOError> writeOutputEntryWithParent(Path directory, &[I8] extension, Location location, Map<&[I8], &[I8]> outputsByExtensions) {
+	return Main/*auto*/.ensureTargetParent(directory/*Path*/, location/*Location*/.namespace(/*auto*/)).match(lambdaDefinition/*auto*/, Some/*auto*/.new);
+}
+static Option<IOError> writeOutputEntry(Path targetParent, Location location, Map<&[I8], &[I8]> outputsByExtensions, &[I8] extension) {
+	var target = targetParent/*Path*/.resolveChild(location/*Location*/.name(/*auto*/) + "." + extension/*&[I8]*/);
+	return target/*auto*/.writeString(outputsByExtensions/*Map<&[I8], &[I8]>*/.get(extension/*&[I8]*/));
+}
+static Result<Path, IOError> ensureTargetParent(Path directory, List<&[I8]> namespace) {
+	var targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<&[I8]>*/);
+	if (!targetParent/*Path*/.exists(/*auto*/)) {
+		var maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
 		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-			return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+			return new Err<>(maybeError/*Option<IOError>*/.orElse(null/*auto*/));
 		}
 	}
-	Option<IOError> initial = new None<IOError>(/*auto*/);
-	var ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, lambdaDefinition/*auto*/);
-	return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
+	return new Ok<>(targetParent/*Path*/);
 }
 auto temp(&[I8] value) {
 	return "\n\t" + value/*&[I8]*/;
@@ -142,11 +156,11 @@ static &[I8] generateEntry(&[I8] current, Tuple2<List<&[I8]>, List<&[I8]>> entry
 static List<Tuple2<List<&[I8]>, List<&[I8]>>> foldImport(List<Tuple2<List<&[I8]>, List<&[I8]>>> current, Import anImport) {
 	var namespace = anImport/*Import*/.namespace(/*auto*/);
 	var child = anImport/*Import*/.child(/*auto*/);
-	if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/)) {
-		return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*Location*/, child/*&[I8]*/);
+	if (Main/*auto*/.hasNamespace(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/)) {
+		return Main/*auto*/.attachChildToMapEntries(current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/, namespace/*List<&[I8]>*/, child/*&[I8]*/);
 	}
 	else {
-		return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(new Tuple2Impl<>(namespace/*Location*/, Lists/*auto*/.of(child/*&[I8]*/)));
+		return current/*List<Tuple2<List<&[I8]>, List<&[I8]>>>*/.addLast(new Tuple2Impl<>(namespace/*List<&[I8]>*/, Lists/*auto*/.of(child/*&[I8]*/)));
 	}
 }
 auto temp(List<&[I8]> stringList) {
@@ -396,7 +410,7 @@ static Option<Tuple2<CompileState, &[I8]>> assembleStructure(CompileState state,
 	return Main/*auto*/.getTuple2Some(outputContentState/*CompileState*/.defineType(name/*&[I8]*/), annotations/*List<&[I8]>*/, infix/*&[I8]*/, parameters/*List<Definition>*/, maybeSuperType/*Option<&[I8]>*/, name/*&[I8]*/, joinedModifiers/*&[I8]*/, joinedTypeParams/*&[I8]*/, implementingString/*&[I8]*/, platform/*Platform*/, constructorString/*&[I8]*/, outputContent/*&[I8]*/);
 }
 auto temp(Location location) {
-	return new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance");
+	return new Location(location/*Location*/.namespace(/*auto*/), location/*Location*/.name(/*auto*/) + "Instance");
 }
 auto temp(&[I8] inner) {
 	return " extends " + inner/*auto*/;
