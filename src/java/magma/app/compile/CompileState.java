@@ -53,11 +53,7 @@ public interface CompileState {
 
     int depth();
 
-    List<Definition> definitions();
-
     Option<Location> maybeLocation();
-
-    List<Source> sources();
 
     Platform platform();
 }
