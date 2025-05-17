@@ -69,20 +69,25 @@ public final class Main {
     }
 
     private static Option<IOError> runWithChildren(final List<Path> children, final Path sourceDirectory) {
-        final var sources = children.query()
-                .filter((Path source) -> source.endsWith(".java"))
-                .map((Path child) -> new Source(sourceDirectory, child))
-                .collect(new ListCollector<Source>());
-
-        final var initial = sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
-
+        final var sources = Main.findSources(children, sourceDirectory);
         return sources.query()
-                .foldWithInitial(Main.createInitialState(initial), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
+                .foldWithInitial(Main.createInitialStateToTuple(sources), (Tuple2<CompileState, Option<IOError>> current, Source source1) -> Main.foldChild(current.left(), current.right(), source1))
                 .right();
     }
 
-    private static Tuple2<CompileState, Option<IOError>> createInitialState(final CompileState state) {
-        return new Tuple2Impl<CompileState, Option<IOError>>(state, new None<IOError>());
+    private static Tuple2<CompileState, Option<IOError>> createInitialStateToTuple(final List<Source> sources) {
+        return new Tuple2Impl<CompileState, Option<IOError>>(Main.createInitialState(sources), new None<IOError>());
+    }
+
+    private static CompileState createInitialState(final List<Source> sources) {
+        return sources.query().foldWithInitial(ImmutableCompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
+    }
+
+    private static List<Source> findSources(final List<Path> children, final Path sourceDirectory) {
+        return children.query()
+                .filter((Path source) -> source.endsWith(".java"))
+                .map((Path child) -> new Source(sourceDirectory, child))
+                .collect(new ListCollector<Source>());
     }
 
     private static Tuple2<CompileState, Option<IOError>> foldChild(final CompileState state, final Option<IOError> maybeError, final Source source) {
