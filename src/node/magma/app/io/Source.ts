@@ -12,17 +12,17 @@ export class Source {
 		this.source = source;
 	}
 	read(): Result<string, IOError> {
-		return this.source.readString();
+		return this/*auto*/.source.readString(/*auto*/);
 	}
 	computeName(): string {
-		let fileName: string = this.source.findFileName();
-		let separator: number = fileName.lastIndexOf(".");
-		return fileName.substring(0, separator);
+		let fileName: string = this/*auto*/.source.findFileName(/*auto*/);
+		let separator: number = fileName/*auto*/.lastIndexOf(".");
+		return fileName/*auto*/.substring(0/*auto*/, separator/*auto*/);
 	}
 	computeNamespace(): List<string> {
-		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>());
+		return this/*auto*/.sourceDirectory.relativize(this/*auto*/.source).getParent(/*auto*/).query(/*auto*/).collect(new ListCollector<string>(/*auto*/));
 	}
 	computeLocation(): Location {
-		return new Location(this.computeNamespace(), this.computeName());
+		return new Location(this/*auto*/.computeNamespace(/*auto*/), this/*auto*/.computeName(/*auto*/));
 	}
 }

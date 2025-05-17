@@ -8,12 +8,12 @@ export struct Err<T, X> implements Result<T, X> {
 		this.error = error;
 	}
 	def findError(): Option<X> {
-		return Some<X>(this.error);
+		return Some<X>(this/*auto*/.error);
 	}
 	def findValue(): Option<T> {
-		return None<T>();
+		return None<T>(/*auto*/);
 	}
 	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenErr(this.error);
+		return whenErr/*auto*/(this/*auto*/.error);
 	}
 }

@@ -17,19 +17,19 @@ export struct LambdaNode implements Value {
 		this.content = content;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		let joinedParamNames: &[I8] = this.paramNames.query().map((mut definition: Definition) => definition.generate(platform)).collect(Joiner(", ")).orElse("");
-		return "(" + joinedParamNames + ")" + " => " + this.content;
+		let joinedParamNames: &[I8] = this/*auto*/.paramNames.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(Joiner(", ")).orElse("");
+		return "(" + joinedParamNames/*auto*/ + ")" + " => " + this/*auto*/.content;
 	}
 	def toValue(): Option<Value> {
-		return Some<Value>(this);
+		return Some<Value>(this/*auto*/);
 	}
 	def findChild(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
-		return None<&[I8]>();
+		return None<&[I8]>(/*auto*/);
 	}
 }

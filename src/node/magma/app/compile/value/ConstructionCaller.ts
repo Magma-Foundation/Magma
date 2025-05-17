@@ -11,12 +11,12 @@ export class ConstructionCaller implements Caller {
 		this.platform = platform;
 	}
 	generate(platform: Platform): string {
-		if (Platform.Magma === this.platform) {
-			return this.right;
+		if (Platform/*auto*/.Magma === this/*auto*/.platform) {
+			return this/*auto*/.right;
 		}
-		return "new " + this.right;
+		return "new " + this/*auto*/.right;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 }

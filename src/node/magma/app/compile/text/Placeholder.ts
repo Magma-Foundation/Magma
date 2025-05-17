@@ -13,33 +13,33 @@ export class Placeholder {
 		this.input = input;
 	}
 	generate(): string {
-		return Main.generatePlaceholder(this.input);
+		return Main/*auto*/.generatePlaceholder(this/*auto*/.input);
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generate(platform: Platform): string {
-		return this.generate();
+		return this/*auto*/.generate(/*auto*/);
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 	asDefinition(): Option<Definition> {
-		return new None<Definition>();
+		return new None<Definition>(/*auto*/);
 	}
 	toValue(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
-		return new None<string>();
+		return new None<string>(/*auto*/);
 	}
 }

@@ -6,22 +6,22 @@ import magma.api.collect.list.List;
 import magma.api.collect.Joiner;
 export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	def generateWithAfterName(mut platform: Platform, afterName: &[I8]): &[I8] {
-		return "constructor " + afterName;
+		return "constructor " + afterName/*auto*/;
 	}
 	def hasAnnotation(annotation: &[I8]): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def removeModifier(modifier: &[I8]): ConstructorHeader {
-		return this;
+		return this/*auto*/;
 	}
 	def addModifierLast(modifier: &[I8]): ConstructorHeader {
-		return this;
+		return this/*auto*/;
 	}
 	def generateWithDefinitions0(mut platform: Platform, mut definitions: &[I8]): &[I8] {
-		return generateWithAfterName(platform, "(" + definitions + ")");
+		return generateWithAfterName/*auto*/(platform/*auto*/, "(" + definitions/*auto*/ + ")");
 	}
 	def generateWithDefinitions(platform: Platform, definitions: List<Definition>): &[I8] {
-		let joinedDefinitions: &[I8] = definitions.query().map((mut definition: Definition) => definition.generate(platform)).collect(Joiner(", ")).orElse("");
-		return this.generateWithDefinitions0(platform, joinedDefinitions);
+		let joinedDefinitions: &[I8] = definitions/*auto*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(Joiner(", ")).orElse("");
+		return this/*auto*/.generateWithDefinitions0(platform/*auto*/, joinedDefinitions/*auto*/);
 	}
 }

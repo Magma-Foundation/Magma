@@ -20,44 +20,44 @@ export struct DivideState {
 		this.index = index;
 	}
 	static def createInitial(input: &[I8]): DivideState {
-		return DivideState(Lists.empty(), "", 0, input, 0);
+		return DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*auto*/, 0/*auto*/);
 	}
 	def advance(): DivideState {
-		return DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
+		return DivideState(this/*auto*/.segments.addLast(this/*auto*/.buffer), "", this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	def append(c: I8): DivideState {
-		return DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*auto*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	def isLevel(): Bool {
-		return 0 === this.depth;
+		return 0/*auto*/ === this/*auto*/.depth;
 	}
 	def enter(): DivideState {
-		return DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth + 1/*auto*/, this/*auto*/.input, this/*auto*/.index);
 	}
 	def exit(): DivideState {
-		return DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth - 1/*auto*/, this/*auto*/.input, this/*auto*/.index);
 	}
 	def isShallow(): Bool {
-		return 1 === this.depth;
+		return 1/*auto*/ === this/*auto*/.depth;
 	}
 	def pop(): Option<Tuple2<DivideState, I8>> {
-		if (this.index >= Strings.length(this.input)) {
-			return None<Tuple2<DivideState, I8>>();
+		if (this/*auto*/.index >= Strings/*auto*/.length(this/*auto*/.input)) {
+			return None<Tuple2<DivideState, I8>>(/*auto*/);
 		}
-		let c: I8 = Strings.charAt(this.input, this.index);
-		let nextState: DivideState = DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState, c));
+		let c: I8 = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+		let nextState: DivideState = DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
+		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState/*auto*/, c/*auto*/));
 	}
 	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {
-		return this.pop().map((mut inner: Tuple2<DivideState, I8>) => Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right()));
+		return this/*auto*/.pop(/*auto*/).map((mut inner: Tuple2<DivideState, I8>) => Tuple2Impl<DivideState, I8>(inner/*auto*/.left(/*auto*/).append(inner/*auto*/.right(/*auto*/)), inner/*auto*/.right(/*auto*/)));
 	}
 	def popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((mut tuple: Tuple2<DivideState, I8>) => tuple.left());
+		return this/*auto*/.popAndAppendToTuple(/*auto*/).map((mut tuple: Tuple2<DivideState, I8>) => tuple/*auto*/.left(/*auto*/));
 	}
 	def peek(): I8 {
-		return Strings.charAt(this.input, this.index);
+		return Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
 	}
 	def startsWith(slice: &[I8]): Bool {
-		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
+		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*auto*/);
 	}
 }

@@ -9,17 +9,17 @@ export class FunctionType implements Type {
 }
 
 auto temp(Tuple2<number, &[I8]> tuple) {
-	return "arg" + tuple.left() + " : " + tuple.right();
+	return "arg" + tuple/*auto*/.left(/*auto*/) + " : " + tuple/*auto*/.right(/*auto*/);
 }
 &[I8] generate() {
-	&[I8] joinedArguments = this.args.queryWithIndices().map(temp).collect(new Joiner(", ")).orElse("");
-	return "(" + joinedArguments + ") => " + this.returns;
+	&[I8] joinedArguments = this/*auto*/.args.queryWithIndices(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
+	return "(" + joinedArguments/*auto*/ + ") => " + this/*auto*/.returns;
 }
 Bool isFunctional() {
-	return true;
+	return true/*auto*/;
 }
 Bool isVar() {
-	return false;
+	return false/*auto*/;
 }
 &[I8] generateBeforeName() {
 	return "";

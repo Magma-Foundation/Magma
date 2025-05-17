@@ -8,6 +8,6 @@ export class Whitespace implements Parameter {
 		return "";
 	}
 	asDefinition(): Option<Definition> {
-		return new None<Definition>();
+		return new None<Definition>(/*auto*/);
 	}
 }

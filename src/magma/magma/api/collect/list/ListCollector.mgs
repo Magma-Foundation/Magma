@@ -3,9 +3,9 @@ import magma.api.collect.Collector;
 import jvm.api.collect.list.Lists;
 export struct ListCollector<T> implements Collector<T, List<T>> {
 	def createInitial(): List<T> {
-		return Lists.empty();
+		return Lists/*auto*/.empty(/*auto*/);
 	}
 	def fold(current: List<T>, element: T): List<T> {
-		return current.addLast(element);
+		return current/*auto*/.addLast(element/*auto*/);
 	}
 }

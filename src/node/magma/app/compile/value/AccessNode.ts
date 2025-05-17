@@ -14,18 +14,18 @@ export class AccessNode implements Value {
 		this.property = property;
 	}
 	generate(platform: Platform): string {
-		return this.child.generate(platform) + "." + this.property;
+		return this/*auto*/.child.generate(platform/*auto*/) + "." + this/*auto*/.property;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this/*auto*/);
 	}
 	findChild(): Option<Value> {
-		return new Some<Value>(this.child);
+		return new Some<Value>(this/*auto*/.child);
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
-		return new None<string>();
+		return new None<string>(/*auto*/);
 	}
 }

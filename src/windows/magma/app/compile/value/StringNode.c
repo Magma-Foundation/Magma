@@ -7,17 +7,17 @@ export class StringNode implements Value {
 }
 
 &[I8] generate(Platform platform) {
-	return "\"" + this.value + "\"";
+	return "\"" + this/*auto*/.value + "\"";
 }
 Option<Value> toValue() {
-	return new Some<Value>(this);
+	return new Some<Value>(this/*auto*/);
 }
 Option<Value> findChild() {
-	return new None<Value>();
+	return new None<Value>(/*auto*/);
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Auto;
+	return PrimitiveType/*auto*/.Auto;
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
-	return new None<&[I8]>();
+	return new None<&[I8]>(/*auto*/);
 }

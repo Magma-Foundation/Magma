@@ -6,14 +6,14 @@ export struct SingleHead<T> implements Head<T> {
 	element: T;
 	mut retrieved: Bool;
 	constructor (element: T) {
-		this.element = element;
-		this.retrieved = false;
+		this/*auto*/.element = element/*auto*/;
+		this/*auto*/.retrieved = false/*auto*/;
 	}
 	def next(): Option<T> {
-		if (this.retrieved) {
-			return None<T>();
+		if (this/*auto*/.retrieved) {
+			return None<T>(/*auto*/);
 		}
-		this.retrieved = true;
-		return Some<T>(this.element);
+		this/*auto*/.retrieved = true/*auto*/;
+		return Some<T>(this/*auto*/.element);
 	}
 }

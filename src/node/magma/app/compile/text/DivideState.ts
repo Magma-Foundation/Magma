@@ -20,44 +20,44 @@ export class DivideState {
 		this.index = index;
 	}
 	static createInitial(input: string): DivideState {
-		return new DivideState(Lists.empty(), "", 0, input, 0);
+		return new DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*auto*/, 0/*auto*/);
 	}
 	advance(): DivideState {
-		return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
+		return new DivideState(this/*auto*/.segments.addLast(this/*auto*/.buffer), "", this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	append(c: string): DivideState {
-		return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
+		return new DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*auto*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	isLevel(): boolean {
-		return 0 === this.depth;
+		return 0/*auto*/ === this/*auto*/.depth;
 	}
 	enter(): DivideState {
-		return new DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
+		return new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth + 1/*auto*/, this/*auto*/.input, this/*auto*/.index);
 	}
 	exit(): DivideState {
-		return new DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
+		return new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth - 1/*auto*/, this/*auto*/.input, this/*auto*/.index);
 	}
 	isShallow(): boolean {
-		return 1 === this.depth;
+		return 1/*auto*/ === this/*auto*/.depth;
 	}
 	pop(): Option<Tuple2<DivideState, string>> {
-		if (this.index >= Strings.length(this.input)) {
-			return new None<Tuple2<DivideState, string>>();
+		if (this/*auto*/.index >= Strings/*auto*/.length(this/*auto*/.input)) {
+			return new None<Tuple2<DivideState, string>>(/*auto*/);
 		}
-		let c: string = Strings.charAt(this.input, this.index);
-		let nextState: DivideState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c));
+		let c: string = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+		let nextState: DivideState = new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
+		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState/*auto*/, c/*auto*/));
 	}
 	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
-		return this.pop().map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right()));
+		return this/*auto*/.pop(/*auto*/).map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner/*auto*/.left(/*auto*/).append(inner/*auto*/.right(/*auto*/)), inner/*auto*/.right(/*auto*/)));
 	}
 	popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left());
+		return this/*auto*/.popAndAppendToTuple(/*auto*/).map((tuple: Tuple2<DivideState, string>) => tuple/*auto*/.left(/*auto*/));
 	}
 	peek(): string {
-		return Strings.charAt(this.input, this.index);
+		return Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
 	}
 	startsWith(slice: string): boolean {
-		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
+		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*auto*/);
 	}
 }

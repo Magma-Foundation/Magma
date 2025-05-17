@@ -3,9 +3,9 @@ import { Collector } from "../../../../magma/api/collect/Collector";
 import { Lists } from "../../../../jvm/api/collect/list/Lists";
 export class ListCollector<T> implements Collector<T, List<T>> {
 	createInitial(): List<T> {
-		return Lists.empty();
+		return Lists/*auto*/.empty(/*auto*/);
 	}
 	fold(current: List<T>, element: T): List<T> {
-		return current.addLast(element);
+		return current/*auto*/.addLast(element/*auto*/);
 	}
 }

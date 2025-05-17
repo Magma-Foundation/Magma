@@ -9,10 +9,10 @@ export class Import {
 }
 
 &[I8] generate(Platform platform) {
-	if (Platform.Magma === platform) {
-		&[I8] joinedNamespace = this.namespace.query().collect(new Joiner(".")).orElse("");
-		return "import " + joinedNamespace + "." + this.child + ";\n";
+	if (Platform/*auto*/.Magma === platform/*auto*/) {
+		&[I8] joinedNamespace = this/*auto*/.namespace.query(/*auto*/).collect(new Joiner(".")).orElse("");
+		return "import " + joinedNamespace/*auto*/ + "." + this/*auto*/.child + ";\n";
 	}
-	&[I8] joinedNamespace = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
-	return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
+	&[I8] joinedNamespace = this/*auto*/.namespace.addLast(this/*auto*/.child).query(/*auto*/).collect(new Joiner("/")).orElse("");
+	return "import { " + this/*auto*/.child + " } from \"" + joinedNamespace/*auto*/ + "\";\n";
 }

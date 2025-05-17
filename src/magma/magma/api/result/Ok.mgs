@@ -8,12 +8,12 @@ export struct Ok<T, X> implements Result<T, X> {
 		this.value = value;
 	}
 	def findError(): Option<X> {
-		return None<X>();
+		return None<X>(/*auto*/);
 	}
 	def findValue(): Option<T> {
-		return Some<T>(this.value);
+		return Some<T>(this/*auto*/.value);
 	}
 	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenOk(this.value);
+		return whenOk/*auto*/(this/*auto*/.value);
 	}
 }

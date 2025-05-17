@@ -9,22 +9,22 @@ export class TemplateType implements Type {
 }
 
 static &[I8] generateValueStrings(List<&[I8]> values) {
-	return Main.generateAll(values, TemplateType.mergeValues);
+	return Main/*auto*/.generateAll(values/*auto*/, TemplateType/*auto*/.mergeValues);
 }
 static &[I8] mergeValues(&[I8] cache, &[I8] element) {
-	if (Strings.isEmpty(cache)) {
-		return cache + element;
+	if (Strings/*auto*/.isEmpty(cache/*auto*/)) {
+		return cache/*auto*/ + element/*auto*/;
 	}
-	return cache + ", " + element;
+	return cache/*auto*/ + ", " + element/*auto*/;
 }
 &[I8] generate() {
-	return this.base + "<" + TemplateType.generateValueStrings(this.args) + ">";
+	return this/*auto*/.base + "<" + TemplateType/*auto*/.generateValueStrings(this/*auto*/.args) + ">";
 }
 Bool isFunctional() {
-	return false;
+	return false/*auto*/;
 }
 Bool isVar() {
-	return false;
+	return false/*auto*/;
 }
 &[I8] generateBeforeName() {
 	return "";

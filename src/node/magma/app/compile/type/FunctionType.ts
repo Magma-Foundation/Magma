@@ -10,14 +10,14 @@ export class FunctionType implements Type {
 		this.returns = returns;
 	}
 	generate(): string {
-		let joinedArguments: string = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
-		return "(" + joinedArguments + ") => " + this.returns;
+		let joinedArguments: string = this/*auto*/.args.queryWithIndices(/*auto*/).map((tuple: Tuple2<number, string>) => "arg" + tuple/*auto*/.left(/*auto*/) + " : " + tuple/*auto*/.right(/*auto*/)).collect(new Joiner(", ")).orElse("");
+		return "(" + joinedArguments/*auto*/ + ") => " + this/*auto*/.returns;
 	}
 	isFunctional(): boolean {
-		return true;
+		return true/*auto*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";

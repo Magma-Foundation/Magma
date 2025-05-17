@@ -9,5 +9,5 @@ export class MapHead<T, R> implements Head<R> {
 }
 
 Option<R> next() {
-	return this.head.next().map(this.mapper);
+	return this/*auto*/.head.next(/*auto*/).map(this/*auto*/.mapper);
 }

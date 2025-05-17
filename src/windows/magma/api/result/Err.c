@@ -7,11 +7,11 @@ export class Err<T, X> implements Result<T, X> {
 }
 
 Option<X> findError() {
-	return new Some<X>(this.error);
+	return new Some<X>(this/*auto*/.error);
 }
 Option<T> findValue() {
-	return new None<T>();
+	return new None<T>(/*auto*/);
 }
 R match((arg0 : T) => R whenOk, (arg0 : X) => R whenErr) {
-	return whenErr(this.error);
+	return whenErr/*auto*/(this/*auto*/.error);
 }

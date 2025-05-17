@@ -7,6 +7,7 @@ import { Type } from "../../../magma/api/Type";
 import { Source } from "../../../magma/app/io/Source";
 import { Import } from "../../../magma/app/compile/Import";
 export interface CompileState {
+	functionName(): string;
 	findLastStructureName(): Option<string>;
 	createIndent(): string;
 	isPlatform(platform: Platform): boolean;

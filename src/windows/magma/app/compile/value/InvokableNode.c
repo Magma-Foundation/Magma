@@ -9,24 +9,24 @@ export class InvokableNode implements Value {
 }
 
 &[I8] generate(Platform platform) {
-	&[I8] joinedArguments = this.joinArgs(platform);
-	return this.caller.generate(platform) + "(" + joinedArguments + ")";
+	&[I8] joinedArguments = this/*auto*/.joinArgs(platform/*auto*/);
+	return this/*auto*/.caller.generate(platform/*auto*/) + "(" + joinedArguments/*auto*/ + ")";
 }
 auto temp(Value value) {
-	return value.generate(platform);
+	return value/*auto*/.generate(platform/*auto*/);
 }
 &[I8] joinArgs(Platform platform) {
-	return this.args.query().map(temp).collect(new Joiner(", ")).orElse("");
+	return this/*auto*/.args.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
 }
 Option<Value> toValue() {
-	return new Some<Value>(this);
+	return new Some<Value>(this/*auto*/);
 }
 Option<Value> findChild() {
-	return new None<Value>();
+	return new None<Value>(/*auto*/);
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Auto;
+	return PrimitiveType/*auto*/.Auto;
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
-	return new Some<&[I8]>("\n\tstatic " + this.caller.generate(platform) + ": " + structureName + " = new " + structureName + "(" + this.joinArgs(platform) + ");");
+	return new Some<&[I8]>("\n\tstatic " + this/*auto*/.caller.generate(platform/*auto*/) + ": " + structureName/*auto*/ + " = new " + structureName/*auto*/ + "(" + this/*auto*/.joinArgs(platform/*auto*/) + ");");
 }

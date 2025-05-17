@@ -1,5 +1,6 @@
 #include "./CompileState.h"
 export interface CompileState {
+	&[I8] functionName();
 	Option<&[I8]> findLastStructureName();
 	&[I8] createIndent();
 	Bool isPlatform(Platform platform);

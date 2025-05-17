@@ -9,11 +9,11 @@ export class Import {
 		this.child = child;
 	}
 	generate(platform: Platform): string {
-		if (Platform.Magma === platform) {
-			let joinedNamespace: string = this.namespace.query().collect(new Joiner(".")).orElse("");
-			return "import " + joinedNamespace + "." + this.child + ";\n";
+		if (Platform/*auto*/.Magma === platform/*auto*/) {
+			let joinedNamespace: string = this/*auto*/.namespace.query(/*auto*/).collect(new Joiner(".")).orElse("");
+			return "import " + joinedNamespace/*auto*/ + "." + this/*auto*/.child + ";\n";
 		}
-		let joinedNamespace: string = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
-		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
+		let joinedNamespace: string = this/*auto*/.namespace.addLast(this/*auto*/.child).query(/*auto*/).collect(new Joiner("/")).orElse("");
+		return "import { " + this/*auto*/.child + " } from \"" + joinedNamespace/*auto*/ + "\";\n";
 	}
 }

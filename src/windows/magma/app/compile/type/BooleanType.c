@@ -7,16 +7,16 @@ export class BooleanType implements Type {
 }
 
 &[I8] generate() {
-	if (Platform.TypeScript === this.platform) {
+	if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 		return "boolean";
 	}
 	return "Bool";
 }
 Bool isFunctional() {
-	return false;
+	return false/*auto*/;
 }
 Bool isVar() {
-	return false;
+	return false/*auto*/;
 }
 &[I8] generateBeforeName() {
 	return "";

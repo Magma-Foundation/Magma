@@ -10,22 +10,22 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	static generateValueStrings(values: List<string>): string {
-		return Main.generateAll(values, TemplateType.mergeValues);
+		return Main/*auto*/.generateAll(values/*auto*/, TemplateType/*auto*/.mergeValues);
 	}
 	static mergeValues(cache: string, element: string): string {
-		if (Strings.isEmpty(cache)) {
-			return cache + element;
+		if (Strings/*auto*/.isEmpty(cache/*auto*/)) {
+			return cache/*auto*/ + element/*auto*/;
 		}
-		return cache + ", " + element;
+		return cache/*auto*/ + ", " + element/*auto*/;
 	}
 	generate(): string {
-		return this.base + "<" + TemplateType.generateValueStrings(this.args) + ">";
+		return this/*auto*/.base + "<" + TemplateType/*auto*/.generateValueStrings(this/*auto*/.args) + ">";
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";

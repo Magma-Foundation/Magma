@@ -7,32 +7,32 @@ export class Placeholder {
 }
 
 &[I8] generate() {
-	return Main.generatePlaceholder(this.input);
+	return Main/*auto*/.generatePlaceholder(this/*auto*/.input);
 }
 Bool isFunctional() {
-	return false;
+	return false/*auto*/;
 }
 &[I8] generate(Platform platform) {
-	return this.generate();
+	return this/*auto*/.generate(/*auto*/);
 }
 Option<Value> findChild() {
-	return new None<Value>();
+	return new None<Value>(/*auto*/);
 }
 Option<Definition> asDefinition() {
-	return new None<Definition>();
+	return new None<Definition>(/*auto*/);
 }
 Option<Value> toValue() {
-	return new None<Value>();
+	return new None<Value>(/*auto*/);
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Auto;
+	return PrimitiveType/*auto*/.Auto;
 }
 Bool isVar() {
-	return false;
+	return false/*auto*/;
 }
 &[I8] generateBeforeName() {
 	return "";
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
-	return new None<&[I8]>();
+	return new None<&[I8]>(/*auto*/);
 }

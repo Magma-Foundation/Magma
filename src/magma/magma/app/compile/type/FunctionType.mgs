@@ -10,14 +10,14 @@ export struct FunctionType implements Type {
 		this.returns = returns;
 	}
 	def generate(): &[I8] {
-		let joinedArguments: &[I8] = this.args.queryWithIndices().map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
-		return "(" + joinedArguments + ") => " + this.returns;
+		let joinedArguments: &[I8] = this/*auto*/.args.queryWithIndices(/*auto*/).map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple/*auto*/.left(/*auto*/) + " : " + tuple/*auto*/.right(/*auto*/)).collect(Joiner(", ")).orElse("");
+		return "(" + joinedArguments/*auto*/ + ") => " + this/*auto*/.returns;
 	}
 	def isFunctional(): Bool {
-		return true;
+		return true/*auto*/;
 	}
 	def isVar(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generateBeforeName(): &[I8] {
 		return "";

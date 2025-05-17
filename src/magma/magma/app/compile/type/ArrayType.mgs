@@ -5,13 +5,13 @@ export struct ArrayType implements Type {
 		this.child = child;
 	}
 	def generate(): &[I8] {
-		return this.child.generate() + "[]";
+		return this/*auto*/.child.generate(/*auto*/) + "[]";
 	}
 	def isFunctional(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def isVar(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generateBeforeName(): &[I8] {
 		return "";

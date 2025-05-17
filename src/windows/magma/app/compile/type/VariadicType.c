@@ -7,13 +7,13 @@ export class VariadicType implements Type {
 }
 
 &[I8] generate() {
-	return this.type.generate() + "[]";
+	return this/*auto*/.type.generate(/*auto*/) + "[]";
 }
 Bool isFunctional() {
-	return false;
+	return false/*auto*/;
 }
 Bool isVar() {
-	return false;
+	return false/*auto*/;
 }
 &[I8] generateBeforeName() {
 	return "...";

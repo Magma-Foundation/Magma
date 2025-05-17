@@ -17,22 +17,22 @@ export struct InvokableNode implements Value {
 		this.args = args;
 	}
 	def generate(platform: Platform): &[I8] {
-		let joinedArguments: &[I8] = this.joinArgs(platform);
-		return this.caller.generate(platform) + "(" + joinedArguments + ")";
+		let joinedArguments: &[I8] = this/*auto*/.joinArgs(platform/*auto*/);
+		return this/*auto*/.caller.generate(platform/*auto*/) + "(" + joinedArguments/*auto*/ + ")";
 	}
 	def joinArgs(platform: Platform): &[I8] {
-		return this.args.query().map((mut value: Value) => value.generate(platform)).collect(Joiner(", ")).orElse("");
+		return this/*auto*/.args.query(/*auto*/).map((mut value: Value) => value/*auto*/.generate(platform/*auto*/)).collect(Joiner(", ")).orElse("");
 	}
 	def toValue(): Option<Value> {
-		return Some<Value>(this);
+		return Some<Value>(this/*auto*/);
 	}
 	def findChild(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
-		return Some<&[I8]>("\n\tstatic " + this.caller.generate(platform) + ": " + structureName + " = new " + structureName + "(" + this.joinArgs(platform) + ");");
+		return Some<&[I8]>("\n\tstatic " + this/*auto*/.caller.generate(platform/*auto*/) + ": " + structureName/*auto*/ + " = new " + structureName/*auto*/ + "(" + this/*auto*/.joinArgs(platform/*auto*/) + ");");
 	}
 }

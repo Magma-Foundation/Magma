@@ -10,17 +10,17 @@ static Joiner empty() {
 	return new Joiner("");
 }
 auto temp(&[I8] inner) {
-	return prefix + inner + suffix;
+	return prefix/*auto*/ + inner/*auto*/ + suffix/*auto*/;
 }
 static &[I8] joinOrEmpty(List<&[I8]> items, &[I8] delimiter, &[I8] prefix, &[I8] suffix) {
-	return items.query().collect(new Joiner(delimiter)).map(temp).orElse("");
+	return items/*auto*/.query(/*auto*/).collect(new Joiner(delimiter/*auto*/)).map(lambdaDefinition/*auto*/).orElse("");
 }
 Option<&[I8]> createInitial() {
-	return new None<&[I8]>();
+	return new None<&[I8]>(/*auto*/);
 }
 auto temp(&[I8] inner) {
-	return inner + this.delimiter + element;
+	return inner/*auto*/ + this/*auto*/.delimiter + element/*auto*/;
 }
 Option<&[I8]> fold(Option<&[I8]> maybe, &[I8] element) {
-	return new Some<&[I8]>(maybe.map(temp).orElse(element));
+	return new Some<&[I8]>(maybe/*auto*/.map(lambdaDefinition/*auto*/).orElse(element/*auto*/));
 }

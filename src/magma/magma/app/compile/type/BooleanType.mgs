@@ -6,16 +6,16 @@ export struct BooleanType implements Type {
 		this.platform = platform;
 	}
 	def generate(): &[I8] {
-		if (Platform.TypeScript === this.platform) {
+		if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 			return "boolean";
 		}
 		return "Bool";
 	}
 	def isFunctional(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def isVar(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generateBeforeName(): &[I8] {
 		return "";

@@ -16,18 +16,18 @@ export class OperationNode implements Value {
 		this.right = right;
 	}
 	generate(platform: Platform): string {
-		return this.left.generate(platform) + " " + this.targetInfix + " " + this.right.generate(platform);
+		return this/*auto*/.left.generate(platform/*auto*/) + " " + this/*auto*/.targetInfix + " " + this/*auto*/.right.generate(platform/*auto*/);
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this/*auto*/);
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
-		return new None<string>();
+		return new None<string>(/*auto*/);
 	}
 }

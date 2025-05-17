@@ -3,32 +3,32 @@ import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 export struct None<T> implements Option<T> {
 	def map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return None<R>();
+		return None<R>(/*auto*/);
 	}
 	def orElse(other: T): T {
-		return other;
+		return other/*auto*/;
 	}
 	def orElseGet(supplier: () => T): T {
-		return supplier();
+		return supplier/*auto*/(/*auto*/);
 	}
 	def isPresent(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def ifPresent(consumer: (arg0 : T) => void): void {
 	}
 	def or(other: () => Option<T>): Option<T> {
-		return other();
+		return other/*auto*/(/*auto*/);
 	}
 	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return None<R>();
+		return None<R>(/*auto*/);
 	}
 	def filter(predicate: (arg0 : T) => boolean): Option<T> {
-		return None<T>();
+		return None<T>(/*auto*/);
 	}
 	def toTuple(other: T): Tuple2<Bool, T> {
-		return Tuple2Impl<Bool, T>(false, other);
+		return Tuple2Impl<Bool, T>(false/*auto*/, other/*auto*/);
 	}
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return None<Tuple2<T, R>>();
+		return None<Tuple2<T, R>>(/*auto*/);
 	}
 }

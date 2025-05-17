@@ -9,17 +9,17 @@ export class AccessNode implements Value {
 }
 
 &[I8] generate(Platform platform) {
-	return this.child.generate(platform) + "." + this.property;
+	return this/*auto*/.child.generate(platform/*auto*/) + "." + this/*auto*/.property;
 }
 Option<Value> toValue() {
-	return new Some<Value>(this);
+	return new Some<Value>(this/*auto*/);
 }
 Option<Value> findChild() {
-	return new Some<Value>(this.child);
+	return new Some<Value>(this/*auto*/.child);
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Auto;
+	return PrimitiveType/*auto*/.Auto;
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
-	return new None<&[I8]>();
+	return new None<&[I8]>(/*auto*/);
 }

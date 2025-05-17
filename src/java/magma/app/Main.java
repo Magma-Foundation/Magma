@@ -907,7 +907,7 @@ public final class Main {
     private static Some<Tuple2<CompileState, Value>> assembleLambdaWithContent(final CompileState state, final List<Definition> parameters, final String content) {
         final Definition lambdaDefinition = new Definition(PrimitiveType.Auto, state.functionName());
         final FunctionSegment<Definition> value = new FunctionSegment<Definition>(lambdaDefinition, parameters, new Some<>(content));
-        return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("lambdaDefinition")));
+        return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("lambdaDefinition", PrimitiveType.Auto)));
     }
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRule(final String infix) {
@@ -968,7 +968,7 @@ public final class Main {
     private static Option<Tuple2<CompileState, Value>> parseNumber(final CompileState state, final String input) {
         final String stripped = Strings.strip(input);
         if (Main.isNumber(stripped)) {
-            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped)));
+            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new SymbolNode(stripped, PrimitiveType.Auto)));
         }
         else {
             return new None<Tuple2<CompileState, Value>>();
@@ -984,7 +984,7 @@ public final class Main {
         final String stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
             final CompileState withImport = state.addResolvedImportFromCache(stripped);
-            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped)));
+            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped, PrimitiveType.Auto)));
         }
         else {
             return new None<Tuple2<CompileState, Value>>();
@@ -1198,7 +1198,7 @@ public final class Main {
     private static Option<Tuple2<CompileState, Type>> parseSymbolType(final CompileState state, final String input) {
         final String stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
-            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped)));
+            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped, PrimitiveType.Auto)));
         }
         return new None<Tuple2<CompileState, Type>>();
     }

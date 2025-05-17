@@ -12,18 +12,18 @@ export class NotNode implements Value {
 		this.child = child;
 	}
 	generate(platform: Platform): string {
-		return this.child;
+		return this/*auto*/.child;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this/*auto*/);
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
-		return new None<string>();
+		return new None<string>(/*auto*/);
 	}
 }

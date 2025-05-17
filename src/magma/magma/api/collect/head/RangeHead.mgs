@@ -6,15 +6,15 @@ export struct RangeHead implements Head<I32> {
 	length: I32;
 	mut counter: I32;
 	constructor (length: I32) {
-		this.length = length;
-		this.counter = 0;
+		this/*auto*/.length = length/*auto*/;
+		this/*auto*/.counter = 0/*auto*/;
 	}
 	def next(): Option<I32> {
-		if (this.counter >= this.length) {
-			return None<I32>();
+		if (this/*auto*/.counter >= this/*auto*/.length) {
+			return None<I32>(/*auto*/);
 		}
-		let value: I32 = this.counter;
-		this.counter++;
-		return Some<I32>(value);
+		let value: I32 = this/*auto*/.counter;
+		this/*auto*/.counter++;
+		return Some<I32>(value/*auto*/);
 	}
 }

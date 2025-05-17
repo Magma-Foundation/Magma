@@ -1,5 +1,6 @@
-import { Platform } from "../../../../magma/app/io/Platform";
 import { Type } from "../../../../magma/api/Type";
+import { Platform } from "../../../../magma/app/io/Platform";
+import { Main } from "../../../../magma/app/Main";
 import { CompileState } from "../../../../magma/app/compile/CompileState";
 import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 import { Value } from "../../../../magma/app/compile/value/Value";
@@ -8,34 +9,36 @@ import { Some } from "../../../../magma/api/option/Some";
 import { None } from "../../../../magma/api/option/None";
 export class SymbolNode {
 	value: string;
-	constructor (value: string) {
+	type: Type;
+	constructor (value: string, type: Type) {
 		this.value = value;
+		this.type = type;
 	}
 	generate(platform: Platform): string {
-		return this.value;
+		return this/*auto*/.value + Main/*auto*/.generatePlaceholder(type/*auto*/.generate(/*auto*/));
 	}
 	resolve(state: CompileState): Type {
-		return state.resolve(this.value).orElse(PrimitiveType.Auto);
+		return state/*auto*/.resolve(this/*auto*/.value).orElse(PrimitiveType/*auto*/.Auto);
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this/*auto*/);
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 	generate(): string {
-		return this.value;
+		return this/*auto*/.value;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
-		return new None<string>();
+		return new None<string>(/*auto*/);
 	}
 }

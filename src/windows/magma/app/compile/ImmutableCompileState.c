@@ -23,116 +23,119 @@ export class ImmutableCompileState implements CompileState {
 }
 
 static CompileState createInitial() {
-	return new ImmutableCompileState(Platform.Magma, new None<Location>(), Lists.empty(), Lists.empty(), Lists.empty(), "", "", Lists.empty(), 0);
+	return new ImmutableCompileState(Platform/*auto*/.Magma, new None<Location>(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), "", "", Lists/*auto*/.empty(/*auto*/), 0/*auto*/);
 }
 auto temp(&[I8] anObject) {
-	return Strings.equalsTo(name, anObject);
+	return Strings/*auto*/.equalsTo(name/*auto*/, anObject/*auto*/);
 }
 Bool hasLastStructureNameOf(&[I8] name) {
-	return this.structureNames.findLast().filter(temp).isPresent();
+	return this/*auto*/.structureNames.findLast(/*auto*/).filter(lambdaDefinition/*auto*/).isPresent(/*auto*/);
 }
 CompileState withLocation(Location namespace) {
-	return new ImmutableCompileState(this.platform, new Some<Location>(namespace), this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, new Some<Location>(namespace/*auto*/), this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState append(&[I8] element) {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures + element, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures + element/*auto*/, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState pushStructureName(&[I8] name) {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames.addLast(name), this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames.addLast(name/*auto*/), this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState enterDepth() {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth + 1);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth + 1/*auto*/);
 }
 CompileState exitDepth() {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth - 1);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth - 1/*auto*/);
 }
 CompileState defineAll(List<Definition> definitions) {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions.addAll(definitions), this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions.addAll(definitions/*auto*/), this/*auto*/.depth);
 }
 auto temp(Definition definition) {
-	return Strings.equalsTo(definition.name(), name);
+	return Strings/*auto*/.equalsTo(definition/*auto*/.name(/*auto*/), name/*auto*/);
 }
 auto temp(Definition definition1) {
-	return definition1.type();
+	return definition1/*auto*/.type(/*auto*/);
 }
 Option<Type> resolve(&[I8] name) {
-	return this.definitions.queryReversed().filter(temp).map(temp).next();
+	return this/*auto*/.definitions.queryReversed(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).next(/*auto*/);
 }
 CompileState clearImports() {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, Lists.empty(), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, Lists/*auto*/.empty(/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState clear() {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, "", "", this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, "", "", this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState addSource(Source source) {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources.addLast(source), this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources.addLast(source/*auto*/), this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 auto temp(&[I8] inner) {
-	return Strings.equalsTo(inner, base);
+	return Strings/*auto*/.equalsTo(inner/*auto*/, base/*auto*/);
 }
 auto temp(Source source) {
-	return this.addResolvedImportWithNamespace(source.computeNamespace(), source.computeName());
+	return this/*auto*/.addResolvedImportWithNamespace(source/*auto*/.computeNamespace(/*auto*/), source/*auto*/.computeName(/*auto*/));
 }
 CompileState addResolvedImportFromCache(&[I8] base) {
-	if (this.structureNames.query().anyMatch(temp)) {
-		return this;
+	if (this/*auto*/.structureNames.query(/*auto*/).anyMatch(lambdaDefinition/*auto*/)) {
+		return this/*auto*/;
 	}
-	return this.findSource(base).map(temp).orElse(this);
+	return this/*auto*/.findSource(base/*auto*/).map(lambdaDefinition/*auto*/).orElse(this/*auto*/);
 }
 CompileState popStructureName() {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames.removeLast().orElse(this.structureNames), this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames.removeLast(/*auto*/).orElse(this/*auto*/.structureNames), this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState mapLocation((arg0 : Location) => Location mapper) {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation.map(mapper), this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation.map(mapper/*auto*/), this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState withPlatform(Platform platform) {
-	return new ImmutableCompileState(platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+	return new ImmutableCompileState(platform/*auto*/, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 CompileState addFunction(&[I8] function) {
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions + function, this.definitions, this.depth);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions + function/*auto*/, this/*auto*/.definitions, this/*auto*/.depth);
 }
 &[I8] join() {
-	return this.structures + this.functions;
+	return this/*auto*/.structures + this/*auto*/.functions;
 }
 auto temp(Location location) {
-	return location.namespace();
+	return location/*auto*/.namespace(/*auto*/);
 }
 auto temp(Import node) {
-	return Strings.equalsTo(node.child(), child);
+	return Strings/*auto*/.equalsTo(node/*auto*/.child(/*auto*/), child/*auto*/);
 }
 CompileState addResolvedImportWithNamespace(List<&[I8]> oldParent, &[I8] child) {
-	List<&[I8]> namespace = this.findCurrentLocation.map(temp).orElse(Lists.empty());
-	List < String > newParent = oldParent;
-	if (Platform.TypeScript === this.platform) {
-		if (namespace.isEmpty()) {
-			newParent = newParent.addFirst(".");
+	List<&[I8]> namespace = this/*auto*/.findCurrentLocation.map(lambdaDefinition/*auto*/).orElse(Lists/*auto*/.empty(/*auto*/));
+	List/*auto*/ < String/*auto*/ > newParent/*auto*/ = oldParent/*auto*/;
+	if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
+		if (namespace/*auto*/.isEmpty(/*auto*/)) {
+			newParent/*auto*/ = newParent/*auto*/.addFirst(".");
 		}
-		number i = 0;
-		number size = namespace.size();
-		while (i < size) {
-			newParent = newParent.addFirst("..");
-			i++;
+		number i = 0/*auto*/;
+		number size = namespace/*auto*/.size(/*auto*/);
+		while (i/*auto*/ < size/*auto*/) {
+			newParent/*auto*/ = newParent/*auto*/.addFirst("..");
+			i/*auto*/++;
 		}
 	}
-	if (this.imports.query().filter(temp).next().isPresent()) {
-		return this;
+	if (this/*auto*/.imports.query(/*auto*/).filter(lambdaDefinition/*auto*/).next(/*auto*/).isPresent(/*auto*/)) {
+		return this/*auto*/;
 	}
-	Import importString = new Import(newParent, child);
-	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+	Import importString = new Import(newParent/*auto*/, child/*auto*/);
+	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports.addLast(importString/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 auto temp(Source source) {
-	return Strings.equalsTo(source.computeName(), name);
+	return Strings/*auto*/.equalsTo(source/*auto*/.computeName(/*auto*/), name/*auto*/);
 }
 Option<Source> findSource(&[I8] name) {
-	return this.sources.query().filter(temp).next();
+	return this/*auto*/.sources.query(/*auto*/).filter(lambdaDefinition/*auto*/).next(/*auto*/);
 }
 Bool isPlatform(Platform platform) {
-	return platform === this.platform();
+	return platform/*auto*/ === this/*auto*/.platform(/*auto*/);
 }
 &[I8] createIndent() {
-	number indent = this.depth();
-	return "\n" + "\t".repeat(indent);
+	number indent = this/*auto*/.depth(/*auto*/);
+	return "\n" + "\t".repeat(indent/*auto*/);
+}
+&[I8] functionName() {
+	return "temp";
 }
 Option<&[I8]> findLastStructureName() {
-	return this.structureNames().findLast();
+	return this/*auto*/.structureNames(/*auto*/).findLast(/*auto*/);
 }

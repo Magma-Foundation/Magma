@@ -20,45 +20,45 @@ export class Definition {
 		this.name = name;
 	}
 	constructor (type: Type, name: string) {
-		this(Lists.empty(), Lists.empty(), Lists.empty(), type, name);
+		this/*auto*/(Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), type/*auto*/, name/*auto*/);
 	}
 	generate(platform: Platform): string {
-		return this.generateWithAfterName(platform, "");
+		return this/*auto*/.generateWithAfterName(platform/*auto*/, "");
 	}
 	asDefinition(): Option<Definition> {
-		return new Some<Definition>(this);
+		return new Some<Definition>(this/*auto*/);
 	}
 	generateWithAfterName(platform: Platform, afterName: string): string {
-		let joinedTypeParams: string = this.joinTypeParams();
-		let joinedModifiers: string = this.joinModifiers();
-		if (Platform.Windows === platform) {
-			return joinedModifiers + this.type.generateBeforeName() + this.type.generate() + " " + this.name + afterName;
+		let joinedTypeParams: string = this/*auto*/.joinTypeParams(/*auto*/);
+		let joinedModifiers: string = this/*auto*/.joinModifiers(/*auto*/);
+		if (Platform/*auto*/.Windows === platform/*auto*/) {
+			return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*auto*/;
 		}
-		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+		return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.name + joinedTypeParams/*auto*/ + afterName/*auto*/ + this/*auto*/.generateType(/*auto*/);
 	}
 	joinModifiers(): string {
-		return this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
+		return this/*auto*/.modifiers.query(/*auto*/).map((value: string) => value/*auto*/ + " ").collect(new Joiner("")).orElse("");
 	}
 	generateType(): string {
-		if (this.type.isVar()) {
+		if (this/*auto*/.type.isVar(/*auto*/)) {
 			return "";
 		}
-		return ": " + this.type.generate();
+		return ": " + this/*auto*/.type.generate(/*auto*/);
 	}
 	joinTypeParams(): string {
-		return Joiner.joinOrEmpty(this.typeParams, ", ", "<", ">");
+		return Joiner/*auto*/.joinOrEmpty(this/*auto*/.typeParams, ", ", "<", ">");
 	}
 	hasAnnotation(annotation: string): boolean {
-		return this.annotations.contains(annotation, Strings.equalsTo);
+		return this/*auto*/.annotations.contains(annotation/*auto*/, Strings/*auto*/.equalsTo);
 	}
 	removeModifier(modifier: string): Definition {
-		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
+		return new Definition(this/*auto*/.annotations, this/*auto*/.modifiers.removeValue(modifier/*auto*/, Strings/*auto*/.equalsTo), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
 	}
 	addModifierLast(modifier: string): Definition {
-		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+		return new Definition(this/*auto*/.annotations, this/*auto*/.modifiers.addLast(modifier/*auto*/), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
 	}
 	generateWithDefinitions(platform: Platform, definitions: List<Definition>): string {
-		let joinedDefinitions: string = definitions.query().map((definition: Definition) => definition.generate(platform)).collect(new Joiner(", ")).orElse("");
-		return this.generateWithAfterName(platform, "(" + joinedDefinitions + ")");
+		let joinedDefinitions: string = definitions/*auto*/.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(new Joiner(", ")).orElse("");
+		return this/*auto*/.generateWithAfterName(platform/*auto*/, "(" + joinedDefinitions/*auto*/ + ")");
 	}
 }

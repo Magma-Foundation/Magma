@@ -9,8 +9,8 @@ export class Tuple2Impl<A, B> implements Tuple2<A, B> {
 }
 
 A left() {
-	return this.leftValue;
+	return this/*auto*/.leftValue;
 }
 B right() {
-	return this.rightValue;
+	return this/*auto*/.rightValue;
 }

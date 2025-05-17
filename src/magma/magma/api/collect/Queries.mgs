@@ -6,10 +6,10 @@ import magma.api.collect.head.Head;
 import magma.api.collect.head.SingleHead;
 export struct Queries {
 	static def fromOption<T>(option: Option<T>): Query<T> {
-		return HeadedQuery<T>(option.map((mut element: T) => Queries.getTSingleHead(element)).orElseGet(() => EmptyHead<T>()));
+		return HeadedQuery<T>(option/*auto*/.map((mut element: T) => Queries/*auto*/.getTSingleHead(element/*auto*/)).orElseGet(() => EmptyHead<T>(/*auto*/)));
 	}
 	static def getTSingleHead<T>(element: T): Head<T> {
-		return SingleHead<T>(element);
+		return SingleHead<T>(element/*auto*/);
 	}
 	static def fromArray<T>(elements: T[]): Query<T> {
 		/*return new HeadedQuery<Integer>(new RangeHead(elements.length)).map((Integer index) -> elements[index])*/;

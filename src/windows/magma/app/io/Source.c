@@ -9,16 +9,16 @@ export class Source {
 }
 
 Result<&[I8], IOError> read() {
-	return this.source.readString();
+	return this/*auto*/.source.readString(/*auto*/);
 }
 &[I8] computeName() {
-	&[I8] fileName = this.source.findFileName();
-	number separator = fileName.lastIndexOf(".");
-	return fileName.substring(0, separator);
+	&[I8] fileName = this/*auto*/.source.findFileName(/*auto*/);
+	number separator = fileName/*auto*/.lastIndexOf(".");
+	return fileName/*auto*/.substring(0/*auto*/, separator/*auto*/);
 }
 List<&[I8]> computeNamespace() {
-	return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<&[I8]>());
+	return this/*auto*/.sourceDirectory.relativize(this/*auto*/.source).getParent(/*auto*/).query(/*auto*/).collect(new ListCollector<&[I8]>(/*auto*/));
 }
 Location computeLocation() {
-	return new Location(this.computeNamespace(), this.computeName());
+	return new Location(this/*auto*/.computeNamespace(/*auto*/), this/*auto*/.computeName(/*auto*/));
 }

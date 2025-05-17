@@ -194,6 +194,11 @@ public record ImmutableCompileState(
     }
 
     @Override
+    public String functionName() {
+        return "temp";
+    }
+
+    @Override
     public Option<String> findLastStructureName() {
         return this.structureNames().findLast();
     }

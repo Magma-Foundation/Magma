@@ -5,13 +5,13 @@ export class ArrayType implements Type {
 		this.child = child;
 	}
 	generate(): string {
-		return this.child.generate() + "[]";
+		return this/*auto*/.child.generate(/*auto*/) + "[]";
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";

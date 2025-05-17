@@ -17,22 +17,22 @@ export class InvokableNode implements Value {
 		this.args = args;
 	}
 	generate(platform: Platform): string {
-		let joinedArguments: string = this.joinArgs(platform);
-		return this.caller.generate(platform) + "(" + joinedArguments + ")";
+		let joinedArguments: string = this/*auto*/.joinArgs(platform/*auto*/);
+		return this/*auto*/.caller.generate(platform/*auto*/) + "(" + joinedArguments/*auto*/ + ")";
 	}
 	joinArgs(platform: Platform): string {
-		return this.args.query().map((value: Value) => value.generate(platform)).collect(new Joiner(", ")).orElse("");
+		return this/*auto*/.args.query(/*auto*/).map((value: Value) => value/*auto*/.generate(platform/*auto*/)).collect(new Joiner(", ")).orElse("");
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this/*auto*/);
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>(/*auto*/);
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
-		return new Some<string>("\n\tstatic " + this.caller.generate(platform) + ": " + structureName + " = new " + structureName + "(" + this.joinArgs(platform) + ");");
+		return new Some<string>("\n\tstatic " + this/*auto*/.caller.generate(platform/*auto*/) + ": " + structureName/*auto*/ + " = new " + structureName/*auto*/ + "(" + this/*auto*/.joinArgs(platform/*auto*/) + ");");
 	}
 }

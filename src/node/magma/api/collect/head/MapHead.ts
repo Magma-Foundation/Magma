@@ -8,6 +8,6 @@ export class MapHead<T, R> implements Head<R> {
 		this.mapper = mapper;
 	}
 	next(): Option<R> {
-		return this.head.next().map(this.mapper);
+		return this/*auto*/.head.next(/*auto*/).map(this/*auto*/.mapper);
 	}
 }

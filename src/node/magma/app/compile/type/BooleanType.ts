@@ -6,16 +6,16 @@ export class BooleanType implements Type {
 		this.platform = platform;
 	}
 	generate(): string {
-		if (Platform.TypeScript === this.platform) {
+		if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 			return "boolean";
 		}
 		return "Bool";
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";

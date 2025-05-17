@@ -5,13 +5,13 @@ export struct SliceType implements Type {
 		this.type = type;
 	}
 	def generate(): &[I8] {
-		return "&[" + this.type.generate() + "]";
+		return "&[" + this/*auto*/.type.generate(/*auto*/) + "]";
 	}
 	def isFunctional(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def isVar(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generateBeforeName(): &[I8] {
 		return "";

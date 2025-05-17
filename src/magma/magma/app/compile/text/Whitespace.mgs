@@ -8,6 +8,6 @@ export struct Whitespace implements Parameter {
 		return "";
 	}
 	def asDefinition(): Option<Definition> {
-		return None<Definition>();
+		return None<Definition>(/*auto*/);
 	}
 }

@@ -11,9 +11,9 @@ export class FunctionSegment<S extends FunctionHeader<S>> {
 }
 
 auto temp(&[I8] inner) {
-	return " {" + inner + indent + "}";
+	return " {" + inner/*auto*/ + indent/*auto*/ + "}";
 }
 &[I8] generate(Platform platform, &[I8] indent) {
-	&[I8] content = this.maybeContent().map(temp).orElse(";");
-	return indent + this.header.generateWithDefinitions(platform, this.definitions()) + content;
+	&[I8] content = this/*auto*/.maybeContent(/*auto*/).map(lambdaDefinition/*auto*/).orElse(";");
+	return indent/*auto*/ + this/*auto*/.header.generateWithDefinitions(platform/*auto*/, this/*auto*/.definitions(/*auto*/)) + content/*auto*/;
 }

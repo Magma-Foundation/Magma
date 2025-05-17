@@ -9,8 +9,8 @@ export class ZipHead<T, R> implements Head<Tuple2<T, R>> {
 }
 
 auto temp() {
-	return this.other.next();
+	return this/*auto*/.other.next(/*auto*/);
 }
 Option<Tuple2<T, R>> next() {
-	return this.head.next().and(temp);
+	return this/*auto*/.head.next(/*auto*/).and(lambdaDefinition/*auto*/);
 }

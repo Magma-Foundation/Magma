@@ -5,13 +5,13 @@ export class SliceType implements Type {
 		this.type = type;
 	}
 	generate(): string {
-		return "&[" + this.type.generate() + "]";
+		return "&[" + this/*auto*/.type.generate(/*auto*/) + "]";
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*auto*/;
 	}
 	generateBeforeName(): string {
 		return "";

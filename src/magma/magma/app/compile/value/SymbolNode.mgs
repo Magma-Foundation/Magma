@@ -1,5 +1,6 @@
-import magma.app.io.Platform;
 import magma.api.Type;
+import magma.app.io.Platform;
+import magma.app.Main;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.value.Value;
@@ -8,34 +9,36 @@ import magma.api.option.Some;
 import magma.api.option.None;
 export struct SymbolNode {
 	mut value: &[I8];
-	constructor (mut value: &[I8]) {
+	mut type: Type;
+	constructor (mut value: &[I8], mut type: Type) {
 		this.value = value;
+		this.type = type;
 	}
 	def generate(platform: Platform): &[I8] {
-		return this.value;
+		return this/*auto*/.value + Main/*auto*/.generatePlaceholder(type/*auto*/.generate(/*auto*/));
 	}
 	def resolve(state: CompileState): Type {
-		return state.resolve(this.value).orElse(PrimitiveType.Auto);
+		return state/*auto*/.resolve(this/*auto*/.value).orElse(PrimitiveType/*auto*/.Auto);
 	}
 	def toValue(): Option<Value> {
-		return Some<Value>(this);
+		return Some<Value>(this/*auto*/);
 	}
 	def findChild(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 	def generate(): &[I8] {
-		return this.value;
+		return this/*auto*/.value;
 	}
 	def isFunctional(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def isVar(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generateBeforeName(): &[I8] {
 		return "";
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
-		return None<&[I8]>();
+		return None<&[I8]>(/*auto*/);
 	}
 }

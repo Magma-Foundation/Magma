@@ -8,12 +8,12 @@ export class Err<T, X> implements Result<T, X> {
 		this.error = error;
 	}
 	findError(): Option<X> {
-		return new Some<X>(this.error);
+		return new Some<X>(this/*auto*/.error);
 	}
 	findValue(): Option<T> {
-		return new None<T>();
+		return new None<T>(/*auto*/);
 	}
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenErr(this.error);
+		return whenErr/*auto*/(this/*auto*/.error);
 	}
 }

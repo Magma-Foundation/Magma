@@ -14,49 +14,49 @@ export struct HeadedQuery<T> implements Query<T> {
 		this.head = head;
 	}
 	def next(): Option<T> {
-		return this.head.next();
+		return this/*auto*/.head.next(/*auto*/);
 	}
 	def collect<C>(collector: Collector<T, C>): C {
-		return this.foldWithInitial(collector.createInitial(), (mut current: C, mut element: T) => collector.fold(current, element));
+		return this/*auto*/.foldWithInitial(collector/*auto*/.createInitial(/*auto*/), (mut current: C, mut element: T) => collector/*auto*/.fold(current/*auto*/, element/*auto*/));
 	}
 	def map<R>(mapper: (arg0 : T) => R): Query<R> {
-		return HeadedQuery<R>(MapHead<T, R>(this.head, mapper));
+		return HeadedQuery<R>(MapHead<T, R>(this/*auto*/.head, mapper/*auto*/));
 	}
 	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-		mut let result: R = initial;
-		while (true) {
-			let finalResult: R = result;
-			let maybeNext: Tuple2<Bool, R> = this.head.next().map((mut inner: T) => folder(finalResult, inner)).toTuple(finalResult);
-			if (maybeNext.left()) {
-				result = maybeNext.right();
+		mut let result: R = initial/*auto*/;
+		while (true/*auto*/) {
+			let finalResult: R = result/*auto*/;
+			let maybeNext: Tuple2<Bool, R> = this/*auto*/.head.next(/*auto*/).map((mut inner: T) => folder/*auto*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
+			if (maybeNext/*auto*/.left(/*auto*/)) {
+				result/*auto*/ = maybeNext/*auto*/.right(/*auto*/);
 			}
 			else {
-				return result;
+				return result/*auto*/;
 			}
 		}
 	}
 	def foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder));
+		return this/*auto*/.head.next(/*auto*/).map(next/*auto*/).map((maybeNext: R) => this/*auto*/.foldWithInitial(maybeNext/*auto*/, folder/*auto*/));
 	}
 	def flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this.head.next().map(mapper).map((mut initial: Query<R>) => HeadedQuery<R>(FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => HeadedQuery<R>(EmptyHead<R>()));
+		return this/*auto*/.head.next(/*auto*/).map(mapper/*auto*/).map((mut initial: Query<R>) => HeadedQuery<R>(FlatMapHead<T, R>(this/*auto*/.head, initial/*auto*/, mapper/*auto*/))).orElseGet(() => HeadedQuery<R>(EmptyHead<R>(/*auto*/)));
 	}
 	def allMatch(predicate: (arg0 : T) => boolean): Bool {
-		return this.foldWithInitial(true, (mut maybeAllTrue: Bool, mut element: T) => maybeAllTrue && predicate(element));
+		return this/*auto*/.foldWithInitial(true/*auto*/, (mut maybeAllTrue: Bool, mut element: T) => maybeAllTrue/*auto*/ && predicate/*auto*/(element/*auto*/));
 	}
 	def anyMatch(predicate: (arg0 : T) => boolean): Bool {
-		return this.foldWithInitial(false, (mut aBoolean: Bool, mut t: T) => aBoolean || predicate(t));
+		return this/*auto*/.foldWithInitial(false/*auto*/, (mut aBoolean: Bool, mut t: T) => aBoolean/*auto*/ || predicate/*auto*/(t/*auto*/));
 	}
 	def zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
-		return HeadedQuery<Tuple2<T, R>>(ZipHead<T, R>(this.head, other));
+		return HeadedQuery<Tuple2<T, R>>(ZipHead<T, R>(this/*auto*/.head, other/*auto*/));
 	}
 	def filter(predicate: (arg0 : T) => boolean): Query<T> {
-		return this.flatMap((element: T) => {
-			if (predicate(element)) {
-				return HeadedQuery<T>(SingleHead<T>(element));
+		return this/*auto*/.flatMap((element: T) => {
+			if (predicate/*auto*/(element/*auto*/)) {
+				return HeadedQuery<T>(SingleHead<T>(element/*auto*/));
 			}
 			else {
-				return HeadedQuery<T>(EmptyHead<T>());
+				return HeadedQuery<T>(EmptyHead<T>(/*auto*/));
 			}
 		});
 	}

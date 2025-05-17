@@ -13,33 +13,33 @@ export struct Placeholder {
 		this.input = input;
 	}
 	def generate(): &[I8] {
-		return Main.generatePlaceholder(this.input);
+		return Main/*auto*/.generatePlaceholder(this/*auto*/.input);
 	}
 	def isFunctional(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generate(platform: Platform): &[I8] {
-		return this.generate();
+		return this/*auto*/.generate(/*auto*/);
 	}
 	def findChild(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 	def asDefinition(): Option<Definition> {
-		return None<Definition>();
+		return None<Definition>(/*auto*/);
 	}
 	def toValue(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	def isVar(): Bool {
-		return false;
+		return false/*auto*/;
 	}
 	def generateBeforeName(): &[I8] {
 		return "";
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
-		return None<&[I8]>();
+		return None<&[I8]>(/*auto*/);
 	}
 }

@@ -11,12 +11,12 @@ export struct ConstructionCaller implements Caller {
 		this.platform = platform;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		if (Platform.Magma === this.platform) {
-			return this.right;
+		if (Platform/*auto*/.Magma === this/*auto*/.platform) {
+			return this/*auto*/.right;
 		}
-		return "new " + this.right;
+		return "new " + this/*auto*/.right;
 	}
 	def findChild(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 }

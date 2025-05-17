@@ -12,18 +12,18 @@ export struct NotNode implements Value {
 		this.child = child;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		return this.child;
+		return this/*auto*/.child;
 	}
 	def toValue(): Option<Value> {
-		return Some<Value>(this);
+		return Some<Value>(this/*auto*/);
 	}
 	def findChild(): Option<Value> {
-		return None<Value>();
+		return None<Value>(/*auto*/);
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Auto;
+		return PrimitiveType/*auto*/.Auto;
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
-		return None<&[I8]>();
+		return None<&[I8]>(/*auto*/);
 	}
 }

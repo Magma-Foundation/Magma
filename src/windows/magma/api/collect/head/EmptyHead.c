@@ -3,5 +3,5 @@ export class EmptyHead<T> implements Head<T> {
 }
 
 Option<T> next() {
-	return new None<T>();
+	return new None<T>(/*auto*/);
 }

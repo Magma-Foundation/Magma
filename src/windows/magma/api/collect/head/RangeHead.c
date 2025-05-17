@@ -5,14 +5,14 @@ export class RangeHead implements Head<number> {
 }
 
 constructor (number length) {
-	this.length = length;
-	this.counter = 0;
+	this/*auto*/.length = length/*auto*/;
+	this/*auto*/.counter = 0/*auto*/;
 }
 Option<number> next() {
-	if (this.counter >= this.length) {
-		return new None<number>();
+	if (this/*auto*/.counter >= this/*auto*/.length) {
+		return new None<number>(/*auto*/);
 	}
-	number value = this.counter;
-	this.counter++;
-	return new Some<number>(value);
+	number value = this/*auto*/.counter;
+	this/*auto*/.counter++;
+	return new Some<number>(value/*auto*/);
 }

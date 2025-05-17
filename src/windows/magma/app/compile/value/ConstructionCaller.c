@@ -9,11 +9,11 @@ export class ConstructionCaller implements Caller {
 }
 
 &[I8] generate(Platform platform) {
-	if (Platform.Magma === this.platform) {
-		return this.right;
+	if (Platform/*auto*/.Magma === this/*auto*/.platform) {
+		return this/*auto*/.right;
 	}
-	return "new " + this.right;
+	return "new " + this/*auto*/.right;
 }
 Option<Value> findChild() {
-	return new None<Value>();
+	return new None<Value>(/*auto*/);
 }

@@ -5,13 +5,13 @@ export class SingleHead<T> implements Head<T> {
 }
 
 constructor (T element) {
-	this.element = element;
-	this.retrieved = false;
+	this/*auto*/.element = element/*auto*/;
+	this/*auto*/.retrieved = false/*auto*/;
 }
 Option<T> next() {
-	if (this.retrieved) {
-		return new None<T>();
+	if (this/*auto*/.retrieved) {
+		return new None<T>(/*auto*/);
 	}
-	this.retrieved = true;
-	return new Some<T>(this.element);
+	this/*auto*/.retrieved = true/*auto*/;
+	return new Some<T>(this/*auto*/.element);
 }
