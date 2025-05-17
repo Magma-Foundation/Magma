@@ -8,8 +8,10 @@ export class FunctionType implements Type {
 	}
 }
 
+auto temp(Tuple2<number, &[I8]> tuple) {"arg" + tuple.left() + " : " + tuple.right()
+}
 &[I8] generate() {
-	&[I8] joinedArguments = this.args.queryWithIndices().map((Tuple2<number, &[I8]> tuple) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
+	&[I8] joinedArguments = this.args.queryWithIndices().map(temp).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedArguments + ") => " + this.returns;
 }
 Bool isFunctional() {

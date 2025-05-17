@@ -33,10 +33,11 @@ import { Argument } from "../../magma/app/compile/value/Argument";
 import { InvokableNode } from "../../magma/app/compile/value/InvokableNode";
 import { StringNode } from "../../magma/app/compile/value/StringNode";
 import { NotNode } from "../../magma/app/compile/value/NotNode";
+import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
+import { SymbolNode } from "../../magma/app/compile/value/SymbolNode";
 import { LambdaNode } from "../../magma/app/compile/value/LambdaNode";
 import { AccessNode } from "../../magma/app/compile/value/AccessNode";
 import { OperationNode } from "../../magma/app/compile/value/OperationNode";
-import { SymbolNode } from "../../magma/app/compile/value/SymbolNode";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
@@ -44,7 +45,6 @@ import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { Placeholder } from "../../magma/app/compile/text/Placeholder";
 import { ArrayType } from "../../magma/app/compile/type/ArrayType";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
-import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
 import { SliceType } from "../../magma/app/compile/type/SliceType";
 import { BooleanType } from "../../magma/app/compile/type/BooleanType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
@@ -602,11 +602,12 @@ export class Main {
 			return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
 		})).or(() => Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => Main.assembleLambda(tuple.left(), paramNames, tuple.right())));
 	}
-	static assembleLambda(state: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
+	static assembleLambda(state: CompileState, parameters: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
 		if (state.isPlatform(Platform.Windows)) {
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(""), new LambdaNode(paramNames, content)));
+			let value: FunctionSegment<Definition> = new FunctionSegment<Definition>(new Definition(PrimitiveType.Auto, "temp"), parameters, new Some<>(content));
+			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state.addFunction(value.generate(state.platform(), "\n")), new SymbolNode("temp")));
 		}
-		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(paramNames, content)));
+		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state, new LambdaNode(parameters, content)));
 	}
 	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return Main.createOperatorRuleWithDifferentInfix(infix, infix);

@@ -25,7 +25,7 @@ public record StringNode(String value) implements Value {
     }
 
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override

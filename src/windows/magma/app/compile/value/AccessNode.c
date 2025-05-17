@@ -18,7 +18,7 @@ Option<Value> findChild() {
 	return new Some<Value>(this.child);
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Unknown;
+	return PrimitiveType.Auto;
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();

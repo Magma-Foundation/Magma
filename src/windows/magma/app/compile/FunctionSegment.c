@@ -10,7 +10,9 @@ export class FunctionSegment<S extends FunctionHeader<S>> {
 	}
 }
 
+auto temp(&[I8] inner) {" {" + inner + indent + "}"
+}
 &[I8] generate(Platform platform, &[I8] indent) {
-	&[I8] content = this.maybeContent().map((&[I8] inner) => " {" + inner + indent + "}").orElse(";");
+	&[I8] content = this.maybeContent().map(temp).orElse(";");
 	return indent + this.header.generateWithDefinitions(platform, this.definitions()) + content;
 }

@@ -2,8 +2,12 @@
 export class Queries {
 }
 
+auto temp(T element) {Queries.getTSingleHead(element)
+}
+auto temp() {new EmptyHead<T>()
+}
 static Query<T> fromOption(Option<T> option) {
-	return new HeadedQuery<T>(option.map((T element) => Queries.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));
+	return new HeadedQuery<T>(option.map(temp).orElseGet(temp));
 }
 static Head<T> getTSingleHead(T element) {
 	return new SingleHead<T>(element);

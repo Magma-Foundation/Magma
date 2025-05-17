@@ -31,7 +31,7 @@ export class Placeholder {
 		return new None<Value>();
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	isVar(): boolean {
 		return false;

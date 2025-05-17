@@ -25,7 +25,7 @@ export struct OperationNode implements Value {
 		return None<Value>();
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>();

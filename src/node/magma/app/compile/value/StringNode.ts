@@ -21,7 +21,7 @@ export class StringNode implements Value {
 		return new None<Value>();
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();

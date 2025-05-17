@@ -10,7 +10,7 @@ export class SymbolNode {
 	return this.value;
 }
 Type resolve(CompileState state) {
-	return state.resolve(this.value).orElse(PrimitiveType.Unknown);
+	return state.resolve(this.value).orElse(PrimitiveType.Auto);
 }
 Option<Value> toValue() {
 	return new Some<Value>(this);

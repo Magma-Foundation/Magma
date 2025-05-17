@@ -1,5 +1,6 @@
 import { List } from "../../../../magma/api/collect/list/List";
 import { Type } from "../../../../magma/api/Type";
+import { Lists } from "../../../../jvm/api/collect/list/Lists";
 import { Platform } from "../../../../magma/app/io/Platform";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -17,6 +18,9 @@ export class Definition {
 		this.typeParams = typeParams;
 		this.type = type;
 		this.name = name;
+	}
+	constructor (type: Type, name: string) {
+		this(Lists.empty(), Lists.empty(), Lists.empty(), type, name);
 	}
 	generate(platform: Platform): string {
 		return this.generateWithAfterName(platform, "");

@@ -31,7 +31,7 @@ export struct Placeholder {
 		return None<Value>();
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	def isVar(): Bool {
 		return false;

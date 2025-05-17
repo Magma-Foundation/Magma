@@ -8,8 +8,10 @@ export class LambdaNode implements Value {
 	}
 }
 
+auto temp(Definition definition) {definition.generate(platform)
+}
 &[I8] generate(Platform platform) {
-	&[I8] joinedParamNames = this.paramNames.query().map((Definition definition) => definition.generate(platform)).collect(new Joiner(", ")).orElse("");
+	&[I8] joinedParamNames = this.paramNames.query().map(temp).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedParamNames + ")" + " => " + this.content;
 }
 Option<Value> toValue() {
@@ -19,7 +21,7 @@ Option<Value> findChild() {
 	return new None<Value>();
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Unknown;
+	return PrimitiveType.Auto;
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();

@@ -1,5 +1,6 @@
 import magma.api.collect.list.List;
 import magma.api.Type;
+import jvm.api.collect.list.Lists;
 import magma.app.io.Platform;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -17,6 +18,9 @@ export struct Definition {
 		this.typeParams = typeParams;
 		this.type = type;
 		this.name = name;
+	}
+	constructor (type: Type, name: &[I8]) {
+		this(Lists.empty(), Lists.empty(), Lists.empty(), type, name);
 	}
 	def generate(platform: Platform): &[I8] {
 		return this.generateWithAfterName(platform, "");

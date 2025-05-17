@@ -23,7 +23,7 @@ export class AccessNode implements Value {
 		return new Some<Value>(this.child);
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();

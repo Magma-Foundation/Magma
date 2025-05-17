@@ -15,7 +15,7 @@ export class SymbolNode {
 		return this.value;
 	}
 	resolve(state: CompileState): Type {
-		return state.resolve(this.value).orElse(PrimitiveType.Unknown);
+		return state.resolve(this.value).orElse(PrimitiveType.Auto);
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this);

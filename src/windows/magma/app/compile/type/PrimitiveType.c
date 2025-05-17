@@ -4,7 +4,7 @@ export class PrimitiveType implements Type {
 	static Number: PrimitiveType = new PrimitiveType("number");
 	static Var: PrimitiveType = new PrimitiveType("var");
 	static Void: PrimitiveType = new PrimitiveType("void");
-	static Unknown: PrimitiveType = new PrimitiveType("unknown");
+	static Auto: PrimitiveType = new PrimitiveType("auto");
 	static I8: PrimitiveType = new PrimitiveType("I8");
 	static I32: PrimitiveType = new PrimitiveType("I32");
 	&[I8] value;

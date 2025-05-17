@@ -23,7 +23,7 @@ export struct AccessNode implements Value {
 		return Some<Value>(this.child);
 	}
 	def resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>();

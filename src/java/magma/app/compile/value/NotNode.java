@@ -25,7 +25,7 @@ public record NotNode(String child) implements Value {
     }
 
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override

@@ -25,7 +25,7 @@ Option<Value> toValue() {
 	return new None<Value>();
 }
 Type resolve(CompileState state) {
-	return PrimitiveType.Unknown;
+	return PrimitiveType.Auto;
 }
 Bool isVar() {
 	return false;

@@ -25,8 +25,10 @@ export class ImmutableCompileState implements CompileState {
 static CompileState createInitial() {
 	return new ImmutableCompileState(Platform.Magma, new None<Location>(), Lists.empty(), Lists.empty(), Lists.empty(), "", "", Lists.empty(), 0);
 }
+auto temp(&[I8] anObject) {Strings.equalsTo(name, anObject)
+}
 Bool hasLastStructureNameOf(&[I8] name) {
-	return this.structureNames.findLast().filter((&[I8] anObject) => Strings.equalsTo(name, anObject)).isPresent();
+	return this.structureNames.findLast().filter(temp).isPresent();
 }
 CompileState withLocation(Location namespace) {
 	return new ImmutableCompileState(this.platform, new Some<Location>(namespace), this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
@@ -46,8 +48,12 @@ CompileState exitDepth() {
 CompileState defineAll(List<Definition> definitions) {
 	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions.addAll(definitions), this.depth);
 }
+auto temp(Definition definition) {Strings.equalsTo(definition.name(), name)
+}
+auto temp(Definition definition1) {definition1.type()
+}
 Option<Type> resolve(&[I8] name) {
-	return this.definitions.queryReversed().filter((Definition definition) => Strings.equalsTo(definition.name(), name)).map((Definition definition1) => definition1.type()).next();
+	return this.definitions.queryReversed().filter(temp).map(temp).next();
 }
 CompileState clearImports() {
 	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, Lists.empty(), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
@@ -58,11 +64,15 @@ CompileState clear() {
 CompileState addSource(Source source) {
 	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources.addLast(source), this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
 }
+auto temp(&[I8] inner) {Strings.equalsTo(inner, base)
+}
+auto temp(Source source) {this.addResolvedImportWithNamespace(source.computeNamespace(), source.computeName())
+}
 CompileState addResolvedImportFromCache(&[I8] base) {
-	if (this.structureNames.query().anyMatch((&[I8] inner) => Strings.equalsTo(inner, base))) {
+	if (this.structureNames.query().anyMatch(temp)) {
 		return this;
 	}
-	return this.findSource(base).map((Source source) => this.addResolvedImportWithNamespace(source.computeNamespace(), source.computeName())).orElse(this);
+	return this.findSource(base).map(temp).orElse(this);
 }
 CompileState popStructureName() {
 	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames.removeLast().orElse(this.structureNames), this.structures, this.functions, this.definitions, this.depth);
@@ -79,8 +89,12 @@ CompileState addFunction(&[I8] function) {
 &[I8] join() {
 	return this.structures + this.functions;
 }
+auto temp(Location location) {location.namespace()
+}
+auto temp(Import node) {Strings.equalsTo(node.child(), child)
+}
 CompileState addResolvedImportWithNamespace(List<&[I8]> oldParent, &[I8] child) {
-	List<&[I8]> namespace = this.findCurrentLocation.map((Location location) => location.namespace()).orElse(Lists.empty());
+	List<&[I8]> namespace = this.findCurrentLocation.map(temp).orElse(Lists.empty());
 	List < String > newParent = oldParent;
 	if (Platform.TypeScript === this.platform) {
 		if (namespace.isEmpty()) {
@@ -93,14 +107,16 @@ CompileState addResolvedImportWithNamespace(List<&[I8]> oldParent, &[I8] child) 
 			i++;
 		}
 	}
-	if (this.imports.query().filter((Import node) => Strings.equalsTo(node.child(), child)).next().isPresent()) {
+	if (this.imports.query().filter(temp).next().isPresent()) {
 		return this;
 	}
 	Import importString = new Import(newParent, child);
 	return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
 }
+auto temp(Source source) {Strings.equalsTo(source.computeName(), name)
+}
 Option<Source> findSource(&[I8] name) {
-	return this.sources.query().filter((Source source) => Strings.equalsTo(source.computeName(), name)).next();
+	return this.sources.query().filter(temp).next();
 }
 Bool isPlatform(Platform platform) {
 	return platform === this.platform();

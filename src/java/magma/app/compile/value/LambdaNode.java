@@ -33,7 +33,7 @@ public record LambdaNode(List<Definition> paramNames, String content) implements
     }
 
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override

@@ -8,6 +8,8 @@ export class ZipHead<T, R> implements Head<Tuple2<T, R>> {
 	}
 }
 
+auto temp() {this.other.next()
+}
 Option<Tuple2<T, R>> next() {
-	return this.head.next().and(() => this.other.next());
+	return this.head.next().and(temp);
 }

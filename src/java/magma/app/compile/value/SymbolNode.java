@@ -16,7 +16,7 @@ public record SymbolNode(String value) implements Value, Type {
 
     @Override
     public Type resolve(final CompileState state) {
-        return state.resolve(this.value).orElse(PrimitiveType.Unknown);
+        return state.resolve(this.value).orElse(PrimitiveType.Auto);
     }
 
     @Override

@@ -35,7 +35,7 @@ public record InvokableNode(Caller caller, List<Value> args) implements Value {
     }
 
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override

@@ -2,6 +2,7 @@
 #define magma_app_compile_define_Definition
 import { List } from "magma/api/collect/list/List";
 import { Type } from "magma/api/Type";
+import { Lists } from "jvm/api/collect/list/Lists";
 import { Platform } from "magma/app/io/Platform";
 import { Option } from "magma/api/option/Option";
 import { Some } from "magma/api/option/Some";

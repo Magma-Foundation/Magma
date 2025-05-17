@@ -14,6 +14,9 @@ export class Definition {
 	}
 }
 
+constructor (Type type, &[I8] name) {
+	this(Lists.empty(), Lists.empty(), Lists.empty(), type, name);
+}
 &[I8] generate(Platform platform) {
 	return this.generateWithAfterName(platform, "");
 }
@@ -28,8 +31,10 @@ Option<Definition> asDefinition() {
 	}
 	return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 }
+auto temp(&[I8] value) {value + " "
+}
 &[I8] joinModifiers() {
-	return this.modifiers.query().map((&[I8] value) => value + " ").collect(new Joiner("")).orElse("");
+	return this.modifiers.query().map(temp).collect(new Joiner("")).orElse("");
 }
 &[I8] generateType() {
 	if (this.type.isVar()) {
@@ -49,7 +54,9 @@ Definition removeModifier(&[I8] modifier) {
 Definition addModifierLast(&[I8] modifier) {
 	return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
 }
+auto temp(Definition definition) {definition.generate(platform)
+}
 &[I8] generateWithDefinitions(Platform platform, List<Definition> definitions) {
-	&[I8] joinedDefinitions = definitions.query().map((Definition definition) => definition.generate(platform)).collect(new Joiner(", ")).orElse("");
+	&[I8] joinedDefinitions = definitions.query().map(temp).collect(new Joiner(", ")).orElse("");
 	return this.generateWithAfterName(platform, "(" + joinedDefinitions + ")");
 }

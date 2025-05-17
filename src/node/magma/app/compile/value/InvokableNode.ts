@@ -30,7 +30,7 @@ export class InvokableNode implements Value {
 		return new None<Value>();
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Auto;
 	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new Some<string>("\n\tstatic " + this.caller.generate(platform) + ": " + structureName + " = new " + structureName + "(" + this.joinArgs(platform) + ");");

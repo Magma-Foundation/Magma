@@ -25,7 +25,7 @@ public record OperationNode(Value left, String targetInfix, Value right) impleme
     }
 
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override

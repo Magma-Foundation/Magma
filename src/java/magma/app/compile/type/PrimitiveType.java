@@ -7,7 +7,7 @@ public enum PrimitiveType implements Type {
     Number("number"),
     Var("var"),
     Void("void"),
-    Unknown("unknown"),
+    Auto("auto"),
     I8("I8"),
     I32("I32");
 

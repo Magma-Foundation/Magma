@@ -44,7 +44,7 @@ public record Placeholder(String input) implements Parameter, Value, Type {
 
     @Override
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override

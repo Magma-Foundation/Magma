@@ -1,5 +1,6 @@
 package magma.app.compile.define;
 
+import jvm.api.collect.list.Lists;
 import jvm.api.text.Strings;
 import magma.api.Type;
 import magma.api.collect.Joiner;
@@ -15,6 +16,10 @@ public record Definition(
         Type type,
         String name
 ) implements FunctionHeader<Definition>, Parameter {
+    public Definition(final Type type, final String name) {
+        this(Lists.empty(), Lists.empty(), Lists.empty(), type, name);
+    }
+
     @Override
     public String generate(final Platform platform) {
         return this.generateWithAfterName(platform, "");

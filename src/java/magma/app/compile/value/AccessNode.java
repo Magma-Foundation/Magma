@@ -26,7 +26,7 @@ public record AccessNode(Value child, String property) implements Value {
 
     @Override
     public Type resolve(final CompileState state) {
-        return PrimitiveType.Unknown;
+        return PrimitiveType.Auto;
     }
 
     @Override
