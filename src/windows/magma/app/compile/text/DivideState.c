@@ -39,8 +39,8 @@ Option<Tuple2<DivideState, I8>> pop() {
 	if (this/*auto*/.index >= Strings/*auto*/.length(this/*auto*/.input)) {
 		return new None<Tuple2<DivideState, I8>>(/*auto*/);
 	}
-	I8 c = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
-	DivideState nextState = new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
+	var c = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+	var nextState = new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
 	return new Some<Tuple2<DivideState, I8>>(new Tuple2Impl<DivideState, I8>(nextState/*auto*/, c/*I8*/));
 }
 auto temp(Tuple2<DivideState, I8> inner) {

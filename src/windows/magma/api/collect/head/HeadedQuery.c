@@ -22,10 +22,10 @@ auto temp(T inner) {
 	return folder/*(arg0 : R, arg1 : T) => R*/(finalResult/*auto*/, inner/*auto*/);
 }
 R foldWithInitial(R initial, (arg0 : R, arg1 : T) => R folder) {
-	R result = initial/*R*/;
+	var result = initial/*R*/;
 	while (true/*auto*/) {
-		R finalResult = result/*auto*/;
-		Tuple2<Bool, R> maybeNext = this/*auto*/.head.next(/*auto*/).map(lambdaDefinition/*auto*/).toTuple(finalResult/*auto*/);
+		var finalResult = result/*auto*/;
+		var maybeNext = this/*auto*/.head.next(/*auto*/).map(lambdaDefinition/*auto*/).toTuple(finalResult/*auto*/);
 		if (maybeNext/*auto*/.left(/*auto*/)) {
 			result/*auto*/ = maybeNext/*auto*/.right(/*auto*/);
 		}

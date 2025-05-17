@@ -21,7 +21,7 @@ export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 		return generateWithAfterName/*auto*/(platform/*Platform*/, "(" + definitions/*&[I8]*/ + ")");
 	}
 	def generateWithDefinitions(platform: Platform, definitions: List<Definition>): &[I8] {
-		let joinedDefinitions: &[I8] = definitions/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
+		let joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
 		return this/*auto*/.generateWithDefinitions0(platform/*Platform*/, joinedDefinitions/*auto*/);
 	}
 }

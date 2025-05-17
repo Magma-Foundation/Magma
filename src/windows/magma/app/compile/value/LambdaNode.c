@@ -12,7 +12,7 @@ auto temp(Definition definition) {
 	return definition/*auto*/.generate(platform/*Platform*/);
 }
 &[I8] generate(Platform platform) {
-	&[I8] joinedParamNames = this/*auto*/.paramNames.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
+	var joinedParamNames = this/*auto*/.paramNames.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedParamNames/*auto*/ + ")" + " => " + this/*auto*/.content;
 }
 Option<Value> toValue() {

@@ -5,9 +5,9 @@ import { Head } from "magma/api/collect/head/Head";
 import { Option } from "magma/api/option/Option";
 import { Collector } from "magma/api/collect/Collector";
 import { MapHead } from "magma/api/collect/head/MapHead";
-import { Tuple2 } from "magma/api/Tuple2";
 import { FlatMapHead } from "magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "magma/api/collect/head/EmptyHead";
+import { Tuple2 } from "magma/api/Tuple2";
 import { ZipHead } from "magma/api/collect/head/ZipHead";
 import { SingleHead } from "magma/api/collect/head/SingleHead";
 #endif

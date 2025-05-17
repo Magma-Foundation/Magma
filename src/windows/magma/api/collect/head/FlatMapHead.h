@@ -3,6 +3,5 @@
 import { Head } from "magma/api/collect/head/Head";
 import { Query } from "magma/api/collect/Query";
 import { Option } from "magma/api/option/Option";
-import { Tuple2 } from "magma/api/Tuple2";
 import { None } from "magma/api/option/None";
 #endif

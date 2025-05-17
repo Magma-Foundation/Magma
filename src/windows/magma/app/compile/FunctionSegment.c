@@ -14,6 +14,6 @@ auto temp(&[I8] inner) {
 	return " {" + inner/*auto*/ + indent/*&[I8]*/ + "}";
 }
 &[I8] generate(Platform platform, &[I8] indent) {
-	&[I8] content = this/*auto*/.maybeContent(/*auto*/).map(lambdaDefinition/*auto*/).orElse(";");
+	var content = this/*auto*/.maybeContent(/*auto*/).map(lambdaDefinition/*auto*/).orElse(";");
 	return indent/*&[I8]*/ + this/*auto*/.header.generateWithDefinitions(platform/*Platform*/, this/*auto*/.definitions(/*auto*/)) + content/*auto*/;
 }

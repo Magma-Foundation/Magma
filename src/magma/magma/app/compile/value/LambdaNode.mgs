@@ -16,7 +16,7 @@ export struct LambdaNode implements Value {
 		this.content = content;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		let joinedParamNames: &[I8] = this/*auto*/.paramNames.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
+		let joinedParamNames = this/*auto*/.paramNames.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
 		return "(" + joinedParamNames/*auto*/ + ")" + " => " + this/*auto*/.content;
 	}
 	def toValue(): Option<Value> {

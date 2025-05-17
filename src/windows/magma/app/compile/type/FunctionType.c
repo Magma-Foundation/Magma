@@ -12,7 +12,7 @@ auto temp(Tuple2<number, &[I8]> tuple) {
 	return "arg" + tuple/*auto*/.left(/*auto*/) + " : " + tuple/*auto*/.right(/*auto*/);
 }
 &[I8] generate() {
-	&[I8] joinedArguments = this/*auto*/.args.queryWithIndices(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
+	var joinedArguments = this/*auto*/.args.queryWithIndices(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedArguments/*auto*/ + ") => " + this/*auto*/.returns;
 }
 Bool isFunctional() {

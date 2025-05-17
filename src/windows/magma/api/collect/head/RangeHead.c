@@ -12,7 +12,7 @@ Option<number> next() {
 	if (this/*auto*/.counter >= this/*auto*/.length) {
 		return new None<number>(/*auto*/);
 	}
-	number value = this/*auto*/.counter;
+	var value = this/*auto*/.counter;
 	this/*auto*/.counter++;
 	return new Some<number>(value/*auto*/);
 }

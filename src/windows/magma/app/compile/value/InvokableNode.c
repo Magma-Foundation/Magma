@@ -9,7 +9,7 @@ export class InvokableNode implements Value {
 }
 
 &[I8] generate(Platform platform) {
-	&[I8] joinedArguments = this/*auto*/.joinArgs(platform/*Platform*/);
+	var joinedArguments = this/*auto*/.joinArgs(platform/*Platform*/);
 	return this/*auto*/.caller.generate(platform/*Platform*/) + "(" + joinedArguments/*auto*/ + ")";
 }
 auto temp(Value value) {

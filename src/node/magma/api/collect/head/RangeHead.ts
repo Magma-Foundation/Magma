@@ -13,7 +13,7 @@ export class RangeHead implements Head<number> {
 		if (this/*auto*/.counter >= this/*auto*/.length) {
 			return new None<number>(/*auto*/);
 		}
-		let value: number = this/*auto*/.counter;
+		let value = this/*auto*/.counter;
 		this/*auto*/.counter++;
 		return new Some<number>(value/*auto*/);
 	}

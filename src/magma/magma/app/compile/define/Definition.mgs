@@ -29,8 +29,8 @@ export struct Definition {
 		return Some<Definition>(this/*auto*/);
 	}
 	def generateWithAfterName(platform: Platform, afterName: &[I8]): &[I8] {
-		let joinedTypeParams: &[I8] = this/*auto*/.joinTypeParams(/*auto*/);
-		let joinedModifiers: &[I8] = this/*auto*/.joinModifiers(/*auto*/);
+		let joinedTypeParams = this/*auto*/.joinTypeParams(/*auto*/);
+		let joinedModifiers = this/*auto*/.joinModifiers(/*auto*/);
 		if (Platform/*auto*/.Windows === platform/*Platform*/) {
 			return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*&[I8]*/;
 		}
@@ -58,7 +58,7 @@ export struct Definition {
 		return Definition(this/*auto*/.annotations, this/*auto*/.modifiers.addLast(modifier/*&[I8]*/), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
 	}
 	def generateWithDefinitions(platform: Platform, definitions: List<Definition>): &[I8] {
-		let joinedDefinitions: &[I8] = definitions/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
+		let joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
 		return this/*auto*/.generateWithAfterName(platform/*Platform*/, "(" + joinedDefinitions/*auto*/ + ")");
 	}
 }

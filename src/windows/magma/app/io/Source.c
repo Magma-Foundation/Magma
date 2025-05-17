@@ -12,8 +12,8 @@ Result<&[I8], IOError> read() {
 	return this/*auto*/.source.readString(/*auto*/);
 }
 &[I8] computeName() {
-	&[I8] fileName = this/*auto*/.source.findFileName(/*auto*/);
-	number separator = fileName/*auto*/.lastIndexOf(".");
+	var fileName = this/*auto*/.source.findFileName(/*auto*/);
+	var separator = fileName/*auto*/.lastIndexOf(".");
 	return fileName/*auto*/.substring(0/*auto*/, separator/*auto*/);
 }
 List<&[I8]> computeNamespace() {

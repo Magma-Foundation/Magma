@@ -3,9 +3,9 @@ import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";
 import { Collector } from "../../../../magma/api/collect/Collector";
 import { MapHead } from "../../../../magma/api/collect/head/MapHead";
-import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { ZipHead } from "../../../../magma/api/collect/head/ZipHead";
 import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
 export class HeadedQuery<T> implements Query<T> {
@@ -23,10 +23,10 @@ export class HeadedQuery<T> implements Query<T> {
 		return new HeadedQuery<R>(new MapHead<T, R>(this/*auto*/.head, mapper/*(arg0 : T) => R*/));
 	}
 	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-		let result: R = initial/*R*/;
+		let result = initial/*R*/;
 		while (true/*auto*/) {
-			let finalResult: R = result/*auto*/;
-			let maybeNext: Tuple2<boolean, R> = this/*auto*/.head.next(/*auto*/).map((inner: T) => folder/*(arg0 : R, arg1 : T) => R*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
+			let finalResult = result/*auto*/;
+			let maybeNext = this/*auto*/.head.next(/*auto*/).map((inner: T) => folder/*(arg0 : R, arg1 : T) => R*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
 			if (maybeNext/*auto*/.left(/*auto*/)) {
 				result/*auto*/ = maybeNext/*auto*/.right(/*auto*/);
 			}

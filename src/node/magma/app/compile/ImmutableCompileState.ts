@@ -90,14 +90,14 @@ export class ImmutableCompileState implements CompileState {
 		return this/*auto*/.structures + this/*auto*/.functions;
 	}
 	addResolvedImportWithNamespace(oldParent: List<string>, child: string): CompileState {
-		let namespace: List<string> = this/*auto*/.findCurrentLocation.map((location: Location) => location/*auto*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
-		List/*auto*/ < String/*auto*/ > newParent/*auto*/ = oldParent/*List<string>*/;
+		let namespace = this/*auto*/.findCurrentLocation.map((location: Location) => location/*auto*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
+		let newParent = oldParent/*List<string>*/;
 		if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 			if (namespace/*Location*/.isEmpty(/*auto*/)) {
 				newParent/*auto*/ = newParent/*auto*/.addFirst(".");
 			}
-			let i: number = 0/*auto*/;
-			let size: number = namespace/*Location*/.size(/*auto*/);
+			let i = 0/*auto*/;
+			let size = namespace/*Location*/.size(/*auto*/);
 			while (i/*auto*/ < size/*auto*/) {
 				newParent/*auto*/ = newParent/*auto*/.addFirst("..");
 				i/*auto*/++;
@@ -106,7 +106,7 @@ export class ImmutableCompileState implements CompileState {
 		if (this/*auto*/.imports.query(/*auto*/).filter((node: Import) => Strings/*auto*/.equalsTo(node/*auto*/.child(/*auto*/), child/*string*/)).next(/*auto*/).isPresent(/*auto*/)) {
 			return this/*auto*/;
 		}
-		let importString: Import = new Import(newParent/*auto*/, child/*string*/);
+		let importString = new Import(newParent/*auto*/, child/*string*/);
 		return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports.addLast(importString/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 	}
 	findSource(name: string): Option<Source> {
@@ -116,7 +116,7 @@ export class ImmutableCompileState implements CompileState {
 		return platform/*Platform*/ === this/*auto*/.platform(/*auto*/);
 	}
 	createIndent(): string {
-		let indent: number = this/*auto*/.depth(/*auto*/);
+		let indent = this/*auto*/.depth(/*auto*/);
 		return "\n" + "\t".repeat(indent/*&[I8]*/);
 	}
 	functionName(): string {

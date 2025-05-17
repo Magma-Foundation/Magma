@@ -24,8 +24,8 @@ Option<Definition> asDefinition() {
 	return new Some<Definition>(this/*auto*/);
 }
 &[I8] generateWithAfterName(Platform platform, &[I8] afterName) {
-	&[I8] joinedTypeParams = this/*auto*/.joinTypeParams(/*auto*/);
-	&[I8] joinedModifiers = this/*auto*/.joinModifiers(/*auto*/);
+	var joinedTypeParams = this/*auto*/.joinTypeParams(/*auto*/);
+	var joinedModifiers = this/*auto*/.joinModifiers(/*auto*/);
 	if (Platform/*auto*/.Windows === platform/*Platform*/) {
 		return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*&[I8]*/;
 	}
@@ -59,6 +59,6 @@ auto temp(Definition definition) {
 	return definition/*auto*/.generate(platform/*Platform*/);
 }
 &[I8] generateWithDefinitions(Platform platform, List<Definition> definitions) {
-	&[I8] joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
+	var joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
 	return this/*auto*/.generateWithAfterName(platform/*Platform*/, "(" + joinedDefinitions/*auto*/ + ")");
 }

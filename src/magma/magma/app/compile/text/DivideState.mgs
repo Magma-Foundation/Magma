@@ -44,8 +44,8 @@ export struct DivideState {
 		if (this/*auto*/.index >= Strings/*auto*/.length(this/*auto*/.input)) {
 			return None<Tuple2<DivideState, I8>>(/*auto*/);
 		}
-		let c: I8 = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
-		let nextState: DivideState = DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
+		let c = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+		let nextState = DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
 		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState/*auto*/, c/*I8*/));
 	}
 	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {

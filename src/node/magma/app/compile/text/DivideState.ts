@@ -44,8 +44,8 @@ export class DivideState {
 		if (this/*auto*/.index >= Strings/*auto*/.length(this/*auto*/.input)) {
 			return new None<Tuple2<DivideState, string>>(/*auto*/);
 		}
-		let c: string = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
-		let nextState: DivideState = new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
+		let c = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+		let nextState = new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
 		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState/*auto*/, c/*string*/));
 	}
 	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {

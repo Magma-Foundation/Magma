@@ -16,7 +16,7 @@ export class InvokableNode implements Value {
 		this.args = args;
 	}
 	generate(platform: Platform): string {
-		let joinedArguments: string = this/*auto*/.joinArgs(platform/*Platform*/);
+		let joinedArguments = this/*auto*/.joinArgs(platform/*Platform*/);
 		return this/*auto*/.caller.generate(platform/*Platform*/) + "(" + joinedArguments/*auto*/ + ")";
 	}
 	joinArgs(platform: Platform): string {

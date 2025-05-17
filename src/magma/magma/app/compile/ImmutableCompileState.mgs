@@ -90,14 +90,14 @@ export struct ImmutableCompileState implements CompileState {
 		return this/*auto*/.structures + this/*auto*/.functions;
 	}
 	def addResolvedImportWithNamespace(oldParent: List<&[I8]>, child: &[I8]): CompileState {
-		let namespace: List<&[I8]> = this/*auto*/.findCurrentLocation.map((mut location: Location) => location/*auto*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
-		List/*auto*/ < String/*auto*/ > newParent/*auto*/ = oldParent/*List<&[I8]>*/;
+		let namespace = this/*auto*/.findCurrentLocation.map((mut location: Location) => location/*auto*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
+		mut let newParent = oldParent/*List<&[I8]>*/;
 		if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 			if (namespace/*Location*/.isEmpty(/*auto*/)) {
 				newParent/*auto*/ = newParent/*auto*/.addFirst(".");
 			}
-			mut let i: I32 = 0/*auto*/;
-			let size: I32 = namespace/*Location*/.size(/*auto*/);
+			mut let i = 0/*auto*/;
+			let size = namespace/*Location*/.size(/*auto*/);
 			while (i/*auto*/ < size/*auto*/) {
 				newParent/*auto*/ = newParent/*auto*/.addFirst("..");
 				i/*auto*/++;
@@ -106,7 +106,7 @@ export struct ImmutableCompileState implements CompileState {
 		if (this/*auto*/.imports.query(/*auto*/).filter((mut node: Import) => Strings/*auto*/.equalsTo(node/*auto*/.child(/*auto*/), child/*&[I8]*/)).next(/*auto*/).isPresent(/*auto*/)) {
 			return this/*auto*/;
 		}
-		let importString: Import = Import(newParent/*auto*/, child/*&[I8]*/);
+		let importString = Import(newParent/*auto*/, child/*&[I8]*/);
 		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports.addLast(importString/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 	}
 	def findSource(name: &[I8]): Option<Source> {
@@ -116,7 +116,7 @@ export struct ImmutableCompileState implements CompileState {
 		return platform/*Platform*/ === this/*auto*/.platform(/*auto*/);
 	}
 	def createIndent(): &[I8] {
-		let indent: I32 = this/*auto*/.depth(/*auto*/);
+		let indent = this/*auto*/.depth(/*auto*/);
 		return "\n" + "\t".repeat(indent/*&[I8]*/);
 	}
 	def functionName(): &[I8] {

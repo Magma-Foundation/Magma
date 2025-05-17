@@ -101,14 +101,14 @@ auto temp(Import node) {
 	return Strings/*auto*/.equalsTo(node/*auto*/.child(/*auto*/), child/*&[I8]*/);
 }
 CompileState addResolvedImportWithNamespace(List<&[I8]> oldParent, &[I8] child) {
-	List<&[I8]> namespace = this/*auto*/.findCurrentLocation.map(lambdaDefinition/*auto*/).orElse(Lists/*auto*/.empty(/*auto*/));
-	List/*auto*/ < String/*auto*/ > newParent/*auto*/ = oldParent/*List<&[I8]>*/;
+	var namespace = this/*auto*/.findCurrentLocation.map(lambdaDefinition/*auto*/).orElse(Lists/*auto*/.empty(/*auto*/));
+	var newParent = oldParent/*List<&[I8]>*/;
 	if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
 		if (namespace/*Location*/.isEmpty(/*auto*/)) {
 			newParent/*auto*/ = newParent/*auto*/.addFirst(".");
 		}
-		number i = 0/*auto*/;
-		number size = namespace/*Location*/.size(/*auto*/);
+		var i = 0/*auto*/;
+		var size = namespace/*Location*/.size(/*auto*/);
 		while (i/*auto*/ < size/*auto*/) {
 			newParent/*auto*/ = newParent/*auto*/.addFirst("..");
 			i/*auto*/++;
@@ -117,7 +117,7 @@ CompileState addResolvedImportWithNamespace(List<&[I8]> oldParent, &[I8] child) 
 	if (this/*auto*/.imports.query(/*auto*/).filter(lambdaDefinition/*auto*/).next(/*auto*/).isPresent(/*auto*/)) {
 		return this/*auto*/;
 	}
-	Import importString = new Import(newParent/*auto*/, child/*&[I8]*/);
+	var importString = new Import(newParent/*auto*/, child/*&[I8]*/);
 	return new ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports.addLast(importString/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth);
 }
 auto temp(Source source) {
@@ -130,7 +130,7 @@ Bool isPlatform(Platform platform) {
 	return platform/*Platform*/ === this/*auto*/.platform(/*auto*/);
 }
 &[I8] createIndent() {
-	number indent = this/*auto*/.depth(/*auto*/);
+	var indent = this/*auto*/.depth(/*auto*/);
 	return "\n" + "\t".repeat(indent/*&[I8]*/);
 }
 &[I8] functionName() {

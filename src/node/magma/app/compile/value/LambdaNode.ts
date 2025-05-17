@@ -16,7 +16,7 @@ export class LambdaNode implements Value {
 		this.content = content;
 	}
 	generate(platform: Platform): string {
-		let joinedParamNames: string = this/*auto*/.paramNames.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(new Joiner(", ")).orElse("");
+		let joinedParamNames = this/*auto*/.paramNames.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedParamNames/*auto*/ + ")" + " => " + this/*auto*/.content;
 	}
 	toValue(): Option<Value> {

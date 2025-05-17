@@ -29,8 +29,8 @@ export class Definition {
 		return new Some<Definition>(this/*auto*/);
 	}
 	generateWithAfterName(platform: Platform, afterName: string): string {
-		let joinedTypeParams: string = this/*auto*/.joinTypeParams(/*auto*/);
-		let joinedModifiers: string = this/*auto*/.joinModifiers(/*auto*/);
+		let joinedTypeParams = this/*auto*/.joinTypeParams(/*auto*/);
+		let joinedModifiers = this/*auto*/.joinModifiers(/*auto*/);
 		if (Platform/*auto*/.Windows === platform/*Platform*/) {
 			return joinedModifiers/*auto*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*string*/;
 		}
@@ -58,7 +58,7 @@ export class Definition {
 		return new Definition(this/*auto*/.annotations, this/*auto*/.modifiers.addLast(modifier/*string*/), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
 	}
 	generateWithDefinitions(platform: Platform, definitions: List<Definition>): string {
-		let joinedDefinitions: string = definitions/*List<Definition>*/.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(new Joiner(", ")).orElse("");
+		let joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(new Joiner(", ")).orElse("");
 		return this/*auto*/.generateWithAfterName(platform/*Platform*/, "(" + joinedDefinitions/*auto*/ + ")");
 	}
 }

@@ -10,10 +10,10 @@ export struct Import {
 	}
 	def generate(platform: Platform): &[I8] {
 		if (Platform/*auto*/.Magma === platform/*Platform*/) {
-			let joinedNamespace: &[I8] = this/*auto*/.namespace.query(/*auto*/).collect(Joiner(".")).orElse("");
+			let joinedNamespace = this/*auto*/.namespace.query(/*auto*/).collect(Joiner(".")).orElse("");
 			return "import " + joinedNamespace/*auto*/ + "." + this/*auto*/.child + ";\n";
 		}
-		let joinedNamespace: &[I8] = this/*auto*/.namespace.addLast(this/*auto*/.child).query(/*auto*/).collect(Joiner("/")).orElse("");
+		let joinedNamespace = this/*auto*/.namespace.addLast(this/*auto*/.child).query(/*auto*/).collect(Joiner("/")).orElse("");
 		return "import { " + this/*auto*/.child + " } from \"" + joinedNamespace/*auto*/ + "\";\n";
 	}
 }
