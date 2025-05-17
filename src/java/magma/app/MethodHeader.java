@@ -1,6 +1,6 @@
 package magma.app;
 
-interface MethodHeader<S extends MethodHeader<S>> {
+public interface MethodHeader<S extends MethodHeader<S>> {
     String generateWithAfterName(String afterName);
 
     boolean hasAnnotation(String annotation);

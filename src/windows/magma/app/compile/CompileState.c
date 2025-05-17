@@ -1,13 +1,14 @@
 #include "./CompileState.h"
 export class CompileState {
-	mut imports: List<>;
+	mut imports: List<Import>;
 	mut output: &[I8];
 	mut structureNames: List<&[I8]>;
 	mut depth: number;
 	mut definitions: List<Definition>;
-	mut maybeLocation: Option<>;
-	mut sources: List<>;
-	constructor (mut imports: List<>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: number, mut definitions: List<Definition>, mut maybeLocation: Option<>, mut sources: List<>) {
+	mut maybeLocation: Option<Location>;
+	mut sources: List<Source>;
+	mut platform: Platform;
+	constructor (mut imports: List<Import>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: number, mut definitions: List<Definition>, mut maybeLocation: Option<Location>, mut sources: List<Source>, mut platform: Platform) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
@@ -15,19 +16,18 @@ export class CompileState {
 		this.definitions = definitions;
 		this.maybeLocation = maybeLocation;
 		this.sources = sources;
+		this.platform = platform;
 	}
 	mut static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty(), Main.Platform.Magma);
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
 	}
 	mut isLastWithin(name: &[I8]): Bool {
 		return this.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	mut addResolvedImport(oldParent: List<&[I8]>, child: &[I8]): CompileState {
-		let namespace = /* this.maybeLocation
-                .map((Main.Location location) -> location.namespace())
-                .orElse(Lists.empty())*/;
+		let namespace = this.maybeLocation.map((mut location: Location) => location.namespace()).orElse(Lists.empty());
 		let mut newParent = oldParent;
-		if (Main.Platform.TypeScript === this.platform) {
+		if (Platform.TypeScript === this.platform) {
 			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
@@ -38,18 +38,14 @@ export class CompileState {
 				i++;
 			}
 		}
-		if (/*this.imports
-                .query()
-                .filter((Main.Import node) -> Strings.equalsTo(node.child(), child))
-                .next()
-                .isPresent()*/) {
+		if (this.imports.query().filter((mut node: Import) => Strings.equalsTo(node.child(), child)).next().isPresent()) {
 			return this;
 		}
-		let importString = /* new Main.Import(newParent, child)*/;
+		let importString = new Import(newParent, child);
 		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	mut withLocation(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(namespace), this.sources, this.platform);
+	mut withLocation(namespace: Location): CompileState {
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
 	}
 	mut append(element: &[I8]): CompileState {
 		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
@@ -75,29 +71,25 @@ export class CompileState {
 	mut clearOutput(): CompileState {
 		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	mut addSource(): CompileState {
+	mut addSource(source: Source): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
 	}
-	mut findSource(name: &[I8]): Option<> {
-		/*return this.sources.query()
-                .filter((Main.Source source) -> Strings.equalsTo(source.computeName(), name))
-                .next()*/;
+	mut findSource(name: &[I8]): Option<Source> {
+		return this.sources.query().filter((mut source: Source) => Strings.equalsTo(source.computeName(), name)).next();
 	}
 	mut addResolvedImportFromCache(base: &[I8]): CompileState {
 		if (this.structureNames.query().anyMatch((mut inner: &[I8]) => Strings.equalsTo(inner, base))) {
 			return this;
 		}
-		/*return this.findSource(base)
-                .map((Main.Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
-                .orElse(this)*/;
+		return this.findSource(base).map((mut source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 	mut popStructureName(): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	mut mapLocation(mapper: Function<>): CompileState {
+	mut mapLocation(mapper: (arg0 : Location) => Location): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
 	}
-	mut withPlatform(): CompileState {
+	mut withPlatform(platform: Platform): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
 	}
 }

@@ -1,6 +1,6 @@
 import magma.app.Definition;
 import magma.api.option.Option;
-struct Parameter {
+export struct Parameter {
 	def generate(): &[I8];
 	def asDefinition(): Option<Definition>;
 }

@@ -1,0 +1,30 @@
+import magma.app.Value;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.Type;
+import magma.app.compile.CompileState;
+import magma.app.Primitive;
+import magma.api.option.None;
+struct Access implements Value {
+	mut child: Value;
+	mut property: &[I8];
+	constructor (mut child: Value, mut property: &[I8]) {
+		this.child = child;
+		this.property = property;
+	}
+	def generate(): &[I8] {
+		return this.child.generate() + "." + this.property;
+	}
+	def toValue(): Option<Value> {
+		return Some<Value>(this);
+	}
+	def findChild(): Option<Value> {
+		return Some<Value>(this.child);
+	}
+	def resolve(state: CompileState): Type {
+		return Primitive.Unknown;
+	}
+	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+		return None<&[I8]>();
+	}
+}

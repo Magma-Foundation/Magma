@@ -1,0 +1,23 @@
+import magma.api.Type;
+import magma.app.Platform;
+struct BooleanType implements Type {
+	mut platform: Platform;
+	constructor (mut platform: Platform) {
+		this.platform = platform;
+	}
+	def generate(): &[I8] {
+		if (Platform.TypeScript === this.platform) {
+			return "boolean";
+		}
+		return "Bool";
+	}
+	def isFunctional(): Bool {
+		return false;
+	}
+	def isVar(): Bool {
+		return false;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+}

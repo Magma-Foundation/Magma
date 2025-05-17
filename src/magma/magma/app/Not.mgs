@@ -1,0 +1,28 @@
+import magma.app.Value;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.option.None;
+import magma.api.Type;
+import magma.app.compile.CompileState;
+import magma.app.Primitive;
+struct Not implements Value {
+	mut child: &[I8];
+	constructor (mut child: &[I8]) {
+		this.child = child;
+	}
+	def generate(): &[I8] {
+		return this.child;
+	}
+	def toValue(): Option<Value> {
+		return Some<Value>(this);
+	}
+	def findChild(): Option<Value> {
+		return None<Value>();
+	}
+	def resolve(state: CompileState): Type {
+		return Primitive.Unknown;
+	}
+	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+		return None<&[I8]>();
+	}
+}

@@ -2,7 +2,7 @@ package magma.app;
 
 import magma.api.option.Option;
 
-interface Parameter {
+public interface Parameter {
     String generate();
 
     Option<Definition> asDefinition();

@@ -1,4 +1,4 @@
-struct MethodHeader<S extends MethodHeader<S>> {
+export struct MethodHeader<S extends MethodHeader<S>> {
 	def generateWithAfterName(mut afterName: &[I8]): &[I8];
 	def hasAnnotation(mut annotation: &[I8]): Bool;
 	def removeModifier(mut modifier: &[I8]): S;

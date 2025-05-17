@@ -1,489 +1,52 @@
-import magma.api.Type;
-import magma.app.compile.CompileState;
-import magma.api.option.Option;
-import magma.app.MethodHeader;
-import magma.api.option.None;
-import magma.app.Definition;
-import magma.app.Parameter;
-import magma.api.option.Some;
-import magma.api.collect.list.List;
-import magma.api.collect.Joiner;
-import magma.api.Tuple2;
-import jvm.api.text.Strings;
-import magma.api.io.Path;
-import magma.api.io.IOError;
-import magma.api.result.Result;
-import magma.api.collect.list.ListCollector;
 import jvm.api.io.Files;
+import magma.api.io.Path;
+import magma.api.collect.list.List;
+import magma.api.io.IOError;
+import magma.api.option.Some;
 import jvm.api.io.Console;
+import magma.api.option.Option;
+import magma.app.Source;
+import magma.api.collect.list.ListCollector;
+import magma.app.compile.CompileState;
+import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.api.option.None;
+import magma.app.Platform;
+import magma.app.Location;
 import jvm.api.collect.list.Lists;
 import magma.api.collect.Queries;
+import magma.app.compile.Import;
+import magma.api.collect.Joiner;
+import jvm.api.text.Strings;
 import magma.app.DivideState;
+import magma.api.Type;
+import magma.app.Definition;
+import magma.app.Parameter;
+import magma.app.compile.ConstructorHeader;
+import magma.app.MethodHeader;
+import magma.app.Value;
+import magma.app.ConstructionCaller;
+import magma.app.compile.Caller;
+import magma.app.compile.Argument;
+import magma.app.Invokable;
+import magma.app.compile.Placeholder;
+import magma.app.StringValue;
+import magma.app.Not;
+import magma.app.Lambda;
+import magma.app.Access;
+import magma.app.Operation;
+import magma.app.SymbolNode;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import jvm.api.text.Characters;
-struct Value extends Argument, Caller  {
-	def resolve(mut state: CompileState): Type;
-	def generateAsEnumValue(mut structureName: &[I8]): Option<&[I8]>;
-}
-struct Argument {
-	def toValue(): Option<Value>;
-}
-struct Caller {
-	def generate(): &[I8];
-	def findChild(): Option<Value>;
-}
-struct ConstructorHeader implements MethodHeader<ConstructorHeader> {
-	def generateWithAfterName(afterName: &[I8]): &[I8] {
-		return "constructor " + afterName;
-	}
-	def hasAnnotation(annotation: &[I8]): Bool {
-		return false;
-	}
-	def removeModifier(modifier: &[I8]): ConstructorHeader {
-		return this;
-	}
-	def addModifier(modifier: &[I8]): ConstructorHeader {
-		return this;
-	}
-}
-struct Placeholder {
-	mut input: &[I8];
-	constructor (mut input: &[I8]) {
-		this.input = input;
-	}
-	def generate(): &[I8] {
-		return Main.generatePlaceholder(this.input);
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def asDefinition(): Option<Definition> {
-		return None<Definition>();
-	}
-	def toValue(): Option<Value> {
-		return None<Value>();
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct Whitespace implements Parameter {
-	def generate(): &[I8] {
-		return "";
-	}
-	def asDefinition(): Option<Definition> {
-		return None<Definition>();
-	}
-}
-struct Access implements Value {
-	mut child: Value;
-	mut property: &[I8];
-	constructor (mut child: Value, mut property: &[I8]) {
-		this.child = child;
-		this.property = property;
-	}
-	def generate(): &[I8] {
-		return this.child.generate() + "." + this.property;
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return Some<Value>(this.child);
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct SymbolNode {
-	mut value: &[I8];
-	constructor (mut value: &[I8]) {
-		this.value = value;
-	}
-	def generate(): &[I8] {
-		return this.value;
-	}
-	def resolve(state: CompileState): Type {
-		return state.resolve(this.value).orElse(Primitive.Unknown);
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct StringValue implements Value {
-	mut value: &[I8];
-	constructor (mut value: &[I8]) {
-		this.value = value;
-	}
-	def generate(): &[I8] {
-		return "\"" + this.value + "\"";
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct Not implements Value {
-	mut child: &[I8];
-	constructor (mut child: &[I8]) {
-		this.child = child;
-	}
-	def generate(): &[I8] {
-		return this.child;
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct Lambda implements Value {
-	mut paramNames: List<Definition>;
-	mut content: &[I8];
-	constructor (mut paramNames: List<Definition>, mut content: &[I8]) {
-		this.paramNames = paramNames;
-		this.content = content;
-	}
-	def generate(): &[I8] {
-		let joinedParamNames = this.paramNames.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).orElse("");
-		return "(" + joinedParamNames + ")" + " => " + this.content;
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct Invokable implements Value {
-	mut caller: Caller;
-	mut args: List<Value>;
-	constructor (mut caller: Caller, mut args: List<Value>) {
-		this.caller = caller;
-		this.args = args;
-	}
-	def generate(): &[I8] {
-		let joinedArguments = this.joinArgs();
-		return this.caller.generate() + "(" + joinedArguments + ")";
-	}
-	def joinArgs(): &[I8] {
-		return this.args.query().map((mut value: Value) => value.generate()).collect(Joiner(", ")).orElse("");
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return Some<&[I8]>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
-	}
-}
-struct Operation implements Value {
-	mut left: Value;
-	mut targetInfix: &[I8];
-	mut right: Value;
-	constructor (mut left: Value, mut targetInfix: &[I8], mut right: Value) {
-		this.left = left;
-		this.targetInfix = targetInfix;
-		this.right = right;
-	}
-	def generate(): &[I8] {
-		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
-	}
-	def toValue(): Option<Value> {
-		return Some<Value>(this);
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-	def resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
-		return None<&[I8]>();
-	}
-}
-struct ConstructionCaller implements Caller {
-	mut right: &[I8];
-	mut platform: Platform;
-	constructor (mut right: &[I8], mut platform: Platform) {
-		this.right = right;
-		this.platform = platform;
-	}
-	def generate(): &[I8] {
-		if (Platform.Magma === this.platform) {
-			return this.right;
-		}
-		return "new " + this.right;
-	}
-	def findChild(): Option<Value> {
-		return None<Value>();
-	}
-}
-struct FunctionType implements Type {
-	mut args: List<&[I8]>;
-	mut returns: &[I8];
-	constructor (mut args: List<&[I8]>, mut returns: &[I8]) {
-		this.args = args;
-		this.returns = returns;
-	}
-	def generate(): &[I8] {
-		let joinedArguments = this.args.queryWithIndices().map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
-		return "(" + joinedArguments + ") => " + this.returns;
-	}
-	def isFunctional(): Bool {
-		return true;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
-struct Generic implements Type {
-	mut base: &[I8];
-	mut args: List<&[I8]>;
-	constructor (mut base: &[I8], mut args: List<&[I8]>) {
-		this.base = base;
-		this.args = args;
-	}
-	def static generateValueStrings(values: List<&[I8]>): &[I8] {
-		return Main.generateAll(values, Generic.mergeValues);
-	}
-	def static mergeValues(cache: &[I8], element: &[I8]): &[I8] {
-		if (Strings.isEmpty(cache)) {
-			return cache + element;
-		}
-		return cache + ", " + element;
-	}
-	def generate(): &[I8] {
-		return this.base + "<" + Generic.generateValueStrings(this.args) + ">";
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
-struct VarArgs implements Type {
-	mut type: Type;
-	constructor (mut type: Type) {
-		this.type = type;
-	}
-	def generate(): &[I8] {
-		return this.type.generate() + "[]";
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "...";
-	}
-}
-export struct Import {
-	mut namespace: List<&[I8]>;
-	mut child: &[I8];
-	constructor (mut namespace: List<&[I8]>, mut child: &[I8]) {
-		this.namespace = namespace;
-		this.child = child;
-	}
-	def generate(platform: Platform): &[I8] {
-		if (Platform.Magma === platform) {
-			let joinedNamespace = this.namespace.query().collect(Joiner(".")).orElse("");
-			return "import " + joinedNamespace + "." + this.child + ";\n";
-		}
-		let joinedNamespace = this.namespace.addLast(this.child).query().collect(Joiner("/")).orElse("");
-		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
-	}
-}
-export struct Source {
-	mut sourceDirectory: Path;
-	mut source: Path;
-	constructor (mut sourceDirectory: Path, mut source: Path) {
-		this.sourceDirectory = sourceDirectory;
-		this.source = source;
-	}
-	def read(): Result<&[I8], IOError> {
-		return this.source.readString();
-	}
-	def computeName(): &[I8] {
-		let fileName = this.source.findFileName();
-		let separator = fileName.lastIndexOf(".");
-		return fileName.substring(0, separator);
-	}
-	def computeNamespace(): List<&[I8]> {
-		return this.sourceDirectory.relativize(this.source).getParent().query().collect(ListCollector<&[I8]>());
-	}
-	def computeLocation(): Location {
-		return Location(this.computeNamespace(), this.computeName());
-	}
-}
-export struct Location {
-	mut namespace: List<&[I8]>;
-	mut name: &[I8];
-	constructor (mut namespace: List<&[I8]>, mut name: &[I8]) {
-		this.namespace = namespace;
-		this.name = name;
-	}
-}
-struct ArrayType implements Type {
-	mut child: Type;
-	constructor (mut child: Type) {
-		this.child = child;
-	}
-	def generate(): &[I8] {
-		return this.child.generate() + "[]";
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
-struct Slice implements Type {
-	mut type: Type;
-	constructor (mut type: Type) {
-		this.type = type;
-	}
-	def generate(): &[I8] {
-		return "&[" + this.type.generate() + "]";
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
-struct BooleanType implements Type {
-	mut platform: Platform;
-	constructor (mut platform: Platform) {
-		this.platform = platform;
-	}
-	def generate(): &[I8] {
-		if (Platform.TypeScript === this.platform) {
-			return "boolean";
-		}
-		return "Bool";
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return false;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
-export struct Platform {
-	static TypeScript: Platform = new Platform("node", "ts");
-	static Magma: Platform = new Platform("magma", "mgs");
-	static Windows: Platform = new Platform("windows", "h", "c");
-	root: &[I8];
-	extension: &[I8][];
-	constructor (root: &[I8], ...extensions: &[I8][]) {
-		this.root = root;
-		this.extension = extensions;
-	}
-}
-struct Primitive implements Type {
-	static String: Primitive = new Primitive("string");
-	static Number: Primitive = new Primitive("number");
-	static Var: Primitive = new Primitive("var");
-	static Void: Primitive = new Primitive("void");
-	static Unknown: Primitive = new Primitive("unknown");
-	static I8: Primitive = new Primitive("I8");
-	static I32: Primitive = new Primitive("I32");
-	value: &[I8];
-	constructor (value: &[I8]) {
-		this.value = value;
-	}
-	def generate(): &[I8] {
-		return this.value;
-	}
-	def isFunctional(): Bool {
-		return false;
-	}
-	def isVar(): Bool {
-		return Primitive.Var === this;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
+import magma.app.Whitespace;
+import magma.app.ArrayType;
+import magma.app.VarArgs;
+import magma.app.Primitive;
+import magma.app.Slice;
+import magma.app.BooleanType;
+import magma.app.Generic;
+import magma.app.FunctionType;
 export struct Main {
 	def static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
@@ -517,7 +80,7 @@ export struct Main {
 		let output = Main.compileRoot(state1, source, input);
 		let location = output.left().maybeLocation().orElse(Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
-		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
+		let targetParent = targetDirectory.resolveChildSegments(location.namespace());
 		if (!targetParent.exists()) {
 			let maybeError = targetParent.createDirectories();
 			if (maybeError.isPresent()) {
@@ -526,7 +89,7 @@ export struct Main {
 		}
 		let initial: Option<IOError> = None<IOError>();
 		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
-			let target = targetParent.resolveChild(location.name + "." + extension);
+			let target = targetParent.resolveChild(location.name() + "." + extension);
 			return ioErrorOption.or(() => target.writeString(output.right().get(extension)));
 		});
 		return Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
@@ -538,10 +101,10 @@ export struct Main {
 		let compileState = statementsState.clearImports().clearOutput();
 		let withMain = Main.createMain(source);
 		let entries = HashMap<&[I8], &[I8]>();
-		let mut platform = state.platform();
+		let platform = state.platform();
 		if (Platform.Windows === platform) {
 			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
-			/*entries.put(platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
 			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
@@ -702,7 +265,7 @@ export struct Main {
 			let actualInfix: &[I8] = "interface ";
 			let newName: &[I8] = name + "Instance";
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-			let withNewLocation = outputContentState.append(generated).mapLocation((mut location: Location) => Location(location.namespace, location.name + "Instance"));
+			let withNewLocation = outputContentState.append(generated).mapLocation((mut location: Location) => Location(location.namespace(), location.name() + "Instance"));
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(withNewLocation, ""));
 		}
 		else {

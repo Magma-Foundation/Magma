@@ -8,22 +8,24 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.Definition;
-import magma.app.Main;
+import magma.app.Location;
+import magma.app.Platform;
+import magma.app.Source;
 
 import java.util.function.Function;
 
 public record CompileState(
-        List<Main.Import> imports,
+        List<Import> imports,
         String output,
         List<String> structureNames,
         int depth,
         List<Definition> definitions,
-        Option<Main.Location> maybeLocation,
-        List<Main.Source> sources,
-        Main.Platform platform
+        Option<Location> maybeLocation,
+        List<Source> sources,
+        Platform platform
 ) {
     public static CompileState createInitial() {
-        return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Main.Location>(), Lists.empty(), Main.Platform.Magma);
+        return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
     }
 
     public boolean isLastWithin(final String name) {
@@ -34,11 +36,11 @@ public record CompileState(
 
     private CompileState addResolvedImport(final List<String> oldParent, final String child) {
         final var namespace = this.maybeLocation
-                .map((Main.Location location) -> location.namespace())
+                .map((Location location) -> location.namespace())
                 .orElse(Lists.empty());
 
         var newParent = oldParent;
-        if (Main.Platform.TypeScript == this.platform) {
+        if (Platform.TypeScript == this.platform) {
             if (namespace.isEmpty()) {
                 newParent = newParent.addFirst(".");
             }
@@ -53,18 +55,18 @@ public record CompileState(
 
         if (this.imports
                 .query()
-                .filter((Main.Import node) -> Strings.equalsTo(node.child(), child))
+                .filter((Import node) -> Strings.equalsTo(node.child(), child))
                 .next()
                 .isPresent()) {
             return this;
         }
 
-        final var importString = new Main.Import(newParent, child);
+        final var importString = new Import(newParent, child);
         return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
     }
 
-    public CompileState withLocation(final Main.Location namespace) {
-        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Main.Location>(namespace), this.sources, this.platform);
+    public CompileState withLocation(final Location namespace) {
+        return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
     }
 
     public CompileState append(final String element) {
@@ -102,13 +104,13 @@ public record CompileState(
         return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
     }
 
-    public CompileState addSource(final Main.Source source) {
+    public CompileState addSource(final Source source) {
         return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
     }
 
-    Option<Main.Source> findSource(final String name) {
+    Option<Source> findSource(final String name) {
         return this.sources.query()
-                .filter((Main.Source source) -> Strings.equalsTo(source.computeName(), name))
+                .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
                 .next();
     }
 
@@ -118,7 +120,7 @@ public record CompileState(
         }
 
         return this.findSource(base)
-                .map((Main.Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
+                .map((Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
                 .orElse(this);
     }
 
@@ -126,11 +128,11 @@ public record CompileState(
         return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
     }
 
-    public CompileState mapLocation(final Function<Main.Location, Main.Location> mapper) {
+    public CompileState mapLocation(final Function<Location, Location> mapper) {
         return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
     }
 
-    public CompileState withPlatform(final Main.Platform platform) {
+    public CompileState withPlatform(final Platform platform) {
         return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
     }
 }

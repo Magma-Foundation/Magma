@@ -19,8 +19,12 @@ import magma.api.io.Path;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.api.result.Result;
+import magma.app.compile.Argument;
+import magma.app.compile.Caller;
 import magma.app.compile.CompileState;
+import magma.app.compile.ConstructorHeader;
+import magma.app.compile.Import;
+import magma.app.compile.Placeholder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,529 +32,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
-    private interface Value extends Argument, Caller {
-        Type resolve(CompileState state);
-
-        Option<String> generateAsEnumValue(String structureName);
-    }
-
-    private interface Argument {
-        Option<Value> toValue();
-    }
-
-    private interface Caller {
-        String generate();
-
-        Option<Value> findChild();
-    }
-
-    private static class ConstructorHeader implements MethodHeader<ConstructorHeader> {
-        @Override
-        public String generateWithAfterName(final String afterName) {
-            return "constructor " + afterName;
-        }
-
-        @Override
-        public boolean hasAnnotation(final String annotation) {
-            return false;
-        }
-
-        @Override
-        public ConstructorHeader removeModifier(final String modifier) {
-            return this;
-        }
-
-        @Override
-        public ConstructorHeader addModifier(final String modifier) {
-            return this;
-        }
-    }
-
-    private record Placeholder(String input) implements Parameter, Value, Type {
-        @Override
-        public String generate() {
-            return Main.generatePlaceholder(this.input);
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        @Override
-        public Option<Definition> asDefinition() {
-            return new None<Definition>();
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new None<Value>();
-        }
-
-        @Override
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record Whitespace() implements Parameter {
-        @Override
-        public String generate() {
-            return "";
-        }
-
-        @Override
-        public Option<Definition> asDefinition() {
-            return new None<Definition>();
-        }
-    }
-
-    private record Access(Value child, String property) implements Value {
-        @Override
-        public String generate() {
-            return this.child.generate() + "." + this.property;
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new Some<Value>(this.child);
-        }
-
-        @Override
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record SymbolNode(String value) implements Value, Type {
-        @Override
-        public String generate() {
-            return this.value;
-        }
-
-        @Override
-        public Type resolve(final CompileState state) {
-            return state.resolve(this.value).orElse(Primitive.Unknown);
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record StringValue(String value) implements Value {
-        @Override
-        public String generate() {
-            return "\"" + this.value + "\"";
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record Not(String child) implements Value {
-        @Override
-        public String generate() {
-            return this.child;
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record Lambda(List<Definition> paramNames, String content) implements Value {
-        @Override
-        public String generate() {
-            final var joinedParamNames = this.paramNames.query()
-                    .map((Definition definition) -> definition.generate())
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            return "(" + joinedParamNames + ")" + " => " + this.content;
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record Invokable(Caller caller, List<Value> args) implements Value {
-        @Override
-        public String generate() {
-            final var joinedArguments = this.joinArgs();
-            return this.caller.generate() + "(" + joinedArguments + ")";
-        }
-
-        private String joinArgs() {
-            return this.args.query()
-                    .map((Value value) -> value.generate())
-                    .collect(new Joiner(", "))
-                    .orElse("");
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new Some<String>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
-        }
-    }
-
-    private record Operation(Value left, String targetInfix, Value right) implements Value {
-        @Override
-        public String generate() {
-            return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
-        }
-
-        @Override
-        public Option<Value> toValue() {
-            return new Some<Value>(this);
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-
-        public Type resolve(final CompileState state) {
-            return Primitive.Unknown;
-        }
-
-        @Override
-        public Option<String> generateAsEnumValue(final String structureName) {
-            return new None<String>();
-        }
-    }
-
-    private record ConstructionCaller(String right, Platform platform) implements Caller {
-        @Override
-        public String generate() {
-            if (Platform.Magma == this.platform) {
-                return this.right;
-            }
-            return "new " + this.right;
-        }
-
-        @Override
-        public Option<Value> findChild() {
-            return new None<Value>();
-        }
-    }
-
-    private record FunctionType(List<String> args, String returns) implements Type {
-        @Override
-        public String generate() {
-            final var joinedArguments = this.args
-                    .queryWithIndices()
-                    .map((Tuple2<Integer, String> tuple) -> "arg" + tuple.left() + " : " + tuple.right())
-                    .collect(new Joiner(", "))
-                    .orElse("");
-
-            return "(" + joinedArguments + ") => " + this.returns;
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return true;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-    }
-
-    private record Generic(String base, List<String> args) implements Type {
-        private static String generateValueStrings(final List<String> values) {
-            return Main.generateAll(values, Generic::mergeValues);
-        }
-
-        private static String mergeValues(final String cache, final String element) {
-            if (Strings.isEmpty(cache)) {
-                return cache + element;
-            }
-            return cache + ", " + element;
-        }
-
-        @Override
-        public String generate() {
-            return this.base + "<" + Generic.generateValueStrings(this.args) + ">";
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-    }
-
-    private record VarArgs(Type type) implements Type {
-        @Override
-        public String generate() {
-            return this.type.generate() + "[]";
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "...";
-        }
-    }
-
-    public record Import(List<String> namespace, String child) {
-        private String generate(final Platform platform) {
-            if (Platform.Magma == platform) {
-                final var joinedNamespace = this.namespace.query()
-                        .collect(new Joiner("."))
-                        .orElse("");
-
-                return "import " + joinedNamespace + "." + this.child + ";\n";
-            }
-
-            final var joinedNamespace = this.namespace
-                    .addLast(this.child)
-                    .query()
-                    .collect(new Joiner("/"))
-                    .orElse("");
-
-            return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
-        }
-    }
-
-    public record Source(Path sourceDirectory, Path source) {
-        private Result<String, IOError> read() {
-            return this.source.readString();
-        }
-
-        public String computeName() {
-            final var fileName = this.source.findFileName();
-            final var separator = fileName.lastIndexOf('.');
-            return fileName.substring(0, separator);
-        }
-
-        public List<String> computeNamespace() {
-            return this.sourceDirectory.relativize(this.source)
-                    .getParent()
-                    .query()
-                    .collect(new ListCollector<String>());
-        }
-
-        Location computeLocation() {
-            return new Location(this.computeNamespace(), this.computeName());
-        }
-    }
-
-    public record Location(List<String> namespace, String name) {
-    }
-
-    private record ArrayType(Type child) implements Type {
-        @Override
-        public String generate() {
-            return this.child.generate() + "[]";
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-    }
-
-    private record Slice(Type type) implements Type {
-        @Override
-        public String generate() {
-            return "&[" + this.type.generate() + "]";
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-    }
-
-    private record BooleanType(Platform platform) implements Type {
-        @Override
-        public String generate() {
-            if (Platform.TypeScript == this.platform) {
-                return "boolean";
-            }
-
-            return "Bool";
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return false;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
-    }
-
     public static void main() {
         final var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -608,7 +89,7 @@ public final class Main {
 
         final var location = output.left().maybeLocation().orElse(new Location(Lists.empty(), ""));
         final var targetDirectory = Files.get(".", "src", platform.root);
-        final var targetParent = targetDirectory.resolveChildSegments(location.namespace);
+        final var targetParent = targetDirectory.resolveChildSegments(location.namespace());
         if (!targetParent.exists()) {
             final var maybeError = targetParent.createDirectories();
             if (maybeError.isPresent()) {
@@ -618,7 +99,7 @@ public final class Main {
 
         final Option<IOError> initial = new None<IOError>();
         final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> ioErrorOption, final String extension) -> {
-            final var target = targetParent.resolveChild(location.name + "." + extension);
+            final var target = targetParent.resolveChild(location.name() + "." + extension);
             return ioErrorOption.or(() -> target.writeString(output.right().get(extension)));
         });
 
@@ -638,10 +119,10 @@ public final class Main {
         final var withMain = Main.createMain(source);
 
         final var entries = new HashMap<String, String>();
-        var platform = state.platform();
+        final var platform = state.platform();
         if (Platform.Windows == platform) {
             final var value = source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName();
-            entries.put(platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
+            entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
             entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain);
         }
         else {
@@ -671,7 +152,7 @@ public final class Main {
         return new Tuple2Impl<CompileState, String>(folded.left(), Main.generateAll(folded.right(), merger));
     }
 
-    private static String generateAll(final List<String> elements, final BiFunction<String, String, String> merger) {
+    static String generateAll(final List<String> elements, final BiFunction<String, String, String> merger) {
         return elements.query()
                 .foldWithInitial("", merger);
     }
@@ -878,7 +359,7 @@ public final class Main {
             final String newName = name + "Instance";
 
             final var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-            final var withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace, location.name + "Instance"));
+            final var withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace(), location.name() + "Instance"));
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(withNewLocation, ""));
         }
@@ -1840,61 +1321,11 @@ public final class Main {
         return input.indexOf(infix);
     }
 
-    private static String generatePlaceholder(final String input) {
+    public static String generatePlaceholder(final String input) {
         final var replaced = input
                 .replace("/*", "start")
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
-    }
-
-    public enum Platform {
-        TypeScript("node", "ts"),
-        Magma("magma", "mgs"),
-        Windows("windows", "h", "c");
-
-        final String root;
-        final String[] extension;
-
-        Platform(final String root, final String... extensions) {
-            this.root = root;
-            this.extension = extensions;
-        }
-    }
-
-    private enum Primitive implements Type {
-        String("string"),
-        Number("number"),
-        Var("var"),
-        Void("void"),
-        Unknown("unknown"),
-        I8("I8"),
-        I32("I32");
-
-        private final String value;
-
-        Primitive(final String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String generate() {
-            return this.value;
-        }
-
-        @Override
-        public boolean isFunctional() {
-            return false;
-        }
-
-        @Override
-        public boolean isVar() {
-            return Primitive.Var == this;
-        }
-
-        @Override
-        public String generateBeforeName() {
-            return "";
-        }
     }
 }

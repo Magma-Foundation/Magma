@@ -1,0 +1,25 @@
+import magma.api.Type;
+import magma.api.collect.list.List;
+import magma.api.Tuple2;
+import magma.api.collect.Joiner;
+struct FunctionType implements Type {
+	mut args: List<&[I8]>;
+	mut returns: &[I8];
+	constructor (mut args: List<&[I8]>, mut returns: &[I8]) {
+		this.args = args;
+		this.returns = returns;
+	}
+	def generate(): &[I8] {
+		let joinedArguments = this.args.queryWithIndices().map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
+		return "(" + joinedArguments + ") => " + this.returns;
+	}
+	def isFunctional(): Bool {
+		return true;
+	}
+	def isVar(): Bool {
+		return false;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+}

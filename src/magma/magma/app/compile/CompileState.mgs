@@ -1,21 +1,25 @@
+import magma.app.compile.Import;
 import magma.api.collect.list.List;
 import magma.app.Definition;
+import magma.app.Location;
 import magma.api.option.Option;
+import magma.app.Source;
+import magma.app.Platform;
 import jvm.api.collect.list.Lists;
 import magma.api.option.None;
-import magma.app.Main;
 import jvm.api.text.Strings;
 import magma.api.option.Some;
 import magma.api.Type;
 export struct CompileState {
-	mut imports: List<>;
+	mut imports: List<Import>;
 	mut output: &[I8];
 	mut structureNames: List<&[I8]>;
 	mut depth: I32;
 	mut definitions: List<Definition>;
-	mut maybeLocation: Option<>;
-	mut sources: List<>;
-	constructor (mut imports: List<>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: I32, mut definitions: List<Definition>, mut maybeLocation: Option<>, mut sources: List<>) {
+	mut maybeLocation: Option<Location>;
+	mut sources: List<Source>;
+	mut platform: Platform;
+	constructor (mut imports: List<Import>, mut output: &[I8], mut structureNames: List<&[I8]>, mut depth: I32, mut definitions: List<Definition>, mut maybeLocation: Option<Location>, mut sources: List<Source>, mut platform: Platform) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
@@ -23,19 +27,18 @@ export struct CompileState {
 		this.definitions = definitions;
 		this.maybeLocation = maybeLocation;
 		this.sources = sources;
+		this.platform = platform;
 	}
 	def static createInitial(): CompileState {
-		return CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), None<>(), Lists.empty(), Main.Platform.Magma);
+		return CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), None<Location>(), Lists.empty(), Platform.Magma);
 	}
 	def isLastWithin(name: &[I8]): Bool {
 		return this.structureNames.findLast().filter((mut anObject: &[I8]) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	def addResolvedImport(oldParent: List<&[I8]>, child: &[I8]): CompileState {
-		let namespace = /* this.maybeLocation
-                .map((Main.Location location) -> location.namespace())
-                .orElse(Lists.empty())*/;
+		let namespace = this.maybeLocation.map((mut location: Location) => location.namespace()).orElse(Lists.empty());
 		let mut newParent = oldParent;
-		if (Main.Platform.TypeScript === this.platform) {
+		if (Platform.TypeScript === this.platform) {
 			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
@@ -46,18 +49,14 @@ export struct CompileState {
 				i++;
 			}
 		}
-		if (/*this.imports
-                .query()
-                .filter((Main.Import node) -> Strings.equalsTo(node.child(), child))
-                .next()
-                .isPresent()*/) {
+		if (this.imports.query().filter((mut node: Import) => Strings.equalsTo(node.child(), child)).next().isPresent()) {
 			return this;
 		}
-		let importString = /* new Main.Import(newParent, child)*/;
+		let importString = Import(newParent, child);
 		return CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	def withLocation(): CompileState {
-		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, Some<>(namespace), this.sources, this.platform);
+	def withLocation(namespace: Location): CompileState {
+		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, Some<Location>(namespace), this.sources, this.platform);
 	}
 	def append(element: &[I8]): CompileState {
 		return CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
@@ -83,29 +82,25 @@ export struct CompileState {
 	def clearOutput(): CompileState {
 		return CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	def addSource(): CompileState {
+	def addSource(source: Source): CompileState {
 		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
 	}
-	def findSource(name: &[I8]): Option<> {
-		/*return this.sources.query()
-                .filter((Main.Source source) -> Strings.equalsTo(source.computeName(), name))
-                .next()*/;
+	def findSource(name: &[I8]): Option<Source> {
+		return this.sources.query().filter((mut source: Source) => Strings.equalsTo(source.computeName(), name)).next();
 	}
 	def addResolvedImportFromCache(base: &[I8]): CompileState {
 		if (this.structureNames.query().anyMatch((mut inner: &[I8]) => Strings.equalsTo(inner, base))) {
 			return this;
 		}
-		/*return this.findSource(base)
-                .map((Main.Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
-                .orElse(this)*/;
+		return this.findSource(base).map((mut source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 	def popStructureName(): CompileState {
 		return CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	def mapLocation(mapper: Function<>): CompileState {
+	def mapLocation(mapper: (arg0 : Location) => Location): CompileState {
 		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
 	}
-	def withPlatform(): CompileState {
+	def withPlatform(platform: Platform): CompileState {
 		return CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
 	}
 }

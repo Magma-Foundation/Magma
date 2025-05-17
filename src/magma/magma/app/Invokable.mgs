@@ -1,0 +1,37 @@
+import magma.app.Value;
+import magma.app.compile.Caller;
+import magma.api.collect.list.List;
+import magma.api.collect.Joiner;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.option.None;
+import magma.api.Type;
+import magma.app.compile.CompileState;
+import magma.app.Primitive;
+struct Invokable implements Value {
+	mut caller: Caller;
+	mut args: List<Value>;
+	constructor (mut caller: Caller, mut args: List<Value>) {
+		this.caller = caller;
+		this.args = args;
+	}
+	def generate(): &[I8] {
+		let joinedArguments = this.joinArgs();
+		return this.caller.generate() + "(" + joinedArguments + ")";
+	}
+	def joinArgs(): &[I8] {
+		return this.args.query().map((mut value: Value) => value.generate()).collect(Joiner(", ")).orElse("");
+	}
+	def toValue(): Option<Value> {
+		return Some<Value>(this);
+	}
+	def findChild(): Option<Value> {
+		return None<Value>();
+	}
+	def resolve(state: CompileState): Type {
+		return Primitive.Unknown;
+	}
+	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+		return Some<&[I8]>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
+	}
+}

@@ -1,21 +1,25 @@
+import { Import } from "../../../magma/app/compile/Import";
 import { List } from "../../../magma/api/collect/list/List";
 import { Definition } from "../../../magma/app/Definition";
+import { Location } from "../../../magma/app/Location";
 import { Option } from "../../../magma/api/option/Option";
+import { Source } from "../../../magma/app/Source";
+import { Platform } from "../../../magma/app/Platform";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { None } from "../../../magma/api/option/None";
-import { Main } from "../../../magma/app/Main";
 import { Strings } from "../../../jvm/api/text/Strings";
 import { Some } from "../../../magma/api/option/Some";
 import { Type } from "../../../magma/api/Type";
 export class CompileState {
-	imports: List<>;
+	imports: List<Import>;
 	output: string;
 	structureNames: List<string>;
 	depth: number;
 	definitions: List<Definition>;
-	maybeLocation: Option<>;
-	sources: List<>;
-	constructor (imports: List<>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<>, sources: List<>) {
+	maybeLocation: Option<Location>;
+	sources: List<Source>;
+	platform: Platform;
+	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
@@ -23,19 +27,18 @@ export class CompileState {
 		this.definitions = definitions;
 		this.maybeLocation = maybeLocation;
 		this.sources = sources;
+		this.platform = platform;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty(), Main.Platform.Magma);
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
 	}
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
 	}
 	addResolvedImport(oldParent: List<string>, child: string): CompileState {
-		let namespace = /* this.maybeLocation
-                .map((Main.Location location) -> location.namespace())
-                .orElse(Lists.empty())*/;
+		let namespace = this.maybeLocation.map((location: Location) => location.namespace()).orElse(Lists.empty());
 		let newParent = oldParent;
-		if (Main.Platform.TypeScript === this.platform) {
+		if (Platform.TypeScript === this.platform) {
 			if (namespace.isEmpty()) {
 				newParent = newParent.addFirst(".");
 			}
@@ -46,18 +49,14 @@ export class CompileState {
 				i++;
 			}
 		}
-		if (/*this.imports
-                .query()
-                .filter((Main.Import node) -> Strings.equalsTo(node.child(), child))
-                .next()
-                .isPresent()*/) {
+		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child(), child)).next().isPresent()) {
 			return this;
 		}
-		let importString = /* new Main.Import(newParent, child)*/;
+		let importString = new Import(newParent, child);
 		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	withLocation(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(namespace), this.sources, this.platform);
+	withLocation(namespace: Location): CompileState {
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
 	}
 	append(element: string): CompileState {
 		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
@@ -83,29 +82,25 @@ export class CompileState {
 	clearOutput(): CompileState {
 		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	addSource(): CompileState {
+	addSource(source: Source): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform);
 	}
-	findSource(name: string): Option<> {
-		/*return this.sources.query()
-                .filter((Main.Source source) -> Strings.equalsTo(source.computeName(), name))
-                .next()*/;
+	findSource(name: string): Option<Source> {
+		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
 	}
 	addResolvedImportFromCache(base: string): CompileState {
 		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base))) {
 			return this;
 		}
-		/*return this.findSource(base)
-                .map((Main.Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
-                .orElse(this)*/;
+		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
 	}
 	popStructureName(): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
-	mapLocation(mapper: Function<>): CompileState {
+	mapLocation(mapper: (arg0 : Location) => Location): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation.map(mapper), this.sources, this.platform);
 	}
-	withPlatform(): CompileState {
+	withPlatform(platform: Platform): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, platform);
 	}
 }

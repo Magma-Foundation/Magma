@@ -1,489 +1,52 @@
-import { Type } from "../../magma/api/Type";
-import { CompileState } from "../../magma/app/compile/CompileState";
-import { Option } from "../../magma/api/option/Option";
-import { MethodHeader } from "../../magma/app/MethodHeader";
-import { None } from "../../magma/api/option/None";
-import { Definition } from "../../magma/app/Definition";
-import { Parameter } from "../../magma/app/Parameter";
-import { Some } from "../../magma/api/option/Some";
-import { List } from "../../magma/api/collect/list/List";
-import { Joiner } from "../../magma/api/collect/Joiner";
-import { Tuple2 } from "../../magma/api/Tuple2";
-import { Strings } from "../../jvm/api/text/Strings";
-import { Path } from "../../magma/api/io/Path";
-import { IOError } from "../../magma/api/io/IOError";
-import { Result } from "../../magma/api/result/Result";
-import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Files } from "../../jvm/api/io/Files";
+import { Path } from "../../magma/api/io/Path";
+import { List } from "../../magma/api/collect/list/List";
+import { IOError } from "../../magma/api/io/IOError";
+import { Some } from "../../magma/api/option/Some";
 import { Console } from "../../jvm/api/io/Console";
+import { Option } from "../../magma/api/option/Option";
+import { Source } from "../../magma/app/Source";
+import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+import { CompileState } from "../../magma/app/compile/CompileState";
+import { Tuple2 } from "../../magma/api/Tuple2";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { None } from "../../magma/api/option/None";
+import { Platform } from "../../magma/app/Platform";
+import { Location } from "../../magma/app/Location";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Queries } from "../../magma/api/collect/Queries";
+import { Import } from "../../magma/app/compile/Import";
+import { Joiner } from "../../magma/api/collect/Joiner";
+import { Strings } from "../../jvm/api/text/Strings";
 import { DivideState } from "../../magma/app/DivideState";
+import { Type } from "../../magma/api/Type";
+import { Definition } from "../../magma/app/Definition";
+import { Parameter } from "../../magma/app/Parameter";
+import { ConstructorHeader } from "../../magma/app/compile/ConstructorHeader";
+import { MethodHeader } from "../../magma/app/MethodHeader";
+import { Value } from "../../magma/app/Value";
+import { ConstructionCaller } from "../../magma/app/ConstructionCaller";
+import { Caller } from "../../magma/app/compile/Caller";
+import { Argument } from "../../magma/app/compile/Argument";
+import { Invokable } from "../../magma/app/Invokable";
+import { Placeholder } from "../../magma/app/compile/Placeholder";
+import { StringValue } from "../../magma/app/StringValue";
+import { Not } from "../../magma/app/Not";
+import { Lambda } from "../../magma/app/Lambda";
+import { Access } from "../../magma/app/Access";
+import { Operation } from "../../magma/app/Operation";
+import { SymbolNode } from "../../magma/app/SymbolNode";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
-interface Value extends Argument, Caller  {
-	resolve(state: CompileState): Type;
-	generateAsEnumValue(structureName: string): Option<string>;
-}
-interface Argument {
-	toValue(): Option<Value>;
-}
-interface Caller {
-	generate(): string;
-	findChild(): Option<Value>;
-}
-class ConstructorHeader implements MethodHeader<ConstructorHeader> {
-	generateWithAfterName(afterName: string): string {
-		return "constructor " + afterName;
-	}
-	hasAnnotation(annotation: string): boolean {
-		return false;
-	}
-	removeModifier(modifier: string): ConstructorHeader {
-		return this;
-	}
-	addModifier(modifier: string): ConstructorHeader {
-		return this;
-	}
-}
-class Placeholder {
-	input: string;
-	constructor (input: string) {
-		this.input = input;
-	}
-	generate(): string {
-		return Main.generatePlaceholder(this.input);
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	asDefinition(): Option<Definition> {
-		return new None<Definition>();
-	}
-	toValue(): Option<Value> {
-		return new None<Value>();
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class Whitespace implements Parameter {
-	generate(): string {
-		return "";
-	}
-	asDefinition(): Option<Definition> {
-		return new None<Definition>();
-	}
-}
-class Access implements Value {
-	child: Value;
-	property: string;
-	constructor (child: Value, property: string) {
-		this.child = child;
-		this.property = property;
-	}
-	generate(): string {
-		return this.child.generate() + "." + this.property;
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new Some<Value>(this.child);
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class SymbolNode {
-	value: string;
-	constructor (value: string) {
-		this.value = value;
-	}
-	generate(): string {
-		return this.value;
-	}
-	resolve(state: CompileState): Type {
-		return state.resolve(this.value).orElse(Primitive.Unknown);
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class StringValue implements Value {
-	value: string;
-	constructor (value: string) {
-		this.value = value;
-	}
-	generate(): string {
-		return "\"" + this.value + "\"";
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class Not implements Value {
-	child: string;
-	constructor (child: string) {
-		this.child = child;
-	}
-	generate(): string {
-		return this.child;
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class Lambda implements Value {
-	paramNames: List<Definition>;
-	content: string;
-	constructor (paramNames: List<Definition>, content: string) {
-		this.paramNames = paramNames;
-		this.content = content;
-	}
-	generate(): string {
-		let joinedParamNames = this.paramNames.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
-		return "(" + joinedParamNames + ")" + " => " + this.content;
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class Invokable implements Value {
-	caller: Caller;
-	args: List<Value>;
-	constructor (caller: Caller, args: List<Value>) {
-		this.caller = caller;
-		this.args = args;
-	}
-	generate(): string {
-		let joinedArguments = this.joinArgs();
-		return this.caller.generate() + "(" + joinedArguments + ")";
-	}
-	joinArgs(): string {
-		return this.args.query().map((value: Value) => value.generate()).collect(new Joiner(", ")).orElse("");
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new Some<string>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
-	}
-}
-class Operation implements Value {
-	left: Value;
-	targetInfix: string;
-	right: Value;
-	constructor (left: Value, targetInfix: string, right: Value) {
-		this.left = left;
-		this.targetInfix = targetInfix;
-		this.right = right;
-	}
-	generate(): string {
-		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
-	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this);
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-	resolve(state: CompileState): Type {
-		return Primitive.Unknown;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
-	}
-}
-class ConstructionCaller implements Caller {
-	right: string;
-	platform: Platform;
-	constructor (right: string, platform: Platform) {
-		this.right = right;
-		this.platform = platform;
-	}
-	generate(): string {
-		if (Platform.Magma === this.platform) {
-			return this.right;
-		}
-		return "new " + this.right;
-	}
-	findChild(): Option<Value> {
-		return new None<Value>();
-	}
-}
-class FunctionType implements Type {
-	args: List<string>;
-	returns: string;
-	constructor (args: List<string>, returns: string) {
-		this.args = args;
-		this.returns = returns;
-	}
-	generate(): string {
-		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
-		return "(" + joinedArguments + ") => " + this.returns;
-	}
-	isFunctional(): boolean {
-		return true;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
-class Generic implements Type {
-	base: string;
-	args: List<string>;
-	constructor (base: string, args: List<string>) {
-		this.base = base;
-		this.args = args;
-	}
-	static generateValueStrings(values: List<string>): string {
-		return Main.generateAll(values, Generic.mergeValues);
-	}
-	static mergeValues(cache: string, element: string): string {
-		if (Strings.isEmpty(cache)) {
-			return cache + element;
-		}
-		return cache + ", " + element;
-	}
-	generate(): string {
-		return this.base + "<" + Generic.generateValueStrings(this.args) + ">";
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
-class VarArgs implements Type {
-	type: Type;
-	constructor (type: Type) {
-		this.type = type;
-	}
-	generate(): string {
-		return this.type.generate() + "[]";
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "...";
-	}
-}
-export class Import {
-	namespace: List<string>;
-	child: string;
-	constructor (namespace: List<string>, child: string) {
-		this.namespace = namespace;
-		this.child = child;
-	}
-	generate(platform: Platform): string {
-		if (Platform.Magma === platform) {
-			let joinedNamespace = this.namespace.query().collect(new Joiner(".")).orElse("");
-			return "import " + joinedNamespace + "." + this.child + ";\n";
-		}
-		let joinedNamespace = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
-		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
-	}
-}
-export class Source {
-	sourceDirectory: Path;
-	source: Path;
-	constructor (sourceDirectory: Path, source: Path) {
-		this.sourceDirectory = sourceDirectory;
-		this.source = source;
-	}
-	read(): Result<string, IOError> {
-		return this.source.readString();
-	}
-	computeName(): string {
-		let fileName = this.source.findFileName();
-		let separator = fileName.lastIndexOf(".");
-		return fileName.substring(0, separator);
-	}
-	computeNamespace(): List<string> {
-		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>());
-	}
-	computeLocation(): Location {
-		return new Location(this.computeNamespace(), this.computeName());
-	}
-}
-export class Location {
-	namespace: List<string>;
-	name: string;
-	constructor (namespace: List<string>, name: string) {
-		this.namespace = namespace;
-		this.name = name;
-	}
-}
-class ArrayType implements Type {
-	child: Type;
-	constructor (child: Type) {
-		this.child = child;
-	}
-	generate(): string {
-		return this.child.generate() + "[]";
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
-class Slice implements Type {
-	type: Type;
-	constructor (type: Type) {
-		this.type = type;
-	}
-	generate(): string {
-		return "&[" + this.type.generate() + "]";
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
-class BooleanType implements Type {
-	platform: Platform;
-	constructor (platform: Platform) {
-		this.platform = platform;
-	}
-	generate(): string {
-		if (Platform.TypeScript === this.platform) {
-			return "boolean";
-		}
-		return "Bool";
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return false;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
-export class Platform {
-	static TypeScript: Platform = new Platform("node", "ts");
-	static Magma: Platform = new Platform("magma", "mgs");
-	static Windows: Platform = new Platform("windows", "h", "c");
-	root: string;
-	extension: string[];
-	constructor (root: string, ...extensions: string[]) {
-		this.root = root;
-		this.extension = extensions;
-	}
-}
-class Primitive implements Type {
-	static String: Primitive = new Primitive("string");
-	static Number: Primitive = new Primitive("number");
-	static Var: Primitive = new Primitive("var");
-	static Void: Primitive = new Primitive("void");
-	static Unknown: Primitive = new Primitive("unknown");
-	static I8: Primitive = new Primitive("I8");
-	static I32: Primitive = new Primitive("I32");
-	value: string;
-	constructor (value: string) {
-		this.value = value;
-	}
-	generate(): string {
-		return this.value;
-	}
-	isFunctional(): boolean {
-		return false;
-	}
-	isVar(): boolean {
-		return Primitive.Var === this;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
+import { Whitespace } from "../../magma/app/Whitespace";
+import { ArrayType } from "../../magma/app/ArrayType";
+import { VarArgs } from "../../magma/app/VarArgs";
+import { Primitive } from "../../magma/app/Primitive";
+import { Slice } from "../../magma/app/Slice";
+import { BooleanType } from "../../magma/app/BooleanType";
+import { Generic } from "../../magma/app/Generic";
+import { FunctionType } from "../../magma/app/FunctionType";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java");
@@ -517,7 +80,7 @@ export class Main {
 		let output = Main.compileRoot(state1, source, input);
 		let location = output.left().maybeLocation().orElse(new Location(Lists.empty(), ""));
 		let targetDirectory = Files.get(".", "src", platform.root);
-		let targetParent = targetDirectory.resolveChildSegments(location.namespace);
+		let targetParent = targetDirectory.resolveChildSegments(location.namespace());
 		if (!targetParent.exists()) {
 			let maybeError = targetParent.createDirectories();
 			if (maybeError.isPresent()) {
@@ -526,7 +89,7 @@ export class Main {
 		}
 		let initial: Option<IOError> = new None<IOError>();
 		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: string) => {
-			let target = targetParent.resolveChild(location.name + "." + extension);
+			let target = targetParent.resolveChild(location.name() + "." + extension);
 			return ioErrorOption.or(() => target.writeString(output.right().get(extension)));
 		});
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
@@ -541,7 +104,7 @@ export class Main {
 		let platform = state.platform();
 		if (Platform.Windows === platform) {
 			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
-			/*entries.put(platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
 			/*entries.put(platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
 		}
 		else {
@@ -702,7 +265,7 @@ export class Main {
 			let actualInfix: string = "interface ";
 			let newName: string = name + "Instance";
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-			let withNewLocation = outputContentState.append(generated).mapLocation((location: Location) => new Location(location.namespace, location.name + "Instance"));
+			let withNewLocation = outputContentState.append(generated).mapLocation((location: Location) => new Location(location.namespace(), location.name() + "Instance"));
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(withNewLocation, ""));
 		}
 		else {
