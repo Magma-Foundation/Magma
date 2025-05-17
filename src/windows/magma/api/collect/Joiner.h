@@ -1,23 +1,8 @@
+#ifndef magma_api_collect_Joiner
+#define magma_api_collect_Joiner
 import { Option } from "magma/api/option/Option";
 import { Collector } from "magma/api/collect/Collector";
 import { List } from "magma/api/collect/list/List";
 import { None } from "magma/api/option/None";
 import { Some } from "magma/api/option/Some";
-export class Joiner implements Collector<&[I8], Option<&[I8]>> {
-	mut delimiter: &[I8];
-	constructor (mut delimiter: &[I8]) {
-		this.delimiter = delimiter;
-	}
-	mut static empty(): Joiner {
-		return new Joiner("");
-	}
-	mut static joinOrEmpty(items: List<&[I8]>, mut delimiter: &[I8], mut prefix: &[I8], mut suffix: &[I8]): &[I8] {
-		return items.query().collect(new Joiner(delimiter)).map((mut inner: &[I8]) => prefix + inner + suffix).orElse("");
-	}
-	mut createInitial(): Option<&[I8]> {
-		return new None<&[I8]>();
-	}
-	mut fold(maybe: Option<&[I8]>, element: &[I8]): Option<&[I8]> {
-		return new Some<&[I8]>(maybe.map((mut inner: &[I8]) => inner + this.delimiter + element).orElse(element));
-	}
-}
+#endif

@@ -1,3 +1,4 @@
+#include "./MethodHeader.h"
 interface MethodHeader<S extends MethodHeader<S>> {
 	mut generateWithAfterName(mut afterName: &[I8]): &[I8];
 	mut hasAnnotation(mut annotation: &[I8]): Bool;

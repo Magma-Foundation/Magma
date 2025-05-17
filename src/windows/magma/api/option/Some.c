@@ -1,7 +1,4 @@
-import { Option } from "magma/api/option/Option";
-import { None } from "magma/api/option/None";
-import { Tuple2 } from "magma/api/Tuple2";
-import { Tuple2Impl } from "magma/api/Tuple2Impl";
+#include "./Some.h"
 export class Some<T> implements Option<T> {
 	mut value: T;
 	constructor (mut value: T) {

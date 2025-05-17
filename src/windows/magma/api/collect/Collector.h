@@ -1,4 +1,3 @@
-export interface Collector<T, C> {
-	mut createInitial(): C;
-	mut fold(mut current: C, mut element: T): C;
-}
+#ifndef magma_api_collect_Collector
+#define magma_api_collect_Collector
+#endif

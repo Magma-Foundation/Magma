@@ -1,9 +1,4 @@
-import { Query } from "magma/api/collect/Query";
-import { Option } from "magma/api/option/Option";
-import { HeadedQuery } from "magma/api/collect/head/HeadedQuery";
-import { EmptyHead } from "magma/api/collect/head/EmptyHead";
-import { Head } from "magma/api/collect/head/Head";
-import { SingleHead } from "magma/api/collect/head/SingleHead";
+#include "./Queries.h"
 export class Queries {
 	mut static fromOption<T>(option: Option<T>): Query<T> {
 		return new HeadedQuery<T>(option.map((mut element: T) => Queries.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));

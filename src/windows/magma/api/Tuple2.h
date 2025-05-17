@@ -1,4 +1,3 @@
-export interface Tuple2<A, B> {
-	mut left(): A;
-	mut right(): B;
-}
+#ifndef magma_api_Tuple2
+#define magma_api_Tuple2
+#endif

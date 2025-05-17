@@ -1,4 +1,4 @@
-import { Option } from "magma/api/option/Option";
+#include "./Result.h"
 export interface Result<T, X> {
 	mut findError(): Option<X>;
 	mut findValue(): Option<T>;

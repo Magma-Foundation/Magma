@@ -1,3 +1,3 @@
-export interface IOError {
-	mut display(): &[I8];
-}
+#ifndef magma_api_io_IOError
+#define magma_api_io_IOError
+#endif

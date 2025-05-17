@@ -1,7 +1,4 @@
-import { Head } from "magma/api/collect/head/Head";
-import { Option } from "magma/api/option/Option";
-import { None } from "magma/api/option/None";
-import { Some } from "magma/api/option/Some";
+#include "./RangeHead.h"
 export class RangeHead implements Head<number> {
 	length: number;
 	mut counter: number;

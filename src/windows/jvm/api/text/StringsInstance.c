@@ -1,3 +1,4 @@
+#include "./Strings.h"
 export interface StringsInstance {
 	mut length(stripped: &[I8]): number;
 

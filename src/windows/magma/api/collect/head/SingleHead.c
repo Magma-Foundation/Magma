@@ -1,7 +1,4 @@
-import { Head } from "magma/api/collect/head/Head";
-import { Option } from "magma/api/option/Option";
-import { None } from "magma/api/option/None";
-import { Some } from "magma/api/option/Some";
+#include "./SingleHead.h"
 export class SingleHead<T> implements Head<T> {
 	element: T;
 	mut retrieved: Bool;

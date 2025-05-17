@@ -1,9 +1,4 @@
-import { List } from "magma/api/collect/list/List";
-import { Type } from "magma/api/Type";
-import { Option } from "magma/api/option/Option";
-import { Some } from "magma/api/option/Some";
-import { Joiner } from "magma/api/collect/Joiner";
-import { Strings } from "jvm/api/text/Strings";
+#include "./Definition.h"
 export class Definition {
 	mut annotations: List<&[I8]>;
 	mut modifiers: List<&[I8]>;

@@ -1,4 +1,3 @@
-export interface ConsoleInstance {
-	mut printErrLn(message: &[I8]): void;
-
-}
+#ifndef jvm_api_io_Console
+#define jvm_api_io_Console
+#endif

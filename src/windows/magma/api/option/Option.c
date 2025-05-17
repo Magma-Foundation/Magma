@@ -1,4 +1,4 @@
-import { Tuple2 } from "magma/api/Tuple2";
+#include "./Option.h"
 export interface Option<T> {
 	mut map<R>(mut mapper: (arg0 : T) => R): Option<R>;
 	mut orElse(mut other: T): T;

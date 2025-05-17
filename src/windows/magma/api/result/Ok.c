@@ -1,7 +1,4 @@
-import { Result } from "magma/api/result/Result";
-import { Option } from "magma/api/option/Option";
-import { None } from "magma/api/option/None";
-import { Some } from "magma/api/option/Some";
+#include "./Ok.h"
 export class Ok<T, X> implements Result<T, X> {
 	mut value: T;
 	constructor (mut value: T) {

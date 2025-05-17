@@ -1,4 +1,4 @@
+#ifndef magma_api_collect_head_Head
+#define magma_api_collect_head_Head
 import { Option } from "magma/api/option/Option";
-export interface Head<T> {
-	mut next(): Option<T>;
-}
+#endif

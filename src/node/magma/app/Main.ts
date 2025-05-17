@@ -620,28 +620,35 @@ export class Main {
 		let initial: Option<IOError> = new None<IOError>();
 		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: string) => {
 			let target = targetParent.resolveChild(location.name + "." + extension);
-			return ioErrorOption.or(() => target.writeString(output.right()));
+			return ioErrorOption.or(() => target.writeString(output.right().get(extension)));
 		});
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
 	}
-	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {
+	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Map<string, string>> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
 		let statementsState = statementsTuple.left();
 		let imports = statementsState.imports.query().map((anImport: Import) => anImport.generate(state.platform)).collect(new Joiner("")).orElse("");
 		let compileState = statementsState.clearImports().clearOutput();
 		let withMain = Main.createMain(source);
-		let output = imports + statementsState.output + statementsTuple.right() + withMain;
-		return new Tuple2Impl<CompileState, string>(compileState, output);
+		let entries = new HashMap<string, string>();
+		if (Platform.Windows === state.platform) {
+			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
+			/*entries.put(state.platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+			/*entries.put(state.platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output + statementsTuple.right() + withMain)*/;
+		}
+		else {
+			/*entries.put(state.platform.extension[0], imports + statementsState.output + statementsTuple.right() + withMain)*/;
+		}
+		return new Tuple2Impl<>(compileState, entries);
+	}
+	static generateDirective(content: string): string {
+		return "#" + content + "\n";
 	}
 	static createMain(source: Source): string {
 		if (Strings.equalsTo(source.computeName(), "Main")) {
 			return "Main.main();";
 		}
 		return "";
-	}
-	static formatSource(source: Source): string {
-		let joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
-		return "\n\t" + source.computeName() + ": " + joinedNamespace;
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);

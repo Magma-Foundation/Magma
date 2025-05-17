@@ -1,7 +1,4 @@
-import { Head } from "magma/api/collect/head/Head";
-import { Query } from "magma/api/collect/Query";
-import { Option } from "magma/api/option/Option";
-import { None } from "magma/api/option/None";
+#include "./FlatMapHead.h"
 export class FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;

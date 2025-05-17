@@ -1,6 +1,4 @@
-import { Head } from "magma/api/collect/head/Head";
-import { Option } from "magma/api/option/Option";
-import { None } from "magma/api/option/None";
+#include "./EmptyHead.h"
 export class EmptyHead<T> implements Head<T> {
 	mut next(): Option<T> {
 		return new None<T>();

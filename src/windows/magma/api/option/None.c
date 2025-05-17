@@ -1,6 +1,4 @@
-import { Option } from "magma/api/option/Option";
-import { Tuple2 } from "magma/api/Tuple2";
-import { Tuple2Impl } from "magma/api/Tuple2Impl";
+#include "./None.h"
 export class None<T> implements Option<T> {
 	mut map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return new None<R>();

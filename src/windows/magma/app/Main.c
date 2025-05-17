@@ -1,27 +1,4 @@
-import { Type } from "magma/api/Type";
-import { Option } from "magma/api/option/Option";
-import { List } from "magma/api/collect/list/List";
-import { Definition } from "magma/app/Definition";
-import { Lists } from "jvm/api/collect/list/Lists";
-import { None } from "magma/api/option/None";
-import { Strings } from "jvm/api/text/Strings";
-import { Some } from "magma/api/option/Some";
-import { MethodHeader } from "magma/app/MethodHeader";
-import { Parameter } from "magma/app/Parameter";
-import { Joiner } from "magma/api/collect/Joiner";
-import { Tuple2 } from "magma/api/Tuple2";
-import { Path } from "magma/api/io/Path";
-import { IOError } from "magma/api/io/IOError";
-import { Result } from "magma/api/result/Result";
-import { ListCollector } from "magma/api/collect/list/ListCollector";
-import { Files } from "jvm/api/io/Files";
-import { Console } from "jvm/api/io/Console";
-import { Tuple2Impl } from "magma/api/Tuple2Impl";
-import { Queries } from "magma/api/collect/Queries";
-import { DivideState } from "magma/app/DivideState";
-import { HeadedQuery } from "magma/api/collect/head/HeadedQuery";
-import { RangeHead } from "magma/api/collect/head/RangeHead";
-import { Characters } from "jvm/api/text/Characters";
+#include "./Main.h"
 interface Value extends Argument, Caller  {
 	mut resolve(mut state: CompileState): Type;
 	mut generateAsEnumValue(mut structureName: &[I8]): Option<&[I8]>;
@@ -620,28 +597,35 @@ export class Main {
 		let initial: Option<IOError> = new None<IOError>();
 		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
 			let target = targetParent.resolveChild(location.name + "." + extension);
-			return ioErrorOption.or(() => target.writeString(output.right()));
+			return ioErrorOption.or(() => target.writeString(output.right().get(extension)));
 		});
 		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
 	}
-	mut static compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, &[I8]> {
+	mut static compileRoot(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Map<&[I8], &[I8]>> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
 		let statementsState = statementsTuple.left();
 		let imports = statementsState.imports.query().map((mut anImport: Import) => anImport.generate(state.platform)).collect(new Joiner("")).orElse("");
 		let compileState = statementsState.clearImports().clearOutput();
 		let withMain = Main.createMain(source);
-		let output = imports + statementsState.output + statementsTuple.right() + withMain;
-		return new Tuple2Impl<CompileState, &[I8]>(compileState, output);
+		let entries = new HashMap<&[I8], &[I8]>();
+		if (Platform.Windows === state.platform) {
+			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName()*/;
+			/*entries.put(state.platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+			/*entries.put(state.platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output + statementsTuple.right() + withMain)*/;
+		}
+		else {
+			/*entries.put(state.platform.extension[0], imports + statementsState.output + statementsTuple.right() + withMain)*/;
+		}
+		return new Tuple2Impl<>(compileState, entries);
+	}
+	mut static generateDirective(content: &[I8]): &[I8] {
+		return "#" + content + "\n";
 	}
 	mut static createMain(source: Source): &[I8] {
 		if (Strings.equalsTo(source.computeName(), "Main")) {
 			return "Main.main();";
 		}
 		return "";
-	}
-	mut static formatSource(source: Source): &[I8] {
-		let joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
-		return "\n\t" + source.computeName() + ": " + joinedNamespace;
 	}
 	mut static compileStatements(state: CompileState, input: &[I8], mapper: (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]>): Tuple2<CompileState, &[I8]> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);

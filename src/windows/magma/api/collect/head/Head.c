@@ -1,4 +1,4 @@
-import { Option } from "magma/api/option/Option";
+#include "./Head.h"
 export interface Head<T> {
 	mut next(): Option<T>;
 }

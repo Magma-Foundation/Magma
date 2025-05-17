@@ -21,6 +21,8 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Result;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -739,13 +741,13 @@ public final class Main {
         final Option<IOError> initial = new None<IOError>();
         final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> ioErrorOption, final String extension) -> {
             final var target = targetParent.resolveChild(location.name + "." + extension);
-            return ioErrorOption.or(() -> target.writeString(output.right()));
+            return ioErrorOption.or(() -> target.writeString(output.right().get(extension)));
         });
 
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
     }
 
-    private static Tuple2Impl<CompileState, String> compileRoot(final CompileState state, final Source source, final String input) {
+    private static Tuple2Impl<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {
         final var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
         final var statementsState = statementsTuple.left();
 
@@ -756,8 +758,22 @@ public final class Main {
 
         final var compileState = statementsState.clearImports().clearOutput();
         final var withMain = Main.createMain(source);
-        final var output = imports + statementsState.output + statementsTuple.right() + withMain;
-        return new Tuple2Impl<CompileState, String>(compileState, output);
+
+        final var entries = new HashMap<String, String>();
+        if (Platform.Windows == state.platform) {
+            final var value = source.computeNamespace().query().collect(new Joiner("_")).map(inner -> inner + "_").orElse("") + source.computeName();
+            entries.put(state.platform.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
+            entries.put(state.platform.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output + statementsTuple.right() + withMain);
+        }
+        else {
+            entries.put(state.platform.extension[0], imports + statementsState.output + statementsTuple.right() + withMain);
+        }
+
+        return new Tuple2Impl<>(compileState, entries);
+    }
+
+    private static String generateDirective(final String content) {
+        return "#" + content + "\n";
     }
 
     private static String createMain(final Source source) {
@@ -765,11 +781,6 @@ public final class Main {
             return "Main.main();";
         }
         return "";
-    }
-
-    private static String formatSource(final Source source) {
-        final var joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
-        return "\n\t" + source.computeName() + ": " + joinedNamespace;
     }
 
     private static Tuple2<CompileState, String> compileStatements(final CompileState state, final String input, final BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {

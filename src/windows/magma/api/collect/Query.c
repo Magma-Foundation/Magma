@@ -1,6 +1,4 @@
-import { Collector } from "magma/api/collect/Collector";
-import { Option } from "magma/api/option/Option";
-import { Tuple2 } from "magma/api/Tuple2";
+#include "./Query.h"
 export interface Query<T> {
 	mut collect<C>(mut collector: Collector<T, C>): C;
 	mut map<R>(mut mapper: (arg0 : T) => R): Query<R>;

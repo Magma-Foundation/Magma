@@ -1,6 +1,3 @@
-export interface Type {
-	mut generate(): &[I8];
-	mut isFunctional(): Bool;
-	mut isVar(): Bool;
-	mut generateBeforeName(): &[I8];
-}
+#ifndef magma_api_Type
+#define magma_api_Type
+#endif

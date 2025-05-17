@@ -1,8 +1,4 @@
-import { IOError } from "magma/api/io/IOError";
-import { Option } from "magma/api/option/Option";
-import { Result } from "magma/api/result/Result";
-import { List } from "magma/api/collect/list/List";
-import { Query } from "magma/api/collect/Query";
+#include "./Path.h"
 export interface Path {
 	mut asString(): &[I8];
 	mut writeString(mut output: &[I8]): Option<IOError>;

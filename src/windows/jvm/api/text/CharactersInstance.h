@@ -1,6 +1,3 @@
-export interface CharactersInstance {
-	mut isDigit(c: I8): Bool;
-
-	mut isLetter(c: I8): Bool;
-
-}
+#ifndef jvm_api_text_Characters
+#define jvm_api_text_Characters
+#endif

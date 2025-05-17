@@ -1,8 +1,4 @@
-import { Option } from "magma/api/option/Option";
-import { Collector } from "magma/api/collect/Collector";
-import { List } from "magma/api/collect/list/List";
-import { None } from "magma/api/option/None";
-import { Some } from "magma/api/option/Some";
+#include "./Joiner.h"
 export class Joiner implements Collector<&[I8], Option<&[I8]>> {
 	mut delimiter: &[I8];
 	constructor (mut delimiter: &[I8]) {

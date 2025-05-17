@@ -1,4 +1,4 @@
-import { List } from "magma/api/collect/list/List";
+#include "./Lists.h"
 export interface ListsInstance {
 	mut fromArray<T>(elements: T[]): List<T>;
 

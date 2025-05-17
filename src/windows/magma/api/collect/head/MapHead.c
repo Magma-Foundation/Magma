@@ -1,5 +1,4 @@
-import { Head } from "magma/api/collect/head/Head";
-import { Option } from "magma/api/option/Option";
+#include "./MapHead.h"
 export class MapHead<T, R> implements Head<R> {
 	mut head: Head<T>;
 	mut mapper: (arg0 : T) => R;
