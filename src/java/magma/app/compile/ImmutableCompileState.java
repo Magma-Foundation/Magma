@@ -15,17 +15,27 @@ import magma.app.io.Source;
 import java.util.function.Function;
 
 public record ImmutableCompileState(
-        List<Import> imports,
-        String output,
-        List<String> structureNames,
-        int depth,
-        List<Definition> definitions,
+        Platform platform,
         Option<Location> findCurrentLocation,
         List<Source> sources,
-        Platform platform
+        List<Import> imports,
+        List<String> structureNames,
+        String structures,
+        String functions,
+        List<Definition> definitions,
+        int depth
 ) implements CompileState {
     public static CompileState createInitial() {
-        return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.Magma);
+        return new ImmutableCompileState(Platform.Magma,
+                new None<Location>(),
+                Lists.empty(),
+                Lists.empty(),
+                Lists.empty(),
+                "",
+                "",
+                Lists.empty(),
+                0
+        );
     }
 
     @Override
@@ -37,32 +47,32 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState withLocation(final Location namespace) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(namespace), this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, new Some<Location>(namespace), this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override
     public CompileState append(final String element) {
-        return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures + element, this.functions, this.definitions, this.depth);
     }
 
     @Override
     public CompileState pushStructureName(final String name) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames.addLast(name), this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override
     public CompileState enterDepth() {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth + 1);
     }
 
     @Override
     public CompileState exitDepth() {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth - 1);
     }
 
     @Override
     public CompileState defineAll(final List<Definition> definitions) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions.addAll(definitions), this.depth);
     }
 
     @Override
@@ -75,17 +85,26 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState clearImports() {
-        return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, Lists.empty(), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override
-    public CompileState clearOutput() {
-        return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+    public CompileState clear() {
+        return new ImmutableCompileState(
+                this.platform,
+                this.findCurrentLocation,
+                this.sources,
+                this.imports,
+                this.structureNames,
+                "",
+                "",
+                this.definitions,
+                this.depth);
     }
 
     @Override
     public CompileState addSource(final Source source) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources.addLast(source), this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources.addLast(source), this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override
@@ -101,17 +120,27 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState popStructureName() {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames.removeLast().orElse(this.structureNames), this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override
     public CompileState mapLocation(final Function<Location, Location> mapper) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation.map(mapper), this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation.map(mapper), this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override
     public CompileState withPlatform(final Platform platform) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, platform);
+        return new ImmutableCompileState(platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions, this.definitions, this.depth);
+    }
+
+    @Override
+    public CompileState addFunction(final String function) {
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports, this.structureNames, this.structures, this.functions + function, this.definitions, this.depth);
+    }
+
+    @Override
+    public String join() {
+        return this.structures + this.functions;
     }
 
     @Override
@@ -143,7 +172,7 @@ public record ImmutableCompileState(
         }
 
         final var importString = new Import(newParent, child);
-        return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.findCurrentLocation, this.sources, this.platform);
+        return new ImmutableCompileState(this.platform, this.findCurrentLocation, this.sources, this.imports.addLast(importString), this.structureNames, this.structures, this.functions, this.definitions, this.depth);
     }
 
     @Override

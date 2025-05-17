@@ -99,17 +99,17 @@ export class Main {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
 		let statementsState = statementsTuple.left();
 		let imports = statementsState.imports().query().map((anImport: Import) => anImport.generate(state.platform())).collect(new Joiner("")).orElse("");
-		let compileState = statementsState.clearImports().clearOutput();
+		let compileState = statementsState.clearImports().clear();
 		let withMain = Main.createMain(source);
 		let entries = new HashMap<string, string>();
 		let platform = state.platform();
 		if (Platform.Windows === platform) {
 			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
 			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain)*/;
+			/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain)*/;
 		}
 		else {
-			/*entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain)*/;
+			/*entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain)*/;
 		}
 		return new Tuple2Impl<>(compileState, entries);
 	}
@@ -353,8 +353,17 @@ export class Main {
 			}
 			let headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
-				let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"));
+				let compileState1 = parametersState.enterDepth();
+				let compileState = /* compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth()*/;
+				let statementsTuple = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
+				let compileState2 = statementsTuple.left().exitDepth();
+				let indent = compileState2.createIndent();
+				let exited = /* compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth()*/;
+				let generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
+				if (exited.isPlatform(Platform.Windows)) {
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(exited.addFunction(generated), ""));
+				}
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(exited, generated));
 			})).or(() => {
 				if (Strings.equalsTo(";", Strings.strip(afterParams))) {
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"));

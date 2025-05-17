@@ -6,7 +6,8 @@ export class MapHead<T, R> implements Head<R> {
 		this.head = head;
 		this.mapper = mapper;
 	}
-	mut next(): Option<R> {
-		return this.head.next().map(this.mapper);
-	}
+}
+
+mut next(): Option<R> {
+	return this.head.next().map(this.mapper);
 }

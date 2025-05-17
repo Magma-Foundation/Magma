@@ -6,7 +6,8 @@ export class ZipHead<T, R> implements Head<Tuple2<T, R>> {
 		this.head = head;
 		this.other = other;
 	}
-	mut next(): Option<Tuple2<T, R>> {
-		return this.head.next().and(() => this.other.next());
-	}
+}
+
+mut next(): Option<Tuple2<T, R>> {
+	return this.head.next().and(() => this.other.next());
 }

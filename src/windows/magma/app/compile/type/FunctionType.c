@@ -6,17 +6,18 @@ export class FunctionType implements Type {
 		this.args = args;
 		this.returns = returns;
 	}
-	mut generate(): &[I8] {
-		let joinedArguments = this.args.queryWithIndices().map((mut tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
-		return "(" + joinedArguments + ") => " + this.returns;
-	}
-	mut isFunctional(): Bool {
-		return true;
-	}
-	mut isVar(): Bool {
-		return false;
-	}
-	mut generateBeforeName(): &[I8] {
-		return "";
-	}
+}
+
+mut generate(): &[I8] {
+	let joinedArguments = this.args.queryWithIndices().map((mut tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
+	return "(" + joinedArguments + ") => " + this.returns;
+}
+mut isFunctional(): Bool {
+	return true;
+}
+mut isVar(): Bool {
+	return false;
+}
+mut generateBeforeName(): &[I8] {
+	return "";
 }

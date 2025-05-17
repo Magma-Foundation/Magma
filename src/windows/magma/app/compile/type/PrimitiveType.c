@@ -8,19 +8,20 @@ export class PrimitiveType implements Type {
 	static I8: PrimitiveType = new PrimitiveType("I8");
 	static I32: PrimitiveType = new PrimitiveType("I32");
 	value: &[I8];
-	constructor (value: &[I8]) {
-		this.value = value;
-	}
-	mut generate(): &[I8] {
-		return this.value;
-	}
-	mut isFunctional(): Bool {
-		return false;
-	}
-	mut isVar(): Bool {
-		return PrimitiveType.Var === this;
-	}
-	mut generateBeforeName(): &[I8] {
-		return "";
-	}
+}
+
+constructor (value: &[I8]) {
+	this.value = value;
+}
+mut generate(): &[I8] {
+	return this.value;
+}
+mut isFunctional(): Bool {
+	return false;
+}
+mut isVar(): Bool {
+	return PrimitiveType.Var === this;
+}
+mut generateBeforeName(): &[I8] {
+	return "";
 }

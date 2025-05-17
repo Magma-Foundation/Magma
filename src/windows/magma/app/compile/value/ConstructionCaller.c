@@ -6,13 +6,14 @@ export class ConstructionCaller implements Caller {
 		this.right = right;
 		this.platform = platform;
 	}
-	mut generate(): &[I8] {
-		if (Platform.Magma === this.platform) {
-			return this.right;
-		}
-		return "new " + this.right;
+}
+
+mut generate(): &[I8] {
+	if (Platform.Magma === this.platform) {
+		return this.right;
 	}
-	mut findChild(): Option<Value> {
-		return new None<Value>();
-	}
+	return "new " + this.right;
+}
+mut findChild(): Option<Value> {
+	return new None<Value>();
 }

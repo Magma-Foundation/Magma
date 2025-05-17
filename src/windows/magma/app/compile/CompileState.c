@@ -14,14 +14,15 @@ export interface CompileState {
 	mut defineAll(mut definitions: List<Definition>): CompileState;
 	mut resolve(mut name: &[I8]): Option<Type>;
 	mut clearImports(): CompileState;
-	mut clearOutput(): CompileState;
+	mut clear(): CompileState;
 	mut addSource(mut source: Source): CompileState;
 	mut findSource(mut name: &[I8]): Option<Source>;
 	mut popStructureName(): CompileState;
 	mut mapLocation(mut mapper: (arg0 : Location) => Location): CompileState;
 	mut withPlatform(mut platform: Platform): CompileState;
 	mut imports(): List<Import>;
-	mut output(): &[I8];
+	mut join(): &[I8];
 	mut findCurrentLocation(): Option<Location>;
 	mut platform(): Platform;
+	mut addFunction(mut function: &[I8]): CompileState;
 }

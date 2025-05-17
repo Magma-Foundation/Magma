@@ -21,34 +21,34 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.ImmutableCompileState;
-import magma.app.compile.value.AccessNode;
-import magma.app.compile.value.Argument;
+import magma.app.compile.Import;
+import magma.app.compile.define.Definition;
+import magma.app.compile.define.FunctionHeader;
+import magma.app.compile.define.Parameter;
+import magma.app.compile.text.DivideState;
+import magma.app.compile.text.Placeholder;
+import magma.app.compile.text.Whitespace;
 import magma.app.compile.type.ArrayType;
 import magma.app.compile.type.BooleanType;
-import magma.app.compile.value.Caller;
-import magma.app.compile.value.StringNode;
-import magma.app.compile.value.ConstructionCaller;
-import magma.app.compile.value.ConstructorHeader;
-import magma.app.compile.define.Definition;
-import magma.app.compile.text.DivideState;
 import magma.app.compile.type.FunctionType;
-import magma.app.compile.type.TemplateType;
-import magma.app.compile.Import;
-import magma.app.compile.value.InvokableNode;
-import magma.app.compile.value.LambdaNode;
-import magma.app.io.Location;
-import magma.app.compile.define.FunctionHeader;
-import magma.app.compile.value.NotNode;
-import magma.app.compile.value.OperationNode;
-import magma.app.compile.define.Parameter;
-import magma.app.compile.text.Placeholder;
-import magma.app.io.Platform;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.SliceType;
+import magma.app.compile.type.TemplateType;
+import magma.app.compile.type.VariadicType;
+import magma.app.compile.value.AccessNode;
+import magma.app.compile.value.Argument;
+import magma.app.compile.value.Caller;
+import magma.app.compile.value.ConstructionCaller;
+import magma.app.compile.value.ConstructorHeader;
+import magma.app.compile.value.InvokableNode;
+import magma.app.compile.value.LambdaNode;
+import magma.app.compile.value.NotNode;
+import magma.app.compile.value.OperationNode;
+import magma.app.compile.value.StringNode;
 import magma.app.compile.value.SymbolNode;
 import magma.app.compile.value.Value;
-import magma.app.compile.type.VariadicType;
-import magma.app.compile.text.Whitespace;
+import magma.app.io.Location;
+import magma.app.io.Platform;
 import magma.app.io.Source;
 
 import java.util.HashMap;
@@ -140,7 +140,7 @@ public final class Main {
                 .collect(new Joiner(""))
                 .orElse("");
 
-        final var compileState = statementsState.clearImports().clearOutput();
+        final var compileState = statementsState.clearImports().clear();
         final var withMain = Main.createMain(source);
 
         final var entries = new HashMap<String, String>();
@@ -148,10 +148,10 @@ public final class Main {
         if (Platform.Windows == platform) {
             final var value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
             entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
-            entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.output() + statementsTuple.right() + withMain);
+            entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain);
         }
         else {
-            entries.put(platform.extension[0], imports + statementsState.output() + statementsTuple.right() + withMain);
+            entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain);
         }
 
         return new Tuple2Impl<>(compileState, entries);
@@ -541,9 +541,20 @@ public final class Main {
 
             final var headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
             return Main.compilePrefix(Strings.strip(afterParams), "{", (final String withoutContentStart) -> Main.compileSuffix(Strings.strip(withoutContentStart), "}", (final String withoutContentEnd) -> {
-                final var statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
+                final var compileState1 = parametersState.enterDepth();
+                final var compileState = compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth();
 
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"));
+                final var statementsTuple = Main.compileFunctionStatements(compileState.defineAll(definitions), withoutContentEnd);
+                final var compileState2 = statementsTuple.left().exitDepth();
+                final var indent = compileState2.createIndent();
+                final var exited = compileState2.isPlatform(Platform.Windows) ? compileState2 : compileState2.exitDepth();
+
+                final var generated = indent + headerGenerated + " {" + statementsTuple.right() + indent + "}";
+                if (exited.isPlatform(Platform.Windows)) {
+                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(exited.addFunction(generated), ""));
+                }
+
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(exited, generated));
             })).or(() -> {
                 if (Strings.equalsTo(";", Strings.strip(afterParams))) {
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";"));

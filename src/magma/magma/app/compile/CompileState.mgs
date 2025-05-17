@@ -21,14 +21,15 @@ export struct CompileState {
 	def defineAll(mut definitions: List<Definition>): CompileState;
 	def resolve(mut name: &[I8]): Option<Type>;
 	def clearImports(): CompileState;
-	def clearOutput(): CompileState;
+	def clear(): CompileState;
 	def addSource(mut source: Source): CompileState;
 	def findSource(mut name: &[I8]): Option<Source>;
 	def popStructureName(): CompileState;
 	def mapLocation(mut mapper: (arg0 : Location) => Location): CompileState;
 	def withPlatform(mut platform: Platform): CompileState;
 	def imports(): List<Import>;
-	def output(): &[I8];
+	def join(): &[I8];
 	def findCurrentLocation(): Option<Location>;
 	def platform(): Platform;
+	def addFunction(mut function: &[I8]): CompileState;
 }

@@ -4,19 +4,20 @@ export class BooleanType implements Type {
 	constructor (mut platform: Platform) {
 		this.platform = platform;
 	}
-	mut generate(): &[I8] {
-		if (Platform.TypeScript === this.platform) {
-			return "boolean";
-		}
-		return "Bool";
+}
+
+mut generate(): &[I8] {
+	if (Platform.TypeScript === this.platform) {
+		return "boolean";
 	}
-	mut isFunctional(): Bool {
-		return false;
-	}
-	mut isVar(): Bool {
-		return false;
-	}
-	mut generateBeforeName(): &[I8] {
-		return "";
-	}
+	return "Bool";
+}
+mut isFunctional(): Bool {
+	return false;
+}
+mut isVar(): Bool {
+	return false;
+}
+mut generateBeforeName(): &[I8] {
+	return "";
 }

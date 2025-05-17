@@ -39,7 +39,7 @@ public interface CompileState {
 
     CompileState clearImports();
 
-    CompileState clearOutput();
+    CompileState clear();
 
     CompileState addSource(Source source);
 
@@ -53,9 +53,11 @@ public interface CompileState {
 
     List<Import> imports();
 
-    String output();
+    String join();
 
     Option<Location> findCurrentLocation();
 
     Platform platform();
+
+    CompileState addFunction(String function);
 }

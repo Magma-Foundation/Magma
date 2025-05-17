@@ -21,14 +21,15 @@ export interface CompileState {
 	defineAll(definitions: List<Definition>): CompileState;
 	resolve(name: string): Option<Type>;
 	clearImports(): CompileState;
-	clearOutput(): CompileState;
+	clear(): CompileState;
 	addSource(source: Source): CompileState;
 	findSource(name: string): Option<Source>;
 	popStructureName(): CompileState;
 	mapLocation(mapper: (arg0 : Location) => Location): CompileState;
 	withPlatform(platform: Platform): CompileState;
 	imports(): List<Import>;
-	output(): string;
+	join(): string;
 	findCurrentLocation(): Option<Location>;
 	platform(): Platform;
+	addFunction(function: string): CompileState;
 }
