@@ -1912,7 +1912,12 @@ public final class Main {
     private static Option<Type> findPrimitiveValue(final String input, final Platform platform) {
         final var stripped = Strings.strip(input);
         if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)) {
-            return new Some<Type>(Primitive.String);
+            if (Platform.TypeScript == platform) {
+                return new Some<Type>(Primitive.String);
+            }
+            else {
+                return new Some<Type>(Primitive.I8);
+            }
         }
 
         if (Strings.equalsTo("String", stripped)) {

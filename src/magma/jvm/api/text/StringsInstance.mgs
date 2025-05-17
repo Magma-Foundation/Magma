@@ -48,6 +48,6 @@ export interface StringsInstance {
 
 	def isBlank(value: &[I8]): Bool;
 
-	def charAt(input: &[I8], index: I32): string;
+	def charAt(input: &[I8], index: I32): I8;
 
 }

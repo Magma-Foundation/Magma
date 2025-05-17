@@ -98,7 +98,7 @@ struct DivideState {
 	def advance(): DivideState {
 		return DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
 	}
-	def append(c: string): DivideState {
+	def append(c: I8): DivideState {
 		return DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
 	}
 	def isLevel(): Bool {
@@ -113,21 +113,21 @@ struct DivideState {
 	def isShallow(): Bool {
 		return 1 === this.depth;
 	}
-	def pop(): Option<Tuple2<DivideState, string>> {
+	def pop(): Option<Tuple2<DivideState, I8>> {
 		if (this.index >= Strings.length(this.input)){
-			return None<Tuple2<DivideState, string>>();
+			return None<Tuple2<DivideState, I8>>();
 		}
 		let c = Strings.charAt(this.input, this.index);
 		let nextState = DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-		return Some<Tuple2<DivideState, string>>(Tuple2Impl<DivideState, string>(nextState, c));
+		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState, c));
 	}
-	def popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
-		return this.pop().map((inner: Tuple2<DivideState, string>) => Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right()));
+	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {
+		return this.pop().map((inner: Tuple2<DivideState, I8>) => Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right()));
 	}
 	def popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left());
+		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, I8>) => tuple.left());
 	}
-	def peek(): string {
+	def peek(): I8 {
 		return Strings.charAt(this.input, this.index);
 	}
 	def startsWith(slice: &[I8]): Bool {
@@ -800,14 +800,14 @@ export struct Main {
 	static def compileStatements(state: CompileState, input: &[I8], mapper: (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]>): Tuple2<CompileState, &[I8]> {
 		return Main.compileAll(state, input, Main.foldStatements, mapper, Main.mergeStatements);
 	}
-	static def compileAll(state: CompileState, input: &[I8], folder: (arg0 : DivideState, arg1 : string) => DivideState, mapper: (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]>, merger: (arg0 : &[I8], arg1 : &[I8]) => &[I8]): Tuple2<CompileState, &[I8]> {
+	static def compileAll(state: CompileState, input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, mapper: (arg0 : CompileState, arg1 : &[I8]) => Tuple2<CompileState, &[I8]>, merger: (arg0 : &[I8], arg1 : &[I8]) => &[I8]): Tuple2<CompileState, &[I8]> {
 		let folded = Main.parseAll(state, input, folder, (state1: CompileState, s: &[I8]) => Some<Tuple2<CompileState, &[I8]>>(mapper(state1, s))).orElse(Tuple2Impl<CompileState, List<&[I8]>>(state, Lists.empty()));
 		return Tuple2Impl<CompileState, &[I8]>(folded.left(), Main.generateAll(folded.right(), merger));
 	}
 	static def generateAll(elements: List<&[I8]>, merger: (arg0 : &[I8], arg1 : &[I8]) => &[I8]): &[I8] {
 		return elements.query().foldWithInitial("", merger);
 	}
-	static def parseAll<T>(state: CompileState, input: &[I8], folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
+	static def parseAll<T>(state: CompileState, input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, biFunction: (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 		return Main.divide(input, folder).query().foldWithInitial(Some<Tuple2<CompileState, List<T>>>(Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: &[I8]) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
 			let currentState = current.left();
 			let currentElement = current.right();
@@ -821,10 +821,10 @@ export struct Main {
 	static def mergeStatements(cache: &[I8], element: &[I8]): &[I8] {
 		return cache + element;
 	}
-	static def divide(input: &[I8], folder: (arg0 : DivideState, arg1 : string) => DivideState): List<&[I8]> {
+	static def divide(input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState): List<&[I8]> {
 		let current = DivideState.createInitial(input);
 		while (true){
-			let poppedTuple0 = current.pop().toTuple(Tuple2Impl<DivideState, string>(current, "\0"));
+			let poppedTuple0 = current.pop().toTuple(Tuple2Impl<DivideState, I8>(current, "\0"));
 			if (!poppedTuple0.left()){
 				break;
 			}
@@ -835,13 +835,13 @@ export struct Main {
 		}
 		return current.advance().segments;
 	}
-	static def foldDoubleQuotes(state: DivideState, c: string): Option<DivideState> {
+	static def foldDoubleQuotes(state: DivideState, c: I8): Option<DivideState> {
 		if ("\"" !== c){
 			return None<DivideState>();
 		}
 		let appended = state.append(c);
 		while (true){
-			let maybeTuple = appended.popAndAppendToTuple().toTuple(Tuple2Impl<DivideState, string>(appended, "\0"));
+			let maybeTuple = appended.popAndAppendToTuple().toTuple(Tuple2Impl<DivideState, I8>(appended, "\0"));
 			if (!maybeTuple.left()){
 				break;
 			}
@@ -856,13 +856,13 @@ export struct Main {
 		}
 		return Some<DivideState>(appended);
 	}
-	static def foldSingleQuotes(state: DivideState, c: string): Option<DivideState> {
+	static def foldSingleQuotes(state: DivideState, c: I8): Option<DivideState> {
 		if ("\'" !== c){
 			return None<DivideState>();
 		}
 		return state.append(c).popAndAppendToTuple().flatMap(Main.foldEscaped).flatMap((state1: DivideState) => state1.popAndAppendToOption());
 	}
-	static def foldEscaped(tuple: Tuple2<DivideState, string>): Option<DivideState> {
+	static def foldEscaped(tuple: Tuple2<DivideState, I8>): Option<DivideState> {
 		let state = tuple.left();
 		let c = tuple.right();
 		if ("\\" === c){
@@ -870,7 +870,7 @@ export struct Main {
 		}
 		return Some<DivideState>(state);
 	}
-	static def foldStatements(state: DivideState, c: string): DivideState {
+	static def foldStatements(state: DivideState, c: I8): DivideState {
 		let appended = state.append(c);
 		if (";" === c && appended.isLevel()){
 			return appended.advance();
@@ -985,7 +985,7 @@ export struct Main {
 	}
 	static def compileImport(state: CompileState, stripped: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compilePrefix(stripped, "import ", (s: &[I8]) => Main.compileSuffix(s, ";", (s1: &[I8]) => {
-			let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
+			let divisions = Main.divide(s1, (divideState: DivideState, c: I8) => Main.foldDelimited(divideState, c, "."));
 			let child = Strings.strip(divisions.findLast().orElse(""));
 			let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
 			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)){
@@ -1076,7 +1076,7 @@ export struct Main {
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 		}))));
 	}
-	static def foldBlockStarts(state: DivideState, c: string): DivideState {
+	static def foldBlockStarts(state: DivideState, c: I8): DivideState {
 		let appended = state.append(c);
 		if ("{" === c){
 			let entered = appended.enter();
@@ -1151,10 +1151,10 @@ export struct Main {
 			return Main.assembleInvokable(callerState, ConstructionCaller(caller, callerState.platform), args);
 		})).or(() => Main.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => Main.assembleInvokable(callerTuple.left(), callerTuple.right(), args))))));
 	}
-	static def splitFoldedLast(input: &[I8], delimiter: &[I8], folder: (arg0 : DivideState, arg1 : string) => DivideState): Option<Tuple2<&[I8], &[I8]>> {
+	static def splitFoldedLast(input: &[I8], delimiter: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState): Option<Tuple2<&[I8], &[I8]>> {
 		return Main.splitFolded(input, folder, (divisions1: List<&[I8]>) => Main.selectLast(divisions1, delimiter));
 	}
-	static def splitFolded(input: &[I8], folder: (arg0 : DivideState, arg1 : string) => DivideState, selector: (arg0 : List<&[I8]>) => Option<Tuple2<&[I8], &[I8]>>): Option<Tuple2<&[I8], &[I8]>> {
+	static def splitFolded(input: &[I8], folder: (arg0 : DivideState, arg1 : I8) => DivideState, selector: (arg0 : List<&[I8]>) => Option<Tuple2<&[I8], &[I8]>>): Option<Tuple2<&[I8], &[I8]>> {
 		let divisions = Main.divide(input, folder);
 		if (2 > divisions.size()){
 			return None<Tuple2<&[I8], &[I8]>>();
@@ -1167,7 +1167,7 @@ export struct Main {
 		let joined = beforeLast.query().collect(Joiner(delimiter)).orElse("");
 		return Some<Tuple2<&[I8], &[I8]>>(Tuple2Impl<&[I8], &[I8]>(joined, last));
 	}
-	static def foldInvocationStarts(state: DivideState, c: string): DivideState {
+	static def foldInvocationStarts(state: DivideState, c: I8): DivideState {
 		let appended = state.append(c);
 		if ("(" === c){
 			let entered = appended.enter();
@@ -1286,15 +1286,15 @@ export struct Main {
 		let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(Joiner(delimiter)).orElse("");
 		return Some<Tuple2<&[I8], &[I8]>>(Tuple2Impl<&[I8], &[I8]>(first, afterFirst));
 	}
-	static def foldOperator(infix: &[I8]): (arg0 : DivideState, arg1 : string) => DivideState {
-		return (state: DivideState, c: string) => {
+	static def foldOperator(infix: &[I8]): (arg0 : DivideState, arg1 : I8) => DivideState {
+		return (state: DivideState, c: I8) => {
 			if (c === Strings.charAt(infix, 0) && state.startsWith(Strings.sliceFrom(infix, 1))){
 				let length = Strings.length(infix) - 1;
 				let counter = 0;
 				let current = state;
 				while (counter < length){
 					counter++;
-					current = current.pop().map((tuple: Tuple2<DivideState, string>) => tuple.left()).orElse(current);
+					current = current.pop().map((tuple: Tuple2<DivideState, I8>) => tuple.left()).orElse(current);
 				}
 				return current.advance();
 			}
@@ -1312,7 +1312,7 @@ export struct Main {
 	}
 	static def isNumber(input: &[I8]): Bool {
 		let query = HeadedQuery<I32>(RangeHead(Strings.length(input)));
-		return query.map((index: I32) => input.charAt(index)).allMatch((c: string) => Characters.isDigit(c));
+		return query.map((index: I32) => input.charAt(index)).allMatch((c: I8) => Characters.isDigit(c));
 	}
 	static def parseSymbol(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
@@ -1328,7 +1328,7 @@ export struct Main {
 		let query = HeadedQuery<I32>(RangeHead(Strings.length(input)));
 		return query.allMatch((index: I32) => Main.isSymbolChar(index, Strings.charAt(input, index)));
 	}
-	static def isSymbolChar(index: I32, c: string): Bool {
+	static def isSymbolChar(index: I32, c: I8): Bool {
 		return "_" === c || Characters.isLetter(c) || (0 !== index && Characters.isDigit(c));
 	}
 	static def compilePrefix<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
@@ -1375,7 +1375,7 @@ export struct Main {
 		}).or(() => Main.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() => Main.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)));
 	}
 	static def parseAnnotations(s: &[I8]): List<&[I8]> {
-		return Main.divide(s, (state1: DivideState, c: string) => Main.foldDelimited(state1, c, "\n")).query().map((s2: &[I8]) => Strings.strip(s2)).filter((value: &[I8]) => !Strings.isEmpty(value)).filter((value: &[I8]) => 1 <= Strings.length(value)).map((value: &[I8]) => Strings.sliceFrom(value, 1)).map((s1: &[I8]) => Strings.strip(s1)).filter((value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
+		return Main.divide(s, (state1: DivideState, c: I8) => Main.foldDelimited(state1, c, "\n")).query().map((s2: &[I8]) => Strings.strip(s2)).filter((value: &[I8]) => !Strings.isEmpty(value)).filter((value: &[I8]) => 1 <= Strings.length(value)).map((value: &[I8]) => Strings.sliceFrom(value, 1)).map((s1: &[I8]) => Strings.strip(s1)).filter((value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
 	}
 	static def parseDefinitionWithAnnotations(state: CompileState, annotations: List<&[I8]>, beforeType: &[I8], type: &[I8], name: &[I8]): Option<Tuple2<CompileState, Definition>> {
 		return Main.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: &[I8]) => Main.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams: &[I8], typeParamsString: &[I8]) => {
@@ -1387,9 +1387,9 @@ export struct Main {
 		});
 	}
 	static def parseModifiers(beforeType: &[I8]): List<&[I8]> {
-		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => Main.foldDelimited(state1, c, " ")).query().map((s: &[I8]) => Strings.strip(s)).filter((value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
+		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: I8) => Main.foldDelimited(state1, c, " ")).query().map((s: &[I8]) => Strings.strip(s)).filter((value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
 	}
-	static def foldDelimited(state1: DivideState, c: string, delimiter: string): DivideState {
+	static def foldDelimited(state1: DivideState, c: I8, delimiter: I8): DivideState {
 		if (delimiter === c){
 			return state1.advance();
 		}
@@ -1398,7 +1398,7 @@ export struct Main {
 	static def divideValues(input: &[I8]): List<&[I8]> {
 		return Main.divide(input, Main.foldValues).query().map((input1: &[I8]) => Strings.strip(input1)).filter((value: &[I8]) => !Strings.isEmpty(value)).collect(ListCollector<&[I8]>());
 	}
-	static def foldTypeSeparators(state: DivideState, c: string): DivideState {
+	static def foldTypeSeparators(state: DivideState, c: I8): DivideState {
 		if (" " === c && state.isLevel()){
 			return state.advance();
 		}
@@ -1460,7 +1460,12 @@ export struct Main {
 	static def findPrimitiveValue(input: &[I8], platform: Platform): Option<Type> {
 		let stripped = Strings.strip(input);
 		if (Strings.equalsTo("char", stripped) || Strings.equalsTo("Character", stripped)){
-			return Some<Type>(Primitive.String);
+			if (Platform.TypeScript === platform){
+				return Some<Type>(Primitive.String);
+			}
+			else {
+				return Some<Type>(Primitive.I8);
+			}
 		}
 		if (Strings.equalsTo("String", stripped)){
 			if (Platform.TypeScript === platform){
@@ -1531,7 +1536,7 @@ export struct Main {
 	static def parseValues<T>(state: CompileState, input: &[I8], mapper: (arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 		return Main.parseAll(state, input, Main.foldValues, mapper);
 	}
-	static def foldValues(state: DivideState, c: string): DivideState {
+	static def foldValues(state: DivideState, c: I8): DivideState {
 		if ("," === c && state.isLevel()){
 			return state.advance();
 		}

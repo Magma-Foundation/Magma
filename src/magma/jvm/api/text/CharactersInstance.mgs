@@ -34,8 +34,8 @@
 	Main: magma.app
 ]*/
 export interface CharactersInstance {
-	def isDigit(c: string): Bool;
+	def isDigit(c: I8): Bool;
 
-	def isLetter(c: string): Bool;
+	def isLetter(c: I8): Bool;
 
 }
