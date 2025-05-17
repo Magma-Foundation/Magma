@@ -10,7 +10,7 @@ import java.util.Arrays;
 @Namespace
 public final class Lists {
     @Actual
-    public static <T> List<T> fromArray(T[] elements) {
+    public static <T> List<T> fromArray(final T[] elements) {
         return new JVMList<>(Arrays.asList(elements));
     }
 
@@ -20,7 +20,7 @@ public final class Lists {
     }
 
     @Actual
-    public static <T> List<T> of(T... elements) {
+    public static <T> List<T> of(final T... elements) {
         return new JVMList<T>(new ArrayList<T>(Arrays.asList(elements)));
     }
 }

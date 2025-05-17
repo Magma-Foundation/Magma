@@ -17,8 +17,8 @@ import java.util.function.BiFunction;
 @Actual
 public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
-    public List<T> addLast(T element) {
-        var copy = new ArrayList<>(this.list);
+    public List<T> addLast(final T element) {
+        final var copy = new ArrayList<>(this.list);
         copy.add(element);
         return new JVMList<>(copy);
     }
@@ -41,18 +41,18 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
         return this.list.getFirst();
     }
 
-    private T get(int index) {
+    private T get(final int index) {
         return this.list.get(index);
     }
 
     @Override
     public Query<Tuple2<Integer, T>> queryWithIndices() {
-        var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
+        final var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
         return query.map((Integer index) -> new Tuple2Impl<Integer, T>(index, this.list.get(index)));
     }
 
     @Override
-    public List<T> addAll(List<T> others) {
+    public List<T> addAll(final List<T> others) {
         return others.query().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.addLast(element));
     }
 
@@ -61,19 +61,19 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean contains(T element, BiFunction<T, T, Boolean> equator) {
+    public boolean contains(final T element, final BiFunction<T, T, Boolean> equator) {
         return this.list.contains(element);
     }
 
     @Override
     public Query<T> queryReversed() {
-        var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
+        final var query = new HeadedQuery<Integer>(new RangeHead(this.list.size()));
         return query.map((Integer index) -> this.list.size() - index - 1).map((Integer index1) -> this.list.get(index1));
     }
 
     @Override
-    public List<T> addFirst(T element) {
-        var copy = new ArrayList<T>();
+    public List<T> addFirst(final T element) {
+        final var copy = new ArrayList<T>();
         copy.addFirst(element);
         copy.addAll(this.list);
         return new JVMList<>(copy);
@@ -85,13 +85,13 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean equalsTo(List<T> other, BiFunction<T, T, Boolean> equator) {
+    public boolean equalsTo(final List<T> other, final BiFunction<T, T, Boolean> equator) {
         return this.equals(other);
     }
 
     @Override
-    public List<T> removeValue(T element, BiFunction<T, T, Boolean> equator) {
-        var copy = new ArrayList<T>(this.list);
+    public List<T> removeValue(final T element, final BiFunction<T, T, Boolean> equator) {
+        final var copy = new ArrayList<T>(this.list);
         copy.remove(element);
         return new JVMList<>(copy);
     }
@@ -102,13 +102,13 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
             return new None<>();
         }
 
-        var copy = new ArrayList<T>(this.list);
+        final var copy = new ArrayList<T>(this.list);
         copy.removeLast();
         return new Some<>(new JVMList<>(copy));
     }
 
     @Override
-    public Option<List<T>> subList(int startInclusive, int endExclusive) {
+    public Option<List<T>> subList(final int startInclusive, final int endExclusive) {
         return new Some<List<T>>(new JVMList<T>(this.list.subList(startInclusive, endExclusive)));
     }
 
@@ -123,7 +123,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public Option<T> find(int index) {
+    public Option<T> find(final int index) {
         return new Some<T>(this.get(index));
     }
 }

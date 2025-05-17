@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 @Namespace
 public final class Files {
     @Actual
-    public static Path get(String first, String... more) {
+    public static Path get(final String first, final String... more) {
         return new JVMPath(Paths.get(first, more));
     }
 }

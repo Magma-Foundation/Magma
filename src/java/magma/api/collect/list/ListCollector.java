@@ -10,7 +10,7 @@ public class ListCollector<T> implements Collector<T, List<T>> {
     }
 
     @Override
-    public List<T> fold(List<T> current, T element) {
+    public List<T> fold(final List<T> current, final T element) {
         return current.addLast(element);
     }
 }

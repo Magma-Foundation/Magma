@@ -4,14 +4,14 @@ import magma.annotate.Actual;
 import magma.annotate.Namespace;
 
 @Namespace
-public class Characters {
+public final class Characters {
     @Actual
-    public static boolean isDigit(char c) {
+    public static boolean isDigit(final char c) {
         return Character.isDigit(c);
     }
 
     @Actual
-    public static boolean isLetter(char c) {
+    public static boolean isLetter(final char c) {
         return Character.isLetter(c);
     }
 }

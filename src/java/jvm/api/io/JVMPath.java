@@ -26,13 +26,13 @@ record JVMPath(java.nio.file.Path path) implements Path {
     private record JVMIOError(IOException error) implements IOError {
         @Override
         public String display() {
-            var writer = new StringWriter();
+            final var writer = new StringWriter();
             this.error.printStackTrace(new PrintWriter(writer));
             return writer.toString();
         }
     }
 
-    private static java.nio.file.Path fromPath(Path path) {
+    private static java.nio.file.Path fromPath(final Path path) {
         return path.query()
                 .foldWithMapper(Paths::get, java.nio.file.Path::resolve)
                 .orElse(Paths.get("."));
@@ -44,11 +44,11 @@ record JVMPath(java.nio.file.Path path) implements Path {
     }
 
     @Override
-    public Option<IOError> writeString(String output) {
+    public Option<IOError> writeString(final String output) {
         try {
             java.nio.file.Files.writeString(this.path, output);
             return new None<IOError>();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new Some<IOError>(new JVMIOError(e));
         }
     }
@@ -57,16 +57,16 @@ record JVMPath(java.nio.file.Path path) implements Path {
     public Result<String, IOError> readString() {
         try {
             return new Ok<String, IOError>(java.nio.file.Files.readString(this.path));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new Err<String, IOError>(new JVMIOError(e));
         }
     }
 
     @Override
     public Result<List<Path>, IOError> walk() {
-        try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
+        try (final Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
             return new Ok<>(new JVMList<>(stream.<Path>map(JVMPath::new).toList()));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new Err<>(new JVMIOError(e));
         }
     }
@@ -77,12 +77,12 @@ record JVMPath(java.nio.file.Path path) implements Path {
     }
 
     @Override
-    public boolean endsWith(String suffix) {
+    public boolean endsWith(final String suffix) {
         return this.path.toString().endsWith(suffix);
     }
 
     @Override
-    public Path relativize(Path source) {
+    public Path relativize(final Path source) {
         return new JVMPath(this.path.relativize(JVMPath.fromPath(source)));
     }
 
@@ -98,12 +98,12 @@ record JVMPath(java.nio.file.Path path) implements Path {
     }
 
     @Override
-    public Path resolveChildSegments(List<String> children) {
+    public Path resolveChildSegments(final List<String> children) {
         return children.query().foldWithInitial(this, Path::resolveChild);
     }
 
     @Override
-    public Path resolveChild(String name) {
+    public Path resolveChild(final String name) {
         return new JVMPath(this.path.resolve(name));
     }
 
@@ -117,7 +117,7 @@ record JVMPath(java.nio.file.Path path) implements Path {
         try {
             java.nio.file.Files.createDirectories(this.path);
             return new None<>();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return new Some<>(new JVMIOError(e));
         }
     }

@@ -16,21 +16,21 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public <C> C collect(Collector<T, C> collector) {
+    public <C> C collect(final Collector<T, C> collector) {
         return this.foldWithInitial(collector.createInitial(), (C current, T element) -> collector.fold(current, element));
     }
 
     @Override
-    public <R> Query<R> map(Function<T, R> mapper) {
+    public <R> Query<R> map(final Function<T, R> mapper) {
         return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
     }
 
     @Override
-    public <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder) {
+    public <R> R foldWithInitial(final R initial, final BiFunction<R, T, R> folder) {
         R result = initial;
         while (true) {
-            R finalResult = result;
-            Tuple2<Boolean, R> maybeNext = this.head.next()
+            final R finalResult = result;
+            final Tuple2<Boolean, R> maybeNext = this.head.next()
                     .map((T inner) -> folder.apply(finalResult, inner))
                     .toTuple(finalResult);
 
@@ -44,14 +44,12 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public <R> Option<R> foldWithMapper(Function<T, R> next, BiFunction<R, T, R> folder) {
-        return this.head.next().map(next).map((R maybeNext) -> {
-            return this.foldWithInitial(maybeNext, folder);
-        });
+    public <R> Option<R> foldWithMapper(final Function<T, R> next, final BiFunction<R, T, R> folder) {
+        return this.head.next().map(next).map((final R maybeNext) -> this.foldWithInitial(maybeNext, folder));
     }
 
     @Override
-    public <R> Query<R> flatMap(Function<T, Query<R>> mapper) {
+    public <R> Query<R> flatMap(final Function<T, Query<R>> mapper) {
         return this.head.next()
                 .map(mapper)
                 .map((Query<R> initial) -> new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper)))
@@ -59,23 +57,23 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public boolean allMatch(Predicate<T> predicate) {
+    public boolean allMatch(final Predicate<T> predicate) {
         return this.foldWithInitial(true, (Boolean maybeAllTrue, T element) -> maybeAllTrue && predicate.test(element));
     }
 
     @Override
-    public boolean anyMatch(Predicate<T> predicate) {
+    public boolean anyMatch(final Predicate<T> predicate) {
         return this.foldWithInitial(false, (Boolean aBoolean, T t) -> aBoolean || predicate.test(t));
     }
 
     @Override
-    public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
+    public <R> Query<Tuple2<T, R>> zip(final Query<R> other) {
         return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
     }
 
     @Override
-    public Query<T> filter(Predicate<T> predicate) {
-        return this.flatMap((T element) -> {
+    public Query<T> filter(final Predicate<T> predicate) {
+        return this.flatMap((final T element) -> {
             if (predicate.test(element)) {
                 return new HeadedQuery<T>(new SingleHead<T>(element));
             }

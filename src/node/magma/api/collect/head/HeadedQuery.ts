@@ -71,9 +71,7 @@ export class HeadedQuery<T> implements Query<T> {
 		}
 	}
 	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this.head.next().map(next).map((maybeNext: R) => {
-			return this.foldWithInitial(maybeNext, folder);
-		});
+		return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder));
 	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
 		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));

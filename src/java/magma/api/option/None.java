@@ -2,7 +2,6 @@ package magma.api.option;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.app.Main;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -11,17 +10,17 @@ import java.util.function.Supplier;
 
 public record None<T>() implements Option<T> {
     @Override
-    public <R> Option<R> map(Function<T, R> mapper) {
+    public <R> Option<R> map(final Function<T, R> mapper) {
         return new None<R>();
     }
 
     @Override
-    public T orElse(T other) {
+    public T orElse(final T other) {
         return other;
     }
 
     @Override
-    public T orElseGet(Supplier<T> supplier) {
+    public T orElseGet(final Supplier<T> supplier) {
         return supplier.get();
     }
 
@@ -31,31 +30,31 @@ public record None<T>() implements Option<T> {
     }
 
     @Override
-    public void ifPresent(Consumer<T> consumer) {
+    public void ifPresent(final Consumer<T> consumer) {
     }
 
     @Override
-    public Option<T> or(Supplier<Option<T>> other) {
+    public Option<T> or(final Supplier<Option<T>> other) {
         return other.get();
     }
 
     @Override
-    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+    public <R> Option<R> flatMap(final Function<T, Option<R>> mapper) {
         return new None<R>();
     }
 
     @Override
-    public Option<T> filter(Predicate<T> predicate) {
+    public Option<T> filter(final Predicate<T> predicate) {
         return new None<T>();
     }
 
     @Override
-    public Tuple2<Boolean, T> toTuple(T other) {
+    public Tuple2<Boolean, T> toTuple(final T other) {
         return new Tuple2Impl<Boolean, T>(false, other);
     }
 
     @Override
-    public <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other) {
+    public <R> Option<Tuple2<T, R>> and(final Supplier<Option<R>> other) {
         return new None<Tuple2<T, R>>();
     }
 }
