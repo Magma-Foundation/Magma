@@ -13,7 +13,7 @@ export class FunctionSegment<S extends FunctionHeader<S>> {
 		this.maybeContent = maybeContent;
 	}
 	generate(platform: Platform, indent: string): string {
-		let content: string = this/*auto*/.maybeContent(/*auto*/).map((inner: string) => " {" + inner/*auto*/ + indent/*auto*/ + "}").orElse(";");
-		return indent/*auto*/ + this/*auto*/.header.generateWithDefinitions(platform/*auto*/, this/*auto*/.definitions(/*auto*/)) + content/*auto*/;
+		let content: string = this/*auto*/.maybeContent(/*auto*/).map((inner: string) => " {" + inner/*auto*/ + indent/*string*/ + "}").orElse(";");
+		return indent/*string*/ + this/*auto*/.header.generateWithDefinitions(platform/*Platform*/, this/*auto*/.definitions(/*auto*/)) + content/*auto*/;
 	}
 }

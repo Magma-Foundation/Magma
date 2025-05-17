@@ -9,7 +9,7 @@ export class PrimitiveType implements Type {
 	static I32/*auto*/: PrimitiveType = new PrimitiveType("I32");
 	value: string;
 	constructor (value: string) {
-		this/*auto*/.value = value/*auto*/;
+		this/*auto*/.value = value/*string*/;
 	}
 	generate(): string {
 		return this/*auto*/.value;

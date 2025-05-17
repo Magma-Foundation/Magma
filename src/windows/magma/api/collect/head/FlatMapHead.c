@@ -6,9 +6,9 @@ export class FlatMapHead<T, R> implements Head<R> {
 }
 
 constructor (Head<T> head, Query<R> initial, (arg0 : T) => Query<R> mapper) {
-	this/*auto*/.head = head/*auto*/;
-	this/*auto*/.current = initial/*auto*/;
-	this/*auto*/.mapper = mapper/*auto*/;
+	this/*auto*/.head = head/*Head<T>*/;
+	this/*auto*/.current = initial/*Query<R>*/;
+	this/*auto*/.mapper = mapper/*(arg0 : T) => Query<R>*/;
 }
 Option<R> next() {
 	while (true/*auto*/) {

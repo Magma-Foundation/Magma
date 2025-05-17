@@ -14,6 +14,6 @@ export class Err<T, X> implements Result<T, X> {
 		return new None<T>(/*auto*/);
 	}
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenErr/*auto*/(this/*auto*/.error);
+		return whenErr/*(arg0 : X) => R*/(this/*auto*/.error);
 	}
 }

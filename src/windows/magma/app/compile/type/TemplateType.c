@@ -9,13 +9,13 @@ export class TemplateType implements Type {
 }
 
 static &[I8] generateValueStrings(List<&[I8]> values) {
-	return Main/*auto*/.generateAll(values/*auto*/, TemplateType/*auto*/.mergeValues);
+	return Main/*auto*/.generateAll(values/*List<&[I8]>*/, TemplateType/*auto*/.mergeValues);
 }
 static &[I8] mergeValues(&[I8] cache, &[I8] element) {
-	if (Strings/*auto*/.isEmpty(cache/*auto*/)) {
-		return cache/*auto*/ + element/*auto*/;
+	if (Strings/*auto*/.isEmpty(cache/*&[I8]*/)) {
+		return cache/*&[I8]*/ + element/*&[I8]*/;
 	}
-	return cache/*auto*/ + ", " + element/*auto*/;
+	return cache/*&[I8]*/ + ", " + element/*&[I8]*/;
 }
 &[I8] generate() {
 	return this/*auto*/.base + "<" + TemplateType/*auto*/.generateValueStrings(this/*auto*/.args) + ">";

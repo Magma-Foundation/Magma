@@ -10,13 +10,13 @@ export struct TemplateType implements Type {
 		this.args = args;
 	}
 	static def generateValueStrings(values: List<&[I8]>): &[I8] {
-		return Main/*auto*/.generateAll(values/*auto*/, TemplateType/*auto*/.mergeValues);
+		return Main/*auto*/.generateAll(values/*List<&[I8]>*/, TemplateType/*auto*/.mergeValues);
 	}
 	static def mergeValues(cache: &[I8], element: &[I8]): &[I8] {
-		if (Strings/*auto*/.isEmpty(cache/*auto*/)) {
-			return cache/*auto*/ + element/*auto*/;
+		if (Strings/*auto*/.isEmpty(cache/*&[I8]*/)) {
+			return cache/*&[I8]*/ + element/*&[I8]*/;
 		}
-		return cache/*auto*/ + ", " + element/*auto*/;
+		return cache/*&[I8]*/ + ", " + element/*&[I8]*/;
 	}
 	def generate(): &[I8] {
 		return this/*auto*/.base + "<" + TemplateType/*auto*/.generateValueStrings(this/*auto*/.args) + ">";

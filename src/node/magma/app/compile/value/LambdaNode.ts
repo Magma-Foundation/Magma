@@ -7,7 +7,6 @@ import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { None } from "../../../../magma/api/option/None";
 import { Type } from "../../../../magma/api/Type";
-import { CompileState } from "../../../../magma/app/compile/CompileState";
 import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 export class LambdaNode implements Value {
 	paramNames: List<Definition>;
@@ -17,7 +16,7 @@ export class LambdaNode implements Value {
 		this.content = content;
 	}
 	generate(platform: Platform): string {
-		let joinedParamNames: string = this/*auto*/.paramNames.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(new Joiner(", ")).orElse("");
+		let joinedParamNames: string = this/*auto*/.paramNames.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedParamNames/*auto*/ + ")" + " => " + this/*auto*/.content;
 	}
 	toValue(): Option<Value> {
@@ -26,10 +25,10 @@ export class LambdaNode implements Value {
 	findChild(): Option<Value> {
 		return new None<Value>(/*auto*/);
 	}
-	resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>(/*auto*/);
+	}
+	type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

@@ -13,5 +13,5 @@ Option<T> findValue() {
 	return new Some<T>(this/*auto*/.value);
 }
 R match((arg0 : T) => R whenOk, (arg0 : X) => R whenErr) {
-	return whenOk/*auto*/(this/*auto*/.value);
+	return whenOk/*(arg0 : T) => R*/(this/*auto*/.value);
 }

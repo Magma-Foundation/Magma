@@ -6,7 +6,7 @@ import { List } from "../../../../magma/api/collect/list/List";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
 export class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	generateWithAfterName(platform: Platform, afterName: string): string {
-		return "constructor " + afterName/*auto*/;
+		return "constructor " + afterName/*string*/;
 	}
 	hasAnnotation(annotation: string): boolean {
 		return false/*auto*/;
@@ -18,10 +18,10 @@ export class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 		return this/*auto*/;
 	}
 	generateWithDefinitions0(platform: Platform, definitions: string): string {
-		return generateWithAfterName/*auto*/(platform/*auto*/, "(" + definitions/*auto*/ + ")");
+		return generateWithAfterName/*auto*/(platform/*Platform*/, "(" + definitions/*string*/ + ")");
 	}
 	generateWithDefinitions(platform: Platform, definitions: List<Definition>): string {
-		let joinedDefinitions: string = definitions/*auto*/.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(new Joiner(", ")).orElse("");
-		return this/*auto*/.generateWithDefinitions0(platform/*auto*/, joinedDefinitions/*auto*/);
+		let joinedDefinitions: string = definitions/*List<Definition>*/.query(/*auto*/).map((definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(new Joiner(", ")).orElse("");
+		return this/*auto*/.generateWithDefinitions0(platform/*Platform*/, joinedDefinitions/*auto*/);
 	}
 }

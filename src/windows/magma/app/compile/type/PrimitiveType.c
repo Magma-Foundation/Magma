@@ -11,7 +11,7 @@ export class PrimitiveType implements Type {
 }
 
 constructor (&[I8] value) {
-	this/*auto*/.value = value/*auto*/;
+	this/*auto*/.value = value/*&[I8]*/;
 }
 &[I8] generate() {
 	return this/*auto*/.value;

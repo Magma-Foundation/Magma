@@ -17,16 +17,16 @@ export class HeadedQuery<T> implements Query<T> {
 		return this/*auto*/.head.next(/*auto*/);
 	}
 	collect<C>(collector: Collector<T, C>): C {
-		return this/*auto*/.foldWithInitial(collector/*auto*/.createInitial(/*auto*/), (current: C, element: T) => collector/*auto*/.fold(current/*auto*/, element/*auto*/));
+		return this/*auto*/.foldWithInitial(collector/*Collector<T, C>*/.createInitial(/*auto*/), (current: C, element: T) => collector/*Collector<T, C>*/.fold(current/*auto*/, element/*auto*/));
 	}
 	map<R>(mapper: (arg0 : T) => R): Query<R> {
-		return new HeadedQuery<R>(new MapHead<T, R>(this/*auto*/.head, mapper/*auto*/));
+		return new HeadedQuery<R>(new MapHead<T, R>(this/*auto*/.head, mapper/*(arg0 : T) => R*/));
 	}
 	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-		let result: R = initial/*auto*/;
+		let result: R = initial/*R*/;
 		while (true/*auto*/) {
 			let finalResult: R = result/*auto*/;
-			let maybeNext: Tuple2<boolean, R> = this/*auto*/.head.next(/*auto*/).map((inner: T) => folder/*auto*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
+			let maybeNext: Tuple2<boolean, R> = this/*auto*/.head.next(/*auto*/).map((inner: T) => folder/*(arg0 : R, arg1 : T) => R*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
 			if (maybeNext/*auto*/.left(/*auto*/)) {
 				result/*auto*/ = maybeNext/*auto*/.right(/*auto*/);
 			}
@@ -36,24 +36,24 @@ export class HeadedQuery<T> implements Query<T> {
 		}
 	}
 	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this/*auto*/.head.next(/*auto*/).map(next/*auto*/).map((maybeNext: R) => this/*auto*/.foldWithInitial(maybeNext/*auto*/, folder/*auto*/));
+		return this/*auto*/.head.next(/*auto*/).map(next/*(arg0 : T) => R*/).map((maybeNext: R) => this/*auto*/.foldWithInitial(maybeNext/*auto*/, folder/*(arg0 : R, arg1 : T) => R*/));
 	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this/*auto*/.head.next(/*auto*/).map(mapper/*auto*/).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this/*auto*/.head, initial/*auto*/, mapper/*auto*/))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>(/*auto*/)));
+		return this/*auto*/.head.next(/*auto*/).map(mapper/*(arg0 : T) => Query<R>*/).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this/*auto*/.head, initial/*R*/, mapper/*(arg0 : T) => Query<R>*/))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>(/*auto*/)));
 	}
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this/*auto*/.foldWithInitial(true/*auto*/, (maybeAllTrue: boolean, element: T) => maybeAllTrue/*auto*/ && predicate/*auto*/(element/*auto*/));
+		return this/*auto*/.foldWithInitial(true/*auto*/, (maybeAllTrue: boolean, element: T) => maybeAllTrue/*auto*/ && predicate/*(arg0 : T) => boolean*/(element/*auto*/));
 	}
 	anyMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this/*auto*/.foldWithInitial(false/*auto*/, (aBoolean: boolean, t: T) => aBoolean/*auto*/ || predicate/*auto*/(t/*auto*/));
+		return this/*auto*/.foldWithInitial(false/*auto*/, (aBoolean: boolean, t: T) => aBoolean/*auto*/ || predicate/*(arg0 : T) => boolean*/(t/*auto*/));
 	}
 	zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
-		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this/*auto*/.head, other/*auto*/));
+		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this/*auto*/.head, other/*Query<R>*/));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this/*auto*/.flatMap((element: T) => {
-			if (predicate/*auto*/(element/*auto*/)) {
-				return new HeadedQuery<T>(new SingleHead<T>(element/*auto*/));
+			if (predicate/*(arg0 : T) => boolean*/(element/*T*/)) {
+				return new HeadedQuery<T>(new SingleHead<T>(element/*T*/));
 			}
 			else {
 				return new HeadedQuery<T>(new EmptyHead<T>(/*auto*/));

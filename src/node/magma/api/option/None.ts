@@ -6,10 +6,10 @@ export class None<T> implements Option<T> {
 		return new None<R>(/*auto*/);
 	}
 	orElse(other: T): T {
-		return other/*auto*/;
+		return other/*T*/;
 	}
 	orElseGet(supplier: () => T): T {
-		return supplier/*auto*/(/*auto*/);
+		return supplier/*() => T*/(/*auto*/);
 	}
 	isPresent(): boolean {
 		return false/*auto*/;
@@ -17,7 +17,7 @@ export class None<T> implements Option<T> {
 	ifPresent(consumer: (arg0 : T) => void): void {
 	}
 	or(other: () => Option<T>): Option<T> {
-		return other/*auto*/(/*auto*/);
+		return other/*() => Option<T>*/(/*auto*/);
 	}
 	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
 		return new None<R>(/*auto*/);
@@ -26,7 +26,7 @@ export class None<T> implements Option<T> {
 		return new None<T>(/*auto*/);
 	}
 	toTuple(other: T): Tuple2<boolean, T> {
-		return new Tuple2Impl<boolean, T>(false/*auto*/, other/*auto*/);
+		return new Tuple2Impl<boolean, T>(false/*auto*/, other/*T*/);
 	}
 	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
 		return new None<Tuple2<T, R>>(/*auto*/);

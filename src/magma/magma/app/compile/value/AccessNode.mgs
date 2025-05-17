@@ -2,10 +2,9 @@ import magma.app.compile.value.Value;
 import magma.app.io.Platform;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.api.Type;
-import magma.app.compile.CompileState;
-import magma.app.compile.type.PrimitiveType;
 import magma.api.option.None;
+import magma.api.Type;
+import magma.app.compile.type.PrimitiveType;
 export struct AccessNode implements Value {
 	mut child: Value;
 	mut property: &[I8];
@@ -14,7 +13,7 @@ export struct AccessNode implements Value {
 		this.property = property;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		return this/*auto*/.child.generate(platform/*auto*/) + "." + this/*auto*/.property;
+		return this/*auto*/.child.generate(platform/*Platform*/) + "." + this/*auto*/.property;
 	}
 	def toValue(): Option<Value> {
 		return Some<Value>(this/*auto*/);
@@ -22,10 +21,10 @@ export struct AccessNode implements Value {
 	def findChild(): Option<Value> {
 		return Some<Value>(this/*auto*/.child);
 	}
-	def resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>(/*auto*/);
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

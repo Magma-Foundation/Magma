@@ -4,7 +4,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.option.None;
 import magma.api.Type;
-import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
 export struct OperationNode implements Value {
 	mut left: Value;
@@ -16,7 +15,7 @@ export struct OperationNode implements Value {
 		this.right = right;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		return this/*auto*/.left.generate(platform/*auto*/) + " " + this/*auto*/.targetInfix + " " + this/*auto*/.right.generate(platform/*auto*/);
+		return this/*auto*/.left.generate(platform/*Platform*/) + " " + this/*auto*/.targetInfix + " " + this/*auto*/.right.generate(platform/*Platform*/);
 	}
 	def toValue(): Option<Value> {
 		return Some<Value>(this/*auto*/);
@@ -24,10 +23,10 @@ export struct OperationNode implements Value {
 	def findChild(): Option<Value> {
 		return None<Value>(/*auto*/);
 	}
-	def resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>(/*auto*/);
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

@@ -6,6 +6,6 @@ export class ListCollector<T> implements Collector<T, List<T>> {
 		return Lists/*auto*/.empty(/*auto*/);
 	}
 	fold(current: List<T>, element: T): List<T> {
-		return current/*auto*/.addLast(element/*auto*/);
+		return current/*List<T>*/.addLast(element/*T*/);
 	}
 }

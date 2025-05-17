@@ -7,7 +7,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.option.None;
 import magma.api.Type;
-import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
 export struct InvokableNode implements Value {
 	mut caller: Caller;
@@ -17,11 +16,11 @@ export struct InvokableNode implements Value {
 		this.args = args;
 	}
 	def generate(platform: Platform): &[I8] {
-		let joinedArguments: &[I8] = this/*auto*/.joinArgs(platform/*auto*/);
-		return this/*auto*/.caller.generate(platform/*auto*/) + "(" + joinedArguments/*auto*/ + ")";
+		let joinedArguments: &[I8] = this/*auto*/.joinArgs(platform/*Platform*/);
+		return this/*auto*/.caller.generate(platform/*Platform*/) + "(" + joinedArguments/*auto*/ + ")";
 	}
 	def joinArgs(platform: Platform): &[I8] {
-		return this/*auto*/.args.query(/*auto*/).map((mut value: Value) => value/*auto*/.generate(platform/*auto*/)).collect(Joiner(", ")).orElse("");
+		return this/*auto*/.args.query(/*auto*/).map((mut value: Value) => value/*&[I8]*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
 	}
 	def toValue(): Option<Value> {
 		return Some<Value>(this/*auto*/);
@@ -29,10 +28,10 @@ export struct InvokableNode implements Value {
 	def findChild(): Option<Value> {
 		return None<Value>(/*auto*/);
 	}
-	def resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
-		return Some<&[I8]>("\n\tstatic " + this/*auto*/.caller.generate(platform/*auto*/) + ": " + structureName/*auto*/ + " = new " + structureName/*auto*/ + "(" + this/*auto*/.joinArgs(platform/*auto*/) + ");");
+		return Some<&[I8]>("\n\tstatic " + this/*auto*/.caller.generate(platform/*Platform*/) + ": " + structureName/*&[I8]*/ + " = new " + structureName/*&[I8]*/ + "(" + this/*auto*/.joinArgs(platform/*Platform*/) + ");");
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

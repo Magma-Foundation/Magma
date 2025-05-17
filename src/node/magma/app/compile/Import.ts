@@ -9,7 +9,7 @@ export class Import {
 		this.child = child;
 	}
 	generate(platform: Platform): string {
-		if (Platform/*auto*/.Magma === platform/*auto*/) {
+		if (Platform/*auto*/.Magma === platform/*Platform*/) {
 			let joinedNamespace: string = this/*auto*/.namespace.query(/*auto*/).collect(new Joiner(".")).orElse("");
 			return "import " + joinedNamespace/*auto*/ + "." + this/*auto*/.child + ";\n";
 		}

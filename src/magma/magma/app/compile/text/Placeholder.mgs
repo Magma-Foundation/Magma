@@ -5,7 +5,6 @@ import magma.api.option.Option;
 import magma.api.option.None;
 import magma.app.compile.define.Definition;
 import magma.api.Type;
-import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
 export struct Placeholder {
 	mut input: &[I8];
@@ -30,9 +29,6 @@ export struct Placeholder {
 	def toValue(): Option<Value> {
 		return None<Value>(/*auto*/);
 	}
-	def resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	def isVar(): Bool {
 		return false/*auto*/;
 	}
@@ -41,5 +37,8 @@ export struct Placeholder {
 	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>(/*auto*/);
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

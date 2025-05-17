@@ -20,13 +20,13 @@ export class DivideState {
 		this.index = index;
 	}
 	static createInitial(input: string): DivideState {
-		return new DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*auto*/, 0/*auto*/);
+		return new DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*string*/, 0/*auto*/);
 	}
 	advance(): DivideState {
 		return new DivideState(this/*auto*/.segments.addLast(this/*auto*/.buffer), "", this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	append(c: string): DivideState {
-		return new DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*auto*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
+		return new DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*string*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	isLevel(): boolean {
 		return 0/*auto*/ === this/*auto*/.depth;
@@ -46,7 +46,7 @@ export class DivideState {
 		}
 		let c: string = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
 		let nextState: DivideState = new DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
-		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState/*auto*/, c/*auto*/));
+		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState/*auto*/, c/*string*/));
 	}
 	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
 		return this/*auto*/.pop(/*auto*/).map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner/*auto*/.left(/*auto*/).append(inner/*auto*/.right(/*auto*/)), inner/*auto*/.right(/*auto*/)));
@@ -58,6 +58,6 @@ export class DivideState {
 		return Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
 	}
 	startsWith(slice: string): boolean {
-		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*auto*/);
+		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*string*/);
 	}
 }

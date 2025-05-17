@@ -9,7 +9,7 @@ export class LambdaNode implements Value {
 }
 
 auto temp(Definition definition) {
-	return definition/*auto*/.generate(platform/*auto*/);
+	return definition/*auto*/.generate(platform/*Platform*/);
 }
 &[I8] generate(Platform platform) {
 	&[I8] joinedParamNames = this/*auto*/.paramNames.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(new Joiner(", ")).orElse("");
@@ -21,9 +21,9 @@ Option<Value> toValue() {
 Option<Value> findChild() {
 	return new None<Value>(/*auto*/);
 }
-Type resolve(CompileState state) {
-	return PrimitiveType/*auto*/.Auto;
-}
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>(/*auto*/);
+}
+Type type() {
+	return PrimitiveType/*auto*/.Auto;
 }

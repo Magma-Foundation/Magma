@@ -10,13 +10,13 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	static generateValueStrings(values: List<string>): string {
-		return Main/*auto*/.generateAll(values/*auto*/, TemplateType/*auto*/.mergeValues);
+		return Main/*auto*/.generateAll(values/*List<string>*/, TemplateType/*auto*/.mergeValues);
 	}
 	static mergeValues(cache: string, element: string): string {
-		if (Strings/*auto*/.isEmpty(cache/*auto*/)) {
-			return cache/*auto*/ + element/*auto*/;
+		if (Strings/*auto*/.isEmpty(cache/*string*/)) {
+			return cache/*string*/ + element/*string*/;
 		}
-		return cache/*auto*/ + ", " + element/*auto*/;
+		return cache/*string*/ + ", " + element/*string*/;
 	}
 	generate(): string {
 		return this/*auto*/.base + "<" + TemplateType/*auto*/.generateValueStrings(this/*auto*/.args) + ">";

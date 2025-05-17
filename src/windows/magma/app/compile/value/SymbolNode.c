@@ -9,10 +9,7 @@ export class SymbolNode {
 }
 
 &[I8] generate(Platform platform) {
-	return this/*auto*/.value + Main/*auto*/.generatePlaceholder(type/*auto*/.generate(/*auto*/));
-}
-Type resolve(CompileState state) {
-	return state/*auto*/.resolve(this/*auto*/.value).orElse(PrimitiveType/*auto*/.Auto);
+	return this/*auto*/.value + Main/*auto*/.generatePlaceholder(type/*Type*/.generate(/*auto*/));
 }
 Option<Value> toValue() {
 	return new Some<Value>(this/*auto*/);

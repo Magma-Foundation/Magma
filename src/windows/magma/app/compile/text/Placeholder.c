@@ -24,9 +24,6 @@ Option<Definition> asDefinition() {
 Option<Value> toValue() {
 	return new None<Value>(/*auto*/);
 }
-Type resolve(CompileState state) {
-	return PrimitiveType/*auto*/.Auto;
-}
 Bool isVar() {
 	return false/*auto*/;
 }
@@ -35,4 +32,7 @@ Bool isVar() {
 }
 Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>(/*auto*/);
+}
+Type type() {
+	return PrimitiveType/*auto*/.Auto;
 }

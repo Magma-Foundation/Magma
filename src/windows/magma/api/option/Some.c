@@ -7,7 +7,7 @@ export class Some<T> implements Option<T> {
 }
 
 Option<R> map((arg0 : T) => R mapper) {
-	return new Some<R>(mapper/*auto*/(this/*auto*/.value));
+	return new Some<R>(mapper/*(arg0 : T) => R*/(this/*auto*/.value));
 }
 T orElse(T other) {
 	return this/*auto*/.value;
@@ -19,16 +19,16 @@ Bool isPresent() {
 	return true/*auto*/;
 }
 void ifPresent((arg0 : T) => void consumer) {
-	consumer/*auto*/(this/*auto*/.value);
+	consumer/*(arg0 : T) => void*/(this/*auto*/.value);
 }
 Option<T> or(() => Option<T> other) {
 	return this/*auto*/;
 }
 Option<R> flatMap((arg0 : T) => Option<R> mapper) {
-	return mapper/*auto*/(this/*auto*/.value);
+	return mapper/*(arg0 : T) => Option<R>*/(this/*auto*/.value);
 }
 Option<T> filter((arg0 : T) => boolean predicate) {
-	if (predicate/*auto*/(this/*auto*/.value)) {
+	if (predicate/*(arg0 : T) => boolean*/(this/*auto*/.value)) {
 		return this/*auto*/;
 	}
 	return new None<T>(/*auto*/);
@@ -40,5 +40,5 @@ auto temp(R otherValue) {
 	return new Tuple2Impl<T, R>(this/*auto*/.value, otherValue/*auto*/);
 }
 Option<Tuple2<T, R>> and(() => Option<R> other) {
-	return other/*auto*/(/*auto*/).map(lambdaDefinition/*auto*/);
+	return other/*() => Option<R>*/(/*auto*/).map(lambdaDefinition/*auto*/);
 }

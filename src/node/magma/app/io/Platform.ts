@@ -5,7 +5,7 @@ export class Platform {
 	root: string;
 	extension: string[];
 	constructor (root: string, ...extensions: string[]) {
-		this/*auto*/.root = root/*auto*/;
-		this/*auto*/.extension = extensions/*auto*/;
+		this/*auto*/.root = root/*string*/;
+		this/*auto*/.extension = extensions/*string[]*/;
 	}
 }

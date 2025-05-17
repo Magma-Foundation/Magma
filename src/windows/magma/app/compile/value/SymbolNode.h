@@ -3,8 +3,6 @@
 import { Type } from "magma/api/Type";
 import { Platform } from "magma/app/io/Platform";
 import { Main } from "magma/app/Main";
-import { CompileState } from "magma/app/compile/CompileState";
-import { PrimitiveType } from "magma/app/compile/type/PrimitiveType";
 import { Value } from "magma/app/compile/value/Value";
 import { Option } from "magma/api/option/Option";
 import { Some } from "magma/api/option/Some";

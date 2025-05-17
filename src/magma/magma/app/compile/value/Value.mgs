@@ -1,8 +1,7 @@
-import magma.api.Type;
-import magma.app.compile.CompileState;
 import magma.api.option.Option;
 import magma.app.io.Platform;
+import magma.api.Type;
 export struct Value extends Argument, Caller  {
-	def resolve(mut state: CompileState): Type;
 	def generateAsEnumValue(mut structureName: &[I8], mut platform: Platform): Option<&[I8]>;
+	def type(): Type;
 }

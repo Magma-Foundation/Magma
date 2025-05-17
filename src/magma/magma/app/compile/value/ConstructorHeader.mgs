@@ -6,7 +6,7 @@ import magma.api.collect.list.List;
 import magma.api.collect.Joiner;
 export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 	def generateWithAfterName(mut platform: Platform, afterName: &[I8]): &[I8] {
-		return "constructor " + afterName/*auto*/;
+		return "constructor " + afterName/*&[I8]*/;
 	}
 	def hasAnnotation(annotation: &[I8]): Bool {
 		return false/*auto*/;
@@ -18,10 +18,10 @@ export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 		return this/*auto*/;
 	}
 	def generateWithDefinitions0(mut platform: Platform, mut definitions: &[I8]): &[I8] {
-		return generateWithAfterName/*auto*/(platform/*auto*/, "(" + definitions/*auto*/ + ")");
+		return generateWithAfterName/*auto*/(platform/*Platform*/, "(" + definitions/*&[I8]*/ + ")");
 	}
 	def generateWithDefinitions(platform: Platform, definitions: List<Definition>): &[I8] {
-		let joinedDefinitions: &[I8] = definitions/*auto*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(Joiner(", ")).orElse("");
-		return this/*auto*/.generateWithDefinitions0(platform/*auto*/, joinedDefinitions/*auto*/);
+		let joinedDefinitions: &[I8] = definitions/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
+		return this/*auto*/.generateWithDefinitions0(platform/*Platform*/, joinedDefinitions/*auto*/);
 	}
 }

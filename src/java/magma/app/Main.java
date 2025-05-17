@@ -529,7 +529,6 @@ public final class Main {
             final FunctionHeader<S> newHeader = Main.retainDef(header, parametersState);
 
             if (newHeader.hasAnnotation("Actual")) {
-                final S aStatic = newHeader.removeModifier("static");
                 final FunctionSegment<S> sFunctionSegment = new FunctionSegment<S>(newHeader, definitions, new None<>());
                 final String generate = sFunctionSegment.generate(parametersState.platform(), "\n\t");
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, generate));
@@ -767,7 +766,7 @@ public final class Main {
 
     private static Caller transformCaller(final CompileState state, final Caller oldCaller) {
         return oldCaller.findChild().flatMap((final Value parent) -> {
-            final Type parentType = parent.resolve(state);
+            final Type parentType = parent.type();
             if (parentType.isFunctional()) {
                 return new Some<Caller>(parent);
             }
@@ -984,7 +983,8 @@ public final class Main {
         final String stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
             final CompileState withImport = state.addResolvedImportFromCache(stripped);
-            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new SymbolNode(stripped, PrimitiveType.Auto)));
+            final SymbolNode symbolNode = new SymbolNode(stripped, state.resolve(stripped).orElse(PrimitiveType.Auto));
+            return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, symbolNode));
         }
         else {
             return new None<Tuple2<CompileState, Value>>();
@@ -1198,7 +1198,8 @@ public final class Main {
     private static Option<Tuple2<CompileState, Type>> parseSymbolType(final CompileState state, final String input) {
         final String stripped = Strings.strip(input);
         if (Main.isSymbol(stripped)) {
-            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new SymbolNode(stripped, PrimitiveType.Auto)));
+            final SymbolNode symbolNode = new SymbolNode(stripped, PrimitiveType.Auto);
+            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), symbolNode));
         }
         return new None<Tuple2<CompileState, Type>>();
     }

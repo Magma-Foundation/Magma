@@ -9,7 +9,7 @@ export struct PrimitiveType implements Type {
 	static I32/*auto*/: PrimitiveType = new PrimitiveType("I32");
 	value: &[I8];
 	constructor (value: &[I8]) {
-		this/*auto*/.value = value/*auto*/;
+		this/*auto*/.value = value/*&[I8]*/;
 	}
 	def generate(): &[I8] {
 		return this/*auto*/.value;

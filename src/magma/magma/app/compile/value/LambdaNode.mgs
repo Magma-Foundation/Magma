@@ -7,7 +7,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.option.None;
 import magma.api.Type;
-import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
 export struct LambdaNode implements Value {
 	mut paramNames: List<Definition>;
@@ -17,7 +16,7 @@ export struct LambdaNode implements Value {
 		this.content = content;
 	}
 	def generate(mut platform: Platform): &[I8] {
-		let joinedParamNames: &[I8] = this/*auto*/.paramNames.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*auto*/)).collect(Joiner(", ")).orElse("");
+		let joinedParamNames: &[I8] = this/*auto*/.paramNames.query(/*auto*/).map((mut definition: Definition) => definition/*auto*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
 		return "(" + joinedParamNames/*auto*/ + ")" + " => " + this/*auto*/.content;
 	}
 	def toValue(): Option<Value> {
@@ -26,10 +25,10 @@ export struct LambdaNode implements Value {
 	def findChild(): Option<Value> {
 		return None<Value>(/*auto*/);
 	}
-	def resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>(/*auto*/);
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

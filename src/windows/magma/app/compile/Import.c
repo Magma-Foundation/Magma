@@ -9,7 +9,7 @@ export class Import {
 }
 
 &[I8] generate(Platform platform) {
-	if (Platform/*auto*/.Magma === platform/*auto*/) {
+	if (Platform/*auto*/.Magma === platform/*Platform*/) {
 		&[I8] joinedNamespace = this/*auto*/.namespace.query(/*auto*/).collect(new Joiner(".")).orElse("");
 		return "import " + joinedNamespace/*auto*/ + "." + this/*auto*/.child + ";\n";
 	}

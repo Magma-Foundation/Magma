@@ -8,7 +8,7 @@ export class Some<T> implements Option<T> {
 		this.value = value;
 	}
 	map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return new Some<R>(mapper/*auto*/(this/*auto*/.value));
+		return new Some<R>(mapper/*(arg0 : T) => R*/(this/*auto*/.value));
 	}
 	orElse(other: T): T {
 		return this/*auto*/.value;
@@ -20,16 +20,16 @@ export class Some<T> implements Option<T> {
 		return true/*auto*/;
 	}
 	ifPresent(consumer: (arg0 : T) => void): void {
-		consumer/*auto*/(this/*auto*/.value);
+		consumer/*(arg0 : T) => void*/(this/*auto*/.value);
 	}
 	or(other: () => Option<T>): Option<T> {
 		return this/*auto*/;
 	}
 	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return mapper/*auto*/(this/*auto*/.value);
+		return mapper/*(arg0 : T) => Option<R>*/(this/*auto*/.value);
 	}
 	filter(predicate: (arg0 : T) => boolean): Option<T> {
-		if (predicate/*auto*/(this/*auto*/.value)) {
+		if (predicate/*(arg0 : T) => boolean*/(this/*auto*/.value)) {
 			return this/*auto*/;
 		}
 		return new None<T>(/*auto*/);
@@ -38,6 +38,6 @@ export class Some<T> implements Option<T> {
 		return new Tuple2Impl<boolean, T>(true/*auto*/, this/*auto*/.value);
 	}
 	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other/*auto*/(/*auto*/).map((otherValue: R) => new Tuple2Impl<T, R>(this/*auto*/.value, otherValue/*auto*/));
+		return other/*() => Option<R>*/(/*auto*/).map((otherValue: R) => new Tuple2Impl<T, R>(this/*auto*/.value, otherValue/*auto*/));
 	}
 }

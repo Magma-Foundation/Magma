@@ -8,7 +8,7 @@ export struct Some<T> implements Option<T> {
 		this.value = value;
 	}
 	def map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return Some<R>(mapper/*auto*/(this/*auto*/.value));
+		return Some<R>(mapper/*(arg0 : T) => R*/(this/*auto*/.value));
 	}
 	def orElse(other: T): T {
 		return this/*auto*/.value;
@@ -20,16 +20,16 @@ export struct Some<T> implements Option<T> {
 		return true/*auto*/;
 	}
 	def ifPresent(consumer: (arg0 : T) => void): void {
-		consumer/*auto*/(this/*auto*/.value);
+		consumer/*(arg0 : T) => void*/(this/*auto*/.value);
 	}
 	def or(other: () => Option<T>): Option<T> {
 		return this/*auto*/;
 	}
 	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return mapper/*auto*/(this/*auto*/.value);
+		return mapper/*(arg0 : T) => Option<R>*/(this/*auto*/.value);
 	}
 	def filter(predicate: (arg0 : T) => boolean): Option<T> {
-		if (predicate/*auto*/(this/*auto*/.value)) {
+		if (predicate/*(arg0 : T) => boolean*/(this/*auto*/.value)) {
 			return this/*auto*/;
 		}
 		return None<T>(/*auto*/);
@@ -38,6 +38,6 @@ export struct Some<T> implements Option<T> {
 		return Tuple2Impl<Bool, T>(true/*auto*/, this/*auto*/.value);
 	}
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other/*auto*/(/*auto*/).map((mut otherValue: R) => Tuple2Impl<T, R>(this/*auto*/.value, otherValue/*auto*/));
+		return other/*() => Option<R>*/(/*auto*/).map((mut otherValue: R) => Tuple2Impl<T, R>(this/*auto*/.value, otherValue/*auto*/));
 	}
 }

@@ -14,6 +14,6 @@ export struct Err<T, X> implements Result<T, X> {
 		return None<T>(/*auto*/);
 	}
 	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenErr/*auto*/(this/*auto*/.error);
+		return whenErr/*(arg0 : X) => R*/(this/*auto*/.error);
 	}
 }

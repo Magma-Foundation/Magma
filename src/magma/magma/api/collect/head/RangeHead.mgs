@@ -6,7 +6,7 @@ export struct RangeHead implements Head<I32> {
 	length: I32;
 	mut counter: I32;
 	constructor (length: I32) {
-		this/*auto*/.length = length/*auto*/;
+		this/*auto*/.length = length/*I32*/;
 		this/*auto*/.counter = 0/*auto*/;
 	}
 	def next(): Option<I32> {

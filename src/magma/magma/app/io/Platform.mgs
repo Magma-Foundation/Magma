@@ -5,7 +5,7 @@ export struct Platform {
 	root: &[I8];
 	extension: &[I8][];
 	constructor (root: &[I8], ...extensions: &[I8][]) {
-		this/*auto*/.root = root/*auto*/;
-		this/*auto*/.extension = extensions/*auto*/;
+		this/*auto*/.root = root/*&[I8]*/;
+		this/*auto*/.extension = extensions/*&[I8][]*/;
 	}
 }

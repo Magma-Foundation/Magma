@@ -14,6 +14,6 @@ export class Ok<T, X> implements Result<T, X> {
 		return new Some<T>(this/*auto*/.value);
 	}
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenOk/*auto*/(this/*auto*/.value);
+		return whenOk/*(arg0 : T) => R*/(this/*auto*/.value);
 	}
 }

@@ -6,7 +6,7 @@ export class RangeHead implements Head<number> {
 	length: number;
 	counter: number;
 	constructor (length: number) {
-		this/*auto*/.length = length/*auto*/;
+		this/*auto*/.length = length/*number*/;
 		this/*auto*/.counter = 0/*auto*/;
 	}
 	next(): Option<number> {

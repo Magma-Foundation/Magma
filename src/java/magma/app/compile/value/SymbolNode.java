@@ -5,19 +5,12 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.Main;
-import magma.app.compile.CompileState;
-import magma.app.compile.type.PrimitiveType;
 import magma.app.io.Platform;
 
 public record SymbolNode(String value, Type type) implements Value, Type {
     @Override
     public String generate(final Platform platform) {
         return this.value + Main.generatePlaceholder(type.generate());
-    }
-
-    @Override
-    public Type resolve(final CompileState state) {
-        return state.resolve(this.value).orElse(PrimitiveType.Auto);
     }
 
     @Override

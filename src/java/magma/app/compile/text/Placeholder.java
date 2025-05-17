@@ -4,7 +4,6 @@ import magma.api.Type;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.app.Main;
-import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
 import magma.app.compile.type.PrimitiveType;
@@ -43,11 +42,6 @@ public record Placeholder(String input) implements Parameter, Value, Type {
     }
 
     @Override
-    public Type resolve(final CompileState state) {
-        return PrimitiveType.Auto;
-    }
-
-    @Override
     public boolean isVar() {
         return false;
     }
@@ -60,5 +54,10 @@ public record Placeholder(String input) implements Parameter, Value, Type {
     @Override
     public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
+    }
+
+    @Override
+    public Type type() {
+        return PrimitiveType.Auto;
     }
 }

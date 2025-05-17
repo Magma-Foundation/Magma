@@ -8,6 +8,6 @@ export class Platform {
 }
 
 constructor (&[I8] root, ...&[I8][] extensions) {
-	this/*auto*/.root = root/*auto*/;
-	this/*auto*/.extension = extensions/*auto*/;
+	this/*auto*/.root = root/*&[I8]*/;
+	this/*auto*/.extension = extensions/*&[I8][]*/;
 }

@@ -20,13 +20,13 @@ export struct DivideState {
 		this.index = index;
 	}
 	static def createInitial(input: &[I8]): DivideState {
-		return DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*auto*/, 0/*auto*/);
+		return DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*&[I8]*/, 0/*auto*/);
 	}
 	def advance(): DivideState {
 		return DivideState(this/*auto*/.segments.addLast(this/*auto*/.buffer), "", this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	def append(c: I8): DivideState {
-		return DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*auto*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*I8*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
 	}
 	def isLevel(): Bool {
 		return 0/*auto*/ === this/*auto*/.depth;
@@ -46,7 +46,7 @@ export struct DivideState {
 		}
 		let c: I8 = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
 		let nextState: DivideState = DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
-		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState/*auto*/, c/*auto*/));
+		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState/*auto*/, c/*I8*/));
 	}
 	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {
 		return this/*auto*/.pop(/*auto*/).map((mut inner: Tuple2<DivideState, I8>) => Tuple2Impl<DivideState, I8>(inner/*auto*/.left(/*auto*/).append(inner/*auto*/.right(/*auto*/)), inner/*auto*/.right(/*auto*/)));
@@ -58,6 +58,6 @@ export struct DivideState {
 		return Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
 	}
 	def startsWith(slice: &[I8]): Bool {
-		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*auto*/);
+		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*&[I8]*/);
 	}
 }

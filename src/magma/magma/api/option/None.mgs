@@ -6,10 +6,10 @@ export struct None<T> implements Option<T> {
 		return None<R>(/*auto*/);
 	}
 	def orElse(other: T): T {
-		return other/*auto*/;
+		return other/*T*/;
 	}
 	def orElseGet(supplier: () => T): T {
-		return supplier/*auto*/(/*auto*/);
+		return supplier/*() => T*/(/*auto*/);
 	}
 	def isPresent(): Bool {
 		return false/*auto*/;
@@ -17,7 +17,7 @@ export struct None<T> implements Option<T> {
 	def ifPresent(consumer: (arg0 : T) => void): void {
 	}
 	def or(other: () => Option<T>): Option<T> {
-		return other/*auto*/(/*auto*/);
+		return other/*() => Option<T>*/(/*auto*/);
 	}
 	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
 		return None<R>(/*auto*/);
@@ -26,7 +26,7 @@ export struct None<T> implements Option<T> {
 		return None<T>(/*auto*/);
 	}
 	def toTuple(other: T): Tuple2<Bool, T> {
-		return Tuple2Impl<Bool, T>(false/*auto*/, other/*auto*/);
+		return Tuple2Impl<Bool, T>(false/*auto*/, other/*T*/);
 	}
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
 		return None<Tuple2<T, R>>(/*auto*/);

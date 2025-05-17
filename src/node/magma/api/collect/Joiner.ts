@@ -12,12 +12,12 @@ export class Joiner implements Collector<string, Option<string>> {
 		return new Joiner("");
 	}
 	static joinOrEmpty(items: List<string>, delimiter: string, prefix: string, suffix: string): string {
-		return items/*auto*/.query(/*auto*/).collect(new Joiner(delimiter/*auto*/)).map((inner: string) => prefix/*auto*/ + inner/*auto*/ + suffix/*auto*/).orElse("");
+		return items/*List<string>*/.query(/*auto*/).collect(new Joiner(delimiter/*string*/)).map((inner: string) => prefix/*string*/ + inner/*auto*/ + suffix/*string*/).orElse("");
 	}
 	createInitial(): Option<string> {
 		return new None<string>(/*auto*/);
 	}
 	fold(maybe: Option<string>, element: string): Option<string> {
-		return new Some<string>(maybe/*auto*/.map((inner: string) => inner/*auto*/ + this/*auto*/.delimiter + element/*auto*/).orElse(element/*auto*/));
+		return new Some<string>(maybe/*Option<string>*/.map((inner: string) => inner/*auto*/ + this/*auto*/.delimiter + element/*string*/).orElse(element/*string*/));
 	}
 }

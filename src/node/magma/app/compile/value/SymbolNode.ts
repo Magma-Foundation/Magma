@@ -1,8 +1,6 @@
 import { Type } from "../../../../magma/api/Type";
 import { Platform } from "../../../../magma/app/io/Platform";
 import { Main } from "../../../../magma/app/Main";
-import { CompileState } from "../../../../magma/app/compile/CompileState";
-import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -15,10 +13,7 @@ export class SymbolNode {
 		this.type = type;
 	}
 	generate(platform: Platform): string {
-		return this/*auto*/.value + Main/*auto*/.generatePlaceholder(type/*auto*/.generate(/*auto*/));
-	}
-	resolve(state: CompileState): Type {
-		return state/*auto*/.resolve(this/*auto*/.value).orElse(PrimitiveType/*auto*/.Auto);
+		return this/*auto*/.value + Main/*auto*/.generatePlaceholder(type/*Type*/.generate(/*auto*/));
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this/*auto*/);

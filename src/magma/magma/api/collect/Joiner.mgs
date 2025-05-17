@@ -12,12 +12,12 @@ export struct Joiner implements Collector<&[I8], Option<&[I8]>> {
 		return Joiner("");
 	}
 	static def joinOrEmpty(items: List<&[I8]>, delimiter: &[I8], prefix: &[I8], suffix: &[I8]): &[I8] {
-		return items/*auto*/.query(/*auto*/).collect(Joiner(delimiter/*auto*/)).map((mut inner: &[I8]) => prefix/*auto*/ + inner/*auto*/ + suffix/*auto*/).orElse("");
+		return items/*List<&[I8]>*/.query(/*auto*/).collect(Joiner(delimiter/*&[I8]*/)).map((mut inner: &[I8]) => prefix/*&[I8]*/ + inner/*auto*/ + suffix/*&[I8]*/).orElse("");
 	}
 	def createInitial(): Option<&[I8]> {
 		return None<&[I8]>(/*auto*/);
 	}
 	def fold(maybe: Option<&[I8]>, element: &[I8]): Option<&[I8]> {
-		return Some<&[I8]>(maybe/*auto*/.map((mut inner: &[I8]) => inner/*auto*/ + this/*auto*/.delimiter + element/*auto*/).orElse(element/*auto*/));
+		return Some<&[I8]>(maybe/*Option<&[I8]>*/.map((mut inner: &[I8]) => inner/*auto*/ + this/*auto*/.delimiter + element/*&[I8]*/).orElse(element/*&[I8]*/));
 	}
 }

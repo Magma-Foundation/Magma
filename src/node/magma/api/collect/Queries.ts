@@ -6,10 +6,10 @@ import { Head } from "../../../magma/api/collect/head/Head";
 import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
 export class Queries {
 	static fromOption<T>(option: Option<T>): Query<T> {
-		return new HeadedQuery<T>(option/*auto*/.map((element: T) => Queries/*auto*/.getTSingleHead(element/*auto*/)).orElseGet(() => new EmptyHead<T>(/*auto*/)));
+		return new HeadedQuery<T>(option/*Option<T>*/.map((element: T) => Queries/*auto*/.getTSingleHead(element/*T*/)).orElseGet(() => new EmptyHead<T>(/*auto*/)));
 	}
 	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element/*auto*/);
+		return new SingleHead<T>(element/*T*/);
 	}
 	static fromArray<T>(elements: T[]): Query<T> {
 		/*return new HeadedQuery<Integer>(new RangeHead(elements.length)).map((Integer index) -> elements[index])*/;

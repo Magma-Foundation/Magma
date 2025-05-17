@@ -4,7 +4,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.option.None;
 import magma.api.Type;
-import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
 export struct NotNode implements Value {
 	mut child: &[I8];
@@ -20,10 +19,10 @@ export struct NotNode implements Value {
 	def findChild(): Option<Value> {
 		return None<Value>(/*auto*/);
 	}
-	def resolve(state: CompileState): Type {
-		return PrimitiveType/*auto*/.Auto;
-	}
 	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>(/*auto*/);
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
 	}
 }

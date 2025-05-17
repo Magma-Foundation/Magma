@@ -5,7 +5,7 @@ export class SingleHead<T> implements Head<T> {
 }
 
 constructor (T element) {
-	this/*auto*/.element = element/*auto*/;
+	this/*auto*/.element = element/*T*/;
 	this/*auto*/.retrieved = false/*auto*/;
 }
 Option<T> next() {
