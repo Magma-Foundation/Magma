@@ -1,5 +1,6 @@
 #ifndef magma_app_compile_value_SymbolNode
 #define magma_app_compile_value_SymbolNode
+import { Platform } from "magma/app/io/Platform";
 import { Type } from "magma/api/Type";
 import { CompileState } from "magma/app/compile/CompileState";
 import { PrimitiveType } from "magma/app/compile/type/PrimitiveType";

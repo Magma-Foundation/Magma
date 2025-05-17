@@ -1,4 +1,5 @@
 import magma.app.Main;
+import magma.app.io.Platform;
 import magma.app.compile.value.Value;
 import magma.api.option.Option;
 import magma.api.option.None;
@@ -16,6 +17,9 @@ export struct Placeholder {
 	}
 	def isFunctional(): Bool {
 		return false;
+	}
+	def generate(platform: Platform): &[I8] {
+		return this.generate();
 	}
 	def findChild(): Option<Value> {
 		return None<Value>();
@@ -35,7 +39,7 @@ export struct Placeholder {
 	def generateBeforeName(): &[I8] {
 		return "";
 	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>();
 	}
 }

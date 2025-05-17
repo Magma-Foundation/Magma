@@ -1,14 +1,14 @@
 #include "./SingleHead.h"
 export class SingleHead<T> implements Head<T> {
-	element: T;
-	retrieved: Bool;
+	T element;
+	Bool retrieved;
 }
 
-constructor (element: T) {
+constructor (T element) {
 	this.element = element;
 	this.retrieved = false;
 }
-next(): Option<T> {
+Option<T> next() {
 	if (this.retrieved) {
 		return new None<T>();
 	}

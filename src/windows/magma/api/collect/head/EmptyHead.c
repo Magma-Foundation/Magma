@@ -2,6 +2,6 @@
 export class EmptyHead<T> implements Head<T> {
 }
 
-next(): Option<T> {
+Option<T> next() {
 	return new None<T>();
 }

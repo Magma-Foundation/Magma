@@ -6,10 +6,11 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
+import magma.app.io.Platform;
 
 public record SymbolNode(String value) implements Value, Type {
     @Override
-    public String generate() {
+    public String generate(final Platform platform) {
         return this.value;
     }
 
@@ -29,6 +30,11 @@ public record SymbolNode(String value) implements Value, Type {
     }
 
     @Override
+    public String generate() {
+        return this.value;
+    }
+
+    @Override
     public boolean isFunctional() {
         return false;
     }
@@ -44,7 +50,7 @@ public record SymbolNode(String value) implements Value, Type {
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
     }
 }

@@ -1,23 +1,23 @@
 #include "./BooleanType.h"
 export class BooleanType implements Type {
-	platform: Platform;
-	constructor (platform: Platform) {
+	Platform platform;
+	constructor (Platform platform) {
 		this.platform = platform;
 	}
 }
 
-generate(): &[I8] {
+&[I8] generate() {
 	if (Platform.TypeScript === this.platform) {
 		return "boolean";
 	}
 	return "Bool";
 }
-isFunctional(): Bool {
+Bool isFunctional() {
 	return false;
 }
-isVar(): Bool {
+Bool isVar() {
 	return false;
 }
-generateBeforeName(): &[I8] {
+&[I8] generateBeforeName() {
 	return "";
 }

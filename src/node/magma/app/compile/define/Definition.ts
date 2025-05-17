@@ -1,5 +1,6 @@
 import { List } from "../../../../magma/api/collect/list/List";
 import { Type } from "../../../../magma/api/Type";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
@@ -17,15 +18,18 @@ export class Definition {
 		this.type = type;
 		this.name = name;
 	}
-	generate(): string {
-		return this.generateWithAfterName("");
+	generate(platform: Platform): string {
+		return this.generateWithAfterName(platform, "");
 	}
 	asDefinition(): Option<Definition> {
 		return new Some<Definition>(this);
 	}
-	generateWithAfterName(afterName: string): string {
+	generateWithAfterName(platform: Platform, afterName: string): string {
 		let joinedTypeParams: string = this.joinTypeParams();
 		let joinedModifiers: string = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
+		if (Platform.Windows === platform) {
+			return joinedModifiers + this.type.generateBeforeName() + this.type.generate() + " " + this.name + afterName;
+		}
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
 	}
 	generateType(): string {

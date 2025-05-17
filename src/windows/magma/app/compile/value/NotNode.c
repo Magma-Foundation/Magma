@@ -1,23 +1,23 @@
 #include "./NotNode.h"
 export class NotNode implements Value {
-	child: &[I8];
-	constructor (child: &[I8]) {
+	&[I8] child;
+	constructor (&[I8] child) {
 		this.child = child;
 	}
 }
 
-generate(): &[I8] {
+&[I8] generate(Platform platform) {
 	return this.child;
 }
-toValue(): Option<Value> {
+Option<Value> toValue() {
 	return new Some<Value>(this);
 }
-findChild(): Option<Value> {
+Option<Value> findChild() {
 	return new None<Value>();
 }
-resolve(state: CompileState): Type {
+Type resolve(CompileState state) {
 	return PrimitiveType.Unknown;
 }
-generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();
 }

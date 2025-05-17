@@ -6,6 +6,7 @@ import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.app.io.Platform;
 
 public record Definition(
         List<String> annotations,
@@ -15,8 +16,8 @@ public record Definition(
         String name
 ) implements FunctionHeader<Definition>, Parameter {
     @Override
-    public String generate() {
-        return this.generateWithAfterName("");
+    public String generate(Platform platform) {
+        return this.generateWithAfterName(platform, "");
     }
 
     @Override
@@ -25,13 +26,16 @@ public record Definition(
     }
 
     @Override
-    public String generateWithAfterName(final String afterName) {
+    public String generateWithAfterName(final Platform platform, final String afterName) {
         final String joinedTypeParams = this.joinTypeParams();
         final String joinedModifiers = this.modifiers.query()
                 .map((String value) -> value + " ")
                 .collect(new Joiner(""))
                 .orElse("");
 
+        if (Platform.Windows == platform) {
+            return joinedModifiers + this.type.generateBeforeName() + this.type.generate() +  " " + this.name + afterName;
+        }
         return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
     }
 

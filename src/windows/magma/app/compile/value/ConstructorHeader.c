@@ -2,15 +2,15 @@
 export class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
 }
 
-generateWithAfterName(afterName: &[I8]): &[I8] {
+&[I8] generateWithAfterName(Platform platform, &[I8] afterName) {
 	return "constructor " + afterName;
 }
-hasAnnotation(annotation: &[I8]): Bool {
+Bool hasAnnotation(&[I8] annotation) {
 	return false;
 }
-removeModifier(modifier: &[I8]): ConstructorHeader {
+ConstructorHeader removeModifier(&[I8] modifier) {
 	return this;
 }
-addModifier(modifier: &[I8]): ConstructorHeader {
+ConstructorHeader addModifier(&[I8] modifier) {
 	return this;
 }

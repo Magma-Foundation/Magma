@@ -6,11 +6,12 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
+import magma.app.io.Platform;
 
 public record OperationNode(Value left, String targetInfix, Value right) implements Value {
     @Override
-    public String generate() {
-        return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
+    public String generate(Platform platform) {
+        return this.left.generate(platform) + " " + this.targetInfix + " " + this.right.generate(platform);
     }
 
     @Override
@@ -28,7 +29,7 @@ public record OperationNode(Value left, String targetInfix, Value right) impleme
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
     }
 }

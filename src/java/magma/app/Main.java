@@ -369,7 +369,8 @@ public final class Main {
         final CompileState outputContentState = outputContentTuple.left().popStructureName();
         final String outputContent = outputContentTuple.right();
 
-        final String constructorString = Main.generateConstructorFromRecordParameters(parameters);
+        final Platform platform = outputContentState.platform();
+        final String constructorString = Main.generateConstructorFromRecordParameters(parameters, platform);
         final String joinedTypeParams = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
         final String implementingString = Main.generateImplementing(maybeImplementing);
         final List<String> newModifiers = Main.modifyModifiers0(oldModifiers);
@@ -383,7 +384,7 @@ public final class Main {
             final String actualInfix = "interface ";
             final String newName = name + "Instance";
 
-            final String generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            final String generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters, platform) + constructorString + outputContent + "\n}\n";
             final CompileState withNewLocation = outputContentState.append(generated).mapLocation((Location location) -> new Location(location.namespace(), location.name() + "Instance"));
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(withNewLocation, ""));
@@ -392,7 +393,7 @@ public final class Main {
             final String extendsString = maybeSuperType.map((String inner) -> " extends " + inner).orElse("");
             final String infix1 = Main.retainStruct(infix, outputContentState);
 
-            final String generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+            final String generated = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters, platform) + constructorString + outputContent + "\n}\n";
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
         }
     }
@@ -417,9 +418,9 @@ public final class Main {
                 .orElse("");
     }
 
-    private static String generateConstructorFromRecordParameters(final List<Definition> parameters) {
+    private static String generateConstructorFromRecordParameters(final List<Definition> parameters, final Platform platform) {
         return parameters.query()
-                .map((Definition definition) -> definition.generate())
+                .map((Definition definition) -> definition.generate(platform))
                 .collect(new Joiner(", "))
                 .map((String generatedParameters) -> Main.generateConstructorWithParameterString(parameters, generatedParameters))
                 .orElse("");
@@ -440,9 +441,9 @@ public final class Main {
                 .orElse("");
     }
 
-    private static String joinParameters(final List<Definition> parameters) {
+    private static String joinParameters(final List<Definition> parameters, final Platform platform) {
         return parameters.query()
-                .map((Definition definition) -> definition.generate())
+                .map((Definition definition) -> definition.generate(platform))
                 .map((String generated) -> "\n\t" + generated + ";")
                 .collect(Joiner.empty())
                 .orElse("");
@@ -525,7 +526,7 @@ public final class Main {
             final List<Definition> definitions = Main.retainDefinitionsFromParameters(parameters);
 
             final String joinedDefinitions = definitions.query()
-                    .map((Definition definition) -> definition.generate())
+                    .map((Definition definition) -> definition.generate(parametersState.platform()))
                     .collect(new Joiner(", "))
                     .orElse("");
 
@@ -534,12 +535,12 @@ public final class Main {
             if (newHeader.hasAnnotation("Actual")) {
                 final String headerGenerated = newHeader
                         .removeModifier("static")
-                        .generateWithAfterName("(" + joinedDefinitions + ")");
+                        .generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
 
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(parametersState, "\n\t" + headerGenerated + ";\n"));
             }
 
-            final String headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
+            final String headerGenerated = newHeader.generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
             return Main.compilePrefix(Strings.strip(afterParams), "{", (final String withoutContentStart) -> Main.compileSuffix(Strings.strip(withoutContentStart), "}", (final String withoutContentEnd) -> {
                 final CompileState compileState1 = parametersState.enterDepth();
                 final CompileState compileState = compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth();
@@ -670,7 +671,7 @@ public final class Main {
         return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(
                 Main::compileReturnWithValue,
                 Main::compileAssignment,
-                (CompileState state1, String input) -> Main.parseInvokable(state1, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate())),
+                (CompileState state1, String input) -> Main.parseInvokable(state1, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate(tuple.left().platform()))),
                 Main.createPostRule("++"),
                 Main.createPostRule("--"),
                 Main::compileBreak
@@ -794,11 +795,28 @@ public final class Main {
             final Tuple2<CompileState, String> sourceTuple = Main.compileValueOrPlaceholder(state, source);
 
             final Tuple2<CompileState, String> destinationTuple = Main.compileValue(sourceTuple.left(), destination)
-                    .or(() -> Main.parseDefinition(sourceTuple.left(), destination).map((final Tuple2<CompileState, Definition> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().addModifier("let").generate())))
+                    .or(() -> Main.parseDefinition(sourceTuple.left(), destination).map((final Tuple2<CompileState, Definition> definitionTuple) -> {
+                        final CompileState definitionState = definitionTuple.left();
+                        final Definition definition = definitionTuple.right();
+                        final Definition let = Main.attachLet(definitionState, definition);
+                        final String generate = let.generate(definitionState.platform());
+                        return new Tuple2Impl<CompileState, String>(definitionState, generate);
+                    }))
                     .orElseGet(() -> new Tuple2Impl<CompileState, String>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
         });
+    }
+
+    private static Definition attachLet(final CompileState definitionState, final Definition definition) {
+        final Definition let;
+        if (definitionState.isPlatform(Platform.Windows)) {
+            let = definition;
+        }
+        else {
+            let = definition.addModifier("let");
+        }
+        return let;
     }
 
     private static Tuple2<CompileState, String> compileValueOrPlaceholder(final CompileState state, final String input) {
@@ -806,7 +824,10 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileValue(final CompileState state, final String input) {
-        return Main.parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
+        return Main.parseValue(state, input).map((final Tuple2<CompileState, Value> tuple) -> {
+            final String generated = tuple.right().generate(tuple.left().platform());
+            return new Tuple2Impl<CompileState, String>(tuple.left(), generated);
+        });
     }
 
     private static Option<Tuple2<CompileState, Value>> parseValue(final CompileState state, final String input) {
@@ -978,7 +999,10 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileWhitespace(final CompileState state, final String input) {
-        return Main.parseWhitespace(state, input).map((Tuple2<CompileState, Whitespace> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
+        return Main.parseWhitespace(state, input).map((final Tuple2<CompileState, Whitespace> tuple) -> {
+            final String generate = tuple.right().generate(tuple.left().platform());
+            return new Tuple2Impl<CompileState, String>(tuple.left(), generate);
+        });
     }
 
     private static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(final CompileState state, final String input) {
@@ -993,13 +1017,16 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> getTupleOption(final CompileState state, final String withoutEnd) {
-        return Main.parseParameter(state, withoutEnd).flatMap((final Tuple2<CompileState, Parameter> definitionTuple) -> new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(definitionTuple.left(), "\n\t" + definitionTuple.right().generate() + ";")));
+        return Main.parseParameter(state, withoutEnd).flatMap((final Tuple2<CompileState, Parameter> definitionTuple) -> {
+            final String generate = "\n\t" + definitionTuple.right().generate(definitionTuple.left().platform()) + ";";
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(definitionTuple.left(), generate));
+        });
     }
 
     private static Option<Tuple2<CompileState, String>> compileEnumValues(final CompileState state, final String withoutEnd) {
         return Main.parseValues(state, withoutEnd, (final CompileState state1, final String s) -> Main.parseInvokable(state1, s).flatMap((final Tuple2<CompileState, Value> tuple) -> {
             final String structureName = state.findLastStructureName().orElse("");
-            return tuple.right().generateAsEnumValue(structureName).map((final String stringOption) -> new Tuple2Impl<CompileState, String>(tuple.left(), stringOption));
+            return tuple.right().generateAsEnumValue(structureName, state.platform()).map((final String stringOption) -> new Tuple2Impl<CompileState, String>(tuple.left(), stringOption));
         })).map((final Tuple2<CompileState, List<String>> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
     }
 

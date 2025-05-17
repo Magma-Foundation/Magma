@@ -6,11 +6,12 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
+import magma.app.io.Platform;
 
 public record AccessNode(Value child, String property) implements Value {
     @Override
-    public String generate() {
-        return this.child.generate() + "." + this.property;
+    public String generate(Platform platform) {
+        return this.child.generate(platform) + "." + this.property;
     }
 
     @Override
@@ -29,7 +30,7 @@ public record AccessNode(Value child, String property) implements Value {
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
     }
 }

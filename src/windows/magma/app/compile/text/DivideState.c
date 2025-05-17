@@ -1,11 +1,11 @@
 #include "./DivideState.h"
 export class DivideState {
-	segments: List<&[I8]>;
-	buffer: &[I8];
-	depth: number;
-	input: &[I8];
-	index: number;
-	constructor (segments: List<&[I8]>, buffer: &[I8], depth: number, input: &[I8], index: number) {
+	List<&[I8]> segments;
+	&[I8] buffer;
+	number depth;
+	&[I8] input;
+	number index;
+	constructor (List<&[I8]> segments, &[I8] buffer, number depth, &[I8] input, number index) {
 		this.segments = segments;
 		this.buffer = buffer;
 		this.depth = depth;
@@ -14,44 +14,44 @@ export class DivideState {
 	}
 }
 
-static createInitial(input: &[I8]): DivideState {
+static DivideState createInitial(&[I8] input) {
 	return new DivideState(Lists.empty(), "", 0, input, 0);
 }
-advance(): DivideState {
+DivideState advance() {
 	return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
 }
-append(c: I8): DivideState {
+DivideState append(I8 c) {
 	return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
 }
-isLevel(): Bool {
+Bool isLevel() {
 	return 0 === this.depth;
 }
-enter(): DivideState {
+DivideState enter() {
 	return new DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
 }
-exit(): DivideState {
+DivideState exit() {
 	return new DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
 }
-isShallow(): Bool {
+Bool isShallow() {
 	return 1 === this.depth;
 }
-pop(): Option<Tuple2<DivideState, I8>> {
+Option<Tuple2<DivideState, I8>> pop() {
 	if (this.index >= Strings.length(this.input)) {
 		return new None<Tuple2<DivideState, I8>>();
 	}
-	let c: I8 = Strings.charAt(this.input, this.index);
-	let nextState: DivideState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
+	I8 c = Strings.charAt(this.input, this.index);
+	DivideState nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
 	return new Some<Tuple2<DivideState, I8>>(new Tuple2Impl<DivideState, I8>(nextState, c));
 }
-popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {
-	return this.pop().map((inner: Tuple2<DivideState, I8>) => new Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right()));
+Option<Tuple2<DivideState, I8>> popAndAppendToTuple() {
+	return this.pop().map((Tuple2<DivideState, I8> inner) => new Tuple2Impl<DivideState, I8>(inner.left().append(inner.right()), inner.right()));
 }
-popAndAppendToOption(): Option<DivideState> {
-	return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, I8>) => tuple.left());
+Option<DivideState> popAndAppendToOption() {
+	return this.popAndAppendToTuple().map((Tuple2<DivideState, I8> tuple) => tuple.left());
 }
-peek(): I8 {
+I8 peek() {
 	return Strings.charAt(this.input, this.index);
 }
-startsWith(slice: &[I8]): Bool {
+Bool startsWith(&[I8] slice) {
 	return Strings.sliceFrom(this.input, this.index).startsWith(slice);
 }

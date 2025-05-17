@@ -1,4 +1,5 @@
 import { Main } from "../../../../magma/app/Main";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";
@@ -16,6 +17,9 @@ export class Placeholder {
 	}
 	isFunctional(): boolean {
 		return false;
+	}
+	generate(platform: Platform): string {
+		return this.generate();
 	}
 	findChild(): Option<Value> {
 		return new None<Value>();
@@ -35,7 +39,7 @@ export class Placeholder {
 	generateBeforeName(): string {
 		return "";
 	}
-	generateAsEnumValue(structureName: string): Option<string> {
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();
 	}
 }

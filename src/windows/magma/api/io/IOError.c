@@ -1,4 +1,4 @@
 #include "./IOError.h"
 export interface IOError {
-	display(): &[I8];
+	&[I8] display();
 }

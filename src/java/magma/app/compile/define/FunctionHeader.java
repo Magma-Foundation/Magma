@@ -1,7 +1,9 @@
 package magma.app.compile.define;
 
+import magma.app.io.Platform;
+
 public interface FunctionHeader<S extends FunctionHeader<S>> {
-    String generateWithAfterName(String afterName);
+    String generateWithAfterName(Platform platform, String afterName);
 
     boolean hasAnnotation(String annotation);
 

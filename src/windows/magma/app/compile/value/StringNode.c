@@ -1,23 +1,23 @@
 #include "./StringNode.h"
 export class StringNode implements Value {
-	value: &[I8];
-	constructor (value: &[I8]) {
+	&[I8] value;
+	constructor (&[I8] value) {
 		this.value = value;
 	}
 }
 
-generate(): &[I8] {
+&[I8] generate(Platform platform) {
 	return "\"" + this.value + "\"";
 }
-toValue(): Option<Value> {
+Option<Value> toValue() {
 	return new Some<Value>(this);
 }
-findChild(): Option<Value> {
+Option<Value> findChild() {
 	return new None<Value>();
 }
-resolve(state: CompileState): Type {
+Type resolve(CompileState state) {
 	return PrimitiveType.Unknown;
 }
-generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();
 }

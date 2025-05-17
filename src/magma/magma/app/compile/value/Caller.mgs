@@ -1,6 +1,7 @@
+import magma.app.io.Platform;
 import magma.app.compile.value.Value;
 import magma.api.option.Option;
 export struct Caller {
-	def generate(): &[I8];
+	def generate(mut platform: Platform): &[I8];
 	def findChild(): Option<Value>;
 }

@@ -1,18 +1,18 @@
 #include "./RangeHead.h"
 export class RangeHead implements Head<number> {
-	length: number;
-	counter: number;
+	number length;
+	number counter;
 }
 
-constructor (length: number) {
+constructor (number length) {
 	this.length = length;
 	this.counter = 0;
 }
-next(): Option<number> {
+Option<number> next() {
 	if (this.counter >= this.length) {
 		return new None<number>();
 	}
-	let value: number = this.counter;
+	number value = this.counter;
 	this.counter++;
 	return new Some<number>(value);
 }

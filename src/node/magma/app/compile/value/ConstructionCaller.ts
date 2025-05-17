@@ -10,7 +10,7 @@ export class ConstructionCaller implements Caller {
 		this.right = right;
 		this.platform = platform;
 	}
-	generate(): string {
+	generate(platform: Platform): string {
 		if (Platform.Magma === this.platform) {
 			return this.right;
 		}

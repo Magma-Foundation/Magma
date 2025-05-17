@@ -1,22 +1,22 @@
 #include "./FlatMapHead.h"
 export class FlatMapHead<T, R> implements Head<R> {
-	mapper: (arg0 : T) => Query<R>;
-	head: Head<T>;
-	current: Query<R>;
+	(arg0 : T) => Query<R> mapper;
+	Head<T> head;
+	Query<R> current;
 }
 
-constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
+constructor (Head<T> head, Query<R> initial, (arg0 : T) => Query<R> mapper) {
 	this.head = head;
 	this.current = initial;
 	this.mapper = mapper;
 }
-next(): Option<R> {
+Option<R> next() {
 	while (true) {
-		let next: Option<R> = this.current.next();
+		Option<R> next = this.current.next();
 		if (next.isPresent()) {
 			return next;
 		}
-		let tuple: Tuple2<Bool, Query<R>> = this.head.next().map(this.mapper).toTuple(this.current);
+		Tuple2<Bool, Query<R>> tuple = this.head.next().map(this.mapper).toTuple(this.current);
 		if (tuple.left()) {
 			this.current = tuple.right();
 		}

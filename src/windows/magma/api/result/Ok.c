@@ -1,17 +1,17 @@
 #include "./Ok.h"
 export class Ok<T, X> implements Result<T, X> {
-	value: T;
-	constructor (value: T) {
+	T value;
+	constructor (T value) {
 		this.value = value;
 	}
 }
 
-findError(): Option<X> {
+Option<X> findError() {
 	return new None<X>();
 }
-findValue(): Option<T> {
+Option<T> findValue() {
 	return new Some<T>(this.value);
 }
-match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+R match((arg0 : T) => R whenOk, (arg0 : X) => R whenErr) {
 	return whenOk(this.value);
 }

@@ -1,5 +1,5 @@
 #include "./Value.h"
 export interface Value extends Argument, Caller  {
-	resolve(state: CompileState): Type;
-	generateAsEnumValue(structureName: &[I8]): Option<&[I8]>;
+	Type resolve(CompileState state);
+	Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform);
 }

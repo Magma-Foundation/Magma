@@ -1,4 +1,5 @@
 import { Value } from "../../../../magma/app/compile/value/Value";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { Type } from "../../../../magma/api/Type";
@@ -12,8 +13,8 @@ export class AccessNode implements Value {
 		this.child = child;
 		this.property = property;
 	}
-	generate(): string {
-		return this.child.generate() + "." + this.property;
+	generate(platform: Platform): string {
+		return this.child.generate(platform) + "." + this.property;
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this);
@@ -24,7 +25,7 @@ export class AccessNode implements Value {
 	resolve(state: CompileState): Type {
 		return PrimitiveType.Unknown;
 	}
-	generateAsEnumValue(structureName: string): Option<string> {
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();
 	}
 }

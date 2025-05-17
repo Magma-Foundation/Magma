@@ -2,32 +2,32 @@
 export class None<T> implements Option<T> {
 }
 
-map<R>(mapper: (arg0 : T) => R): Option<R> {
+Option<R> map((arg0 : T) => R mapper) {
 	return new None<R>();
 }
-orElse(other: T): T {
+T orElse(T other) {
 	return other;
 }
-orElseGet(supplier: () => T): T {
+T orElseGet(() => T supplier) {
 	return supplier();
 }
-isPresent(): Bool {
+Bool isPresent() {
 	return false;
 }
-ifPresent(consumer: (arg0 : T) => void): void {
+void ifPresent((arg0 : T) => void consumer) {
 }
-or(other: () => Option<T>): Option<T> {
+Option<T> or(() => Option<T> other) {
 	return other();
 }
-flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
+Option<R> flatMap((arg0 : T) => Option<R> mapper) {
 	return new None<R>();
 }
-filter(predicate: (arg0 : T) => boolean): Option<T> {
+Option<T> filter((arg0 : T) => boolean predicate) {
 	return new None<T>();
 }
-toTuple(other: T): Tuple2<Bool, T> {
+Tuple2<Bool, T> toTuple(T other) {
 	return new Tuple2Impl<Bool, T>(false, other);
 }
-and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+Option<Tuple2<T, R>> and(() => Option<R> other) {
 	return new None<Tuple2<T, R>>();
 }

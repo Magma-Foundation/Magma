@@ -1,17 +1,17 @@
 #include "./Err.h"
 export class Err<T, X> implements Result<T, X> {
-	error: X;
-	constructor (error: X) {
+	X error;
+	constructor (X error) {
 		this.error = error;
 	}
 }
 
-findError(): Option<X> {
+Option<X> findError() {
 	return new Some<X>(this.error);
 }
-findValue(): Option<T> {
+Option<T> findValue() {
 	return new None<T>();
 }
-match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+R match((arg0 : T) => R whenOk, (arg0 : X) => R whenErr) {
 	return whenErr(this.error);
 }

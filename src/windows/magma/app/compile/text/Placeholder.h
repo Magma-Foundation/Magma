@@ -1,6 +1,7 @@
 #ifndef magma_app_compile_text_Placeholder
 #define magma_app_compile_text_Placeholder
 import { Main } from "magma/app/Main";
+import { Platform } from "magma/app/io/Platform";
 import { Value } from "magma/app/compile/value/Value";
 import { Option } from "magma/api/option/Option";
 import { None } from "magma/api/option/None";

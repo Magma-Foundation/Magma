@@ -1,19 +1,19 @@
 #include "./Strings.h"
 export interface StringsInstance {
-	length(stripped: &[I8]): number;
+	number length(&[I8] stripped);
 
-	sliceBetween(input: &[I8], startInclusive: number, endExclusive: number): &[I8];
+	&[I8] sliceBetween(&[I8] input, number startInclusive, number endExclusive);
 
-	sliceFrom(input: &[I8], startInclusive: number): &[I8];
+	&[I8] sliceFrom(&[I8] input, number startInclusive);
 
-	isEmpty(cache: &[I8]): Bool;
+	Bool isEmpty(&[I8] cache);
 
-	equalsTo(left: &[I8], right: &[I8]): Bool;
+	Bool equalsTo(&[I8] left, &[I8] right);
 
-	strip(input: &[I8]): &[I8];
+	&[I8] strip(&[I8] input);
 
-	isBlank(value: &[I8]): Bool;
+	Bool isBlank(&[I8] value);
 
-	charAt(input: &[I8], index: number): I8;
+	I8 charAt(&[I8] input, number index);
 
 }

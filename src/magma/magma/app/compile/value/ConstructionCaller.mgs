@@ -10,7 +10,7 @@ export struct ConstructionCaller implements Caller {
 		this.right = right;
 		this.platform = platform;
 	}
-	def generate(): &[I8] {
+	def generate(mut platform: Platform): &[I8] {
 		if (Platform.Magma === this.platform) {
 			return this.right;
 		}

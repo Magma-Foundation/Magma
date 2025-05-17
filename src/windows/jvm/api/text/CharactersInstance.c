@@ -1,7 +1,7 @@
 #include "./Characters.h"
 export interface CharactersInstance {
-	isDigit(c: I8): Bool;
+	Bool isDigit(I8 c);
 
-	isLetter(c: I8): Bool;
+	Bool isLetter(I8 c);
 
 }

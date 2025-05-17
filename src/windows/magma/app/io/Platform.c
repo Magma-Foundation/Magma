@@ -3,11 +3,11 @@ export class Platform {
 	static TypeScript: Platform = new Platform("node", "ts");
 	static Magma: Platform = new Platform("magma", "mgs");
 	static Windows: Platform = new Platform("windows", "h", "c");
-	root: &[I8];
-	extension: &[I8][];
+	&[I8] root;
+	&[I8][] extension;
 }
 
-constructor (root: &[I8], ...extensions: &[I8][]) {
+constructor (&[I8] root, ...&[I8][] extensions) {
 	this.root = root;
 	this.extension = extensions;
 }

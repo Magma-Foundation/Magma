@@ -1,7 +1,8 @@
 import { ConstructorHeader } from "../../../../magma/app/compile/value/ConstructorHeader";
 import { FunctionHeader } from "../../../../magma/app/compile/define/FunctionHeader";
+import { Platform } from "../../../../magma/app/io/Platform";
 export class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
-	generateWithAfterName(afterName: string): string {
+	generateWithAfterName(platform: Platform, afterName: string): string {
 		return "constructor " + afterName;
 	}
 	hasAnnotation(annotation: string): boolean {

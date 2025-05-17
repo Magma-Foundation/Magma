@@ -1,18 +1,18 @@
 #include "./Import.h"
 export class Import {
-	namespace: List<&[I8]>;
-	child: &[I8];
-	constructor (namespace: List<&[I8]>, child: &[I8]) {
+	List<&[I8]> namespace;
+	&[I8] child;
+	constructor (List<&[I8]> namespace, &[I8] child) {
 		this.namespace = namespace;
 		this.child = child;
 	}
 }
 
-generate(platform: Platform): &[I8] {
+&[I8] generate(Platform platform) {
 	if (Platform.Magma === platform) {
-		let joinedNamespace: &[I8] = this.namespace.query().collect(new Joiner(".")).orElse("");
+		&[I8] joinedNamespace = this.namespace.query().collect(new Joiner(".")).orElse("");
 		return "import " + joinedNamespace + "." + this.child + ";\n";
 	}
-	let joinedNamespace: &[I8] = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
+	&[I8] joinedNamespace = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
 	return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 }

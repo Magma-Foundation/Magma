@@ -1,24 +1,24 @@
 #include "./Source.h"
 export class Source {
-	sourceDirectory: Path;
-	source: Path;
-	constructor (sourceDirectory: Path, source: Path) {
+	Path sourceDirectory;
+	Path source;
+	constructor (Path sourceDirectory, Path source) {
 		this.sourceDirectory = sourceDirectory;
 		this.source = source;
 	}
 }
 
-read(): Result<&[I8], IOError> {
+Result<&[I8], IOError> read() {
 	return this.source.readString();
 }
-computeName(): &[I8] {
-	let fileName: &[I8] = this.source.findFileName();
-	let separator: number = fileName.lastIndexOf(".");
+&[I8] computeName() {
+	&[I8] fileName = this.source.findFileName();
+	number separator = fileName.lastIndexOf(".");
 	return fileName.substring(0, separator);
 }
-computeNamespace(): List<&[I8]> {
+List<&[I8]> computeNamespace() {
 	return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<&[I8]>());
 }
-computeLocation(): Location {
+Location computeLocation() {
 	return new Location(this.computeNamespace(), this.computeName());
 }

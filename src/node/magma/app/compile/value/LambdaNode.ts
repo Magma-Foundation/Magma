@@ -1,6 +1,7 @@
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Definition } from "../../../../magma/app/compile/define/Definition";
 import { List } from "../../../../magma/api/collect/list/List";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -15,8 +16,8 @@ export class LambdaNode implements Value {
 		this.paramNames = paramNames;
 		this.content = content;
 	}
-	generate(): string {
-		let joinedParamNames: string = this.paramNames.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
+	generate(platform: Platform): string {
+		let joinedParamNames: string = this.paramNames.query().map((definition: Definition) => definition.generate(platform)).collect(new Joiner(", ")).orElse("");
 		return "(" + joinedParamNames + ")" + " => " + this.content;
 	}
 	toValue(): Option<Value> {
@@ -28,7 +29,7 @@ export class LambdaNode implements Value {
 	resolve(state: CompileState): Type {
 		return PrimitiveType.Unknown;
 	}
-	generateAsEnumValue(structureName: string): Option<string> {
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();
 	}
 }

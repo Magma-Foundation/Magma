@@ -2,9 +2,9 @@
 export class Whitespace implements Parameter {
 }
 
-generate(): &[I8] {
+&[I8] generate(Platform platform) {
 	return "";
 }
-asDefinition(): Option<Definition> {
+Option<Definition> asDefinition() {
 	return new None<Definition>();
 }

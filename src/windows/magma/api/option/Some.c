@@ -1,41 +1,41 @@
 #include "./Some.h"
 export class Some<T> implements Option<T> {
-	value: T;
-	constructor (value: T) {
+	T value;
+	constructor (T value) {
 		this.value = value;
 	}
 }
 
-map<R>(mapper: (arg0 : T) => R): Option<R> {
+Option<R> map((arg0 : T) => R mapper) {
 	return new Some<R>(mapper(this.value));
 }
-orElse(other: T): T {
+T orElse(T other) {
 	return this.value;
 }
-orElseGet(supplier: () => T): T {
+T orElseGet(() => T supplier) {
 	return this.value;
 }
-isPresent(): Bool {
+Bool isPresent() {
 	return true;
 }
-ifPresent(consumer: (arg0 : T) => void): void {
+void ifPresent((arg0 : T) => void consumer) {
 	consumer(this.value);
 }
-or(other: () => Option<T>): Option<T> {
+Option<T> or(() => Option<T> other) {
 	return this;
 }
-flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
+Option<R> flatMap((arg0 : T) => Option<R> mapper) {
 	return mapper(this.value);
 }
-filter(predicate: (arg0 : T) => boolean): Option<T> {
+Option<T> filter((arg0 : T) => boolean predicate) {
 	if (predicate(this.value)) {
 		return this;
 	}
 	return new None<T>();
 }
-toTuple(other: T): Tuple2<Bool, T> {
+Tuple2<Bool, T> toTuple(T other) {
 	return new Tuple2Impl<Bool, T>(true, this.value);
 }
-and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-	return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue));
+Option<Tuple2<T, R>> and(() => Option<R> other) {
+	return other().map((R otherValue) => new Tuple2Impl<T, R>(this.value, otherValue));
 }

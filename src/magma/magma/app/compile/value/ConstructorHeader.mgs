@@ -1,7 +1,8 @@
 import magma.app.compile.value.ConstructorHeader;
 import magma.app.compile.define.FunctionHeader;
+import magma.app.io.Platform;
 export struct ConstructorHeader implements FunctionHeader<ConstructorHeader> {
-	def generateWithAfterName(afterName: &[I8]): &[I8] {
+	def generateWithAfterName(mut platform: Platform, afterName: &[I8]): &[I8] {
 		return "constructor " + afterName;
 	}
 	def hasAnnotation(annotation: &[I8]): Bool {

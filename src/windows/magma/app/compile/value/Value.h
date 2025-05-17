@@ -3,4 +3,5 @@
 import { Type } from "magma/api/Type";
 import { CompileState } from "magma/app/compile/CompileState";
 import { Option } from "magma/api/option/Option";
+import { Platform } from "magma/app/io/Platform";
 #endif

@@ -1,10 +1,11 @@
 package magma.app.compile.value;
 
 import magma.app.compile.define.FunctionHeader;
+import magma.app.io.Platform;
 
 public class ConstructorHeader implements FunctionHeader<ConstructorHeader> {
     @Override
-    public String generateWithAfterName(final String afterName) {
+    public String generateWithAfterName(Platform platform, final String afterName) {
         return "constructor " + afterName;
     }
 

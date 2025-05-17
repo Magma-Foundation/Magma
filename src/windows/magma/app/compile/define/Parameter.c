@@ -1,5 +1,5 @@
 #include "./Parameter.h"
 export interface Parameter {
-	generate(): &[I8];
-	asDefinition(): Option<Definition>;
+	&[I8] generate(Platform platform);
+	Option<Definition> asDefinition();
 }

@@ -1,8 +1,8 @@
 #include "./Location.h"
 export class Location {
-	namespace: List<&[I8]>;
-	name: &[I8];
-	constructor (namespace: List<&[I8]>, name: &[I8]) {
+	List<&[I8]> namespace;
+	&[I8] name;
+	constructor (List<&[I8]> namespace, &[I8] name) {
 		this.namespace = namespace;
 		this.name = name;
 	}

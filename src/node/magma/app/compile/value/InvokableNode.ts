@@ -1,6 +1,7 @@
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Caller } from "../../../../magma/app/compile/value/Caller";
 import { List } from "../../../../magma/api/collect/list/List";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -15,12 +16,12 @@ export class InvokableNode implements Value {
 		this.caller = caller;
 		this.args = args;
 	}
-	generate(): string {
-		let joinedArguments: string = this.joinArgs();
-		return this.caller.generate() + "(" + joinedArguments + ")";
+	generate(platform: Platform): string {
+		let joinedArguments: string = this.joinArgs(platform);
+		return this.caller.generate(platform) + "(" + joinedArguments + ")";
 	}
-	joinArgs(): string {
-		return this.args.query().map((value: Value) => value.generate()).collect(new Joiner(", ")).orElse("");
+	joinArgs(platform: Platform): string {
+		return this.args.query().map((value: Value) => value.generate(platform)).collect(new Joiner(", ")).orElse("");
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this);
@@ -31,7 +32,7 @@ export class InvokableNode implements Value {
 	resolve(state: CompileState): Type {
 		return PrimitiveType.Unknown;
 	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new Some<string>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
+		return new Some<string>("\n\tstatic " + this.caller.generate(platform) + ": " + structureName + " = new " + structureName + "(" + this.joinArgs(platform) + ");");
 	}
 }

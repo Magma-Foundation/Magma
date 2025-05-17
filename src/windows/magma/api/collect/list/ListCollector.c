@@ -2,9 +2,9 @@
 export class ListCollector<T> implements Collector<T, List<T>> {
 }
 
-createInitial(): List<T> {
+List<T> createInitial() {
 	return Lists.empty();
 }
-fold(current: List<T>, element: T): List<T> {
+List<T> fold(List<T> current, T element) {
 	return current.addLast(element);
 }

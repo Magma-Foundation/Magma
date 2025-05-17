@@ -1,9 +1,9 @@
 #include "./Lists.h"
 export interface ListsInstance {
-	fromArray<T>(elements: T[]): List<T>;
+	List<T> fromArray(T[] elements);
 
-	empty<T>(): List<T>;
+	List<T> empty();
 
-	of<T>(...elements: T[]): List<T>;
+	List<T> of(...T[] elements);
 
 }

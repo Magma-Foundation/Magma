@@ -9,12 +9,13 @@ import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.type.PrimitiveType;
+import magma.app.io.Platform;
 
 public record LambdaNode(List<Definition> paramNames, String content) implements Value {
     @Override
-    public String generate() {
+    public String generate(Platform platform) {
         final String joinedParamNames = this.paramNames.query()
-                .map((Definition definition) -> definition.generate())
+                .map((Definition definition) -> definition.generate(platform))
                 .collect(new Joiner(", "))
                 .orElse("");
 
@@ -36,7 +37,7 @@ public record LambdaNode(List<Definition> paramNames, String content) implements
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
     }
 }

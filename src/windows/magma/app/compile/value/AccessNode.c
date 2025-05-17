@@ -1,25 +1,25 @@
 #include "./AccessNode.h"
 export class AccessNode implements Value {
-	child: Value;
-	property: &[I8];
-	constructor (child: Value, property: &[I8]) {
+	Value child;
+	&[I8] property;
+	constructor (Value child, &[I8] property) {
 		this.child = child;
 		this.property = property;
 	}
 }
 
-generate(): &[I8] {
-	return this.child.generate() + "." + this.property;
+&[I8] generate(Platform platform) {
+	return this.child.generate(platform) + "." + this.property;
 }
-toValue(): Option<Value> {
+Option<Value> toValue() {
 	return new Some<Value>(this);
 }
-findChild(): Option<Value> {
+Option<Value> findChild() {
 	return new Some<Value>(this.child);
 }
-resolve(state: CompileState): Type {
+Type resolve(CompileState state) {
 	return PrimitiveType.Unknown;
 }
-generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();
 }

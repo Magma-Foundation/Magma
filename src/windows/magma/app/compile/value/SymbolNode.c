@@ -1,32 +1,35 @@
 #include "./SymbolNode.h"
 export class SymbolNode {
-	value: &[I8];
-	constructor (value: &[I8]) {
+	&[I8] value;
+	constructor (&[I8] value) {
 		this.value = value;
 	}
 }
 
-generate(): &[I8] {
+&[I8] generate(Platform platform) {
 	return this.value;
 }
-resolve(state: CompileState): Type {
+Type resolve(CompileState state) {
 	return state.resolve(this.value).orElse(PrimitiveType.Unknown);
 }
-toValue(): Option<Value> {
+Option<Value> toValue() {
 	return new Some<Value>(this);
 }
-findChild(): Option<Value> {
+Option<Value> findChild() {
 	return new None<Value>();
 }
-isFunctional(): Bool {
+&[I8] generate() {
+	return this.value;
+}
+Bool isFunctional() {
 	return false;
 }
-isVar(): Bool {
+Bool isVar() {
 	return false;
 }
-generateBeforeName(): &[I8] {
+&[I8] generateBeforeName() {
 	return "";
 }
-generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();
 }

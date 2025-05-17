@@ -1,3 +1,4 @@
+import magma.app.io.Platform;
 import magma.api.Type;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
@@ -10,7 +11,7 @@ export struct SymbolNode {
 	constructor (mut value: &[I8]) {
 		this.value = value;
 	}
-	def generate(): &[I8] {
+	def generate(platform: Platform): &[I8] {
 		return this.value;
 	}
 	def resolve(state: CompileState): Type {
@@ -22,6 +23,9 @@ export struct SymbolNode {
 	def findChild(): Option<Value> {
 		return None<Value>();
 	}
+	def generate(): &[I8] {
+		return this.value;
+	}
 	def isFunctional(): Bool {
 		return false;
 	}
@@ -31,7 +35,7 @@ export struct SymbolNode {
 	def generateBeforeName(): &[I8] {
 		return "";
 	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>();
 	}
 }

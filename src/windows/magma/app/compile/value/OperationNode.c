@@ -1,27 +1,27 @@
 #include "./OperationNode.h"
 export class OperationNode implements Value {
-	left: Value;
-	targetInfix: &[I8];
-	right: Value;
-	constructor (left: Value, targetInfix: &[I8], right: Value) {
+	Value left;
+	&[I8] targetInfix;
+	Value right;
+	constructor (Value left, &[I8] targetInfix, Value right) {
 		this.left = left;
 		this.targetInfix = targetInfix;
 		this.right = right;
 	}
 }
 
-generate(): &[I8] {
-	return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
+&[I8] generate(Platform platform) {
+	return this.left.generate(platform) + " " + this.targetInfix + " " + this.right.generate(platform);
 }
-toValue(): Option<Value> {
+Option<Value> toValue() {
 	return new Some<Value>(this);
 }
-findChild(): Option<Value> {
+Option<Value> findChild() {
 	return new None<Value>();
 }
-resolve(state: CompileState): Type {
+Type resolve(CompileState state) {
 	return PrimitiveType.Unknown;
 }
-generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();
 }

@@ -257,7 +257,8 @@ export struct Main {
 		let outputContentTuple: Tuple2<CompileState, &[I8]> = Main.compileStatements(state.pushStructureName(name), content, Main.compileClassSegment);
 		let outputContentState: CompileState = outputContentTuple.left().popStructureName();
 		let outputContent: &[I8] = outputContentTuple.right();
-		let constructorString: &[I8] = Main.generateConstructorFromRecordParameters(parameters);
+		let platform: Platform = outputContentState.platform();
+		let constructorString: &[I8] = Main.generateConstructorFromRecordParameters(parameters, platform);
 		let joinedTypeParams: &[I8] = Joiner.joinOrEmpty(typeParams, ", ", "<", ">");
 		let implementingString: &[I8] = Main.generateImplementing(maybeImplementing);
 		let newModifiers: List<&[I8]> = Main.modifyModifiers0(oldModifiers);
@@ -265,14 +266,14 @@ export struct Main {
 		if (annotations.contains("Namespace", Strings.equalsTo)) {
 			let actualInfix: &[I8] = "interface ";
 			let newName: &[I8] = name + "Instance";
-			let generated: &[I8] = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+			let generated: &[I8] = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Main.joinParameters(parameters, platform) + constructorString + outputContent + "\n}\n";
 			let withNewLocation: CompileState = outputContentState.append(generated).mapLocation((mut location: Location) => Location(location.namespace(), location.name() + "Instance"));
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(withNewLocation, ""));
 		}
 		else {
 			let extendsString: &[I8] = maybeSuperType.map((mut inner: &[I8]) => " extends " + inner).orElse("");
 			let infix1: &[I8] = Main.retainStruct(infix, outputContentState);
-			let generated: &[I8] = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
+			let generated: &[I8] = joinedModifiers + infix1 + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters, platform) + constructorString + outputContent + "\n}\n";
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(outputContentState.append(generated), ""));
 		}
 	}
@@ -291,8 +292,8 @@ export struct Main {
 	def static generateImplementing(maybeImplementing: Option<Type>): &[I8] {
 		return maybeImplementing.map((mut type: Type) => type.generate()).map((mut inner: &[I8]) => " implements " + inner).orElse("");
 	}
-	def static generateConstructorFromRecordParameters(parameters: List<Definition>): &[I8] {
-		return parameters.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).map((mut generatedParameters: &[I8]) => Main.generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
+	def static generateConstructorFromRecordParameters(parameters: List<Definition>, platform: Platform): &[I8] {
+		return parameters.query().map((mut definition: Definition) => definition.generate(platform)).collect(Joiner(", ")).map((mut generatedParameters: &[I8]) => Main.generateConstructorWithParameterString(parameters, generatedParameters)).orElse("");
 	}
 	def static generateConstructorWithParameterString(parameters: List<Definition>, parametersString: &[I8]): &[I8] {
 		let constructorAssignments: &[I8] = Main.generateConstructorAssignments(parameters);
@@ -301,8 +302,8 @@ export struct Main {
 	def static generateConstructorAssignments(parameters: List<Definition>): &[I8] {
 		return parameters.query().map((mut definition: Definition) => "\n\t\tthis." + definition.name() + " = " + definition.name() + ";").collect(Joiner.empty()).orElse("");
 	}
-	def static joinParameters(parameters: List<Definition>): &[I8] {
-		return parameters.query().map((mut definition: Definition) => definition.generate()).map((mut generated: &[I8]) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");
+	def static joinParameters(parameters: List<Definition>, platform: Platform): &[I8] {
+		return parameters.query().map((mut definition: Definition) => definition.generate(platform)).map((mut generated: &[I8]) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");
 	}
 	def static compileNamespaced(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		let stripped: &[I8] = Strings.strip(input);
@@ -345,13 +346,13 @@ export struct Main {
 			let parametersState: CompileState = parametersTuple.left();
 			let parameters: List<Parameter> = parametersTuple.right();
 			let definitions: List<Definition> = Main.retainDefinitionsFromParameters(parameters);
-			let joinedDefinitions: &[I8] = definitions.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).orElse("");
+			let joinedDefinitions: &[I8] = definitions.query().map((mut definition: Definition) => definition.generate(parametersState.platform())).collect(Joiner(", ")).orElse("");
 			let newHeader: FunctionHeader<S> = Main.retainDef(header, parametersState);
 			if (newHeader.hasAnnotation("Actual")) {
-				let headerGenerated: &[I8] = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
+				let headerGenerated: &[I8] = newHeader.removeModifier("static").generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
 				return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(parametersState, "\n\t" + headerGenerated + ";\n"));
 			}
-			let headerGenerated: &[I8] = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
+			let headerGenerated: &[I8] = newHeader.generateWithAfterName(parametersState.platform(), "(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: &[I8]) => Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: &[I8]) => {
 				let compileState1: CompileState = parametersState.enterDepth();
 				let compileState: CompileState = /* compileState1.isPlatform(Platform.Windows) ? compileState1 : compileState1.enterDepth()*/;
@@ -448,7 +449,7 @@ export struct Main {
 		});
 	}
 	def static compileFunctionStatementValue(state: CompileState, withoutEnd: &[I8]): Tuple2<CompileState, &[I8]> {
-		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (mut state1: CompileState, mut input: &[I8]) => Main.parseInvokable(state1, input).map((mut tuple: Tuple2<CompileState, Value>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
+		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (mut state1: CompileState, mut input: &[I8]) => Main.parseInvokable(state1, input).map((mut tuple: Tuple2<CompileState, Value>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate(tuple.left().platform()))), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
 	}
 	def static compileBreak(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		if (Strings.equalsTo("break", Strings.strip(input))) {
@@ -535,15 +536,34 @@ export struct Main {
 	def static compileAssignment(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.compileFirst(input, "=", (destination: &[I8], source: &[I8]) => {
 			let sourceTuple: Tuple2<CompileState, &[I8]> = Main.compileValueOrPlaceholder(state, source);
-			let destinationTuple: Tuple2<CompileState, &[I8]> = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().addModifier("let").generate()))).orElseGet(() => Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+			let destinationTuple: Tuple2<CompileState, &[I8]> = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((definitionTuple: Tuple2<CompileState, Definition>) => {
+				let definitionState: CompileState = definitionTuple.left();
+				let definition: Definition = definitionTuple.right();
+				let let: Definition = Main.attachLet(definitionState, definition);
+				let generate: &[I8] = let.generate(definitionState.platform());
+				return Tuple2Impl<CompileState, &[I8]>(definitionState, generate);
+			})).orElseGet(() => Tuple2Impl<CompileState, &[I8]>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 		});
+	}
+	def static attachLet(definitionState: CompileState, definition: Definition): Definition {
+		/*final Definition let*/;
+		if (definitionState.isPlatform(Platform.Windows)) {
+			let = definition;
+		}
+		else {
+			let = definition.addModifier("let");
+		}
+		return let;
 	}
 	def static compileValueOrPlaceholder(state: CompileState, input: &[I8]): Tuple2<CompileState, &[I8]> {
 		return Main.compileValue(state, input).orElseGet(() => Tuple2Impl<CompileState, &[I8]>(state, Main.generatePlaceholder(input)));
 	}
 	def static compileValue(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		return Main.parseValue(state, input).map((mut tuple: Tuple2<CompileState, Value>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate()));
+		return Main.parseValue(state, input).map((tuple: Tuple2<CompileState, Value>) => {
+			let generated: &[I8] = tuple.right().generate(tuple.left().platform());
+			return Tuple2Impl<CompileState, &[I8]>(tuple.left(), generated);
+		});
 	}
 	def static parseValue(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 		return Main.or(state, input, Lists.of(Main.parseLambda, Main.createOperatorRule("+"), Main.createOperatorRule("-"), Main.createOperatorRule("<="), Main.createOperatorRule("<"), Main.createOperatorRule("&&"), Main.createOperatorRule("||"), Main.createOperatorRule(">"), Main.createOperatorRule(">="), Main.parseInvokable, Main.createAccessRule("."), Main.createAccessRule("::"), Main.parseSymbol, Main.parseNot, Main.parseNumber, Main.createOperatorRuleWithDifferentInfix("==", "==="), Main.createOperatorRuleWithDifferentInfix("!=", "!=="), Main.createTextRule("\""), Main.createTextRule("'")));
@@ -662,7 +682,10 @@ export struct Main {
 		return mapper(slice);
 	}
 	def static compileWhitespace(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		return Main.parseWhitespace(state, input).map((mut tuple: Tuple2<CompileState, Whitespace>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().generate()));
+		return Main.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {
+			let generate: &[I8] = tuple.right().generate(tuple.left().platform());
+			return Tuple2Impl<CompileState, &[I8]>(tuple.left(), generate);
+		});
 	}
 	def static parseWhitespace(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Whitespace>> {
 		if (Strings.isBlank(input)) {
@@ -674,12 +697,15 @@ export struct Main {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: &[I8]) => Main.getTupleOption(state, withoutEnd).or(() => Main.compileEnumValues(state, withoutEnd)));
 	}
 	def static getTupleOption(state: CompileState, withoutEnd: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		return Main.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple2<CompileState, Parameter>) => Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(definitionTuple.left(), "\n\t" + definitionTuple.right().generate() + ";")));
+		return Main.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple2<CompileState, Parameter>) => {
+			let generate: &[I8] = "\n\t" + definitionTuple.right().generate(definitionTuple.left().platform()) + ";";
+			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(definitionTuple.left(), generate));
+		});
 	}
 	def static compileEnumValues(state: CompileState, withoutEnd: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: &[I8]) => Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
 			let structureName: &[I8] = state.findLastStructureName().orElse("");
-			return tuple.right().generateAsEnumValue(structureName).map((stringOption: &[I8]) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption));
+			return tuple.right().generateAsEnumValue(structureName, state.platform()).map((stringOption: &[I8]) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), stringOption));
 		})).map((tuple: Tuple2<CompileState, List<&[I8]>>) => Tuple2Impl<CompileState, &[I8]>(tuple.left(), tuple.right().query().collect(Joiner("")).orElse("")));
 	}
 	def static parseParameterOrPlaceholder(state: CompileState, input: &[I8]): Tuple2<CompileState, Parameter> {

@@ -1,7 +1,7 @@
 #include "./FunctionHeader.h"
 export interface FunctionHeader<S extends FunctionHeader<S>> {
-	generateWithAfterName(afterName: &[I8]): &[I8];
-	hasAnnotation(annotation: &[I8]): Bool;
-	removeModifier(modifier: &[I8]): S;
-	addModifier(modifier: &[I8]): S;
+	&[I8] generateWithAfterName(Platform platform, &[I8] afterName);
+	Bool hasAnnotation(&[I8] annotation);
+	S removeModifier(&[I8] modifier);
+	S addModifier(&[I8] modifier);
 }

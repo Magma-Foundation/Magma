@@ -1,25 +1,25 @@
 #include "./HeadedQuery.h"
 export class HeadedQuery<T> implements Query<T> {
-	head: Head<T>;
-	constructor (head: Head<T>) {
+	Head<T> head;
+	constructor (Head<T> head) {
 		this.head = head;
 	}
 }
 
-next(): Option<T> {
+Option<T> next() {
 	return this.head.next();
 }
-collect<C>(collector: Collector<T, C>): C {
-	return this.foldWithInitial(collector.createInitial(), (current: C, element: T) => collector.fold(current, element));
+C collect(Collector<T, C> collector) {
+	return this.foldWithInitial(collector.createInitial(), (C current, T element) => collector.fold(current, element));
 }
-map<R>(mapper: (arg0 : T) => R): Query<R> {
+Query<R> map((arg0 : T) => R mapper) {
 	return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
 }
-foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-	let result: R = initial;
+R foldWithInitial(R initial, (arg0 : R, arg1 : T) => R folder) {
+	R result = initial;
 	while (true) {
-		let finalResult: R = result;
-		let maybeNext: Tuple2<Bool, R> = this.head.next().map((inner: T) => folder(finalResult, inner)).toTuple(finalResult);
+		R finalResult = result;
+		Tuple2<Bool, R> maybeNext = this.head.next().map((T inner) => folder(finalResult, inner)).toTuple(finalResult);
 		if (maybeNext.left()) {
 			result = maybeNext.right();
 		}
@@ -28,23 +28,23 @@ foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		}
 	}
 }
-foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-	return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder));
+Option<R> foldWithMapper((arg0 : T) => R next, (arg0 : R, arg1 : T) => R folder) {
+	return this.head.next().map(next).map((R maybeNext) => this.foldWithInitial(maybeNext, folder));
 }
-flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-	return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
+Query<R> flatMap((arg0 : T) => Query<R> mapper) {
+	return this.head.next().map(mapper).map((Query<R> initial) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
 }
-allMatch(predicate: (arg0 : T) => boolean): Bool {
-	return this.foldWithInitial(true, (maybeAllTrue: Bool, element: T) => maybeAllTrue && predicate(element));
+Bool allMatch((arg0 : T) => boolean predicate) {
+	return this.foldWithInitial(true, (Bool maybeAllTrue, T element) => maybeAllTrue && predicate(element));
 }
-anyMatch(predicate: (arg0 : T) => boolean): Bool {
-	return this.foldWithInitial(false, (aBoolean: Bool, t: T) => aBoolean || predicate(t));
+Bool anyMatch((arg0 : T) => boolean predicate) {
+	return this.foldWithInitial(false, (Bool aBoolean, T t) => aBoolean || predicate(t));
 }
-zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
+Query<Tuple2<T, R>> zip(Query<R> other) {
 	return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
 }
-filter(predicate: (arg0 : T) => boolean): Query<T> {
-	return this.flatMap((element: T) => {
+Query<T> filter((arg0 : T) => boolean predicate) {
+	return this.flatMap((T element) => {
 		if (predicate(element)) {
 			return new HeadedQuery<T>(new SingleHead<T>(element));
 		}

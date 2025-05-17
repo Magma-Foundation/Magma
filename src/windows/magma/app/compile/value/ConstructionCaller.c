@@ -1,19 +1,19 @@
 #include "./ConstructionCaller.h"
 export class ConstructionCaller implements Caller {
-	right: &[I8];
-	platform: Platform;
-	constructor (right: &[I8], platform: Platform) {
+	&[I8] right;
+	Platform platform;
+	constructor (&[I8] right, Platform platform) {
 		this.right = right;
 		this.platform = platform;
 	}
 }
 
-generate(): &[I8] {
+&[I8] generate(Platform platform) {
 	if (Platform.Magma === this.platform) {
 		return this.right;
 	}
 	return "new " + this.right;
 }
-findChild(): Option<Value> {
+Option<Value> findChild() {
 	return new None<Value>();
 }

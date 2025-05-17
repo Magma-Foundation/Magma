@@ -1,4 +1,5 @@
 import { Value } from "../../../../magma/app/compile/value/Value";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { None } from "../../../../magma/api/option/None";
@@ -10,7 +11,7 @@ export class NotNode implements Value {
 	constructor (child: string) {
 		this.child = child;
 	}
-	generate(): string {
+	generate(platform: Platform): string {
 		return this.child;
 	}
 	toValue(): Option<Value> {
@@ -22,7 +23,7 @@ export class NotNode implements Value {
 	resolve(state: CompileState): Type {
 		return PrimitiveType.Unknown;
 	}
-	generateAsEnumValue(structureName: string): Option<string> {
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();
 	}
 }

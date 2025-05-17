@@ -1,35 +1,38 @@
 #include "./Placeholder.h"
 export class Placeholder {
-	input: &[I8];
-	constructor (input: &[I8]) {
+	&[I8] input;
+	constructor (&[I8] input) {
 		this.input = input;
 	}
 }
 
-generate(): &[I8] {
+&[I8] generate() {
 	return Main.generatePlaceholder(this.input);
 }
-isFunctional(): Bool {
+Bool isFunctional() {
 	return false;
 }
-findChild(): Option<Value> {
+&[I8] generate(Platform platform) {
+	return this.generate();
+}
+Option<Value> findChild() {
 	return new None<Value>();
 }
-asDefinition(): Option<Definition> {
+Option<Definition> asDefinition() {
 	return new None<Definition>();
 }
-toValue(): Option<Value> {
+Option<Value> toValue() {
 	return new None<Value>();
 }
-resolve(state: CompileState): Type {
+Type resolve(CompileState state) {
 	return PrimitiveType.Unknown;
 }
-isVar(): Bool {
+Bool isVar() {
 	return false;
 }
-generateBeforeName(): &[I8] {
+&[I8] generateBeforeName() {
 	return "";
 }
-generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+Option<&[I8]> generateAsEnumValue(&[I8] structureName, Platform platform) {
 	return new None<&[I8]>();
 }

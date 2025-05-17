@@ -1,6 +1,7 @@
 import magma.app.compile.value.Value;
 import magma.app.compile.define.Definition;
 import magma.api.collect.list.List;
+import magma.app.io.Platform;
 import magma.api.collect.Joiner;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -15,8 +16,8 @@ export struct LambdaNode implements Value {
 		this.paramNames = paramNames;
 		this.content = content;
 	}
-	def generate(): &[I8] {
-		let joinedParamNames: &[I8] = this.paramNames.query().map((mut definition: Definition) => definition.generate()).collect(Joiner(", ")).orElse("");
+	def generate(mut platform: Platform): &[I8] {
+		let joinedParamNames: &[I8] = this.paramNames.query().map((mut definition: Definition) => definition.generate(platform)).collect(Joiner(", ")).orElse("");
 		return "(" + joinedParamNames + ")" + " => " + this.content;
 	}
 	def toValue(): Option<Value> {
@@ -28,7 +29,7 @@ export struct LambdaNode implements Value {
 	def resolve(state: CompileState): Type {
 		return PrimitiveType.Unknown;
 	}
-	def generateAsEnumValue(structureName: &[I8]): Option<&[I8]> {
+	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
 		return None<&[I8]>();
 	}
 }

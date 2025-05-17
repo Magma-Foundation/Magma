@@ -8,17 +8,18 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
+import magma.app.io.Platform;
 
 public record InvokableNode(Caller caller, List<Value> args) implements Value {
     @Override
-    public String generate() {
-        final String joinedArguments = this.joinArgs();
-        return this.caller.generate() + "(" + joinedArguments + ")";
+    public String generate(final Platform platform) {
+        final String joinedArguments = this.joinArgs(platform);
+        return this.caller.generate(platform) + "(" + joinedArguments + ")";
     }
 
-    private String joinArgs() {
+    private String joinArgs(final Platform platform) {
         return this.args.query()
-                .map((Value value) -> value.generate())
+                .map((Value value) -> value.generate(platform))
                 .collect(new Joiner(", "))
                 .orElse("");
     }
@@ -38,7 +39,7 @@ public record InvokableNode(Caller caller, List<Value> args) implements Value {
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
-        return new Some<String>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
+        return new Some<String>("\n\tstatic " + this.caller.generate(platform) + ": " + structureName + " = new " + structureName + "(" + this.joinArgs(platform) + ");");
     }
 }

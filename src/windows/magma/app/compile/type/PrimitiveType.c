@@ -7,21 +7,21 @@ export class PrimitiveType implements Type {
 	static Unknown: PrimitiveType = new PrimitiveType("unknown");
 	static I8: PrimitiveType = new PrimitiveType("I8");
 	static I32: PrimitiveType = new PrimitiveType("I32");
-	value: &[I8];
+	&[I8] value;
 }
 
-constructor (value: &[I8]) {
+constructor (&[I8] value) {
 	this.value = value;
 }
-generate(): &[I8] {
+&[I8] generate() {
 	return this.value;
 }
-isFunctional(): Bool {
+Bool isFunctional() {
 	return false;
 }
-isVar(): Bool {
+Bool isVar() {
 	return PrimitiveType.Var === this;
 }
-generateBeforeName(): &[I8] {
+&[I8] generateBeforeName() {
 	return "";
 }

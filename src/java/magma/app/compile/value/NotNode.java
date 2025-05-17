@@ -6,10 +6,11 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.type.PrimitiveType;
+import magma.app.io.Platform;
 
 public record NotNode(String child) implements Value {
     @Override
-    public String generate() {
+    public String generate(Platform platform) {
         return this.child;
     }
 
@@ -28,7 +29,7 @@ public record NotNode(String child) implements Value {
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
     }
 }

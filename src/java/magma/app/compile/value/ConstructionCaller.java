@@ -6,7 +6,7 @@ import magma.app.io.Platform;
 
 public record ConstructionCaller(String right, Platform platform) implements Caller {
     @Override
-    public String generate() {
+    public String generate(Platform platform) {
         if (Platform.Magma == this.platform) {
             return this.right;
         }

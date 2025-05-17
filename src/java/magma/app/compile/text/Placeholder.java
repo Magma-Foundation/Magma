@@ -9,6 +9,7 @@ import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.value.Value;
+import magma.app.io.Platform;
 
 public record Placeholder(String input) implements Parameter, Value, Type {
     @Override
@@ -19,6 +20,11 @@ public record Placeholder(String input) implements Parameter, Value, Type {
     @Override
     public boolean isFunctional() {
         return false;
+    }
+
+    @Override
+    public String generate(final Platform platform) {
+        return this.generate();
     }
 
     @Override
@@ -52,7 +58,7 @@ public record Placeholder(String input) implements Parameter, Value, Type {
     }
 
     @Override
-    public Option<String> generateAsEnumValue(final String structureName) {
+    public Option<String> generateAsEnumValue(final String structureName, Platform platform) {
         return new None<String>();
     }
 }

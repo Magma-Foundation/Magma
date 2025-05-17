@@ -1,23 +1,23 @@
 #include "./FunctionType.h"
 export class FunctionType implements Type {
-	args: List<&[I8]>;
-	returns: &[I8];
-	constructor (args: List<&[I8]>, returns: &[I8]) {
+	List<&[I8]> args;
+	&[I8] returns;
+	constructor (List<&[I8]> args, &[I8] returns) {
 		this.args = args;
 		this.returns = returns;
 	}
 }
 
-generate(): &[I8] {
-	let joinedArguments: &[I8] = this.args.queryWithIndices().map((tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
+&[I8] generate() {
+	&[I8] joinedArguments = this.args.queryWithIndices().map((Tuple2<number, &[I8]> tuple) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
 	return "(" + joinedArguments + ") => " + this.returns;
 }
-isFunctional(): Bool {
+Bool isFunctional() {
 	return true;
 }
-isVar(): Bool {
+Bool isVar() {
 	return false;
 }
-generateBeforeName(): &[I8] {
+&[I8] generateBeforeName() {
 	return "";
 }

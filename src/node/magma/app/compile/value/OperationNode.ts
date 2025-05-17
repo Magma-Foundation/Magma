@@ -1,4 +1,5 @@
 import { Value } from "../../../../magma/app/compile/value/Value";
+import { Platform } from "../../../../magma/app/io/Platform";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { None } from "../../../../magma/api/option/None";
@@ -14,8 +15,8 @@ export class OperationNode implements Value {
 		this.targetInfix = targetInfix;
 		this.right = right;
 	}
-	generate(): string {
-		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
+	generate(platform: Platform): string {
+		return this.left.generate(platform) + " " + this.targetInfix + " " + this.right.generate(platform);
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this);
@@ -26,7 +27,7 @@ export class OperationNode implements Value {
 	resolve(state: CompileState): Type {
 		return PrimitiveType.Unknown;
 	}
-	generateAsEnumValue(structureName: string): Option<string> {
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
 		return new None<string>();
 	}
 }
