@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_CompileState
 #define magma_app_compile_CompileState
 import { Option } from "magma/api/option/Option";

@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_FunctionSegment
 #define magma_app_compile_FunctionSegment
 import { FunctionHeader } from "magma/app/compile/define/FunctionHeader";

@@ -1,3 +1,4 @@
+// []
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
 import { None } from "../../../magma/api/option/None";

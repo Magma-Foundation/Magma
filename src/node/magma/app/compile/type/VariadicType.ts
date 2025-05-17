@@ -1,3 +1,4 @@
+// []
 import { Type } from "../../../../magma/api/Type";
 export class VariadicType implements Type {
 	type: Type;

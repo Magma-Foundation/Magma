@@ -1,3 +1,4 @@
+// []
 import magma.api.collect.{ Query, Collector };
 import magma.api.collect.head.{ Head, MapHead, FlatMapHead, EmptyHead, ZipHead, SingleHead };
 import magma.api.option.{ Option };

@@ -1,3 +1,4 @@
+// []
 import magma.api.result.{ Result };
 import magma.api.option.{ Option, None, Some };
 export struct Ok<T, X> implements Result<T, X> {

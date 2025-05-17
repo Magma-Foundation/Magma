@@ -1,3 +1,4 @@
+// []
 import { Query } from "../../../../magma/api/collect/Query";
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";

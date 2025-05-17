@@ -1,3 +1,4 @@
+// []
 import { Type } from "../../../../magma/api/Type";
 export class PrimitiveType implements Type {
 	static String/*auto*/: PrimitiveType = new PrimitiveType("string");

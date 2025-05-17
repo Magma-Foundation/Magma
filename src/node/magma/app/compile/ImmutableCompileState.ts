@@ -1,3 +1,4 @@
+// []
 import { CompileState } from "../../../magma/app/compile/CompileState";
 import { Platform } from "../../../magma/app/io/Platform";
 import { Location } from "../../../magma/app/io/Location";

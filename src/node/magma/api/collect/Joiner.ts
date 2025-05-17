@@ -1,3 +1,4 @@
+// []
 import { Option } from "../../../magma/api/option/Option";
 import { Collector } from "../../../magma/api/collect/Collector";
 import { List } from "../../../magma/api/collect/list/List";

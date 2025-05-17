@@ -1,3 +1,4 @@
+// []
 import { Option } from "../../../magma/api/option/Option";
 export interface Result<T, X> {
 	findError(): Option<X>;

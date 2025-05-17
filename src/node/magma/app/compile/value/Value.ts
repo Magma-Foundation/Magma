@@ -1,3 +1,4 @@
+// []
 import { Option } from "../../../../magma/api/option/Option";
 import { Platform } from "../../../../magma/app/io/Platform";
 import { Type } from "../../../../magma/api/Type";

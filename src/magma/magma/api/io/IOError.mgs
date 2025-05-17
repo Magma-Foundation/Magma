@@ -1,3 +1,4 @@
+// []
 export struct IOError {
 	def display(): &[I8];
 }

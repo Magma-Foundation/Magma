@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_define_Definition
 #define magma_app_compile_define_Definition
 import { List } from "magma/api/collect/list/List";

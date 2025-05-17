@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_head_ZipHead
 #define magma_api_collect_head_ZipHead
 import { Tuple2 } from "magma/api/Tuple2";

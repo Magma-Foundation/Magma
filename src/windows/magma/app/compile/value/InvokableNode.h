@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_value_InvokableNode
 #define magma_app_compile_value_InvokableNode
 import { Value } from "magma/app/compile/value/Value";

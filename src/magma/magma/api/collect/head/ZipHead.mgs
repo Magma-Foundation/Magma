@@ -1,3 +1,4 @@
+// []
 import magma.api.{ Tuple2 };
 import magma.api.collect.head.{ Head };
 import magma.api.collect.{ Query };

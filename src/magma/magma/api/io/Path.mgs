@@ -1,3 +1,4 @@
+// []
 import magma.api.io.{ IOError };
 import magma.api.option.{ Option };
 import magma.api.result.{ Result };

@@ -1,3 +1,4 @@
+// []
 export struct Type {
 	def generate(): &[I8];
 	def isFunctional(): Bool;

@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_text_Placeholder
 #define magma_app_compile_text_Placeholder
 import { Main } from "magma/app/Main";

@@ -1,3 +1,4 @@
+// []
 import { Type } from "../../../../magma/api/Type";
 export class ArrayType implements Type {
 	child: Type;

@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_Joiner
 #define magma_api_collect_Joiner
 import { Option } from "magma/api/option/Option";

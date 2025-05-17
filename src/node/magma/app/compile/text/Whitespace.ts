@@ -1,3 +1,4 @@
+// []
 import { Parameter } from "../../../../magma/app/compile/define/Parameter";
 import { Platform } from "../../../../magma/app/io/Platform";
 import { Definition } from "../../../../magma/app/compile/define/Definition";

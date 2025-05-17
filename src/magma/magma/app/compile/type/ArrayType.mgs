@@ -1,3 +1,4 @@
+// []
 import magma.api.{ Type };
 export struct ArrayType implements Type {
 	mut child: Type;

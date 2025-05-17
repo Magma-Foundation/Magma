@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_ImmutableCompileState
 #define magma_app_compile_ImmutableCompileState
 import { CompileState } from "magma/app/compile/CompileState";

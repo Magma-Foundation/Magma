@@ -1,3 +1,4 @@
+// []
 import magma.api.io.{ Path, IOError };
 import magma.api.result.{ Result };
 import magma.api.collect.list.{ List, ListCollector };

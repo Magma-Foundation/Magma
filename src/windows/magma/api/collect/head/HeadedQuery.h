@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_head_HeadedQuery
 #define magma_api_collect_head_HeadedQuery
 import { Query } from "magma/api/collect/Query";

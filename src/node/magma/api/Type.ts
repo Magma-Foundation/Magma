@@ -1,3 +1,4 @@
+// []
 export interface Type {
 	generate(): string;
 	isFunctional(): boolean;

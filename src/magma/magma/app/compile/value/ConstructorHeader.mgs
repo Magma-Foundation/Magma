@@ -1,3 +1,4 @@
+// []
 import magma.app.compile.value.{ ConstructorHeader };
 import magma.app.compile.define.{ FunctionHeader, Definition };
 import magma.app.io.{ Platform };

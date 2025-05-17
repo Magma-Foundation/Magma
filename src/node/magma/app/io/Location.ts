@@ -1,3 +1,4 @@
+// []
 import { List } from "../../../magma/api/collect/list/List";
 export class Location {
 	namespace: List<string>;

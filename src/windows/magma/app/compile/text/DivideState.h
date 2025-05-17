@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_text_DivideState
 #define magma_app_compile_text_DivideState
 import { List } from "magma/api/collect/list/List";

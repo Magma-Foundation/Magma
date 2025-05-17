@@ -89,23 +89,23 @@ static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state,
 	var ioErrorOption1 = Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*R*/, lambdaDefinition/*auto*/);
 	return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
 }
-static Tuple2Impl<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, Source source, &[I8] input) {
+static Tuple2<CompileState, Map<&[I8], &[I8]>> compileRoot(CompileState state, Source source, &[I8] input) {
 	var statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*&[I8]*/, Main/*auto*/.compileRootSegment);
 	var statementsState = statementsTuple/*auto*/.left(/*auto*/);
+	var output = statementsTuple/*auto*/.right(/*auto*/);
 	var imports = Main/*auto*/.generateOrFoldImports(statementsState/*CompileState*/);
-	var compileState = statementsState/*CompileState*/.clearImports(/*auto*/).clear(/*auto*/);
-	var withMain = Main/*auto*/.createMain(source/*Source*/);
 	var entries = new HashMap<&[I8], &[I8]>(/*auto*/);
-	var platform = state/*CompileState*/.platform(/*auto*/);
-	if (Platform/*auto*/.Windows === platform/*Platform*/) {
-		var value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
-		/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-		/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain)*/;
+	var generatedMain = Main/*auto*/.createMain(source/*Source*/);
+	var clearedState = statementsState/*CompileState*/.clearImports(/*auto*/).clear(/*auto*/);
+	var temp = "// []\n";
+	if (!statementsState/*CompileState*/.isPlatform(Platform/*auto*/.Windows)) {
+		/*entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain)*/;
+		return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);
 	}
-	else {
-		/*entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain)*/;
-	}
-	return new Tuple2Impl<>(compileState/*auto*/, entries/*auto*/);
+	var value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
+	/*entries.put(Platform.Windows.extension[0], temp + Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+	/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + output + generatedMain)*/;
+	return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);
 }
 static &[I8] generateOrFoldImports(CompileState state) {
 	if (state/*CompileState*/.isPlatform(Platform/*auto*/.Magma)) {

@@ -1,3 +1,4 @@
+// []
 import magma.api.option.{ Option };
 import magma.api.{ Tuple2, Tuple2Impl };
 export struct None<T> implements Option<T> {

@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_Query
 #define magma_api_collect_Query
 import { Collector } from "magma/api/collect/Collector";

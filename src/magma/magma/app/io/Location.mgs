@@ -1,3 +1,4 @@
+// []
 import magma.api.collect.list.{ List };
 export struct Location {
 	mut namespace: List<&[I8]>;

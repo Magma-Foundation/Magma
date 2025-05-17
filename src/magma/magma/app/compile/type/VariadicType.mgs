@@ -1,3 +1,4 @@
+// []
 import magma.api.{ Type };
 export struct VariadicType implements Type {
 	mut type: Type;

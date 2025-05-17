@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_define_Parameter
 #define magma_app_compile_define_Parameter
 import { Platform } from "magma/app/io/Platform";

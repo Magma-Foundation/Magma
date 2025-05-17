@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_value_NotNode
 #define magma_app_compile_value_NotNode
 import { Value } from "magma/app/compile/value/Value";

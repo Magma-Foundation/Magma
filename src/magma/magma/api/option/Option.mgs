@@ -1,3 +1,4 @@
+// []
 import magma.api.{ Tuple2 };
 export struct Option<T> {
 	def map<R>(mut mapper: (arg0 : T) => R): Option<R>;

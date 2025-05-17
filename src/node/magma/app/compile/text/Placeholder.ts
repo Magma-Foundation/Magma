@@ -1,3 +1,4 @@
+// []
 import { Main } from "../../../../magma/app/Main";
 import { Platform } from "../../../../magma/app/io/Platform";
 import { Value } from "../../../../magma/app/compile/value/Value";

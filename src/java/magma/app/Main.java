@@ -58,9 +58,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
-    private record Result(HashMap<String, String> entries, CompileState compileState) {
-    }
-
     public static void main() {
         final var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -145,13 +142,14 @@ public final class Main {
         final var generatedMain = Main.createMain(source);
         final var clearedState = statementsState.clearImports().clear();
 
+        final var temp = "// []\n";
         if (!statementsState.isPlatform(Platform.Windows)) {
-            entries.put(statementsState.platform().extension[0], imports + statementsState.join() + output + generatedMain);
+            entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain);
             return new Tuple2Impl<>(clearedState, entries);
         }
 
         final var value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
-        entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
+        entries.put(Platform.Windows.extension[0], temp + Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
         entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + output + generatedMain);
         return new Tuple2Impl<>(clearedState, entries);
     }

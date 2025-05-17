@@ -1,3 +1,4 @@
+// []
 import { Type } from "../../../../magma/api/Type";
 import { Platform } from "../../../../magma/app/io/Platform";
 export class BooleanType implements Type {

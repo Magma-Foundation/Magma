@@ -1,3 +1,4 @@
+// []
 import magma.app.{ Main };
 import magma.app.io.{ Platform };
 import magma.app.compile.value.{ Value };

@@ -1,3 +1,4 @@
+// []
 import magma.app.io.{ Platform };
 import magma.app.compile.define.{ Definition };
 import magma.api.collect.list.{ List };

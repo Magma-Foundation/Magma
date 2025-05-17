@@ -1,3 +1,4 @@
+// []
 import magma.app.compile.define.{ FunctionHeader, Definition };
 import magma.api.collect.list.{ List };
 import magma.api.option.{ Option };

@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_io_Path
 #define magma_api_io_Path
 import { IOError } from "magma/api/io/IOError";

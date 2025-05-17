@@ -1,3 +1,4 @@
+// []
 export struct Tuple2<A, B> {
 	def left(): A;
 	def right(): B;

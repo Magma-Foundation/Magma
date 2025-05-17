@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_io_Source
 #define magma_app_io_Source
 import { Path } from "magma/api/io/Path";

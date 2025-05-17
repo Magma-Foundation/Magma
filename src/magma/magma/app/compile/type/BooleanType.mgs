@@ -1,3 +1,4 @@
+// []
 import magma.api.{ Type };
 import magma.app.io.{ Platform };
 export struct BooleanType implements Type {

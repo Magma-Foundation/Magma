@@ -1,3 +1,4 @@
+// []
 #ifndef jvm_api_collect_list_JVMList
 #define jvm_api_collect_list_JVMList
 #endif

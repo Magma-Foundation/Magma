@@ -1,3 +1,4 @@
+// []
 import magma.app.compile.value.{ Value };
 import magma.api.option.{ Option };
 export struct Argument {

@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_Collector
 #define magma_api_collect_Collector
 #endif

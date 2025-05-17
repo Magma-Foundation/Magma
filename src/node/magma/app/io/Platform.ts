@@ -1,3 +1,4 @@
+// []
 export class Platform {
 	static TypeScript/*auto*/: Platform = new Platform("node", "ts");
 	static Magma/*auto*/: Platform = new Platform("magma", "mgs");

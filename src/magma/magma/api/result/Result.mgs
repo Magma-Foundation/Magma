@@ -1,3 +1,4 @@
+// []
 import magma.api.option.{ Option };
 export struct Result<T, X> {
 	def findError(): Option<X>;

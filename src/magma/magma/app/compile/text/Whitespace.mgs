@@ -1,3 +1,4 @@
+// []
 import magma.app.compile.define.{ Parameter, Definition };
 import magma.app.io.{ Platform };
 import magma.api.option.{ Option, None };

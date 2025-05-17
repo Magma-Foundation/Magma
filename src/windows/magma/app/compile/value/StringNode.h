@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_value_StringNode
 #define magma_app_compile_value_StringNode
 import { Value } from "magma/app/compile/value/Value";

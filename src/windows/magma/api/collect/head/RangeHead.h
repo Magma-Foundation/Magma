@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_head_RangeHead
 #define magma_api_collect_head_RangeHead
 import { Head } from "magma/api/collect/head/Head";

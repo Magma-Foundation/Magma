@@ -1,3 +1,4 @@
+// []
 import magma.api.result.{ Result };
 import magma.api.option.{ Option, Some, None };
 export struct Err<T, X> implements Result<T, X> {

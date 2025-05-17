@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_collect_head_SingleHead
 #define magma_api_collect_head_SingleHead
 import { Head } from "magma/api/collect/head/Head";

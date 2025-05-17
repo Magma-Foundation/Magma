@@ -1,3 +1,4 @@
+// []
 import magma.api.{ Type };
 export struct PrimitiveType implements Type {
 	static String/*auto*/: PrimitiveType = new PrimitiveType("string");

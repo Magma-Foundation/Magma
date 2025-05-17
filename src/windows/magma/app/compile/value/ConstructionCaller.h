@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_value_ConstructionCaller
 #define magma_app_compile_value_ConstructionCaller
 import { Caller } from "magma/app/compile/value/Caller";

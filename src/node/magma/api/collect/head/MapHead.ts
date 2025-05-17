@@ -1,3 +1,4 @@
+// []
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";
 export class MapHead<T, R> implements Head<R> {

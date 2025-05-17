@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_type_FunctionType
 #define magma_app_compile_type_FunctionType
 import { Type } from "magma/api/Type";

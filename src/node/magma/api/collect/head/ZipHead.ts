@@ -1,3 +1,4 @@
+// []
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Query } from "../../../../magma/api/collect/Query";

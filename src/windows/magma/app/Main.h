@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_Main
 #define magma_app_Main
 import { Files } from "jvm/api/io/Files";

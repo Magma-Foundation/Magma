@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_text_Whitespace
 #define magma_app_compile_text_Whitespace
 import { Parameter } from "magma/app/compile/define/Parameter";

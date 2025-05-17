@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_option_None
 #define magma_api_option_None
 import { Option } from "magma/api/option/Option";

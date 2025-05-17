@@ -1,3 +1,4 @@
+// []
 export interface StringsInstance {
 	static length(stripped: string): number;
 	static sliceBetween(input: string, startInclusive: number, endExclusive: number): string;

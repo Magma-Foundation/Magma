@@ -1,3 +1,4 @@
+// []
 import { Files } from "../../jvm/api/io/Files";
 import { Path } from "../../magma/api/io/Path";
 import { List } from "../../magma/api/collect/list/List";
@@ -96,23 +97,23 @@ export class Main {
 		});
 		return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), ioErrorOption1/*auto*/);
 	}
-	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Map<string, string>> {
+	static compileRoot(state: CompileState, source: Source, input: string): Tuple2<CompileState, Map<string, string>> {
 		let statementsTuple = Main/*auto*/.compileStatements(state/*CompileState*/, input/*string*/, Main/*auto*/.compileRootSegment);
 		let statementsState = statementsTuple/*auto*/.left(/*auto*/);
+		let output = statementsTuple/*auto*/.right(/*auto*/);
 		let imports = Main/*auto*/.generateOrFoldImports(statementsState/*auto*/);
-		let compileState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
-		let withMain = Main/*auto*/.createMain(source/*Source*/);
 		let entries = new HashMap<string, string>(/*auto*/);
-		let platform = state/*CompileState*/.platform(/*auto*/);
-		if (Platform/*auto*/.Windows === platform/*Platform*/) {
-			let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
-			/*entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
-			/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain)*/;
+		let generatedMain = Main/*auto*/.createMain(source/*Source*/);
+		let clearedState = statementsState/*auto*/.clearImports(/*auto*/).clear(/*auto*/);
+		let temp = "// []\n";
+		if (!statementsState/*auto*/.isPlatform(Platform/*auto*/.Windows)) {
+			/*entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain)*/;
+			return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);
 		}
-		else {
-			/*entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain)*/;
-		}
-		return new Tuple2Impl<>(compileState/*auto*/, entries/*auto*/);
+		let value = /* source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName()*/;
+		/*entries.put(Platform.Windows.extension[0], temp + Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"))*/;
+		/*entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + output + generatedMain)*/;
+		return new Tuple2Impl<>(clearedState/*auto*/, entries/*auto*/);
 	}
 	static generateOrFoldImports(state: CompileState): string {
 		if (state/*CompileState*/.isPlatform(Platform/*auto*/.Magma)) {

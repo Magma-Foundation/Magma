@@ -1,3 +1,4 @@
+// []
 import magma.api.option.{ Option, None, Some };
 import magma.api.collect.{ Collector };
 import magma.api.collect.list.{ List };

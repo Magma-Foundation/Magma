@@ -1,3 +1,4 @@
+// []
 import magma.api.collect.list.{ List };
 import magma.api.collect.{ Collector };
 import jvm.api.collect.list.{ Lists };

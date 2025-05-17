@@ -1,3 +1,4 @@
+// []
 import { Path } from "../../../magma/api/io/Path";
 import { IOError } from "../../../magma/api/io/IOError";
 import { Result } from "../../../magma/api/result/Result";

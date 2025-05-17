@@ -1,3 +1,4 @@
+// []
 #ifndef magma_api_result_Ok
 #define magma_api_result_Ok
 import { Result } from "magma/api/result/Result";

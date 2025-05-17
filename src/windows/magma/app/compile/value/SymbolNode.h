@@ -1,3 +1,4 @@
+// []
 #ifndef magma_app_compile_value_SymbolNode
 #define magma_app_compile_value_SymbolNode
 import { Type } from "magma/api/Type";
