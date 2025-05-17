@@ -32,12 +32,14 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Type: magma.api, 
 	Definition: magma.app, 
 	Main: magma.app, 
 	MethodHeader: magma.app, 
 	Parameter: magma.app
 ]*/
 import magma.api.collect.list.List;
+import magma.api.Type;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.collect.Joiner;
@@ -46,11 +48,13 @@ export struct Definition {
 	mut annotations: List<&[I8]>;
 	mut modifiers: List<&[I8]>;
 	mut typeParams: List<&[I8]>;
+	mut type: Type;
 	mut name: &[I8];
-	constructor (mut annotations: List<&[I8]>, mut modifiers: List<&[I8]>, mut typeParams: List<&[I8]>, mut name: &[I8]) {
+	constructor (mut annotations: List<&[I8]>, mut modifiers: List<&[I8]>, mut typeParams: List<&[I8]>, mut type: Type, mut name: &[I8]) {
 		this.annotations = annotations;
 		this.modifiers = modifiers;
 		this.typeParams = typeParams;
+		this.type = type;
 		this.name = name;
 	}
 	def generate(): &[I8] {

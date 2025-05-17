@@ -1,6 +1,7 @@
 package magma.app;
 
 import jvm.api.text.Strings;
+import magma.api.Type;
 import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
@@ -10,7 +11,7 @@ public record Definition(
         List<String> annotations,
         List<String> modifiers,
         List<String> typeParams,
-        Main.Type type,
+        Type type,
         String name
 ) implements MethodHeader<Definition>, Parameter {
     @Override

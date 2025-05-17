@@ -32,11 +32,13 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Type: magma.api, 
 	Definition: magma.app, 
 	Main: magma.app, 
 	MethodHeader: magma.app, 
 	Parameter: magma.app
 ]*/
+import { Type } from "../../magma/api/Type";
 import { Option } from "../../magma/api/option/Option";
 import { List } from "../../magma/api/collect/list/List";
 import { Lists } from "../../jvm/api/collect/list/Lists";
@@ -69,12 +71,6 @@ interface Argument {
 interface Caller {
 	generate(): string;
 	findChild(): Option<Value>;
-}
-export interface Type {
-	generate(): string;
-	isFunctional(): boolean;
-	isVar(): boolean;
-	generateBeforeName(): string;
 }
 class DivideState {
 	segments: List<string>;

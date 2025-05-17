@@ -32,12 +32,14 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Type: magma.api, 
 	Definition: magma.app, 
 	Main: magma.app, 
 	MethodHeader: magma.app, 
 	Parameter: magma.app
 ]*/
 import { List } from "../../magma/api/collect/list/List";
+import { Type } from "../../magma/api/Type";
 import { Option } from "../../magma/api/option/Option";
 import { Some } from "../../magma/api/option/Some";
 import { Joiner } from "../../magma/api/collect/Joiner";
@@ -46,11 +48,13 @@ export class Definition {
 	annotations: List<string>;
 	modifiers: List<string>;
 	typeParams: List<string>;
+	type: Type;
 	name: string;
-	constructor (annotations: List<string>, modifiers: List<string>, typeParams: List<string>, name: string) {
+	constructor (annotations: List<string>, modifiers: List<string>, typeParams: List<string>, type: Type, name: string) {
 		this.annotations = annotations;
 		this.modifiers = modifiers;
 		this.typeParams = typeParams;
+		this.type = type;
 		this.name = name;
 	}
 	generate(): string {

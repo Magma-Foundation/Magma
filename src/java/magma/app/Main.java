@@ -7,6 +7,7 @@ import jvm.api.text.Characters;
 import jvm.api.text.Strings;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.api.Type;
 import magma.api.collect.Joiner;
 import magma.api.collect.Queries;
 import magma.api.collect.head.HeadedQuery;
@@ -38,16 +39,6 @@ public final class Main {
         String generate();
 
         Option<Value> findChild();
-    }
-
-    public interface Type {
-        String generate();
-
-        boolean isFunctional();
-
-        boolean isVar();
-
-        String generateBeforeName();
     }
 
     private record DivideState(List<String> segments, String buffer, int depth, String input, int index) {

@@ -32,11 +32,13 @@
 	Result: magma.api.result, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Type: magma.api, 
 	Definition: magma.app, 
 	Main: magma.app, 
 	MethodHeader: magma.app, 
 	Parameter: magma.app
 ]*/
+import magma.api.Type;
 import magma.api.option.Option;
 import magma.api.collect.list.List;
 import jvm.api.collect.list.Lists;
@@ -69,12 +71,6 @@ struct Argument {
 struct Caller {
 	def generate(): &[I8];
 	def findChild(): Option<Value>;
-}
-export struct Type {
-	def generate(): &[I8];
-	def isFunctional(): Bool;
-	def isVar(): Bool;
-	def generateBeforeName(): &[I8];
 }
 struct DivideState {
 	mut segments: List<&[I8]>;
