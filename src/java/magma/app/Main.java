@@ -92,11 +92,12 @@ public final class Main {
 
         return sources.query()
                 .foldWithInitialToResult(compileStateListTuple2, (Tuple2<CompileState, List<IncompleteRoot>> tuple, Source source) -> Main.foldWithInput(platform, tuple.left(), tuple.right(), source))
-                .flatMapValue((Tuple2<CompileState, List<IncompleteRoot>> result) -> Main.getCompileStateIOErrorResult(platform, result.left(), result.right()));
+                .flatMapValue((Tuple2<CompileState, List<IncompleteRoot>> result) -> Main.completeAll(platform, result.left(), result.right()));
     }
 
-    private static Result<CompileState, IOError> getCompileStateIOErrorResult(final Platform platform, final CompileState state, final List<IncompleteRoot> incomplete) {
-        return incomplete.query().foldWithInitialToResult(state, (CompileState current, IncompleteRoot incompleteRoot) -> Main.complete(current, incompleteRoot, platform));
+    private static Result<CompileState, IOError> completeAll(final Platform platform, final CompileState state, final List<IncompleteRoot> incomplete) {
+        return incomplete.query().foldWithInitialToResult(state,
+                (CompileState current, IncompleteRoot incompleteRoot) -> Main.complete(current, incompleteRoot, platform));
     }
 
     private static Result<Tuple2<CompileState, List<IncompleteRoot>>, IOError> foldWithInput(
