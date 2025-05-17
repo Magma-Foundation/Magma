@@ -58,6 +58,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
+    private record Result(HashMap<String, String> entries, CompileState compileState) {
+    }
+
     public static void main() {
         final var sourceDirectory = Files.get(".", "src", "java");
         sourceDirectory.walk()
@@ -132,27 +135,25 @@ public final class Main {
         return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), ioErrorOption1);
     }
 
-    private static Tuple2Impl<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {
+    private static Tuple2<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {
         final var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
         final var statementsState = statementsTuple.left();
 
+        final var output = statementsTuple.right();
         final var imports = Main.generateOrFoldImports(statementsState);
-
-        final var compileState = statementsState.clearImports().clear();
-        final var withMain = Main.createMain(source);
-
         final var entries = new HashMap<String, String>();
-        final var platform = state.platform();
-        if (Platform.Windows == platform) {
-            final var value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
-            entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
-            entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + statementsTuple.right() + withMain);
-        }
-        else {
-            entries.put(platform.extension[0], imports + statementsState.join() + statementsTuple.right() + withMain);
+        final var generatedMain = Main.createMain(source);
+        final var clearedState = statementsState.clearImports().clear();
+
+        if (!statementsState.isPlatform(Platform.Windows)) {
+            entries.put(statementsState.platform().extension[0], imports + statementsState.join() + output + generatedMain);
+            return new Tuple2Impl<>(clearedState, entries);
         }
 
-        return new Tuple2Impl<>(compileState, entries);
+        final var value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
+        entries.put(Platform.Windows.extension[0], Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
+        entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + output + generatedMain);
+        return new Tuple2Impl<>(clearedState, entries);
     }
 
     private static String generateOrFoldImports(final CompileState state) {
