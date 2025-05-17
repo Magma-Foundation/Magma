@@ -39,7 +39,7 @@ import magma.api.option.None;
 import magma.api.option.Some;
 export struct RangeHead implements Head<I32> {
 	length: I32;
-	counter: I32;
+	mut counter: I32;
 	constructor (length: I32) {
 		this.length = length;
 		this.counter = 0;

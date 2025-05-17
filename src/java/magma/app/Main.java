@@ -24,14 +24,14 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
-    private interface MethodHeader {
+    private interface MethodHeader<S extends MethodHeader<S>> {
         String generateWithAfterName(String afterName);
 
         boolean hasAnnotation(String annotation);
 
-        MethodHeader removeModifier(String modifier);
+        S removeModifier(String modifier);
 
-        MethodHeader addModifier(String modifier);
+        S addModifier(String modifier);
     }
 
     private interface Parameter {
@@ -267,7 +267,7 @@ public final class Main {
             List<String> typeParams,
             Type type,
             String name
-    ) implements MethodHeader, Parameter {
+    ) implements MethodHeader<Definition>, Parameter {
         @Override
         public String generate() {
             return this.generateWithAfterName("");
@@ -307,17 +307,17 @@ public final class Main {
         }
 
         @Override
-        public MethodHeader removeModifier(final String modifier) {
+        public Definition removeModifier(final String modifier) {
             return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings::equalsTo), this.typeParams, this.type, this.name);
         }
 
         @Override
-        public MethodHeader addModifier(final String modifier) {
-            return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+        public Definition addModifier(final String modifier) {
+            return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
         }
     }
 
-    private static class ConstructorHeader implements MethodHeader {
+    private static class ConstructorHeader implements MethodHeader<ConstructorHeader> {
         @Override
         public String generateWithAfterName(final String afterName) {
             return "constructor " + afterName;
@@ -329,12 +329,12 @@ public final class Main {
         }
 
         @Override
-        public MethodHeader removeModifier(final String modifier) {
+        public ConstructorHeader removeModifier(final String modifier) {
             return this;
         }
 
         @Override
-        public MethodHeader addModifier(final String modifier) {
+        public ConstructorHeader addModifier(final String modifier) {
             return this;
         }
     }
@@ -1282,7 +1282,11 @@ public final class Main {
         });
     }
 
-    private static Option<Tuple2<CompileState, String>> compileMethodWithBeforeParams(final CompileState state, final MethodHeader header, final String withParams) {
+    private static <S extends MethodHeader<S>> Option<Tuple2<CompileState, String>> compileMethodWithBeforeParams(
+            final CompileState state,
+            final MethodHeader<S> header,
+            final String withParams
+    ) {
         return Main.compileFirst(withParams, ")", (final String params, final String afterParams) -> {
             final var parametersTuple = Main.parseParameters(state, params);
 
@@ -1296,7 +1300,7 @@ public final class Main {
                     .orElse("");
 
             final var newHeader = Platform.Magma == parametersState.platform
-                    ? header.addModifier("def")
+                    ? header.addModifier("def").removeModifier("mut")
                     : header;
 
             if (newHeader.hasAnnotation("Actual")) {
@@ -1551,7 +1555,9 @@ public final class Main {
             final var sourceTuple = Main.compileValueOrPlaceholder(state, source);
 
             final var destinationTuple = Main.compileValue(sourceTuple.left(), destination)
-                    .or(() -> Main.parseDefinition(sourceTuple.left(), destination).map((Tuple2<CompileState, Definition> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), "let " + tuple.right().generate())))
+                    .or(() -> Main.parseDefinition(sourceTuple.left(), destination).map((final Tuple2<CompileState, Definition> tuple) -> {
+                        return new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().addModifier("let").generate());
+                    }))
                     .orElseGet(() -> new Tuple2Impl<CompileState, String>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
@@ -1848,17 +1854,28 @@ public final class Main {
             final String name
     ) {
         return Main.parseType(state, type).flatMap((final Tuple2<CompileState, Type> typeTuple) -> {
-            final var newModifiers = Main.modifyModifiers(oldModifiers);
+            final var newModifiers = Main.modifyModifiers(oldModifiers, state.platform);
             final var generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
             return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
         });
     }
 
-    private static List<String> modifyModifiers(final List<String> oldModifiers) {
+    private static List<String> modifyModifiers(final List<String> oldModifiers, Platform platform) {
+        final List<String> list = Main.retainFinal(oldModifiers, platform);
+
         if (oldModifiers.contains("static", Strings::equalsTo)) {
-            return Lists.of("static");
+            return list.addLast("static");
         }
-        return Lists.empty();
+
+        return list;
+    }
+
+    private static List<String> retainFinal(final List<String> oldModifiers, Platform platform) {
+        if (oldModifiers.contains("final", Strings::equalsTo) || platform == Platform.TypeScript) {
+            return Lists.empty();
+        }
+
+        return Lists.of("mut");
     }
 
     private static Tuple2<CompileState, Type> parseTypeOrPlaceholder(final CompileState state, final String type) {

@@ -38,9 +38,9 @@ import magma.api.collect.head.Head;
 import magma.api.collect.Query;
 import magma.api.option.Option;
 export struct ZipHead<T, R> implements Head<Tuple2<T, R>> {
-	head: Head<T>;
-	other: Query<R>;
-	constructor (head: Head<T>, other: Query<R>) {
+	mut head: Head<T>;
+	mut other: Query<R>;
+	constructor (mut head: Head<T>, mut other: Query<R>) {
 		this.head = head;
 		this.other = other;
 	}

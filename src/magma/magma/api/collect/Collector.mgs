@@ -35,5 +35,5 @@
 ]*/
 export struct Collector<T, C> {
 	def createInitial(): C;
-	def fold(current: C, element: T): C;
+	def fold(mut current: C, mut element: T): C;
 }

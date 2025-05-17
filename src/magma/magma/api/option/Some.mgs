@@ -38,8 +38,8 @@ import magma.api.option.None;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 export struct Some<T> implements Option<T> {
-	value: T;
-	constructor (value: T) {
+	mut value: T;
+	constructor (mut value: T) {
 		this.value = value;
 	}
 	def map<R>(mapper: (arg0 : T) => R): Option<R> {
@@ -73,6 +73,6 @@ export struct Some<T> implements Option<T> {
 		return Tuple2Impl<Bool, T>(true, this.value);
 	}
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other().map((otherValue: R) => Tuple2Impl<T, R>(this.value, otherValue));
+		return other().map((mut otherValue: R) => Tuple2Impl<T, R>(this.value, otherValue));
 	}
 }

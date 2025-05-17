@@ -39,7 +39,7 @@ import magma.api.option.None;
 import magma.api.option.Some;
 export struct SingleHead<T> implements Head<T> {
 	element: T;
-	retrieved: Bool;
+	mut retrieved: Bool;
 	constructor (element: T) {
 		this.element = element;
 		this.retrieved = false;

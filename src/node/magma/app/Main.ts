@@ -52,11 +52,11 @@ import { Queries } from "../../magma/api/collect/Queries";
 import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../jvm/api/text/Characters";
-interface MethodHeader {
+interface MethodHeader<S extends MethodHeader<S>> {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
-	removeModifier(modifier: string): MethodHeader;
-	addModifier(modifier: string): MethodHeader;
+	removeModifier(modifier: string): S;
+	addModifier(modifier: string): S;
 }
 interface Parameter {
 	generate(): string;
@@ -279,24 +279,24 @@ class Definition {
 	hasAnnotation(annotation: string): boolean {
 		return this.annotations.contains(annotation, Strings.equalsTo);
 	}
-	removeModifier(modifier: string): MethodHeader {
+	removeModifier(modifier: string): Definition {
 		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 	}
-	addModifier(modifier: string): MethodHeader {
-		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+	addModifier(modifier: string): Definition {
+		return new Definition(this.annotations, this.modifiers.addFirst(modifier), this.typeParams, this.type, this.name);
 	}
 }
-class ConstructorHeader implements MethodHeader {
+class ConstructorHeader implements MethodHeader<ConstructorHeader> {
 	generateWithAfterName(afterName: string): string {
 		return "constructor " + afterName;
 	}
 	hasAnnotation(annotation: string): boolean {
 		return false;
 	}
-	removeModifier(modifier: string): MethodHeader {
+	removeModifier(modifier: string): ConstructorHeader {
 		return this;
 	}
-	addModifier(modifier: string): MethodHeader {
+	addModifier(modifier: string): ConstructorHeader {
 		return this;
 	}
 }
@@ -1023,7 +1023,7 @@ export class Main {
 			}).or(() => Main.parseDefinition(state, beforeParams).flatMap((tuple: Tuple2<CompileState, Definition>) => Main.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)));
 		});
 	}
-	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple2<CompileState, string>> {
+	static compileMethodWithBeforeParams<S extends MethodHeader<S>>(state: CompileState, header: MethodHeader<S>, withParams: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(withParams, ")", (params: string, afterParams: string) => {
 			let parametersTuple = Main.parseParameters(state, params);
 			let parametersState = parametersTuple.left();
@@ -1031,7 +1031,7 @@ export class Main {
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
 			let newHeader = /* Platform.Magma == parametersState.platform
-                    ? header.addModifier("def")
+                    ? header.addModifier("def").removeModifier("mut")
                     : header*/;
 			if (newHeader.hasAnnotation("Actual")){
 				let headerGenerated = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
@@ -1212,7 +1212,9 @@ export class Main {
 	static compileAssignment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(input, "=", (destination: string, source: string) => {
 			let sourceTuple = Main.compileValueOrPlaceholder(state, source);
-			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, string>(tuple.left(), "let " + tuple.right().generate()))).orElseGet(() => new Tuple2Impl<CompileState, string>(sourceTuple.left(), Main.generatePlaceholder(destination)));
+			let destinationTuple = Main.compileValue(sourceTuple.left(), destination).or(() => Main.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => {
+				return new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().addModifier("let").generate());
+			})).orElseGet(() => new Tuple2Impl<CompileState, string>(sourceTuple.left(), Main.generatePlaceholder(destination)));
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
 		});
 	}
@@ -1413,16 +1415,23 @@ export class Main {
 	}
 	static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<string>, typeParams: List<string>, oldModifiers: List<string>, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
 		return Main.parseType(state, type).flatMap((typeTuple: Tuple2<CompileState, Type>) => {
-			let newModifiers = Main.modifyModifiers(oldModifiers);
+			let newModifiers = Main.modifyModifiers(oldModifiers, state.platform);
 			let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name);
 			return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated));
 		});
 	}
-	static modifyModifiers(oldModifiers: List<string>): List<string> {
+	static modifyModifiers(oldModifiers: List<string>, platform: Platform): List<string> {
+		let list: List<string> = Main.retainFinal(oldModifiers, platform);
 		if (oldModifiers.contains("static", Strings.equalsTo)){
-			return Lists.of("static");
+			return list.addLast("static");
 		}
-		return Lists.empty();
+		return list;
+	}
+	static retainFinal(oldModifiers: List<string>, platform: Platform): List<string> {
+		if (oldModifiers.contains("final", Strings.equalsTo) || platform === Platform.TypeScript){
+			return Lists.empty();
+		}
+		return Lists.of("mut");
 	}
 	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, Type> {
 		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right())).orElseGet(() => new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));

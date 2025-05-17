@@ -35,14 +35,14 @@
 ]*/
 import magma.api.Tuple2;
 export struct Option<T> {
-	def map<R>(mapper: (arg0 : T) => R): Option<R>;
-	def orElse(other: T): T;
-	def orElseGet(supplier: () => T): T;
+	def map<R>(mut mapper: (arg0 : T) => R): Option<R>;
+	def orElse(mut other: T): T;
+	def orElseGet(mut supplier: () => T): T;
 	def isPresent(): Bool;
-	def ifPresent(consumer: (arg0 : T) => void): void;
-	def or(other: () => Option<T>): Option<T>;
-	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
-	def filter(predicate: (arg0 : T) => boolean): Option<T>;
-	def toTuple(other: T): Tuple2<Bool, T>;
-	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>>;
+	def ifPresent(mut consumer: (arg0 : T) => void): void;
+	def or(mut other: () => Option<T>): Option<T>;
+	def flatMap<R>(mut mapper: (arg0 : T) => Option<R>): Option<R>;
+	def filter(mut predicate: (arg0 : T) => boolean): Option<T>;
+	def toTuple(mut other: T): Tuple2<Bool, T>;
+	def and<R>(mut other: () => Option<R>): Option<Tuple2<T, R>>;
 }

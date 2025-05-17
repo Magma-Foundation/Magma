@@ -40,10 +40,10 @@ import magma.api.collect.head.EmptyHead;
 import magma.api.collect.head.Head;
 import magma.api.collect.head.SingleHead;
 export struct Queries {
-	static def fromOption<T>(option: Option<T>): Query<T> {
-		return HeadedQuery<T>(option.map((element: T) => Queries.getTSingleHead(element)).orElseGet(() => EmptyHead<T>()));
+	def static fromOption<T>(option: Option<T>): Query<T> {
+		return HeadedQuery<T>(option.map((mut element: T) => Queries.getTSingleHead(element)).orElseGet(() => EmptyHead<T>()));
 	}
-	static def getTSingleHead<T>(element: T): Head<T> {
+	def static getTSingleHead<T>(element: T): Head<T> {
 		return SingleHead<T>(element);
 	}
 }

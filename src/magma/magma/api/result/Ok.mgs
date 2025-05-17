@@ -38,8 +38,8 @@ import magma.api.option.Option;
 import magma.api.option.None;
 import magma.api.option.Some;
 export struct Ok<T, X> implements Result<T, X> {
-	value: T;
-	constructor (value: T) {
+	mut value: T;
+	constructor (mut value: T) {
 		this.value = value;
 	}
 	def findError(): Option<X> {
