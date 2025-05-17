@@ -37,33 +37,33 @@ import magma.api.option.Option;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 export struct None<T> implements Option<T> {
-	map<R>(mapper: (arg0 : T) => R): Option<R> {
+	def map<R>(mapper: (arg0 : T) => R): Option<R> {
 		return new None<R>();
 	}
-	orElse(other: T): T {
+	def orElse(other: T): T {
 		return other;
 	}
-	orElseGet(supplier: () => T): T {
+	def orElseGet(supplier: () => T): T {
 		return supplier();
 	}
-	isPresent(): boolean {
+	def isPresent(): boolean {
 		return false;
 	}
-	ifPresent(consumer: (arg0 : T) => void): void {
+	def ifPresent(consumer: (arg0 : T) => void): void {
 	}
-	or(other: () => Option<T>): Option<T> {
+	def or(other: () => Option<T>): Option<T> {
 		return other();
 	}
-	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
+	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
 		return new None<R>();
 	}
-	filter(predicate: (arg0 : T) => boolean): Option<T> {
+	def filter(predicate: (arg0 : T) => boolean): Option<T> {
 		return new None<T>();
 	}
-	toTuple(other: T): Tuple2<boolean, T> {
+	def toTuple(other: T): Tuple2<boolean, T> {
 		return new Tuple2Impl<boolean, T>(false, other);
 	}
-	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
 		return new None<Tuple2<T, R>>();
 	}
 }

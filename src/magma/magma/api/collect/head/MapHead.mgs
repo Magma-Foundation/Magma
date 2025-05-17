@@ -42,7 +42,7 @@ export struct MapHead<T, R> implements Head<R> {
 		this.head = head;
 		this.mapper = mapper;
 	}
-	next(): Option<R> {
+	def next(): Option<R> {
 		return this.head.next().map(this.mapper);
 	}
 }

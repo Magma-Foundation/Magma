@@ -35,5 +35,5 @@
 ]*/
 import magma.api.option.Option;
 export struct Head<T> {
-	next(): Option<T>;
+	def next(): Option<T>;
 }

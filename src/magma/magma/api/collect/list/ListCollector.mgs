@@ -37,10 +37,10 @@ import magma.api.collect.list.List;
 import magma.api.collect.Collector;
 import jvm.api.collect.list.Lists;
 export struct ListCollector<T> implements Collector<T, List<T>> {
-	createInitial(): List<T> {
+	def createInitial(): List<T> {
 		return Lists.empty();
 	}
-	fold(current: List<T>, element: T): List<T> {
+	def fold(current: List<T>, element: T): List<T> {
 		return current.addLast(element);
 	}
 }

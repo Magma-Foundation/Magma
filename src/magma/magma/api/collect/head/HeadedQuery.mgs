@@ -48,16 +48,16 @@ export struct HeadedQuery<T> implements Query<T> {
 	constructor (head: Head<T>) {
 		this.head = head;
 	}
-	next(): Option<T> {
+	def next(): Option<T> {
 		return this.head.next();
 	}
-	collect<C>(collector: Collector<T, C>): C {
+	def collect<C>(collector: Collector<T, C>): C {
 		return this.foldWithInitial(collector.createInitial(), (current: C, element: T) => collector.fold(current, element));
 	}
-	map<R>(mapper: (arg0 : T) => R): Query<R> {
+	def map<R>(mapper: (arg0 : T) => R): Query<R> {
 		return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
 	}
-	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
+	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		let result: R = initial;
 		while (true){
 			let finalResult: R = result;
@@ -70,24 +70,24 @@ export struct HeadedQuery<T> implements Query<T> {
 			}
 		}
 	}
-	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
+	def foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
 		return this.head.next().map(next).map((maybeNext: R) => {
 			return this.foldWithInitial(maybeNext, folder);
 		});
 	}
-	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
+	def flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
 		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
 	}
-	allMatch(predicate: (arg0 : T) => boolean): boolean {
+	def allMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => maybeAllTrue && predicate(element));
 	}
-	anyMatch(predicate: (arg0 : T) => boolean): boolean {
+	def anyMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t));
 	}
-	zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
+	def zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
 		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
 	}
-	filter(predicate: (arg0 : T) => boolean): Query<T> {
+	def filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
 			if (predicate(element)){
 				return new HeadedQuery<T>(new SingleHead<T>(element));

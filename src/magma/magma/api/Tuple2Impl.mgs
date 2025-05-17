@@ -41,10 +41,10 @@ export struct Tuple2Impl<A, B> implements Tuple2<A, B> {
 		this.leftValue = leftValue;
 		this.rightValue = rightValue;
 	}
-	left(): A {
+	def left(): A {
 		return this.leftValue;
 	}
-	right(): B {
+	def right(): B {
 		return this.rightValue;
 	}
 }

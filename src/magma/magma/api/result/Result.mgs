@@ -35,7 +35,7 @@
 ]*/
 import magma.api.option.Option;
 export struct Result<T, X> {
-	findError(): Option<X>;
-	findValue(): Option<T>;
-	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
+	def findError(): Option<X>;
+	def findValue(): Option<T>;
+	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
 }

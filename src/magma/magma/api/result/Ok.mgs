@@ -42,13 +42,13 @@ export struct Ok<T, X> implements Result<T, X> {
 	constructor (value: T) {
 		this.value = value;
 	}
-	findError(): Option<X> {
+	def findError(): Option<X> {
 		return new None<X>();
 	}
-	findValue(): Option<T> {
+	def findValue(): Option<T> {
 		return new Some<T>(this.value);
 	}
-	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenOk(this.value);
 	}
 }

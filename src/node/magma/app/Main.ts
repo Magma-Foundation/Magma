@@ -56,6 +56,7 @@ interface MethodHeader {
 	generateWithAfterName(afterName: string): string;
 	hasAnnotation(annotation: string): boolean;
 	removeModifier(modifier: string): MethodHeader;
+	addModifier(modifier: string): MethodHeader;
 }
 interface Parameter {
 	generate(): string;
@@ -161,7 +162,7 @@ class CompileState {
 	addResolvedImport(oldParent: List<string>, child: string): CompileState {
 		let namespace = this.maybeLocation.map((location: Location) => location.namespace).orElse(Lists.empty());
 		let newParent = oldParent;
-		if (Platform.TypeScript === platform){
+		if (Platform.TypeScript === this.platform){
 			if (namespace.isEmpty()){
 				newParent = newParent.addFirst(".");
 			}
@@ -281,6 +282,9 @@ class Definition {
 	removeModifier(modifier: string): MethodHeader {
 		return new Definition(this.annotations, this.modifiers.removeValue(modifier, Strings.equalsTo), this.typeParams, this.type, this.name);
 	}
+	addModifier(modifier: string): MethodHeader {
+		return new Definition(this.annotations, this.modifiers.addLast(modifier), this.typeParams, this.type, this.name);
+	}
 }
 class ConstructorHeader implements MethodHeader {
 	generateWithAfterName(afterName: string): string {
@@ -290,6 +294,9 @@ class ConstructorHeader implements MethodHeader {
 		return false;
 	}
 	removeModifier(modifier: string): MethodHeader {
+		return this;
+	}
+	addModifier(modifier: string): MethodHeader {
 		return this;
 	}
 }
@@ -999,11 +1006,14 @@ export class Main {
 			let parameters = parametersTuple.right();
 			let definitions = Main.retainDefinitionsFromParameters(parameters);
 			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()).collect(new Joiner(", ")).orElse("");
-			if (header.hasAnnotation("Actual")){
-				let headerGenerated = header.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
+			let newHeader = /* Platform.Magma == parametersState.platform
+                    ? header.addModifier("def")
+                    : header*/;
+			if (newHeader.hasAnnotation("Actual")){
+				let headerGenerated = newHeader.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")");
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"));
 			}
-			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
+			let headerGenerated = newHeader.generateWithAfterName("(" + joinedDefinitions + ")");
 			return Main.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {
 				return Main.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
 					let statementsTuple = Main.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);

@@ -34,6 +34,6 @@
 	Main: magma.app
 ]*/
 export struct Collector<T, C> {
-	createInitial(): C;
-	fold(current: C, element: T): C;
+	def createInitial(): C;
+	def fold(current: C, element: T): C;
 }

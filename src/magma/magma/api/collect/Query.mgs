@@ -37,14 +37,14 @@ import magma.api.collect.Collector;
 import magma.api.option.Option;
 import magma.api.Tuple2;
 export struct Query<T> {
-	collect<C>(collector: Collector<T, C>): C;
-	map<R>(mapper: (arg0 : T) => R): Query<R>;
-	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
-	foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
-	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R>;
-	next(): Option<T>;
-	allMatch(predicate: (arg0 : T) => boolean): boolean;
-	filter(predicate: (arg0 : T) => boolean): Query<T>;
-	anyMatch(predicate: (arg0 : T) => boolean): boolean;
-	zip<R>(other: Query<R>): Query<Tuple2<T, R>>;
+	def collect<C>(collector: Collector<T, C>): C;
+	def map<R>(mapper: (arg0 : T) => R): Query<R>;
+	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
+	def foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
+	def flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R>;
+	def next(): Option<T>;
+	def allMatch(predicate: (arg0 : T) => boolean): boolean;
+	def filter(predicate: (arg0 : T) => boolean): Query<T>;
+	def anyMatch(predicate: (arg0 : T) => boolean): boolean;
+	def zip<R>(other: Query<R>): Query<Tuple2<T, R>>;
 }

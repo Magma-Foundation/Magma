@@ -46,7 +46,7 @@ export struct FlatMapHead<T, R> implements Head<R> {
 		this.current = initial;
 		this.mapper = mapper;
 	}
-	next(): Option<R> {
+	def next(): Option<R> {
 		while (true){
 			let next = this.current.next();
 			if (next.isPresent()){

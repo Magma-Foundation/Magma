@@ -35,6 +35,6 @@
 ]*/
 import magma.api.io.Path;
 export interface FilesInstance {
-	get(first: string, ...more: string[]): Path;
+	def get(first: string, ...more: string[]): Path;
 
 }
