@@ -618,7 +618,7 @@ export class Main {
 			}
 		}
 		let initial: Option<IOError> = new None<IOError>();
-		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (mut ioErrorOption: Option<IOError>, mut extension: &[I8]) => {
+		let ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (ioErrorOption: Option<IOError>, extension: &[I8]) => {
 			let target = targetParent.resolveChild(location.name + "." + extension);
 			return ioErrorOption.or(() => target.writeString(output.right()));
 		});
@@ -827,22 +827,10 @@ export class Main {
 	}
 	mut static compileNamespaced(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
 		let stripped = Strings.strip(input);
-		if (stripped.startsWith("package ")) {
+		if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
 			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(state, ""));
 		}
-		return Main.compileImport(state, stripped);
-	}
-	mut static compileImport(state: CompileState, stripped: &[I8]): Option<Tuple2<CompileState, &[I8]>> {
-		return Main.compilePrefix(stripped, "import ", (s: &[I8]) => Main.compileSuffix(s, ";", (s1: &[I8]) => {
-			let divisions = Main.divide(s1, (mut divideState: DivideState, mut c: I8) => Main.foldDelimited(divideState, c, "."));
-			let child = Strings.strip(divisions.findLast().orElse(""));
-			let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)) {
-				return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(state, ""));
-			}
-			let compileState = state.addResolvedImport(parent, child);
-			return new Some<Tuple2<CompileState, &[I8]>>(new Tuple2Impl<CompileState, &[I8]>(state, ""));
-		}));
+		return new None<>();
 	}
 	mut static compileOrPlaceholder(state: CompileState, input: &[I8], rules: List<(arg0 : CompileState, arg1 : &[I8]) => Option<Tuple2<CompileState, &[I8]>>>): Tuple2<CompileState, &[I8]> {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, &[I8]>(state, Main.generatePlaceholder(input)));

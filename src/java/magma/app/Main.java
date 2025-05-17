@@ -737,7 +737,7 @@ public final class Main {
         }
 
         final Option<IOError> initial = new None<IOError>();
-        final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (Option<IOError> ioErrorOption, String extension) -> {
+        final var ioErrorOption1 = Queries.fromArray(platform.extension).foldWithInitial(initial, (final Option<IOError> ioErrorOption, final String extension) -> {
             final var target = targetParent.resolveChild(location.name + "." + extension);
             return ioErrorOption.or(() -> target.writeString(output.right()));
         });
@@ -1054,27 +1054,11 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileNamespaced(final CompileState state, final String input) {
         final var stripped = Strings.strip(input);
-        if (stripped.startsWith("package ")) {
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
         }
 
-        return Main.compileImport(state, stripped);
-    }
-
-    private static Option<Tuple2<CompileState, String>> compileImport(final CompileState state, final String stripped) {
-        return Main.compilePrefix(stripped, "import ", (final String s) -> Main.compileSuffix(s, ";", (final String s1) -> {
-            final var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'));
-            final var child = Strings.strip(divisions.findLast().orElse(""));
-            final var parent = divisions.subList(0, divisions.size() - 1)
-                    .orElse(Lists.empty());
-
-            if (parent.equalsTo(Lists.of("java", "util", "function"), Strings::equalsTo)) {
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-            }
-
-            final var compileState = state.addResolvedImport(parent, child);
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-        }));
+        return new None<>();
     }
 
     private static Tuple2<CompileState, String> compileOrPlaceholder(

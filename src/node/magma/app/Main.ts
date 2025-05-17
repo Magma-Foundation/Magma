@@ -827,22 +827,10 @@ export class Main {
 	}
 	static compileNamespaced(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		let stripped = Strings.strip(input);
-		if (stripped.startsWith("package ")) {
+		if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
 		}
-		return Main.compileImport(state, stripped);
-	}
-	static compileImport(state: CompileState, stripped: string): Option<Tuple2<CompileState, string>> {
-		return Main.compilePrefix(stripped, "import ", (s: string) => Main.compileSuffix(s, ";", (s1: string) => {
-			let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
-			let child = Strings.strip(divisions.findLast().orElse(""));
-			let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
-			if (parent.equalsTo(Lists.of("java", "util", "function"), Strings.equalsTo)) {
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
-			}
-			let compileState = state.addResolvedImport(parent, child);
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""));
-		}));
+		return new None<>();
 	}
 	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>>>): Tuple2<CompileState, string> {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(input)));
