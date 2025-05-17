@@ -685,7 +685,7 @@ class BooleanType implements Type {
 		this.platform = platform;
 	}
 	generate(): string {
-		if (Platform.TypeScript === platform){
+		if (Platform.TypeScript === this.platform){
 			return "boolean";
 		}
 		return "Bool";
@@ -717,6 +717,7 @@ class Primitive implements Type {
 	static Void: Primitive = new Primitive("void");
 	static Unknown: Primitive = new Primitive("unknown");
 	static I8: Primitive = new Primitive("I8");
+	static I32: Primitive = new Primitive("I32");
 	value: string;
 	constructor (value: string) {
 		this.value = value;
@@ -759,7 +760,7 @@ export class Main {
 	static getCompileStateOptionTuple2(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, Option<IOError>> {
 		let result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
 		let compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
-		return new Tuple2Impl<>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
+		return new Tuple2Impl<CompileState, Option<IOError>>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
@@ -1466,11 +1467,16 @@ export class Main {
 				return new Some<Type>(Primitive.String);
 			}
 			else {
-				return new Some<>(new Slice(Primitive.I8));
+				return new Some<Type>(new Slice(Primitive.I8));
 			}
 		}
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)){
-			return new Some<Type>(Primitive.Number);
+			if (Platform.Magma === platform){
+				return new Some<Type>(Primitive.I32);
+			}
+			else {
+				return new Some<Type>(Primitive.Number);
+			}
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
 			return new Some<Type>(new BooleanType(platform));

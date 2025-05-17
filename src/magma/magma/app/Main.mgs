@@ -82,10 +82,10 @@ struct Type {
 struct DivideState {
 	segments: List<&[I8]>;
 	buffer: &[I8];
-	depth: number;
+	depth: I32;
 	input: &[I8];
-	index: number;
-	constructor (segments: List<&[I8]>, buffer: &[I8], depth: number, input: &[I8], index: number) {
+	index: I32;
+	constructor (segments: List<&[I8]>, buffer: &[I8], depth: I32, input: &[I8], index: I32) {
 		this.segments = segments;
 		this.buffer = buffer;
 		this.depth = depth;
@@ -138,12 +138,12 @@ struct CompileState {
 	imports: List<Import>;
 	output: &[I8];
 	structureNames: List<&[I8]>;
-	depth: number;
+	depth: I32;
 	definitions: List<Definition>;
 	maybeLocation: Option<Location>;
 	sources: List<Source>;
 	platform: Platform;
-	constructor (imports: List<Import>, output: &[I8], structureNames: List<&[I8]>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform) {
+	constructor (imports: List<Import>, output: &[I8], structureNames: List<&[I8]>, depth: I32, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
@@ -537,7 +537,7 @@ struct FunctionType implements Type {
 		this.returns = returns;
 	}
 	def generate(): &[I8] {
-		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
+		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<I32, &[I8]>) => "arg" + tuple.left() + " : " + tuple.right()).collect(Joiner(", ")).orElse("");
 		return "(" + joinedArguments + ") => " + this.returns;
 	}
 	def isFunctional(): Bool {
@@ -685,7 +685,7 @@ struct BooleanType implements Type {
 		this.platform = platform;
 	}
 	def generate(): &[I8] {
-		if (Platform.TypeScript === platform){
+		if (Platform.TypeScript === this.platform){
 			return "boolean";
 		}
 		return "Bool";
@@ -717,6 +717,7 @@ struct Primitive implements Type {
 	static Void: Primitive = new Primitive("void");
 	static Unknown: Primitive = new Primitive("unknown");
 	static I8: Primitive = new Primitive("I8");
+	static I32: Primitive = new Primitive("I32");
 	value: &[I8];
 	constructor (value: &[I8]) {
 		this.value = value;
@@ -759,7 +760,7 @@ export struct Main {
 	static def getCompileStateOptionTuple2(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Option<IOError>> {
 		let result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
 		let compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
-		return Tuple2Impl<>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
+		return Tuple2Impl<CompileState, Option<IOError>>(compileStateOptionTuple2.left(), result.right().or(() => compileStateOptionTuple2.right()));
 	}
 	static def compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state.withLocation(source.computeLocation()).withPlatform(platform);
@@ -1117,7 +1118,7 @@ export struct Main {
 			return Some<Tuple2<CompileState, &[I8]>>(Tuple2Impl<CompileState, &[I8]>(valueTuple.left(), Main.generateIndent(state.depth) + valueTuple.right() + ";"));
 		});
 	}
-	static def generateIndent(indent: number): &[I8] {
+	static def generateIndent(indent: I32): &[I8] {
 		return "\n" + "\t".repeat(indent);
 	}
 	static def compileFunctionStatementValue(state: CompileState, withoutEnd: &[I8]): Tuple2<CompileState, &[I8]> {
@@ -1310,8 +1311,8 @@ export struct Main {
 		}
 	}
 	static def isNumber(input: &[I8]): Bool {
-		let query = HeadedQuery<number>(RangeHead(Strings.length(input)));
-		return query.map((index: number) => input.charAt(index)).allMatch((c: string) => Characters.isDigit(c));
+		let query = HeadedQuery<I32>(RangeHead(Strings.length(input)));
+		return query.map((index: I32) => input.charAt(index)).allMatch((c: string) => Characters.isDigit(c));
 	}
 	static def parseSymbol(state: CompileState, input: &[I8]): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input);
@@ -1324,10 +1325,10 @@ export struct Main {
 		}
 	}
 	static def isSymbol(input: &[I8]): Bool {
-		let query = HeadedQuery<number>(RangeHead(Strings.length(input)));
-		return query.allMatch((index: number) => Main.isSymbolChar(index, Strings.charAt(input, index)));
+		let query = HeadedQuery<I32>(RangeHead(Strings.length(input)));
+		return query.allMatch((index: I32) => Main.isSymbolChar(index, Strings.charAt(input, index)));
 	}
-	static def isSymbolChar(index: number, c: string): Bool {
+	static def isSymbolChar(index: I32, c: string): Bool {
 		return "_" === c || Characters.isLetter(c) || (0 !== index && Characters.isDigit(c));
 	}
 	static def compilePrefix<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8]) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
@@ -1466,11 +1467,16 @@ export struct Main {
 				return Some<Type>(Primitive.String);
 			}
 			else {
-				return Some<>(Slice(Primitive.I8));
+				return Some<Type>(Slice(Primitive.I8));
 			}
 		}
 		if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)){
-			return Some<Type>(Primitive.Number);
+			if (Platform.Magma === platform){
+				return Some<Type>(Primitive.I32);
+			}
+			else {
+				return Some<Type>(Primitive.Number);
+			}
 		}
 		if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)){
 			return Some<Type>(BooleanType(platform));
@@ -1550,7 +1556,7 @@ export struct Main {
 	static def compileLast<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
 		return Main.compileInfix(input, infix, Main.findLast, mapper);
 	}
-	static def findLast(input: &[I8], infix: &[I8]): number {
+	static def findLast(input: &[I8], infix: &[I8]): I32 {
 		return input.lastIndexOf(infix);
 	}
 	static def compileSuffix<T>(input: &[I8], suffix: &[I8], mapper: (arg0 : &[I8]) => Option<T>): Option<T> {
@@ -1565,13 +1571,13 @@ export struct Main {
 	static def compileFirst<T>(input: &[I8], infix: &[I8], mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
 		return Main.compileInfix(input, infix, Main.findFirst, mapper);
 	}
-	static def compileInfix<T>(input: &[I8], infix: &[I8], locator: (arg0 : &[I8], arg1 : &[I8]) => number, mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
+	static def compileInfix<T>(input: &[I8], infix: &[I8], locator: (arg0 : &[I8], arg1 : &[I8]) => I32, mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
 		return Main.compileSplit(Main.split(input, infix, locator), mapper);
 	}
 	static def compileSplit<T>(splitter: Option<Tuple2<&[I8], &[I8]>>, mapper: (arg0 : &[I8], arg1 : &[I8]) => Option<T>): Option<T> {
 		return splitter.flatMap((tuple: Tuple2<&[I8], &[I8]>) => mapper(tuple.left(), tuple.right()));
 	}
-	static def split(input: &[I8], infix: &[I8], locator: (arg0 : &[I8], arg1 : &[I8]) => number): Option<Tuple2<&[I8], &[I8]>> {
+	static def split(input: &[I8], infix: &[I8], locator: (arg0 : &[I8], arg1 : &[I8]) => I32): Option<Tuple2<&[I8], &[I8]>> {
 		let index = locator(input, infix);
 		if (0 > index){
 			return None<Tuple2<&[I8], &[I8]>>();
@@ -1581,7 +1587,7 @@ export struct Main {
 		let right = Strings.sliceFrom(input, index + length);
 		return Some<Tuple2<&[I8], &[I8]>>(Tuple2Impl<&[I8], &[I8]>(left, right));
 	}
-	static def findFirst(input: &[I8], infix: &[I8]): number {
+	static def findFirst(input: &[I8], infix: &[I8]): I32 {
 		return input.indexOf(infix);
 	}
 	static def generatePlaceholder(input: &[I8]): &[I8] {

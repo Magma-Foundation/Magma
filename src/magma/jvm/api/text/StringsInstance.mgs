@@ -34,11 +34,11 @@
 	Main: magma.app
 ]*/
 export interface StringsInstance {
-	def length(stripped: &[I8]): number;
+	def length(stripped: &[I8]): I32;
 
-	def sliceBetween(input: &[I8], startInclusive: number, endExclusive: number): &[I8];
+	def sliceBetween(input: &[I8], startInclusive: I32, endExclusive: I32): &[I8];
 
-	def sliceFrom(input: &[I8], startInclusive: number): &[I8];
+	def sliceFrom(input: &[I8], startInclusive: I32): &[I8];
 
 	def isEmpty(cache: &[I8]): Bool;
 
@@ -48,6 +48,6 @@ export interface StringsInstance {
 
 	def isBlank(value: &[I8]): Bool;
 
-	def charAt(input: &[I8], index: number): string;
+	def charAt(input: &[I8], index: I32): string;
 
 }

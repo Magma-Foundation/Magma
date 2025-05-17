@@ -801,7 +801,7 @@ public final class Main {
     private record BooleanType(Platform platform) implements Type {
         @Override
         public String generate() {
-            if (Platform.TypeScript == platform) {
+            if (Platform.TypeScript == this.platform) {
                 return "boolean";
             }
 
@@ -868,7 +868,7 @@ public final class Main {
     private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(final CompileState state, final Source source, final String input) {
         final var result = Main.compileAndWrite(state, source, input, Platform.TypeScript);
         final var compileStateOptionTuple2 = Main.compileAndWrite(result.left(), source, input, Platform.Magma);
-        return new Tuple2Impl<>(compileStateOptionTuple2.left(), result.right().or(() -> compileStateOptionTuple2.right()));
+        return new Tuple2Impl<CompileState, Option<IOError>>(compileStateOptionTuple2.left(), result.right().or(() -> compileStateOptionTuple2.right()));
     }
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(final CompileState state, final Source source, final String input, final Platform platform) {
@@ -1920,12 +1920,17 @@ public final class Main {
                 return new Some<Type>(Primitive.String);
             }
             else {
-                return new Some<>(new Slice(Primitive.I8));
+                return new Some<Type>(new Slice(Primitive.I8));
             }
         }
 
         if (Strings.equalsTo("int", stripped) || Strings.equalsTo("Integer", stripped)) {
-            return new Some<Type>(Primitive.Number);
+            if (Platform.Magma == platform) {
+                return new Some<Type>(Primitive.I32);
+            }
+            else {
+                return new Some<Type>(Primitive.Number);
+            }
         }
 
         if (Strings.equalsTo("boolean", stripped) || Strings.equalsTo("Boolean", stripped)) {
@@ -2109,7 +2114,8 @@ public final class Main {
         Var("var"),
         Void("void"),
         Unknown("unknown"),
-        I8("I8");
+        I8("I8"),
+        I32("I32");
 
         private final String value;
 

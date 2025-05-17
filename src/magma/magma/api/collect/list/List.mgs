@@ -39,12 +39,12 @@ import magma.api.Tuple2;
 export struct List<T> {
 	def addLast(element: T): List<T>;
 	def query(): Query<T>;
-	def size(): number;
-	def subList(startInclusive: number, endExclusive: number): Option<List<T>>;
+	def size(): I32;
+	def subList(startInclusive: I32, endExclusive: I32): Option<List<T>>;
 	def findLast(): Option<T>;
 	def findFirst(): Option<T>;
-	def find(index: number): Option<T>;
-	def queryWithIndices(): Query<Tuple2<number, T>>;
+	def find(index: I32): Option<T>;
+	def queryWithIndices(): Query<Tuple2<I32, T>>;
 	def addAll(others: List<T>): List<T>;
 	def contains(element: T, equator: (arg0 : T, arg1 : T) => Bool): Bool;
 	def queryReversed(): Query<T>;
