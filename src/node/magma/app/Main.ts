@@ -514,10 +514,15 @@ class Operation implements Value {
 }
 class ConstructionCaller implements Caller {
 	right: string;
-	constructor (right: string) {
+	platform: Platform;
+	constructor (right: string, platform: Platform) {
 		this.right = right;
+		this.platform = platform;
 	}
 	generate(): string {
+		if (Platform.Magma === platform){
+			return this.right;
+		}
 		return "new " + this.right;
 	}
 	findChild(): Option<Value> {
@@ -1140,9 +1145,9 @@ export class Main {
 				return Main.compileSuffix(callerWithArgStart, "(", (callerString: string) => {
 					return Main.compilePrefix(Strings.strip(callerString), "new ", (type: string) => {
 						return Main.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, string>) => {
-							let callerState = callerTuple.right();
-							let caller = callerTuple.left();
-							return Main.assembleInvokable(caller, new ConstructionCaller(callerState), args);
+							let callerState = callerTuple.left();
+							let caller = callerTuple.right();
+							return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform), args);
 						});
 					}).or(() => {
 						return Main.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => {

@@ -38,7 +38,7 @@ import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 export struct None<T> implements Option<T> {
 	def map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return new None<R>();
+		return None<R>();
 	}
 	def orElse(other: T): T {
 		return other;
@@ -55,15 +55,15 @@ export struct None<T> implements Option<T> {
 		return other();
 	}
 	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return new None<R>();
+		return None<R>();
 	}
 	def filter(predicate: (arg0 : T) => boolean): Option<T> {
-		return new None<T>();
+		return None<T>();
 	}
 	def toTuple(other: T): Tuple2<boolean, T> {
-		return new Tuple2Impl<boolean, T>(false, other);
+		return Tuple2Impl<boolean, T>(false, other);
 	}
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return new None<Tuple2<T, R>>();
+		return None<Tuple2<T, R>>();
 	}
 }

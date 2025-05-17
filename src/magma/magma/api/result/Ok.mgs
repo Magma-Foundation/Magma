@@ -43,10 +43,10 @@ export struct Ok<T, X> implements Result<T, X> {
 		this.value = value;
 	}
 	def findError(): Option<X> {
-		return new None<X>();
+		return None<X>();
 	}
 	def findValue(): Option<T> {
-		return new Some<T>(this.value);
+		return Some<T>(this.value);
 	}
 	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenOk(this.value);

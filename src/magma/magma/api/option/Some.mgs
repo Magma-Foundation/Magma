@@ -43,7 +43,7 @@ export struct Some<T> implements Option<T> {
 		this.value = value;
 	}
 	def map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return new Some<R>(mapper(this.value));
+		return Some<R>(mapper(this.value));
 	}
 	def orElse(other: T): T {
 		return this.value;
@@ -67,12 +67,12 @@ export struct Some<T> implements Option<T> {
 		if (predicate(this.value)){
 			return this;
 		}
-		return new None<T>();
+		return None<T>();
 	}
 	def toTuple(other: T): Tuple2<boolean, T> {
-		return new Tuple2Impl<boolean, T>(true, this.value);
+		return Tuple2Impl<boolean, T>(true, this.value);
 	}
 	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue));
+		return other().map((otherValue: R) => Tuple2Impl<T, R>(this.value, otherValue));
 	}
 }

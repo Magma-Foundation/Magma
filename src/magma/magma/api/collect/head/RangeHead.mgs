@@ -46,10 +46,10 @@ export struct RangeHead implements Head<number> {
 	}
 	def next(): Option<number> {
 		if (this.counter >= this.length){
-			return new None<number>();
+			return None<number>();
 		}
 		let value = this.counter;
 		this.counter++;
-		return new Some<number>(value);
+		return Some<number>(value);
 	}
 }

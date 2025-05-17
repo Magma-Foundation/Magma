@@ -610,9 +610,12 @@ public final class Main {
         }
     }
 
-    private record ConstructionCaller(String right) implements Caller {
+    private record ConstructionCaller(String right, Platform platform) implements Caller {
         @Override
         public String generate() {
+            if (Platform.Magma == this.platform) {
+                return this.right;
+            }
             return "new " + this.right;
         }
 
@@ -1442,9 +1445,9 @@ public final class Main {
                 return Main.compileSuffix(callerWithArgStart, "(", (String callerString) -> {
                     return Main.compilePrefix(Strings.strip(callerString), "new ", (String type) -> {
                         return Main.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple) -> {
-                            var callerState = callerTuple.right();
-                            var caller = callerTuple.left();
-                            return Main.assembleInvokable(caller, new ConstructionCaller(callerState), args);
+                            var callerState = callerTuple.left();
+                            var caller = callerTuple.right();
+                            return Main.assembleInvokable(callerState, new ConstructionCaller(caller, callerState.platform), args);
                         });
                     }).or(() -> {
                         return Main.parseValue(state, callerString).flatMap((Tuple2<CompileState, Value> callerTuple) -> {

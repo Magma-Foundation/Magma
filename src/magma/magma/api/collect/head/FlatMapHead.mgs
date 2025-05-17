@@ -57,7 +57,7 @@ export struct FlatMapHead<T, R> implements Head<R> {
 				this.current = tuple.right();
 			}
 			else {
-				return new None<R>();
+				return None<R>();
 			}
 		}
 	}

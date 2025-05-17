@@ -38,6 +38,6 @@ import magma.api.option.Option;
 import magma.api.option.None;
 export struct EmptyHead<T> implements Head<T> {
 	def next(): Option<T> {
-		return new None<T>();
+		return None<T>();
 	}
 }

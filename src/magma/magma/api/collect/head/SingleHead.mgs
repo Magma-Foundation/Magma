@@ -46,9 +46,9 @@ export struct SingleHead<T> implements Head<T> {
 	}
 	def next(): Option<T> {
 		if (this.retrieved){
-			return new None<T>();
+			return None<T>();
 		}
 		this.retrieved = true;
-		return new Some<T>(this.element);
+		return Some<T>(this.element);
 	}
 }

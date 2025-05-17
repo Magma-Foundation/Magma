@@ -41,9 +41,9 @@ import magma.api.collect.head.Head;
 import magma.api.collect.head.SingleHead;
 export struct Queries {
 	static def fromOption<T>(option: Option<T>): Query<T> {
-		return new HeadedQuery<T>(option.map((element: T) => Queries.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));
+		return HeadedQuery<T>(option.map((element: T) => Queries.getTSingleHead(element)).orElseGet(() => EmptyHead<T>()));
 	}
 	static def getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element);
+		return SingleHead<T>(element);
 	}
 }

@@ -55,7 +55,7 @@ export struct HeadedQuery<T> implements Query<T> {
 		return this.foldWithInitial(collector.createInitial(), (current: C, element: T) => collector.fold(current, element));
 	}
 	def map<R>(mapper: (arg0 : T) => R): Query<R> {
-		return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
+		return HeadedQuery<R>(MapHead<T, R>(this.head, mapper));
 	}
 	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
 		let result: R = initial;
@@ -76,7 +76,7 @@ export struct HeadedQuery<T> implements Query<T> {
 		});
 	}
 	def flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
+		return this.head.next().map(mapper).map((initial: Query<R>) => HeadedQuery<R>(FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => HeadedQuery<R>(EmptyHead<R>()));
 	}
 	def allMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => maybeAllTrue && predicate(element));
@@ -85,15 +85,15 @@ export struct HeadedQuery<T> implements Query<T> {
 		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t));
 	}
 	def zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
-		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
+		return HeadedQuery<Tuple2<T, R>>(ZipHead<T, R>(this.head, other));
 	}
 	def filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {
 			if (predicate(element)){
-				return new HeadedQuery<T>(new SingleHead<T>(element));
+				return HeadedQuery<T>(SingleHead<T>(element));
 			}
 			else {
-				return new HeadedQuery<T>(new EmptyHead<T>());
+				return HeadedQuery<T>(EmptyHead<T>());
 			}
 		});
 	}
