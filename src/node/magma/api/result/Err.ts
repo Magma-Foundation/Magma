@@ -45,4 +45,7 @@ export class Err<T, X> implements Result<T, X> {
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenErr/*(arg0 : X) => R*/(this/*auto*/.error);
 	}
+	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
+		return new Err<>(this/*auto*/.error);
+	}
 }

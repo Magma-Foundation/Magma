@@ -2,6 +2,7 @@ package magma.api.collect;
 
 import magma.api.Tuple2;
 import magma.api.option.Option;
+import magma.api.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -27,4 +28,6 @@ public interface Query<T> {
     boolean anyMatch(Predicate<T> predicate);
 
     <R> Query<Tuple2<T, R>> zip(Query<R> other);
+
+    <R, X> Result<R, X> foldWithInitialToResult(R initial, BiFunction<R, T, Result<R, X>> mapper);
 }

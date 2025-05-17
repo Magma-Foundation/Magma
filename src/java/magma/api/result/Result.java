@@ -10,4 +10,6 @@ public interface Result<T, X> {
     Option<T> findValue();
 
     <R> R match(Function<T, R> whenOk, Function<X, R> whenErr);
+
+    <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
 }

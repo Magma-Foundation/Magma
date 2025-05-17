@@ -15,3 +15,6 @@ Option<T> findValue() {
 R match((arg0 : T) => R whenOk, (arg0 : X) => R whenErr) {
 	return whenErr/*(arg0 : X) => R*/(this/*auto*/.error);
 }
+Result<R, X> flatMapValue((arg0 : T) => Result<R, X> mapper) {
+	return new Err<>(this/*auto*/.error);
+}

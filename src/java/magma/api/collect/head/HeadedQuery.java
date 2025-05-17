@@ -4,6 +4,8 @@ import magma.api.Tuple2;
 import magma.api.collect.Collector;
 import magma.api.collect.Query;
 import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -69,6 +71,14 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     @Override
     public <R> Query<Tuple2<T, R>> zip(final Query<R> other) {
         return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
+    }
+
+    @Override
+    public <R, X> Result<R, X> foldWithInitialToResult(final R initial, final BiFunction<R, T, Result<R, X>> mapper) {
+        final Result<R, X> initialResult = new Ok<R, X>(initial);
+        return this.foldWithInitial(initialResult,
+                (Result<R, X> currentResult, T element) -> currentResult.flatMapValue(
+                        (R current) -> mapper.apply(current, element)));
     }
 
     @Override

@@ -23,5 +23,7 @@ import { FlatMapHead } from "magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "magma/api/collect/head/EmptyHead";
 import { Tuple2 } from "magma/api/Tuple2";
 import { ZipHead } from "magma/api/collect/head/ZipHead";
+import { Result } from "magma/api/result/Result";
+import { Ok } from "magma/api/result/Ok";
 import { SingleHead } from "magma/api/collect/head/SingleHead";
 #endif

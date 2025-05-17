@@ -72,21 +72,21 @@ import { IOError } from "../../magma/api/io/IOError";
 import { Some } from "../../magma/api/option/Some";
 import { Console } from "../../jvm/api/io/Console";
 import { Option } from "../../magma/api/option/Option";
+import { Source } from "../../magma/app/io/Source";
 import { Queries } from "../../magma/api/collect/Queries";
 import { Platform } from "../../magma/app/io/Platform";
 import { CompileState } from "../../magma/app/compile/CompileState";
-import { Tuple2 } from "../../magma/api/Tuple2";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Source } from "../../magma/app/io/Source";
-import { None } from "../../magma/api/option/None";
+import { Result } from "../../magma/api/result/Result";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Location } from "../../magma/app/io/Location";
 import { Lists } from "../../jvm/api/collect/list/Lists";
-import { Result } from "../../magma/api/result/Result";
+import { None } from "../../magma/api/option/None";
 import { Err } from "../../magma/api/result/Err";
 import { Ok } from "../../magma/api/result/Ok";
+import { Tuple2 } from "../../magma/api/Tuple2";
 import { Joiner } from "../../magma/api/collect/Joiner";
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Import } from "../../magma/app/compile/Import";
 import { Strings } from "../../jvm/api/text/Strings";
 import { DivideState } from "../../magma/app/compile/text/DivideState";
@@ -122,23 +122,16 @@ import { FunctionType } from "../../magma/app/compile/type/FunctionType";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files/*auto*/.get(".", "src", "java");
-		sourceDirectory/*auto*/.walk(/*auto*/).match((children: List<Path>) => Main/*auto*/.runWithChildren(children/*auto*/, sourceDirectory/*auto*/), (value: IOError) => new Some<IOError>(value/*string*/)).map((error: IOError) => error/*auto*/.display(/*auto*/)).ifPresent((displayed: string) => Console/*auto*/.printErrLn(displayed/*auto*/));
+		sourceDirectory/*auto*/.walk(/*auto*/).match((children: List<Path>) => Main/*auto*/.runWithSources(Main/*auto*/.findSources(children/*auto*/, sourceDirectory/*auto*/)), (value: IOError) => new Some<IOError>(value/*string*/)).map((error: IOError) => error/*auto*/.display(/*auto*/)).ifPresent((displayed: string) => Console/*auto*/.printErrLn(displayed/*auto*/));
 	}
-	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
-		let initial = Main/*auto*/.createInitialStateToTuple(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
-		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, (current1: Tuple2<CompileState, Option<IOError>>, platform: Platform) => Main/*auto*/.runWithPlatformAndSources(current1/*auto*/, platform/*Platform*/, sourceDirectory/*Path*/, children/*List<Path>*/)).right(/*auto*/);
+	static runWithSources(sources: List<Source>): Option<IOError> {
+		return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitialToResult(Main/*auto*/.createInitialState(sources/*List<Source>*/), (current1: CompileState, platform: Platform) => Main/*auto*/.runWithPlatform(current1/*auto*/, platform/*Platform*/, sources/*List<Source>*/)).findError(/*auto*/);
 	}
-	static runWithPlatformAndSources(initial: Tuple2<CompileState, Option<IOError>>, platform: Platform, root: Path, children: List<Path>): Tuple2<CompileState, Option<IOError>> {
-		return Main/*auto*/.findSources(children/*List<Path>*/, root/*Path*/).query(/*auto*/).foldWithInitial(new Tuple2Impl<>(initial/*Tuple2<CompileState, Option<IOError>>*/.left(/*auto*/).clearDefinedTypes(/*auto*/), initial/*Tuple2<CompileState, Option<IOError>>*/.right(/*auto*/)), (current: Tuple2<CompileState, Option<IOError>>, source: Source) => Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source/*Source*/));
+	static runWithPlatform(initial: CompileState, platform: Platform, sources: List<Source>): Result<CompileState, IOError> {
+		return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(initial/*CompileState*/.clearDefinedTypes(/*auto*/), (state: CompileState, source: Source) => Main/*auto*/.runWithInput(state/*auto*/, platform/*Platform*/, source/*Source*/));
 	}
-	static runWithPlatformAndSource(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source): Tuple2<CompileState, Option<IOError>> {
-		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-			return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, maybeError/*Option<IOError>*/);
-		}
-		return source/*Source*/.read(/*auto*/).match((input: string) => Main/*auto*/.compileAndWritePlatform(state/*CompileState*/, maybeError/*Option<IOError>*/, platform/*Platform*/, source/*Source*/, input/*string*/), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new Some<IOError>(value/*string*/)));
-	}
-	static createInitialStateToTuple(sources: List<Source>): Tuple2<CompileState, Option<IOError>> {
-		return new Tuple2Impl<CompileState, Option<IOError>>(Main/*auto*/.createInitialState(sources/*List<Source>*/), new None<IOError>(/*auto*/));
+	static runWithInput(state: CompileState, platform: Platform, source: Source): Result<CompileState, IOError> {
+		return source/*Source*/.read(/*auto*/).flatMapValue((input: string) => Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*string*/, platform/*Platform*/));
 	}
 	static createInitialState(sources: List<Source>): CompileState {
 		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), (state: CompileState, source: Source) => state/*CompileState*/.addSource(source/*Source*/));
@@ -146,26 +139,20 @@ export class Main {
 	static findSources(children: List<Path>, sourceDirectory: Path): List<Source> {
 		return children/*List<Path>*/.query(/*auto*/).filter((source: Path) => source/*Source*/.endsWith(".java")).map((child: Path) => new Source(sourceDirectory/*Path*/, child/*string*/)).collect(new ListCollector<Source>(/*auto*/));
 	}
-	static compileAndWritePlatform(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source, input: string): Tuple2<CompileState, Option<IOError>> {
-		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-			return new Tuple2Impl<>(state/*CompileState*/, maybeError/*Option<IOError>*/);
-		}
-		let otherTuple = Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*string*/, platform/*Platform*/);
-		let otherState = otherTuple/*auto*/.left(/*auto*/);
-		let otherValue = otherTuple/*auto*/.right(/*auto*/);
-		return new Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(() => otherValue/*auto*/));
-	}
-	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Tuple2<CompileState, Option<IOError>> {
+	static compileAndWrite(state: CompileState, source: Source, input: string, platform: Platform): Result<CompileState, IOError> {
 		let initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
-		let output = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*string*/);
-		let location = output/*auto*/.left(/*auto*/).findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
-		let maybeError = Main/*auto*/.writeOutputEntries(platform/*Platform*/, location/*auto*/, output/*auto*/.right(/*auto*/));
-		return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+		let outputTuple = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*string*/);
+		let outputState = outputTuple/*auto*/.left(/*auto*/);
+		let outputsByExtensions = outputTuple/*auto*/.right(/*auto*/);
+		let location = outputState/*auto*/.findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
+		/*return Main.writeOutputEntries(platform, location, outputsByExtensions)
+                .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
+                .orElseGet(() -> new Ok<>(outputState))*/;
 	}
 	static writeOutputEntries(platform: Platform, location: Location, outputsByExtensions: Map<string, string>): Option<IOError> {
 		let initial: Option<IOError> = new None<IOError>(/*auto*/);
 		let platformRoot = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
-		return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, (maybeError0: Option<IOError>, extension: string) => maybeError0/*auto*/.or(() => Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*auto*/, location/*Location*/, outputsByExtensions/*Map<string, string>*/)));
+		return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*CompileState*/, (maybeError0: Option<IOError>, extension: string) => maybeError0/*auto*/.or(() => Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*auto*/, location/*Location*/, outputsByExtensions/*Map<string, string>*/)));
 	}
 	static writeOutputEntryWithParent(directory: Path, extension: string, location: Location, outputsByExtensions: Map<string, string>): Option<IOError> {
 		return Main/*auto*/.ensureTargetParent(directory/*Path*/, location/*Location*/.namespace(/*auto*/)).match((targetParent: Path) => Main/*auto*/.writeOutputEntry(targetParent/*auto*/, location/*Location*/, outputsByExtensions/*Map<string, string>*/, extension/*string*/), Some/*auto*/.new);
@@ -178,8 +165,8 @@ export class Main {
 		let targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<string>*/);
 		if (!targetParent/*Path*/.exists(/*auto*/)) {
 			let maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
-			if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-				return new Err<>(maybeError/*Option<IOError>*/.orElse(null/*auto*/));
+			if (maybeError/*auto*/.isPresent(/*auto*/)) {
+				return new Err<>(maybeError/*auto*/.orElse(null/*auto*/));
 			}
 		}
 		return new Ok<>(targetParent/*Path*/);

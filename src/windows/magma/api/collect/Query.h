@@ -26,4 +26,5 @@
 import { Collector } from "magma/api/collect/Collector";
 import { Option } from "magma/api/option/Option";
 import { Tuple2 } from "magma/api/Tuple2";
+import { Result } from "magma/api/result/Result";
 #endif

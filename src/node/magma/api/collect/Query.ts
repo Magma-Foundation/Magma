@@ -24,6 +24,7 @@
 import { Collector } from "../../../magma/api/collect/Collector";
 import { Option } from "../../../magma/api/option/Option";
 import { Tuple2 } from "../../../magma/api/Tuple2";
+import { Result } from "../../../magma/api/result/Result";
 export interface Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;
@@ -35,4 +36,5 @@ export interface Query<T> {
 	filter(predicate: (arg0 : T) => boolean): Query<T>;
 	anyMatch(predicate: (arg0 : T) => boolean): boolean;
 	zip<R>(other: Query<R>): Query<Tuple2<T, R>>;
+	foldWithInitialToResult<R, X>(initial: R, mapper: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X>;
 }

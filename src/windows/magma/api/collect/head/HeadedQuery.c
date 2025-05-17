@@ -64,6 +64,16 @@ Bool anyMatch((arg0 : T) => boolean predicate) {
 Query<Tuple2<T, R>> zip(Query<R> other) {
 	return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this/*auto*/.head, other/*Query<R>*/));
 }
+auto temp(R current) {
+	return mapper/*(arg0 : R, arg1 : T) => Result<R, X>*/(current/*Tuple2<CompileState, List<T>>*/, element/*&[I8]*/);
+}
+auto temp(Result<R, X> currentResult, T element) {
+	return currentResult/*auto*/.flatMapValue(lambdaDefinition/*auto*/);
+}
+Result<R, X> foldWithInitialToResult(R initial, (arg0 : R, arg1 : T) => Result<R, X> mapper) {
+	Result<R, X> initialResult = new Ok<R, X>(initial/*R*/);
+	return this/*auto*/.foldWithInitial(initialResult/*auto*/, lambdaDefinition/*auto*/);
+}
 auto temp(T element) {{
 		if (predicate/*(arg0 : T) => boolean*/(element/*T*/)) {
 			return new HeadedQuery<T>(new SingleHead<T>(element/*T*/));

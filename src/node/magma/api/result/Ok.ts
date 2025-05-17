@@ -46,4 +46,7 @@ export class Ok<T, X> implements Result<T, X> {
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenOk/*(arg0 : T) => R*/(this/*auto*/.value);
 	}
+	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
+		return mapper/*(arg0 : T) => Result<R, X>*/(this/*auto*/.value);
+	}
 }

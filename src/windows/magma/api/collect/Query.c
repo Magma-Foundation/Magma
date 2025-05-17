@@ -10,4 +10,5 @@ export interface Query<T> {
 	Query<T> filter((arg0 : T) => boolean predicate);
 	Bool anyMatch((arg0 : T) => boolean predicate);
 	Query<Tuple2<T, R>> zip(Query<R> other);
+	Result<R, X> foldWithInitialToResult(R initial, (arg0 : R, arg1 : T) => Result<R, X> mapper);
 }

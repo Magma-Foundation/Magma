@@ -3,7 +3,7 @@ export class Main {
 }
 
 auto temp(List<Path> children) {
-	return Main/*auto*/.runWithChildren(children/*List<Path>*/, sourceDirectory/*Path*/);
+	return Main/*auto*/.runWithSources(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
 }
 auto temp(IOError value) {
 	return new Some<IOError>(value/*&[I8]*/);
@@ -18,33 +18,23 @@ static void main() {
 	var sourceDirectory = Files/*auto*/.get(".", "src", "java");
 	sourceDirectory/*Path*/.walk(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).ifPresent(lambdaDefinition/*auto*/);
 }
-auto temp(Tuple2<CompileState, Option<IOError>> current1, Platform platform) {
-	return Main/*auto*/.runWithPlatformAndSources(current1/*auto*/, platform/*Platform*/, sourceDirectory/*Path*/, children/*List<Path>*/);
+auto temp(CompileState current1, Platform platform) {
+	return Main/*auto*/.runWithPlatform(current1/*auto*/, platform/*Platform*/, sources/*List<Source>*/);
 }
-static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
-	var initial = Main/*auto*/.createInitialStateToTuple(Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/));
-	return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitial(initial/*R*/, lambdaDefinition/*auto*/).right(/*auto*/);
+static Option<IOError> runWithSources(List<Source> sources) {
+	return Queries/*auto*/.fromArray(Platform/*auto*/.values(/*auto*/)).foldWithInitialToResult(Main/*auto*/.createInitialState(sources/*List<Source>*/), lambdaDefinition/*auto*/).findError(/*auto*/);
 }
-auto temp(Tuple2<CompileState, Option<IOError>> current, Source source) {
-	return Main/*auto*/.runWithPlatformAndSource(current/*List<T>*/.left(/*auto*/), current/*List<T>*/.right(/*auto*/), platform/*Platform*/, source/*Source*/);
+auto temp(CompileState state, Source source) {
+	return Main/*auto*/.runWithInput(state/*DivideState*/, platform/*Platform*/, source/*Source*/);
 }
-static Tuple2<CompileState, Option<IOError>> runWithPlatformAndSources(Tuple2<CompileState, Option<IOError>> initial, Platform platform, Path root, List<Path> children) {
-	return Main/*auto*/.findSources(children/*List<Path>*/, root/*Path*/).query(/*auto*/).foldWithInitial(new Tuple2Impl<>(initial/*Tuple2<CompileState, Option<IOError>>*/.left(/*auto*/).clearDefinedTypes(/*auto*/), initial/*Tuple2<CompileState, Option<IOError>>*/.right(/*auto*/)), lambdaDefinition/*auto*/);
+static Result<CompileState, IOError> runWithPlatform(CompileState initial, Platform platform, List<Source> sources) {
+	return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(initial/*CompileState*/.clearDefinedTypes(/*auto*/), lambdaDefinition/*auto*/);
 }
 auto temp(&[I8] input) {
-	return Main/*auto*/.compileAndWritePlatform(state/*CompileState*/, maybeError/*Option<IOError>*/, platform/*Platform*/, source/*Source*/, input/*&[I8]*/);
+	return Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, platform/*Platform*/);
 }
-auto temp(IOError value) {
-	return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new Some<IOError>(value/*&[I8]*/));
-}
-static Tuple2<CompileState, Option<IOError>> runWithPlatformAndSource(CompileState state, Option<IOError> maybeError, Platform platform, Source source) {
-	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-		return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, maybeError/*Option<IOError>*/);
-	}
-	return source/*Source*/.read(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/);
-}
-static Tuple2<CompileState, Option<IOError>> createInitialStateToTuple(List<Source> sources) {
-	return new Tuple2Impl<CompileState, Option<IOError>>(Main/*auto*/.createInitialState(sources/*List<Source>*/), new None<IOError>(/*auto*/));
+static Result<CompileState, IOError> runWithInput(CompileState state, Platform platform, Source source) {
+	return source/*Source*/.read(/*auto*/).flatMapValue(lambdaDefinition/*auto*/);
 }
 auto temp(CompileState state, Source source) {
 	return state/*CompileState*/.addSource(source/*Source*/);
@@ -61,24 +51,15 @@ auto temp(Path child) {
 static List<Source> findSources(List<Path> children, Path sourceDirectory) {
 	return children/*List<Path>*/.query(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<Source>(/*auto*/));
 }
-auto temp() {
-	return otherValue/*auto*/;
-}
-static Tuple2<CompileState, Option<IOError>> compileAndWritePlatform(CompileState state, Option<IOError> maybeError, Platform platform, Source source, &[I8] input) {
-	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-		return new Tuple2Impl<>(state/*CompileState*/, maybeError/*Option<IOError>*/);
-	}
-	var otherTuple = Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, platform/*Platform*/);
-	var otherState = otherTuple/*auto*/.left(/*auto*/);
-	var otherValue = otherTuple/*auto*/.right(/*auto*/);
-	return new Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(lambdaDefinition/*auto*/));
-}
-static Tuple2<CompileState, Option<IOError>> compileAndWrite(CompileState state, Source source, &[I8] input, Platform platform) {
+static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, &[I8] input, Platform platform) {
 	var initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
-	var output = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*&[I8]*/);
-	var location = output/*auto*/.left(/*auto*/).findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
-	var maybeError = Main/*auto*/.writeOutputEntries(platform/*Platform*/, location/*Location*/, output/*auto*/.right(/*auto*/));
-	return new Tuple2Impl<CompileState, Option<IOError>>(output/*auto*/.left(/*auto*/), maybeError/*Option<IOError>*/);
+	var outputTuple = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*&[I8]*/);
+	var outputState = outputTuple/*auto*/.left(/*auto*/);
+	var outputsByExtensions = outputTuple/*auto*/.right(/*auto*/);
+	var location = outputState/*auto*/.findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
+	/*return Main.writeOutputEntries(platform, location, outputsByExtensions)
+                .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
+                .orElseGet(() -> new Ok<>(outputState))*/;
 }
 auto temp() {
 	return Main/*auto*/.writeOutputEntryWithParent(platformRoot/*auto*/, extension/*&[I8]*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/);
@@ -89,7 +70,7 @@ auto temp(Option<IOError> maybeError0, &[I8] extension) {
 static Option<IOError> writeOutputEntries(Platform platform, Location location, Map<&[I8], &[I8]> outputsByExtensions) {
 	Option<IOError> initial = new None<IOError>(/*auto*/);
 	var platformRoot = Files/*auto*/.get(".", "src", platform/*Platform*/.root);
-	return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*Tuple2<CompileState, Option<IOError>>*/, lambdaDefinition/*auto*/);
+	return Queries/*auto*/.fromArray(platform/*Platform*/.extension).foldWithInitial(initial/*CompileState*/, lambdaDefinition/*auto*/);
 }
 auto temp(Path targetParent) {
 	return Main/*auto*/.writeOutputEntry(targetParent/*Path*/, location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/, extension/*&[I8]*/);
@@ -105,8 +86,8 @@ static Result<Path, IOError> ensureTargetParent(Path directory, List<&[I8]> name
 	var targetParent = directory/*Path*/.resolveChildSegments(namespace/*List<&[I8]>*/);
 	if (!targetParent/*Path*/.exists(/*auto*/)) {
 		var maybeError = targetParent/*Path*/.createDirectories(/*auto*/);
-		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
-			return new Err<>(maybeError/*Option<IOError>*/.orElse(null/*auto*/));
+		if (maybeError/*auto*/.isPresent(/*auto*/)) {
+			return new Err<>(maybeError/*auto*/.orElse(null/*auto*/));
 		}
 	}
 	return new Ok<>(targetParent/*Path*/);

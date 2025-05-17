@@ -43,4 +43,7 @@ export struct Err<T, X> implements Result<T, X> {
 	def match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenErr/*(arg0 : X) => R*/(this/*auto*/.error);
 	}
+	def flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
+		return Err<>(this/*auto*/.error);
+	}
 }

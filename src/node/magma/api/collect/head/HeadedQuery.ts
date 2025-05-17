@@ -21,6 +21,8 @@ import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { ZipHead } from "../../../../magma/api/collect/head/ZipHead";
+import { Result } from "../../../../magma/api/result/Result";
+import { Ok } from "../../../../magma/api/result/Ok";
 import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
@@ -63,6 +65,10 @@ export class HeadedQuery<T> implements Query<T> {
 	}
 	zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
 		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this/*auto*/.head, other/*Query<R>*/));
+	}
+	foldWithInitialToResult<R, X>(initial: R, mapper: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
+		let initialResult: Result<R, X> = new Ok<R, X>(initial/*R*/);
+		return this/*auto*/.foldWithInitial(initialResult/*auto*/, (currentResult: Result<R, X>, element: T) => currentResult/*auto*/.flatMapValue((current: R) => mapper/*(arg0 : R, arg1 : T) => Result<R, X>*/(current/*auto*/, element/*auto*/)));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this/*auto*/.flatMap((element: T) => {
