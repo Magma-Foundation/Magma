@@ -3,9 +3,9 @@ import jvm.api.io.{ Files, Console };
 import magma.api.io.{ Path, IOError };
 import magma.api.collect.list.{ List, ListCollector };
 import magma.api.option.{ Some, Option, None };
-import magma.app.io.{ Source, Platform, Location };
-import magma.app.compile.{ ImmutableCompileState, CompileState, Import, FunctionSegment };
+import magma.app.compile.{ CompileState, ImmutableCompileState, Import, FunctionSegment };
 import magma.api.{ Tuple2, Tuple2Impl, Type };
+import magma.app.io.{ Source, Platform, Location };
 import jvm.api.collect.list.{ Lists };
 import magma.api.collect.{ Queries, Joiner };
 import jvm.api.text.{ Strings, Characters };
@@ -20,12 +20,17 @@ export struct Main {
 		sourceDirectory/*Path*/.walk(/*auto*/).match((mut children: List<Path>) => Main/*auto*/.runWithChildren(children/*List<Path>*/, sourceDirectory/*Path*/), (mut value: IOError) => Some<IOError>(value/*&[I8]*/)).map((mut error: IOError) => error/*auto*/.display(/*auto*/)).ifPresent((mut displayed: &[I8]) => Console/*auto*/.printErrLn(displayed/*auto*/));
 	}
 	static def runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
-		let sources = children/*List<Path>*/.query(/*auto*/).filter((mut source: Path) => source/*string*/.endsWith(".java")).map((mut child: Path) => Source(sourceDirectory/*Path*/, child/*string*/)).collect(ListCollector<Source>(/*auto*/));
-		let initial = sources/*auto*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), (mut state: CompileState, mut source: Source) => state/*DivideState*/.addSource(source/*string*/));
-		return sources/*auto*/.query(/*auto*/).foldWithInitial(Main/*auto*/.createInitialState(initial/*R*/), (mut current: Tuple2<CompileState, Option<IOError>>, mut source1: Source) => Main/*auto*/.foldChild(current/*Tuple2<CompileState, List<T>>*/.left(/*auto*/), current/*Tuple2<CompileState, List<T>>*/.right(/*auto*/), source1/*auto*/)).right(/*auto*/);
+		let sources = Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/);
+		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(Main/*auto*/.createInitialStateToTuple(sources/*List<Source>*/), (mut current: Tuple2<CompileState, Option<IOError>>, mut source1: Source) => Main/*auto*/.foldChild(current/*Tuple2<CompileState, List<T>>*/.left(/*auto*/), current/*Tuple2<CompileState, List<T>>*/.right(/*auto*/), source1/*auto*/)).right(/*auto*/);
 	}
-	static def createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
-		return Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, None<IOError>(/*auto*/));
+	static def createInitialStateToTuple(sources: List<Source>): Tuple2<CompileState, Option<IOError>> {
+		return Tuple2Impl<CompileState, Option<IOError>>(Main/*auto*/.createInitialState(sources/*List<Source>*/), None<IOError>(/*auto*/));
+	}
+	static def createInitialState(sources: List<Source>): CompileState {
+		return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), (mut state: CompileState, mut source: Source) => state/*DivideState*/.addSource(source/*string*/));
+	}
+	static def findSources(children: List<Path>, sourceDirectory: Path): List<Source> {
+		return children/*List<Path>*/.query(/*auto*/).filter((mut source: Path) => source/*string*/.endsWith(".java")).map((mut child: Path) => Source(sourceDirectory/*Path*/, child/*string*/)).collect(ListCollector<Source>(/*auto*/));
 	}
 	static def foldChild(state: CompileState, maybeError: Option<IOError>, source: Source): Tuple2<CompileState, Option<IOError>> {
 		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
@@ -34,13 +39,23 @@ export struct Main {
 		return Main/*auto*/.runWithSource(state/*CompileState*/, source/*Source*/);
 	}
 	static def runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
-		return source/*Source*/.read(/*auto*/).match((mut input: &[I8]) => Main/*auto*/.getCompileStateOptionTuple2(state/*CompileState*/, source/*Source*/, input/*string*/), (mut value: IOError) => Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, Some<IOError>(value/*&[I8]*/)));
+		return source/*Source*/.read(/*auto*/).match((mut input: &[I8]) => Main/*auto*/.compileAndWritePlatforms(state/*CompileState*/, source/*Source*/, input/*string*/), (mut value: IOError) => Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, Some<IOError>(value/*&[I8]*/)));
 	}
-	static def getCompileStateOptionTuple2(state: CompileState, source: Source, input: &[I8]): Tuple2Impl<CompileState, Option<IOError>> {
-		let typeScriptTuple = Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, Platform/*auto*/.TypeScript);
-		let magmaTuple = Main/*auto*/.compileAndWrite(typeScriptTuple/*auto*/.left(/*auto*/), source/*Source*/, input/*&[I8]*/, Platform/*auto*/.Magma);
-		let windowsTuple = Main/*auto*/.compileAndWrite(magmaTuple/*auto*/.left(/*auto*/), source/*Source*/, input/*&[I8]*/, Platform/*auto*/.Windows);
-		return Tuple2Impl<CompileState, Option<IOError>>(windowsTuple/*auto*/.left(/*auto*/), typeScriptTuple/*auto*/.right(/*auto*/).or(() => magmaTuple/*auto*/.right(/*auto*/)).or(() => windowsTuple/*auto*/.right(/*auto*/)));
+	static def compileAndWritePlatforms(state: CompileState, source: Source, input: &[I8]): Tuple2<CompileState, Option<IOError>> {
+		mut let current: Tuple2<CompileState, Option<IOError>> = Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, None<>(/*auto*/));/*
+        for (final var platform : Platform.values()) {
+            current = Main.foldPlatform(current.left(), current.right(), platform, source, input);
+        }*/
+		return current/*Tuple2<CompileState, List<T>>*/;
+	}
+	static def foldPlatform(state: CompileState, maybeError: Option<IOError>, platform: Platform, source: Source, input: &[I8]): Tuple2<CompileState, Option<IOError>> {
+		if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
+			return Tuple2Impl<>(state/*CompileState*/, maybeError/*Option<IOError>*/);
+		}
+		let otherTuple = Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, platform/*Platform*/);
+		let otherState = otherTuple/*auto*/.left(/*auto*/);
+		let otherValue = otherTuple/*auto*/.right(/*auto*/);
+		return Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(() => otherValue/*auto*/));
 	}
 	static def compileAndWrite(state: CompileState, source: Source, input: &[I8], platform: Platform): Tuple2<CompileState, Option<IOError>> {
 		let state1 = state/*CompileState*/.withLocation(source/*Source*/.computeLocation(/*auto*/)).withPlatform(platform/*Platform*/);
@@ -273,9 +288,9 @@ export struct Main {
 		let implementingString = Main/*auto*/.generateImplementing(maybeImplementing/*Option<Type>*/);
 		let newModifiers = Main/*auto*/.modifyModifiers0(oldModifiers/*List<&[I8]>*/);
 		let joinedModifiers = newModifiers/*auto*/.query(/*auto*/).map((mut value: &[I8]) => value/*&[I8]*/ + " ").collect(Joiner/*auto*/.empty(/*auto*/)).orElse("");
-		return getTuple2Some/*auto*/(outputContentState/*CompileState*/.defineType(name/*&[I8]*/), annotations/*List<&[I8]>*/, infix/*&[I8]*/, parameters/*List<Definition>*/, maybeSuperType/*Option<&[I8]>*/, name/*&[I8]*/, joinedModifiers/*string*/, joinedTypeParams/*string*/, implementingString/*string*/, platform/*Platform*/, constructorString/*string*/, outputContent/*string*/);
+		return Main/*auto*/.getTuple2Some(outputContentState/*CompileState*/.defineType(name/*&[I8]*/), annotations/*List<&[I8]>*/, infix/*&[I8]*/, parameters/*List<Definition>*/, maybeSuperType/*Option<&[I8]>*/, name/*&[I8]*/, joinedModifiers/*string*/, joinedTypeParams/*string*/, implementingString/*string*/, platform/*Platform*/, constructorString/*string*/, outputContent/*string*/);
 	}
-	static def getTuple2Some(mut state: CompileState, mut annotations: List<&[I8]>, mut infix: &[I8], mut parameters: List<Definition>, mut maybeSuperType: Option<&[I8]>, mut name: &[I8], mut joinedModifiers: &[I8], mut joinedTypeParams: &[I8], mut implementingString: &[I8], mut platform: Platform, mut constructorString: &[I8], mut outputContent: &[I8]): Some<Tuple2<CompileState, &[I8]>> {
+	static def getTuple2Some(state: CompileState, annotations: List<&[I8]>, infix: &[I8], parameters: List<Definition>, maybeSuperType: Option<&[I8]>, name: &[I8], joinedModifiers: &[I8], joinedTypeParams: &[I8], implementingString: &[I8], platform: Platform, constructorString: &[I8], outputContent: &[I8]): Some<Tuple2<CompileState, &[I8]>> {
 		if (annotations/*List<&[I8]>*/.contains("Namespace", Strings/*auto*/.equalsTo)) {
 			let actualInfix = "interface ";
 			let newName = name/*&[I8]*/ + "Instance";

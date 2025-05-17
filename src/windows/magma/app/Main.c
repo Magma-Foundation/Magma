@@ -18,25 +18,30 @@ static void main() {
 	var sourceDirectory = Files/*auto*/.get(".", "src", "java");
 	sourceDirectory/*Path*/.walk(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).ifPresent(lambdaDefinition/*auto*/);
 }
+auto temp(Tuple2<CompileState, Option<IOError>> current, Source source1) {
+	return Main/*auto*/.foldChild(current/*Tuple2<CompileState, List<T>>*/.left(/*auto*/), current/*Tuple2<CompileState, List<T>>*/.right(/*auto*/), source1/*auto*/);
+}
+static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
+	var sources = Main/*auto*/.findSources(children/*List<Path>*/, sourceDirectory/*Path*/);
+	return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(Main/*auto*/.createInitialStateToTuple(sources/*List<Source>*/), lambdaDefinition/*auto*/).right(/*auto*/);
+}
+static Tuple2<CompileState, Option<IOError>> createInitialStateToTuple(List<Source> sources) {
+	return new Tuple2Impl<CompileState, Option<IOError>>(Main/*auto*/.createInitialState(sources/*List<Source>*/), new None<IOError>(/*auto*/));
+}
+auto temp(CompileState state, Source source) {
+	return state/*DivideState*/.addSource(source/*&[I8]*/);
+}
+static CompileState createInitialState(List<Source> sources) {
+	return sources/*List<Source>*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), lambdaDefinition/*auto*/);
+}
 auto temp(Path source) {
 	return source/*&[I8]*/.endsWith(".java");
 }
 auto temp(Path child) {
 	return new Source(sourceDirectory/*Path*/, child/*&[I8]*/);
 }
-auto temp(CompileState state, Source source) {
-	return state/*DivideState*/.addSource(source/*&[I8]*/);
-}
-auto temp(Tuple2<CompileState, Option<IOError>> current, Source source1) {
-	return Main/*auto*/.foldChild(current/*Tuple2<CompileState, List<T>>*/.left(/*auto*/), current/*Tuple2<CompileState, List<T>>*/.right(/*auto*/), source1/*auto*/);
-}
-static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
-	var sources = children/*List<Path>*/.query(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<Source>(/*auto*/));
-	var initial = sources/*auto*/.query(/*auto*/).foldWithInitial(ImmutableCompileState/*auto*/.createInitial(/*auto*/), lambdaDefinition/*auto*/);
-	return sources/*auto*/.query(/*auto*/).foldWithInitial(Main/*auto*/.createInitialState(initial/*R*/), lambdaDefinition/*auto*/).right(/*auto*/);
-}
-static Tuple2<CompileState, Option<IOError>> createInitialState(CompileState state) {
-	return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new None<IOError>(/*auto*/));
+static List<Source> findSources(List<Path> children, Path sourceDirectory) {
+	return children/*List<Path>*/.query(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<Source>(/*auto*/));
 }
 static Tuple2<CompileState, Option<IOError>> foldChild(CompileState state, Option<IOError> maybeError, Source source) {
 	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
@@ -45,7 +50,7 @@ static Tuple2<CompileState, Option<IOError>> foldChild(CompileState state, Optio
 	return Main/*auto*/.runWithSource(state/*CompileState*/, source/*Source*/);
 }
 auto temp(&[I8] input) {
-	return Main/*auto*/.getCompileStateOptionTuple2(state/*CompileState*/, source/*Source*/, input/*&[I8]*/);
+	return Main/*auto*/.compileAndWritePlatforms(state/*CompileState*/, source/*Source*/, input/*&[I8]*/);
 }
 auto temp(IOError value) {
 	return new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new Some<IOError>(value/*&[I8]*/));
@@ -53,17 +58,24 @@ auto temp(IOError value) {
 static Tuple2<CompileState, Option<IOError>> runWithSource(CompileState state, Source source) {
 	return source/*Source*/.read(/*auto*/).match(lambdaDefinition/*auto*/, lambdaDefinition/*auto*/);
 }
-auto temp() {
-	return magmaTuple/*auto*/.right(/*auto*/);
+static Tuple2<CompileState, Option<IOError>> compileAndWritePlatforms(CompileState state, Source source, &[I8] input) {
+	Tuple2<CompileState, Option<IOError>> current = new Tuple2Impl<CompileState, Option<IOError>>(state/*CompileState*/, new None<>(/*auto*/));/*
+        for (final var platform : Platform.values()) {
+            current = Main.foldPlatform(current.left(), current.right(), platform, source, input);
+        }*/
+	return current/*Tuple2<CompileState, List<T>>*/;
 }
 auto temp() {
-	return windowsTuple/*auto*/.right(/*auto*/);
+	return otherValue/*auto*/;
 }
-static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(CompileState state, Source source, &[I8] input) {
-	var typeScriptTuple = Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, Platform/*auto*/.TypeScript);
-	var magmaTuple = Main/*auto*/.compileAndWrite(typeScriptTuple/*auto*/.left(/*auto*/), source/*Source*/, input/*&[I8]*/, Platform/*auto*/.Magma);
-	var windowsTuple = Main/*auto*/.compileAndWrite(magmaTuple/*auto*/.left(/*auto*/), source/*Source*/, input/*&[I8]*/, Platform/*auto*/.Windows);
-	return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple/*auto*/.left(/*auto*/), typeScriptTuple/*auto*/.right(/*auto*/).or(lambdaDefinition/*auto*/).or(lambdaDefinition/*auto*/));
+static Tuple2<CompileState, Option<IOError>> foldPlatform(CompileState state, Option<IOError> maybeError, Platform platform, Source source, &[I8] input) {
+	if (maybeError/*Option<IOError>*/.isPresent(/*auto*/)) {
+		return new Tuple2Impl<>(state/*CompileState*/, maybeError/*Option<IOError>*/);
+	}
+	var otherTuple = Main/*auto*/.compileAndWrite(state/*CompileState*/, source/*Source*/, input/*&[I8]*/, platform/*Platform*/);
+	var otherState = otherTuple/*auto*/.left(/*auto*/);
+	var otherValue = otherTuple/*auto*/.right(/*auto*/);
+	return new Tuple2Impl<>(otherState/*auto*/, maybeError/*Option<IOError>*/.or(lambdaDefinition/*auto*/));
 }
 auto temp() {
 	return target/*auto*/.writeString(output/*auto*/.right(/*auto*/).get(extension/*&[I8]*/));
@@ -382,7 +394,7 @@ static Option<Tuple2<CompileState, &[I8]>> assembleStructure(CompileState state,
 	var implementingString = Main/*auto*/.generateImplementing(maybeImplementing/*Option<Type>*/);
 	var newModifiers = Main/*auto*/.modifyModifiers0(oldModifiers/*List<&[I8]>*/);
 	var joinedModifiers = newModifiers/*auto*/.query(/*auto*/).map(lambdaDefinition/*auto*/).collect(Joiner/*auto*/.empty(/*auto*/)).orElse("");
-	return getTuple2Some/*auto*/(outputContentState/*CompileState*/.defineType(name/*&[I8]*/), annotations/*List<&[I8]>*/, infix/*&[I8]*/, parameters/*List<Definition>*/, maybeSuperType/*Option<&[I8]>*/, name/*&[I8]*/, joinedModifiers/*&[I8]*/, joinedTypeParams/*&[I8]*/, implementingString/*&[I8]*/, platform/*Platform*/, constructorString/*&[I8]*/, outputContent/*&[I8]*/);
+	return Main/*auto*/.getTuple2Some(outputContentState/*CompileState*/.defineType(name/*&[I8]*/), annotations/*List<&[I8]>*/, infix/*&[I8]*/, parameters/*List<Definition>*/, maybeSuperType/*Option<&[I8]>*/, name/*&[I8]*/, joinedModifiers/*&[I8]*/, joinedTypeParams/*&[I8]*/, implementingString/*&[I8]*/, platform/*Platform*/, constructorString/*&[I8]*/, outputContent/*&[I8]*/);
 }
 auto temp(Location location) {
 	return new Location(location/*auto*/.namespace(/*auto*/), location/*auto*/.name(/*auto*/) + "Instance");

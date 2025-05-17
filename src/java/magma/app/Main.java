@@ -100,18 +100,34 @@ public final class Main {
 
     private static Tuple2<CompileState, Option<IOError>> runWithSource(final CompileState state, final Source source) {
         return source.read().match(
-                (String input) -> Main.getCompileStateOptionTuple2(state, source, input),
+                (String input) -> Main.compileAndWritePlatforms(state, source, input),
                 (IOError value) -> new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
     }
 
-    private static Tuple2Impl<CompileState, Option<IOError>> getCompileStateOptionTuple2(final CompileState state, final Source source, final String input) {
-        final var typeScriptTuple = Main.compileAndWrite(state, source, input, Platform.TypeScript);
-        final var magmaTuple = Main.compileAndWrite(typeScriptTuple.left(), source, input, Platform.Magma);
-        final var windowsTuple = Main.compileAndWrite(magmaTuple.left(), source, input, Platform.Windows);
+    private static Tuple2<CompileState, Option<IOError>> compileAndWritePlatforms(final CompileState state, final Source source, final String input) {
+        Tuple2<CompileState, Option<IOError>> current = new Tuple2Impl<CompileState, Option<IOError>>(state, new None<>());
+        for (final var platform : Platform.values()) {
+            current = Main.foldPlatform(current.left(), current.right(), platform, source, input);
+        }
 
-        return new Tuple2Impl<CompileState, Option<IOError>>(windowsTuple.left(), typeScriptTuple.right()
-                .or(() -> magmaTuple.right())
-                .or(() -> windowsTuple.right()));
+        return current;
+    }
+
+    private static Tuple2<CompileState, Option<IOError>> foldPlatform(
+            final CompileState state,
+            final Option<IOError> maybeError,
+            final Platform platform,
+            final Source source,
+            final String input
+    ) {
+        if (maybeError.isPresent()) {
+            return new Tuple2Impl<>(state, maybeError);
+        }
+
+        final var otherTuple = Main.compileAndWrite(state, source, input, platform);
+        final var otherState = otherTuple.left();
+        final var otherValue = otherTuple.right();
+        return new Tuple2Impl<>(otherState, maybeError.or(() -> otherValue));
     }
 
     private static Tuple2<CompileState, Option<IOError>> compileAndWrite(final CompileState state, final Source source, final String input, final Platform platform) {
