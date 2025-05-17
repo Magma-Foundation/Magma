@@ -161,14 +161,13 @@ public final class Main {
 
     private static Result<Path, IOError> ensureTargetParent(final Path directory, final List<String> namespace) {
         final var targetParent = directory.resolveChildSegments(namespace);
-        if (!targetParent.exists()) {
-            final var maybeError = targetParent.createDirectories();
-            if (maybeError.isPresent()) {
-                return new Err<>(maybeError.orElse(null));
-            }
+        if (targetParent.exists()) {
+            return new Ok<>(targetParent);
         }
 
-        return new Ok<>(targetParent);
+        return targetParent.createDirectories()
+                .<Result<Path, IOError>>map((IOError error) -> new Err<>(error))
+                .orElseGet(() -> new Ok<>(targetParent));
     }
 
     private static Tuple2<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {
