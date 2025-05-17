@@ -33,7 +33,7 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Option } from "../../../magma/api/option/Option";
+import magma.api.option.Option;
 export struct Result<T, X> {
 	findError(): Option<X>;
 	findValue(): Option<T>;

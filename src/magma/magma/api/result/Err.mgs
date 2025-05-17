@@ -33,10 +33,10 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Result } from "../../../magma/api/result/Result";
-import { Option } from "../../../magma/api/option/Option";
-import { Some } from "../../../magma/api/option/Some";
-import { None } from "../../../magma/api/option/None";
+import magma.api.result.Result;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.option.None;
 export struct Err<T, X> implements Result<T, X> {
 	error: X;
 	constructor (error: X) {

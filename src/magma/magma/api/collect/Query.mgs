@@ -33,9 +33,9 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Collector } from "../../../magma/api/collect/Collector";
-import { Option } from "../../../magma/api/option/Option";
-import { Tuple2 } from "../../../magma/api/Tuple2";
+import magma.api.collect.Collector;
+import magma.api.option.Option;
+import magma.api.Tuple2;
 export struct Query<T> {
 	collect<C>(collector: Collector<T, C>): C;
 	map<R>(mapper: (arg0 : T) => R): Query<R>;

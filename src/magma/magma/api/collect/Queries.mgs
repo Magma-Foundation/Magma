@@ -33,12 +33,12 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Query } from "../../../magma/api/collect/Query";
-import { Option } from "../../../magma/api/option/Option";
-import { HeadedQuery } from "../../../magma/api/collect/head/HeadedQuery";
-import { EmptyHead } from "../../../magma/api/collect/head/EmptyHead";
-import { Head } from "../../../magma/api/collect/head/Head";
-import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
+import magma.api.collect.Query;
+import magma.api.option.Option;
+import magma.api.collect.head.HeadedQuery;
+import magma.api.collect.head.EmptyHead;
+import magma.api.collect.head.Head;
+import magma.api.collect.head.SingleHead;
 export struct Queries {
 	static fromOption<T>(option: Option<T>): Query<T> {
 		return new HeadedQuery<T>(option.map((element: T) => Queries.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));

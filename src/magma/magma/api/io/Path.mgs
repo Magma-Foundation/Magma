@@ -33,11 +33,11 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { IOError } from "../../../magma/api/io/IOError";
-import { Option } from "../../../magma/api/option/Option";
-import { Result } from "../../../magma/api/result/Result";
-import { List } from "../../../magma/api/collect/list/List";
-import { Query } from "../../../magma/api/collect/Query";
+import magma.api.io.IOError;
+import magma.api.option.Option;
+import magma.api.result.Result;
+import magma.api.collect.list.List;
+import magma.api.collect.Query;
 export struct Path {
 	asString(): string;
 	writeString(output: string): Option<IOError>;

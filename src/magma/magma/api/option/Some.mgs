@@ -33,10 +33,10 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Option } from "../../../magma/api/option/Option";
-import { None } from "../../../magma/api/option/None";
-import { Tuple2 } from "../../../magma/api/Tuple2";
-import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
+import magma.api.option.Option;
+import magma.api.option.None;
+import magma.api.Tuple2;
+import magma.api.Tuple2Impl;
 export struct Some<T> implements Option<T> {
 	value: T;
 	constructor (value: T) {

@@ -33,10 +33,10 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Head } from "../../../../magma/api/collect/head/Head";
-import { Query } from "../../../../magma/api/collect/Query";
-import { Option } from "../../../../magma/api/option/Option";
-import { None } from "../../../../magma/api/option/None";
+import magma.api.collect.head.Head;
+import magma.api.collect.Query;
+import magma.api.option.Option;
+import magma.api.option.None;
 export struct FlatMapHead<T, R> implements Head<R> {
 	mapper: (arg0 : T) => Query<R>;
 	head: Head<T>;

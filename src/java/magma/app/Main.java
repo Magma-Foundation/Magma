@@ -140,24 +140,25 @@ public final class Main {
                     .isPresent();
         }
 
-        private CompileState addResolvedImport(List<String> parent, String child) {
+        private CompileState addResolvedImport(List<String> oldParent, String child) {
             var namespace = this.maybeLocation
                     .map((Location location) -> location.namespace)
                     .orElse(Lists.empty());
 
-            var parent1 = parent;
-            if (namespace.isEmpty()) {
-                parent1 = parent1.addFirst(".");
+            var newParent = oldParent;
+            if (Platform.TypeScript == platform) {
+                if (namespace.isEmpty()) {
+                    newParent = newParent.addFirst(".");
+                }
+
+                var i = 0;
+                var size = namespace.size();
+                while (i < size) {
+                    newParent = newParent.addFirst("..");
+                    i++;
+                }
             }
 
-            var i = 0;
-            var size = namespace.size();
-            while (i < size) {
-                parent1 = parent1.addFirst("..");
-                i++;
-            }
-
-            var stringList = parent1.addLast(child);
             if (this.imports
                     .query()
                     .filter((Import node) -> Strings.equalsTo(node.child, child))
@@ -166,7 +167,7 @@ public final class Main {
                 return this;
             }
 
-            var importString = new Import(stringList, child);
+            var importString = new Import(newParent, child);
             return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
         }
 
@@ -682,8 +683,18 @@ public final class Main {
     }
 
     private record Import(List<String> namespace, String child) {
-        private String generate() {
-            var joinedNamespace = this.namespace.query()
+        private String generate(Platform platform) {
+            if (Platform.Magma == platform) {
+                var joinedNamespace = this.namespace.query()
+                        .collect(new Joiner("."))
+                        .orElse("");
+
+                return "import " + joinedNamespace + "." + this.child + ";\n";
+            }
+
+            var joinedNamespace = this.namespace
+                    .addLast(this.child)
+                    .query()
                     .collect(new Joiner("/"))
                     .orElse("");
 
@@ -807,8 +818,9 @@ public final class Main {
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, Source source, String input) {
         var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
         var statementsState = statementsTuple.left();
+
         var imports = statementsState.imports.query()
-                .map((Import anImport) -> anImport.generate())
+                .map((Import anImport) -> anImport.generate(state.platform))
                 .collect(new Joiner(""))
                 .orElse("");
 

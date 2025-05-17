@@ -33,7 +33,7 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { List } from "../../../../magma/api/collect/list/List";
+import magma.api.collect.list.List;
 export interface ListsInstance {
 	fromArray<T>(elements: T[]): List<T>;
 

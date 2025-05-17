@@ -158,23 +158,24 @@ class CompileState {
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
 	}
-	addResolvedImport(parent: List<string>, child: string): CompileState {
+	addResolvedImport(oldParent: List<string>, child: string): CompileState {
 		let namespace = this.maybeLocation.map((location: Location) => location.namespace).orElse(Lists.empty());
-		let parent1 = parent;
-		if (namespace.isEmpty()){
-			parent1 = parent1.addFirst(".");
+		let newParent = oldParent;
+		if (Platform.TypeScript === platform){
+			if (namespace.isEmpty()){
+				newParent = newParent.addFirst(".");
+			}
+			let i = 0;
+			let size = namespace.size();
+			while (i < size){
+				newParent = newParent.addFirst("..");
+				i++;
+			}
 		}
-		let i = 0;
-		let size = namespace.size();
-		while (i < size){
-			parent1 = parent1.addFirst("..");
-			i++;
-		}
-		let stringList = parent1.addLast(child);
 		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child, child)).next().isPresent()){
 			return this;
 		}
-		let importString = new Import(stringList, child);
+		let importString = new Import(newParent, child);
 		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform);
 	}
 	withLocation(namespace: Location): CompileState {
@@ -582,8 +583,12 @@ class Import {
 		this.namespace = namespace;
 		this.child = child;
 	}
-	generate(): string {
-		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("");
+	generate(platform: Platform): string {
+		if (Platform.Magma === platform){
+			let joinedNamespace = this.namespace.query().collect(new Joiner(".")).orElse("");
+			return "import " + joinedNamespace + "." + this.child + ";\n";
+		}
+		let joinedNamespace = this.namespace.addLast(this.child).query().collect(new Joiner("/")).orElse("");
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
 	}
 }
@@ -714,7 +719,7 @@ export class Main {
 	static compileRoot(state: CompileState, source: Source, input: string): Tuple2Impl<CompileState, string> {
 		let statementsTuple = Main.compileStatements(state, input, Main.compileRootSegment);
 		let statementsState = statementsTuple.left();
-		let imports = statementsState.imports.query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
+		let imports = statementsState.imports.query().map((anImport: Import) => anImport.generate(state.platform)).collect(new Joiner("")).orElse("");
 		let compileState = statementsState.clearImports().clearOutput();
 		let segment = compileState.sources.query().map((source1: Source) => Main.formatSource(source1)).collect(new Joiner(", ")).orElse("");
 		let withMain = Main.createMain(source);

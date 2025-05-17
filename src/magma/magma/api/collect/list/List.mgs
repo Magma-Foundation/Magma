@@ -33,9 +33,9 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Query } from "../../../../magma/api/collect/Query";
-import { Option } from "../../../../magma/api/option/Option";
-import { Tuple2 } from "../../../../magma/api/Tuple2";
+import magma.api.collect.Query;
+import magma.api.option.Option;
+import magma.api.Tuple2;
 export struct List<T> {
 	addLast(element: T): List<T>;
 	query(): Query<T>;

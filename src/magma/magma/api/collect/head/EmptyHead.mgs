@@ -33,9 +33,9 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Head } from "../../../../magma/api/collect/head/Head";
-import { Option } from "../../../../magma/api/option/Option";
-import { None } from "../../../../magma/api/option/None";
+import magma.api.collect.head.Head;
+import magma.api.option.Option;
+import magma.api.option.None;
 export struct EmptyHead<T> implements Head<T> {
 	next(): Option<T> {
 		return new None<T>();

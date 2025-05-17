@@ -33,10 +33,10 @@
 	Tuple2Impl: magma.api, 
 	Main: magma.app
 ]*/
-import { Head } from "../../../../magma/api/collect/head/Head";
-import { Option } from "../../../../magma/api/option/Option";
-import { None } from "../../../../magma/api/option/None";
-import { Some } from "../../../../magma/api/option/Some";
+import magma.api.collect.head.Head;
+import magma.api.option.Option;
+import magma.api.option.None;
+import magma.api.option.Some;
 export struct RangeHead implements Head<number> {
 	length: number;
 	counter: number;
