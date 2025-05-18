@@ -25,16 +25,12 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -45,7 +41,6 @@
 	Parameter, 
 	Path, 
 	Placeholder, 
-	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -54,17 +49,42 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
 	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
 	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.app.compile.value.{ Value };
+import magma.app.io.{ Platform };
+import magma.api.option.{ Option, Some, None };
+import magma.api.{ Type };
+import magma.app.compile.type.{ PrimitiveType };
+export struct OperationNode implements Value {
+	mut left: Value;
+	mut targetInfix: &[I8];
+	mut right: Value;
+	constructor (mut left: Value, mut targetInfix: &[I8], mut right: Value) {
+		this.left = left;
+		this.targetInfix = targetInfix;
+		this.right = right;
+	}
+	def generate(mut platform: Platform): &[I8] {
+		return this/*auto*/.left.generate(platform/*Platform*/) + " " + this/*auto*/.targetInfix + " " + this/*auto*/.right.generate(platform/*Platform*/);
+	}
+	def toValue(): Option<Value> {
+		return Some<Value>(this/*auto*/);
+	}
+	def findChild(): Option<Value> {
+		return None<Value>(/*auto*/);
+	}
+	def generateAsEnumValue(structureName: &[I8], mut platform: Platform): Option<&[I8]> {
+		return None<&[I8]>(/*auto*/);
+	}
+	def type(): Type {
+		return PrimitiveType/*auto*/.Auto;
+	}
+}

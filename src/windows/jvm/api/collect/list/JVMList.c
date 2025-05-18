@@ -1,2 +1,1 @@
-#include "./Main.h"
-Main.main();
+#include "./JVMList.h"

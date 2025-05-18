@@ -1,2 +1,3 @@
-#include "./Main.h"
-Main.main();
+#include "./Actual.h"
+export interface Actual {
+}

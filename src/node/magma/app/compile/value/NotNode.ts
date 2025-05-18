@@ -25,27 +25,21 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
 	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
-	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -54,17 +48,40 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
 	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
 	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import { Value } from "../../../../magma/app/compile/value/Value";
+import { Platform } from "../../../../magma/app/io/Platform";
+import { Option } from "../../../../magma/api/option/Option";
+import { Some } from "../../../../magma/api/option/Some";
+import { None } from "../../../../magma/api/option/None";
+import { Type } from "../../../../magma/api/Type";
+import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
+export class NotNode implements Value {
+	child: string;
+	constructor (child: string) {
+		this.child = child;
+	}
+	generate(platform: Platform): string {
+		return this/*auto*/.child;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this/*auto*/);
+	}
+	findChild(): Option<Value> {
+		return new None<Value>(/*auto*/);
+	}
+	generateAsEnumValue(structureName: string, platform: Platform): Option<string> {
+		return new None<string>(/*auto*/);
+	}
+	type(): Type {
+		return PrimitiveType/*auto*/.Auto;
+	}
+}

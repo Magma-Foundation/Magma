@@ -1,70 +1,45 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
-	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
-	Definition, 
-	DivideState, 
 	EmptyHead, 
-	Err, 
 	Files, 
 	FlatMapHead, 
-	FunctionHeader, 
-	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
-	ImmutableCompileState, 
-	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
-	None, 
-	NotNode, 
-	Ok, 
-	OperationNode, 
-	Option, 
-	Parameter, 
 	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
-	Result, 
 	SingleHead, 
-	SliceType, 
-	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
-	Tuple2, 
-	Tuple2Impl, 
-	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import { IOError } from "../../../magma/api/io/IOError";
+import { Option } from "../../../magma/api/option/Option";
+import { Result } from "../../../magma/api/result/Result";
+import { List } from "../../../magma/api/collect/list/List";
+import { Query } from "../../../magma/api/collect/Query";
+export interface Path {
+	asString(): string;
+	writeString(output: string): Option<IOError>;
+	readString(): Result<string, IOError>;
+	walk(): Result<List<Path>, IOError>;
+	findFileName(): string;
+	endsWith(suffix: string): boolean;
+	relativize(source: Path): Path;
+	getParent(): Path;
+	query(): Query<string>;
+	resolveChildSegments(children: List<string>): Path;
+	resolveChild(name: string): Path;
+	exists(): boolean;
+	createDirectories(): Option<IOError>;
+}

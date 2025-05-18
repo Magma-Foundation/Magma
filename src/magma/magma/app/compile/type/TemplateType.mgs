@@ -1,16 +1,11 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
 	ArrayType, 
 	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
 	Definition, 
 	DivideState, 
 	EmptyHead, 
@@ -25,27 +20,18 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
-	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
-	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -54,17 +40,44 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
 	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
-	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.api.{ Type };
+import magma.api.collect.list.{ List };
+import magma.app.{ Main };
+import jvm.api.text.{ Strings };
+export struct TemplateType implements Type {
+	mut base: &[I8];
+	mut args: List<&[I8]>;
+	constructor (mut base: &[I8], mut args: List<&[I8]>) {
+		this.base = base;
+		this.args = args;
+	}
+	static def generateValueStrings(values: List<&[I8]>): &[I8] {
+		return Main/*auto*/.generateAll(values/*List<&[I8]>*/, TemplateType/*auto*/.mergeValues);
+	}
+	static def mergeValues(cache: &[I8], element: &[I8]): &[I8] {
+		if (Strings/*auto*/.isEmpty(cache/*&[I8]*/)) {
+			return cache/*&[I8]*/ + element/*&[I8]*/;
+		}
+		return cache/*&[I8]*/ + ", " + element/*&[I8]*/;
+	}
+	def generate(): &[I8] {
+		return this/*auto*/.base + "<" + TemplateType/*auto*/.generateValueStrings(this/*auto*/.args) + ">";
+	}
+	def isFunctional(): Bool {
+		return false/*auto*/;
+	}
+	def isVar(): Bool {
+		return false/*auto*/;
+	}
+	def generateBeforeName(): &[I8] {
+		return "";
+	}
+}

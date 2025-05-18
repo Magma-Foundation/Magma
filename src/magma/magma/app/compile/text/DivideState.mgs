@@ -1,16 +1,9 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
 	Definition, 
 	DivideState, 
 	EmptyHead, 
@@ -19,52 +12,91 @@
 	FlatMapHead, 
 	FunctionHeader, 
 	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
-	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
-	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.api.collect.list.{ List };
+import jvm.api.collect.list.{ Lists };
+import magma.api.{ Tuple2, Tuple2Impl };
+import magma.api.option.{ Option, None, Some };
+import jvm.api.text.{ Strings };
+export struct DivideState {
+	mut segments: List<&[I8]>;
+	mut buffer: &[I8];
+	mut depth: I32;
+	mut input: &[I8];
+	mut index: I32;
+	constructor (mut segments: List<&[I8]>, mut buffer: &[I8], mut depth: I32, mut input: &[I8], mut index: I32) {
+		this.segments = segments;
+		this.buffer = buffer;
+		this.depth = depth;
+		this.input = input;
+		this.index = index;
+	}
+	static def createInitial(input: &[I8]): DivideState {
+		return DivideState(Lists/*auto*/.empty(/*auto*/), "", 0/*auto*/, input/*&[I8]*/, 0/*auto*/);
+	}
+	def advance(): DivideState {
+		return DivideState(this/*auto*/.segments.addLast(this/*auto*/.buffer), "", this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
+	}
+	def append(c: I8): DivideState {
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer + c/*I8*/, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index);
+	}
+	def isLevel(): Bool {
+		return 0/*auto*/ === this/*auto*/.depth;
+	}
+	def enter(): DivideState {
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth + 1/*auto*/, this/*auto*/.input, this/*auto*/.index);
+	}
+	def exit(): DivideState {
+		return DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth - 1/*auto*/, this/*auto*/.input, this/*auto*/.index);
+	}
+	def isShallow(): Bool {
+		return 1/*auto*/ === this/*auto*/.depth;
+	}
+	def pop(): Option<Tuple2<DivideState, I8>> {
+		if (this/*auto*/.index >= Strings/*auto*/.length(this/*auto*/.input)) {
+			return None<Tuple2<DivideState, I8>>(/*auto*/);
+		}
+		let c = Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+		let nextState = DivideState(this/*auto*/.segments, this/*auto*/.buffer, this/*auto*/.depth, this/*auto*/.input, this/*auto*/.index + 1/*auto*/);
+		return Some<Tuple2<DivideState, I8>>(Tuple2Impl<DivideState, I8>(nextState/*auto*/, c/*I8*/));
+	}
+	def popAndAppendToTuple(): Option<Tuple2<DivideState, I8>> {
+		return this/*auto*/.pop(/*auto*/).map((mut inner: Tuple2<DivideState, I8>) => Tuple2Impl<DivideState, I8>(inner/*auto*/.left(/*auto*/).append(inner/*auto*/.right(/*auto*/)), inner/*auto*/.right(/*auto*/)));
+	}
+	def popAndAppendToOption(): Option<DivideState> {
+		return this/*auto*/.popAndAppendToTuple(/*auto*/).map((mut tuple: Tuple2<DivideState, I8>) => tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/));
+	}
+	def peek(): I8 {
+		return Strings/*auto*/.charAt(this/*auto*/.input, this/*auto*/.index);
+	}
+	def startsWith(slice: &[I8]): Bool {
+		return Strings/*auto*/.sliceFrom(this/*auto*/.input, this/*auto*/.index).startsWith(slice/*&[I8]*/);
+	}
+}

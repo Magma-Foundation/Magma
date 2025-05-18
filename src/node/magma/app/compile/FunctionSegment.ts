@@ -1,70 +1,58 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
 	Definition, 
-	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
 	FunctionHeader, 
 	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
-	ImmutableCompileState, 
-	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
-	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
-	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import { FunctionHeader } from "../../../magma/app/compile/define/FunctionHeader";
+import { Definition } from "../../../magma/app/compile/define/Definition";
+import { List } from "../../../magma/api/collect/list/List";
+import { Option } from "../../../magma/api/option/Option";
+import { Platform } from "../../../magma/app/io/Platform";
+export class FunctionSegment<S extends FunctionHeader<S>> {
+	header: FunctionHeader<S>;
+	definitions: List<Definition>;
+	maybeContent: Option<string>;
+	constructor (header: FunctionHeader<S>, definitions: List<Definition>, maybeContent: Option<string>) {
+		this.header = header;
+		this.definitions = definitions;
+		this.maybeContent = maybeContent;
+	}
+	generate(platform: Platform, indent: string): string {
+		let content = this/*auto*/.maybeContent(/*auto*/).map((inner: string) => " {" + inner/*auto*/ + indent/*string*/ + "}").orElse(";");
+		return indent/*string*/ + this/*auto*/.header.generateWithDefinitions(platform/*Platform*/, this/*auto*/.definitions(/*auto*/)) + content/*auto*/;
+	}
+}

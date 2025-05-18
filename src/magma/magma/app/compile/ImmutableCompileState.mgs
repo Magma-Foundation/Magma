@@ -1,70 +1,174 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
 	Definition, 
-	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
 	FunctionHeader, 
 	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
 	ImmutableCompileState, 
-	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
-	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
-	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.app.compile.{ CompileState, Import };
+import magma.app.io.{ Platform, Location, Source };
+import magma.api.option.{ Option, None, Some };
+import magma.api.collect.list.{ List };
+import magma.app.compile.define.{ Definition };
+import jvm.api.collect.list.{ Lists };
+import jvm.api.text.{ Strings };
+import magma.api.{ Type };
+export struct ImmutableCompileState implements CompileState {
+	mut platform: Platform;
+	mut findCurrentLocation: Option<Location>;
+	mut sources: List<Source>;
+	mut imports: List<Import>;
+	mut structureNames: List<&[I8]>;
+	mut structures: &[I8];
+	mut functions: &[I8];
+	mut definitions: List<Definition>;
+	mut depth: I32;
+	mut definedTypes: List<&[I8]>;
+	constructor (mut platform: Platform, mut findCurrentLocation: Option<Location>, mut sources: List<Source>, mut imports: List<Import>, mut structureNames: List<&[I8]>, mut structures: &[I8], mut functions: &[I8], mut definitions: List<Definition>, mut depth: I32, mut definedTypes: List<&[I8]>) {
+		this.platform = platform;
+		this.findCurrentLocation = findCurrentLocation;
+		this.sources = sources;
+		this.imports = imports;
+		this.structureNames = structureNames;
+		this.structures = structures;
+		this.functions = functions;
+		this.definitions = definitions;
+		this.depth = depth;
+		this.definedTypes = definedTypes;
+	}
+	static def createInitial(): CompileState {
+		return ImmutableCompileState(Platform/*auto*/.Magma, None<Location>(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), "", "", Lists/*auto*/.empty(/*auto*/), 0/*auto*/, Lists/*auto*/.empty(/*auto*/));
+	}
+	def hasLastStructureNameOf(name: &[I8]): Bool {
+		return this/*auto*/.structureNames.findLast(/*auto*/).filter((mut anObject: &[I8]) => Strings/*auto*/.equalsTo(name/*&[I8]*/, anObject/*auto*/)).isPresent(/*auto*/);
+	}
+	def withLocation(namespace: Location): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, Some<Location>(namespace/*Location*/), this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def append(element: &[I8]): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures + element/*&[I8]*/, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def pushStructureName(name: &[I8]): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames.addLast(name/*&[I8]*/), this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def enterDepth(): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth + 1/*auto*/, this/*auto*/.definedTypes);
+	}
+	def exitDepth(): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth - 1/*auto*/, this/*auto*/.definedTypes);
+	}
+	def defineAll(definitions: List<Definition>): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions.addAll(definitions/*List<Definition>*/), this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def resolve(name: &[I8]): Option<Type> {
+		return this/*auto*/.definitions.queryReversed(/*auto*/).filter((mut definition: Definition) => Strings/*auto*/.equalsTo(definition/*Definition*/.name(/*auto*/), name/*&[I8]*/)).map((mut definition1: Definition) => definition1/*auto*/.type(/*auto*/)).next(/*auto*/);
+	}
+	def clearImports(): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, Lists/*auto*/.empty(/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def clear(): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, "", "", this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def addSource(source: Source): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources.addLast(source/*Source*/), this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def addResolvedImportFromCache(base: &[I8]): CompileState {
+		if (this/*auto*/.structureNames.query(/*auto*/).anyMatch((mut inner: &[I8]) => Strings/*auto*/.equalsTo(inner/*auto*/, base/*&[I8]*/))) {
+			return this/*auto*/;
+		}
+		return this/*auto*/.findSource(base/*&[I8]*/).map((mut source: Source) => this/*auto*/.addResolvedImportWithNamespace(source/*Source*/.computeNamespace(/*auto*/), source/*Source*/.computeName(/*auto*/))).orElse(this/*auto*/);
+	}
+	def popStructureName(): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames.removeLast(/*auto*/).orElse(this/*auto*/.structureNames), this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def mapLocation(mapper: (arg0 : Location) => Location): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation.map(mapper/*(arg0 : Location) => Location*/), this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def withPlatform(platform: Platform): CompileState {
+		return ImmutableCompileState(platform/*Platform*/, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def addFunction(function: &[I8]): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions + function/*&[I8]*/, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def findDefinedTypes(): List<&[I8]> {
+		return this/*auto*/.definedTypes;
+	}
+	def defineType(name: &[I8]): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes.addLast(name/*&[I8]*/));
+	}
+	def clearDefinedTypes(): CompileState {
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports, this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, Lists/*auto*/.empty(/*auto*/));
+	}
+	def join(): &[I8] {
+		return this/*auto*/.structures + this/*auto*/.functions;
+	}
+	def addResolvedImportWithNamespace(oldParent: List<&[I8]>, child: &[I8]): CompileState {
+		let namespace = this/*auto*/.findCurrentLocation.map((mut location: Location) => location/*Location*/.namespace(/*auto*/)).orElse(Lists/*auto*/.empty(/*auto*/));
+		mut let newParent = oldParent/*List<&[I8]>*/;
+		if (Platform/*auto*/.TypeScript === this/*auto*/.platform) {
+			if (namespace/*Location*/.isEmpty(/*auto*/)) {
+				newParent/*auto*/ = newParent/*auto*/.addFirst(".");
+			}
+			mut let i = 0/*auto*/;
+			let size = namespace/*Location*/.size(/*auto*/);
+			while (i/*auto*/ < size/*auto*/) {
+				newParent/*auto*/ = newParent/*auto*/.addFirst("..");
+				i/*auto*/++;
+			}
+		}
+		if (this/*auto*/.imports.query(/*auto*/).filter((mut node: Import) => Strings/*auto*/.equalsTo(node/*auto*/.child(/*auto*/), child/*&[I8]*/)).next(/*auto*/).isPresent(/*auto*/)) {
+			return this/*auto*/;
+		}
+		let importString = Import(newParent/*auto*/, child/*&[I8]*/);
+		return ImmutableCompileState(this/*auto*/.platform, this/*auto*/.findCurrentLocation, this/*auto*/.sources, this/*auto*/.imports.addLast(importString/*auto*/), this/*auto*/.structureNames, this/*auto*/.structures, this/*auto*/.functions, this/*auto*/.definitions, this/*auto*/.depth, this/*auto*/.definedTypes);
+	}
+	def findSource(name: &[I8]): Option<Source> {
+		return this/*auto*/.sources.query(/*auto*/).filter((mut source: Source) => Strings/*auto*/.equalsTo(source/*Source*/.computeName(/*auto*/), name/*&[I8]*/)).next(/*auto*/);
+	}
+	def isPlatform(platform: Platform): Bool {
+		return platform/*Platform*/ === this/*auto*/.platform(/*auto*/);
+	}
+	def createIndent(): &[I8] {
+		let indent = this/*auto*/.depth(/*auto*/);
+		return "\n" + "\t".repeat(indent/*&[I8]*/);
+	}
+	def functionName(): &[I8] {
+		return "temp";
+	}
+	def findLastStructureName(): Option<&[I8]> {
+		return this/*auto*/.structureNames(/*auto*/).findLast(/*auto*/);
+	}
+}

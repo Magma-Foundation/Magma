@@ -1,70 +1,33 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
-	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
-	Definition, 
-	DivideState, 
 	EmptyHead, 
-	Err, 
 	Files, 
 	FlatMapHead, 
-	FunctionHeader, 
-	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
-	IOError, 
-	ImmutableCompileState, 
-	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
-	Joiner, 
-	LambdaNode, 
-	List, 
-	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
-	None, 
-	NotNode, 
-	Ok, 
-	OperationNode, 
-	Option, 
-	Parameter, 
-	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
-	Queries, 
-	Query, 
 	RangeHead, 
-	Result, 
 	SingleHead, 
-	SliceType, 
-	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
-	Tuple2, 
-	Tuple2Impl, 
-	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { Head } from "../../../../magma/api/collect/head/Head";
+import { Query } from "../../../../magma/api/collect/Query";
+import { Option } from "../../../../magma/api/option/Option";
+export class ZipHead<T, R> implements Head<Tuple2<T, R>> {
+	head: Head<T>;
+	other: Query<R>;
+	constructor (head: Head<T>, other: Query<R>) {
+		this.head = head;
+		this.other = other;
+	}
+	next(): Option<Tuple2<T, R>> {
+		return this/*auto*/.head.next(/*auto*/).and(() => this/*auto*/.other.next(/*auto*/));
+	}
+}

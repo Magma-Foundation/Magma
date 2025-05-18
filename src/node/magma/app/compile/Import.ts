@@ -1,70 +1,60 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
 	Definition, 
-	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
 	FunctionHeader, 
 	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
-	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
-	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import { List } from "../../../magma/api/collect/list/List";
+import { Platform } from "../../../magma/app/io/Platform";
+import { Joiner } from "../../../magma/api/collect/Joiner";
+export class Import {
+	namespace: List<string>;
+	child: string;
+	constructor (namespace: List<string>, child: string) {
+		this.namespace = namespace;
+		this.child = child;
+	}
+	generate(platform: Platform): string {
+		if (Platform/*auto*/.Magma === platform/*Platform*/) {
+			let joinedNamespace = this/*auto*/.namespace.query(/*auto*/).collect(new Joiner(".")).orElse("");
+			return "import " + joinedNamespace/*auto*/ + "." + this/*auto*/.child + ";\n";
+		}
+		let joinedNamespace = this/*auto*/.namespace.addLast(this/*auto*/.child).query(/*auto*/).collect(new Joiner("/")).orElse("");
+		return "import { " + this/*auto*/.child + " } from \"" + joinedNamespace/*auto*/ + "\";\n";
+	}
+}

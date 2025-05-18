@@ -25,8 +25,6 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -34,7 +32,6 @@
 	ListCollector, 
 	Lists, 
 	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -67,4 +64,29 @@
 	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.api.io.{ Path, IOError };
+import magma.api.result.{ Result };
+import magma.api.collect.list.{ List, ListCollector };
+import magma.app.io.{ Location };
+export struct Source {
+	mut sourceDirectory: Path;
+	mut source: Path;
+	constructor (mut sourceDirectory: Path, mut source: Path) {
+		this.sourceDirectory = sourceDirectory;
+		this.source = source;
+	}
+	def read(): Result<&[I8], IOError> {
+		return this/*auto*/.source.readString(/*auto*/);
+	}
+	def computeName(): &[I8] {
+		let fileName = this/*auto*/.source.findFileName(/*auto*/);
+		let separator = fileName/*auto*/.lastIndexOf(".");
+		return fileName/*auto*/.substring(0/*auto*/, separator/*auto*/);
+	}
+	def computeNamespace(): List<&[I8]> {
+		return this/*auto*/.sourceDirectory.relativize(this/*auto*/.source).getParent(/*auto*/).query(/*auto*/).collect(ListCollector<&[I8]>(/*auto*/));
+	}
+	def computeLocation(): Location {
+		return Location(this/*auto*/.computeNamespace(/*auto*/), this/*auto*/.computeName(/*auto*/));
+	}
+}

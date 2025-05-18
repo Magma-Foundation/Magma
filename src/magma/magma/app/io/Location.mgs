@@ -25,8 +25,6 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -34,7 +32,6 @@
 	ListCollector, 
 	Lists, 
 	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -45,7 +42,6 @@
 	Parameter, 
 	Path, 
 	Placeholder, 
-	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -54,7 +50,6 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
-	Source, 
 	StringNode, 
 	Strings, 
 	SymbolNode, 
@@ -67,4 +62,12 @@
 	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.api.collect.list.{ List };
+export struct Location {
+	mut namespace: List<&[I8]>;
+	mut name: &[I8];
+	constructor (mut namespace: List<&[I8]>, mut name: &[I8]) {
+		this.namespace = namespace;
+		this.name = name;
+	}
+}

@@ -1,70 +1,72 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
-	Definition, 
-	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
-	FunctionHeader, 
-	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
-	ImmutableCompileState, 
-	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
-	NotNode, 
 	Ok, 
-	OperationNode, 
 	Option, 
-	Parameter, 
 	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
-	SliceType, 
 	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.api.option.{ Option };
+import magma.app.io.{ Platform, Location, Source };
+import magma.api.collect.list.{ List };
+import magma.app.compile.define.{ Definition };
+import magma.api.{ Type };
+import magma.app.compile.{ Import };
+export struct CompileState {
+	def functionName(): &[I8];
+	def findLastStructureName(): Option<&[I8]>;
+	def createIndent(): &[I8];
+	def isPlatform(mut platform: Platform): Bool;
+	def hasLastStructureNameOf(mut name: &[I8]): Bool;
+	def addResolvedImportFromCache(mut base: &[I8]): CompileState;
+	def addResolvedImportWithNamespace(mut namespace: List<&[I8]>, mut child: &[I8]): CompileState;
+	def withLocation(mut namespace: Location): CompileState;
+	def append(mut element: &[I8]): CompileState;
+	def pushStructureName(mut name: &[I8]): CompileState;
+	def enterDepth(): CompileState;
+	def exitDepth(): CompileState;
+	def defineAll(mut definitions: List<Definition>): CompileState;
+	def resolve(mut name: &[I8]): Option<Type>;
+	def clearImports(): CompileState;
+	def clear(): CompileState;
+	def addSource(mut source: Source): CompileState;
+	def findSource(mut name: &[I8]): Option<Source>;
+	def popStructureName(): CompileState;
+	def mapLocation(mut mapper: (arg0 : Location) => Location): CompileState;
+	def withPlatform(mut platform: Platform): CompileState;
+	def imports(): List<Import>;
+	def join(): &[I8];
+	def findCurrentLocation(): Option<Location>;
+	def platform(): Platform;
+	def addFunction(mut function: &[I8]): CompileState;
+	def findDefinedTypes(): List<&[I8]>;
+	def defineType(mut name: &[I8]): CompileState;
+	def clearDefinedTypes(): CompileState;
+}

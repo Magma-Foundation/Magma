@@ -1,70 +1,32 @@
 /*[
-	AccessNode, 
 	Actual, 
-	Argument, 
-	ArrayType, 
-	BooleanType, 
-	Caller, 
 	Characters, 
 	Collector, 
-	CompileState, 
 	Console, 
-	ConstructionCaller, 
-	ConstructorHeader, 
-	Definition, 
-	DivideState, 
 	EmptyHead, 
-	Err, 
 	Files, 
 	FlatMapHead, 
-	FunctionHeader, 
-	FunctionSegment, 
-	FunctionType, 
 	Head, 
 	HeadedQuery, 
-	IOError, 
-	ImmutableCompileState, 
-	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
-	InvokableNode, 
 	Joiner, 
-	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
-	None, 
-	NotNode, 
-	Ok, 
-	OperationNode, 
-	Option, 
-	Parameter, 
-	Path, 
-	Placeholder, 
-	Platform, 
-	PrimitiveType, 
-	Queries, 
-	Query, 
 	RangeHead, 
-	Result, 
 	SingleHead, 
-	SliceType, 
-	Some, 
-	Source, 
-	StringNode, 
 	Strings, 
-	SymbolNode, 
-	TemplateType, 
-	Tuple2, 
-	Tuple2Impl, 
-	Type, 
-	Value, 
-	VariadicType, 
-	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import { List } from "../../../../magma/api/collect/list/List";
+import { Collector } from "../../../../magma/api/collect/Collector";
+import { Lists } from "../../../../jvm/api/collect/list/Lists";
+export class ListCollector<T> implements Collector<T, List<T>> {
+	createInitial(): List<T> {
+		return Lists/*auto*/.empty(/*auto*/);
+	}
+	fold(current: List<T>, element: T): List<T> {
+		return current/*List<T>*/.addLast(element/*T*/);
+	}
+}

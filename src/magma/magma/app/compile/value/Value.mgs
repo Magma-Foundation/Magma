@@ -25,16 +25,12 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
-	IncompleteRoot, 
-	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
-	Location, 
-	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -45,7 +41,6 @@
 	Parameter, 
 	Path, 
 	Placeholder, 
-	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -54,7 +49,6 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
-	Source, 
 	StringNode, 
 	Strings, 
 	SymbolNode, 
@@ -67,4 +61,10 @@
 	Whitespace, 
 	ZipHead
 ]*/
-Main.main();
+import magma.api.option.{ Option };
+import magma.app.io.{ Platform };
+import magma.api.{ Type };
+export struct Value extends Argument, Caller  {
+	def generateAsEnumValue(mut structureName: &[I8], mut platform: Platform): Option<&[I8]>;
+	def type(): Type;
+}

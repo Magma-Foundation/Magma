@@ -41,7 +41,7 @@ public interface CompileState {
 
     CompileState clearImports();
 
-    CompileState clearGenerated();
+    CompileState clear();
 
     CompileState addSource(Source source);
 
