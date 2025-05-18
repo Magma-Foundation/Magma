@@ -151,18 +151,17 @@ public final class Main {
         return new Tuple2Impl<CompileState, IncompleteRoot>(statementsState, incomplete);
     }
 
-    private static HashMap<String, String> getStringStringHashMap(
+    private static Tuple2<CompileState, Map<String, String>> getStringStringHashMap(
             final CompileState state,
             final List<IncompleteRootSegment> segments
     ) {
-        final var state1 = state.clearImports().clearGenerated();
-        final var location = state1.findCurrentLocation().orElse(new Location(Lists.empty(), ""));
+        final var location = state.findCurrentLocation().orElse(new Location(Lists.empty(), ""));
 
         final var entries = new HashMap<String, String>();
         final var namespace = location.namespace();
         final var name = location.name();
 
-        final var joinedDefinedTypes = state1.findDefinedTypes()
+        final var joinedDefinedTypes = state.findDefinedTypes()
                 .sort(String::compareTo)
                 .query()
                 .map((String value) -> "\n\t" + value)
@@ -174,28 +173,29 @@ public final class Main {
                 "\n]*/\n";
 
         final var generatedMain = Main.createMain(name);
-        final var imports = Main.generateOrFoldImports(state1);
+        final var imports = Main.generateOrFoldImports(state);
         final var joinedOutput = segments.query()
                 .map(IncompleteRootSegment::value)
                 .collect(new Joiner(""))
                 .orElse("");
 
-        if (state1.isPlatform(Platform.Windows)) {
+        if (state.isPlatform(Platform.Windows)) {
             final var value = namespace.query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + name;
             entries.put(Platform.Windows.extension[0], debug + Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
-            entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + name + ".h\"") + state1.join() + joinedOutput + generatedMain);
+            entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + name + ".h\"") + state.join() + joinedOutput + generatedMain);
         }
         else {
-            entries.put(state1.platform().extension[0], debug + imports + state1.join() + joinedOutput + generatedMain);
+            entries.put(state.platform().extension[0], debug + imports + state.join() + joinedOutput + generatedMain);
         }
-        return entries;
+
+        return new Tuple2Impl<>(state.clearImports().clearGenerated(), entries);
     }
 
     private static Result<CompileState, IOError> complete(final CompileState state, final IncompleteRoot incomplete, final Platform platform) {
         final var entries = Main.getStringStringHashMap(state, incomplete.outputsByExtensions());
-        return Main.writeOutputEntries(platform, incomplete.location(), entries)
+        return Main.writeOutputEntries(platform, incomplete.location(), entries.right())
                 .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
-                .orElseGet(() -> new Ok<>(state));
+                .orElseGet(() -> new Ok<>(entries.left()));
     }
 
     private static Option<IOError> writeOutputEntries(
@@ -451,8 +451,9 @@ public final class Main {
     }
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, IncompleteRootSegment>>> typed(final BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> mapper) {
-        return (CompileState state, String s) -> {
-            return mapper.apply(state, s).map((Tuple2<CompileState, String> result) -> {
+        return (final CompileState state, final String s) -> {
+            final var apply = mapper.apply(state, s);
+            return apply.map((final Tuple2<CompileState, String> result) -> {
                 return new Tuple2Impl<>(result.left(), new IncompleteRootSegment(result.right()));
             });
         };
