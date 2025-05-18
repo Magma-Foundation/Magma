@@ -76,22 +76,22 @@ export class Invokable implements Value {
 		this.args = args;
 	}
 	generate(): string {
-		let joinedArguments = this.joinArgs();
-		return this.caller.generate() + "(" + joinedArguments + ")";
+		let joinedArguments = this.joinArgs()/*unknown*/;
+		return this.caller.generate() + "(" + joinedArguments + ")"/*unknown*/;
 	}
 	joinArgs(): string {
-		return this.args.query().map((value: Value) => value.generate()).collect(new Joiner(", ")).orElse("");
+		return this.args.query().map((value: Value) => value.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this)/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Unknown/*unknown*/;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new Some<string>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");");
+		return new Some<string>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");")/*unknown*/;
 	}
 }

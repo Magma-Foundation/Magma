@@ -68,18 +68,18 @@ export class PrimitiveType implements Type {
 	static Unknown: PrimitiveType = new PrimitiveType("unknown");
 	value: string;
 	constructor (value: string) {
-		this.value = value;
+		this.value/*unknown*/ = value/*string*/;
 	}
 	generate(): string {
-		return this.value;
+		return this.value/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	isVar(): boolean {
-		return PrimitiveType.Var === this;
+		return PrimitiveType.Var === this/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 }

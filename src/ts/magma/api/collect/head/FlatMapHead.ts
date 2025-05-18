@@ -67,22 +67,22 @@ export class FlatMapHead<T, R> implements Head<R> {
 	head: Head<T>;
 	current: Query<R>;
 	constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
-		this.head = head;
-		this.current = initial;
-		this.mapper = mapper;
+		this.head/*unknown*/ = head/*Head<T>*/;
+		this.current/*unknown*/ = initial/*Query<R>*/;
+		this.mapper/*unknown*/ = mapper/*(arg0 : T) => Query<R>*/;
 	}
 	next(): Option<R> {
-		while (true){
-			let next = this.current.next();
-			if (next.isPresent()){
-				return next;
+		while (true/*unknown*/){
+			let next = this.current.next()/*unknown*/;
+			if (next.isPresent()/*unknown*/){
+				return next/*unknown*/;
 			}
-			let tuple = this.head.next().map(this.mapper).toTuple(this.current);
-			if (tuple.left()){
-				this.current = tuple.right();
+			let tuple = this.head.next().map(this.mapper).toTuple(this.current)/*unknown*/;
+			if (tuple.left()/*unknown*/){
+				this.current/*unknown*/ = tuple.right()/*unknown*/;
 			}
 			else {
-				return new None<R>();
+				return new None<R>()/*unknown*/;
 			}
 		}
 	}

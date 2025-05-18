@@ -69,10 +69,10 @@ export class Import {
 		this.child = child;
 	}
 	generate(): string {
-		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("");
-		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
+		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("")/*unknown*/;
+		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n"/*unknown*/;
 	}
 	hasSameChild(child: string): boolean {
-		return Strings.equalsTo(this.child, child);
+		return Strings.equalsTo(this.child, child)/*unknown*/;
 	}
 }

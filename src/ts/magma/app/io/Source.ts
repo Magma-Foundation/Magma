@@ -71,14 +71,14 @@ export class Source {
 		this.source = source;
 	}
 	read(): Result<string, IOError> {
-		return this.source.readString();
+		return this.source.readString()/*unknown*/;
 	}
 	computeName(): string {
-		let fileName = this.source.findFileName();
-		let separator = fileName.lastIndexOf(".");
-		return fileName.substring(0, separator);
+		let fileName = this.source.findFileName()/*unknown*/;
+		let separator = fileName.lastIndexOf(".")/*unknown*/;
+		return fileName.substring(0, separator)/*unknown*/;
 	}
 	computeNamespace(): List<string> {
-		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>());
+		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>())/*unknown*/;
 	}
 }

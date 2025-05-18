@@ -622,11 +622,20 @@ public final class Main {
         return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(
                 Main::compileReturnWithValue,
                 Main::compileAssignment,
-                (CompileState state1, String input) -> Main.parseInvokable(state1, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate())),
+                (CompileState state1, String input) -> Main.parseInvokable(state1, input)
+                        .map((Tuple2<CompileState, Value> tuple) -> Main.generateValue(tuple)),
                 Main.createPostRule("++"),
                 Main.createPostRule("--"),
                 Main::compileBreak
         ));
+    }
+
+    private static Tuple2Impl<CompileState, String> generateValue(Tuple2<CompileState, Value> tuple) {
+        var state = tuple.left();
+        var right = tuple.right();
+        var generated = right.generate();
+        var s = Main.generatePlaceholder(right.resolve(state).generate());
+        return new Tuple2Impl<CompileState, String>(state, generated + s);
     }
 
     private static Option<Tuple2<CompileState, String>> compileBreak(CompileState state, String input) {
@@ -760,7 +769,7 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileValue(CompileState state, String input) {
-        return Main.parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
+        return Main.parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> Main.generateValue(tuple));
     }
 
     private static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, String input) {

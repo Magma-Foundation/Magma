@@ -69,15 +69,15 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + Main.generateValueStrings(this.args) + ">";
+		return this.base + "<" + Main.generateValueStrings(this.args) + ">"/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 }

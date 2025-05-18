@@ -67,9 +67,9 @@ export class Tuple2Impl<A, B> implements Tuple2<A, B> {
 		this.rightValue = rightValue;
 	}
 	left(): A {
-		return this.leftValue;
+		return this.leftValue/*unknown*/;
 	}
 	right(): B {
-		return this.rightValue;
+		return this.rightValue/*unknown*/;
 	}
 }

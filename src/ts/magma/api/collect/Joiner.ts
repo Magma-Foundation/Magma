@@ -68,12 +68,12 @@ export class Joiner implements Collector<string, Option<string>> {
 		this.delimiter = delimiter;
 	}
 	static empty(): Joiner {
-		return new Joiner("");
+		return new Joiner("")/*unknown*/;
 	}
 	createInitial(): Option<string> {
-		return new None<string>();
+		return new None<string>()/*unknown*/;
 	}
 	fold(maybe: Option<string>, element: string): Option<string> {
-		return new Some<string>(maybe.map((inner: string) => inner + this.delimiter + element).orElse(element));
+		return new Some<string>(maybe.map((inner: string) => inner + this.delimiter + element/*unknown*/).orElse(element))/*unknown*/;
 	}
 }

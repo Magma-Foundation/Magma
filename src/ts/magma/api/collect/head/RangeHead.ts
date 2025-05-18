@@ -66,15 +66,15 @@ export class RangeHead implements Head<number> {
 	length: number;
 	counter: number;
 	constructor (length: number) {
-		this.length = length;
-		this.counter = 0;
+		this.length/*unknown*/ = length/*number*/;
+		this.counter/*unknown*/ = 0/*unknown*/;
 	}
 	next(): Option<number> {
-		if (this.counter >= this.length){
-			return new None<number>();
+		if (this.counter >= this.length/*unknown*/){
+			return new None<number>()/*unknown*/;
 		}
-		let value = this.counter;
-		this.counter++;
-		return new Some<number>(value);
+		let value = this.counter/*unknown*/;
+		this.counter/*unknown*/++;
+		return new Some<number>(value)/*unknown*/;
 	}
 }

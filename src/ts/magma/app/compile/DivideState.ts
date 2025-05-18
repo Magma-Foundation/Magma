@@ -81,47 +81,47 @@ export class DivideState {
 		this.index = index;
 	}
 	static createInitial(input: string): DivideState {
-		return new DivideState(Lists.empty(), "", 0, input, 0);
+		return new DivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
 	}
 	query(): Query<string> {
-		return this.segments.query();
+		return this.segments.query()/*unknown*/;
 	}
 	advance(): DivideState {
-		return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);
+		return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index)/*unknown*/;
 	}
 	append(c: string): DivideState {
-		return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index);
+		return new DivideState(this.segments, this.buffer + c, this.depth, this.input, this.index)/*unknown*/;
 	}
 	isLevel(): boolean {
-		return 0 === this.depth;
+		return 0 === this.depth/*unknown*/;
 	}
 	enter(): DivideState {
-		return new DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index);
+		return new DivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index)/*unknown*/;
 	}
 	exit(): DivideState {
-		return new DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index);
+		return new DivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index)/*unknown*/;
 	}
 	isShallow(): boolean {
-		return 1 === this.depth;
+		return 1 === this.depth/*unknown*/;
 	}
 	pop(): Option<Tuple2<DivideState, string>> {
-		if (this.index >= Strings.length(this.input)){
-			return new None<Tuple2<DivideState, string>>();
+		if (this.index >= Strings.length(this.input)/*unknown*/){
+			return new None<Tuple2<DivideState, string>>()/*unknown*/;
 		}
-		let c = this.input.charAt(this.index);
-		let nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1);
-		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c));
+		let c = this.input.charAt(this.index)/*unknown*/;
+		let nextState = new DivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1)/*unknown*/;
+		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c))/*unknown*/;
 	}
 	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
-		return this.pop().map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right()));
+		return this.pop().map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right())/*unknown*/)/*unknown*/;
 	}
 	popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left());
+		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left()/*unknown*/)/*unknown*/;
 	}
 	peek(): string {
-		return this.input.charAt(this.index);
+		return this.input.charAt(this.index)/*unknown*/;
 	}
 	startsWith(slice: string): boolean {
-		return Strings.sliceFrom(this.input, this.index).startsWith(slice);
+		return Strings.sliceFrom(this.input, this.index).startsWith(slice)/*unknown*/;
 	}
 }

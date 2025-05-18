@@ -68,9 +68,9 @@ export class ConstructionCaller implements Caller {
 		this.right = right;
 	}
 	generate(): string {
-		return "new " + this.right;
+		return "new " + this.right/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 }

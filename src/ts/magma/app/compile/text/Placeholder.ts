@@ -72,30 +72,30 @@ export class Placeholder {
 		this.input = input;
 	}
 	generate(): string {
-		return Main.generatePlaceholder(this.input);
+		return Main.generatePlaceholder(this.input)/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 	asDefinition(): Option<Definition> {
-		return new None<Definition>();
+		return new None<Definition>()/*unknown*/;
 	}
 	toValue(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Unknown/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
+		return new None<string>()/*unknown*/;
 	}
 }

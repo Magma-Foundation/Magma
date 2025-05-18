@@ -72,27 +72,27 @@ export class Symbol {
 		this.value = value;
 	}
 	generate(): string {
-		return this.value;
+		return this.value/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return state.resolve(this.value).map((definition: Definition) => definition.findType()).orElse(PrimitiveType.Unknown);
+		return state.resolve(this.value).map((definition: Definition) => definition.findType()/*unknown*/).orElse(PrimitiveType.Unknown)/*unknown*/;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this)/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
+		return new None<string>()/*unknown*/;
 	}
 }

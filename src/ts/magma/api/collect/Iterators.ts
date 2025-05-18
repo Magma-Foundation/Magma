@@ -66,9 +66,9 @@ import { Head } from "../../../magma/api/collect/head/Head";
 import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
 export class Iterators {
 	static fromOption<T>(option: Option<T>): Query<T> {
-		return new HeadedQuery<T>(option.map((element: T) => Iterators.getTSingleHead(element)).orElseGet(() => new EmptyHead<T>()));
+		return new HeadedQuery<T>(option.map((element: T) => Iterators.getTSingleHead(element)/*unknown*/).orElseGet(() => new EmptyHead<T>()/*unknown*/))/*unknown*/;
 	}
 	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element);
+		return new SingleHead<T>(element)/*unknown*/;
 	}
 }

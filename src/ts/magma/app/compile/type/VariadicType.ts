@@ -65,15 +65,15 @@ export class VariadicType implements Type {
 		this.type = type;
 	}
 	generate(): string {
-		return this.type.generate() + "[]";
+		return this.type.generate() + "[]"/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "...";
+		return "..."/*unknown*/;
 	}
 }

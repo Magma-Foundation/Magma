@@ -71,18 +71,18 @@ export class Not implements Value {
 		this.child = child;
 	}
 	generate(): string {
-		return this.child;
+		return this.child/*unknown*/;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this)/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Unknown/*unknown*/;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
+		return new None<string>()/*unknown*/;
 	}
 }

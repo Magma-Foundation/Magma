@@ -87,86 +87,86 @@ export class CompileState {
 		this.sources = sources;
 	}
 	static createInitial(): CompileState {
-		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty());
+		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty())/*unknown*/;
 	}
 	getJoined(otherOutput: string): string {
-		let imports = this.queryImports().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
-		return imports + this.output + otherOutput;
+		let imports = this.queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		return imports + this.output + otherOutput/*unknown*/;
 	}
 	queryImports(): Query<Import> {
-		return this.imports.query();
+		return this.imports.query()/*unknown*/;
 	}
 	querySources(): Query<Source> {
-		return this.sources.query();
+		return this.sources.query()/*unknown*/;
 	}
 	createIndent(): string {
-		return "\n" + "\t".repeat(this.depth);
+		return "\n" + "\t".repeat(this.depth)/*unknown*/;
 	}
 	findLastStructureName(): Option<string> {
-		return this.structureNames.findLast();
+		return this.structureNames.findLast()/*unknown*/;
 	}
 	isLastWithin(name: string): boolean {
-		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
+		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
 	}
 	addResolvedImport(parent: List<string>, child: string): CompileState {
-		let parent1 = parent;
-		let namespace = this.maybeNamespace.orElse(Lists.empty());
-		if (namespace.isEmpty()){
-			parent1 = parent1.addFirst(".");
+		let parent1 = parent/*List<string>*/;
+		let namespace = this.maybeNamespace.orElse(Lists.empty())/*unknown*/;
+		if (namespace.isEmpty()/*unknown*/){
+			parent1/*unknown*/ = parent1.addFirst(".")/*unknown*/;
 		}
-		let i = 0;
-		let size = namespace.size();
-		while (i < size){
-			parent1 = parent1.addFirst("..");
-			i++;
+		let i = 0/*unknown*/;
+		let size = namespace.size()/*unknown*/;
+		while (i < size/*unknown*/){
+			parent1/*unknown*/ = parent1.addFirst("..")/*unknown*/;
+			i/*unknown*/++;
 		}
-		let stringList = parent1.addLast(child);
-		if (this.imports.query().filter((node: Import) => node.hasSameChild(child)).next().isPresent()){
-			return this;
+		let stringList = parent1.addLast(child)/*unknown*/;
+		if (this.imports.query().filter((node: Import) => node.hasSameChild(child)/*unknown*/).next().isPresent()/*unknown*/){
+			return this/*unknown*/;
 		}
-		let importString = new Import(stringList, child);
-		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		let importString = new Import(stringList, child)/*unknown*/;
+		return new CompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	withNamespace(namespace: List<string>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<string>>(namespace), this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<string>>(namespace), this.sources)/*unknown*/;
 	}
 	append(element: string): CompileState {
-		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	pushStructureName(name: string): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	enterDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	exitDepth(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	defineAll(definitions: List<Definition>): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	resolve(name: string): Option<Definition> {
-		return this.definitions.queryReversed().filter((definition: Definition) => definition.isNamed(name)).next();
+		return this.definitions.queryReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
 	}
 	clearImports(): CompileState {
-		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	clearOutput(): CompileState {
-		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 	addSource(source: Source): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source))/*unknown*/;
 	}
 	findSource(name: string): Option<Source> {
-		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)).next();
+		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)/*unknown*/).next()/*unknown*/;
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base))){
-			return this;
+		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
+			return this/*unknown*/;
 		}
-		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())).orElse(this);
+		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())/*unknown*/).orElse(this)/*unknown*/;
 	}
 	popStructureName(): CompileState {
-		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
+		return new CompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
 	}
 }
