@@ -1,6 +1,7 @@
 package magma.api.collect;
 
 import magma.api.option.Option;
+import magma.api.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -24,4 +25,6 @@ public interface Query<T> {
     Query<T> filter(Predicate<T> predicate);
 
     boolean anyMatch(Predicate<T> predicate);
+
+    <R, X> Result<R, X> foldWithInitialToResult(R initial, BiFunction<R, T, Result<R, X>> folder);
 }

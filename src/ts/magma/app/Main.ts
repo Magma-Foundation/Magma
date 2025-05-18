@@ -67,11 +67,12 @@ import { Option } from "../../magma/api/option/Option";
 import { Source } from "../../magma/app/io/Source";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { CompileState } from "../../magma/app/compile/CompileState";
-import { Tuple2 } from "../../magma/api/Tuple2";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Result } from "../../magma/api/result/Result";
 import { None } from "../../magma/api/option/None";
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Import } from "../../magma/app/compile/Import";
 import { Joiner } from "../../magma/api/collect/Joiner";
+import { Tuple2 } from "../../magma/api/Tuple2";
 import { DivideState } from "../../magma/app/compile/DivideState";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Strings } from "../../magma/api/text/Strings";
@@ -132,32 +133,25 @@ export class Main {
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let sources = children.query().filter((source: Path) => source.endsWith(".java")).map((child: Path) => new Source(sourceDirectory, child)).collect(new ListCollector<Source>());
 		let initial = sources.query().foldWithInitial(CompileState.createInitial(), (state: CompileState, source: Source) => state.addSource(source));
-		return sources.query().foldWithInitial(Main.createInitialState(initial), (current: Tuple2<CompileState, Option<IOError>>, source1: Source) => Main.foldChild(current.left(), current.right(), source1)).right();
+		return sources.query().foldWithInitialToResult(initial, Main.runWithSource).findError();
 	}
-	static createInitialState(state: CompileState): Tuple2<CompileState, Option<IOError>> {
-		return new Tuple2Impl<CompileState, Option<IOError>>(state, new None<IOError>());
-	}
-	static foldChild(state: CompileState, maybeError: Option<IOError>, source: Source): Tuple2<CompileState, Option<IOError>> {
-		if (maybeError.isPresent()){
-			return new Tuple2Impl<CompileState, Option<IOError>>(state, maybeError);
-		}
-		return Main.runWithSource(state, source);
-	}
-	static runWithSource(state: CompileState, source: Source): Tuple2<CompileState, Option<IOError>> {
+	static runWithSource(state: CompileState, source: Source): Result<CompileState, IOError> {
 		let target = Files.get(".", "src", "ts").resolveChildSegments(source.computeNamespace()).resolveChild(source.computeName() + ".ts");
-		return source.read().match((input: string) => Main.compileAndWrite(state, source, input, target), (value: IOError) => new Tuple2Impl<CompileState, Option<IOError>>(state, new Some<IOError>(value)));
+		return source.read().flatMapValue((input: string) => Main.compileAndWrite(state, source, input, target));
 	}
-	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Tuple2<CompileState, Option<IOError>> {
+	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Result<CompileState, IOError> {
 		let namespace = source.computeNamespace();
 		let output = Main.compileRoot(state, input, namespace);
+		/*return Main.ensureTargetParent(target).or(() -> target.writeString(output.right()))
+                .<Result<CompileState, IOError>>map(Err::new)
+                .orElseGet(() -> new Ok<>(output.left()))*/;
+	}
+	static ensureTargetParent(target: Path): Option<IOError> {
 		let parent = target.getParent();
-		if (!parent.exists()){
-			let error = parent.createDirectories();
-			if (error.isPresent()){
-				return new Tuple2Impl<>(state, error);
-			}
+		if (parent.exists()){
+			return new None<>();
 		}
-		return new Tuple2Impl<CompileState, Option<IOError>>(output.left(), target.writeString(output.right()));
+		return parent.createDirectories();
 	}
 	static compileRoot(state: CompileState, input: string, namespace: List<string>): Tuple2Impl<CompileState, string> {
 		let compiled = Main.compileStatements(state.withNamespace(namespace), input, Main.compileRootSegment);

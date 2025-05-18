@@ -4,6 +4,8 @@ import magma.api.Tuple2;
 import magma.api.collect.Collector;
 import magma.api.collect.Query;
 import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -45,9 +47,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <R> Option<R> foldWithMapper(Function<T, R> next, BiFunction<R, T, R> folder) {
-        return this.head.next().map(next).map((R maybeNext) -> {
-            return this.foldWithInitial(maybeNext, folder);
-        });
+        return this.head.next().map(next).map((R maybeNext) -> this.foldWithInitial(maybeNext, folder));
     }
 
     @Override
@@ -66,6 +66,13 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     @Override
     public boolean anyMatch(Predicate<T> predicate) {
         return this.foldWithInitial(false, (Boolean aBoolean, T t) -> aBoolean || predicate.test(t));
+    }
+
+    @Override
+    public <R, X> Result<R, X> foldWithInitialToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
+        return this.foldWithInitial(new Ok<>(initial),
+                (Result<R, X> rxResult, T element) -> rxResult.flatMapValue(
+                        (R inner) -> folder.apply(inner, element)));
     }
 
     @Override

@@ -58,6 +58,8 @@
 	Main: magma.app
 ]*/
 import { Result } from "../../../magma/api/result/Result";
+import { Option } from "../../../magma/api/option/Option";
+import { None } from "../../../magma/api/option/None";
 export class Ok<T, X> implements Result<T, X> {
 	value: T;
 	constructor (value: T) {
@@ -65,5 +67,11 @@ export class Ok<T, X> implements Result<T, X> {
 	}
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
 		return whenOk(this.value);
+	}
+	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
+		return mapper(this.value);
+	}
+	findError(): Option<X> {
+		return new None<>();
 	}
 }
