@@ -1,128 +1,68 @@
-import { HeadedQuery } from "../../../../magma/api/collect/head/HeadedQuery";
-import { RangeHead } from "../../../../magma/api/collect/head/RangeHead";
+/*[
+	JVMList: jvm.api.collect.list, 
+	Lists: jvm.api.collect.list, 
+	Files: jvm.api.io, 
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
+	Collector: magma.api.collect, 
+	EmptyHead: magma.api.collect.head, 
+	FlatMapHead: magma.api.collect.head, 
+	Head: magma.api.collect.head, 
+	HeadedQuery: magma.api.collect.head, 
+	MapHead: magma.api.collect.head, 
+	RangeHead: magma.api.collect.head, 
+	SingleHead: magma.api.collect.head, 
+	Iterators: magma.api.collect, 
+	Joiner: magma.api.collect, 
+	List: magma.api.collect.list, 
+	ListCollector: magma.api.collect.list, 
+	Query: magma.api.collect, 
+	Console: magma.api.io, 
+	IOError: magma.api.io, 
+	Path: magma.api.io, 
+	None: magma.api.option, 
+	Option: magma.api.option, 
+	Some: magma.api.option, 
+	Err: magma.api.result, 
+	Ok: magma.api.result, 
+	Result: magma.api.result, 
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	CompileState: magma.app.compile, 
+	ConstructionCaller: magma.app.compile.define, 
+	ConstructorHeader: magma.app.compile.define, 
+	Definition: magma.app.compile.define, 
+	MethodHeader: magma.app.compile.define, 
+	Parameter: magma.app.compile.define, 
+	DivideState: magma.app.compile, 
+	Import: magma.app.compile, 
+	Placeholder: magma.app.compile.text, 
+	Symbol: magma.app.compile.text, 
+	Whitespace: magma.app.compile.text, 
+	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
+	TemplateType: magma.app.compile.type, 
+	Type: magma.app.compile.type, 
+	VariadicType: magma.app.compile.type, 
+	AccessValue: magma.app.compile.value, 
+	Argument: magma.app.compile.value, 
+	Caller: magma.app.compile.value, 
+	Invokable: magma.app.compile.value, 
+	Lambda: magma.app.compile.value, 
+	Not: magma.app.compile.value, 
+	Operation: magma.app.compile.value, 
+	StringValue: magma.app.compile.value, 
+	Value: magma.app.compile.value, 
+	Source: magma.app.io, 
+	Main: magma.app
+]*/
 import { List } from "../../../../magma/api/collect/list/List";
-import { Query } from "../../../../magma/api/collect/Query";
-import { None } from "../../../../magma/api/option/None";
-import { Option } from "../../../../magma/api/option/Option";
-import { Some } from "../../../../magma/api/option/Some";
-import { Tuple2 } from "../../../../magma/api/Tuple2";
-import { Tuple2Impl } from "../../../../magma/api/Tuple2Impl";
-import { ListsInstance } from "./ListsInstance";
+export interface ListsInstance {
+	empty<T>(): List<T>;
 
-export class NodeList<T> implements List<T> {
-  private readonly elements: T[];
+	of<T>(...elements: T[]): List<T>;
 
-  constructor(elements: T[]) {
-    this.elements = elements;
-  }
-
-  addLast(element: T): List<T> {
-    return new NodeList([...this.elements, element]);
-  }
-
-  addFirst(element: T): List<T> {
-    return new NodeList([element, ...this.elements]);
-  }
-
-  addAll(others: List<T>): List<T> {
-    return others
-      .query()
-      .foldWithInitial(this as List<T>, (current, e) => current.addLast(e));
-  }
-
-  query(): Query<T> {
-    return this.queryWithIndices().map(tuple => tuple.right());
-  }
-
-  queryWithIndices(): Query<Tuple2<number, T>> {
-    return new HeadedQuery(new RangeHead(this.elements.length))
-      .map(i => new Tuple2Impl(i, this.elements[i]));
-  }
-
-  queryReversed(): Query<T> {
-    return new HeadedQuery(new RangeHead(this.elements.length))
-      .map(i => this.elements.length - i - 1)
-      .map(i => this.elements[i]);
-  }
-
-  size(): number {
-    return this.elements.length;
-  }
-
-  isEmpty(): boolean {
-    return this.elements.length === 0;
-  }
-
-  contains(element: T): boolean {
-    return this.elements.indexOf(element) !== -1;
-  }
-
-  subList(startInclusive: number, endExclusive: number): Option<List<T>> {
-    if (
-      startInclusive < 0 ||
-      endExclusive > this.elements.length ||
-      startInclusive > endExclusive
-    ) {
-      return new None();
-    }
-    return new Some(
-      new NodeList(this.elements.slice(startInclusive, endExclusive))
-    );
-  }
-
-  findFirst(): Option<T> {
-    return this.isEmpty()
-      ? new None()
-      : new Some(this.elements[0]);
-  }
-
-  findLast(): Option<T> {
-    return this.isEmpty()
-      ? new None()
-      : new Some(this.elements[this.elements.length - 1]);
-  }
-
-  find(index: number): Option<T> {
-    if (index < 0 || index >= this.elements.length) {
-      return new None();
-    }
-    return new Some(this.elements[index]);
-  }
-
-  removeValue(element: T): List<T> {
-    const idx = this.elements.indexOf(element);
-    if (idx === -1) return this;
-    return new NodeList([
-      ...this.elements.slice(0, idx),
-      ...this.elements.slice(idx + 1),
-    ]);
-  }
-
-  removeLast(): Option<List<T>> {
-    if (this.isEmpty()) return new None();
-    return new Some(new NodeList(this.elements.slice(0, -1)));
-  }
-
-  equalsTo(other: List<T>): boolean {
-    if (this.size() !== other.size()) return false;
-    return this.query()
-      .zip(other.query())
-      .allMatch(tuple => tuple.left() === tuple.right());
-  }
 }
-
-// And now update your ListsInstance to use the class:
-
-export const Lists: ListsInstance = {
-  empty: function <T>(): List<T> {
-    return new NodeList<T>([]);
-  },
-
-  of: function <T>(...elements: T[]): List<T> {
-    return new NodeList<T>(elements);
-  },
-
-  fromArray: function <T>(elements: T[]): List<T> {
-    return new NodeList<T>(elements);
-  },
-};
+export declare const Lists: ListsInstance;

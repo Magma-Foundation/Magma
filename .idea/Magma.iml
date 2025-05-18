@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/windows" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/clang" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

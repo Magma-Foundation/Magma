@@ -1,11 +1,7 @@
 /*[
 	JVMList: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
-	Console: jvm.api.io, 
 	Files: jvm.api.io, 
-	JVMPath: jvm.api.io, 
-	Characters: jvm.api.text, 
-	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
@@ -16,11 +12,12 @@
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
-	ZipHead: magma.api.collect.head, 
+	Iterators: magma.api.collect, 
+	Joiner: magma.api.collect, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
-	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
+	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
 	None: magma.api.option, 
@@ -29,8 +26,36 @@
 	Err: magma.api.result, 
 	Ok: magma.api.result, 
 	Result: magma.api.result, 
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	CompileState: magma.app.compile, 
+	ConstructionCaller: magma.app.compile.define, 
+	ConstructorHeader: magma.app.compile.define, 
+	Definition: magma.app.compile.define, 
+	MethodHeader: magma.app.compile.define, 
+	Parameter: magma.app.compile.define, 
+	DivideState: magma.app.compile, 
+	Import: magma.app.compile, 
+	Placeholder: magma.app.compile.text, 
+	Symbol: magma.app.compile.text, 
+	Whitespace: magma.app.compile.text, 
+	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
+	TemplateType: magma.app.compile.type, 
+	Type: magma.app.compile.type, 
+	VariadicType: magma.app.compile.type, 
+	AccessValue: magma.app.compile.value, 
+	Argument: magma.app.compile.value, 
+	Caller: magma.app.compile.value, 
+	Invokable: magma.app.compile.value, 
+	Lambda: magma.app.compile.value, 
+	Not: magma.app.compile.value, 
+	Operation: magma.app.compile.value, 
+	StringValue: magma.app.compile.value, 
+	Value: magma.app.compile.value, 
+	Source: magma.app.io, 
 	Main: magma.app
 ]*/
 import { Query } from "../../../../magma/api/collect/Query";
@@ -41,7 +66,8 @@ import { MapHead } from "../../../../magma/api/collect/head/MapHead";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
 import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
-import { ZipHead } from "../../../../magma/api/collect/head/ZipHead";
+import { Result } from "../../../../magma/api/result/Result";
+import { Ok } from "../../../../magma/api/result/Ok";
 import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
 export class HeadedQuery<T> implements Query<T> {
 	head: Head<T>;
@@ -52,7 +78,7 @@ export class HeadedQuery<T> implements Query<T> {
 		return this.head.next();
 	}
 	collect<C>(collector: Collector<T, C>): C {
-		return this.foldWithInitial(collector.createInitial(), (current: C, element: T) => collector.fold(current, element));
+		return this.foldWithInitial(collector.createInitial(), collector.fold);
 	}
 	map<R>(mapper: (arg0 : T) => R): Query<R> {
 		return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
@@ -71,9 +97,7 @@ export class HeadedQuery<T> implements Query<T> {
 		}
 	}
 	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this.head.next().map(next).map((maybeNext: R) => {
-			return this.foldWithInitial(maybeNext, folder);
-		});
+		return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder));
 	}
 	flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
 		return this.head.next().map(mapper).map((initial: Query<R>) => new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper))).orElseGet(() => new HeadedQuery<R>(new EmptyHead<R>()));
@@ -84,8 +108,8 @@ export class HeadedQuery<T> implements Query<T> {
 	anyMatch(predicate: (arg0 : T) => boolean): boolean {
 		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t));
 	}
-	zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
-		return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
+	foldWithInitialToResult<R, X>(initial: R, folder: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
+		return this.foldWithInitial(new Ok<R, X>(initial), (rxResult: Result<R, X>, element: T) => rxResult.flatMapValue((inner: R) => folder(inner, element)));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {

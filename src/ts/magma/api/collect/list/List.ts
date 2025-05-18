@@ -1,11 +1,7 @@
 /*[
 	JVMList: jvm.api.collect.list, 
 	Lists: jvm.api.collect.list, 
-	Console: jvm.api.io, 
 	Files: jvm.api.io, 
-	JVMPath: jvm.api.io, 
-	Characters: jvm.api.text, 
-	Strings: jvm.api.text, 
 	Actual: magma.annotate, 
 	Namespace: magma.annotate, 
 	Collector: magma.api.collect, 
@@ -16,11 +12,12 @@
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
-	ZipHead: magma.api.collect.head, 
+	Iterators: magma.api.collect, 
+	Joiner: magma.api.collect, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
-	Queries: magma.api.collect, 
 	Query: magma.api.collect, 
+	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
 	None: magma.api.option, 
@@ -29,8 +26,36 @@
 	Err: magma.api.result, 
 	Ok: magma.api.result, 
 	Result: magma.api.result, 
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	CompileState: magma.app.compile, 
+	ConstructionCaller: magma.app.compile.define, 
+	ConstructorHeader: magma.app.compile.define, 
+	Definition: magma.app.compile.define, 
+	MethodHeader: magma.app.compile.define, 
+	Parameter: magma.app.compile.define, 
+	DivideState: magma.app.compile, 
+	Import: magma.app.compile, 
+	Placeholder: magma.app.compile.text, 
+	Symbol: magma.app.compile.text, 
+	Whitespace: magma.app.compile.text, 
+	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
+	TemplateType: magma.app.compile.type, 
+	Type: magma.app.compile.type, 
+	VariadicType: magma.app.compile.type, 
+	AccessValue: magma.app.compile.value, 
+	Argument: magma.app.compile.value, 
+	Caller: magma.app.compile.value, 
+	Invokable: magma.app.compile.value, 
+	Lambda: magma.app.compile.value, 
+	Not: magma.app.compile.value, 
+	Operation: magma.app.compile.value, 
+	StringValue: magma.app.compile.value, 
+	Value: magma.app.compile.value, 
+	Source: magma.app.io, 
 	Main: magma.app
 ]*/
 import { Query } from "../../../../magma/api/collect/Query";
@@ -46,11 +71,11 @@ export interface List<T> {
 	find(index: number): Option<T>;
 	queryWithIndices(): Query<Tuple2<number, T>>;
 	addAll(others: List<T>): List<T>;
-	contains(element: T, equator: (arg0 : T, arg1 : T) => boolean): boolean;
+	contains(element: T): boolean;
 	queryReversed(): Query<T>;
 	addFirst(element: T): List<T>;
 	isEmpty(): boolean;
-	equalsTo(other: List<T>, equator: (arg0 : T, arg1 : T) => boolean): boolean;
-	removeValue(element: T, equator: (arg0 : T, arg1 : T) => boolean): List<T>;
+	equalsTo(other: List<T>): boolean;
+	removeValue(element: T): List<T>;
 	removeLast(): Option<List<T>>;
 }

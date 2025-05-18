@@ -4,6 +4,8 @@ import magma.api.Tuple2;
 import magma.api.collect.Collector;
 import magma.api.collect.Query;
 import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -17,7 +19,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return this.foldWithInitial(collector.createInitial(), (C current, T element) -> collector.fold(current, element));
+        return this.foldWithInitial(collector.createInitial(), collector::fold);
     }
 
     @Override
@@ -45,9 +47,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <R> Option<R> foldWithMapper(Function<T, R> next, BiFunction<R, T, R> folder) {
-        return this.head.next().map(next).map((R maybeNext) -> {
-            return this.foldWithInitial(maybeNext, folder);
-        });
+        return this.head.next().map(next).map((R maybeNext) -> this.foldWithInitial(maybeNext, folder));
     }
 
     @Override
@@ -69,8 +69,10 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public <R> Query<Tuple2<T, R>> zip(Query<R> other) {
-        return new HeadedQuery<Tuple2<T, R>>(new ZipHead<T, R>(this.head, other));
+    public <R, X> Result<R, X> foldWithInitialToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
+        return this.foldWithInitial(new Ok<R, X>(initial),
+                (Result<R, X> rxResult, T element) -> rxResult.flatMapValue(
+                        (R inner) -> folder.apply(inner, element)));
     }
 
     @Override

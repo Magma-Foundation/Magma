@@ -1,16 +1,16 @@
 package magma.api.io;
 
-import magma.api.collect.Query;
 import magma.api.collect.list.List;
-import magma.api.option.Option;
+import magma.api.collect.Query;
 import magma.api.result.Result;
+import magma.api.option.Option;
 
 public interface Path {
-    String asString();
-
     Option<IOError> writeString(String output);
 
     Result<String, IOError> readString();
+
+    Path resolveSibling(String siblingName);
 
     Result<List<Path>, IOError> walk();
 

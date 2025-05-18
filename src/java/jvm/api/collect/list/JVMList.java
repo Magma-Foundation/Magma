@@ -12,15 +12,14 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 
 import java.util.ArrayList;
-import java.util.function.BiFunction;
 
 @Actual
 public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public List<T> addLast(T element) {
-        var copy = new ArrayList<>(this.list);
+        var copy = new ArrayList<T>(this.list);
         copy.add(element);
-        return new JVMList<>(copy);
+        return new JVMList<T>(copy);
     }
 
     @Override
@@ -61,7 +60,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean contains(T element, BiFunction<T, T, Boolean> equator) {
+    public boolean contains(T element) {
         return this.list.contains(element);
     }
 
@@ -76,7 +75,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
         var copy = new ArrayList<T>();
         copy.addFirst(element);
         copy.addAll(this.list);
-        return new JVMList<>(copy);
+        return new JVMList<T>(copy);
     }
 
     @Override
@@ -85,26 +84,26 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean equalsTo(List<T> other, BiFunction<T, T, Boolean> equator) {
+    public boolean equalsTo(List<T> other) {
         return this.equals(other);
     }
 
     @Override
-    public List<T> removeValue(T element, BiFunction<T, T, Boolean> equator) {
+    public List<T> removeValue(T element) {
         var copy = new ArrayList<T>(this.list);
         copy.remove(element);
-        return new JVMList<>(copy);
+        return new JVMList<T>(copy);
     }
 
     @Override
     public Option<List<T>> removeLast() {
         if (this.list.isEmpty()) {
-            return new None<>();
+            return new None<List<T>>();
         }
 
         var copy = new ArrayList<T>(this.list);
         copy.removeLast();
-        return new Some<>(new JVMList<>(copy));
+        return new Some<List<T>>(new JVMList<T>(copy));
     }
 
     @Override
