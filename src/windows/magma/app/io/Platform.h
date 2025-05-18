@@ -25,6 +25,8 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -32,6 +34,7 @@
 	ListCollector, 
 	Lists, 
 	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -51,6 +54,7 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
+	Source, 
 	StringNode, 
 	Strings, 
 	SymbolNode, 
@@ -63,6 +67,6 @@
 	Whitespace, 
 	ZipHead
 ]*/
-#ifndef magma_app_io_Platform
-#define magma_app_io_Platform
+#ifndef magma_app_Main
+#define magma_app_Main
 #endif

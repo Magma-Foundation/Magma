@@ -61,7 +61,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Main {
-    private record IncompleteRoot(Location location, Map<String, String> outputsByExtensions) {
+    private record IncompleteRoot(Location location, List<IncompleteRootSegment> outputsByExtensions) {
+    }
+
+    private record IncompleteRootSegment(String value) {
     }
 
     public static void main() {
@@ -134,16 +137,63 @@ public final class Main {
                 .withPlatform(platform)
                 .withLocation(location);
 
-        final var outputTuple = Main.compileRoot(initialized, source, input);
-        final var outputState = outputTuple.left();
-        final var outputsByExtensions = outputTuple.right();
+        return Main.getCompileStateIncompleteRootTuple2(input, initialized, location);
+    }
 
-        final var incomplete = new IncompleteRoot(location, outputsByExtensions);
-        return new Tuple2Impl<CompileState, IncompleteRoot>(outputState, incomplete);
+    private static Tuple2Impl<CompileState, IncompleteRoot> getCompileStateIncompleteRootTuple2(final String input, final CompileState initialized, final Location location) {
+        final var statementsTuple = Main.parseAll(initialized, input, Main::foldStatements, (CompileState state1, String s) -> new Some<>(Main.parseRootSegment(state1, s)))
+                .orElse(new Tuple2Impl<>(initialized, Lists.empty()));
+
+        final var statementsState = statementsTuple.left();
+        final var statements = statementsTuple.right();
+
+        final var incomplete = new IncompleteRoot(location, statements);
+        return new Tuple2Impl<CompileState, IncompleteRoot>(statementsState, incomplete);
+    }
+
+    private static HashMap<String, String> getStringStringHashMap(
+            final CompileState state,
+            final List<IncompleteRootSegment> segments
+    ) {
+        final var state1 = state.clearImports().clearGenerated();
+        final var location = state1.findCurrentLocation().orElse(new Location(Lists.empty(), ""));
+
+        final var entries = new HashMap<String, String>();
+        final var namespace = location.namespace();
+        final var name = location.name();
+
+        final var joinedDefinedTypes = state1.findDefinedTypes()
+                .sort(String::compareTo)
+                .query()
+                .map((String value) -> "\n\t" + value)
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        final var debug = "/*[" +
+                joinedDefinedTypes +
+                "\n]*/\n";
+
+        final var generatedMain = Main.createMain(name);
+        final var imports = Main.generateOrFoldImports(state1);
+        final var joinedOutput = segments.query()
+                .map(IncompleteRootSegment::value)
+                .collect(new Joiner(""))
+                .orElse("");
+
+        if (state1.isPlatform(Platform.Windows)) {
+            final var value = namespace.query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + name;
+            entries.put(Platform.Windows.extension[0], debug + Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
+            entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + name + ".h\"") + state1.join() + joinedOutput + generatedMain);
+        }
+        else {
+            entries.put(state1.platform().extension[0], debug + imports + state1.join() + joinedOutput + generatedMain);
+        }
+        return entries;
     }
 
     private static Result<CompileState, IOError> complete(final CompileState state, final IncompleteRoot incomplete, final Platform platform) {
-        return Main.writeOutputEntries(platform, incomplete.location(), incomplete.outputsByExtensions())
+        final var entries = Main.getStringStringHashMap(state, incomplete.outputsByExtensions());
+        return Main.writeOutputEntries(platform, incomplete.location(), entries)
                 .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
                 .orElseGet(() -> new Ok<>(state));
     }
@@ -189,38 +239,6 @@ public final class Main {
         return targetParent.createDirectories()
                 .<Result<Path, IOError>>map((IOError error) -> new Err<>(error))
                 .orElseGet(() -> new Ok<>(targetParent));
-    }
-
-    private static Tuple2<CompileState, Map<String, String>> compileRoot(final CompileState state, final Source source, final String input) {
-        final var statementsTuple = Main.compileStatements(state, input, Main::compileRootSegment);
-        final var statementsState = statementsTuple.left();
-
-        final var output = statementsTuple.right();
-        final var imports = Main.generateOrFoldImports(statementsState);
-        final var entries = new HashMap<String, String>();
-        final var generatedMain = Main.createMain(source);
-        final var clearedState = statementsState.clearImports().clear();
-
-        final var joinedDefinedTypes = clearedState.findDefinedTypes()
-                .sort(String::compareTo)
-                .query()
-                .map((String value) -> "\n\t" + value)
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        final var temp = "/*[" +
-                joinedDefinedTypes +
-                "\n]*/\n";
-
-        if (!statementsState.isPlatform(Platform.Windows)) {
-            entries.put(statementsState.platform().extension[0], temp + imports + statementsState.join() + output + generatedMain);
-            return new Tuple2Impl<>(clearedState, entries);
-        }
-
-        final var value = source.computeNamespace().query().collect(new Joiner("_")).map((String inner) -> inner + "_").orElse("") + source.computeName();
-        entries.put(Platform.Windows.extension[0], temp + Main.generateDirective("ifndef " + value) + Main.generateDirective("define " + value) + imports + Main.generateDirective("endif"));
-        entries.put(Platform.Windows.extension[1], Main.generateDirective("include \"./" + source.computeName() + ".h\"") + statementsState.join() + output + generatedMain);
-        return new Tuple2Impl<>(clearedState, entries);
     }
 
     private static String generateOrFoldImports(final CompileState state) {
@@ -292,8 +310,8 @@ public final class Main {
         return "#" + content + "\n";
     }
 
-    private static String createMain(final Source source) {
-        if (Strings.equalsTo(source.computeName(), "Main")) {
+    private static String createMain(final String name) {
+        if (Strings.equalsTo(name, "Main")) {
             return "Main.main();";
         }
         return "";
@@ -421,15 +439,23 @@ public final class Main {
         return appended;
     }
 
-    private static Tuple2<CompileState, String> compileRootSegment(final CompileState state, final String input) {
-        return Main.compileOrPlaceholder(state, input, Lists.of(
-                Main::compileWhitespace,
-                Main::compileNamespaced,
-                Main.createStructureRule("class ", "class "),
-                Main.createStructureRule("interface ", "interface "),
-                Main.createStructureRule("record ", "class "),
-                Main.createStructureRule("enum ", "class ")
-        ));
+    private static Tuple2<CompileState, IncompleteRootSegment> parseRootSegment(final CompileState state, final String input) {
+        return Main.or(state, input, Lists.of(
+                Main.typed(Main::compileWhitespace),
+                Main.typed(Main::compileNamespaced),
+                Main.typed(Main.createStructureRule("class ", "class ")),
+                Main.typed(Main.createStructureRule("interface ", "interface ")),
+                Main.typed(Main.createStructureRule("record ", "class ")),
+                Main.typed(Main.createStructureRule("enum ", "class "))
+        )).orElseGet(() -> new Tuple2Impl<CompileState, IncompleteRootSegment>(state, new IncompleteRootSegment(Main.generatePlaceholder(input))));
+    }
+
+    private static BiFunction<CompileState, String, Option<Tuple2<CompileState, IncompleteRootSegment>>> typed(final BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> mapper) {
+        return (CompileState state, String s) -> {
+            return mapper.apply(state, s).map((Tuple2<CompileState, String> result) -> {
+                return new Tuple2Impl<>(result.left(), new IncompleteRootSegment(result.right()));
+            });
+        };
     }
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createStructureRule(final String sourceInfix, final String targetInfix) {

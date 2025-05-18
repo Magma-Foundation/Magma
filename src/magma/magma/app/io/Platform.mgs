@@ -25,6 +25,8 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -32,6 +34,7 @@
 	ListCollector, 
 	Lists, 
 	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -51,6 +54,7 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
+	Source, 
 	StringNode, 
 	Strings, 
 	SymbolNode, 
@@ -63,14 +67,4 @@
 	Whitespace, 
 	ZipHead
 ]*/
-export struct Platform {
-	static TypeScript/*auto*/: Platform = new Platform("node", "ts");
-	static Magma/*auto*/: Platform = new Platform("magma", "mgs");
-	static Windows/*auto*/: Platform = new Platform("windows", "h", "c");
-	root: &[I8];
-	extension: &[I8][];
-	constructor (root: &[I8], ...extensions: &[I8][]) {
-		this/*auto*/.root = root/*&[I8]*/;
-		this/*auto*/.extension = extensions/*&[I8][]*/;
-	}
-}
+Main.main();

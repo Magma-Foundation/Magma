@@ -1,57 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
+	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
 	FunctionHeader, 
 	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import magma.app.compile.define.{ FunctionHeader, Definition };
-import magma.api.collect.list.{ List };
-import magma.api.option.{ Option };
-import magma.app.io.{ Platform };
-export struct FunctionSegment<S extends FunctionHeader<S>> {
-	mut header: FunctionHeader<S>;
-	mut definitions: List<Definition>;
-	mut maybeContent: Option<&[I8]>;
-	constructor (mut header: FunctionHeader<S>, mut definitions: List<Definition>, mut maybeContent: Option<&[I8]>) {
-		this.header = header;
-		this.definitions = definitions;
-		this.maybeContent = maybeContent;
-	}
-	def generate(platform: Platform, indent: &[I8]): &[I8] {
-		let content = this/*auto*/.maybeContent(/*auto*/).map((mut inner: &[I8]) => " {" + inner/*auto*/ + indent/*&[I8]*/ + "}").orElse(";");
-		return indent/*&[I8]*/ + this/*auto*/.header.generateWithDefinitions(platform/*Platform*/, this/*auto*/.definitions(/*auto*/)) + content/*string*/;
-	}
-}
+Main.main();

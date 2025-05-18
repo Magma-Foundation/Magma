@@ -1,54 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
 	Option, 
+	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
+	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import { Result } from "../../../magma/api/result/Result";
-import { Option } from "../../../magma/api/option/Option";
-import { Some } from "../../../magma/api/option/Some";
-import { None } from "../../../magma/api/option/None";
-export class Err<T, X> implements Result<T, X> {
-	error: X;
-	constructor (error: X) {
-		this.error = error;
-	}
-	findError(): Option<X> {
-		return new Some<X>(this/*auto*/.error);
-	}
-	findValue(): Option<T> {
-		return new None<T>(/*auto*/);
-	}
-	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenErr/*(arg0 : X) => R*/(this/*auto*/.error);
-	}
-	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
-		return new Err<>(this/*auto*/.error);
-	}
-	mapValue<R>(mapper: (arg0 : T) => R): Result<R, X> {
-		return new Err<>(this/*auto*/.error);
-	}
-}
+Main.main();

@@ -1,4 +1,2 @@
-#include "./Argument.h"
-export interface Argument {
-	Option<Value> toValue();
-}
+#include "./Main.h"
+Main.main();

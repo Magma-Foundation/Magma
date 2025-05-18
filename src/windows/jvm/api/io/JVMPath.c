@@ -1,1 +1,2 @@
-#include "./JVMPath.h"
+#include "./Main.h"
+Main.main();

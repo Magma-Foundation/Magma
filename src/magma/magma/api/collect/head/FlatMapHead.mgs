@@ -1,40 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
+	Joiner, 
+	LambdaNode, 
+	List, 
+	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
+	MapHead, 
 	Namespace, 
-	Strings
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
+	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
+	ZipHead
 ]*/
-import magma.api.collect.head.{ Head };
-import magma.api.collect.{ Query };
-import magma.api.option.{ Option, None };
-export struct FlatMapHead<T, R> implements Head<R> {
-	mapper: (arg0 : T) => Query<R>;
-	head: Head<T>;
-	mut current: Query<R>;
-	constructor (head: Head<T>, initial: Query<R>, mapper: (arg0 : T) => Query<R>) {
-		this/*auto*/.head = head/*Head<T>*/;
-		this/*auto*/.current = initial/*Query<R>*/;
-		this/*auto*/.mapper = mapper/*(arg0 : T) => Query<R>*/;
-	}
-	def next(): Option<R> {
-		while (true/*auto*/) {
-			let next = this/*auto*/.current.next(/*auto*/);
-			if (next/*(arg0 : T) => R*/(/*auto*/)) {
-				return next/*(arg0 : T) => R*/;
-			}
-			let tuple = this/*auto*/.head.next(/*auto*/).map(this/*auto*/.mapper).toTuple(this/*auto*/.current);
-			if (tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/)) {
-				this/*auto*/.current = tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/);
-			}
-			else {
-				return None<R>(/*auto*/);
-			}
-		}
-	}
-}
+Main.main();

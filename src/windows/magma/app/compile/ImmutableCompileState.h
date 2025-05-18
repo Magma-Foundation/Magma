@@ -1,56 +1,72 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
+	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
 	FunctionHeader, 
 	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
 	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-#ifndef magma_app_compile_ImmutableCompileState
-#define magma_app_compile_ImmutableCompileState
-import { CompileState } from "magma/app/compile/CompileState";
-import { Platform } from "magma/app/io/Platform";
-import { Location } from "magma/app/io/Location";
-import { Option } from "magma/api/option/Option";
-import { Source } from "magma/app/io/Source";
-import { List } from "magma/api/collect/list/List";
-import { Import } from "magma/app/compile/Import";
-import { Definition } from "magma/app/compile/define/Definition";
-import { None } from "magma/api/option/None";
-import { Lists } from "jvm/api/collect/list/Lists";
-import { Strings } from "jvm/api/text/Strings";
-import { Some } from "magma/api/option/Some";
-import { Type } from "magma/api/Type";
+#ifndef magma_app_Main
+#define magma_app_Main
 #endif

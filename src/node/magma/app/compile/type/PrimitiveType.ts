@@ -1,11 +1,16 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
 	ArrayType, 
 	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
 	DivideState, 
 	EmptyHead, 
@@ -20,55 +25,46 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
+	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-import { Type } from "../../../../magma/api/Type";
-export class PrimitiveType implements Type {
-	static String/*auto*/: PrimitiveType = new PrimitiveType("string");
-	static Number/*auto*/: PrimitiveType = new PrimitiveType("number");
-	static Var/*auto*/: PrimitiveType = new PrimitiveType("var");
-	static Void/*auto*/: PrimitiveType = new PrimitiveType("void");
-	static Auto/*auto*/: PrimitiveType = new PrimitiveType("auto");
-	static I8/*auto*/: PrimitiveType = new PrimitiveType("I8");
-	static I32/*auto*/: PrimitiveType = new PrimitiveType("I32");
-	value: string;
-	constructor (value: string) {
-		this/*auto*/.value = value/*string*/;
-	}
-	generate(): string {
-		return this/*auto*/.value;
-	}
-	isFunctional(): boolean {
-		return false/*auto*/;
-	}
-	isVar(): boolean {
-		return PrimitiveType/*auto*/.Var === this/*auto*/;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
+Main.main();

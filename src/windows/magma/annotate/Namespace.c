@@ -1,3 +1,2 @@
-#include "./Namespace.h"
-export interface Namespace {
-}
+#include "./Main.h"
+Main.main();

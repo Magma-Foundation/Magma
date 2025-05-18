@@ -1,28 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
+	Joiner, 
+	LambdaNode, 
+	List, 
+	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
-	Strings
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
+	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
+	ZipHead
 ]*/
-import { Head } from "../../../../magma/api/collect/head/Head";
-import { Option } from "../../../../magma/api/option/Option";
-export class MapHead<T, R> implements Head<R> {
-	head: Head<T>;
-	mapper: (arg0 : T) => R;
-	constructor (head: Head<T>, mapper: (arg0 : T) => R) {
-		this.head = head;
-		this.mapper = mapper;
-	}
-	next(): Option<R> {
-		return this/*auto*/.head.next(/*auto*/).map(this/*auto*/.mapper);
-	}
-}
+Main.main();

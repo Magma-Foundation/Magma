@@ -1,29 +1,72 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
+	Joiner, 
+	LambdaNode, 
+	List, 
+	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
+	MapHead, 
 	Namespace, 
-	Strings
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
+	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
+	ZipHead
 ]*/
-#ifndef magma_api_collect_head_HeadedQuery
-#define magma_api_collect_head_HeadedQuery
-import { Query } from "magma/api/collect/Query";
-import { Head } from "magma/api/collect/head/Head";
-import { Option } from "magma/api/option/Option";
-import { Collector } from "magma/api/collect/Collector";
-import { MapHead } from "magma/api/collect/head/MapHead";
-import { FlatMapHead } from "magma/api/collect/head/FlatMapHead";
-import { EmptyHead } from "magma/api/collect/head/EmptyHead";
-import { Tuple2 } from "magma/api/Tuple2";
-import { ZipHead } from "magma/api/collect/head/ZipHead";
-import { Result } from "magma/api/result/Result";
-import { Ok } from "magma/api/result/Ok";
-import { SingleHead } from "magma/api/collect/head/SingleHead";
+#ifndef magma_app_Main
+#define magma_app_Main
 #endif

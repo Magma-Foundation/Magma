@@ -1,40 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
 	Option, 
+	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
+	Result, 
 	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import { Tuple2 } from "../../../magma/api/Tuple2";
-export interface Option<T> {
-	map<R>(mapper: (arg0 : T) => R): Option<R>;
-	orElse(other: T): T;
-	orElseGet(supplier: () => T): T;
-	isPresent(): boolean;
-	ifPresent(consumer: (arg0 : T) => void): void;
-	or(other: () => Option<T>): Option<T>;
-	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
-	filter(predicate: (arg0 : T) => boolean): Option<T>;
-	toTuple(other: T): Tuple2<boolean, T>;
-	and<R>(other: () => Option<R>): Option<Tuple2<T, R>>;
-}
+Main.main();

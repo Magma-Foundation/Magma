@@ -1,20 +1,2 @@
-#include "./List.h"
-export interface List<T> {
-	List<T> addLast(T element);
-	Query<T> query();
-	number size();
-	Option<List<T>> subList(number startInclusive, number endExclusive);
-	Option<T> findLast();
-	Option<T> findFirst();
-	Option<T> find(number index);
-	Query<Tuple2<number, T>> queryWithIndices();
-	List<T> addAll(List<T> others);
-	Bool contains(T element, (arg0 : T, arg1 : T) => Bool equator);
-	Query<T> queryReversed();
-	List<T> addFirst(T element);
-	Bool isEmpty();
-	Bool equalsTo(List<T> other, (arg0 : T, arg1 : T) => Bool equator);
-	List<T> removeValue(T element, (arg0 : T, arg1 : T) => Bool equator);
-	Option<List<T>> removeLast();
-	List<T> sort((arg0 : T, arg1 : T) => number sorter);
-}
+#include "./Main.h"
+Main.main();

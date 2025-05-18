@@ -1,99 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
+	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
+	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import magma.api.collect.list.{ List };
-import magma.api.{ Type };
-import jvm.api.collect.list.{ Lists };
-import magma.app.io.{ Platform };
-import magma.api.option.{ Option, Some };
-import magma.api.collect.{ Joiner };
-import jvm.api.text.{ Strings };
-export struct Definition {
-	mut annotations: List<&[I8]>;
-	mut modifiers: List<&[I8]>;
-	mut typeParams: List<&[I8]>;
-	mut type: Type;
-	mut name: &[I8];
-	constructor (mut annotations: List<&[I8]>, mut modifiers: List<&[I8]>, mut typeParams: List<&[I8]>, mut type: Type, mut name: &[I8]) {
-		this.annotations = annotations;
-		this.modifiers = modifiers;
-		this.typeParams = typeParams;
-		this.type = type;
-		this.name = name;
-	}
-	constructor (type: Type, name: &[I8]) {
-		this/*auto*/(Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), Lists/*auto*/.empty(/*auto*/), type/*Type*/, name/*&[I8]*/);
-	}
-	def generate(platform: Platform): &[I8] {
-		return this/*auto*/.generateWithAfterName(platform/*Platform*/, "");
-	}
-	def asDefinition(): Option<Definition> {
-		return Some<Definition>(this/*auto*/);
-	}
-	def generateWithAfterName(platform: Platform, afterName: &[I8]): &[I8] {
-		let joinedTypeParams = this/*auto*/.joinTypeParams(/*auto*/);
-		let joinedModifiers = this/*auto*/.joinModifiers(/*auto*/);
-		if (Platform/*auto*/.Windows === platform/*Platform*/) {
-			return joinedModifiers/*string*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.type.generate(/*auto*/) + " " + this/*auto*/.name + afterName/*&[I8]*/;
-		}
-		return joinedModifiers/*string*/ + this/*auto*/.type.generateBeforeName(/*auto*/) + this/*auto*/.name + joinedTypeParams/*string*/ + afterName/*&[I8]*/ + this/*auto*/.generateType(/*auto*/);
-	}
-	def joinModifiers(): &[I8] {
-		return this/*auto*/.modifiers.query(/*auto*/).map((mut value: &[I8]) => value/*string*/ + " ").collect(Joiner("")).orElse("");
-	}
-	def generateType(): &[I8] {
-		if (this/*auto*/.type.isVar(/*auto*/)) {
-			return "";
-		}
-		return ": " + this/*auto*/.type.generate(/*auto*/);
-	}
-	def joinTypeParams(): &[I8] {
-		return Joiner/*auto*/.joinOrEmpty(this/*auto*/.typeParams, ", ", "<", ">");
-	}
-	def hasAnnotation(annotation: &[I8]): Bool {
-		return this/*auto*/.annotations.contains(annotation/*&[I8]*/, Strings/*auto*/.equalsTo);
-	}
-	def removeModifier(modifier: &[I8]): Definition {
-		return Definition(this/*auto*/.annotations, this/*auto*/.modifiers.removeValue(modifier/*&[I8]*/, Strings/*auto*/.equalsTo), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
-	}
-	def addModifierLast(modifier: &[I8]): Definition {
-		return Definition(this/*auto*/.annotations, this/*auto*/.modifiers.addLast(modifier/*&[I8]*/), this/*auto*/.typeParams, this/*auto*/.type, this/*auto*/.name);
-	}
-	def generateWithDefinitions(platform: Platform, definitions: List<Definition>): &[I8] {
-		let joinedDefinitions = definitions/*List<Definition>*/.query(/*auto*/).map((mut definition: Definition) => definition/*Definition*/.generate(platform/*Platform*/)).collect(Joiner(", ")).orElse("");
-		return this/*auto*/.generateWithAfterName(platform/*Platform*/, "(" + joinedDefinitions/*auto*/ + ")");
-	}
-}
+Main.main();
