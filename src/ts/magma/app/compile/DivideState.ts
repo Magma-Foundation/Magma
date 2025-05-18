@@ -59,6 +59,7 @@
 ]*/
 import { List } from "../../../magma/api/collect/list/List";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
+import { Query } from "../../../magma/api/collect/Query";
 import { Tuple2 } from "../../../magma/api/Tuple2";
 import { Option } from "../../../magma/api/option/Option";
 import { Strings } from "../../../magma/api/text/Strings";
@@ -80,6 +81,9 @@ export class DivideState {
 	}
 	static createInitial(input: string): DivideState {
 		return new DivideState(Lists.empty(), "", 0, input, 0);
+	}
+	query(): Query<string> {
+		return this.segments().query();
 	}
 	advance(): DivideState {
 		return new DivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index);

@@ -3,16 +3,20 @@ package magma.app.compile;
 import jvm.api.collect.list.Lists;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.api.collect.Query;
 import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
-import magma.app.Main;
 
 public record DivideState(List<String> segments, String buffer, int depth, String input, int index) {
     public static DivideState createInitial(String input) {
         return new DivideState(Lists.empty(), "", 0, input, 0);
+    }
+
+    public Query<String> query() {
+        return this.segments().query();
     }
 
     public DivideState advance() {

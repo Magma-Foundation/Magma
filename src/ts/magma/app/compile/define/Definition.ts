@@ -77,6 +77,9 @@ export class Definition {
 		this.type = type;
 		this.name = name;
 	}
+	toAssignment(): string {
+		return "\n\t\tthis." + this.name() + " = " + this.name() + ";";
+	}
 	generate(): string {
 		return this.generateWithAfterName("");
 	}

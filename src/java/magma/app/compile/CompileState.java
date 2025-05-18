@@ -1,6 +1,8 @@
 package magma.app.compile;
 
 import jvm.api.collect.list.Lists;
+import magma.api.collect.Joiner;
+import magma.api.collect.Query;
 import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -21,6 +23,24 @@ public record CompileState(
 ) {
     public static CompileState createInitial() {
         return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
+    }
+
+    public String getJoined(String otherOutput) {
+        var imports = this.queryImports()
+                .map((Import anImport) -> anImport.generate())
+                .collect(new Joiner(""))
+                .orElse("");
+
+        return imports + this.output() + otherOutput;
+    }
+
+    public Query<Import> queryImports() {
+        return this.imports().query();
+    }
+
+    public Query<Source> querySources() {
+        return this.sources()
+                .query();
     }
 
     public String createIndent() {

@@ -68,13 +68,15 @@ import { Source } from "../../magma/app/io/Source";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Result } from "../../magma/api/result/Result";
+import { Ok } from "../../magma/api/result/Ok";
+import { Err } from "../../magma/api/result/Err";
 import { None } from "../../magma/api/option/None";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Import } from "../../magma/app/compile/Import";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { DivideState } from "../../magma/app/compile/DivideState";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Query } from "../../magma/api/collect/Query";
 import { Strings } from "../../magma/api/text/Strings";
 import { Type } from "../../magma/app/compile/type/Type";
 import { Definition } from "../../magma/app/compile/define/Definition";
@@ -87,7 +89,6 @@ import { ConstructionCaller } from "../../magma/app/compile/define/ConstructionC
 import { Caller } from "../../magma/app/compile/value/Caller";
 import { Argument } from "../../magma/app/compile/value/Argument";
 import { Invokable } from "../../magma/app/compile/value/Invokable";
-import { Placeholder } from "../../magma/app/compile/text/Placeholder";
 import { StringValue } from "../../magma/app/compile/value/StringValue";
 import { Not } from "../../magma/app/compile/value/Not";
 import { Lambda } from "../../magma/app/compile/value/Lambda";
@@ -98,6 +99,7 @@ import { HeadedQuery } from "../../magma/api/collect/head/HeadedQuery";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../magma/api/text/Characters";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
+import { Placeholder } from "../../magma/app/compile/text/Placeholder";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
@@ -142,24 +144,25 @@ export class Main {
 	static compileAndWrite(state: CompileState, source: Source, input: string, target: Path): Result<CompileState, IOError> {
 		let namespace = source.computeNamespace();
 		let output = Main.compileRoot(state, input, namespace);
-		/*return Main.ensureTargetParent(target).or(() -> target.writeString(output.right()))
-                .<Result<CompileState, IOError>>map(Err::new)
-                .orElseGet(() -> new Ok<>(output.left()))*/;
+		return Main.writeTarget(target, output.right()).orElseGet(() => new Ok<CompileState, IOError>(output.left()));
+	}
+	static writeTarget(target: Path, output: string): Option<Result<CompileState, IOError>> {
+		return Main.ensureTargetParent(target).or(() => target.writeString(output)).map((error: IOError) => new Err<CompileState, IOError>(error));
 	}
 	static ensureTargetParent(target: Path): Option<IOError> {
 		let parent = target.getParent();
 		if (parent.exists()){
-			return new None<>();
+			return new None<IOError>();
 		}
 		return parent.createDirectories();
 	}
 	static compileRoot(state: CompileState, input: string, namespace: List<string>): Tuple2Impl<CompileState, string> {
 		let compiled = Main.compileStatements(state.withNamespace(namespace), input, Main.compileRootSegment);
 		let compiledState = compiled.left();
-		let imports = compiledState.imports().query().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
 		let compileState = state.clearImports().clearOutput();
-		let segment = compileState.sources().query().map((source: Source) => Main.formatSource(source)).collect(new Joiner(", ")).orElse("");
-		return new Tuple2Impl<CompileState, string>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output() + compiled.right());
+		let segment = compileState.querySources().map((source: Source) => Main.formatSource(source)).collect(new Joiner(", ")).orElse("");
+		let joined = compiledState.getJoined(compiled.right());
+		return new Tuple2Impl<CompileState, string>(compileState, "/*[" + segment + "\n]*/\n" + joined);
 	}
 	static formatSource(source: Source): string {
 		let joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
@@ -176,7 +179,7 @@ export class Main {
 		return elements.query().foldWithInitial("", merger);
 	}
 	static parseAll<T>(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
-		return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
+		return Main.divide(input, folder).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
 			return maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
 				let currentState = current.left();
 				let currentElement = current.right();
@@ -191,7 +194,7 @@ export class Main {
 	static mergeStatements(cache: string, element: string): string {
 		return cache + element;
 	}
-	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): List<string> {
+	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Query<string> {
 		let current = DivideState.createInitial(input);
 		while (true){
 			let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, string>(current, "\0"));
@@ -203,7 +206,7 @@ export class Main {
 			let popped = poppedTuple.right();
 			current = Main.foldSingleQuotes(poppedState, popped).or(() => Main.foldDoubleQuotes(poppedState, popped)).orElseGet(() => folder(poppedState, popped));
 		}
-		return current.advance().segments();
+		return current.advance().query();
 	}
 	static foldDoubleQuotes(state: DivideState, c: string): Option<DivideState> {
 		if ("\"" !== c){
@@ -363,7 +366,7 @@ export class Main {
 		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}";
 	}
 	static generateConstructorAssignments(parameters: List<Definition>): string {
-		return parameters.query().map((definition: Definition) => "\n\t\tthis." + definition.name() + " = " + definition.name() + ";").collect(Joiner.empty()).orElse("");
+		return parameters.query().map((definition: Definition) => definition.toAssignment()).collect(Joiner.empty()).orElse("");
 	}
 	static joinParameters(parameters: List<Definition>): string {
 		return parameters.query().map((definition: Definition) => definition.generate()).map((generated: string) => "\n\t" + generated + ";").collect(Joiner.empty()).orElse("");
@@ -378,7 +381,7 @@ export class Main {
 	static compileImport(state: CompileState, stripped: string): Option<Tuple2<CompileState, string>> {
 		return Main.compilePrefix(stripped, "import ", (s: string) => {
 			return Main.compileSuffix(s, ";", (s1: string) => {
-				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, "."));
+				let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, ".")).collect(new ListCollector<string>());
 				let child = Strings.strip(divisions.findLast().orElse(""));
 				let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty());
 				if (parent.equalsTo(Lists.of("java", "util", "function"))){
@@ -571,7 +574,7 @@ export class Main {
 		return Main.splitFolded(input, folder, (divisions1: List<string>) => Main.selectLast(divisions1, delimiter));
 	}
 	static splitFolded(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, selector: (arg0 : List<string>) => Option<Tuple2<string, string>>): Option<Tuple2<string, string>> {
-		let divisions = Main.divide(input, folder);
+		let divisions = Main.divide(input, folder).collect(new ListCollector<string>());
 		if (2 > divisions.size()){
 			return new None<Tuple2<string, string>>();
 		}
@@ -618,9 +621,6 @@ export class Main {
 	}
 	static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
 		return args.query().map(mapper).flatMap(Iterators.fromOption).collect(new ListCollector<R>());
-	}
-	static parseArgumentOrPlaceholder(state1: CompileState, input: string): Tuple2<CompileState, Argument> {
-		return Main.parseArgument(state1, input).orElseGet(() => new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
 	}
 	static parseArgument(state1: CompileState, input: string): Option<Tuple2<CompileState, Argument>> {
 		return Main.parseValue(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right()));
@@ -829,7 +829,7 @@ export class Main {
 		});
 	}
 	static parseAnnotations(s: string): List<string> {
-		return Main.divide(s, (state1: DivideState, c: string) => Main.foldDelimited(state1, c, "\n")).query().map((s2: string) => Strings.strip(s2)).filter((value: string) => !Strings.isEmpty(value)).filter((value: string) => 1 <= Strings.length(value)).map((value: string) => Strings.sliceFrom(value, 1)).map((s1: string) => Strings.strip(s1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
+		return Main.divide(s, (state1: DivideState, c: string) => Main.foldDelimited(state1, c, "\n")).map((s2: string) => Strings.strip(s2)).filter((value: string) => !Strings.isEmpty(value)).filter((value: string) => 1 <= Strings.length(value)).map((value: string) => Strings.sliceFrom(value, 1)).map((s1: string) => Strings.strip(s1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
 		return Main.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: string) => {
@@ -843,7 +843,7 @@ export class Main {
 		});
 	}
 	static parseModifiers(beforeType: string): List<string> {
-		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => Main.foldDelimited(state1, c, " ")).query().map((s: string) => Strings.strip(s)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
+		return Main.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => Main.foldDelimited(state1, c, " ")).map((s: string) => Strings.strip(s)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static foldDelimited(state1: DivideState, c: string, delimiter: string): DivideState {
 		if (delimiter === c){
@@ -852,7 +852,7 @@ export class Main {
 		return state1.append(c);
 	}
 	static divideValues(input: string): List<string> {
-		return Main.divide(input, Main.foldValues).query().map((input1: string) => Strings.strip(input1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
+		return Main.divide(input, Main.foldValues).map((input1: string) => Strings.strip(input1)).filter((value: string) => !Strings.isEmpty(value)).collect(new ListCollector<string>());
 	}
 	static foldTypeSeparators(state: DivideState, c: string): DivideState {
 		if (" " === c && state.isLevel()){

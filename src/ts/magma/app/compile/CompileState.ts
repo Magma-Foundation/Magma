@@ -64,6 +64,8 @@ import { Option } from "../../../magma/api/option/Option";
 import { Source } from "../../../magma/app/io/Source";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { None } from "../../../magma/api/option/None";
+import { Joiner } from "../../../magma/api/collect/Joiner";
+import { Query } from "../../../magma/api/collect/Query";
 import { Strings } from "../../../magma/api/text/Strings";
 import { Some } from "../../../magma/api/option/Some";
 import { Type } from "../../../magma/app/compile/type/Type";
@@ -86,6 +88,16 @@ export class CompileState {
 	}
 	static createInitial(): CompileState {
 		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty());
+	}
+	getJoined(otherOutput: string): string {
+		let imports = this.queryImports().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
+		return imports + this.output() + otherOutput;
+	}
+	queryImports(): Query<Import> {
+		return this.imports().query();
+	}
+	querySources(): Query<Source> {
+		return this.sources().query();
 	}
 	createIndent(): string {
 		return "\n" + "\t".repeat(this.depth());

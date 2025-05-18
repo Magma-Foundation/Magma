@@ -14,6 +14,10 @@ public record Definition(
         Type type,
         String name
 ) implements MethodHeader, Parameter {
+    public String toAssignment() {
+        return "\n\t\tthis." + this.name() + " = " + this.name() + ";";
+    }
+
     @Override
     public String generate() {
         return this.generateWithAfterName("");

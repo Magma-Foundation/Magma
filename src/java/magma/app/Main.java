@@ -6,6 +6,7 @@ import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iterators;
 import magma.api.collect.Joiner;
+import magma.api.collect.Query;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.List;
@@ -23,7 +24,6 @@ import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
-import magma.app.compile.Import;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.ConstructorHeader;
 import magma.app.compile.define.Definition;
@@ -86,15 +86,19 @@ public final class Main {
         var namespace = source.computeNamespace();
         var output = Main.compileRoot(state, input, namespace);
 
-        return Main.ensureTargetParent(target).or(() -> target.writeString(output.right()))
-                .<Result<CompileState, IOError>>map(Err::new)
-                .orElseGet(() -> new Ok<>(output.left()));
+        return Main.writeTarget(target, output.right()).orElseGet(() -> new Ok<CompileState, IOError>(output.left()));
+    }
+
+    private static Option<Result<CompileState, IOError>> writeTarget(Path target, String output) {
+        return Main.ensureTargetParent(target)
+                .or(() -> target.writeString(output))
+                .map((IOError error) -> new Err<CompileState, IOError>(error));
     }
 
     private static Option<IOError> ensureTargetParent(Path target) {
         var parent = target.getParent();
         if (parent.exists()) {
-            return new None<>();
+            return new None<IOError>();
         }
 
         return parent.createDirectories();
@@ -103,19 +107,15 @@ public final class Main {
     private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
         var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
         var compiledState = compiled.left();
-        var imports = compiledState.imports().query()
-                .map((Import anImport) -> anImport.generate())
-                .collect(new Joiner(""))
-                .orElse("");
 
         var compileState = state.clearImports().clearOutput();
-        var segment = compileState.sources()
-                .query()
+        var segment = compileState.querySources()
                 .map((Source source) -> Main.formatSource(source))
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + imports + compiledState.output() + compiled.right());
+        var joined = compiledState.getJoined(compiled.right());
+        return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + joined);
     }
 
     private static String formatSource(Source source) {
@@ -138,7 +138,7 @@ public final class Main {
     }
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> biFunction) {
-        return Main.divide(input, folder).query().foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> {
+        return Main.divide(input, folder).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> {
             return maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
                 var currentState = current.left();
                 var currentElement = current.right();
@@ -156,7 +156,7 @@ public final class Main {
         return cache + element;
     }
 
-    private static List<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
+    private static Query<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = DivideState.createInitial(input);
 
         while (true) {
@@ -174,7 +174,7 @@ public final class Main {
                     .orElseGet(() -> folder.apply(poppedState, popped));
         }
 
-        return current.advance().segments();
+        return current.advance().query();
     }
 
     private static Option<DivideState> foldDoubleQuotes(DivideState state, char c) {
@@ -413,7 +413,7 @@ public final class Main {
 
     private static String generateConstructorAssignments(List<Definition> parameters) {
         return parameters.query()
-                .map((Definition definition) -> "\n\t\tthis." + definition.name() + " = " + definition.name() + ";")
+                .map((Definition definition) -> definition.toAssignment())
                 .collect(Joiner.empty())
                 .orElse("");
     }
@@ -438,7 +438,9 @@ public final class Main {
     private static Option<Tuple2<CompileState, String>> compileImport(CompileState state, String stripped) {
         return Main.compilePrefix(stripped, "import ", (String s) -> {
             return Main.compileSuffix(s, ";", (String s1) -> {
-                var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'));
+                var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'))
+                        .collect(new ListCollector<String>());
+
                 var child = Strings.strip(divisions.findLast().orElse(""));
                 var parent = divisions.subList(0, divisions.size() - 1)
                         .orElse(Lists.empty());
@@ -717,7 +719,9 @@ public final class Main {
             BiFunction<DivideState, Character, DivideState> folder,
             Function<List<String>, Option<Tuple2<String, String>>> selector
     ) {
-        var divisions = Main.divide(input, folder);
+        var divisions = Main.divide(input, folder)
+                .collect(new ListCollector<String>());
+
         if (2 > divisions.size()) {
             return new None<Tuple2<String, String>>();
         }
@@ -1061,7 +1065,7 @@ public final class Main {
     }
 
     private static List<String> parseAnnotations(String s) {
-        return Main.divide(s, (DivideState state1, Character c) -> Main.foldDelimited(state1, c, '\n')).query()
+        return Main.divide(s, (DivideState state1, Character c) -> Main.foldDelimited(state1, c, '\n'))
                 .map((String s2) -> Strings.strip(s2))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .filter((String value) -> 1 <= Strings.length(value))
@@ -1085,7 +1089,6 @@ public final class Main {
 
     private static List<String> parseModifiers(String beforeType) {
         return Main.divide(Strings.strip(beforeType), (DivideState state1, Character c) -> Main.foldDelimited(state1, c, ' '))
-                .query()
                 .map((String s) -> Strings.strip(s))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());
@@ -1100,7 +1103,6 @@ public final class Main {
 
     private static List<String> divideValues(String input) {
         return Main.divide(input, Main::foldValues)
-                .query()
                 .map((String input1) -> Strings.strip(input1))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());
