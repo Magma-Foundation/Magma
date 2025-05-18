@@ -138,9 +138,9 @@ export class Main {
 	static runWithPlatform(initial: CompileState, platform: Platform, sources: List<Source>): Result<CompileState, IOError> {
 		/*final Tuple2<CompileState, List<IncompleteRoot>> compileStateListTuple2*/;
 		compileStateListTuple2/*auto*/ = new Tuple2Impl<CompileState, List<IncompleteRoot>>(initial/*CompileState*/.clearDefinedTypes(/*auto*/), Lists/*auto*/.empty(/*auto*/));
-		return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(compileStateListTuple2/*auto*/, (tuple: Tuple2<CompileState, List<IncompleteRoot>>, source: Source) => Main/*auto*/.foldWithInput(platform/*Platform*/, tuple/*auto*/.left(/*auto*/), tuple/*auto*/.right(/*auto*/), source/*Source*/)).flatMapValue((result: Tuple2<CompileState, List<IncompleteRoot>>) => Main/*auto*/.getCompileStateIOErrorResult(platform/*Platform*/, result/*auto*/.left(/*auto*/), result/*auto*/.right(/*auto*/)));
+		return sources/*List<Source>*/.query(/*auto*/).foldWithInitialToResult(compileStateListTuple2/*auto*/, (tuple: Tuple2<CompileState, List<IncompleteRoot>>, source: Source) => Main/*auto*/.foldWithInput(platform/*Platform*/, tuple/*auto*/.left(/*auto*/), tuple/*auto*/.right(/*auto*/), source/*Source*/)).flatMapValue((result: Tuple2<CompileState, List<IncompleteRoot>>) => Main/*auto*/.completeAll(platform/*Platform*/, result/*auto*/.left(/*auto*/), result/*auto*/.right(/*auto*/)));
 	}
-	static getCompileStateIOErrorResult(platform: Platform, state: CompileState, incomplete: List<IncompleteRoot>): Result<CompileState, IOError> {
+	static completeAll(platform: Platform, state: CompileState, incomplete: List<IncompleteRoot>): Result<CompileState, IOError> {
 		return incomplete/*List<IncompleteRoot>*/.query(/*auto*/).foldWithInitialToResult(state/*CompileState*/, (current: CompileState, incompleteRoot: IncompleteRoot) => Main/*auto*/.complete(current/*List<T>*/, incompleteRoot/*auto*/, platform/*Platform*/));
 	}
 	static foldWithInput(platform: Platform, state: CompileState, incomplete: List<IncompleteRoot>, source: Source): Result<Tuple2<CompileState, List<IncompleteRoot>>, IOError> {
@@ -160,11 +160,11 @@ export class Main {
 		return children/*List<Path>*/.query(/*auto*/).filter((source: Path) => source/*Source*/.endsWith(".java")).map((child: Path) => new Source(sourceDirectory/*Path*/, child/*string*/)).collect(new ListCollector<Source>(/*auto*/));
 	}
 	static prepareRoot(state: CompileState, source: Source, input: string, platform: Platform): Tuple2Impl<CompileState, IncompleteRoot> {
-		let initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
+		let location = source/*Source*/.computeLocation(/*auto*/);
+		let initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(location/*auto*/);
 		let outputTuple = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*string*/);
 		let outputState = outputTuple/*auto*/.left(/*auto*/);
 		let outputsByExtensions = outputTuple/*auto*/.right(/*auto*/);
-		let location = outputState/*auto*/.findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
 		let incomplete = new IncompleteRoot(location/*auto*/, outputsByExtensions/*auto*/);
 		return new Tuple2Impl<CompileState, IncompleteRoot>(outputState/*auto*/, incomplete/*List<IncompleteRoot>*/);
 	}

@@ -1,34 +1,17 @@
-import { StringsInstance } from "./StringsInstance";
-
-export const Strings: StringsInstance = {
-    length(str: string): number {
-        return str.length;
-    },
-
-    sliceBetween(input: string, startInclusive: number, endExclusive: number): string {
-        return input.slice(startInclusive, endExclusive);
-    },
-
-    sliceFrom(input: string, startInclusive: number): string {
-        return input.slice(startInclusive);
-    },
-
-    isEmpty(value: string): boolean {
-        return value.length === 0;
-    },
-
-    equalsTo(left: string, right: string): boolean {
-        return left === right;
-    },
-
-    strip(input: string): string {
-        return input.trim();
-    },
-
-    isBlank(value: string): boolean {
-        return value.trim().length === 0;
-    },
-    charAt: function (input: string, index: number): string {
-        return input.charAt(index);
-    }
-};
+/*[
+	Characters, 
+	Console, 
+	Files, 
+	Lists, 
+	Strings
+]*/
+export interface StringsInstance {
+	static length(stripped: string): number;
+	static sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
+	static sliceFrom(input: string, startInclusive: number): string;
+	static isEmpty(cache: string): boolean;
+	static equalsTo(left: string, right: string): boolean;
+	static strip(input: string): string;
+	static isBlank(value: string): boolean;
+	static charAt(input: string, index: number): string;
+}

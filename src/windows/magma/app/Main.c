@@ -36,7 +36,7 @@ auto temp(Tuple2<CompileState, List<IncompleteRoot>> tuple, Source source) {
 	return Main/*auto*/.foldWithInput(platform/*Platform*/, tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/), tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/), source/*Source*/);
 }
 auto temp(Tuple2<CompileState, List<IncompleteRoot>> result) {
-	return Main/*auto*/.getCompileStateIOErrorResult(platform/*Platform*/, result/*Tuple2<CompileState, IncompleteRoot>*/.left(/*auto*/), result/*Tuple2<CompileState, IncompleteRoot>*/.right(/*auto*/));
+	return Main/*auto*/.completeAll(platform/*Platform*/, result/*Tuple2<CompileState, IncompleteRoot>*/.left(/*auto*/), result/*Tuple2<CompileState, IncompleteRoot>*/.right(/*auto*/));
 }
 static Result<CompileState, IOError> runWithPlatform(CompileState initial, Platform platform, List<Source> sources) {
 	/*final Tuple2<CompileState, List<IncompleteRoot>> compileStateListTuple2*/;
@@ -46,7 +46,7 @@ static Result<CompileState, IOError> runWithPlatform(CompileState initial, Platf
 auto temp(CompileState current, IncompleteRoot incompleteRoot) {
 	return Main/*auto*/.complete(current/*List<T>*/, incompleteRoot/*auto*/, platform/*Platform*/);
 }
-static Result<CompileState, IOError> getCompileStateIOErrorResult(Platform platform, CompileState state, List<IncompleteRoot> incomplete) {
+static Result<CompileState, IOError> completeAll(Platform platform, CompileState state, List<IncompleteRoot> incomplete) {
 	return incomplete/*List<IncompleteRoot>*/.query(/*auto*/).foldWithInitialToResult(state/*CompileState*/, lambdaDefinition/*auto*/);
 }
 auto temp(Tuple2<CompileState, IncompleteRoot> result) {{
@@ -79,11 +79,11 @@ static List<Source> findSources(List<Path> children, Path sourceDirectory) {
 	return children/*List<Path>*/.query(/*auto*/).filter(lambdaDefinition/*auto*/).map(lambdaDefinition/*auto*/).collect(new ListCollector<Source>(/*auto*/));
 }
 static Tuple2Impl<CompileState, IncompleteRoot> prepareRoot(CompileState state, Source source, &[I8] input, Platform platform) {
-	var initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(source/*Source*/.computeLocation(/*auto*/));
+	var location = source/*Source*/.computeLocation(/*auto*/);
+	var initialized = state/*CompileState*/.withPlatform(platform/*Platform*/).withLocation(location/*Location*/);
 	var outputTuple = Main/*auto*/.compileRoot(initialized/*auto*/, source/*Source*/, input/*&[I8]*/);
 	var outputState = outputTuple/*auto*/.left(/*auto*/);
 	var outputsByExtensions = outputTuple/*auto*/.right(/*auto*/);
-	var location = outputState/*auto*/.findCurrentLocation(/*auto*/).orElse(new Location(Lists/*auto*/.empty(/*auto*/), ""));
 	var incomplete = new IncompleteRoot(location/*Location*/, outputsByExtensions/*Map<&[I8], &[I8]>*/);
 	return new Tuple2Impl<CompileState, IncompleteRoot>(outputState/*auto*/, incomplete/*List<IncompleteRoot>*/);
 }
