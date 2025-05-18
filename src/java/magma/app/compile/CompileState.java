@@ -23,6 +23,14 @@ public record CompileState(
         return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
     }
 
+    public String createIndent() {
+        return "\n" + "\t".repeat(this.depth());
+    }
+
+    public Option<String> findLastStructureName() {
+        return this.structureNames().findLast();
+    }
+
     public boolean isLastWithin(String name) {
         return this.structureNames.findLast()
                 .filter((String anObject) -> Strings.equalsTo(name, anObject))

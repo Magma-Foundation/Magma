@@ -87,6 +87,12 @@ export class CompileState {
 	static createInitial(): CompileState {
 		return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty());
 	}
+	createIndent(): string {
+		return "\n" + "\t".repeat(this.depth());
+	}
+	findLastStructureName(): Option<string> {
+		return this.structureNames().findLast();
+	}
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
 	}

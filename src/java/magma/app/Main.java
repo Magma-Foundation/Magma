@@ -498,7 +498,7 @@ public final class Main {
 
                 return new None<Tuple2<CompileState, String>>();
             }).or(() -> {
-                if (state.structureNames().findLast().filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+                if (state.findLastStructureName().filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
                     return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
@@ -577,7 +577,7 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
         return Main.compileReturn(input1, (String withoutPrefix) -> Main.compileValue(state1, withoutPrefix))
-                .map((Tuple2<CompileState, String> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), Main.generateIndent(state1.depth()) + tuple.right()));
+                .map((Tuple2<CompileState, String> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), state1.createIndent() + tuple.right()));
     }
 
     private static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
@@ -587,7 +587,7 @@ public final class Main {
                     return Main.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
                         var contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
-                        var indent = Main.generateIndent(state.depth());
+                        var indent = state.createIndent();
                         return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
                     });
                 });
@@ -645,12 +645,8 @@ public final class Main {
     private static Option<Tuple2<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
         return Main.compileSuffix(Strings.strip(input), ";", (String withoutEnd) -> {
             var valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(valueTuple.left(), Main.generateIndent(state.depth()) + valueTuple.right() + ";"));
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
         });
-    }
-
-    private static String generateIndent(int indent) {
-        return "\n" + "\t".repeat(indent);
     }
 
     private static Tuple2<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
@@ -787,10 +783,6 @@ public final class Main {
                 .collect(new ListCollector<R>());
     }
 
-    public static Tuple2<CompileState, Argument> parseArgumentOrPlaceholder(CompileState state1, String input) {
-        return Main.parseArgument(state1, input).orElseGet(() -> new Tuple2Impl<CompileState, Argument>(state1, new Placeholder(input)));
-    }
-
     private static Option<Tuple2<CompileState, Argument>> parseArgument(CompileState state1, String input) {
         return Main.parseValue(state1, input)
                 .map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right()));
@@ -880,7 +872,7 @@ public final class Main {
                 var statements = statementsTuple.right();
 
                 var exited = statementsState.exitDepth();
-                return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth()) + "}");
+                return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
             });
         }).or(() -> {
             return Main.compileValue(state, strippedAfterArrow).flatMap((Tuple2<CompileState, String> tuple) -> {
@@ -1030,7 +1022,7 @@ public final class Main {
     private static Option<Tuple2<CompileState, String>> compileEnumValues(CompileState state, String withoutEnd) {
         return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> {
             return Main.parseInvokable(state1, s).flatMap((Tuple2<CompileState, Value> tuple) -> {
-                var structureName = state.structureNames().findLast().orElse("");
+                var structureName = state.findLastStructureName().orElse("");
                 return tuple.right().generateAsEnumValue(structureName).map((String stringOption) -> {
                     return new Tuple2Impl<CompileState, String>(tuple.left(), stringOption);
                 });

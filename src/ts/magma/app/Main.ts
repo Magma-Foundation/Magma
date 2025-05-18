@@ -410,7 +410,7 @@ export class Main {
 				}
 				return new None<Tuple2<CompileState, string>>();
 			}).or(() => {
-				if (state.structureNames().findLast().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
+				if (state.findLastStructureName().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()){
 					return Main.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
 				}
 				return new None<Tuple2<CompileState, string>>();
@@ -462,7 +462,7 @@ export class Main {
 		}
 	}
 	static compileReturnWithoutSuffix(state1: CompileState, input1: string): Option<Tuple2<CompileState, string>> {
-		return Main.compileReturn(input1, (withoutPrefix: string) => Main.compileValue(state1, withoutPrefix)).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), Main.generateIndent(state1.depth()) + tuple.right()));
+		return Main.compileReturn(input1, (withoutPrefix: string) => Main.compileValue(state1, withoutPrefix)).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), state1.createIndent() + tuple.right()));
 	}
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => {
@@ -470,7 +470,7 @@ export class Main {
 				return Main.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => {
 					return Main.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
 						let contentTuple = Main.compileFunctionStatements(headerTuple.left().enterDepth(), content);
-						let indent = Main.generateIndent(state.depth());
+						let indent = state.createIndent();
 						return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
 					});
 				});
@@ -518,11 +518,8 @@ export class Main {
 	static compileFunctionStatement(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
 			let valueTuple = Main.compileFunctionStatementValue(state, withoutEnd);
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(valueTuple.left(), Main.generateIndent(state.depth()) + valueTuple.right() + ";"));
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
 		});
-	}
-	static generateIndent(indent: number): string {
-		return "\n" + "\t".repeat(indent);
 	}
 	static compileFunctionStatementValue(state: CompileState, withoutEnd: string): Tuple2<CompileState, string> {
 		return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(Main.compileReturnWithValue, Main.compileAssignment, (state1: CompileState, input: string) => Main.parseInvokable(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())), Main.createPostRule("++"), Main.createPostRule("--"), Main.compileBreak));
@@ -680,7 +677,7 @@ export class Main {
 				let statementsState = statementsTuple.left();
 				let statements = statementsTuple.right();
 				let exited = statementsState.exitDepth();
-				return Main.assembleLambda(exited, paramNames, "{" + statements + Main.generateIndent(exited.depth()) + "}");
+				return Main.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}");
 			});
 		}).or(() => {
 			return Main.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => {
@@ -799,7 +796,7 @@ export class Main {
 	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
 		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
 			return Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
-				let structureName = state.structureNames().findLast().orElse("");
+				let structureName = state.findLastStructureName().orElse("");
 				return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => {
 					return new Tuple2Impl<CompileState, string>(tuple.left(), stringOption);
 				});
