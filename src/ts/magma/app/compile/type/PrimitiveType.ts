@@ -58,60 +58,28 @@
 	Source: magma.app.io, 
 	Main: magma.app
 ]*/
-import { List } from "../../../../magma/api/collect/list/List";
 import { Type } from "../../../../magma/app/compile/type/Type";
-import { Option } from "../../../../magma/api/option/Option";
-import { Some } from "../../../../magma/api/option/Some";
-import { Joiner } from "../../../../magma/api/collect/Joiner";
-import { Main } from "../../../../magma/app/Main";
-import { MethodHeader } from "../../../../magma/app/compile/define/MethodHeader";
-import { Strings } from "../../../../magma/api/text/Strings";
-export class Definition {
-	annotations: List<string>;
-	modifiers: List<string>;
-	typeParams: List<string>;
-	type: Type;
-	name: string;
-	constructor (annotations: List<string>, modifiers: List<string>, typeParams: List<string>, type: Type, name: string) {
-		this.annotations = annotations;
-		this.modifiers = modifiers;
-		this.typeParams = typeParams;
-		this.type = type;
-		this.name = name;
-	}
-	findType(): Type {
-		return this.type;
-	}
-	toAssignment(): string {
-		return "\n\t\tthis." + this.name + " = " + this.name + ";";
+export class PrimitiveType implements Type {
+	static String: PrimitiveType = new PrimitiveType("string");
+	static Number: PrimitiveType = new PrimitiveType("number");
+	static Boolean: PrimitiveType = new PrimitiveType("boolean");
+	static Var: PrimitiveType = new PrimitiveType("var");
+	static Void: PrimitiveType = new PrimitiveType("void");
+	static Unknown: PrimitiveType = new PrimitiveType("unknown");
+	value: string;
+	constructor (value: string) {
+		this.value = value;
 	}
 	generate(): string {
-		return this.generateWithAfterName("");
+		return this.value;
 	}
-	asDefinition(): Option<Definition> {
-		return new Some<Definition>(this);
+	isFunctional(): boolean {
+		return false;
 	}
-	generateWithAfterName(afterName: string): string {
-		let joinedTypeParams = this.joinTypeParams();
-		let joinedModifiers = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
-		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+	isVar(): boolean {
+		return PrimitiveType.Var === this;
 	}
-	generateType(): string {
-		if (this.type.isVar()){
-			return "";
-		}
-		return ": " + this.type.generate();
-	}
-	joinTypeParams(): string {
-		return Main.joinTypeParams(this.typeParams);
-	}
-	hasAnnotation(annotation: string): boolean {
-		return this.annotations.contains(annotation);
-	}
-	removeModifier(modifier: string): MethodHeader {
-		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
-	}
-	isNamed(name: string): boolean {
-		return Strings.equalsTo(this.name, name);
+	generateBeforeName(): string {
+		return "";
 	}
 }

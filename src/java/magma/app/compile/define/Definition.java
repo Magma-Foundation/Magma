@@ -15,6 +15,10 @@ public record Definition(
         Type type,
         String name
 ) implements MethodHeader, Parameter {
+    public Type findType() {
+        return this.type;
+    }
+
     public String toAssignment() {
         return "\n\t\tthis." + this.name + " = " + this.name + ";";
     }

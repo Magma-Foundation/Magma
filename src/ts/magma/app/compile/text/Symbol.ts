@@ -75,7 +75,7 @@ export class Symbol {
 		return this.value;
 	}
 	resolve(state: CompileState): Type {
-		return state.resolve(this.value).map(Definition.type).orElse(PrimitiveType.Unknown);
+		return state.resolve(this.value).map((definition: Definition) => definition.findType()).orElse(PrimitiveType.Unknown);
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this);
