@@ -8,7 +8,7 @@ public final class SingleHead<T> implements Head<T> {
     private final T element;
     private boolean retrieved;
 
-    public SingleHead(final T element) {
+    public SingleHead(T element) {
         this.element = element;
         this.retrieved = false;
     }

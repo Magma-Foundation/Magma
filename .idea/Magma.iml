@@ -7,12 +7,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/windows" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/clang" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ts" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/node_modules" />
-      <excludeFolder url="file://$MODULE_DIR$/src/magma" />
-      <excludeFolder url="file://$MODULE_DIR$/src/node" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
   </component>
 </module>

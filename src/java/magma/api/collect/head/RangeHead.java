@@ -8,7 +8,7 @@ public final class RangeHead implements Head<Integer> {
     private final int length;
     private int counter;
 
-    public RangeHead(final int length) {
+    public RangeHead(int length) {
         this.length = length;
         this.counter = 0;
     }
@@ -19,7 +19,7 @@ public final class RangeHead implements Head<Integer> {
             return new None<Integer>();
         }
 
-        final var value = this.counter;
+        var value = this.counter;
         this.counter++;
         return new Some<Integer>(value);
     }

@@ -1,0 +1,64 @@
+/*[
+	JVMList: jvm.api.collect.list, 
+	Lists: jvm.api.collect.list, 
+	Files: jvm.api.io, 
+	Actual: magma.annotate, 
+	Namespace: magma.annotate, 
+	Collector: magma.api.collect, 
+	EmptyHead: magma.api.collect.head, 
+	FlatMapHead: magma.api.collect.head, 
+	Head: magma.api.collect.head, 
+	HeadedQuery: magma.api.collect.head, 
+	MapHead: magma.api.collect.head, 
+	RangeHead: magma.api.collect.head, 
+	SingleHead: magma.api.collect.head, 
+	List: magma.api.collect.list, 
+	ListCollector: magma.api.collect.list, 
+	Query: magma.api.collect, 
+	Console: magma.api.io, 
+	IOError: magma.api.io, 
+	Path: magma.api.io, 
+	None: magma.api.option, 
+	Option: magma.api.option, 
+	Some: magma.api.option, 
+	Result: magma.api.result, 
+	Characters: magma.api.text, 
+	Strings: magma.api.text, 
+	Tuple2: magma.api, 
+	Tuple2Impl: magma.api, 
+	Main: magma.app
+]*/
+import { Option } from "../../../magma/api/option/Option";
+import { Tuple2 } from "../../../magma/api/Tuple2";
+import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
+export class None<T> implements Option<T> {
+	map<R>(mapper: (arg0 : T) => R): Option<R> {
+		return new None<R>();
+	}
+	orElse(other: T): T {
+		return other;
+	}
+	orElseGet(supplier: () => T): T {
+		return supplier();
+	}
+	isPresent(): boolean {
+		return false;
+	}
+	ifPresent(consumer: (arg0 : T) => void): void {
+	}
+	or(other: () => Option<T>): Option<T> {
+		return other();
+	}
+	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
+		return new None<R>();
+	}
+	filter(predicate: (arg0 : T) => boolean): Option<T> {
+		return new None<T>();
+	}
+	toTuple(other: T): Tuple2<boolean, T> {
+		return new Tuple2Impl<boolean, T>(false, other);
+	}
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+		return new None<Tuple2<T, R>>();
+	}
+}

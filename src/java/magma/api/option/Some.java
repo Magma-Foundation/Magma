@@ -2,6 +2,7 @@ package magma.api.option;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.app.Main;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -10,17 +11,17 @@ import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
     @Override
-    public <R> Option<R> map(final Function<T, R> mapper) {
+    public <R> Option<R> map(Function<T, R> mapper) {
         return new Some<R>(mapper.apply(this.value));
     }
 
     @Override
-    public T orElse(final T other) {
+    public T orElse(T other) {
         return this.value;
     }
 
     @Override
-    public T orElseGet(final Supplier<T> supplier) {
+    public T orElseGet(Supplier<T> supplier) {
         return this.value;
     }
 
@@ -30,22 +31,22 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
-    public void ifPresent(final Consumer<T> consumer) {
+    public void ifPresent(Consumer<T> consumer) {
         consumer.accept(this.value);
     }
 
     @Override
-    public Option<T> or(final Supplier<Option<T>> other) {
+    public Option<T> or(Supplier<Option<T>> other) {
         return this;
     }
 
     @Override
-    public <R> Option<R> flatMap(final Function<T, Option<R>> mapper) {
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return mapper.apply(this.value);
     }
 
     @Override
-    public Option<T> filter(final Predicate<T> predicate) {
+    public Option<T> filter(Predicate<T> predicate) {
         if (predicate.test(this.value)) {
             return this;
         }
@@ -53,12 +54,12 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
-    public Tuple2<Boolean, T> toTuple(final T other) {
+    public Tuple2<Boolean, T> toTuple(T other) {
         return new Tuple2Impl<Boolean, T>(true, this.value);
     }
 
     @Override
-    public <R> Option<Tuple2<T, R>> and(final Supplier<Option<R>> other) {
+    public <R> Option<Tuple2<T, R>> and(Supplier<Option<R>> other) {
         return other.get().map((R otherValue) -> new Tuple2Impl<T, R>(this.value, otherValue));
     }
 }
