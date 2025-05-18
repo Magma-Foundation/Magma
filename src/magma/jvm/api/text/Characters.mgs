@@ -1,0 +1,10 @@
+/*[
+	Characters, 
+	Console, 
+	Files, 
+	Lists
+]*/
+export interface CharactersInstance {
+	static def isDigit(c: I8): Bool;
+	static def isLetter(c: I8): Bool;
+}

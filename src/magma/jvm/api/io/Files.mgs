@@ -1,0 +1,9 @@
+/*[
+	Console, 
+	Files, 
+	Lists
+]*/
+import magma.api.io.{ Path };
+export interface FilesInstance {
+	static def get(first: &[I8], ...more: &[I8][]): Path;
+}
