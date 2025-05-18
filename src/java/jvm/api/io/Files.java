@@ -12,8 +12,9 @@ import magma.api.io.Path;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.api.result.Err;
+import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.app.Main;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -53,9 +54,9 @@ public final class Files {
         @Override
         public Result<String, IOError> readString() {
             try {
-                return new Main.Ok<String, IOError>(java.nio.file.Files.readString(this.path));
+                return new Ok<String, IOError>(java.nio.file.Files.readString(this.path));
             } catch (IOException e) {
-                return new Main.Err<String, IOError>(new JVMPath.JVMIOError(e));
+                return new Err<String, IOError>(new JVMPath.JVMIOError(e));
             }
         }
 
@@ -67,9 +68,9 @@ public final class Files {
         @Override
         public Result<List<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-                return new Main.Ok<>(new JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
+                return new Ok<>(new JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
             } catch (IOException e) {
-                return new Main.Err<>(new JVMPath.JVMIOError(e));
+                return new Err<>(new JVMPath.JVMIOError(e));
             }
         }
 
@@ -115,12 +116,12 @@ public final class Files {
         }
 
         @Override
-        public Option<IOException> createDirectories() {
+        public Option<IOError> createDirectories() {
             try {
                 java.nio.file.Files.createDirectories(this.path);
                 return new None<>();
             } catch (IOException e) {
-                return new Some<>(e);
+                return new Some<>(new JVMIOError(e));
             }
         }
     }

@@ -5,8 +5,6 @@ import magma.api.collect.Query;
 import magma.api.result.Result;
 import magma.api.option.Option;
 
-import java.io.IOException;
-
 public interface Path {
     Option<IOError> writeString(String output);
 
@@ -32,5 +30,5 @@ public interface Path {
 
     boolean exists();
 
-    Option<IOException> createDirectories();
+    Option<IOError> createDirectories();
 }
