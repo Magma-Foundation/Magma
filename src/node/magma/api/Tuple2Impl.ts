@@ -1,48 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
 	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
+	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import { Tuple2 } from "../../magma/api/Tuple2";
-export class Tuple2Impl<A, B> implements Tuple2<A, B> {
-	leftValue: A;
-	rightValue: B;
-	constructor (leftValue: A, rightValue: B) {
-		this.leftValue = leftValue;
-		this.rightValue = rightValue;
-	}
-	left(): A {
-		return this/*auto*/.leftValue;
-	}
-	right(): B {
-		return this/*auto*/.rightValue;
-	}
-}
+Main.main();

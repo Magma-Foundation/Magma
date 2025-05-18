@@ -25,21 +25,27 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
 	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
+	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -48,22 +54,19 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
 	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
 	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-#ifndef magma_app_compile_value_NotNode
-#define magma_app_compile_value_NotNode
-import { Value } from "magma/app/compile/value/Value";
-import { Platform } from "magma/app/io/Platform";
-import { Option } from "magma/api/option/Option";
-import { Some } from "magma/api/option/Some";
-import { None } from "magma/api/option/None";
-import { Type } from "magma/api/Type";
-import { PrimitiveType } from "magma/app/compile/type/PrimitiveType";
+#ifndef magma_app_Main
+#define magma_app_Main
 #endif

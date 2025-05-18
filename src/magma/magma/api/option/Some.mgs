@@ -1,69 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
 	Option, 
+	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
+	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import magma.api.option.{ Option, None };
-import magma.api.{ Tuple2, Tuple2Impl };
-export struct Some<T> implements Option<T> {
-	mut value: T;
-	constructor (mut value: T) {
-		this.value = value;
-	}
-	def map<R>(mapper: (arg0 : T) => R): Option<R> {
-		return Some<R>(mapper/*(arg0 : T) => R*/(this/*auto*/.value));
-	}
-	def orElse(other: T): T {
-		return this/*auto*/.value;
-	}
-	def orElseGet(supplier: () => T): T {
-		return this/*auto*/.value;
-	}
-	def isPresent(): Bool {
-		return true/*auto*/;
-	}
-	def ifPresent(consumer: (arg0 : T) => void): void {
-		consumer/*(arg0 : T) => void*/(this/*auto*/.value);
-	}
-	def or(other: () => Option<T>): Option<T> {
-		return this/*auto*/;
-	}
-	def flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
-		return mapper/*(arg0 : T) => Option<R>*/(this/*auto*/.value);
-	}
-	def filter(predicate: (arg0 : T) => boolean): Option<T> {
-		if (predicate/*(arg0 : T) => boolean*/(this/*auto*/.value)) {
-			return this/*auto*/;
-		}
-		return None<T>(/*auto*/);
-	}
-	def toTuple(other: T): Tuple2<Bool, T> {
-		return Tuple2Impl<Bool, T>(true/*auto*/, this/*auto*/.value);
-	}
-	def and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other/*() => Option<R>*/(/*auto*/).map((mut otherValue: R) => Tuple2Impl<T, R>(this/*auto*/.value, otherValue/*auto*/));
-	}
-}
+Main.main();

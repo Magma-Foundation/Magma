@@ -1,76 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
+	Joiner, 
+	LambdaNode, 
+	List, 
+	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
+	MapHead, 
 	Namespace, 
-	Strings
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
+	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
+	ZipHead
 ]*/
-import magma.api.collect.{ Query, Collector };
-import magma.api.collect.head.{ Head, MapHead, FlatMapHead, EmptyHead, ZipHead, SingleHead };
-import magma.api.option.{ Option };
-import magma.api.{ Tuple2 };
-import magma.api.result.{ Result, Ok };
-export struct HeadedQuery<T> implements Query<T> {
-	mut head: Head<T>;
-	constructor (mut head: Head<T>) {
-		this.head = head;
-	}
-	def next(): Option<T> {
-		return this/*auto*/.head.next(/*auto*/);
-	}
-	def collect<C>(collector: Collector<T, C>): C {
-		return this/*auto*/.foldWithInitial(collector/*Collector<T, C>*/.createInitial(/*auto*/), (mut current: C, mut element: T) => collector/*Collector<T, C>*/.fold(current/*Tuple2<CompileState, List<T>>*/, element/*string*/));
-	}
-	def map<R>(mapper: (arg0 : T) => R): Query<R> {
-		return HeadedQuery<R>(MapHead<T, R>(this/*auto*/.head, mapper/*(arg0 : T) => R*/));
-	}
-	def foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
-		mut let result = initial/*R*/;
-		while (true/*auto*/) {
-			let finalResult = result/*Tuple2<CompileState, IncompleteRoot>*/;
-			let maybeNext = this/*auto*/.head.next(/*auto*/).map((mut inner: T) => folder/*(arg0 : R, arg1 : T) => R*/(finalResult/*auto*/, inner/*auto*/)).toTuple(finalResult/*auto*/);
-			if (maybeNext/*auto*/.left(/*auto*/)) {
-				result/*Tuple2<CompileState, IncompleteRoot>*/ = maybeNext/*auto*/.right(/*auto*/);
-			}
-			else {
-				return result/*Tuple2<CompileState, IncompleteRoot>*/;
-			}
-		}
-	}
-	def foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this/*auto*/.head.next(/*auto*/).map(next/*(arg0 : T) => R*/).map((maybeNext: R) => this/*auto*/.foldWithInitial(maybeNext/*auto*/, folder/*(arg0 : R, arg1 : T) => R*/));
-	}
-	def flatMap<R>(mapper: (arg0 : T) => Query<R>): Query<R> {
-		return this/*auto*/.head.next(/*auto*/).map(mapper/*(arg0 : T) => Query<R>*/).map((mut initial: Query<R>) => HeadedQuery<R>(FlatMapHead<T, R>(this/*auto*/.head, initial/*R*/, mapper/*(arg0 : T) => Query<R>*/))).orElseGet(() => HeadedQuery<R>(EmptyHead<R>(/*auto*/)));
-	}
-	def allMatch(predicate: (arg0 : T) => boolean): Bool {
-		return this/*auto*/.foldWithInitial(true/*auto*/, (mut maybeAllTrue: Bool, mut element: T) => maybeAllTrue/*auto*/ && predicate/*(arg0 : T) => boolean*/(element/*string*/));
-	}
-	def anyMatch(predicate: (arg0 : T) => boolean): Bool {
-		return this/*auto*/.foldWithInitial(false/*auto*/, (mut aBoolean: Bool, mut t: T) => aBoolean/*auto*/ || predicate/*(arg0 : T) => boolean*/(t/*auto*/));
-	}
-	def zip<R>(other: Query<R>): Query<Tuple2<T, R>> {
-		return HeadedQuery<Tuple2<T, R>>(ZipHead<T, R>(this/*auto*/.head, other/*Query<R>*/));
-	}
-	def foldWithInitialToResult<R, X>(initial: R, mapper: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
-		let initialResult: Result<R, X> = Ok<R, X>(initial/*R*/);
-		return this/*auto*/.foldWithInitial(initialResult/*auto*/, (mut currentResult: Result<R, X>, mut element: T) => currentResult/*auto*/.flatMapValue((mut current: R) => mapper/*(arg0 : R, arg1 : T) => Result<R, X>*/(current/*Tuple2<CompileState, List<T>>*/, element/*string*/)));
-	}
-	def filter(predicate: (arg0 : T) => boolean): Query<T> {
-		return this/*auto*/.flatMap((element: T) => {
-			if (predicate/*(arg0 : T) => boolean*/(element/*T*/)) {
-				return HeadedQuery<T>(SingleHead<T>(element/*T*/));
-			}
-			else {
-				return HeadedQuery<T>(EmptyHead<T>(/*auto*/));
-			}
-		});
-	}
-}
+Main.main();

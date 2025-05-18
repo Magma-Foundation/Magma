@@ -1,4 +1,2 @@
-#include "./IOError.h"
-export interface IOError {
-	&[I8] display();
-}
+#include "./Main.h"
+Main.main();

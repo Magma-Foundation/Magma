@@ -1,11 +1,16 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
 	ArrayType, 
 	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
 	DivideState, 
 	EmptyHead, 
@@ -20,52 +25,46 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
 	Result, 
 	SingleHead, 
+	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-import magma.api.{ Type, Tuple2 };
-import magma.api.collect.list.{ List };
-import magma.api.collect.{ Joiner };
-export struct FunctionType implements Type {
-	mut args: List<&[I8]>;
-	mut returns: &[I8];
-	constructor (mut args: List<&[I8]>, mut returns: &[I8]) {
-		this.args = args;
-		this.returns = returns;
-	}
-	def generate(): &[I8] {
-		let joinedArguments = this/*auto*/.args.queryWithIndices(/*auto*/).map((mut tuple: Tuple2<I32, &[I8]>) => "arg" + tuple/*Tuple2<CompileState, Whitespace>*/.left(/*auto*/) + " : " + tuple/*Tuple2<CompileState, Whitespace>*/.right(/*auto*/)).collect(Joiner(", ")).orElse("");
-		return "(" + joinedArguments/*auto*/ + ") => " + this/*auto*/.returns;
-	}
-	def isFunctional(): Bool {
-		return true/*auto*/;
-	}
-	def isVar(): Bool {
-		return false/*auto*/;
-	}
-	def generateBeforeName(): &[I8] {
-		return "";
-	}
-}
+Main.main();

@@ -1,17 +1,70 @@
 /*[
+	AccessNode, 
+	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
+	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
+	EmptyHead, 
+	Err, 
 	Files, 
+	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
+	Head, 
+	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
+	Joiner, 
+	LambdaNode, 
+	List, 
+	ListCollector, 
 	Lists, 
-	Strings
+	Location, 
+	Main, 
+	MapHead, 
+	Namespace, 
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
+	Queries, 
+	Query, 
+	RangeHead, 
+	Result, 
+	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
+	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
+	ZipHead
 ]*/
-export interface StringsInstance {
-	static def length(stripped: &[I8]): I32;
-	static def sliceBetween(input: &[I8], startInclusive: I32, endExclusive: I32): &[I8];
-	static def sliceFrom(input: &[I8], startInclusive: I32): &[I8];
-	static def isEmpty(cache: &[I8]): Bool;
-	static def equalsTo(left: &[I8], right: &[I8]): Bool;
-	static def strip(input: &[I8]): &[I8];
-	static def isBlank(value: &[I8]): Bool;
-	static def charAt(input: &[I8], index: I32): I8;
-}
+Main.main();

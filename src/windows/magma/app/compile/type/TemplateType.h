@@ -1,11 +1,16 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
 	ArrayType, 
 	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
 	DivideState, 
 	EmptyHead, 
@@ -20,18 +25,27 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
+	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -40,18 +54,19 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
 	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-#ifndef magma_app_compile_type_TemplateType
-#define magma_app_compile_type_TemplateType
-import { Type } from "magma/api/Type";
-import { List } from "magma/api/collect/list/List";
-import { Main } from "magma/app/Main";
-import { Strings } from "jvm/api/text/Strings";
+#ifndef magma_app_Main
+#define magma_app_Main
 #endif

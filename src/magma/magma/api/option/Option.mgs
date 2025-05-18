@@ -1,40 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
 	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
 	Option, 
+	Parameter, 
 	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
 	Query, 
 	RangeHead, 
+	Result, 
 	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import magma.api.{ Tuple2 };
-export struct Option<T> {
-	def map<R>(mut mapper: (arg0 : T) => R): Option<R>;
-	def orElse(mut other: T): T;
-	def orElseGet(mut supplier: () => T): T;
-	def isPresent(): Bool;
-	def ifPresent(mut consumer: (arg0 : T) => void): void;
-	def or(mut other: () => Option<T>): Option<T>;
-	def flatMap<R>(mut mapper: (arg0 : T) => Option<R>): Option<R>;
-	def filter(mut predicate: (arg0 : T) => boolean): Option<T>;
-	def toTuple(mut other: T): Tuple2<Bool, T>;
-	def and<R>(mut other: () => Option<R>): Option<Tuple2<T, R>>;
-}
+Main.main();

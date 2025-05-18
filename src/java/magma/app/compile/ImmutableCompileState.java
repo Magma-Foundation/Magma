@@ -90,7 +90,7 @@ public record ImmutableCompileState(
     }
 
     @Override
-    public CompileState clear() {
+    public CompileState clearGenerated() {
         return new ImmutableCompileState(
                 this.platform,
                 this.findCurrentLocation,

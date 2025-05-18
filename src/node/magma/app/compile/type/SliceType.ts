@@ -1,11 +1,16 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
 	ArrayType, 
 	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
 	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
 	Definition, 
 	DivideState, 
 	EmptyHead, 
@@ -20,18 +25,27 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
+	NotNode, 
 	Ok, 
+	OperationNode, 
 	Option, 
 	Parameter, 
 	Path, 
 	Placeholder, 
+	Platform, 
 	PrimitiveType, 
 	Queries, 
 	Query, 
@@ -40,29 +54,17 @@
 	SingleHead, 
 	SliceType, 
 	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
 	Tuple2, 
 	Tuple2Impl, 
 	Type, 
+	Value, 
+	VariadicType, 
 	Whitespace, 
 	ZipHead
 ]*/
-import { Type } from "../../../../magma/api/Type";
-export class SliceType implements Type {
-	type: Type;
-	constructor (type: Type) {
-		this.type = type;
-	}
-	generate(): string {
-		return "&[" + this/*auto*/.type.generate(/*auto*/) + "]";
-	}
-	isFunctional(): boolean {
-		return false/*auto*/;
-	}
-	isVar(): boolean {
-		return false/*auto*/;
-	}
-	generateBeforeName(): string {
-		return "";
-	}
-}
+Main.main();

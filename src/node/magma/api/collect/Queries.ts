@@ -1,39 +1,70 @@
 /*[
+	AccessNode, 
 	Actual, 
+	Argument, 
+	ArrayType, 
+	BooleanType, 
+	Caller, 
 	Characters, 
 	Collector, 
+	CompileState, 
 	Console, 
+	ConstructionCaller, 
+	ConstructorHeader, 
+	Definition, 
+	DivideState, 
 	EmptyHead, 
+	Err, 
 	Files, 
 	FlatMapHead, 
+	FunctionHeader, 
+	FunctionSegment, 
+	FunctionType, 
 	Head, 
 	HeadedQuery, 
+	IOError, 
+	ImmutableCompileState, 
+	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
+	InvokableNode, 
 	Joiner, 
+	LambdaNode, 
 	List, 
 	ListCollector, 
 	Lists, 
+	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
+	None, 
+	NotNode, 
+	Ok, 
+	OperationNode, 
+	Option, 
+	Parameter, 
+	Path, 
+	Placeholder, 
+	Platform, 
+	PrimitiveType, 
 	Queries, 
+	Query, 
 	RangeHead, 
+	Result, 
 	SingleHead, 
+	SliceType, 
+	Some, 
+	Source, 
+	StringNode, 
 	Strings, 
+	SymbolNode, 
+	TemplateType, 
+	Tuple2, 
+	Tuple2Impl, 
+	Type, 
+	Value, 
+	VariadicType, 
+	Whitespace, 
 	ZipHead
 ]*/
-import { Query } from "../../../magma/api/collect/Query";
-import { Option } from "../../../magma/api/option/Option";
-import { HeadedQuery } from "../../../magma/api/collect/head/HeadedQuery";
-import { EmptyHead } from "../../../magma/api/collect/head/EmptyHead";
-import { Head } from "../../../magma/api/collect/head/Head";
-import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
-export class Queries {
-	static fromOption<T>(option: Option<T>): Query<T> {
-		return new HeadedQuery<T>(option/*Option<T>*/.map((element: T) => Queries/*auto*/.getTSingleHead(element/*T*/)).orElseGet(() => new EmptyHead<T>(/*auto*/)));
-	}
-	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element/*T*/);
-	}
-	static fromArray<T>(elements: T[]): Query<T> {
-		/*return new HeadedQuery<Integer>(new RangeHead(elements.length)).map((Integer index) -> elements[index])*/;
-	}
-}
+Main.main();

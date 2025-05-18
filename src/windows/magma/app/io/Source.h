@@ -25,6 +25,8 @@
 	IOError, 
 	ImmutableCompileState, 
 	Import, 
+	IncompleteRoot, 
+	IncompleteRootSegment, 
 	InvokableNode, 
 	Joiner, 
 	LambdaNode, 
@@ -32,6 +34,7 @@
 	ListCollector, 
 	Lists, 
 	Location, 
+	Main, 
 	MapHead, 
 	Namespace, 
 	None, 
@@ -64,12 +67,6 @@
 	Whitespace, 
 	ZipHead
 ]*/
-#ifndef magma_app_io_Source
-#define magma_app_io_Source
-import { Path } from "magma/api/io/Path";
-import { IOError } from "magma/api/io/IOError";
-import { Result } from "magma/api/result/Result";
-import { List } from "magma/api/collect/list/List";
-import { ListCollector } from "magma/api/collect/list/ListCollector";
-import { Location } from "magma/app/io/Location";
+#ifndef magma_app_Main
+#define magma_app_Main
 #endif
