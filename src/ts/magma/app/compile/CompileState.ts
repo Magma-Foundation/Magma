@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -68,7 +69,6 @@ import { Joiner } from "../../../magma/api/collect/Joiner";
 import { Query } from "../../../magma/api/collect/Query";
 import { Strings } from "../../../magma/api/text/Strings";
 import { Some } from "../../../magma/api/option/Some";
-import { Type } from "../../../magma/app/compile/type/Type";
 export class CompileState {
 	imports: List<Import>;
 	output: string;
@@ -91,19 +91,19 @@ export class CompileState {
 	}
 	getJoined(otherOutput: string): string {
 		let imports = this.queryImports().map((anImport: Import) => anImport.generate()).collect(new Joiner("")).orElse("");
-		return imports + this.output() + otherOutput;
+		return imports + this.output + otherOutput;
 	}
 	queryImports(): Query<Import> {
-		return this.imports().query();
+		return this.imports.query();
 	}
 	querySources(): Query<Source> {
-		return this.sources().query();
+		return this.sources.query();
 	}
 	createIndent(): string {
-		return "\n" + "\t".repeat(this.depth());
+		return "\n" + "\t".repeat(this.depth);
 	}
 	findLastStructureName(): Option<string> {
-		return this.structureNames().findLast();
+		return this.structureNames.findLast();
 	}
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)).isPresent();
@@ -121,7 +121,7 @@ export class CompileState {
 			i++;
 		}
 		let stringList = parent1.addLast(child);
-		if (this.imports.query().filter((node: Import) => Strings.equalsTo(node.child(), child)).next().isPresent()){
+		if (this.imports.query().filter((node: Import) => node.hasSameChild(child)).next().isPresent()){
 			return this;
 		}
 		let importString = new Import(stringList, child);
@@ -145,8 +145,8 @@ export class CompileState {
 	defineAll(definitions: List<Definition>): CompileState {
 		return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
 	}
-	resolve(name: string): Option<Type> {
-		return this.definitions.queryReversed().filter((definition: Definition) => Strings.equalsTo(definition.name(), name)).map((definition1: Definition) => definition1.type()).next();
+	resolve(name: string): Option<Definition> {
+		return this.definitions.queryReversed().filter((definition: Definition) => definition.isNamed(name)).next();
 	}
 	clearImports(): CompileState {
 		return new CompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);

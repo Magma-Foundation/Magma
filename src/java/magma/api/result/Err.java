@@ -13,11 +13,11 @@ public record Err<T, X>(X error) implements Result<T, X> {
 
     @Override
     public <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper) {
-        return new Err<>(this.error);
+        return new Err<R, X>(this.error);
     }
 
     @Override
     public Option<X> findError() {
-        return new Some<>(this.error);
+        return new Some<X>(this.error);
     }
 }

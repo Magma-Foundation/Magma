@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -57,10 +58,12 @@
 	Source: magma.app.io, 
 	Main: magma.app
 ]*/
+import { Argument } from "../../../../magma/app/compile/value/Argument";
+import { Caller } from "../../../../magma/app/compile/value/Caller";
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { CompileState } from "../../../../magma/app/compile/CompileState";
 import { Option } from "../../../../magma/api/option/Option";
-export interface Value extends Argument, Caller  {
+export interface Value extends Argument, Caller {
 	resolve(state: CompileState): Type;
 	generateAsEnumValue(structureName: string): Option<string>;
 }

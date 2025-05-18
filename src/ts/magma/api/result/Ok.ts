@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -72,6 +73,6 @@ export class Ok<T, X> implements Result<T, X> {
 		return mapper(this.value);
 	}
 	findError(): Option<X> {
-		return new None<>();
+		return new None<X>();
 	}
 }

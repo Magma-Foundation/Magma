@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -59,7 +60,8 @@
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { CompileState } from "../../../../magma/app/compile/CompileState";
-import { Main } from "../../../../magma/app/Main";
+import { Definition } from "../../../../magma/app/compile/define/Definition";
+import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -73,7 +75,7 @@ export class Symbol {
 		return this.value;
 	}
 	resolve(state: CompileState): Type {
-		return state.resolve(this.value).orElse(Main.Primitive.Unknown);
+		return state.resolve(this.value).map(Definition.type).orElse(PrimitiveType.Unknown);
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this);

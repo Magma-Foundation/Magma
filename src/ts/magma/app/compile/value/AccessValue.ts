@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -62,7 +63,7 @@ import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { CompileState } from "../../../../magma/app/compile/CompileState";
-import { Main } from "../../../../magma/app/Main";
+import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 import { None } from "../../../../magma/api/option/None";
 export class AccessValue implements Value {
 	child: Value;
@@ -81,7 +82,7 @@ export class AccessValue implements Value {
 		return new Some<Value>(this.child);
 	}
 	resolve(state: CompileState): Type {
-		return Main.Primitive.Unknown;
+		return PrimitiveType.Unknown;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
 		return new None<string>();

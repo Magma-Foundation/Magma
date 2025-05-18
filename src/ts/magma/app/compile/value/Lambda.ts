@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -66,7 +67,7 @@ import { Some } from "../../../../magma/api/option/Some";
 import { None } from "../../../../magma/api/option/None";
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { CompileState } from "../../../../magma/app/compile/CompileState";
-import { Main } from "../../../../magma/app/Main";
+import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 export class Lambda implements Value {
 	paramNames: List<Definition>;
 	content: string;
@@ -85,7 +86,7 @@ export class Lambda implements Value {
 		return new None<Value>();
 	}
 	resolve(state: CompileState): Type {
-		return Main.Primitive.Unknown;
+		return PrimitiveType.Unknown;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
 		return new None<string>();

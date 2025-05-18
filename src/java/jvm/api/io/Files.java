@@ -68,9 +68,9 @@ public final class Files {
         @Override
         public Result<List<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-                return new Ok<>(new JVMList<>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
+                return new Ok<List<Path>, IOError>(new JVMList<Path>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
             } catch (IOException e) {
-                return new Err<>(new JVMPath.JVMIOError(e));
+                return new Err<List<Path>, IOError>(new JVMPath.JVMIOError(e));
             }
         }
 
@@ -96,7 +96,7 @@ public final class Files {
 
         @Override
         public Query<String> query() {
-            return new HeadedQuery<>(new RangeHead(this.path.getNameCount()))
+            return new HeadedQuery<Integer>(new RangeHead(this.path.getNameCount()))
                     .map((Integer index) -> this.path.getName(index).toString());
         }
 
@@ -119,9 +119,9 @@ public final class Files {
         public Option<IOError> createDirectories() {
             try {
                 java.nio.file.Files.createDirectories(this.path);
-                return new None<>();
+                return new None<IOError>();
             } catch (IOException e) {
-                return new Some<>(new JVMIOError(e));
+                return new Some<IOError>(new JVMIOError(e));
             }
         }
     }

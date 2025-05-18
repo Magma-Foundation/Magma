@@ -18,6 +18,6 @@ public record Ok<T, X>(T value) implements Result<T, X> {
 
     @Override
     public Option<X> findError() {
-        return new None<>();
+        return new None<X>();
     }
 }

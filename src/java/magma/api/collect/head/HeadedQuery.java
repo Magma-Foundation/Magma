@@ -70,7 +70,7 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
 
     @Override
     public <R, X> Result<R, X> foldWithInitialToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
-        return this.foldWithInitial(new Ok<>(initial),
+        return this.foldWithInitial(new Ok<R, X>(initial),
                 (Result<R, X> rxResult, T element) -> rxResult.flatMapValue(
                         (R inner) -> folder.apply(inner, element)));
     }

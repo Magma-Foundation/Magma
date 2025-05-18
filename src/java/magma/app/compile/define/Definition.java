@@ -4,6 +4,7 @@ import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.api.text.Strings;
 import magma.app.Main;
 import magma.app.compile.type.Type;
 
@@ -15,7 +16,7 @@ public record Definition(
         String name
 ) implements MethodHeader, Parameter {
     public String toAssignment() {
-        return "\n\t\tthis." + this.name() + " = " + this.name() + ";";
+        return "\n\t\tthis." + this.name + " = " + this.name + ";";
     }
 
     @Override
@@ -59,5 +60,9 @@ public record Definition(
     @Override
     public MethodHeader removeModifier(String modifier) {
         return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
+    }
+
+    public boolean isNamed(String name) {
+        return Strings.equalsTo(this.name, name);
     }
 }

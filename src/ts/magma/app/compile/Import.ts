@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -59,6 +60,7 @@
 ]*/
 import { List } from "../../../magma/api/collect/list/List";
 import { Joiner } from "../../../magma/api/collect/Joiner";
+import { Strings } from "../../../magma/api/text/Strings";
 export class Import {
 	namespace: List<string>;
 	child: string;
@@ -69,5 +71,8 @@ export class Import {
 	generate(): string {
 		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("");
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n";
+	}
+	hasSameChild(child: string): boolean {
+		return Strings.equalsTo(this.child, child);
 	}
 }

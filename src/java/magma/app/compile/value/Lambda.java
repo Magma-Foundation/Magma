@@ -5,9 +5,9 @@ import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.app.Main;
 import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
+import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
 
 public record Lambda(List<Definition> paramNames, String content) implements Value {
@@ -32,7 +32,7 @@ public record Lambda(List<Definition> paramNames, String content) implements Val
     }
 
     public Type resolve(CompileState state) {
-        return Main.Primitive.Unknown;
+        return PrimitiveType.Unknown;
     }
 
     @Override

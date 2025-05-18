@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -64,6 +65,7 @@ import { Some } from "../../../../magma/api/option/Some";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
 import { Main } from "../../../../magma/app/Main";
 import { MethodHeader } from "../../../../magma/app/compile/define/MethodHeader";
+import { Strings } from "../../../../magma/api/text/Strings";
 export class Definition {
 	annotations: List<string>;
 	modifiers: List<string>;
@@ -78,7 +80,7 @@ export class Definition {
 		this.name = name;
 	}
 	toAssignment(): string {
-		return "\n\t\tthis." + this.name() + " = " + this.name() + ";";
+		return "\n\t\tthis." + this.name + " = " + this.name + ";";
 	}
 	generate(): string {
 		return this.generateWithAfterName("");
@@ -105,5 +107,8 @@ export class Definition {
 	}
 	removeModifier(modifier: string): MethodHeader {
 		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
+	}
+	isNamed(name: string): boolean {
+		return Strings.equalsTo(this.name, name);
 	}
 }

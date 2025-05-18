@@ -6,6 +6,7 @@ import magma.app.Main;
 import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
+import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Value;
 
@@ -37,7 +38,7 @@ public record Placeholder(String input) implements Parameter, Value, Type {
 
     @Override
     public Type resolve(CompileState state) {
-        return Main.Primitive.Unknown;
+        return PrimitiveType.Unknown;
     }
 
     @Override

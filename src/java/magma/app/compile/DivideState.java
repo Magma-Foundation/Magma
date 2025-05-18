@@ -16,7 +16,7 @@ public record DivideState(List<String> segments, String buffer, int depth, Strin
     }
 
     public Query<String> query() {
-        return this.segments().query();
+        return this.segments.query();
     }
 
     public DivideState advance() {

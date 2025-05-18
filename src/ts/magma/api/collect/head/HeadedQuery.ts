@@ -42,6 +42,7 @@
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
+	PrimitiveType: magma.app.compile.type, 
 	TemplateType: magma.app.compile.type, 
 	Type: magma.app.compile.type, 
 	VariadicType: magma.app.compile.type, 
@@ -108,7 +109,7 @@ export class HeadedQuery<T> implements Query<T> {
 		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t));
 	}
 	foldWithInitialToResult<R, X>(initial: R, folder: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
-		return this.foldWithInitial(new Ok<>(initial), (rxResult: Result<R, X>, element: T) => rxResult.flatMapValue((inner: R) => folder(inner, element)));
+		return this.foldWithInitial(new Ok<R, X>(initial), (rxResult: Result<R, X>, element: T) => rxResult.flatMapValue((inner: R) => folder(inner, element)));
 	}
 	filter(predicate: (arg0 : T) => boolean): Query<T> {
 		return this.flatMap((element: T) => {

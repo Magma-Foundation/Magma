@@ -5,8 +5,8 @@ import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.app.Main;
 import magma.app.compile.CompileState;
+import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
 
 public record Invokable(Caller caller, List<Value> args) implements Value {
@@ -34,7 +34,7 @@ public record Invokable(Caller caller, List<Value> args) implements Value {
     }
 
     public Type resolve(CompileState state) {
-        return Main.Primitive.Unknown;
+        return PrimitiveType.Unknown;
     }
 
     @Override

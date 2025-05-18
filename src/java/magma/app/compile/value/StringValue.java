@@ -3,8 +3,8 @@ package magma.app.compile.value;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.app.Main;
 import magma.app.compile.CompileState;
+import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
 
 public record StringValue(String value) implements Value {
@@ -24,7 +24,7 @@ public record StringValue(String value) implements Value {
     }
 
     public Type resolve(CompileState state) {
-        return Main.Primitive.Unknown;
+        return PrimitiveType.Unknown;
     }
 
     @Override

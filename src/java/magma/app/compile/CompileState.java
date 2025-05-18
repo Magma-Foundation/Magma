@@ -9,7 +9,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.define.Definition;
-import magma.app.compile.type.Type;
 import magma.app.io.Source;
 
 public record CompileState(
@@ -31,24 +30,23 @@ public record CompileState(
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return imports + this.output() + otherOutput;
+        return imports + this.output + otherOutput;
     }
 
     public Query<Import> queryImports() {
-        return this.imports().query();
+        return this.imports.query();
     }
 
     public Query<Source> querySources() {
-        return this.sources()
-                .query();
+        return this.sources.query();
     }
 
     public String createIndent() {
-        return "\n" + "\t".repeat(this.depth());
+        return "\n" + "\t".repeat(this.depth);
     }
 
     public Option<String> findLastStructureName() {
-        return this.structureNames().findLast();
+        return this.structureNames.findLast();
     }
 
     public boolean isLastWithin(String name) {
@@ -74,7 +72,7 @@ public record CompileState(
         var stringList = parent1.addLast(child);
         if (this.imports
                 .query()
-                .filter((Import node) -> Strings.equalsTo(node.child(), child))
+                .filter((Import node) -> node.hasSameChild(child))
                 .next()
                 .isPresent()) {
             return this;
@@ -108,10 +106,9 @@ public record CompileState(
         return new CompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
     }
 
-    public Option<Type> resolve(String name) {
+    public Option<Definition> resolve(String name) {
         return this.definitions.queryReversed()
-                .filter((Definition definition) -> Strings.equalsTo(definition.name(), name))
-                .map((Definition definition1) -> definition1.type())
+                .filter((Definition definition) -> definition.isNamed(name))
                 .next();
     }
 
