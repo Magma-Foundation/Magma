@@ -3,7 +3,6 @@ package magma.api.collect;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.app.Main;
 
 public record Joiner(String delimiter) implements Collector<String, Option<String>> {
     public static Joiner empty() {

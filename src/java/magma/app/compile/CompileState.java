@@ -24,16 +24,16 @@ public record CompileState(
         return new CompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
     }
 
-    public String getJoined(String otherOutput) {
-        var imports = this.queryImports()
+    public String join(String otherOutput) {
+        var joinedImports = this.queryImports()
                 .map((Import anImport) -> anImport.generate())
                 .collect(new Joiner(""))
                 .orElse("");
 
-        return imports + this.output + otherOutput;
+        return joinedImports + this.output + otherOutput;
     }
 
-    public Query<Import> queryImports() {
+    private Query<Import> queryImports() {
         return this.imports.query();
     }
 
@@ -55,7 +55,7 @@ public record CompileState(
                 .isPresent();
     }
 
-    public CompileState addResolvedImport(List<String> parent, String child) {
+    private CompileState addResolvedImport(List<String> parent, String child) {
         var parent1 = parent;
         var namespace = this.maybeNamespace.orElse(Lists.empty());
         if (namespace.isEmpty()) {

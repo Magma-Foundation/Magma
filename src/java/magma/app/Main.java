@@ -115,7 +115,7 @@ public final class Main {
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var joined = compiledState.getJoined(compiled.right());
+        var joined = compiledState.join(compiled.right());
         return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + joined);
     }
 
@@ -409,29 +409,11 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileNamespaced(CompileState state, String input) {
         var stripped = Strings.strip(input);
-        if (stripped.startsWith("package ")) {
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
         }
 
-        return Main.compileImport(state, stripped);
-    }
-
-    private static Option<Tuple2<CompileState, String>> compileImport(CompileState state, String stripped) {
-        return Main.compilePrefix(stripped, "import ", (String s) -> Main.compileSuffix(s, ";", (String s1) -> {
-            var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'))
-                    .collect(new ListCollector<String>());
-
-            var child = Strings.strip(divisions.findLast().orElse(""));
-            var parent = divisions.subList(0, divisions.size() - 1)
-                    .orElse(Lists.empty());
-
-            if (parent.equalsTo(Lists.of("java", "util", "function"))) {
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-            }
-
-            var compileState = state.addResolvedImport(parent, child);
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-        }));
+        return new None<Tuple2<CompileState, String>>();
     }
 
     private static Tuple2<CompileState, String> compileOrPlaceholder(
@@ -1069,10 +1051,6 @@ public final class Main {
         return Main.parseType(state, type)
                 .map((Tuple2<CompileState, Type> tuple) -> new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right()))
                 .orElseGet(() -> new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
-    }
-
-    public static Tuple2<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
-        return Main.compileType(state, type).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, Main.generatePlaceholder(type)));
     }
 
     private static Option<Tuple2<CompileState, String>> compileType(CompileState state, String type) {
