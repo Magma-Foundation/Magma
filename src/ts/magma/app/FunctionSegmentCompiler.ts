@@ -173,7 +173,7 @@ class FunctionSegmentCompiler {
 		return appended/*unknown*/;
 	}
 	static compileBlockHeader(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.or(state, input, new OrRule<string>(Lists.of(FunctionSegmentCompiler.createConditionalRule("if"), FunctionSegmentCompiler.createConditionalRule("while"), FunctionSegmentCompiler.compileElse)))/*unknown*/;
+		return new OrRule<string>(Lists.of(FunctionSegmentCompiler.createConditionalRule("if"), FunctionSegmentCompiler.createConditionalRule("while"), FunctionSegmentCompiler.compileElse)).apply(state, input)/*unknown*/;
 	}
 	static createConditionalRule(prefix: string): Rule<string> {
 		return (state1: CompileState, input1: string) => {

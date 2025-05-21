@@ -19,7 +19,6 @@ import magma.app.compile.locate.FirstLocator;
 import magma.app.compile.select.LastSelector;
 import magma.app.compile.split.LocatingSplitter;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 final class FunctionSegmentCompiler {
@@ -71,11 +70,11 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileBlockHeader(CompileState state, String input) {
-        return CompilerUtils.or(state, input, new OrRule<String>(Lists.of(
+        return new OrRule<String>(Lists.of(
                 FunctionSegmentCompiler.createConditionalRule("if"),
                 FunctionSegmentCompiler.createConditionalRule("while"),
                 FunctionSegmentCompiler::compileElse
-        )));
+        )).apply(state, input);
     }
 
     private static Rule<String> createConditionalRule(String prefix) {

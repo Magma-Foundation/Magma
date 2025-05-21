@@ -113,10 +113,10 @@ import { Tuple2 } from "../../magma/api/Tuple2";
 import { Option } from "../../magma/api/option/Option";
 import { Type } from "../../magma/app/compile/type/Type";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Strings } from "../../magma/api/text/Strings";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Some } from "../../magma/api/option/Some";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
@@ -142,7 +142,7 @@ class TypeCompiler {
 		})/*unknown*/;
 	}
 	static parseType(state: CompileState, type: string): Option<Tuple2<CompileState, Type>> {
-		return CompilerUtils.or(state, type, new OrRule<Type>(Lists.of(TypeCompiler.parseVarArgs, TypeCompiler.parseGeneric, TypeCompiler.parsePrimitive, TypeCompiler.parseSymbolType)))/*unknown*/;
+		return new OrRule<Type>(Lists.of(TypeCompiler.parseVarArgs, TypeCompiler.parseGeneric, TypeCompiler.parsePrimitive, TypeCompiler.parseSymbolType)).apply(state, type)/*unknown*/;
 	}
 	static parseVarArgs(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input)/*unknown*/;
@@ -238,11 +238,11 @@ class TypeCompiler {
 		return new None<Type>()/*unknown*/;
 	}
 	static compileTypeArgument(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.or(state, input, new OrRule<string>(Lists.of((state2: CompileState, input1: string) => {
+		return new OrRule<string>(Lists.of((state2: CompileState, input1: string) => {
 			return CompilerUtils.compileWhitespace(state2, input1)/*unknown*/;
 		}, (state1: CompileState, type: string) => {
 			return TypeCompiler.compileType(state1, type)/*unknown*/;
-		})))/*unknown*/;
+		})).apply(state, input)/*unknown*/;
 	}
 	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, Type> {
 		return TypeCompiler.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => {

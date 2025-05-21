@@ -124,7 +124,6 @@ import { Rule } from "../../magma/app/compile/rule/Rule";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
-import { Iters } from "../../magma/api/collect/Iters";
 import { None } from "../../magma/api/option/None";
 import { Strings } from "../../magma/api/text/Strings";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
@@ -134,6 +133,7 @@ import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
 import { Composable } from "../../magma/app/compile/compose/Composable";
 import { SuffixComposable } from "../../magma/app/SuffixComposable";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
+import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
@@ -162,14 +162,9 @@ export class CompilerUtils {
 		})/*unknown*/;
 	}
 	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<Rule<string>>): Tuple2<CompileState, string> {
-		return CompilerUtils.or(state, input, new OrRule<string>(rules)).orElseGet(() => {
+		return new OrRule<string>(rules).apply(state, input).orElseGet(() => {
 			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
 		})/*unknown*/;
-	}
-	static or<T>(state: CompileState, input: string, orRule: OrRule<T>): Option<Tuple2<CompileState, T>> {
-		return orRule.rules().iter().map((rule: Rule<T>) => {
-			return rule.apply(state, input)/*unknown*/;
-		}).flatMap(Iters.fromOption).next()/*unknown*/;
 	}
 	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		if (!input/*string*/.startsWith(infix)/*unknown*/){

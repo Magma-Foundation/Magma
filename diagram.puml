@@ -159,6 +159,7 @@ interface Registry {
 }
 class OrRule<T> {
 }
+OrRule <|.. Rule
 interface Rule<T> {
 }
 class FirstSelector {
@@ -460,6 +461,10 @@ Registry --> Iter
 Registry --> Import
 OrRule --> Rule
 OrRule --> Iterable
+OrRule --> CompileState
+OrRule --> Tuple2
+OrRule --> Option
+OrRule --> Iters
 Rule --> CompileState
 Rule --> Tuple2
 Rule --> Option
@@ -599,7 +604,6 @@ CompilerUtils --> Rule
 CompilerUtils --> FoldedDivider
 CompilerUtils --> DecoratedFolder
 CompilerUtils --> OrRule
-CompilerUtils --> Iters
 CompilerUtils --> None
 CompilerUtils --> Strings
 CompilerUtils --> Whitespace
@@ -609,6 +613,7 @@ CompilerUtils --> LastLocator
 CompilerUtils --> Composable
 CompilerUtils --> SuffixComposable
 CompilerUtils --> Splitter
+CompilerUtils --> Iters
 CompilerUtils --> ListCollector
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
@@ -773,10 +778,10 @@ TypeCompiler --> Tuple2
 TypeCompiler --> Option
 TypeCompiler --> Type
 TypeCompiler --> Tuple2Impl
-TypeCompiler --> CompilerUtils
 TypeCompiler --> OrRule
 TypeCompiler --> Lists
 TypeCompiler --> Strings
+TypeCompiler --> CompilerUtils
 TypeCompiler --> Some
 TypeCompiler --> VariadicType
 TypeCompiler --> ValueCompiler

@@ -66,21 +66,9 @@ public final class CompilerUtils {
             String input,
             Iterable<Rule<String>> rules
     ) {
-        return CompilerUtils.or(state, input, new OrRule<String>(rules)).orElseGet(() -> {
+        return new OrRule<String>(rules).apply(state, input).orElseGet(() -> {
             return new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input));
         });
-    }
-
-    public static <T> Option<Tuple2<CompileState, T>> or(
-            CompileState state,
-            String input,
-            OrRule<T> orRule) {
-        return orRule.rules().iter()
-                .map((Rule<T> rule) -> {
-                    return rule.apply(state, input);
-                })
-                .flatMap(Iters::fromOption)
-                .next();
     }
 
     static <T> Option<Tuple2<CompileState, T>> compilePrefix(

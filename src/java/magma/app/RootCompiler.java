@@ -22,8 +22,6 @@ import magma.app.compile.value.Value;
 import magma.app.compile.locate.FirstLocator;
 import magma.app.compile.split.LocatingSplitter;
 
-import java.util.function.BiFunction;
-
 public final class RootCompiler {
     private static Tuple2<CompileState, String> compileRootSegment(CompileState state, String input) {
         return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(
@@ -281,7 +279,7 @@ public final class RootCompiler {
     }
 
     public static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, String input) {
-        return CompilerUtils.or(state, input, new OrRule<Value>(Lists.<Rule<Value>>of(
+        return new OrRule<Value>(Lists.<Rule<Value>>of(
                 ValueCompiler::parseLambda,
                 ValueCompiler.createOperatorRule("+"),
                 ValueCompiler.createOperatorRule("-"),
@@ -301,7 +299,7 @@ public final class RootCompiler {
                 ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="),
                 ValueCompiler.createTextRule("\""),
                 ValueCompiler.createTextRule("'")
-        )));
+        )).apply(state, input);
     }
 
     public static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {
