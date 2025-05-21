@@ -12,7 +12,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
-import magma.app.compile.compose.Composable;
 import magma.app.compile.divide.FoldedDivider;
 import magma.app.compile.fold.DecoratedFolder;
 import magma.app.compile.fold.Folder;
@@ -71,14 +70,6 @@ public final class CompilerUtils {
         });
     }
 
-    static <T> Option<T> compilePrefix(
-            String input,
-            String infix,
-            Composable<String, T> mapper
-    ) {
-        return new PrefixRule<>(infix, mapper).apply(input);
-    }
-
     static Option<Tuple2<CompileState, String>> compileWhitespace(CompileState state, String input) {
         return CompilerUtils.parseWhitespace(state, input).map((Tuple2<CompileState, Whitespace> tuple) -> {
             return new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate());
@@ -117,10 +108,6 @@ public final class CompilerUtils {
 
     public static <T> Option<T> compileLast(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
         return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper);
-    }
-
-    public static <T> Option<T> compileSuffix(String input, String suffix, Composable<String, T> mapper) {
-        return new SuffixComposable<>(suffix, mapper).apply(input);
     }
 
     static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {

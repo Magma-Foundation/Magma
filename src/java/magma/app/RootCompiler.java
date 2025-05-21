@@ -14,6 +14,7 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Context;
 import magma.app.compile.Registry;
 import magma.app.compile.Stack;
+import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.Definition;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
@@ -38,19 +39,19 @@ public final class RootCompiler {
         return (CompileState state, String input1) -> {
             return CompilerUtils.compileSplit(input1, new LocatingSplitter(sourceInfix, new FirstLocator()), (String beforeInfix, String afterInfix) -> {
                 return CompilerUtils.compileSplit(afterInfix, new LocatingSplitter("{", new FirstLocator()), (String beforeContent, String withEnd) -> {
-                    return CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> {
-                        return CompilerUtils.compileLast(beforeInfix, "\n", (String s, String s2) -> {
-                            var annotations = DefiningCompiler.parseAnnotations(s);
-                            if (annotations.contains("Actual")) {
-                                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-                            }
+                    return new SuffixComposable<>("}", (String inputContent) -> {
+                                    return CompilerUtils.compileLast(beforeInfix, "\n", (String s, String s2) -> {
+                                        var annotations = DefiningCompiler.parseAnnotations(s);
+                                        if (annotations.contains("Actual")) {
+                                            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
+                                        }
 
-                            return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent);
-                        }).or(() -> {
-                            var modifiers = DefiningCompiler.parseModifiers(beforeContent);
-                            return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
-                        });
-                    });
+                                        return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent);
+                                    }).or(() -> {
+                                        var modifiers = DefiningCompiler.parseModifiers(beforeContent);
+                                        return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
+                                    });
+                                }).apply(Strings.strip(withEnd));
                 });
             });
         };
@@ -95,12 +96,12 @@ public final class RootCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithTypeParams(CompileState state, String infix, String content, String beforeParams, Iterable<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations, List<String> modifiers, Iterable<Type> maybeSuperType) {
-        return CompilerUtils.compileSuffix(Strings.strip(beforeParams), ">", (String withoutTypeParamEnd) -> {
+        return new SuffixComposable<>(">", (String withoutTypeParamEnd) -> {
             return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String name, String typeParamsString) -> {
                 var typeParams = DefiningCompiler.divideValues(typeParamsString);
                 return RootCompiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
             });
-        }).or(() -> {
+        }).apply(Strings.strip(beforeParams)).or(() -> {
             return RootCompiler.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType);
         });
     }

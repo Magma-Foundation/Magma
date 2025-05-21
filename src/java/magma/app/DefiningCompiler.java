@@ -12,6 +12,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.fold.DelimitedFolder;
 import magma.app.compile.DivideState;
 import magma.app.compile.define.Definition;
@@ -116,12 +117,12 @@ final class DefiningCompiler {
             String type,
             String name
     ) {
-        return CompilerUtils.compileSuffix(Strings.strip(beforeType), ">", (String withoutTypeParamEnd) -> {
+        return new SuffixComposable<>(">", (String withoutTypeParamEnd) -> {
             return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String beforeTypeParams, String typeParamsString) -> {
                 var typeParams = divideValues(typeParamsString);
                 return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name);
             });
-        }).or(() -> {
+        }).apply(Strings.strip(beforeType)).or(() -> {
             var divided = DefiningCompiler.parseModifiers(beforeType);
             return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name);
         });

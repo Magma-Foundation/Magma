@@ -34,6 +34,8 @@
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -101,10 +103,8 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
-	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
@@ -125,15 +125,12 @@ import { Rule } from "../../magma/app/compile/rule/Rule";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
-import { Composable } from "../../magma/app/compile/compose/Composable";
-import { PrefixRule } from "../../magma/app/PrefixRule";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { Strings } from "../../magma/api/text/Strings";
 import { None } from "../../magma/api/option/None";
 import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
-import { SuffixComposable } from "../../magma/app/SuffixComposable";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
@@ -168,9 +165,6 @@ export class CompilerUtils {
 			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
 		})/*unknown*/;
 	}
-	static compilePrefix<T>(input: string, infix: string, mapper: Composable<string, T>): Option<T> {
-		return new PrefixRule<>(infix, mapper).apply(input)/*unknown*/;
-	}
 	static compileWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {
 			return new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())/*unknown*/;
@@ -199,9 +193,6 @@ export class CompilerUtils {
 	}
 	static compileLast<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;
-	}
-	static compileSuffix<T>(input: string, suffix: string, mapper: Composable<string, T>): Option<T> {
-		return new SuffixComposable<>(suffix, mapper).apply(input)/*unknown*/;
 	}
 	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return splitter.apply(input).flatMap((tuple: Tuple2<string, string>) => {

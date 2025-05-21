@@ -82,6 +82,12 @@ interface CompileState {
 }
 interface Composable<T, R> {
 }
+class PrefixComposable<T> {
+}
+PrefixComposable <|.. Composable
+class SuffixComposable<T> {
+}
+SuffixComposable <|.. Composable
 interface Context {
 }
 class ConstructionCaller {
@@ -250,16 +256,10 @@ class PathTargets {
 PathTargets <|.. Targets
 class Platform {
 }
-class PrefixRule<T> {
-}
-PrefixRule <|.. Composable
 class RootCompiler {
 }
 interface Sources {
 }
-class SuffixComposable<T> {
-}
-SuffixComposable <|.. Composable
 interface Targets {
 }
 class TypeCompiler {
@@ -362,6 +362,14 @@ CompileState --> Registry
 CompileState --> Context
 CompileState --> Stack
 Composable --> Option
+PrefixComposable --> Composable
+PrefixComposable --> Option
+PrefixComposable --> None
+PrefixComposable --> Strings
+SuffixComposable --> Composable
+SuffixComposable --> Option
+SuffixComposable --> None
+SuffixComposable --> Strings
 Context --> Source
 Context --> Iter
 Context --> Platform
@@ -607,15 +615,12 @@ CompilerUtils --> Rule
 CompilerUtils --> FoldedDivider
 CompilerUtils --> DecoratedFolder
 CompilerUtils --> OrRule
-CompilerUtils --> Composable
-CompilerUtils --> PrefixRule
 CompilerUtils --> Whitespace
 CompilerUtils --> Strings
 CompilerUtils --> None
 CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
-CompilerUtils --> SuffixComposable
 CompilerUtils --> Splitter
 CompilerUtils --> Iters
 CompilerUtils --> ListCollector
@@ -643,6 +648,7 @@ DefiningCompiler --> FoldedDivider
 DefiningCompiler --> DecoratedFolder
 DefiningCompiler --> DivideState
 DefiningCompiler --> DelimitedFolder
+DefiningCompiler --> SuffixComposable
 DefiningCompiler --> LocatingSplitter
 DefiningCompiler --> FirstLocator
 DefiningCompiler --> TypeCompiler
@@ -676,6 +682,8 @@ FieldCompiler --> MethodHeader
 FieldCompiler --> Joiner
 FieldCompiler --> Some
 FieldCompiler --> Tuple2Impl
+FieldCompiler --> PrefixComposable
+FieldCompiler --> SuffixComposable
 FieldCompiler --> FunctionSegmentCompiler
 FieldCompiler --> Stack
 FieldCompiler --> Parameter
@@ -689,6 +697,7 @@ FunctionSegmentCompiler --> Strings
 FunctionSegmentCompiler --> Some
 FunctionSegmentCompiler --> Tuple2Impl
 FunctionSegmentCompiler --> None
+FunctionSegmentCompiler --> SuffixComposable
 FunctionSegmentCompiler --> CompilerUtils
 FunctionSegmentCompiler --> LastSelector
 FunctionSegmentCompiler --> Selector
@@ -697,6 +706,7 @@ FunctionSegmentCompiler --> DivideState
 FunctionSegmentCompiler --> OrRule
 FunctionSegmentCompiler --> Lists
 FunctionSegmentCompiler --> Rule
+FunctionSegmentCompiler --> PrefixComposable
 FunctionSegmentCompiler --> ValueCompiler
 FunctionSegmentCompiler --> Value
 FunctionSegmentCompiler --> LocatingSplitter
@@ -737,10 +747,6 @@ PathTargets --> IOError
 PathTargets --> Option
 PathTargets --> None
 PathTargets --> Location
-PrefixRule --> Composable
-PrefixRule --> Option
-PrefixRule --> None
-PrefixRule --> Strings
 RootCompiler --> CompileState
 RootCompiler --> Tuple2
 RootCompiler --> CompilerUtils
@@ -748,10 +754,11 @@ RootCompiler --> Lists
 RootCompiler --> Rule
 RootCompiler --> LocatingSplitter
 RootCompiler --> FirstLocator
-RootCompiler --> Strings
+RootCompiler --> SuffixComposable
 RootCompiler --> DefiningCompiler
 RootCompiler --> Some
 RootCompiler --> Tuple2Impl
+RootCompiler --> Strings
 RootCompiler --> Option
 RootCompiler --> List
 RootCompiler --> TypeCompiler
@@ -774,10 +781,6 @@ Sources --> Iterable
 Sources --> IOError
 Sources --> Result
 Sources --> Path
-SuffixComposable --> Composable
-SuffixComposable --> Option
-SuffixComposable --> None
-SuffixComposable --> Strings
 Targets --> IOError
 Targets --> Option
 Targets --> Location
@@ -789,13 +792,14 @@ TypeCompiler --> Tuple2Impl
 TypeCompiler --> OrRule
 TypeCompiler --> Lists
 TypeCompiler --> Strings
-TypeCompiler --> CompilerUtils
+TypeCompiler --> SuffixComposable
 TypeCompiler --> Some
 TypeCompiler --> VariadicType
 TypeCompiler --> ValueCompiler
 TypeCompiler --> Symbol
 TypeCompiler --> None
 TypeCompiler --> PrimitiveType
+TypeCompiler --> CompilerUtils
 TypeCompiler --> LocatingSplitter
 TypeCompiler --> FirstLocator
 TypeCompiler --> TemplateType
@@ -814,13 +818,15 @@ ValueCompiler --> Value
 ValueCompiler --> Tuple2
 ValueCompiler --> CompilerUtils
 ValueCompiler --> Option
-ValueCompiler --> Strings
+ValueCompiler --> SuffixComposable
 ValueCompiler --> LastSelector
 ValueCompiler --> Selector
 ValueCompiler --> FoldingSplitter
 ValueCompiler --> DivideState
+ValueCompiler --> PrefixComposable
 ValueCompiler --> TypeCompiler
 ValueCompiler --> ConstructionCaller
+ValueCompiler --> Strings
 ValueCompiler --> RootCompiler
 ValueCompiler --> Rule
 ValueCompiler --> Some

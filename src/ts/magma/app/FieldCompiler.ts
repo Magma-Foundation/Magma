@@ -34,6 +34,8 @@
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -101,10 +103,8 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
-	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
@@ -124,6 +124,8 @@ import { MethodHeader } from "../../magma/app/compile/define/MethodHeader";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { PrefixComposable } from "../../magma/app/compile/compose/PrefixComposable";
+import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler";
 import { Stack } from "../../magma/app/compile/Stack";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
@@ -167,15 +169,15 @@ class FieldCompiler {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"))/*unknown*/;
 			}
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")")/*unknown*/;
-			return CompilerUtils.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => {
-				return CompilerUtils.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
+			return new PrefixComposable<>("{", (withoutContentStart: string) => {
+				return new SuffixComposable<>("}", (withoutContentEnd: string) => {
 					let compileState: CompileState = parametersState.enterDepth().enterDepth()/*unknown*/;
 					let statementsTuple = FunctionSegmentCompiler.compileFunctionStatements(compileState.mapStack((stack1: Stack) => {
 						return stack1.defineAll(definitions)/*unknown*/;
 					}), withoutContentEnd)/*unknown*/;
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"))/*unknown*/;
-				})/*unknown*/;
-			}).or(() => {
+				}).apply(Strings.strip(withoutContentStart))/*unknown*/;
+			}).apply(Strings.strip(afterParams)).or(() => {
 				if (Strings.equalsTo(";", Strings.strip(afterParams))/*unknown*/){
 					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";"))/*unknown*/;
 				}
@@ -184,11 +186,11 @@ class FieldCompiler {
 		})/*unknown*/;
 	}
 	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => {
+		return new SuffixComposable<>(";", (withoutEnd: string) => {
 			return FieldCompiler.getTupleOption(state, withoutEnd).or(() => {
 				return FieldCompiler.compileEnumValues(state, withoutEnd)/*unknown*/;
 			})/*unknown*/;
-		})/*unknown*/;
+		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static getTupleOption(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
 		return DefiningCompiler.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple2<CompileState, Parameter>) => {

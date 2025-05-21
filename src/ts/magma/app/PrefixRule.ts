@@ -34,8 +34,6 @@
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
-	PrefixComposable: magma.app.compile.compose, 
-	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -103,15 +101,30 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
+	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
-import { Tuple2 } from "../../../../magma/api/Tuple2";
-import { Option } from "../../../../magma/api/option/Option";
-import { List } from "../../../../magma/api/collect/list/List";
-export interface Selector {
-	select(divisions: List<string>): Option<Tuple2<string, string>>;
+import { Composable } from "../../magma/app/compile/compose/Composable";
+import { Option } from "../../magma/api/option/Option";
+import { None } from "../../magma/api/option/None";
+import { Strings } from "../../magma/api/text/Strings";
+export class PrefixRule<T> implements Composable<string, T> {
+	prefix: string;
+	mapper: Composable<string, T>;
+	constructor (prefix: string, mapper: Composable<string, T>) {
+		this.prefix = prefix;
+		this.mapper = mapper;
+	}
+	apply(input: string): Option<T> {
+		if (!input/*string*/.startsWith(this.prefix())/*unknown*/){
+			return new None<>()/*unknown*/;
+		}
+		let slice = Strings.sliceFrom(input, Strings.length(this.prefix()))/*unknown*/;
+		return this.mapper().apply(slice)/*unknown*/;
+	}
 }

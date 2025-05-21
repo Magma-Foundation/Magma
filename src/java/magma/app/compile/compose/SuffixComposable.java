@@ -1,9 +1,8 @@
-package magma.app;
+package magma.app.compile.compose;
 
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.text.Strings;
-import magma.app.compile.compose.Composable;
 
 public record SuffixComposable<T>(String suffix, Composable<String, T> mapper) implements Composable<String, T> {
     @Override

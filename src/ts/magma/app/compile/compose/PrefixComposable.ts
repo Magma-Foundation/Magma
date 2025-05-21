@@ -109,9 +109,22 @@
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
-import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { Composable } from "../../../../magma/app/compile/compose/Composable";
 import { Option } from "../../../../magma/api/option/Option";
-import { List } from "../../../../magma/api/collect/list/List";
-export interface Selector {
-	select(divisions: List<string>): Option<Tuple2<string, string>>;
+import { None } from "../../../../magma/api/option/None";
+import { Strings } from "../../../../magma/api/text/Strings";
+export class PrefixComposable<T> implements Composable<string, T> {
+	prefix: string;
+	mapper: Composable<string, T>;
+	constructor (prefix: string, mapper: Composable<string, T>) {
+		this.prefix = prefix;
+		this.mapper = mapper;
+	}
+	apply(input: string): Option<T> {
+		if (!input/*string*/.startsWith(this.prefix())/*unknown*/){
+			return new None<>()/*unknown*/;
+		}
+		let slice = Strings.sliceFrom(input, Strings.length(this.prefix()))/*unknown*/;
+		return this.mapper().apply(slice)/*unknown*/;
+	}
 }

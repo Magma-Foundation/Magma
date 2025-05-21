@@ -34,6 +34,8 @@
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -101,10 +103,8 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
-	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
@@ -116,10 +116,11 @@ import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Rule } from "../../magma/app/compile/rule/Rule";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
-import { Strings } from "../../magma/api/text/Strings";
+import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Strings } from "../../magma/api/text/Strings";
 import { Option } from "../../magma/api/option/Option";
 import { List } from "../../magma/api/collect/list/List";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
@@ -145,7 +146,7 @@ export class RootCompiler {
 		return (state: CompileState, input1: string) => {
 			return CompilerUtils.compileSplit(input1, new LocatingSplitter(sourceInfix, new FirstLocator()), (beforeInfix: string, afterInfix: string) => {
 				return CompilerUtils.compileSplit(afterInfix, new LocatingSplitter("{", new FirstLocator()), (beforeContent: string, withEnd: string) => {
-					return CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => {
+					return new SuffixComposable<>("}", (inputContent: string) => {
 						return CompilerUtils.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 							let annotations = DefiningCompiler.parseAnnotations(s)/*unknown*/;
 							if (annotations.contains("Actual")/*unknown*/){
@@ -156,7 +157,7 @@ export class RootCompiler {
 							let modifiers = DefiningCompiler.parseModifiers(beforeContent)/*unknown*/;
 							return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent)/*unknown*/;
 						})/*unknown*/;
-					})/*unknown*/;
+					}).apply(Strings.strip(withEnd))/*unknown*/;
 				})/*unknown*/;
 			})/*unknown*/;
 		}/*unknown*/;
@@ -194,12 +195,12 @@ export class RootCompiler {
 		})/*unknown*/;
 	}
 	static compileStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: Iterable<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>, maybeSuperType: Iterable<Type>): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => {
+		return new SuffixComposable<>(">", (withoutTypeParamEnd: string) => {
 			return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (name: string, typeParamsString: string) => {
 				let typeParams = DefiningCompiler.divideValues(typeParamsString)/*unknown*/;
 				return RootCompiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType)/*unknown*/;
 			})/*unknown*/;
-		}).or(() => {
+		}).apply(Strings.strip(beforeParams)).or(() => {
 			return RootCompiler.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType)/*unknown*/;
 		})/*unknown*/;
 	}

@@ -34,6 +34,8 @@
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -101,10 +103,8 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
-	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
@@ -117,13 +117,14 @@ import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Strings } from "../../magma/api/text/Strings";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { Some } from "../../magma/api/option/Some";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Symbol } from "../../magma/app/compile/value/Symbol";
 import { None } from "../../magma/api/option/None";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
@@ -147,10 +148,10 @@ class TypeCompiler {
 	}
 	static parseVarArgs(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input)/*unknown*/;
-		return CompilerUtils.compileSuffix(stripped, "...", (s: string) => {
+		return new SuffixComposable<>("...", (s: string) => {
 			let child = TypeCompiler.parseTypeOrPlaceholder(state, s)/*unknown*/;
 			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())))/*unknown*/;
-		})/*unknown*/;
+		}).apply(stripped)/*unknown*/;
 	}
 	static parseSymbolType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input)/*unknown*/;
@@ -184,7 +185,7 @@ class TypeCompiler {
 		return new None<Type>()/*unknown*/;
 	}
 	static parseGeneric(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
-		return CompilerUtils.compileSuffix(Strings.strip(input), ">", (withoutEnd: string) => {
+		return new SuffixComposable<>(">", (withoutEnd: string) => {
 			return CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (baseString: string, argsString: string) => {
 				let argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (state1: CompileState, s: string) => {
 					return TypeCompiler.compileTypeArgument(state1, s)/*unknown*/;
@@ -197,7 +198,7 @@ class TypeCompiler {
 					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)))/*unknown*/;
 				})/*unknown*/;
 			})/*unknown*/;
-		})/*unknown*/;
+		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple2<CompileState, Type>> {
 		return TypeCompiler.mapFunctionType(base, args).map((generated: Type) => {

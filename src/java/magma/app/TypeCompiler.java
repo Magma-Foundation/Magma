@@ -12,6 +12,7 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Dependency;
 import magma.app.compile.Import;
 import magma.app.compile.Registry;
+import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.type.FunctionType;
 import magma.app.compile.type.PrimitiveType;
@@ -42,10 +43,10 @@ final class TypeCompiler {
 
     private static Option<Tuple2<CompileState, Type>> parseVarArgs(CompileState state, String input) {
         var stripped = Strings.strip(input);
-        return CompilerUtils.compileSuffix(stripped, "...", (String s) -> {
+        return new SuffixComposable<>("...", (String s) -> {
             var child = TypeCompiler.parseTypeOrPlaceholder(state, s);
             return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())));
-        });
+        }).apply(stripped);
     }
 
     private static Option<Tuple2<CompileState, Type>> parseSymbolType(CompileState state, String input) {
@@ -88,7 +89,7 @@ final class TypeCompiler {
     }
 
     private static Option<Tuple2<CompileState, Type>> parseGeneric(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> {
+        return new SuffixComposable<>(">", (String withoutEnd) -> {
             return CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (String baseString, String argsString) -> {
                 var argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
                     return TypeCompiler.compileTypeArgument(state1, s);
@@ -102,7 +103,7 @@ final class TypeCompiler {
                     return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
                 });
             });
-        });
+        }).apply(Strings.strip(input));
     }
 
     private static Option<Tuple2<CompileState, Type>> assembleFunctionType(CompileState state, String base, List<String> args) {

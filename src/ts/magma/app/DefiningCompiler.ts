@@ -34,6 +34,8 @@
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -101,10 +103,8 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
-	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
@@ -133,6 +133,7 @@ import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
 import { DivideState } from "../../magma/app/compile/DivideState";
 import { DelimitedFolder } from "../../magma/app/compile/fold/DelimitedFolder";
+import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
@@ -202,12 +203,12 @@ class DefiningCompiler {
 		}).collect(new ListCollector<string>())/*unknown*/;
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
-		return CompilerUtils.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: string) => {
+		return new SuffixComposable<>(">", (withoutTypeParamEnd: string) => {
 			return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (beforeTypeParams: string, typeParamsString: string) => {
 				let typeParams = divideValues(typeParamsString)/*unknown*/;
 				return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name)/*unknown*/;
 			})/*unknown*/;
-		}).or(() => {
+		}).apply(Strings.strip(beforeType)).or(() => {
 			let divided = DefiningCompiler.parseModifiers(beforeType)/*unknown*/;
 			return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name)/*unknown*/;
 		})/*unknown*/;

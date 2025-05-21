@@ -9,6 +9,8 @@ import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
+import magma.app.compile.compose.PrefixComposable;
+import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.Definition;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
@@ -32,23 +34,23 @@ final class FunctionSegmentCompiler {
     }
 
     public static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), "}", (String withoutEnd) -> {
+        return new SuffixComposable<>("}", (String withoutEnd) -> {
             return CompilerUtils.compileSplit(withoutEnd, (String withoutEnd0) -> {
                 Selector selector = new LastSelector("");
                 return new FoldingSplitter((DivideState state1, char c) -> {
                             return FunctionSegmentCompiler.foldBlockStarts(state1, c);
                         }, selector).apply(withoutEnd0);
             }, (String beforeContentWithEnd, String content) -> {
-                return CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> {
+                return new SuffixComposable<>("{", (String beforeContent) -> {
                     return FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
                         var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
                         var indent = state.createIndent();
                         return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
                     });
-                });
+                }).apply(beforeContentWithEnd);
             });
-        });
+        }).apply(Strings.strip(input));
     }
 
     private static DivideState foldBlockStarts(DivideState state, char c) {
@@ -79,15 +81,15 @@ final class FunctionSegmentCompiler {
 
     private static Rule<String> createConditionalRule(String prefix) {
         return (CompileState state1, String input1) -> {
-            return CompilerUtils.compilePrefix(Strings.strip(input1), prefix, (String withoutPrefix) -> {
-                var strippedCondition = Strings.strip(withoutPrefix);
-                return CompilerUtils.compilePrefix(strippedCondition, "(", (String withoutConditionStart) -> {
-                    return CompilerUtils.compileSuffix(withoutConditionStart, ")", (String withoutConditionEnd) -> {
-                        var tuple = ValueCompiler.compileValueOrPlaceholder(state1, withoutConditionEnd);
-                        return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), prefix + " (" + tuple.right() + ")"));
-                    });
-                });
-            });
+            return new PrefixComposable<>(prefix, (String withoutPrefix) -> {
+                    var strippedCondition = Strings.strip(withoutPrefix);
+                return new PrefixComposable<>("(", (String withoutConditionStart) -> {
+                    return new SuffixComposable<>(")", (String withoutConditionEnd) -> {
+                                        var tuple = ValueCompiler.compileValueOrPlaceholder(state1, withoutConditionEnd);
+                                        return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), prefix + " (" + tuple.right() + ")"));
+                                    }).apply(withoutConditionStart);
+                }).apply(strippedCondition);
+            }).apply(Strings.strip(input1));
         };
     }
 
@@ -101,10 +103,10 @@ final class FunctionSegmentCompiler {
     }
 
     public static Option<Tuple2<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), ";", (String withoutEnd) -> {
+        return new SuffixComposable<>(";", (String withoutEnd) -> {
             var valueTuple = FunctionSegmentCompiler.compileFunctionStatementValue(state, withoutEnd);
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
-        });
+        }).apply(Strings.strip(input));
     }
 
     private static Tuple2<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
@@ -134,10 +136,10 @@ final class FunctionSegmentCompiler {
 
     private static Rule<String> createPostRule(String suffix) {
         return (CompileState state1, String input) -> {
-            return CompilerUtils.compileSuffix(Strings.strip(input), suffix, (String child) -> {
-                var tuple = ValueCompiler.compileValueOrPlaceholder(state1, child);
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right() + suffix));
-            });
+            return new SuffixComposable<>(suffix, (String child) -> {
+                    var tuple = ValueCompiler.compileValueOrPlaceholder(state1, child);
+                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right() + suffix));
+                }).apply(Strings.strip(input));
         };
     }
 
@@ -148,11 +150,11 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileReturn(String input, Function<String, Option<Tuple2<CompileState, String>>> mapper) {
-        return CompilerUtils.compilePrefix(Strings.strip(input), "return ", (String value) -> {
+        return new PrefixComposable<>("return ", (String value) -> {
             return mapper.apply(value).flatMap((Tuple2<CompileState, String> tuple) -> {
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), "return " + tuple.right()));
             });
-        });
+        }).apply(Strings.strip(input));
     }
 
     public static Option<Tuple2<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
