@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -75,7 +77,6 @@ export interface List<T> {
 	queryReversed(): Query<T>;
 	addFirst(element: T): List<T>;
 	isEmpty(): boolean;
-	equalsTo(other: List<T>): boolean;
 	removeValue(element: T): List<T>;
 	removeLast(): Option<List<T>>;
 }

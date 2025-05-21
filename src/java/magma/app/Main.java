@@ -24,6 +24,7 @@ import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
+import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.ImmutableDivideState;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.ConstructorHeader;
@@ -69,7 +70,7 @@ public final class Main {
                 .map((Path child) -> new Source(sourceDirectory, child))
                 .collect(new ListCollector<Source>());
 
-        var initial = sources.query().foldWithInitial(CompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
+        var initial = sources.query().foldWithInitial(Main.createInitial(), (CompileState state, Source source) -> state.addSource(source));
 
         return sources.query()
                 .foldWithInitialToResult(initial, Main::runWithSource)
@@ -157,7 +158,7 @@ public final class Main {
     }
 
     private static Query<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = ImmutableDivideState.createInitial(input);
+        var current = Main.createInitial(input);
 
         while (true) {
             var poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
@@ -1269,5 +1270,13 @@ public final class Main {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
+    }
+
+    private static CompileState createInitial() {
+        return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
+    }
+
+    private static DivideState createInitial(String input) {
+        return new ImmutableDivideState(Lists.empty(), "", 0, input, 0);
     }
 }

@@ -84,11 +84,6 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public boolean equalsTo(List<T> other) {
-        return this.equals(other);
-    }
-
-    @Override
     public List<T> removeValue(T element) {
         var copy = new ArrayList<T>(this.list);
         copy.remove(element);

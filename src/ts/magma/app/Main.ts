@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -105,6 +107,8 @@ import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
+import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
+import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
@@ -112,7 +116,7 @@ export class Main {
 	}
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let sources = children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/).map((child: Path) => new Source(sourceDirectory, child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
-		let initial = sources.query().foldWithInitial(CompileState.createInitial(), (state: CompileState, source: Source) => state.addSource(source)/*unknown*/)/*unknown*/;
+		let initial = sources.query().foldWithInitial(Main.createInitial(), (state: CompileState, source: Source) => state.addSource(source)/*unknown*/)/*unknown*/;
 		return sources.query().foldWithInitialToResult(initial, Main.runWithSource).findError()/*unknown*/;
 	}
 	static runWithSource(state: CompileState, source: Source): Result<CompileState, IOError> {
@@ -139,7 +143,7 @@ export class Main {
 		let compiledState = compiled.left()/*unknown*/;
 		let compileState = state.clearImports().clearOutput()/*unknown*/;
 		let segment = compileState.querySources().map((source: Source) => Main.formatSource(source)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
-		let joined = compiledState.getJoined(compiled.right())/*unknown*/;
+		let joined = compiledState.join(compiled.right())/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(compileState, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
 	}
 	static formatSource(source: Source): string {
@@ -171,7 +175,7 @@ export class Main {
 		return cache + element/*unknown*/;
 	}
 	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Query<string> {
-		let current = DivideState.createInitial(input)/*unknown*/;
+		let current = Main.createInitial(input)/*unknown*/;
 		while (true/*unknown*/){
 			let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, string>(current, "\0"))/*unknown*/;
 			if (!poppedTuple0/*unknown*/.left()/*unknown*/){
@@ -325,22 +329,10 @@ export class Main {
 	}
 	static compileNamespaced(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		let stripped = Strings.strip(input)/*unknown*/;
-		if (stripped.startsWith("package ")/*unknown*/){
+		if (stripped.startsWith("package ") || stripped.startsWith("import ")/*unknown*/){
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""))/*unknown*/;
 		}
-		return Main.compileImport(state, stripped)/*unknown*/;
-	}
-	static compileImport(state: CompileState, stripped: string): Option<Tuple2<CompileState, string>> {
-		return Main.compilePrefix(stripped, "import ", (s: string) => Main.compileSuffix(s, ";", (s1: string) => {
-			let divisions = Main.divide(s1, (divideState: DivideState, c: string) => Main.foldDelimited(divideState, c, ".")/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
-			let child = Strings.strip(divisions.findLast().orElse(""))/*unknown*/;
-			let parent = divisions.subList(0, divisions.size() - 1).orElse(Lists.empty())/*unknown*/;
-			if (parent.equalsTo(Lists.of("java", "util", "function"))/*unknown*/){
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""))/*unknown*/;
-			}
-			let compileState = state.addResolvedImport(parent, child)/*unknown*/;
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""))/*unknown*/;
-		})/*unknown*/)/*unknown*/;
+		return new None<Tuple2<CompileState, string>>()/*unknown*/;
 	}
 	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>>>): Tuple2<CompileState, string> {
 		return Main.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(input))/*unknown*/)/*unknown*/;
@@ -772,9 +764,6 @@ export class Main {
 	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, Type> {
 		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right())/*unknown*/).orElseGet(() => new Tuple2Impl<CompileState, Type>(state, new Placeholder(type))/*unknown*/)/*unknown*/;
 	}
-	static compileTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, string> {
-		return Main.compileType(state, type).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Main.generatePlaceholder(type))/*unknown*/)/*unknown*/;
-	}
 	static compileType(state: CompileState, type: string): Option<Tuple2<CompileState, string>> {
 		return Main.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())/*unknown*/)/*unknown*/;
 	}
@@ -930,5 +919,11 @@ export class Main {
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
 		return "/*" + replaced + "*/"/*unknown*/;
+	}
+	static createInitial(): CompileState {
+		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty())/*unknown*/;
+	}
+	static createInitial(input: string): DivideState {
+		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
 	}
 }

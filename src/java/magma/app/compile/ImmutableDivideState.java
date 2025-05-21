@@ -1,6 +1,5 @@
 package magma.app.compile;
 
-import jvm.api.collect.list.Lists;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Query;
@@ -10,11 +9,8 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 
-public record ImmutableDivideState(List<String> segments, String buffer, int depth, String input, int index) implements DivideState {
-    public static DivideState createInitial(String input) {
-        return new ImmutableDivideState(Lists.empty(), "", 0, input, 0);
-    }
-
+public record ImmutableDivideState(List<String> segments, String buffer, int depth, String input,
+                                   int index) implements DivideState {
     @Override
     public Query<String> query() {
         return this.segments.query();
