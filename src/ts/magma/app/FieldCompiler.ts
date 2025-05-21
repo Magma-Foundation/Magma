@@ -114,7 +114,7 @@
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Option } from "../../magma/api/option/Option";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { Strings } from "../../magma/api/text/Strings";
@@ -131,14 +131,15 @@ import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposab
 import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler";
 import { Stack } from "../../magma/app/compile/Stack";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { List } from "../../magma/api/collect/list/List";
 import { Value } from "../../magma/app/compile/value/Value";
 class FieldCompiler {
 	static compileMethod(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (beforeParams: string, withParams: string) => {
+		return SplitComposable.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams)/*unknown*/;
-			return CompilerUtils.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
+			return SplitComposable.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
 				if (state.stack().isWithinLast(name)/*unknown*/){
 					return FieldCompiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams)/*unknown*/;
 				}
@@ -158,7 +159,7 @@ class FieldCompiler {
 		})/*unknown*/;
 	}
 	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (params: string, afterParams: string) => {
+		return SplitComposable.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (params: string, afterParams: string) => {
 			let parametersTuple = DefiningCompiler.parseParameters(state, params)/*unknown*/;
 			let parametersState = parametersTuple.left()/*unknown*/;
 			let parameters = parametersTuple.right()/*unknown*/;

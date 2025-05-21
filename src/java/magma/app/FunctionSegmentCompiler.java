@@ -10,6 +10,7 @@ import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.compose.PrefixComposable;
+import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.Definition;
 import magma.app.compile.rule.OrRule;
@@ -35,7 +36,7 @@ final class FunctionSegmentCompiler {
 
     private static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
         return new SuffixComposable<Tuple2<CompileState, String>>("}", (String withoutEnd) -> {
-            return CompilerUtils.compileSplit(withoutEnd, (String withoutEnd0) -> {
+            return SplitComposable.compileSplit(withoutEnd, (String withoutEnd0) -> {
                 Selector selector = new LastSelector("");
                 return new FoldingSplitter((DivideState state1, char c) -> {
                             return FunctionSegmentCompiler.foldBlockStarts(state1, c);
@@ -167,7 +168,7 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileAssignment(CompileState state, String input) {
-        return CompilerUtils.compileSplit(input, new LocatingSplitter("=", new FirstLocator()), (String destination, String source) -> {
+        return SplitComposable.compileSplit(input, new LocatingSplitter("=", new FirstLocator()), (String destination, String source) -> {
             var sourceTuple = ValueCompiler.compileValueOrPlaceholder(state, source);
 
             var destinationTuple = ValueCompiler.compileValue(sourceTuple.left(), destination)

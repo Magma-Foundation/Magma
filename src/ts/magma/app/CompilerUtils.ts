@@ -132,11 +132,6 @@ import { Strings } from "../../magma/api/text/Strings";
 import { None } from "../../magma/api/option/None";
 import { ValueMerger } from "../../magma/app/compile/merge/ValueMerger";
 import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
-import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
-import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
-import { Splitter } from "../../magma/app/compile/split/Splitter";
-import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
-import { Composable } from "../../magma/app/compile/compose/Composable";
 import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
@@ -189,17 +184,6 @@ export class CompilerUtils {
 	}
 	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
 		return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper)/*unknown*/;
-	}
-	static compileLast<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;
-	}
-	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return new SplitComposable<T>(splitter, CompilerUtils.toComposable(mapper)).apply(input)/*unknown*/;
-	}
-	static toComposable<T>(mapper: (arg0 : string, arg1 : string) => Option<T>): Composable<Tuple2<string, string>, T> {
-		return (tuple: Tuple2<string, string>) => {
-			return mapper(tuple.left(), tuple.right())/*unknown*/;
-		}/*unknown*/;
 	}
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;

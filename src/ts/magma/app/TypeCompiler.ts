@@ -126,9 +126,10 @@ import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Symbol } from "../../magma/app/compile/value/Symbol";
 import { None } from "../../magma/api/option/None";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { List } from "../../magma/api/collect/list/List";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
@@ -188,7 +189,7 @@ class TypeCompiler {
 	}
 	static parseGeneric(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		return new SuffixComposable<Tuple2<CompileState, Type>>(">", (withoutEnd: string) => {
-			return CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (baseString: string, argsString: string) => {
+			return SplitComposable.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (baseString: string, argsString: string) => {
 				let argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (state1: CompileState, s: string) => {
 					return TypeCompiler.compileTypeArgument(state1, s)/*unknown*/;
 				})/*unknown*/;

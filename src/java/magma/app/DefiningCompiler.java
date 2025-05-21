@@ -12,6 +12,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.fold.DelimitedFolder;
 import magma.app.compile.DivideState;
@@ -68,12 +69,12 @@ final class DefiningCompiler {
     }
 
     public static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
-        return CompilerUtils.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> {
-            return CompilerUtils.compileSplit(beforeName, (String beforeName0) -> {
+        return SplitComposable.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> {
+            return SplitComposable.compileSplit(beforeName, (String beforeName0) -> {
                 Selector selector = new LastSelector(" ");
                 return new FoldingSplitter(new TypeSeparatorFolder(), selector).apply(Strings.strip(beforeName0));
             }, (String beforeType, String type) -> {
-                return CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
+                return SplitComposable.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
                     var annotations = DefiningCompiler.parseAnnotations(annotationsString);
                     return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
                 }).or(() -> {
@@ -118,7 +119,7 @@ final class DefiningCompiler {
             String name
     ) {
         return new SuffixComposable<Tuple2<CompileState, Definition>>(">", (String withoutTypeParamEnd) -> {
-            return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String beforeTypeParams, String typeParamsString) -> {
+            return SplitComposable.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String beforeTypeParams, String typeParamsString) -> {
                 var typeParams = DefiningCompiler.divideValues(typeParamsString);
                 return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name);
             });

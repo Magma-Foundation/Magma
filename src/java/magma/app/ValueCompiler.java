@@ -15,6 +15,7 @@ import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.Stack;
 import magma.app.compile.compose.PrefixComposable;
+import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.Definition;
@@ -51,7 +52,7 @@ final class ValueCompiler {
 
     static Option<Tuple2<CompileState, Value>> parseInvokable(CompileState state, String input) {
         return new SuffixComposable<Tuple2<CompileState, Value>>(")", (String withoutEnd) -> {
-            return CompilerUtils.compileSplit(withoutEnd, (String withoutEnd0) -> {
+            return SplitComposable.compileSplit(withoutEnd, (String withoutEnd0) -> {
                 Selector selector = new LastSelector("");
                 return new FoldingSplitter((DivideState state1, char c) -> {
                     return ValueCompiler.foldInvocationStarts(state1, c);
@@ -95,7 +96,7 @@ final class ValueCompiler {
     }
 
     static Option<Tuple2<CompileState, Value>> parseLambda(CompileState state, String input) {
-        return CompilerUtils.compileSplit(input, new LocatingSplitter("->", new FirstLocator()), (String beforeArrow, String afterArrow) -> {
+        return SplitComposable.compileSplit(input, new LocatingSplitter("->", new FirstLocator()), (String beforeArrow, String afterArrow) -> {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
             return new PrefixComposable<Tuple2<CompileState, Value>>("(", (String withoutStart) -> {
                 return new SuffixComposable<Tuple2<CompileState, Value>>(")", (String withoutEnd) -> {
@@ -140,7 +141,7 @@ final class ValueCompiler {
 
     static Rule<Value> createAccessRule(String infix) {
         return (CompileState state, String input) -> {
-            return CompilerUtils.compileLast(input, infix, (String childString, String rawProperty) -> {
+            return SplitComposable.compileLast(input, infix, (String childString, String rawProperty) -> {
                 var property = Strings.strip(rawProperty);
                 if (!ValueCompiler.isSymbol(property)) {
                     return new None<Tuple2<CompileState, Value>>();
@@ -157,7 +158,7 @@ final class ValueCompiler {
 
     static Rule<Value> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (CompileState state1, String input1) -> {
-            return CompilerUtils.compileSplit(input1, (String slice) -> {
+            return SplitComposable.compileSplit(input1, (String slice) -> {
                 return new FoldingSplitter(new OperatorFolder(sourceInfix), (List<String> divisions) -> {
                         return new FirstSelector(sourceInfix).select(divisions);
                     }).apply(slice);

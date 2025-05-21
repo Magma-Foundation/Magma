@@ -12,21 +12,16 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
-import magma.app.compile.compose.Composable;
-import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.divide.FoldedDivider;
 import magma.app.compile.fold.DecoratedFolder;
 import magma.app.compile.fold.Folder;
 import magma.app.compile.fold.StatementsFolder;
 import magma.app.compile.fold.ValueFolder;
-import magma.app.compile.locate.LastLocator;
 import magma.app.compile.merge.Merger;
 import magma.app.compile.merge.StatementsMerger;
 import magma.app.compile.merge.ValueMerger;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
-import magma.app.compile.split.LocatingSplitter;
-import magma.app.compile.split.Splitter;
 import magma.app.compile.text.Whitespace;
 
 import java.util.function.BiFunction;
@@ -100,20 +95,6 @@ public final class CompilerUtils {
 
     static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, Rule<T> mapper) {
         return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper);
-    }
-
-    public static <T> Option<T> compileLast(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper);
-    }
-
-    static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {
-        return new SplitComposable<T>(splitter, CompilerUtils.toComposable(mapper)).apply(input);
-    }
-
-    private static <T> Composable<Tuple2<String, String>, T> toComposable(BiFunction<String, String, Option<T>> mapper) {
-        return (Tuple2<String, String> tuple) -> {
-            return mapper.apply(tuple.left(), tuple.right());
-        };
     }
 
     public static String generatePlaceholder(String input) {

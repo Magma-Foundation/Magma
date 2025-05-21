@@ -11,6 +11,7 @@ import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.Stack;
 import magma.app.compile.compose.PrefixComposable;
+import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.ConstructorHeader;
 import magma.app.compile.define.Definition;
@@ -22,9 +23,9 @@ import magma.app.compile.split.LocatingSplitter;
 
 final class FieldCompiler {
     public static Option<Tuple2<CompileState, String>> compileMethod(CompileState state, String input) {
-        return CompilerUtils.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (String beforeParams, String withParams) -> {
+        return SplitComposable.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (String beforeParams, String withParams) -> {
             var strippedBeforeParams = Strings.strip(beforeParams);
-            return CompilerUtils.compileLast(strippedBeforeParams, " ", (String _, String name) -> {
+            return SplitComposable.compileLast(strippedBeforeParams, " ", (String _, String name) -> {
                 if (state.stack().isWithinLast(name)) {
                     return FieldCompiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
@@ -48,7 +49,7 @@ final class FieldCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
-        return CompilerUtils.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (String params, String afterParams) -> {
+        return SplitComposable.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (String params, String afterParams) -> {
             var parametersTuple = DefiningCompiler.parseParameters(state, params);
 
             var parametersState = parametersTuple.left();
