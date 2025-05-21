@@ -71,17 +71,17 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
+import { Registry } from "../../../magma/app/compile/Registry";
 import { Location } from "../../../magma/app/Location";
 import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
 import { Source } from "../../../magma/app/io/Source";
 import { Platform } from "../../../magma/app/Platform";
 import { Context } from "../../../magma/app/compile/Context";
-import { Registry } from "../../../magma/app/compile/Registry";
 import { Stack } from "../../../magma/app/compile/Stack";
 export interface CompileState {
 	createIndent(): string;
-	addResolvedImport(location: Location): CompileState;
+	mapRegistry(mapper: (arg0 : Registry) => Registry): CompileState;
 	withLocation(location: Location): CompileState;
 	append(element: string): CompileState;
 	pushStructureName(name: string): CompileState;
@@ -91,7 +91,6 @@ export interface CompileState {
 	clearImports(): CompileState;
 	clearOutput(): CompileState;
 	addSource(source: Source): CompileState;
-	addResolvedImportFromCache(base: string): CompileState;
 	popStructureName(): CompileState;
 	withPlatform(platform: Platform): CompileState;
 	context(): Context;

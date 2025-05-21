@@ -17,8 +17,11 @@ import magma.api.option.Some;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.Dependency;
 import magma.app.compile.DivideState;
 import magma.app.compile.ImmutableDivideState;
+import magma.app.compile.Import;
+import magma.app.compile.Registry;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.ConstructorHeader;
 import magma.app.compile.define.Definition;
@@ -41,6 +44,7 @@ import magma.app.compile.value.Not;
 import magma.app.compile.value.Operation;
 import magma.app.compile.value.StringValue;
 import magma.app.compile.value.Value;
+import magma.app.io.Source;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -370,7 +374,7 @@ public class Compiler {
     public static <T> Option<Tuple2<CompileState, T>> or(
             CompileState state,
             String input,
-            Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState,T>>>> rules
+            Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>>> rules
     ) {
         return rules.iter()
                 .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> Compiler.getApply(state, input, rule))
@@ -841,7 +845,7 @@ public class Compiler {
     public static Option<Tuple2<CompileState, Value>> parseSymbol(CompileState state, String input) {
         var stripped = Strings.strip(input);
         if (Compiler.isSymbol(stripped)) {
-            var withImport = state.addResolvedImportFromCache(stripped);
+            var withImport = Compiler.addResolvedImportFromCache0(state, stripped);
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new Symbol(stripped)));
         }
         else {
@@ -1045,7 +1049,7 @@ public class Compiler {
     public static Option<Tuple2<CompileState, Type>> parseSymbolType(CompileState state, String input) {
         var stripped = Strings.strip(input);
         if (Compiler.isSymbol(stripped)) {
-            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new Symbol(stripped)));
+            return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(Compiler.addResolvedImportFromCache0(state, stripped), new Symbol(stripped)));
         }
         return new None<Tuple2<CompileState, Type>>();
     }
@@ -1087,7 +1091,7 @@ public class Compiler {
 
             var base = Strings.strip(baseString);
             return Compiler.assembleFunctionType(argsState, base, args).or(() -> {
-                var compileState = argsState.addResolvedImportFromCache(base);
+                var compileState = Compiler.addResolvedImportFromCache0(argsState, base);
                 return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
             });
         }));
@@ -1243,11 +1247,73 @@ public class Compiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
-        return compileReturn(input1, (String withoutPrefix) -> compileValue(state1, withoutPrefix))
+        return Compiler.compileReturn(input1, (String withoutPrefix) -> Compiler.compileValue(state1, withoutPrefix))
                 .map((Tuple2<CompileState, String> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), state1.createIndent() + tuple.right()));
     }
 
     static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {
-        return compileStatements(state.withLocation(location), input, Compiler::compileRootSegment);
+        return Compiler.compileStatements(state.withLocation(location), input, Compiler::compileRootSegment);
+    }
+
+    public static List<String> fixNamespace(List<String> requestedNamespace, List<String> thisNamespace) {
+        if (thisNamespace.isEmpty()) {
+            return requestedNamespace.addFirst(".");
+        }
+
+        return Compiler.addParentSeparator(requestedNamespace, thisNamespace.size());
+    }
+
+    private static List<String> addParentSeparator(List<String> newNamespace, int count) {
+        var index = 0;
+        var copy = newNamespace;
+        while (index < count) {
+            copy = copy.addFirst("..");
+            index++;
+        }
+
+        return copy;
+    }
+
+    public static Option<CompileState> getCompileState1(CompileState immutableCompileState, Location location) {
+        if (!immutableCompileState.context().hasPlatform(Platform.PlantUML)) {
+            return new None<>();
+        }
+
+        var name = immutableCompileState.context().findNameOrEmpty();
+        var dependency = new Dependency(name, location.name());
+        if (immutableCompileState.registry().containsDependency(dependency)) {
+            return new None<>();
+        }
+
+        return new Some<>(immutableCompileState.mapRegistry((Registry registry1) -> registry1.addDependency(dependency)));
+    }
+
+    public static CompileState getState(CompileState immutableCompileState, Location location) {
+        var requestedNamespace = location.namespace();
+        var requestedChild = location.name();
+
+        var namespace = Compiler.fixNamespace(requestedNamespace, immutableCompileState.context().findNamespaceOrEmpty());
+        if (immutableCompileState.registry().doesImportExistAlready(requestedChild)) {
+            return immutableCompileState;
+        }
+
+        var namespaceWithChild = namespace.addLast(requestedChild);
+        var anImport = new Import(namespaceWithChild, requestedChild);
+        return immutableCompileState.mapRegistry((Registry registry) -> registry.addImport(anImport));
+    }
+
+    public static CompileState addResolvedImportFromCache0(CompileState state, String base) {
+        if (state.stack().hasAnyStructureName(base)) {
+            return state;
+        }
+
+        return state.context()
+                .findSource(base)
+                .map((Source source) -> {
+                    Location location = source.createLocation();
+                    return Compiler.getCompileState1(state, location)
+                            .orElseGet(() -> Compiler.getState(state, location));
+                })
+                .orElse(state);
     }
 }

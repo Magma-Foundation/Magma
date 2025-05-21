@@ -75,6 +75,7 @@ import { List } from "../../../magma/api/collect/list/List";
 import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Option } from "../../../magma/api/option/Option";
 import { Strings } from "../../../magma/api/text/Strings";
+import { Iterable } from "../../../magma/api/collect/list/Iterable";
 export class Stack {
 	structureNames: List<string>;
 	definitions: List<Definition>;
@@ -93,5 +94,14 @@ export class Stack {
 	}
 	resolveValue(name: string): Option<Definition> {
 		return definitions().iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+	}
+	pushStructureName(name: string): Stack {
+		return new Stack(structureNames().addLast(name), definitions())/*unknown*/;
+	}
+	defineAll(definitions: Iterable<Definition>): Stack {
+		return new Stack(structureNames(), definitions().addAll(definitions))/*unknown*/;
+	}
+	popStructureName(): Stack {
+		return new Stack(structureNames().removeLast().orElse(structureNames()), definitions())/*unknown*/;
 	}
 }

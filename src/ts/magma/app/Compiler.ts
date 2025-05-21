@@ -114,6 +114,10 @@ import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
 import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
 import { Location } from "../../magma/app/Location";
+import { Dependency } from "../../magma/app/compile/Dependency";
+import { Registry } from "../../magma/app/compile/Registry";
+import { Import } from "../../magma/app/compile/Import";
+import { Source } from "../../magma/app/io/Source";
 export class Compiler {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return Compiler.compileAll(state, input, Compiler.foldStatements, mapper, Compiler.mergeStatements)/*unknown*/;
@@ -639,7 +643,7 @@ export class Compiler {
 	static parseSymbol(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input)/*unknown*/;
 		if (Compiler.isSymbol(stripped)/*unknown*/){
-			let withImport = state.addResolvedImportFromCache(stripped)/*unknown*/;
+			let withImport = Compiler.addResolvedImportFromCache0(state, stripped)/*unknown*/;
 			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(withImport, new Symbol(stripped)))/*unknown*/;
 		}
 		else {
@@ -774,7 +778,7 @@ export class Compiler {
 	static parseSymbolType(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input)/*unknown*/;
 		if (Compiler.isSymbol(stripped)/*unknown*/){
-			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(state.addResolvedImportFromCache(stripped), new Symbol(stripped)))/*unknown*/;
+			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(Compiler.addResolvedImportFromCache0(state, stripped), new Symbol(stripped)))/*unknown*/;
 		}
 		return new None<Tuple2<CompileState, Type>>()/*unknown*/;
 	}
@@ -807,7 +811,7 @@ export class Compiler {
 			let args = argsTuple.right()/*unknown*/;
 			let base = Strings.strip(baseString)/*unknown*/;
 			return Compiler.assembleFunctionType(argsState, base, args).or(() => {
-				let compileState = argsState.addResolvedImportFromCache(base)/*unknown*/;
+				let compileState = Compiler.addResolvedImportFromCache0(argsState, base)/*unknown*/;
 				return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)))/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/)/*unknown*/;
@@ -918,9 +922,55 @@ export class Compiler {
 		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
 	}
 	static compileReturnWithoutSuffix(state1: CompileState, input1: string): Option<Tuple2<CompileState, string>> {
-		return compileReturn(input1, (withoutPrefix: string) => compileValue(state1, withoutPrefix)/*unknown*/).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), state1.createIndent() + tuple.right())/*unknown*/)/*unknown*/;
+		return Compiler.compileReturn(input1, (withoutPrefix: string) => Compiler.compileValue(state1, withoutPrefix)/*unknown*/).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), state1.createIndent() + tuple.right())/*unknown*/)/*unknown*/;
 	}
 	static compileRoot(state: CompileState, input: string, location: Location): Tuple2<CompileState, string> {
-		return compileStatements(state.withLocation(location), input, Compiler.compileRootSegment)/*unknown*/;
+		return Compiler.compileStatements(state.withLocation(location), input, Compiler.compileRootSegment)/*unknown*/;
+	}
+	static fixNamespace(requestedNamespace: List<string>, thisNamespace: List<string>): List<string> {
+		if (thisNamespace.isEmpty()/*unknown*/){
+			return requestedNamespace.addFirst(".")/*unknown*/;
+		}
+		return Compiler.addParentSeparator(requestedNamespace, thisNamespace.size())/*unknown*/;
+	}
+	static addParentSeparator(newNamespace: List<string>, count: number): List<string> {
+		let index = 0/*unknown*/;
+		let copy = newNamespace/*List<string>*/;
+		while (index < count/*unknown*/){
+			copy/*unknown*/ = copy.addFirst("..")/*unknown*/;
+			index/*number*/++;
+		}
+		return copy/*unknown*/;
+	}
+	static getCompileState1(immutableCompileState: CompileState, location: Location): Option<CompileState> {
+		if (!immutableCompileState/*CompileState*/.context().hasPlatform(Platform.PlantUML)/*unknown*/){
+			return new None<>()/*unknown*/;
+		}
+		let name = immutableCompileState.context().findNameOrEmpty()/*unknown*/;
+		let dependency = new Dependency(name, location.name())/*unknown*/;
+		if (immutableCompileState.registry().containsDependency(dependency)/*unknown*/){
+			return new None<>()/*unknown*/;
+		}
+		return new Some<>(immutableCompileState.mapRegistry((registry1: Registry) => registry1.addDependency(dependency)/*unknown*/))/*unknown*/;
+	}
+	static getState(immutableCompileState: CompileState, location: Location): CompileState {
+		let requestedNamespace = location.namespace()/*unknown*/;
+		let requestedChild = location.name()/*unknown*/;
+		let namespace = Compiler.fixNamespace(requestedNamespace, immutableCompileState.context().findNamespaceOrEmpty())/*unknown*/;
+		if (immutableCompileState.registry().doesImportExistAlready(requestedChild)/*unknown*/){
+			return immutableCompileState/*CompileState*/;
+		}
+		let namespaceWithChild = namespace.addLast(requestedChild)/*unknown*/;
+		let anImport = new Import(namespaceWithChild, requestedChild)/*unknown*/;
+		return immutableCompileState.mapRegistry((registry: Registry) => registry.addImport(anImport)/*unknown*/)/*unknown*/;
+	}
+	static addResolvedImportFromCache0(state: CompileState, base: string): CompileState {
+		if (state.stack().hasAnyStructureName(base)/*unknown*/){
+			return state/*CompileState*/;
+		}
+		return state.context().findSource(base).map((source: Source) => {
+			let location: Location = source.createLocation()/*unknown*/;
+			return Compiler.getCompileState1(state, location).orElseGet(() => Compiler.getState(state, location)/*unknown*/)/*unknown*/;
+		}).orElse(state)/*unknown*/;
 	}
 }

@@ -75,6 +75,7 @@ import { Import } from "../../../magma/app/compile/Import";
 import { List } from "../../../magma/api/collect/list/List";
 import { Dependency } from "../../../magma/app/compile/Dependency";
 import { Iter } from "../../../magma/api/collect/Iter";
+import { Lists } from "../../../jvm/api/collect/list/Lists";
 export class Registry {
 	imports: List<Import>;
 	dependencies: List<Dependency>;
@@ -92,5 +93,20 @@ export class Registry {
 	}
 	queryImports(): Iter<Import> {
 		return imports().iter()/*unknown*/;
+	}
+	addDependency(dependency: Dependency): Registry {
+		return new Registry(imports(), dependencies().addLast(dependency), output())/*unknown*/;
+	}
+	addImport(import_: Import): Registry {
+		return new Registry(imports().addLast(import_), dependencies(), output())/*unknown*/;
+	}
+	append(element: string): Registry {
+		return new Registry(imports(), dependencies(), output() + element)/*unknown*/;
+	}
+	clearImports(): Registry {
+		return new Registry(Lists.empty(), dependencies(), output())/*unknown*/;
+	}
+	containsDependency(dependency: Dependency): boolean {
+		return dependencies().contains(dependency)/*unknown*/;
 	}
 }

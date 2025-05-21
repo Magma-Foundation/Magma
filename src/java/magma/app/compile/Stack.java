@@ -1,5 +1,6 @@
 package magma.app.compile;
 
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.text.Strings;
@@ -24,5 +25,17 @@ public record Stack(List<String> structureNames, List<Definition> definitions) {
         return definitions().iterReversed()
                 .filter((Definition definition) -> definition.isNamed(name))
                 .next();
+    }
+
+    Stack pushStructureName(String name) {
+        return new Stack(structureNames().addLast(name), definitions());
+    }
+
+    Stack defineAll(Iterable<Definition> definitions) {
+        return new Stack(structureNames(), definitions().addAll(definitions));
+    }
+
+    Stack popStructureName() {
+        return new Stack(structureNames().removeLast().orElse(structureNames()), definitions());
     }
 }

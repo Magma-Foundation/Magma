@@ -76,14 +76,10 @@ import { Context } from "../../../magma/app/compile/Context";
 import { Registry } from "../../../magma/app/compile/Registry";
 import { Stack } from "../../../magma/app/compile/Stack";
 import { Location } from "../../../magma/app/Location";
-import { Platform } from "../../../magma/app/Platform";
-import { Dependency } from "../../../magma/app/compile/Dependency";
-import { Lists } from "../../../jvm/api/collect/list/Lists";
-import { Import } from "../../../magma/app/compile/Import";
-import { Some } from "../../../magma/api/option/Some";
 import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
 import { Source } from "../../../magma/app/io/Source";
+import { Platform } from "../../../magma/app/Platform";
 export class ImmutableCompileState implements CompileState {
 	context: Context;
 	registry: Registry;
@@ -98,41 +94,23 @@ export class ImmutableCompileState implements CompileState {
 	createIndent(): string {
 		return "\n" + "\t".repeat(this.depth)/*unknown*/;
 	}
-	addResolvedImport(location: Location): CompileState {
-		if (Platform.PlantUML === this.context().platform()/*unknown*/){
-			let name = this.context().maybeLocation().map(Location.name).orElse("")/*unknown*/;
-			let dependency = new Dependency(name, location.name())/*unknown*/;
-			if (!this/*unknown*/.registry().dependencies().contains(dependency)/*unknown*/){
-				return new ImmutableCompileState(this.context, new Registry(this.registry().imports(), this.registry().dependencies().addLast(dependency), this.registry().output()), this.depth, this.stack)/*unknown*/;
-			}
-		}
-		let requestedNamespace = location.namespace()/*unknown*/;
-		let requestedChild = location.name()/*unknown*/;
-		let thisNamespace = this.context().maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
-		if (thisNamespace.isEmpty()/*unknown*/){
-			requestedNamespace/*unknown*/ = requestedNamespace.addFirst(".")/*unknown*/;
-		}
-		let i = 0/*unknown*/;
-		let size = thisNamespace.size()/*unknown*/;
-		while (i < size/*unknown*/){
-			requestedNamespace/*unknown*/ = requestedNamespace.addFirst("..")/*unknown*/;
-			i/*unknown*/++;
-		}
-		if (this.registry().doesImportExistAlready(requestedChild)/*unknown*/){
-			return this/*unknown*/;
-		}
-		let newNamespace = requestedNamespace.addLast(requestedChild)/*unknown*/;
-		let importString = new Import(newNamespace, requestedChild)/*unknown*/;
-		return new ImmutableCompileState(this.context, new Registry(this.registry().imports().addLast(importString), this.registry().dependencies(), this.registry().output()), this.depth, this.stack)/*unknown*/;
+	mapRegistry(mapper: (arg0 : Registry) => Registry): CompileState {
+		return this.createWithRegistry(mapper(this.registry()))/*unknown*/;
+	}
+	createWithRegistry(registry: Registry): CompileState {
+		return new ImmutableCompileState(this.context, registry, this.depth, this.stack)/*unknown*/;
 	}
 	withLocation(location: Location): CompileState {
-		return new ImmutableCompileState(new Context(this.context().platform(), new Some<Location>(location), this.context().sources()), this.registry, this.depth, this.stack)/*unknown*/;
+		return this.createWithContext(this.context.withLocation(location))/*unknown*/;
+	}
+	createWithContext(context: Context): CompileState {
+		return new ImmutableCompileState(context, this.registry, this.depth, this.stack)/*unknown*/;
 	}
 	append(element: string): CompileState {
-		return new ImmutableCompileState(this.context, new Registry(this.registry().imports(), this.registry().dependencies(), this.registry().output() + element), this.depth, this.stack)/*unknown*/;
+		return this.createWithRegistry(this.registry().append(element))/*unknown*/;
 	}
 	pushStructureName(name: string): CompileState {
-		return new ImmutableCompileState(this.context, this.registry, this.depth, new Stack(this.stack().structureNames().addLast(name), this.stack().definitions()))/*unknown*/;
+		return this.createWithStack(this.stack().pushStructureName(name))/*unknown*/;
 	}
 	enterDepth(): CompileState {
 		return new ImmutableCompileState(this.context, this.registry, this.depth + 1, this.stack)/*unknown*/;
@@ -141,28 +119,25 @@ export class ImmutableCompileState implements CompileState {
 		return new ImmutableCompileState(this.context, this.registry, this.depth - 1, this.stack)/*unknown*/;
 	}
 	defineAll(definitions: Iterable<Definition>): CompileState {
-		return new ImmutableCompileState(this.context, this.registry, this.depth, new Stack(this.stack().structureNames(), this.stack().definitions().addAll(definitions)))/*unknown*/;
+		return this.createWithStack(this.stack().defineAll(definitions))/*unknown*/;
 	}
 	clearImports(): CompileState {
-		return new ImmutableCompileState(this.context, new Registry(Lists.empty(), this.registry().dependencies(), this.registry().output()), this.depth, this.stack)/*unknown*/;
+		return this.createWithRegistry(this.registry().clearImports())/*unknown*/;
 	}
 	clearOutput(): CompileState {
-		return new ImmutableCompileState(this.context, new Registry(this.registry().imports(), this.registry().dependencies(), ""), this.depth, this.stack)/*unknown*/;
+		return this.createWithRegistry(new Registry(this.registry().imports(), this.registry().dependencies(), ""))/*unknown*/;
 	}
 	addSource(source: Source): CompileState {
-		return new ImmutableCompileState(new Context(this.context().platform(), this.context().maybeLocation(), this.context().sources().addLast(source)), this.registry, this.depth, this.stack)/*unknown*/;
-	}
-	addResolvedImportFromCache(base: string): CompileState {
-		if (this.stack().hasAnyStructureName(base)/*unknown*/){
-			return this/*unknown*/;
-		}
-		return this.context().findSource(base).map((source: Source) => this.addResolvedImport(source.createLocation())/*unknown*/).orElse(this)/*unknown*/;
+		return this.createWithContext(this.context().addSource(source))/*unknown*/;
 	}
 	popStructureName(): CompileState {
-		return new ImmutableCompileState(this.context, this.registry, this.depth, new Stack(this.stack().structureNames().removeLast().orElse(this.stack().structureNames()), this.stack().definitions()))/*unknown*/;
+		return this.createWithStack(this.stack().popStructureName())/*unknown*/;
+	}
+	createWithStack(stack: Stack): CompileState {
+		return new ImmutableCompileState(this.context, this.registry, this.depth, stack)/*unknown*/;
 	}
 	withPlatform(platform: Platform): CompileState {
-		return new ImmutableCompileState(new Context(platform, this.context().maybeLocation(), this.context().sources()), this.registry, this.depth, new Stack(this.stack().structureNames().removeLast().orElse(this.stack().structureNames()), this.stack().definitions()))/*unknown*/;
+		return new ImmutableCompileState(new Context(platform, this.context().maybeLocation(), this.context().sources()), this.registry, this.depth, this.stack)/*unknown*/;
 	}
 	context(): Context {
 		return this.context/*unknown*/;

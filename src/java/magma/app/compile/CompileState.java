@@ -6,10 +6,12 @@ import magma.app.Platform;
 import magma.app.compile.define.Definition;
 import magma.app.io.Source;
 
+import java.util.function.Function;
+
 public interface CompileState {
     String createIndent();
 
-    CompileState addResolvedImport(Location location);
+    CompileState mapRegistry(Function<Registry, Registry> mapper);
 
     CompileState withLocation(Location location);
 
@@ -28,8 +30,6 @@ public interface CompileState {
     CompileState clearOutput();
 
     CompileState addSource(Source source);
-
-    CompileState addResolvedImportFromCache(String base);
 
     CompileState popStructureName();
 

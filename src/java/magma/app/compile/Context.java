@@ -1,8 +1,10 @@
 package magma.app.compile;
 
+import jvm.api.collect.list.Lists;
 import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.Location;
 import magma.app.Platform;
@@ -21,5 +23,23 @@ public record Context(Platform platform, Option<Location> maybeLocation, List<So
         return this.iterSources()
                 .filter((Source source) -> Strings.equalsTo(source.createLocation().name(), name))
                 .next();
+    }
+
+    Context withLocation(Location location) {
+        return new Context(platform(), new Some<Location>(location), sources());
+    }
+
+    Context addSource(Source source) {
+        return new Context(platform(), maybeLocation(), sources().addLast(source));
+    }
+
+    public List<String> findNamespaceOrEmpty() {
+        return maybeLocation()
+                .map(Location::namespace)
+                .orElse(Lists.empty());
+    }
+
+    public String findNameOrEmpty() {
+        return maybeLocation().map(Location::name).orElse("");
     }
 }

@@ -78,6 +78,8 @@ import { Source } from "../../../magma/app/io/Source";
 import { List } from "../../../magma/api/collect/list/List";
 import { Iter } from "../../../magma/api/collect/Iter";
 import { Strings } from "../../../magma/api/text/Strings";
+import { Some } from "../../../magma/api/option/Some";
+import { Lists } from "../../../jvm/api/collect/list/Lists";
 export class Context {
 	platform: Platform;
 	maybeLocation: Option<Location>;
@@ -95,5 +97,17 @@ export class Context {
 	}
 	findSource(name: string): Option<Source> {
 		return this.iterSources().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
+	}
+	withLocation(location: Location): Context {
+		return new Context(platform(), new Some<Location>(location), sources())/*unknown*/;
+	}
+	addSource(source: Source): Context {
+		return new Context(platform(), maybeLocation(), sources().addLast(source))/*unknown*/;
+	}
+	findNamespaceOrEmpty(): List<string> {
+		return maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
+	}
+	findNameOrEmpty(): string {
+		return maybeLocation().map(Location.name).orElse("")/*unknown*/;
 	}
 }
