@@ -103,12 +103,20 @@ public final class Main {
 
     private static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, String input) {
         var namespace = source.computeNamespace();
-        var output = Main.compileRoot(state, input, namespace);
+        var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
+        var compiledState = compiled.left();
 
-        if (state.hasPlatform(Platform.PlantUML)) {
-            return new Ok<>(output.left());
+        if (compiledState.hasPlatform(Platform.PlantUML)) {
+            return new Ok<>(compiledState);
         }
 
+        var segment = state.querySources()
+                .map((Source source1) -> Main.formatSource(source1))
+                .collect(new Joiner(", "))
+                .orElse("");
+
+        var joined = compiledState.join(compiled.right());
+        var output = (Tuple2<CompileState, String>) new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
         return Main.writeTarget(source, output.left().clearImports().clearOutput(), output.right());
     }
 
@@ -133,19 +141,6 @@ public final class Main {
         }
 
         return parent.createDirectories();
-    }
-
-    private static Tuple2<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
-        var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
-        var compiledState = compiled.left();
-
-        var segment = state.querySources()
-                .map((Source source) -> Main.formatSource(source))
-                .collect(new Joiner(", "))
-                .orElse("");
-
-        var joined = compiledState.join(compiled.right());
-        return new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
     }
 
     private static String formatSource(Source source) {

@@ -1,98 +1,45 @@
-/*[
-	JVMList: jvm.api.collect.list, 
-	Lists: jvm.api.collect.list, 
-	Files: jvm.api.io, 
-	Actual: magma.annotate, 
-	Namespace: magma.annotate, 
-	Collector: magma.api.collect, 
-	EmptyHead: magma.api.collect.head, 
-	FlatMapHead: magma.api.collect.head, 
-	Head: magma.api.collect.head, 
-	HeadedIter: magma.api.collect.head, 
-	MapHead: magma.api.collect.head, 
-	RangeHead: magma.api.collect.head, 
-	SingleHead: magma.api.collect.head, 
-	Iter: magma.api.collect, 
-	Iters: magma.api.collect, 
-	Joiner: magma.api.collect, 
-	List: magma.api.collect.list, 
-	ListCollector: magma.api.collect.list, 
-	Console: magma.api.io, 
-	IOError: magma.api.io, 
-	Path: magma.api.io, 
-	None: magma.api.option, 
-	Option: magma.api.option, 
-	Some: magma.api.option, 
-	Err: magma.api.result, 
-	Ok: magma.api.result, 
-	Result: magma.api.result, 
-	Characters: magma.api.text, 
-	Strings: magma.api.text, 
-	Tuple2: magma.api, 
-	Tuple2Impl: magma.api, 
-	CompileState: magma.app.compile, 
-	ConstructionCaller: magma.app.compile.define, 
-	ConstructorHeader: magma.app.compile.define, 
-	Definition: magma.app.compile.define, 
-	MethodHeader: magma.app.compile.define, 
-	Parameter: magma.app.compile.define, 
-	DivideState: magma.app.compile, 
-	ImmutableCompileState: magma.app.compile, 
-	ImmutableDivideState: magma.app.compile, 
-	Import: magma.app.compile, 
-	Placeholder: magma.app.compile.text, 
-	Symbol: magma.app.compile.text, 
-	Whitespace: magma.app.compile.text, 
-	FunctionType: magma.app.compile.type, 
-	PrimitiveType: magma.app.compile.type, 
-	TemplateType: magma.app.compile.type, 
-	Type: magma.app.compile.type, 
-	VariadicType: magma.app.compile.type, 
-	AccessValue: magma.app.compile.value, 
-	Argument: magma.app.compile.value, 
-	Caller: magma.app.compile.value, 
-	Invokable: magma.app.compile.value, 
-	Lambda: magma.app.compile.value, 
-	Not: magma.app.compile.value, 
-	Operation: magma.app.compile.value, 
-	StringValue: magma.app.compile.value, 
-	Value: magma.app.compile.value, 
-	Source: magma.app.io, 
-	Main: magma.app, 
-	Platform: magma.app
-]*/
+import { List } from "../../../../magma/api/collect/list/List";
+import { Path } from "../../../magma/api/io/Path";
+import { Head } from "../../../../magma/api/collect/head/Head";
+import { Option } from "../../../../magma/api/option/Option";
+import { None } from "../../../../magma/api/option/None";
+import { Iter } from "../../../../magma/api/collect/Iter";
+import { Collector } from "../../../../magma/api/collect/Collector";
+import { MapHead } from "../../../../magma/api/collect/head/MapHead";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
+import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
+import { Result } from "../../../../magma/api/result/Result";
+import { Ok } from "../../../../magma/api/result/Ok";
+import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
+import { Some } from "../../../../magma/api/option/Some";
+import { HeadedIter } from "../../../magma/api/collect/head/HeadedIter";
+import { Lists } from "../../../../jvm/api/collect/list/Lists";
+import { IOError } from "../../../magma/api/io/IOError";
+import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
+import { Import } from "../../../magma/app/compile/Import";
+import { Source } from "../../../magma/app/io/Source";
+import { Definition } from "../../../magma/app/compile/define/Definition";
+import { Platform } from "../../../magma/app/Platform";
+import { Caller } from "../../../../magma/app/compile/value/Caller";
+import { Value } from "../../../../magma/app/compile/value/Value";
+import { MethodHeader } from "../../../../magma/app/compile/define/MethodHeader";
+import { Type } from "../../../../magma/app/compile/type/Type";
+import { Joiner } from "../../../../magma/api/collect/Joiner";
+import { Main } from "../../../../magma/app/Main";
+import { Strings } from "../../../../magma/api/text/Strings";
+import { CompileState } from "../../../magma/app/compile/CompileState";
+import { DivideState } from "../../../magma/app/compile/DivideState";
+import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
+import { Parameter } from "../../../../magma/app/compile/define/Parameter";
+import { Argument } from "../../../../magma/app/compile/value/Argument";
+import { ListCollector } from "../../../magma/api/collect/list/ListCollector";
 import { Files } from "../../jvm/api/io/Files";
-import { IOError } from "../../magma/api/io/IOError";
 import { Console } from "../../magma/api/io/Console";
-import { CompileState } from "../../magma/app/compile/CompileState";
-import { Result } from "../../magma/api/result/Result";
-import { Path } from "../../magma/api/io/Path";
 import { Iters } from "../../magma/api/collect/Iters";
-import { Platform } from "../../magma/app/Platform";
-import { List } from "../../magma/api/collect/list/List";
-import { Source } from "../../magma/app/io/Source";
 import { Err } from "../../magma/api/result/Err";
-import { ListCollector } from "../../magma/api/collect/list/ListCollector";
-import { Ok } from "../../magma/api/result/Ok";
-import { Joiner } from "../../magma/api/collect/Joiner";
-import { Option } from "../../magma/api/option/Option";
-import { None } from "../../magma/api/option/None";
-import { Tuple2 } from "../../magma/api/Tuple2";
-import { DivideState } from "../../magma/app/compile/DivideState";
-import { Some } from "../../magma/api/option/Some";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Lists } from "../../jvm/api/collect/list/Lists";
-import { Iter } from "../../magma/api/collect/Iter";
-import { Strings } from "../../magma/api/text/Strings";
-import { Type } from "../../magma/app/compile/type/Type";
-import { Definition } from "../../magma/app/compile/define/Definition";
-import { Parameter } from "../../magma/app/compile/define/Parameter";
 import { ConstructorHeader } from "../../magma/app/compile/define/ConstructorHeader";
-import { MethodHeader } from "../../magma/app/compile/define/MethodHeader";
-import { Value } from "../../magma/app/compile/value/Value";
 import { ConstructionCaller } from "../../magma/app/compile/define/ConstructionCaller";
-import { Caller } from "../../magma/app/compile/value/Caller";
-import { Argument } from "../../magma/app/compile/value/Argument";
 import { Invokable } from "../../magma/app/compile/value/Invokable";
 import { StringValue } from "../../magma/app/compile/value/StringValue";
 import { Not } from "../../magma/app/compile/value/Not";
@@ -100,17 +47,1034 @@ import { Lambda } from "../../magma/app/compile/value/Lambda";
 import { AccessValue } from "../../magma/app/compile/value/AccessValue";
 import { Operation } from "../../magma/app/compile/value/Operation";
 import { Symbol } from "../../magma/app/compile/text/Symbol";
-import { HeadedIter } from "../../magma/api/collect/head/HeadedIter";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../magma/api/text/Characters";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { Placeholder } from "../../magma/app/compile/text/Placeholder";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
-import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
+export interface ListsInstance {
+	empty<T>(): List<T>;
+
+	of<T>(...elements: T[]): List<T>;
+
+}
+export declare const Lists: ListsInstance;
+export interface FilesInstance {
+	get(first: string, ...more: string[]): Path;
+
+}
+export declare const Files: FilesInstance;
+export interface Actual {
+}
+export interface Namespace {
+}
+export interface Collector<T, C> {
+	createInitial(): C;
+	fold(current: C, element: T): C;
+}
+export class EmptyHead<T> implements Head<T> {
+	next(): Option<T> {
+		return new None<T>()/*unknown*/;
+	}
+}
+export class FlatMapHead<T, R> implements Head<R> {
+	mapper: (arg0 : T) => Iter<R>;
+	head: Head<T>;
+	current: Iter<R>;
+	constructor (head: Head<T>, initial: Iter<R>, mapper: (arg0 : T) => Iter<R>) {
+		this.head/*unknown*/ = head/*Head<T>*/;
+		this.current/*unknown*/ = initial/*Iter<R>*/;
+		this.mapper/*unknown*/ = mapper/*(arg0 : T) => Iter<R>*/;
+	}
+	next(): Option<R> {
+		while (true/*unknown*/){
+			let next = this.current.next()/*unknown*/;
+			if (next.isPresent()/*unknown*/){
+				return next/*unknown*/;
+			}
+			let tuple = this.head.next().map(this.mapper).toTuple(this.current)/*unknown*/;
+			if (tuple.left()/*unknown*/){
+				this.current/*unknown*/ = tuple.right()/*unknown*/;
+			}
+			else {
+				return new None<R>()/*unknown*/;
+			}
+		}
+	}
+}
+export interface Head<T> {
+	next(): Option<T>;
+}
+export class HeadedIter<T> implements Iter<T> {
+	head: Head<T>;
+	constructor (head: Head<T>) {
+		this.head = head;
+	}
+	next(): Option<T> {
+		return this.head.next()/*unknown*/;
+	}
+	collect<C>(collector: Collector<T, C>): C {
+		return this.foldWithInitial(collector.createInitial(), collector.fold)/*unknown*/;
+	}
+	map<R>(mapper: (arg0 : T) => R): Iter<R> {
+		return new HeadedIter<R>(new MapHead<T, R>(this.head, mapper))/*unknown*/;
+	}
+	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
+		let result: R = initial/*R*/;
+		while (true/*unknown*/){
+			let finalResult: R = result/*unknown*/;
+			let maybeNext: Tuple2<boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)/*unknown*/).toTuple(finalResult)/*unknown*/;
+			if (maybeNext.left()/*unknown*/){
+				result/*unknown*/ = maybeNext.right()/*unknown*/;
+			}
+			else {
+				return result/*unknown*/;
+			}
+		}
+	}
+	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
+		return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder)/*unknown*/)/*unknown*/;
+	}
+	flatMap<R>(mapper: (arg0 : T) => Iter<R>): Iter<R> {
+		return this.head.next().map(mapper).map((initial: Iter<R>) => new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper))/*unknown*/).orElseGet(() => new HeadedIter<R>(new EmptyHead<R>())/*unknown*/)/*unknown*/;
+	}
+	allMatch(predicate: (arg0 : T) => boolean): boolean {
+		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => maybeAllTrue && predicate(element)/*unknown*/)/*unknown*/;
+	}
+	anyMatch(predicate: (arg0 : T) => boolean): boolean {
+		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t)/*unknown*/)/*unknown*/;
+	}
+	foldWithInitialToResult<R, X>(initial: R, folder: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
+		return this.foldWithInitial(new Ok<R, X>(initial), (rxResult: Result<R, X>, element: T) => rxResult.flatMapValue((inner: R) => folder(inner, element)/*unknown*/)/*unknown*/)/*unknown*/;
+	}
+	filter(predicate: (arg0 : T) => boolean): Iter<T> {
+		return this.flatMap((element: T) => {
+			if (predicate(element)/*unknown*/){
+				return new HeadedIter<T>(new SingleHead<T>(element))/*unknown*/;
+			}
+			else {
+				return new HeadedIter<T>(new EmptyHead<T>())/*unknown*/;
+			}
+		})/*unknown*/;
+	}
+}
+export class MapHead<T, R> implements Head<R> {
+	head: Head<T>;
+	mapper: (arg0 : T) => R;
+	constructor (head: Head<T>, mapper: (arg0 : T) => R) {
+		this.head = head;
+		this.mapper = mapper;
+	}
+	next(): Option<R> {
+		return this.head.next().map(this.mapper)/*unknown*/;
+	}
+}
+export class RangeHead implements Head<number> {
+	length: number;
+	counter: number;
+	constructor (length: number) {
+		this.length/*unknown*/ = length/*number*/;
+		this.counter/*unknown*/ = 0/*unknown*/;
+	}
+	next(): Option<number> {
+		if (this.counter >= this.length/*unknown*/){
+			return new None<number>()/*unknown*/;
+		}
+		let value = this.counter/*unknown*/;
+		this.counter/*unknown*/++;
+		return new Some<number>(value)/*unknown*/;
+	}
+}
+export class SingleHead<T> implements Head<T> {
+	element: T;
+	retrieved: boolean;
+	constructor (element: T) {
+		this.element/*unknown*/ = element/*T*/;
+		this.retrieved/*unknown*/ = false/*unknown*/;
+	}
+	next(): Option<T> {
+		if (this.retrieved/*unknown*/){
+			return new None<T>()/*unknown*/;
+		}
+		this.retrieved/*unknown*/ = true/*unknown*/;
+		return new Some<T>(this.element)/*unknown*/;
+	}
+}
+export interface Iter<T> {
+	collect<C>(collector: Collector<T, C>): C;
+	map<R>(mapper: (arg0 : T) => R): Iter<R>;
+	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R;
+	foldWithMapper<R>(mapper: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R>;
+	flatMap<R>(mapper: (arg0 : T) => Iter<R>): Iter<R>;
+	next(): Option<T>;
+	allMatch(predicate: (arg0 : T) => boolean): boolean;
+	filter(predicate: (arg0 : T) => boolean): Iter<T>;
+	anyMatch(predicate: (arg0 : T) => boolean): boolean;
+	foldWithInitialToResult<R, X>(initial: R, folder: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X>;
+}
+export class Iters {
+	static fromOption<T>(option: Option<T>): Iter<T> {
+		return new HeadedIter<T>(option.map((element: T) => Iters.getTSingleHead(element)/*unknown*/).orElseGet(() => new EmptyHead<T>()/*unknown*/))/*unknown*/;
+	}
+	static getTSingleHead<T>(element: T): Head<T> {
+		return new SingleHead<T>(element)/*unknown*/;
+	}
+	static fromArray<T>(): Iter<T> {
+		/*return new HeadedIter<>(new RangeHead(array.length)).map((Integer index) -> array[index])*/;
+	}
+}
+export class Joiner implements Collector<string, Option<string>> {
+	delimiter: string;
+	constructor (delimiter: string) {
+		this.delimiter = delimiter;
+	}
+	static empty(): Joiner {
+		return new Joiner("")/*unknown*/;
+	}
+	createInitial(): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+	fold(maybe: Option<string>, element: string): Option<string> {
+		return new Some<string>(maybe.map((inner: string) => inner + this.delimiter + element/*unknown*/).orElse(element))/*unknown*/;
+	}
+}
+export interface List<T> {
+	addLast(element: T): List<T>;
+	query(): Iter<T>;
+	size(): number;
+	subList(startInclusive: number, endExclusive: number): Option<List<T>>;
+	findLast(): Option<T>;
+	findFirst(): Option<T>;
+	find(index: number): Option<T>;
+	queryWithIndices(): Iter<Tuple2<number, T>>;
+	addAll(others: List<T>): List<T>;
+	contains(element: T): boolean;
+	queryReversed(): Iter<T>;
+	addFirst(element: T): List<T>;
+	isEmpty(): boolean;
+	removeValue(element: T): List<T>;
+	removeLast(): Option<List<T>>;
+}
+export class ListCollector<T> implements Collector<T, List<T>> {
+	createInitial(): List<T> {
+		return Lists.empty()/*unknown*/;
+	}
+	fold(current: List<T>, element: T): List<T> {
+		return current.addLast(element)/*unknown*/;
+	}
+}
+export interface ConsoleInstance {
+	printErrLn(message: string): void;
+
+}
+export declare const Console: ConsoleInstance;
+export interface IOError {
+	display(): string;
+}
+export interface Path {
+	writeString(output: string): Option<IOError>;
+	readString(): Result<string, IOError>;
+	resolveSibling(siblingName: string): Path;
+	walk(): Result<List<Path>, IOError>;
+	findFileName(): string;
+	endsWith(suffix: string): boolean;
+	relativize(source: Path): Path;
+	getParent(): Path;
+	query(): Iter<string>;
+	resolveChildSegments(children: List<string>): Path;
+	resolveChild(name: string): Path;
+	exists(): boolean;
+	createDirectories(): Option<IOError>;
+}
+export class None<T> implements Option<T> {
+	map<R>(mapper: (arg0 : T) => R): Option<R> {
+		return new None<R>()/*unknown*/;
+	}
+	orElse(other: T): T {
+		return other/*T*/;
+	}
+	orElseGet(supplier: () => T): T {
+		return supplier()/*unknown*/;
+	}
+	isPresent(): boolean {
+		return false/*unknown*/;
+	}
+	ifPresent(consumer: (arg0 : T) => void): void {
+	}
+	or(other: () => Option<T>): Option<T> {
+		return other()/*unknown*/;
+	}
+	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
+		return new None<R>()/*unknown*/;
+	}
+	filter(predicate: (arg0 : T) => boolean): Option<T> {
+		return new None<T>()/*unknown*/;
+	}
+	toTuple(other: T): Tuple2<boolean, T> {
+		return new Tuple2Impl<boolean, T>(false, other)/*unknown*/;
+	}
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+		return new None<Tuple2<T, R>>()/*unknown*/;
+	}
+}
+export interface Option<T> {
+	map<R>(mapper: (arg0 : T) => R): Option<R>;
+	orElse(other: T): T;
+	orElseGet(supplier: () => T): T;
+	isPresent(): boolean;
+	ifPresent(consumer: (arg0 : T) => void): void;
+	or(other: () => Option<T>): Option<T>;
+	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R>;
+	filter(predicate: (arg0 : T) => boolean): Option<T>;
+	toTuple(other: T): Tuple2<boolean, T>;
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>>;
+}
+export class Some<T> implements Option<T> {
+	value: T;
+	constructor (value: T) {
+		this.value = value;
+	}
+	map<R>(mapper: (arg0 : T) => R): Option<R> {
+		return new Some<R>(mapper(this.value))/*unknown*/;
+	}
+	orElse(other: T): T {
+		return this.value/*unknown*/;
+	}
+	orElseGet(supplier: () => T): T {
+		return this.value/*unknown*/;
+	}
+	isPresent(): boolean {
+		return true/*unknown*/;
+	}
+	ifPresent(consumer: (arg0 : T) => void): void {
+		consumer(this.value)/*unknown*/;
+	}
+	or(other: () => Option<T>): Option<T> {
+		return this/*unknown*/;
+	}
+	flatMap<R>(mapper: (arg0 : T) => Option<R>): Option<R> {
+		return mapper(this.value)/*unknown*/;
+	}
+	filter(predicate: (arg0 : T) => boolean): Option<T> {
+		if (predicate(this.value)/*unknown*/){
+			return this/*unknown*/;
+		}
+		return new None<T>()/*unknown*/;
+	}
+	toTuple(other: T): Tuple2<boolean, T> {
+		return new Tuple2Impl<boolean, T>(true, this.value)/*unknown*/;
+	}
+	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
+		return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue)/*unknown*/)/*unknown*/;
+	}
+}
+export class Err<T, X> implements Result<T, X> {
+	error: X;
+	constructor (error: X) {
+		this.error = error;
+	}
+	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+		return whenErr(this.error)/*unknown*/;
+	}
+	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
+		return new Err<R, X>(this.error)/*unknown*/;
+	}
+	findError(): Option<X> {
+		return new Some<X>(this.error)/*unknown*/;
+	}
+}
+export class Ok<T, X> implements Result<T, X> {
+	value: T;
+	constructor (value: T) {
+		this.value = value;
+	}
+	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
+		return whenOk(this.value)/*unknown*/;
+	}
+	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
+		return mapper(this.value)/*unknown*/;
+	}
+	findError(): Option<X> {
+		return new None<X>()/*unknown*/;
+	}
+}
+export interface Result<T, X> {
+	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R;
+	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X>;
+	findError(): Option<X>;
+}
+export interface CharactersInstance {
+	isDigit(c: string): boolean;
+
+	isLetter(c: string): boolean;
+
+}
+export declare const Characters: CharactersInstance;
+export interface StringsInstance {
+	length(stripped: string): number;
+
+	sliceBetween(input: string, startInclusive: number, endExclusive: number): string;
+
+	sliceFrom(input: string, startInclusive: number): string;
+
+	isEmpty(cache: string): boolean;
+
+	equalsTo(left: string, right: string): boolean;
+
+	strip(input: string): string;
+
+	isBlank(value: string): boolean;
+
+}
+export declare const Strings: StringsInstance;
+export interface Tuple2<A, B> {
+	left(): A;
+	right(): B;
+}
+export class Tuple2Impl<A, B> implements Tuple2<A, B> {
+	leftValue: A;
+	rightValue: B;
+	constructor (leftValue: A, rightValue: B) {
+		this.leftValue = leftValue;
+		this.rightValue = rightValue;
+	}
+	left(): A {
+		return this.leftValue/*unknown*/;
+	}
+	right(): B {
+		return this.rightValue/*unknown*/;
+	}
+}
+export interface CompileState {
+	join(otherOutput: string): string;
+	queryImports(): Iter<Import>;
+	querySources(): Iter<Source>;
+	createIndent(): string;
+	findLastStructureName(): Option<string>;
+	isLastWithin(name: string): boolean;
+	addResolvedImport(parent: List<string>, child: string): CompileState;
+	withNamespace(namespace: List<string>): CompileState;
+	append(element: string): CompileState;
+	pushStructureName(name: string): CompileState;
+	enterDepth(): CompileState;
+	exitDepth(): CompileState;
+	defineAll(definitions: List<Definition>): CompileState;
+	resolve(name: string): Option<Definition>;
+	clearImports(): CompileState;
+	clearOutput(): CompileState;
+	addSource(source: Source): CompileState;
+	findSource(name: string): Option<Source>;
+	addResolvedImportFromCache(base: string): CompileState;
+	popStructureName(): CompileState;
+	withPlatform(platform: Platform): CompileState;
+	hasPlatform(platform: Platform): boolean;
+}
+export class ConstructionCaller implements Caller {
+	right: string;
+	constructor (right: string) {
+		this.right = right;
+	}
+	generate(): string {
+		return "new " + this.right/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+}
+export class ConstructorHeader implements MethodHeader {
+	generateWithAfterName(afterName: string): string {
+		return "constructor " + afterName/*unknown*/;
+	}
+	hasAnnotation(annotation: string): boolean {
+		return false/*unknown*/;
+	}
+	removeModifier(modifier: string): MethodHeader {
+		return this/*unknown*/;
+	}
+}
+export class Definition {
+	annotations: List<string>;
+	modifiers: List<string>;
+	typeParams: List<string>;
+	type: Type;
+	name: string;
+	constructor (annotations: List<string>, modifiers: List<string>, typeParams: List<string>, type: Type, name: string) {
+		this.annotations = annotations;
+		this.modifiers = modifiers;
+		this.typeParams = typeParams;
+		this.type = type;
+		this.name = name;
+	}
+	findType(): Type {
+		return this.type/*unknown*/;
+	}
+	toAssignment(): string {
+		return "\n\t\tthis." + this.name + " = " + this.name + ";"/*unknown*/;
+	}
+	generate(): string {
+		return this.generateWithAfterName("")/*unknown*/;
+	}
+	asDefinition(): Option<Definition> {
+		return new Some<Definition>(this)/*unknown*/;
+	}
+	generateWithAfterName(afterName: string): string {
+		let joinedTypeParams = this.joinTypeParams()/*unknown*/;
+		let joinedModifiers = this.modifiers.query().map((value: string) => value + " "/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType()/*unknown*/;
+	}
+	generateType(): string {
+		if (this.type.isVar()/*unknown*/){
+			return ""/*unknown*/;
+		}
+		return ": " + this.type.generate()/*unknown*/;
+	}
+	joinTypeParams(): string {
+		return Main.joinTypeParams(this.typeParams)/*unknown*/;
+	}
+	hasAnnotation(annotation: string): boolean {
+		return this.annotations.contains(annotation)/*unknown*/;
+	}
+	removeModifier(modifier: string): MethodHeader {
+		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name)/*unknown*/;
+	}
+	isNamed(name: string): boolean {
+		return Strings.equalsTo(this.name, name)/*unknown*/;
+	}
+}
+export interface MethodHeader {
+	generateWithAfterName(afterName: string): string;
+	hasAnnotation(annotation: string): boolean;
+	removeModifier(modifier: string): MethodHeader;
+}
+export interface Parameter {
+	generate(): string;
+	asDefinition(): Option<Definition>;
+}
+export interface DivideState {
+	query(): Iter<string>;
+	advance(): DivideState;
+	append(c: string): DivideState;
+	isLevel(): boolean;
+	enter(): DivideState;
+	exit(): DivideState;
+	isShallow(): boolean;
+	pop(): Option<Tuple2<DivideState, string>>;
+	popAndAppendToTuple(): Option<Tuple2<DivideState, string>>;
+	popAndAppendToOption(): Option<DivideState>;
+	peek(): string;
+	startsWith(slice: string): boolean;
+}
+export class ImmutableCompileState implements CompileState {
+	imports: List<Import>;
+	output: string;
+	structureNames: List<string>;
+	depth: number;
+	definitions: List<Definition>;
+	maybeNamespace: Option<List<string>>;
+	sources: List<Source>;
+	platform: Platform;
+	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>, sources: List<Source>, platform: Platform) {
+		this.imports = imports;
+		this.output = output;
+		this.structureNames = structureNames;
+		this.depth = depth;
+		this.definitions = definitions;
+		this.maybeNamespace = maybeNamespace;
+		this.sources = sources;
+		this.platform = platform;
+	}
+	join(otherOutput: string): string {
+		let joinedImports = this.queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		return joinedImports + this.output + otherOutput/*unknown*/;
+	}
+	querySources(): Iter<Source> {
+		return this.sources.query()/*unknown*/;
+	}
+	createIndent(): string {
+		return "\n" + "\t".repeat(this.depth)/*unknown*/;
+	}
+	findLastStructureName(): Option<string> {
+		return this.structureNames.findLast()/*unknown*/;
+	}
+	isLastWithin(name: string): boolean {
+		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
+	}
+	addResolvedImport(parent: List<string>, child: string): CompileState {
+		let parent1 = parent/*List<string>*/;
+		let namespace = this.maybeNamespace.orElse(Lists.empty())/*unknown*/;
+		if (namespace.isEmpty()/*unknown*/){
+			parent1/*unknown*/ = parent1.addFirst(".")/*unknown*/;
+		}
+		let i = 0/*unknown*/;
+		let size = namespace.size()/*unknown*/;
+		while (i < size/*unknown*/){
+			parent1/*unknown*/ = parent1.addFirst("..")/*unknown*/;
+			i/*unknown*/++;
+		}
+		let stringList = parent1.addLast(child)/*unknown*/;
+		if (this.imports.query().filter((node: Import) => node.hasSameChild(child)/*unknown*/).next().isPresent()/*unknown*/){
+			return this/*unknown*/;
+		}
+		let importString = new Import(stringList, child)/*unknown*/;
+		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	withNamespace(namespace: List<string>): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<string>>(namespace), this.sources, this.platform)/*unknown*/;
+	}
+	append(element: string): CompileState {
+		return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	pushStructureName(name: string): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	enterDepth(): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	exitDepth(): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	defineAll(definitions: List<Definition>): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	resolve(name: string): Option<Definition> {
+		return this.definitions.queryReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+	}
+	clearImports(): CompileState {
+		return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	clearOutput(): CompileState {
+		return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	addSource(source: Source): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source), this.platform)/*unknown*/;
+	}
+	findSource(name: string): Option<Source> {
+		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)/*unknown*/).next()/*unknown*/;
+	}
+	addResolvedImportFromCache(base: string): CompileState {
+		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
+			return this/*unknown*/;
+		}
+		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())/*unknown*/).orElse(this)/*unknown*/;
+	}
+	popStructureName(): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform)/*unknown*/;
+	}
+	withPlatform(platform: Platform): CompileState {
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources, platform)/*unknown*/;
+	}
+	hasPlatform(platform: Platform): boolean {
+		return this.platform === platform/*unknown*/;
+	}
+	queryImports(): Iter<Import> {
+		return this.imports.query()/*unknown*/;
+	}
+}
+export class ImmutableDivideState implements DivideState {
+	segments: List<string>;
+	buffer: string;
+	depth: number;
+	input: string;
+	index: number;
+	constructor (segments: List<string>, buffer: string, depth: number, input: string, index: number) {
+		this.segments = segments;
+		this.buffer = buffer;
+		this.depth = depth;
+		this.input = input;
+		this.index = index;
+	}
+	query(): Iter<string> {
+		return this.segments.query()/*unknown*/;
+	}
+	advance(): DivideState {
+		return new ImmutableDivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index)/*unknown*/;
+	}
+	append(c: string): DivideState {
+		return new ImmutableDivideState(this.segments, this.buffer + c, this.depth, this.input, this.index)/*unknown*/;
+	}
+	isLevel(): boolean {
+		return 0 === this.depth/*unknown*/;
+	}
+	enter(): DivideState {
+		return new ImmutableDivideState(this.segments, this.buffer, this.depth + 1, this.input, this.index)/*unknown*/;
+	}
+	exit(): DivideState {
+		return new ImmutableDivideState(this.segments, this.buffer, this.depth - 1, this.input, this.index)/*unknown*/;
+	}
+	isShallow(): boolean {
+		return 1 === this.depth/*unknown*/;
+	}
+	pop(): Option<Tuple2<DivideState, string>> {
+		if (this.index >= Strings.length(this.input)/*unknown*/){
+			return new None<Tuple2<DivideState, string>>()/*unknown*/;
+		}
+		let c = this.input.charAt(this.index)/*unknown*/;
+		let nextState = new ImmutableDivideState(this.segments, this.buffer, this.depth, this.input, this.index + 1)/*unknown*/;
+		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c))/*unknown*/;
+	}
+	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
+		return this.pop().map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right())/*unknown*/)/*unknown*/;
+	}
+	popAndAppendToOption(): Option<DivideState> {
+		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left()/*unknown*/)/*unknown*/;
+	}
+	peek(): string {
+		return this.input.charAt(this.index)/*unknown*/;
+	}
+	startsWith(slice: string): boolean {
+		return Strings.sliceFrom(this.input, this.index).startsWith(slice)/*unknown*/;
+	}
+}
+export class Import {
+	namespace: List<string>;
+	child: string;
+	constructor (namespace: List<string>, child: string) {
+		this.namespace = namespace;
+		this.child = child;
+	}
+	generate(): string {
+		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("")/*unknown*/;
+		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n"/*unknown*/;
+	}
+	hasSameChild(child: string): boolean {
+		return Strings.equalsTo(this.child, child)/*unknown*/;
+	}
+}
+export class Placeholder {
+	input: string;
+	constructor (input: string) {
+		this.input = input;
+	}
+	generate(): string {
+		return Main.generatePlaceholder(this.input)/*unknown*/;
+	}
+	isFunctional(): boolean {
+		return false/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	asDefinition(): Option<Definition> {
+		return new None<Definition>()/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	isVar(): boolean {
+		return false/*unknown*/;
+	}
+	generateBeforeName(): string {
+		return ""/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export class Symbol {
+	value: string;
+	constructor (value: string) {
+		this.value = value;
+	}
+	generate(): string {
+		return this.value/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return state.resolve(this.value).map((definition: Definition) => definition.findType()/*unknown*/).orElse(PrimitiveType.Unknown)/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	isFunctional(): boolean {
+		return false/*unknown*/;
+	}
+	isVar(): boolean {
+		return false/*unknown*/;
+	}
+	generateBeforeName(): string {
+		return ""/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export class Whitespace implements Parameter {
+	generate(): string {
+		return ""/*unknown*/;
+	}
+	asDefinition(): Option<Definition> {
+		return new None<Definition>()/*unknown*/;
+	}
+}
+export class FunctionType implements Type {
+	args: List<string>;
+	returns: string;
+	constructor (args: List<string>, returns: string) {
+		this.args = args;
+		this.returns = returns;
+	}
+	generate(): string {
+		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		return "(" + joinedArguments + ") => " + this.returns/*unknown*/;
+	}
+	isFunctional(): boolean {
+		return true/*unknown*/;
+	}
+	isVar(): boolean {
+		return false/*unknown*/;
+	}
+	generateBeforeName(): string {
+		return ""/*unknown*/;
+	}
+}
+export class PrimitiveType implements Type {
+	static String: PrimitiveType = new PrimitiveType("string");
+	static Number: PrimitiveType = new PrimitiveType("number");
+	static Boolean: PrimitiveType = new PrimitiveType("boolean");
+	static Var: PrimitiveType = new PrimitiveType("var");
+	static Void: PrimitiveType = new PrimitiveType("void");
+	static Unknown: PrimitiveType = new PrimitiveType("unknown");
+	value: string;
+	constructor (value: string) {
+		this.value/*unknown*/ = value/*string*/;
+	}
+	generate(): string {
+		return this.value/*unknown*/;
+	}
+	isFunctional(): boolean {
+		return false/*unknown*/;
+	}
+	isVar(): boolean {
+		return PrimitiveType.Var === this/*unknown*/;
+	}
+	generateBeforeName(): string {
+		return ""/*unknown*/;
+	}
+}
+export class TemplateType implements Type {
+	base: string;
+	args: List<string>;
+	constructor (base: string, args: List<string>) {
+		this.base = base;
+		this.args = args;
+	}
+	generate(): string {
+		return this.base + "<" + Main.generateValueStrings(this.args) + ">"/*unknown*/;
+	}
+	isFunctional(): boolean {
+		return false/*unknown*/;
+	}
+	isVar(): boolean {
+		return false/*unknown*/;
+	}
+	generateBeforeName(): string {
+		return ""/*unknown*/;
+	}
+}
+export interface Type {
+	generate(): string;
+	isFunctional(): boolean;
+	isVar(): boolean;
+	generateBeforeName(): string;
+}
+export class VariadicType implements Type {
+	type: Type;
+	constructor (type: Type) {
+		this.type = type;
+	}
+	generate(): string {
+		return this.type.generate() + "[]"/*unknown*/;
+	}
+	isFunctional(): boolean {
+		return false/*unknown*/;
+	}
+	isVar(): boolean {
+		return false/*unknown*/;
+	}
+	generateBeforeName(): string {
+		return "..."/*unknown*/;
+	}
+}
+export class AccessValue implements Value {
+	child: Value;
+	property: string;
+	constructor (child: Value, property: string) {
+		this.child = child;
+		this.property = property;
+	}
+	generate(): string {
+		return this.child.generate() + "." + this.property/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new Some<Value>(this.child)/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export interface Argument {
+	toValue(): Option<Value>;
+}
+export interface Caller {
+	generate(): string;
+	findChild(): Option<Value>;
+}
+export class Invokable implements Value {
+	caller: Caller;
+	args: List<Value>;
+	constructor (caller: Caller, args: List<Value>) {
+		this.caller = caller;
+		this.args = args;
+	}
+	generate(): string {
+		let joinedArguments = this.joinArgs()/*unknown*/;
+		return this.caller.generate() + "(" + joinedArguments + ")"/*unknown*/;
+	}
+	joinArgs(): string {
+		return this.args.query().map((value: Value) => value.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new Some<string>("\n\tstatic " + this.caller.generate() + ": " + structureName + " = new " + structureName + "(" + this.joinArgs() + ");")/*unknown*/;
+	}
+}
+export class Lambda implements Value {
+	paramNames: List<Definition>;
+	content: string;
+	constructor (paramNames: List<Definition>, content: string) {
+		this.paramNames = paramNames;
+		this.content = content;
+	}
+	generate(): string {
+		let joinedParamNames = this.paramNames.query().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		return "(" + joinedParamNames + ")" + " => " + this.content/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export class Not implements Value {
+	child: string;
+	constructor (child: string) {
+		this.child = child;
+	}
+	generate(): string {
+		return this.child/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export class Operation implements Value {
+	left: Value;
+	targetInfix: string;
+	right: Value;
+	constructor (left: Value, targetInfix: string, right: Value) {
+		this.left = left;
+		this.targetInfix = targetInfix;
+		this.right = right;
+	}
+	generate(): string {
+		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate()/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export class StringValue implements Value {
+	value: string;
+	constructor (value: string) {
+		this.value = value;
+	}
+	generate(): string {
+		return "\"" + this.value + "\""/*unknown*/;
+	}
+	toValue(): Option<Value> {
+		return new Some<Value>(this)/*unknown*/;
+	}
+	findChild(): Option<Value> {
+		return new None<Value>()/*unknown*/;
+	}
+	resolve(state: CompileState): Type {
+		return PrimitiveType.Unknown/*unknown*/;
+	}
+	generateAsEnumValue(structureName: string): Option<string> {
+		return new None<string>()/*unknown*/;
+	}
+}
+export interface Value extends Argument, Caller {
+	resolve(state: CompileState): Type;
+	generateAsEnumValue(structureName: string): Option<string>;
+}
+export class Source {
+	sourceDirectory: Path;
+	source: Path;
+	constructor (sourceDirectory: Path, source: Path) {
+		this.sourceDirectory = sourceDirectory;
+		this.source = source;
+	}
+	read(): Result<string, IOError> {
+		return this.source.readString()/*unknown*/;
+	}
+	computeName(): string {
+		let fileName = this.source.findFileName()/*unknown*/;
+		let separator = fileName.lastIndexOf(".")/*unknown*/;
+		return fileName.substring(0, separator)/*unknown*/;
+	}
+	computeNamespace(): List<string> {
+		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>())/*unknown*/;
+	}
+}
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
@@ -947,4 +1911,8 @@ export class Main {
 	static createInitialDivideState(input: string): DivideState {
 		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
 	}
+}
+export class Platform {/*TypeScript,
+    PlantUML
+*/
 }
