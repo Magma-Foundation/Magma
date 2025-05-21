@@ -127,8 +127,8 @@ export class Main {
 		let initial = Main.retainSources(children, sourceDirectory).query().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
 		let folded = Main.retainSources(children, sourceDirectory).query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
-			let diagramPath = Files.get(".", "diagram.uml")/*unknown*/;
-			let maybeError = diagramPath.writeString("@startuml\n" + result.findOutput())/*unknown*/;
+			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
+			let maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + "@enduml")/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
 				return new Err<>(error)/*unknown*/;
 			}

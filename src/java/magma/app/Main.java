@@ -80,8 +80,8 @@ public final class Main {
                 .foldWithInitialToResult(initial, Main::runWithSource);
 
         if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
-            var diagramPath = Files.get(".", "diagram.uml");
-            var maybeError = diagramPath.writeString("@startuml\n" + result.findOutput());
+            var diagramPath = Files.get(".", "diagram.puml");
+            var maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + "@enduml");
             if (maybeError instanceof Some(var error)) {
                 return new Err<>(error);
             }
