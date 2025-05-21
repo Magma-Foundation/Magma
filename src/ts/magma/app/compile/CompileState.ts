@@ -32,6 +32,7 @@
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	CompileState: magma.app.compile, 
+	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
 	Definition: magma.app.compile.define, 
@@ -42,6 +43,8 @@
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
+	Registry: magma.app.compile, 
+	Stack: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
@@ -68,22 +71,16 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Import } from "../../../magma/app/compile/Import";
-import { Iter } from "../../../magma/api/collect/Iter";
-import { Dependency } from "../../../magma/app/compile/Dependency";
-import { Source } from "../../../magma/app/io/Source";
-import { Option } from "../../../magma/api/option/Option";
 import { Location } from "../../../magma/app/Location";
 import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
+import { Source } from "../../../magma/app/io/Source";
 import { Platform } from "../../../magma/app/Platform";
+import { Context } from "../../../magma/app/compile/Context";
+import { Registry } from "../../../magma/app/compile/Registry";
+import { Stack } from "../../../magma/app/compile/Stack";
 export interface CompileState {
-	queryImports(): Iter<Import>;
-	queryDependencies(): Iter<Dependency>;
-	querySources(): Iter<Source>;
 	createIndent(): string;
-	findLastStructureName(): Option<string>;
-	isLastWithin(name: string): boolean;
 	addResolvedImport(location: Location): CompileState;
 	withLocation(location: Location): CompileState;
 	append(element: string): CompileState;
@@ -91,14 +88,13 @@ export interface CompileState {
 	enterDepth(): CompileState;
 	exitDepth(): CompileState;
 	defineAll(definitions: Iterable<Definition>): CompileState;
-	resolve(name: string): Option<Definition>;
 	clearImports(): CompileState;
 	clearOutput(): CompileState;
 	addSource(source: Source): CompileState;
-	findSource(name: string): Option<Source>;
 	addResolvedImportFromCache(base: string): CompileState;
 	popStructureName(): CompileState;
 	withPlatform(platform: Platform): CompileState;
-	hasPlatform(platform: Platform): boolean;
-	findOutput(): string;
+	context(): Context;
+	registry(): Registry;
+	stack(): Stack;
 }

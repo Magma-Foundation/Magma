@@ -1,25 +1,13 @@
 package magma.app.compile;
 
-import magma.api.collect.Iter;
 import magma.api.collect.list.Iterable;
-import magma.api.option.Option;
 import magma.app.Location;
 import magma.app.Platform;
 import magma.app.compile.define.Definition;
 import magma.app.io.Source;
 
 public interface CompileState {
-    Iter<Import> queryImports();
-
-    Iter<Dependency> queryDependencies();
-
-    Iter<Source> querySources();
-
     String createIndent();
-
-    Option<String> findLastStructureName();
-
-    boolean isLastWithin(String name);
 
     CompileState addResolvedImport(Location location);
 
@@ -35,15 +23,11 @@ public interface CompileState {
 
     CompileState defineAll(Iterable<Definition> definitions);
 
-    Option<Definition> resolve(String name);
-
     CompileState clearImports();
 
     CompileState clearOutput();
 
     CompileState addSource(Source source);
-
-    Option<Source> findSource(String name);
 
     CompileState addResolvedImportFromCache(String base);
 
@@ -51,7 +35,9 @@ public interface CompileState {
 
     CompileState withPlatform(Platform platform);
 
-    boolean hasPlatform(Platform platform);
+    Context context();
 
-    String findOutput();
+    Registry registry();
+
+    Stack stack();
 }

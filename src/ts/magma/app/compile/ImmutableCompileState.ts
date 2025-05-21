@@ -32,6 +32,7 @@
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	CompileState: magma.app.compile, 
+	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
 	Definition: magma.app.compile.define, 
@@ -42,6 +43,8 @@
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
+	Registry: magma.app.compile, 
+	Stack: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
@@ -69,63 +72,43 @@
 	Targets: magma.app
 ]*/
 import { CompileState } from "../../../magma/app/compile/CompileState";
-import { Import } from "../../../magma/app/compile/Import";
-import { List } from "../../../magma/api/collect/list/List";
-import { Definition } from "../../../magma/app/compile/define/Definition";
+import { Context } from "../../../magma/app/compile/Context";
+import { Registry } from "../../../magma/app/compile/Registry";
+import { Stack } from "../../../magma/app/compile/Stack";
 import { Location } from "../../../magma/app/Location";
-import { Option } from "../../../magma/api/option/Option";
-import { Source } from "../../../magma/app/io/Source";
 import { Platform } from "../../../magma/app/Platform";
 import { Dependency } from "../../../magma/app/compile/Dependency";
-import { Iter } from "../../../magma/api/collect/Iter";
-import { Strings } from "../../../magma/api/text/Strings";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
+import { Import } from "../../../magma/app/compile/Import";
 import { Some } from "../../../magma/api/option/Some";
+import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
+import { Source } from "../../../magma/app/io/Source";
 export class ImmutableCompileState implements CompileState {
-	imports: List<Import>;
-	output: string;
-	structureNames: List<string>;
+	context: Context;
+	registry: Registry;
 	depth: number;
-	definitions: List<Definition>;
-	maybeLocation: Option<Location>;
-	sources: List<Source>;
-	platform: Platform;
-	dependencies: List<Dependency>;
-	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform, dependencies: List<Dependency>) {
-		this.imports = imports;
-		this.output = output;
-		this.structureNames = structureNames;
-		this.depth = depth;
-		this.definitions = definitions;
-		this.maybeLocation = maybeLocation;
-		this.sources = sources;
-		this.platform = platform;
-		this.dependencies = dependencies;
-	}
-	querySources(): Iter<Source> {
-		return this.sources.iter()/*unknown*/;
+	stack: Stack;
+	constructor (context: Context, registry: Registry, depth: number, stack: Stack) {
+		this.context/*unknown*/ = context/*Context*/;
+		this.registry/*unknown*/ = registry/*Registry*/;
+		this.depth/*unknown*/ = depth/*number*/;
+		this.stack/*unknown*/ = stack/*Stack*/;
 	}
 	createIndent(): string {
 		return "\n" + "\t".repeat(this.depth)/*unknown*/;
 	}
-	findLastStructureName(): Option<string> {
-		return this.structureNames.findLast()/*unknown*/;
-	}
-	isLastWithin(name: string): boolean {
-		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
-	}
 	addResolvedImport(location: Location): CompileState {
-		if (Platform.PlantUML === this.platform/*unknown*/){
-			let name = this.maybeLocation.map(Location.name).orElse("")/*unknown*/;
+		if (Platform.PlantUML === this.context().platform()/*unknown*/){
+			let name = this.context().maybeLocation().map(Location.name).orElse("")/*unknown*/;
 			let dependency = new Dependency(name, location.name())/*unknown*/;
-			if (!this/*unknown*/.dependencies.contains(dependency)/*unknown*/){
-				return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies.addLast(dependency))/*unknown*/;
+			if (!this/*unknown*/.registry().dependencies().contains(dependency)/*unknown*/){
+				return new ImmutableCompileState(this.context, new Registry(this.registry().imports(), this.registry().dependencies().addLast(dependency), this.registry().output()), this.depth, this.stack)/*unknown*/;
 			}
 		}
 		let requestedNamespace = location.namespace()/*unknown*/;
 		let requestedChild = location.name()/*unknown*/;
-		let thisNamespace = this.maybeLocation.map(Location.namespace).orElse(Lists.empty())/*unknown*/;
+		let thisNamespace = this.context().maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
 		if (thisNamespace.isEmpty()/*unknown*/){
 			requestedNamespace/*unknown*/ = requestedNamespace.addFirst(".")/*unknown*/;
 		}
@@ -135,71 +118,59 @@ export class ImmutableCompileState implements CompileState {
 			requestedNamespace/*unknown*/ = requestedNamespace.addFirst("..")/*unknown*/;
 			i/*unknown*/++;
 		}
-		let stringList = requestedNamespace.addLast(requestedChild)/*unknown*/;
-		if (doesImportExistAlready(requestedChild)/*unknown*/){
+		if (this.registry().doesImportExistAlready(requestedChild)/*unknown*/){
 			return this/*unknown*/;
 		}
-		let importString = new Import(stringList, requestedChild)/*unknown*/;
-		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
-	}
-	doesImportExistAlready(requestedChild: string): boolean {
-		return this.imports.iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
+		let newNamespace = requestedNamespace.addLast(requestedChild)/*unknown*/;
+		let importString = new Import(newNamespace, requestedChild)/*unknown*/;
+		return new ImmutableCompileState(this.context, new Registry(this.registry().imports().addLast(importString), this.registry().dependencies(), this.registry().output()), this.depth, this.stack)/*unknown*/;
 	}
 	withLocation(location: Location): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(location), this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(new Context(this.context().platform(), new Some<Location>(location), this.context().sources()), this.registry, this.depth, this.stack)/*unknown*/;
 	}
 	append(element: string): CompileState {
-		return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, new Registry(this.registry().imports(), this.registry().dependencies(), this.registry().output() + element), this.depth, this.stack)/*unknown*/;
 	}
 	pushStructureName(name: string): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.depth, new Stack(this.stack().structureNames().addLast(name), this.stack().definitions()))/*unknown*/;
 	}
 	enterDepth(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.depth + 1, this.stack)/*unknown*/;
 	}
 	exitDepth(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.depth - 1, this.stack)/*unknown*/;
 	}
 	defineAll(definitions: Iterable<Definition>): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
-	}
-	resolve(name: string): Option<Definition> {
-		return this.definitions.iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.depth, new Stack(this.stack().structureNames(), this.stack().definitions().addAll(definitions)))/*unknown*/;
 	}
 	clearImports(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, new Registry(Lists.empty(), this.registry().dependencies(), this.registry().output()), this.depth, this.stack)/*unknown*/;
 	}
 	clearOutput(): CompileState {
-		return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, new Registry(this.registry().imports(), this.registry().dependencies(), ""), this.depth, this.stack)/*unknown*/;
 	}
 	addSource(source: Source): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform, this.dependencies)/*unknown*/;
-	}
-	findSource(name: string): Option<Source> {
-		return this.sources.iter().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
+		return new ImmutableCompileState(new Context(this.context().platform(), this.context().maybeLocation(), this.context().sources().addLast(source)), this.registry, this.depth, this.stack)/*unknown*/;
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
+		if (this.stack().hasAnyStructureName(base)/*unknown*/){
 			return this/*unknown*/;
 		}
-		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.createLocation())/*unknown*/).orElse(this)/*unknown*/;
+		return this.context().findSource(base).map((source: Source) => this.addResolvedImport(source.createLocation())/*unknown*/).orElse(this)/*unknown*/;
 	}
 	popStructureName(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.depth, new Stack(this.stack().structureNames().removeLast().orElse(this.stack().structureNames()), this.stack().definitions()))/*unknown*/;
 	}
 	withPlatform(platform: Platform): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(new Context(platform, this.context().maybeLocation(), this.context().sources()), this.registry, this.depth, new Stack(this.stack().structureNames().removeLast().orElse(this.stack().structureNames()), this.stack().definitions()))/*unknown*/;
 	}
-	hasPlatform(platform: Platform): boolean {
-		return this.platform === platform/*unknown*/;
+	context(): Context {
+		return this.context/*unknown*/;
 	}
-	findOutput(): string {
-		return this.output/*unknown*/;
+	registry(): Registry {
+		return this.registry/*unknown*/;
 	}
-	queryImports(): Iter<Import> {
-		return this.imports.iter()/*unknown*/;
-	}
-	queryDependencies(): Iter<Dependency> {
-		return this.dependencies.iter()/*unknown*/;
+	stack(): Stack {
+		return this.stack/*unknown*/;
 	}
 }

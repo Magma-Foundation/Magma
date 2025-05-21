@@ -260,7 +260,7 @@ public class Compiler {
                 .collect(Joiner.empty())
                 .orElse("");
 
-        if (outputContentState.hasPlatform(Platform.PlantUML)) {
+        if (outputContentState.context().hasPlatform(Platform.PlantUML)) {
             var joinedImplementing = maybeImplementing
                     .map((Type type) -> type.generateSimple())
                     .map((String generated) -> name + " <|.. " + generated + "\n")
@@ -399,13 +399,13 @@ public class Compiler {
         return Compiler.compileFirst(input, "(", (String beforeParams, String withParams) -> {
             var strippedBeforeParams = Strings.strip(beforeParams);
             return Compiler.compileLast(strippedBeforeParams, " ", (String _, String name) -> {
-                if (state.isLastWithin(name)) {
+                if (state.stack().isWithinLast(name)) {
                     return Compiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
                 return new None<Tuple2<CompileState, String>>();
             }).or(() -> {
-                if (state.findLastStructureName().filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
+                if (state.stack().findLastStructureName().filter((String anObject) -> Strings.equalsTo(strippedBeforeParams, anObject)).isPresent()) {
                     return Compiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams);
                 }
 
@@ -905,7 +905,7 @@ public class Compiler {
 
     public static Option<Tuple2<CompileState, String>> getTuple2Option(CompileState state, CompileState state1, String segment) {
         return Compiler.parseInvokable(state1, segment).flatMap((Tuple2<CompileState, Value> tuple) -> {
-            var structureName = state.findLastStructureName().orElse("");
+            var structureName = state.stack().findLastStructureName().orElse("");
             return tuple.right().generateAsEnumValue(structureName).map((String stringOption) -> new Tuple2Impl<CompileState, String>(tuple.left(), stringOption));
         });
     }

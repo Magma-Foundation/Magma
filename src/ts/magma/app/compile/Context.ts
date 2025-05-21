@@ -71,20 +71,29 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Iter } from "../../../magma/api/collect/Iter";
+import { Platform } from "../../../magma/app/Platform";
+import { Location } from "../../../magma/app/Location";
 import { Option } from "../../../magma/api/option/Option";
-import { HeadedIter } from "../../../magma/api/collect/head/HeadedIter";
-import { EmptyHead } from "../../../magma/api/collect/head/EmptyHead";
-import { Head } from "../../../magma/api/collect/head/Head";
-import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
-export class Iters {
-	static fromOption<T>(option: Option<T>): Iter<T> {
-		return new HeadedIter<T>(option.map((element: T) => Iters.getTSingleHead(element)/*unknown*/).orElseGet(() => new EmptyHead<T>()/*unknown*/))/*unknown*/;
+import { Source } from "../../../magma/app/io/Source";
+import { List } from "../../../magma/api/collect/list/List";
+import { Iter } from "../../../magma/api/collect/Iter";
+import { Strings } from "../../../magma/api/text/Strings";
+export class Context {
+	platform: Platform;
+	maybeLocation: Option<Location>;
+	sources: List<Source>;
+	constructor (platform: Platform, maybeLocation: Option<Location>, sources: List<Source>) {
+		this.platform = platform;
+		this.maybeLocation = maybeLocation;
+		this.sources = sources;
 	}
-	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element)/*unknown*/;
+	iterSources(): Iter<Source> {
+		return this.sources.iter()/*unknown*/;
 	}
-	static fromArray<T>(): Iter<T> {
-		/*return new HeadedIter<Integer>(new RangeHead(array.length)).map((Integer index) -> array[index])*/;
+	hasPlatform(platform: Platform): boolean {
+		return this.platform() === platform/*unknown*/;
+	}
+	findSource(name: string): Option<Source> {
+		return this.iterSources().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
 	}
 }

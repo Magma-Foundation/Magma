@@ -32,6 +32,7 @@
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	CompileState: magma.app.compile, 
+	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
 	Definition: magma.app.compile.define, 
@@ -42,6 +43,8 @@
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
+	Registry: magma.app.compile, 
+	Stack: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
@@ -254,7 +257,7 @@ export class Compiler {
 		let implementingString = Compiler.generateImplementing(maybeImplementing)/*unknown*/;
 		let newModifiers = Compiler.modifyModifiers0(oldModifiers)/*unknown*/;
 		let joinedModifiers = newModifiers.iter().map((value: string) => value + " "/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
-		if (outputContentState.hasPlatform(Platform.PlantUML)/*unknown*/){
+		if (outputContentState.context().hasPlatform(Platform.PlantUML)/*unknown*/){
 			let joinedImplementing = maybeImplementing.map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|.. " + generated + "\n"/*unknown*/).orElse("")/*unknown*/;
 			let joinedSuperTypes = maybeSuperType.iter().map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|-- " + generated + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 			let generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing/*unknown*/;
@@ -323,12 +326,12 @@ export class Compiler {
 		return Compiler.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams)/*unknown*/;
 			return Compiler.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
-				if (state.isLastWithin(name)/*unknown*/){
+				if (state.stack().isWithinLast(name)/*unknown*/){
 					return Compiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams)/*unknown*/;
 				}
 				return new None<Tuple2<CompileState, string>>()/*unknown*/;
 			}).or(() => {
-				if (state.findLastStructureName().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)/*unknown*/).isPresent()/*unknown*/){
+				if (state.stack().findLastStructureName().filter((anObject: string) => Strings.equalsTo(strippedBeforeParams, anObject)/*unknown*/).isPresent()/*unknown*/){
 					return Compiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams)/*unknown*/;
 				}
 				return new None<Tuple2<CompileState, string>>()/*unknown*/;
@@ -683,7 +686,7 @@ export class Compiler {
 	}
 	static getTuple2Option(state: CompileState, state1: CompileState, segment: string): Option<Tuple2<CompileState, string>> {
 		return Compiler.parseInvokable(state1, segment).flatMap((tuple: Tuple2<CompileState, Value>) => {
-			let structureName = state.findLastStructureName().orElse("")/*unknown*/;
+			let structureName = state.stack().findLastStructureName().orElse("")/*unknown*/;
 			return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => new Tuple2Impl<CompileState, string>(tuple.left(), stringOption)/*unknown*/)/*unknown*/;
 		})/*unknown*/;
 	}

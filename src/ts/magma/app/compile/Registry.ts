@@ -71,20 +71,26 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
+import { Import } from "../../../magma/app/compile/Import";
+import { List } from "../../../magma/api/collect/list/List";
+import { Dependency } from "../../../magma/app/compile/Dependency";
 import { Iter } from "../../../magma/api/collect/Iter";
-import { Option } from "../../../magma/api/option/Option";
-import { HeadedIter } from "../../../magma/api/collect/head/HeadedIter";
-import { EmptyHead } from "../../../magma/api/collect/head/EmptyHead";
-import { Head } from "../../../magma/api/collect/head/Head";
-import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
-export class Iters {
-	static fromOption<T>(option: Option<T>): Iter<T> {
-		return new HeadedIter<T>(option.map((element: T) => Iters.getTSingleHead(element)/*unknown*/).orElseGet(() => new EmptyHead<T>()/*unknown*/))/*unknown*/;
+export class Registry {
+	imports: List<Import>;
+	dependencies: List<Dependency>;
+	output: string;
+	constructor (imports: List<Import>, dependencies: List<Dependency>, output: string) {
+		this.imports = imports;
+		this.dependencies = dependencies;
+		this.output = output;
 	}
-	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element)/*unknown*/;
+	iterDependencies(): Iter<Dependency> {
+		return dependencies().iter()/*unknown*/;
 	}
-	static fromArray<T>(): Iter<T> {
-		/*return new HeadedIter<Integer>(new RangeHead(array.length)).map((Integer index) -> array[index])*/;
+	doesImportExistAlready(requestedChild: string): boolean {
+		return imports().iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
+	}
+	queryImports(): Iter<Import> {
+		return imports().iter()/*unknown*/;
 	}
 }

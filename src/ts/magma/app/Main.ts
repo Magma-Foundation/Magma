@@ -32,6 +32,7 @@
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
 	CompileState: magma.app.compile, 
+	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
 	Definition: magma.app.compile.define, 
@@ -42,6 +43,8 @@
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
+	Registry: magma.app.compile, 
+	Stack: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
@@ -86,9 +89,12 @@ import { Ok } from "../../magma/api/result/Ok";
 import { Import } from "../../magma/app/compile/Import";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
-import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Context } from "../../magma/app/compile/Context";
 import { Location } from "../../magma/app/Location";
 import { None } from "../../magma/api/option/None";
+import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Registry } from "../../magma/app/compile/Registry";
+import { Stack } from "../../magma/app/compile/Stack";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
@@ -105,10 +111,10 @@ export class Main {
 	static runWithChildren(state: CompileState, sources: Iterable<Source>): Result<CompileState, IOError> {
 		let initial = sources.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
 		let folded = sources.iter().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
-		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
+		if (/*state.context().hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
-			let joinedDependencies = result.queryDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
-			let maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.findOutput() + joinedDependencies + "@enduml")/*unknown*/;
+			let joinedDependencies = result.registry().iterDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+			let maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.registry().output() + joinedDependencies + "@enduml")/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
 				return new Err<CompileState, IOError>(error)/*unknown*/;
 			}
@@ -122,13 +128,13 @@ export class Main {
 		let location = source.createLocation()/*unknown*/;
 		let compiled = Compiler.compileRoot(state, input, location)/*unknown*/;
 		let compiledState = compiled.left()/*unknown*/;
-		if (compiledState.hasPlatform(Platform.PlantUML)/*unknown*/){
+		if (compiledState.context().hasPlatform(Platform.PlantUML)/*unknown*/){
 			return new Ok<CompileState, IOError>(compiledState)/*unknown*/;
 		}
-		let segment = state.querySources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		let segment = state.context().iterSources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		let otherOutput = compiled.right()/*unknown*/;
-		let joinedImports = compiledState.queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
-		let joined = joinedImports + compiledState.findOutput() + otherOutput/*unknown*/;
+		let joinedImports = compiledState.registry().queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		let joined = joinedImports + compiledState.registry().output() + otherOutput/*unknown*/;
 		let output = new Tuple2Impl<CompileState, string>(state, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
 		let cleared = output.left().clearImports().clearOutput()/*unknown*/;
 		return Main.writeTarget(source, cleared, output.right())/*unknown*/;
@@ -146,6 +152,6 @@ export class Main {
 		return source.createLocation().namespace().iter().collect(new Joiner(".")).orElse("")/*unknown*/;
 	}
 	static createInitialState(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;
+		return new ImmutableCompileState(new Context(Platform.TypeScript, new None<Location>(), Lists.empty()), new Registry(Lists.empty(), Lists.empty(), ""), 0, new Stack(Lists.empty(), Lists.empty()))/*unknown*/;
 	}
 }

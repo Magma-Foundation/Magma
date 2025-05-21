@@ -71,20 +71,27 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Iter } from "../../../magma/api/collect/Iter";
+import { List } from "../../../magma/api/collect/list/List";
+import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Option } from "../../../magma/api/option/Option";
-import { HeadedIter } from "../../../magma/api/collect/head/HeadedIter";
-import { EmptyHead } from "../../../magma/api/collect/head/EmptyHead";
-import { Head } from "../../../magma/api/collect/head/Head";
-import { SingleHead } from "../../../magma/api/collect/head/SingleHead";
-export class Iters {
-	static fromOption<T>(option: Option<T>): Iter<T> {
-		return new HeadedIter<T>(option.map((element: T) => Iters.getTSingleHead(element)/*unknown*/).orElseGet(() => new EmptyHead<T>()/*unknown*/))/*unknown*/;
+import { Strings } from "../../../magma/api/text/Strings";
+export class Stack {
+	structureNames: List<string>;
+	definitions: List<Definition>;
+	constructor (structureNames: List<string>, definitions: List<Definition>) {
+		this.structureNames = structureNames;
+		this.definitions = definitions;
 	}
-	static getTSingleHead<T>(element: T): Head<T> {
-		return new SingleHead<T>(element)/*unknown*/;
+	findLastStructureName(): Option<string> {
+		return this.structureNames().findLast()/*unknown*/;
 	}
-	static fromArray<T>(): Iter<T> {
-		/*return new HeadedIter<Integer>(new RangeHead(array.length)).map((Integer index) -> array[index])*/;
+	isWithinLast(name: string): boolean {
+		return findLastStructureName().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
+	}
+	hasAnyStructureName(base: string): boolean {
+		return structureNames().iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/;
+	}
+	resolveValue(name: string): Option<Definition> {
+		return definitions().iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
 	}
 }

@@ -78,6 +78,8 @@ class Tuple2Impl<A, B> {
 Tuple2Impl <|.. Tuple2
 interface CompileState {
 }
+class Context {
+}
 class ConstructionCaller {
 }
 ConstructionCaller <|.. Caller
@@ -101,6 +103,10 @@ class ImmutableDivideState {
 }
 ImmutableDivideState <|.. DivideState
 class Import {
+}
+class Registry {
+}
+class Stack {
 }
 class Placeholder {
 }
@@ -238,15 +244,21 @@ Ok --> Option
 Ok --> None
 Result --> Option
 Tuple2Impl --> Tuple2
-CompileState --> Import
-CompileState --> Iter
-CompileState --> Dependency
-CompileState --> Source
-CompileState --> Option
 CompileState --> Location
 CompileState --> Definition
 CompileState --> Iterable
+CompileState --> Source
 CompileState --> Platform
+CompileState --> Context
+CompileState --> Registry
+CompileState --> Stack
+Context --> Platform
+Context --> Location
+Context --> Option
+Context --> Source
+Context --> List
+Context --> Iter
+Context --> Strings
 ConstructionCaller --> Caller
 ConstructionCaller --> Value
 ConstructionCaller --> Option
@@ -267,19 +279,18 @@ DivideState --> Iter
 DivideState --> Tuple2
 DivideState --> Option
 ImmutableCompileState --> CompileState
-ImmutableCompileState --> Import
-ImmutableCompileState --> List
-ImmutableCompileState --> Definition
+ImmutableCompileState --> Context
+ImmutableCompileState --> Registry
+ImmutableCompileState --> Stack
 ImmutableCompileState --> Location
-ImmutableCompileState --> Option
-ImmutableCompileState --> Source
 ImmutableCompileState --> Platform
 ImmutableCompileState --> Dependency
-ImmutableCompileState --> Iter
-ImmutableCompileState --> Strings
 ImmutableCompileState --> Lists
+ImmutableCompileState --> Import
 ImmutableCompileState --> Some
+ImmutableCompileState --> Definition
 ImmutableCompileState --> Iterable
+ImmutableCompileState --> Source
 ImmutableDivideState --> DivideState
 ImmutableDivideState --> List
 ImmutableDivideState --> Iter
@@ -292,6 +303,14 @@ ImmutableDivideState --> Tuple2Impl
 Import --> Iterable
 Import --> Joiner
 Import --> Strings
+Registry --> Import
+Registry --> List
+Registry --> Dependency
+Registry --> Iter
+Stack --> List
+Stack --> Definition
+Stack --> Option
+Stack --> Strings
 Placeholder --> Compiler
 Placeholder --> Value
 Placeholder --> Option
@@ -450,9 +469,12 @@ Main --> Ok
 Main --> Import
 Main --> Tuple2Impl
 Main --> ImmutableCompileState
-Main --> Lists
+Main --> Context
 Main --> Location
 Main --> None
+Main --> Lists
+Main --> Registry
+Main --> Stack
 Sources --> Path
 Sources --> Source
 Sources --> Iterable

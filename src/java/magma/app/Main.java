@@ -14,9 +14,12 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.app.compile.CompileState;
+import magma.app.compile.Context;
 import magma.app.compile.Dependency;
 import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.Import;
+import magma.app.compile.Registry;
+import magma.app.compile.Stack;
 import magma.app.io.Source;
 
 public final class Main {
@@ -41,15 +44,15 @@ public final class Main {
         var initial = sources.iter().foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
         var folded = sources.iter().foldWithInitialToResult(initial, Main::runWithSource);
 
-        if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
+        if (state.context().hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
             var diagramPath = Files.get(".", "diagram.puml");
 
-            var joinedDependencies = result.queryDependencies()
+            var joinedDependencies = result.registry().iterDependencies()
                     .map((Dependency dependency) -> dependency.name() + " --> " + dependency.child() + "\n")
                     .collect(new Joiner(""))
                     .orElse("");
 
-            var maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.findOutput() + joinedDependencies + "@enduml");
+            var maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.registry().output() + joinedDependencies + "@enduml");
             if (maybeError instanceof Some(var error)) {
                 return new Err<CompileState, IOError>(error);
             }
@@ -67,22 +70,22 @@ public final class Main {
         var compiled = Compiler.compileRoot(state, input, location);
         var compiledState = compiled.left();
 
-        if (compiledState.hasPlatform(Platform.PlantUML)) {
+        if (compiledState.context().hasPlatform(Platform.PlantUML)) {
             return new Ok<CompileState, IOError>(compiledState);
         }
 
-        var segment = state.querySources()
+        var segment = state.context().iterSources()
                 .map((Source source1) -> Main.formatSource(source1))
                 .collect(new Joiner(", "))
                 .orElse("");
 
         var otherOutput = compiled.right();
-        var joinedImports = compiledState.queryImports()
+        var joinedImports = compiledState.registry().queryImports()
                 .map((Import anImport) -> anImport.generate())
                 .collect(new Joiner(""))
                 .orElse("");
 
-        var joined = joinedImports + compiledState.findOutput() + otherOutput;
+        var joined = joinedImports + compiledState.registry().output() + otherOutput;
         var output = new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
         var cleared = output.left().clearImports().clearOutput();
         return Main.writeTarget(source, cleared, output.right());
@@ -108,14 +111,8 @@ public final class Main {
 
     private static CompileState createInitialState() {
         return new ImmutableCompileState(
-                Lists.empty(),
-                "",
-                Lists.empty(),
-                0,
-                Lists.empty(),
-                new None<Location>(),
-                Lists.empty(),
-                Platform.TypeScript,
-                Lists.empty());
+                new Context(Platform.TypeScript, new None<Location>(), Lists.empty()),
+                new Registry(Lists.empty(), Lists.empty(), ""), 0,
+                new Stack(Lists.empty(), Lists.empty()));
     }
 }
