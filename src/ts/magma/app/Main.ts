@@ -41,7 +41,10 @@
 	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
+	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
+	ImmutableRegistry: magma.app.compile, 
+	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
 	Registry: magma.app.compile, 
 	Stack: magma.app.compile, 
@@ -89,12 +92,12 @@ import { Ok } from "../../magma/api/result/Ok";
 import { Import } from "../../magma/app/compile/Import";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
-import { Context } from "../../magma/app/compile/Context";
+import { ImmutableContext } from "../../magma/app/compile/ImmutableContext";
 import { Location } from "../../magma/app/Location";
 import { None } from "../../magma/api/option/None";
 import { Lists } from "../../jvm/api/collect/list/Lists";
-import { Registry } from "../../magma/app/compile/Registry";
-import { Stack } from "../../magma/app/compile/Stack";
+import { ImmutableRegistry } from "../../magma/app/compile/ImmutableRegistry";
+import { ImmutableStack } from "../../magma/app/compile/ImmutableStack";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
@@ -152,6 +155,6 @@ export class Main {
 		return source.createLocation().namespace().iter().collect(new Joiner(".")).orElse("")/*unknown*/;
 	}
 	static createInitialState(): CompileState {
-		return new ImmutableCompileState(new Context(Platform.TypeScript, new None<Location>(), Lists.empty()), new Registry(Lists.empty(), Lists.empty(), ""), 0, new Stack(Lists.empty(), Lists.empty()))/*unknown*/;
+		return new ImmutableCompileState(new ImmutableContext(Platform.TypeScript, new None<Location>(), Lists.empty()), new ImmutableRegistry(Lists.empty(), Lists.empty(), ""), 0, new ImmutableStack(Lists.empty(), Lists.empty()))/*unknown*/;
 	}
 }

@@ -14,12 +14,12 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.app.compile.CompileState;
-import magma.app.compile.Context;
 import magma.app.compile.Dependency;
 import magma.app.compile.ImmutableCompileState;
+import magma.app.compile.ImmutableContext;
+import magma.app.compile.ImmutableRegistry;
+import magma.app.compile.ImmutableStack;
 import magma.app.compile.Import;
-import magma.app.compile.Registry;
-import magma.app.compile.Stack;
 import magma.app.io.Source;
 
 public final class Main {
@@ -111,8 +111,8 @@ public final class Main {
 
     private static CompileState createInitialState() {
         return new ImmutableCompileState(
-                new Context(Platform.TypeScript, new None<Location>(), Lists.empty()),
-                new Registry(Lists.empty(), Lists.empty(), ""), 0,
-                new Stack(Lists.empty(), Lists.empty()));
+                new ImmutableContext(Platform.TypeScript, new None<Location>(), Lists.empty()),
+                new ImmutableRegistry(Lists.empty(), Lists.empty(), ""), 0,
+                new ImmutableStack(Lists.empty(), Lists.empty()));
     }
 }

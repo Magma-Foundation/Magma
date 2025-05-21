@@ -41,7 +41,10 @@
 	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
+	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
+	ImmutableRegistry: magma.app.compile, 
+	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
 	Registry: magma.app.compile, 
 	Stack: magma.app.compile, 
@@ -71,37 +74,15 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { List } from "../../../magma/api/collect/list/List";
-import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Option } from "../../../magma/api/option/Option";
-import { Strings } from "../../../magma/api/text/Strings";
+import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
-export class Stack {
-	structureNames: List<string>;
-	definitions: List<Definition>;
-	constructor (structureNames: List<string>, definitions: List<Definition>) {
-		this.structureNames = structureNames;
-		this.definitions = definitions;
-	}
-	findLastStructureName(): Option<string> {
-		return this.structureNames().findLast()/*unknown*/;
-	}
-	isWithinLast(name: string): boolean {
-		return this.findLastStructureName().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
-	}
-	hasAnyStructureName(base: string): boolean {
-		return this.structureNames().iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/;
-	}
-	resolveValue(name: string): Option<Definition> {
-		return this.definitions().iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
-	}
-	pushStructureName(name: string): Stack {
-		return new Stack(this.structureNames().addLast(name), this.definitions())/*unknown*/;
-	}
-	defineAll(definitions: Iterable<Definition>): Stack {
-		return new Stack(this.structureNames(), this.definitions().addAll(definitions))/*unknown*/;
-	}
-	popStructureName(): Stack {
-		return new Stack(this.structureNames().removeLast().orElse(this.structureNames()), this.definitions())/*unknown*/;
-	}
+export interface Stack {
+	findLastStructureName(): Option<string>;
+	isWithinLast(name: string): boolean;
+	hasAnyStructureName(base: string): boolean;
+	resolveValue(name: string): Option<Definition>;
+	pushStructureName(name: string): Stack;
+	defineAll(definitions: Iterable<Definition>): Stack;
+	popStructureName(): Stack;
 }

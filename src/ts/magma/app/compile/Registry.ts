@@ -41,7 +41,10 @@
 	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
+	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
+	ImmutableRegistry: magma.app.compile, 
+	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
 	Registry: magma.app.compile, 
 	Stack: magma.app.compile, 
@@ -71,45 +74,18 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Import } from "../../../magma/app/compile/Import";
-import { List } from "../../../magma/api/collect/list/List";
 import { Dependency } from "../../../magma/app/compile/Dependency";
 import { Iter } from "../../../magma/api/collect/Iter";
-import { Lists } from "../../../jvm/api/collect/list/Lists";
-export class Registry {
-	imports: List<Import>;
-	dependencies: List<Dependency>;
-	output: string;
-	constructor (imports: List<Import>, dependencies: List<Dependency>, output: string) {
-		this.imports = imports;
-		this.dependencies = dependencies;
-		this.output = output;
-	}
-	iterDependencies(): Iter<Dependency> {
-		return this.dependencies().iter()/*unknown*/;
-	}
-	doesImportExistAlready(requestedChild: string): boolean {
-		return this.imports().iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
-	}
-	queryImports(): Iter<Import> {
-		return this.imports().iter()/*unknown*/;
-	}
-	addDependency(dependency: Dependency): Registry {
-		return new Registry(this.imports(), this.dependencies().addLast(dependency), this.output())/*unknown*/;
-	}
-	addImport(import_: Import): Registry {
-		return new Registry(this.imports().addLast(import_), this.dependencies(), this.output())/*unknown*/;
-	}
-	append(element: string): Registry {
-		return new Registry(this.imports(), this.dependencies(), this.output() + element)/*unknown*/;
-	}
-	clearImports(): Registry {
-		return new Registry(Lists.empty(), this.dependencies(), this.output())/*unknown*/;
-	}
-	containsDependency(dependency: Dependency): boolean {
-		return this.dependencies().contains(dependency)/*unknown*/;
-	}
-	clearOutput(): Registry {
-		return new Registry(this.imports, this.dependencies, "")/*unknown*/;
-	}
+import { Import } from "../../../magma/app/compile/Import";
+export interface Registry {
+	iterDependencies(): Iter<Dependency>;
+	doesImportExistAlready(requestedChild: string): boolean;
+	queryImports(): Iter<Import>;
+	addDependency(dependency: Dependency): Registry;
+	addImport(import_: Import): Registry;
+	append(element: string): Registry;
+	clearImports(): Registry;
+	containsDependency(dependency: Dependency): boolean;
+	clearOutput(): Registry;
+	output(): string;
 }

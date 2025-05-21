@@ -1,47 +1,25 @@
 package magma.app.compile;
 
-import jvm.api.collect.list.Lists;
 import magma.api.collect.Iter;
-import magma.api.collect.list.List;
 
-public record Registry(List<Import> imports, List<Dependency> dependencies, String output) {
-    public Iter<Dependency> iterDependencies() {
-        return this.dependencies().iter();
-    }
+public interface Registry {
+    Iter<Dependency> iterDependencies();
 
-    public boolean doesImportExistAlready(String requestedChild) {
-        return this.imports()
-                .iter()
-                .filter((Import node) -> node.hasSameChild(requestedChild))
-                .next()
-                .isPresent();
-    }
+    boolean doesImportExistAlready(String requestedChild);
 
-    public Iter<Import> queryImports() {
-        return this.imports().iter();
-    }
+    Iter<Import> queryImports();
 
-    public Registry addDependency(Dependency dependency) {
-        return new Registry(this.imports(), this.dependencies().addLast(dependency), this.output());
-    }
+    Registry addDependency(Dependency dependency);
 
-    public Registry addImport(Import import_) {
-        return new Registry(this.imports().addLast(import_), this.dependencies(), this.output());
-    }
+    Registry addImport(Import import_);
 
-    public Registry append(String element) {
-        return new Registry(this.imports(), this.dependencies(), this.output() + element);
-    }
+    Registry append(String element);
 
-    public   Registry clearImports() {
-        return new Registry(Lists.empty(), this.dependencies(), this.output());
-    }
+    Registry clearImports();
 
-    public boolean containsDependency(Dependency dependency) {
-        return this.dependencies().contains(dependency);
-    }
+    boolean containsDependency(Dependency dependency);
 
-    public Registry clearOutput() {
-        return new Registry(this.imports, this.dependencies, "");
-    }
+    Registry clearOutput();
+
+    String output();
 }

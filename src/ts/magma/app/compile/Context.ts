@@ -41,7 +41,10 @@
 	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
+	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
+	ImmutableRegistry: magma.app.compile, 
+	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
 	Registry: magma.app.compile, 
 	Stack: magma.app.compile, 
@@ -71,46 +74,22 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Platform } from "../../../magma/app/Platform";
-import { Location } from "../../../magma/app/Location";
-import { Option } from "../../../magma/api/option/Option";
 import { Source } from "../../../magma/app/io/Source";
-import { List } from "../../../magma/api/collect/list/List";
 import { Iter } from "../../../magma/api/collect/Iter";
-import { Strings } from "../../../magma/api/text/Strings";
-import { Some } from "../../../magma/api/option/Some";
-import { Lists } from "../../../jvm/api/collect/list/Lists";
-export class Context {
-	platform: Platform;
-	maybeLocation: Option<Location>;
-	sources: List<Source>;
-	constructor (platform: Platform, maybeLocation: Option<Location>, sources: List<Source>) {
-		this.platform = platform;
-		this.maybeLocation = maybeLocation;
-		this.sources = sources;
-	}
-	iterSources(): Iter<Source> {
-		return this.sources.iter()/*unknown*/;
-	}
-	hasPlatform(platform: Platform): boolean {
-		return this.platform() === platform/*unknown*/;
-	}
-	findSource(name: string): Option<Source> {
-		return this.iterSources().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
-	}
-	withLocation(location: Location): Context {
-		return new Context(this.platform(), new Some<Location>(location), this.sources())/*unknown*/;
-	}
-	addSource(source: Source): Context {
-		return new Context(this.platform(), this.maybeLocation(), this.sources().addLast(source))/*unknown*/;
-	}
-	findNamespaceOrEmpty(): List<string> {
-		return this.maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
-	}
-	findNameOrEmpty(): string {
-		return this.maybeLocation().map(Location.name).orElse("")/*unknown*/;
-	}
-	withPlatform(platform: Platform): Context {
-		return new Context(platform, this.maybeLocation(), this.sources())/*unknown*/;
-	}
+import { Platform } from "../../../magma/app/Platform";
+import { Option } from "../../../magma/api/option/Option";
+import { Location } from "../../../magma/app/Location";
+import { List } from "../../../magma/api/collect/list/List";
+export interface Context {
+	iterSources(): Iter<Source>;
+	hasPlatform(platform: Platform): boolean;
+	findSource(name: string): Option<Source>;
+	withLocation(location: Location): Context;
+	addSource(source: Source): Context;
+	findNamespaceOrEmpty(): List<string>;
+	findNameOrEmpty(): string;
+	withPlatform(platform: Platform): Context;
+	platform(): Platform;
+	maybeLocation(): Option<Location>;
+	sources(): List<Source>;
 }

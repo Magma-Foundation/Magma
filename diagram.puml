@@ -78,7 +78,7 @@ class Tuple2Impl<A, B> {
 Tuple2Impl <|.. Tuple2
 interface CompileState {
 }
-class Context {
+interface Context {
 }
 class ConstructionCaller {
 }
@@ -99,14 +99,23 @@ interface DivideState {
 class ImmutableCompileState {
 }
 ImmutableCompileState <|.. CompileState
+class ImmutableContext {
+}
+ImmutableContext <|.. Context
 class ImmutableDivideState {
 }
 ImmutableDivideState <|.. DivideState
+class ImmutableRegistry {
+}
+ImmutableRegistry <|.. Registry
+class ImmutableStack {
+}
+ImmutableStack <|.. Stack
 class Import {
 }
-class Registry {
+interface Registry {
 }
-class Stack {
+interface Stack {
 }
 class Placeholder {
 }
@@ -247,15 +256,12 @@ Tuple2Impl --> Tuple2
 CompileState --> Registry
 CompileState --> Context
 CompileState --> Stack
-Context --> Platform
-Context --> Location
-Context --> Option
 Context --> Source
-Context --> List
 Context --> Iter
-Context --> Strings
-Context --> Some
-Context --> Lists
+Context --> Platform
+Context --> Option
+Context --> Location
+Context --> List
 ConstructionCaller --> Caller
 ConstructionCaller --> Value
 ConstructionCaller --> Option
@@ -279,6 +285,16 @@ ImmutableCompileState --> CompileState
 ImmutableCompileState --> Context
 ImmutableCompileState --> Registry
 ImmutableCompileState --> Stack
+ImmutableContext --> Context
+ImmutableContext --> Platform
+ImmutableContext --> Location
+ImmutableContext --> Option
+ImmutableContext --> Source
+ImmutableContext --> List
+ImmutableContext --> Iter
+ImmutableContext --> Strings
+ImmutableContext --> Some
+ImmutableContext --> Lists
 ImmutableDivideState --> DivideState
 ImmutableDivideState --> List
 ImmutableDivideState --> Iter
@@ -288,18 +304,26 @@ ImmutableDivideState --> Strings
 ImmutableDivideState --> None
 ImmutableDivideState --> Some
 ImmutableDivideState --> Tuple2Impl
+ImmutableRegistry --> Registry
+ImmutableRegistry --> Import
+ImmutableRegistry --> List
+ImmutableRegistry --> Dependency
+ImmutableRegistry --> Iter
+ImmutableRegistry --> Lists
+ImmutableStack --> Stack
+ImmutableStack --> List
+ImmutableStack --> Definition
+ImmutableStack --> Option
+ImmutableStack --> Strings
+ImmutableStack --> Iterable
 Import --> Iterable
 Import --> Joiner
 Import --> Strings
-Registry --> Import
-Registry --> List
 Registry --> Dependency
 Registry --> Iter
-Registry --> Lists
-Stack --> List
-Stack --> Definition
+Registry --> Import
 Stack --> Option
-Stack --> Strings
+Stack --> Definition
 Stack --> Iterable
 Placeholder --> Compiler
 Placeholder --> Value
@@ -464,12 +488,12 @@ Main --> Ok
 Main --> Import
 Main --> Tuple2Impl
 Main --> ImmutableCompileState
-Main --> Context
+Main --> ImmutableContext
 Main --> Location
 Main --> None
 Main --> Lists
-Main --> Registry
-Main --> Stack
+Main --> ImmutableRegistry
+Main --> ImmutableStack
 Sources --> Path
 Sources --> Source
 Sources --> Iterable
