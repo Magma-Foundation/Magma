@@ -50,15 +50,15 @@ final class ValueCompiler {
     }
 
     static Option<Tuple2<CompileState, Value>> parseInvokable(CompileState state, String input) {
-        return new SuffixComposable<>(")", (String withoutEnd) -> {
+        return new SuffixComposable<Tuple2<CompileState, Value>>(")", (String withoutEnd) -> {
             return CompilerUtils.compileSplit(withoutEnd, (String withoutEnd0) -> {
                 Selector selector = new LastSelector("");
                 return new FoldingSplitter((DivideState state1, char c) -> {
                     return ValueCompiler.foldInvocationStarts(state1, c);
                 }, selector).apply(withoutEnd0);
             }, (String callerWithArgStart, String args) -> {
-                return new SuffixComposable<>("(", (String callerString) -> {
-                    return new PrefixComposable<>("new ", (String type) -> {
+                return new SuffixComposable<Tuple2<CompileState, Value>>("(", (String callerString) -> {
+                    return new PrefixComposable<Tuple2<CompileState, Value>>("new ", (String type) -> {
                         return TypeCompiler.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple1) -> {
                             var callerState = callerTuple1.right();
                             var caller = callerTuple1.left();
@@ -77,8 +77,8 @@ final class ValueCompiler {
     static Rule<Value> createTextRule(String slice) {
         return (CompileState state1, String input1) -> {
             var stripped = Strings.strip(input1);
-            return new PrefixComposable<>(slice, (String s) -> {
-                return new SuffixComposable<>(slice, (String s1) -> {
+            return new PrefixComposable<Tuple2<CompileState, Value>>(slice, (String s) -> {
+                return new SuffixComposable<Tuple2<CompileState, Value>>(slice, (String s1) -> {
                                 return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1)));
                             }).apply(s);
             }).apply(stripped);
@@ -86,7 +86,7 @@ final class ValueCompiler {
     }
 
     static Option<Tuple2<CompileState, Value>> parseNot(CompileState state, String input) {
-        return new PrefixComposable<>("!", (String withoutPrefix) -> {
+        return new PrefixComposable<Tuple2<CompileState, Value>>("!", (String withoutPrefix) -> {
             var childTuple = ValueCompiler.compileValueOrPlaceholder(state, withoutPrefix);
             var childState = childTuple.left();
             var child = "!" + childTuple.right();
@@ -97,8 +97,8 @@ final class ValueCompiler {
     static Option<Tuple2<CompileState, Value>> parseLambda(CompileState state, String input) {
         return CompilerUtils.compileSplit(input, new LocatingSplitter("->", new FirstLocator()), (String beforeArrow, String afterArrow) -> {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
-            return new PrefixComposable<>("(", (String withoutStart) -> {
-                return new SuffixComposable<>(")", (String withoutEnd) -> {
+            return new PrefixComposable<Tuple2<CompileState, Value>>("(", (String withoutStart) -> {
+                return new SuffixComposable<Tuple2<CompileState, Value>>(")", (String withoutEnd) -> {
                                 return CompilerUtils.parseValues(state, withoutEnd, (CompileState state1, String s) -> {
                                     return DefiningCompiler.parseParameter(state1, s);
                                 }).flatMap((Tuple2<CompileState, List<Parameter>> paramNames) -> {
@@ -111,8 +111,8 @@ final class ValueCompiler {
 
     private static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(CompileState state, Iterable<Definition> paramNames, String afterArrow) {
         var strippedAfterArrow = Strings.strip(afterArrow);
-        return new PrefixComposable<>("{", (String withoutContentStart) -> {
-            return new SuffixComposable<>("}", (String withoutContentEnd) -> {
+        return new PrefixComposable<Tuple2<CompileState, Value>>("{", (String withoutContentStart) -> {
+            return new SuffixComposable<Tuple2<CompileState, Value>>("}", (String withoutContentEnd) -> {
                     CompileState compileState = state.enterDepth();
                     var statementsTuple = FunctionSegmentCompiler.compileFunctionStatements(compileState.mapStack((Stack stack1) -> {
                         return stack1.defineAll(paramNames);

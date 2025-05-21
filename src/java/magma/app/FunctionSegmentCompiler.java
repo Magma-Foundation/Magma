@@ -24,7 +24,7 @@ import magma.app.compile.split.LocatingSplitter;
 import java.util.function.Function;
 
 final class FunctionSegmentCompiler {
-    public static Option<Tuple2<CompileState, String>> compileEmptySegment(CompileState state, String input) {
+    private static Option<Tuple2<CompileState, String>> compileEmptySegment(CompileState state, String input) {
         if (Strings.equalsTo(";", Strings.strip(input))) {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ";"));
         }
@@ -33,15 +33,15 @@ final class FunctionSegmentCompiler {
         }
     }
 
-    public static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
-        return new SuffixComposable<>("}", (String withoutEnd) -> {
+    private static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
+        return new SuffixComposable<Tuple2<CompileState, String>>("}", (String withoutEnd) -> {
             return CompilerUtils.compileSplit(withoutEnd, (String withoutEnd0) -> {
                 Selector selector = new LastSelector("");
                 return new FoldingSplitter((DivideState state1, char c) -> {
                             return FunctionSegmentCompiler.foldBlockStarts(state1, c);
                         }, selector).apply(withoutEnd0);
             }, (String beforeContentWithEnd, String content) -> {
-                return new SuffixComposable<>("{", (String beforeContent) -> {
+                return new SuffixComposable<Tuple2<CompileState, String>>("{", (String beforeContent) -> {
                     return FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
                         var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
@@ -81,10 +81,10 @@ final class FunctionSegmentCompiler {
 
     private static Rule<String> createConditionalRule(String prefix) {
         return (CompileState state1, String input1) -> {
-            return new PrefixComposable<>(prefix, (String withoutPrefix) -> {
+            return new PrefixComposable<Tuple2<CompileState, String>>(prefix, (String withoutPrefix) -> {
                     var strippedCondition = Strings.strip(withoutPrefix);
-                return new PrefixComposable<>("(", (String withoutConditionStart) -> {
-                    return new SuffixComposable<>(")", (String withoutConditionEnd) -> {
+                return new PrefixComposable<Tuple2<CompileState, String>>("(", (String withoutConditionStart) -> {
+                    return new SuffixComposable<Tuple2<CompileState, String>>(")", (String withoutConditionEnd) -> {
                                         var tuple = ValueCompiler.compileValueOrPlaceholder(state1, withoutConditionEnd);
                                         return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), prefix + " (" + tuple.right() + ")"));
                                     }).apply(withoutConditionStart);
@@ -102,8 +102,8 @@ final class FunctionSegmentCompiler {
         }
     }
 
-    public static Option<Tuple2<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
-        return new SuffixComposable<>(";", (String withoutEnd) -> {
+    private static Option<Tuple2<CompileState, String>> compileFunctionStatement(CompileState state, String input) {
+        return new SuffixComposable<Tuple2<CompileState, String>>(";", (String withoutEnd) -> {
             var valueTuple = FunctionSegmentCompiler.compileFunctionStatementValue(state, withoutEnd);
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"));
         }).apply(Strings.strip(input));
@@ -136,7 +136,7 @@ final class FunctionSegmentCompiler {
 
     private static Rule<String> createPostRule(String suffix) {
         return (CompileState state1, String input) -> {
-            return new SuffixComposable<>(suffix, (String child) -> {
+            return new SuffixComposable<Tuple2<CompileState, String>>(suffix, (String child) -> {
                     var tuple = ValueCompiler.compileValueOrPlaceholder(state1, child);
                     return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right() + suffix));
                 }).apply(Strings.strip(input));
@@ -150,14 +150,14 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileReturn(String input, Function<String, Option<Tuple2<CompileState, String>>> mapper) {
-        return new PrefixComposable<>("return ", (String value) -> {
+        return new PrefixComposable<Tuple2<CompileState, String>>("return ", (String value) -> {
             return mapper.apply(value).flatMap((Tuple2<CompileState, String> tuple) -> {
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), "return " + tuple.right()));
             });
         }).apply(Strings.strip(input));
     }
 
-    public static Option<Tuple2<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
+    private static Option<Tuple2<CompileState, String>> compileReturnWithoutSuffix(CompileState state1, String input1) {
         return FunctionSegmentCompiler.compileReturn(input1, (String withoutPrefix) -> {
                     return ValueCompiler.compileValue(state1, withoutPrefix);
                 })
@@ -188,7 +188,7 @@ final class FunctionSegmentCompiler {
         return CompilerUtils.compileStatements(state, input, FunctionSegmentCompiler::compileFunctionSegment);
     }
 
-    static Tuple2<CompileState, String> compileFunctionSegment(CompileState state, String input) {
+    private static Tuple2<CompileState, String> compileFunctionSegment(CompileState state, String input) {
         return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(
                 CompilerUtils::compileWhitespace,
                 FunctionSegmentCompiler::compileEmptySegment,

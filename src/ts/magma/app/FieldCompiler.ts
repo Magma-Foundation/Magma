@@ -170,8 +170,8 @@ class FieldCompiler {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"))/*unknown*/;
 			}
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")")/*unknown*/;
-			return new PrefixComposable<>("{", (withoutContentStart: string) => {
-				return new SuffixComposable<>("}", (withoutContentEnd: string) => {
+			return new PrefixComposable<Tuple2<CompileState, string>>("{", (withoutContentStart: string) => {
+				return new SuffixComposable<Tuple2<CompileState, string>>("}", (withoutContentEnd: string) => {
 					let compileState: CompileState = parametersState.enterDepth().enterDepth()/*unknown*/;
 					let statementsTuple = FunctionSegmentCompiler.compileFunctionStatements(compileState.mapStack((stack1: Stack) => {
 						return stack1.defineAll(definitions)/*unknown*/;
@@ -187,7 +187,7 @@ class FieldCompiler {
 		})/*unknown*/;
 	}
 	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return new SuffixComposable<>(";", (withoutEnd: string) => {
+		return new SuffixComposable<Tuple2<CompileState, string>>(";", (withoutEnd: string) => {
 			return FieldCompiler.getTupleOption(state, withoutEnd).or(() => {
 				return FieldCompiler.compileEnumValues(state, withoutEnd)/*unknown*/;
 			})/*unknown*/;

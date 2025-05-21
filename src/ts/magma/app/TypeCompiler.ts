@@ -149,7 +149,7 @@ class TypeCompiler {
 	}
 	static parseVarArgs(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input)/*unknown*/;
-		return new SuffixComposable<>("...", (s: string) => {
+		return new SuffixComposable<Tuple2<CompileState, Type>>("...", (s: string) => {
 			let child = TypeCompiler.parseTypeOrPlaceholder(state, s)/*unknown*/;
 			return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(child.left(), new VariadicType(child.right())))/*unknown*/;
 		}).apply(stripped)/*unknown*/;
@@ -186,7 +186,7 @@ class TypeCompiler {
 		return new None<Type>()/*unknown*/;
 	}
 	static parseGeneric(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
-		return new SuffixComposable<>(">", (withoutEnd: string) => {
+		return new SuffixComposable<Tuple2<CompileState, Type>>(">", (withoutEnd: string) => {
 			return CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (baseString: string, argsString: string) => {
 				let argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (state1: CompileState, s: string) => {
 					return TypeCompiler.compileTypeArgument(state1, s)/*unknown*/;

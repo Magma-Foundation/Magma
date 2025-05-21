@@ -179,7 +179,7 @@ export class CompilerUtils {
 		return new None<Tuple2<CompileState, Whitespace>>()/*unknown*/;
 	}
 	static generateValueStrings(values: Iterable<string>): string {
-		return CompilerUtils.generateAll(values, new ValueMerger().merge)/*unknown*/;
+		return CompilerUtils.generateAll(values, new ValueMerger())/*unknown*/;
 	}
 	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: Rule<T>): Tuple2<CompileState, List<T>> {
 		return CompilerUtils.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;

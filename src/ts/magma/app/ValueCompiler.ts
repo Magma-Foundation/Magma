@@ -162,15 +162,15 @@ class ValueCompiler {
 		return new Tuple2Impl<CompileState, string>(state, generated + s)/*unknown*/;
 	}
 	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return new SuffixComposable<>(")", (withoutEnd: string) => {
+		return new SuffixComposable<Tuple2<CompileState, Value>>(")", (withoutEnd: string) => {
 			return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0: string) => {
 				let selector: Selector = new LastSelector("")/*unknown*/;
 				return new FoldingSplitter((state1: DivideState, c: string) => {
 					return ValueCompiler.foldInvocationStarts(state1, c)/*unknown*/;
 				}, selector).apply(withoutEnd0)/*unknown*/;
 			}, (callerWithArgStart: string, args: string) => {
-				return new SuffixComposable<>("(", (callerString: string) => {
-					return new PrefixComposable<>("new ", (type: string) => {
+				return new SuffixComposable<Tuple2<CompileState, Value>>("(", (callerString: string) => {
+					return new PrefixComposable<Tuple2<CompileState, Value>>("new ", (type: string) => {
 						return TypeCompiler.compileType(state, type).flatMap((callerTuple1: Tuple2<CompileState, string>) => {
 							let callerState = callerTuple1.right()/*unknown*/;
 							let caller = callerTuple1.left()/*unknown*/;
@@ -188,15 +188,15 @@ class ValueCompiler {
 	static createTextRule(slice: string): Rule<Value> {
 		return (state1: CompileState, input1: string) => {
 			let stripped = Strings.strip(input1)/*unknown*/;
-			return new PrefixComposable<>(slice, (s: string) => {
-				return new SuffixComposable<>(slice, (s1: string) => {
+			return new PrefixComposable<Tuple2<CompileState, Value>>(slice, (s: string) => {
+				return new SuffixComposable<Tuple2<CompileState, Value>>(slice, (s1: string) => {
 					return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1)))/*unknown*/;
 				}).apply(s)/*unknown*/;
 			}).apply(stripped)/*unknown*/;
 		}/*unknown*/;
 	}
 	static parseNot(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return new PrefixComposable<>("!", (withoutPrefix: string) => {
+		return new PrefixComposable<Tuple2<CompileState, Value>>("!", (withoutPrefix: string) => {
 			let childTuple = ValueCompiler.compileValueOrPlaceholder(state, withoutPrefix)/*unknown*/;
 			let childState = childTuple.left()/*unknown*/;
 			let child = "!" + childTuple.right()/*unknown*/;
@@ -206,8 +206,8 @@ class ValueCompiler {
 	static parseLambda(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return CompilerUtils.compileSplit(input, new LocatingSplitter("->", new FirstLocator()), (beforeArrow: string, afterArrow: string) => {
 			let strippedBeforeArrow = Strings.strip(beforeArrow)/*unknown*/;
-			return new PrefixComposable<>("(", (withoutStart: string) => {
-				return new SuffixComposable<>(")", (withoutEnd: string) => {
+			return new PrefixComposable<Tuple2<CompileState, Value>>("(", (withoutStart: string) => {
+				return new SuffixComposable<Tuple2<CompileState, Value>>(")", (withoutEnd: string) => {
 					return CompilerUtils.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
 						return DefiningCompiler.parseParameter(state1, s)/*unknown*/;
 					}).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => {
@@ -219,8 +219,8 @@ class ValueCompiler {
 	}
 	static compileLambdaWithParameterNames(state: CompileState, paramNames: Iterable<Definition>, afterArrow: string): Option<Tuple2<CompileState, Value>> {
 		let strippedAfterArrow = Strings.strip(afterArrow)/*unknown*/;
-		return new PrefixComposable<>("{", (withoutContentStart: string) => {
-			return new SuffixComposable<>("}", (withoutContentEnd: string) => {
+		return new PrefixComposable<Tuple2<CompileState, Value>>("{", (withoutContentStart: string) => {
+			return new SuffixComposable<Tuple2<CompileState, Value>>("}", (withoutContentEnd: string) => {
 				let compileState: CompileState = state.enterDepth()/*unknown*/;
 				let statementsTuple = FunctionSegmentCompiler.compileFunctionStatements(compileState.mapStack((stack1: Stack) => {
 					return stack1.defineAll(paramNames)/*unknown*/;

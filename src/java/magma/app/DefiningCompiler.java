@@ -117,9 +117,9 @@ final class DefiningCompiler {
             String type,
             String name
     ) {
-        return new SuffixComposable<>(">", (String withoutTypeParamEnd) -> {
+        return new SuffixComposable<Tuple2<CompileState, Definition>>(">", (String withoutTypeParamEnd) -> {
             return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String beforeTypeParams, String typeParamsString) -> {
-                var typeParams = divideValues(typeParamsString);
+                var typeParams = DefiningCompiler.divideValues(typeParamsString);
                 return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name);
             });
         }).apply(Strings.strip(beforeType)).or(() -> {

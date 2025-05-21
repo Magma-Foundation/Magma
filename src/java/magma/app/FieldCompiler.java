@@ -71,8 +71,8 @@ final class FieldCompiler {
             }
 
             var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
-            return new PrefixComposable<>("{", (String withoutContentStart) -> {
-                return new SuffixComposable<>("}", (String withoutContentEnd) -> {
+            return new PrefixComposable<Tuple2<CompileState, String>>("{", (String withoutContentStart) -> {
+                return new SuffixComposable<Tuple2<CompileState, String>>("}", (String withoutContentEnd) -> {
                             CompileState compileState = parametersState.enterDepth().enterDepth();
                             var statementsTuple = FunctionSegmentCompiler.compileFunctionStatements(compileState.mapStack((Stack stack1) -> {
                                 return stack1.defineAll(definitions);
@@ -91,7 +91,7 @@ final class FieldCompiler {
     }
 
     public static Option<Tuple2<CompileState, String>> compileFieldDefinition(CompileState state, String input) {
-        return new SuffixComposable<>(";", (String withoutEnd) -> {
+        return new SuffixComposable<Tuple2<CompileState, String>>(";", (String withoutEnd) -> {
             return FieldCompiler.getTupleOption(state, withoutEnd).or(() -> {
                 return FieldCompiler.compileEnumValues(state, withoutEnd);
             });

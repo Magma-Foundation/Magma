@@ -204,9 +204,9 @@ class DefiningCompiler {
 		}).collect(new ListCollector<string>())/*unknown*/;
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
-		return new SuffixComposable<>(">", (withoutTypeParamEnd: string) => {
+		return new SuffixComposable<Tuple2<CompileState, Definition>>(">", (withoutTypeParamEnd: string) => {
 			return CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (beforeTypeParams: string, typeParamsString: string) => {
-				let typeParams = divideValues(typeParamsString)/*unknown*/;
+				let typeParams = DefiningCompiler.divideValues(typeParamsString)/*unknown*/;
 				return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name)/*unknown*/;
 			})/*unknown*/;
 		}).apply(Strings.strip(beforeType)).or(() => {

@@ -8,7 +8,7 @@ public record PrefixComposable<T>(String prefix, Composable<String, T> mapper) i
     @Override
     public Option<T> apply(String input) {
         if (!input.startsWith(this.prefix())) {
-            return new None<>();
+            return new None<T>();
         }
 
         var slice = Strings.sliceFrom(input, Strings.length(this.prefix()));

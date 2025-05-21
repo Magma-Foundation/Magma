@@ -143,14 +143,14 @@ class FunctionSegmentCompiler {
 		}
 	}
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return new SuffixComposable<>("}", (withoutEnd: string) => {
+		return new SuffixComposable<Tuple2<CompileState, string>>("}", (withoutEnd: string) => {
 			return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0: string) => {
 				let selector: Selector = new LastSelector("")/*unknown*/;
 				return new FoldingSplitter((state1: DivideState, c: string) => {
 					return FunctionSegmentCompiler.foldBlockStarts(state1, c)/*unknown*/;
 				}, selector).apply(withoutEnd0)/*unknown*/;
 			}, (beforeContentWithEnd: string, content: string) => {
-				return new SuffixComposable<>("{", (beforeContent: string) => {
+				return new SuffixComposable<Tuple2<CompileState, string>>("{", (beforeContent: string) => {
 					return FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
 						let contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content)/*unknown*/;
 						let indent = state.createIndent()/*unknown*/;
@@ -181,10 +181,10 @@ class FunctionSegmentCompiler {
 	}
 	static createConditionalRule(prefix: string): Rule<string> {
 		return (state1: CompileState, input1: string) => {
-			return new PrefixComposable<>(prefix, (withoutPrefix: string) => {
+			return new PrefixComposable<Tuple2<CompileState, string>>(prefix, (withoutPrefix: string) => {
 				let strippedCondition = Strings.strip(withoutPrefix)/*unknown*/;
-				return new PrefixComposable<>("(", (withoutConditionStart: string) => {
-					return new SuffixComposable<>(")", (withoutConditionEnd: string) => {
+				return new PrefixComposable<Tuple2<CompileState, string>>("(", (withoutConditionStart: string) => {
+					return new SuffixComposable<Tuple2<CompileState, string>>(")", (withoutConditionEnd: string) => {
 						let tuple = ValueCompiler.compileValueOrPlaceholder(state1, withoutConditionEnd)/*unknown*/;
 						return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), prefix + " (" + tuple.right() + ")"))/*unknown*/;
 					}).apply(withoutConditionStart)/*unknown*/;
@@ -201,7 +201,7 @@ class FunctionSegmentCompiler {
 		}
 	}
 	static compileFunctionStatement(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return new SuffixComposable<>(";", (withoutEnd: string) => {
+		return new SuffixComposable<Tuple2<CompileState, string>>(";", (withoutEnd: string) => {
 			let valueTuple = FunctionSegmentCompiler.compileFunctionStatementValue(state, withoutEnd)/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(valueTuple.left(), state.createIndent() + valueTuple.right() + ";"))/*unknown*/;
 		}).apply(Strings.strip(input))/*unknown*/;
@@ -223,7 +223,7 @@ class FunctionSegmentCompiler {
 	}
 	static createPostRule(suffix: string): Rule<string> {
 		return (state1: CompileState, input: string) => {
-			return new SuffixComposable<>(suffix, (child: string) => {
+			return new SuffixComposable<Tuple2<CompileState, string>>(suffix, (child: string) => {
 				let tuple = ValueCompiler.compileValueOrPlaceholder(state1, child)/*unknown*/;
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right() + suffix))/*unknown*/;
 			}).apply(Strings.strip(input))/*unknown*/;
@@ -235,7 +235,7 @@ class FunctionSegmentCompiler {
 		})/*unknown*/;
 	}
 	static compileReturn(input: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, string>>): Option<Tuple2<CompileState, string>> {
-		return new PrefixComposable<>("return ", (value: string) => {
+		return new PrefixComposable<Tuple2<CompileState, string>>("return ", (value: string) => {
 			return mapper(value).flatMap((tuple: Tuple2<CompileState, string>) => {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), "return " + tuple.right()))/*unknown*/;
 			})/*unknown*/;
