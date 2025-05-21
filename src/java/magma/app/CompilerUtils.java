@@ -105,9 +105,13 @@ public final class CompilerUtils {
     }
 
     static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {
-        return splitter.apply(input).flatMap((Tuple2<String, String> tuple) -> {
+        return splitter.apply(input).flatMap(toComposable(mapper));
+    }
+
+    private static <T> Function<Tuple2<String, String>, Option<T>> toComposable(BiFunction<String, String, Option<T>> mapper) {
+        return (Tuple2<String, String> tuple) -> {
             return mapper.apply(tuple.left(), tuple.right());
-        });
+        };
     }
 
     public static String generatePlaceholder(String input) {
