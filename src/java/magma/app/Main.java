@@ -24,6 +24,7 @@ import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
+import magma.app.compile.ImmutableDivideState;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.ConstructorHeader;
 import magma.app.compile.define.Definition;
@@ -156,7 +157,7 @@ public final class Main {
     }
 
     private static Query<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = DivideState.createInitial(input);
+        var current = ImmutableDivideState.createInitial(input);
 
         while (true) {
             var poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
