@@ -12,7 +12,6 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
-import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
@@ -45,9 +44,9 @@ final class DefiningCompiler {
     }
 
     public static Tuple2<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
-        return ValueUtils.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> {
+        return ValueCompiler.values((CompileState state1, String s) -> {
             return new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s));
-        });
+        }).apply(state, params).orElse(new Tuple2Impl<CompileState, List<Parameter>>(state, Lists.empty()));
     }
 
     public static Tuple2<CompileState, Parameter> parseParameterOrPlaceholder(CompileState state, String input) {

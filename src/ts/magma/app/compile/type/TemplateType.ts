@@ -94,7 +94,6 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -117,7 +116,8 @@
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { Iterable } from "../../../../magma/api/collect/list/Iterable";
-import { ValueUtils } from "../../../../magma/app/compile/ValueUtils";
+import { Merger } from "../../../../magma/app/compile/merge/Merger";
+import { ValueMerger } from "../../../../magma/app/compile/merge/ValueMerger";
 export class TemplateType implements Type {
 	base: string;
 	args: Iterable<string>;
@@ -126,7 +126,7 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + ValueUtils.generateValueStrings(this.args) + ">"/*unknown*/;
+		return this.base + "<" + Merger.generateAll(this.args, new ValueMerger()) + ">"/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;

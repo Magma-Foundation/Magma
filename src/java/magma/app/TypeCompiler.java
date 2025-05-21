@@ -12,7 +12,6 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Dependency;
 import magma.app.compile.Import;
 import magma.app.compile.Registry;
-import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
@@ -96,9 +95,9 @@ final class TypeCompiler {
         return new SuffixComposable<Tuple2<CompileState, Type>>(">", (String withoutEnd) -> {
             Splitter splitter = new LocatingSplitter("<", new FirstLocator());
             return new SplitComposable<Tuple2<CompileState, Type>>(splitter, Composable.toComposable((String baseString, String argsString) -> {
-                    var argsTuple = ValueUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
-                        return TypeCompiler.compileTypeArgument(state1, s);
-                    });
+                var argsTuple = ValueCompiler.values((CompileState state1, String s) -> {
+                    return TypeCompiler.compileTypeArgument(state1, s);
+                }).apply(state, argsString).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
                     var argsState = argsTuple.left();
                     var args = argsTuple.right();
 

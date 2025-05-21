@@ -94,7 +94,6 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -139,7 +138,6 @@ import { Not } from "../../magma/app/compile/value/Not";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
-import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
 import { List } from "../../magma/api/collect/list/List";
@@ -165,7 +163,9 @@ import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
-class ValueCompiler {
+import { DivideRule } from "../../magma/app/DivideRule";
+import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
+export class ValueCompiler {
 	static generateValue(tuple: Tuple2<CompileState, Value>): Tuple2Impl<CompileState, string> {
 		let state = tuple.left()/*unknown*/;
 		let right = tuple.right()/*unknown*/;
@@ -221,9 +221,9 @@ class ValueCompiler {
 			let strippedBeforeArrow = Strings.strip(beforeArrow)/*unknown*/;
 			return new PrefixComposable<Tuple2<CompileState, Value>>("(", (withoutStart: string) => {
 				return new SuffixComposable<Tuple2<CompileState, Value>>(")", (withoutEnd: string) => {
-					return ValueUtils.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
+					return values((state1: CompileState, s: string) => {
 						return DefiningCompiler.parseParameter(state1, s)/*unknown*/;
-					}).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => {
+					}).apply(state, withoutEnd).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => {
 						return ValueCompiler.compileLambdaWithParameterNames(paramNames.left(), DefiningCompiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow)/*unknown*/;
 					})/*unknown*/;
 				}).apply(withoutStart)/*unknown*/;
@@ -373,9 +373,9 @@ class ValueCompiler {
 		return appended/*unknown*/;
 	}
 	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple2<CompileState, Value>> {
-		return ValueUtils.parseValues(state, argsString, (state1: CompileState, s: string) => {
+		return values((state1: CompileState, s: string) => {
 			return ValueCompiler.parseArgument(state1, s)/*unknown*/;
-		}).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
+		}).apply(state, argsString).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
 			let argsState = argsTuple.left()/*unknown*/;
 			let args = retain(argsTuple.right(), (argument: Argument) => {
 				return argument.toValue()/*unknown*/;
@@ -389,5 +389,8 @@ class ValueCompiler {
 	}
 	static parseValue(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return new OrRule<Value>(Lists.of(ValueCompiler.parseLambda, createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">"), createOperatorRule(">="), ValueCompiler.parseInvokable, createAccessRule("."), createAccessRule("::"), ValueCompiler.parseSymbol, ValueCompiler.parseNot, ValueCompiler.parseNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createTextRule("\""), createTextRule("'"))).apply(state, input)/*unknown*/;
+	}
+	static values<T>(mapper: Rule<T>): Rule<List<T>> {
+		return new DivideRule<>(new ValueFolder(), mapper)/*unknown*/;
 	}
 }

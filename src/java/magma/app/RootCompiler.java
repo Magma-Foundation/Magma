@@ -14,7 +14,6 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Context;
 import magma.app.compile.Registry;
 import magma.app.compile.Stack;
-import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
@@ -73,9 +72,9 @@ public final class RootCompiler {
     private static Option<Tuple2<CompileState, String>> compileStructureWithExtends(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Option<Type> maybeImplementing, String inputContent) {
         Splitter splitter = new LocatingSplitter(" extends ", new FirstLocator());
         return new SplitComposable<Tuple2<CompileState, String>>(splitter, Composable.toComposable((String beforeExtends, String afterExtends) -> {
-            return ValueUtils.parseValues(state, afterExtends, (CompileState inner0, String inner1) -> {
+            return ValueCompiler.values((CompileState inner0, String inner1) -> {
                         return TypeCompiler.parseType(inner0, inner1);
-                    })
+                    }).apply(state, afterExtends)
                     .flatMap((Tuple2<CompileState, List<Type>> compileStateListTuple2) -> {
                         return RootCompiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent);
                     });

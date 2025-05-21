@@ -94,7 +94,6 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -123,9 +122,10 @@ import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { ValueUtils } from "../../magma/app/compile/ValueUtils";
+import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Placeholder } from "../../magma/app/compile/value/Placeholder";
 import { Option } from "../../magma/api/option/Option";
 import { WhitespaceCompiler } from "../../magma/app/WhitespaceCompiler";
@@ -137,7 +137,6 @@ import { Selector } from "../../magma/app/compile/select/Selector";
 import { FoldingSplitter } from "../../magma/app/compile/split/FoldingSplitter";
 import { TypeSeparatorFolder } from "../../magma/app/compile/fold/TypeSeparatorFolder";
 import { Composable } from "../../magma/app/compile/compose/Composable";
-import { Lists } from "../../jvm/api/collect/list/Lists";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
 import { DivideState } from "../../magma/app/compile/DivideState";
@@ -157,9 +156,9 @@ class DefiningCompiler {
 		}).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
 	}
 	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
-		return ValueUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
+		return ValueCompiler.values((state1: CompileState, s: string) => {
 			return new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/;
-		})/*unknown*/;
+		}).apply(state, params).orElse(new Tuple2Impl<CompileState, List<Parameter>>(state, Lists.empty()))/*unknown*/;
 	}
 	static parseParameterOrPlaceholder(state: CompileState, input: string): Tuple2<CompileState, Parameter> {
 		return DefiningCompiler.parseParameter(state, input).orElseGet(() => {

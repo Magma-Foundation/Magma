@@ -10,7 +10,6 @@ import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.Stack;
-import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.PrefixComposable;
 import magma.app.compile.compose.SplitComposable;
@@ -111,14 +110,14 @@ final class FieldCompiler {
     }
 
     public static Option<Tuple2<CompileState, String>> compileEnumValues(CompileState state, String withoutEnd) {
-        return ValueUtils.parseValues(state, withoutEnd, (CompileState state1, String segment) -> {
+        return ValueCompiler.values((CompileState state1, String segment) -> {
             var stripped = segment.strip();
             if (ValueCompiler.isSymbol(stripped)) {
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state1, "\n\t static " + stripped + " = \"" + stripped + "\";"));
             }
 
             return FieldCompiler.getTuple2Option(state, state1, segment);
-        }).map((Tuple2<CompileState, List<String>> tuple) -> {
+        }).apply(state, withoutEnd).map((Tuple2<CompileState, List<String>> tuple) -> {
             return new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().iter().collect(new Joiner("")).orElse(""));
         });
     }

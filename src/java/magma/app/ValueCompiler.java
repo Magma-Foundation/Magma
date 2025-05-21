@@ -17,7 +17,6 @@ import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.Stack;
-import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.PrefixComposable;
 import magma.app.compile.compose.SplitComposable;
@@ -25,6 +24,7 @@ import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
+import magma.app.compile.fold.ValueFolder;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
 import magma.app.compile.select.FirstSelector;
@@ -50,7 +50,7 @@ import magma.app.compile.split.LocatingSplitter;
 
 import java.util.function.Function;
 
-final class ValueCompiler {
+public final class ValueCompiler {
     static Tuple2Impl<CompileState, String> generateValue(Tuple2<CompileState, Value> tuple) {
         var state = tuple.left();
         var right = tuple.right();
@@ -110,9 +110,9 @@ final class ValueCompiler {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
             return new PrefixComposable<Tuple2<CompileState, Value>>("(", (String withoutStart) -> {
                 return new SuffixComposable<Tuple2<CompileState, Value>>(")", (String withoutEnd) -> {
-                                return ValueUtils.parseValues(state, withoutEnd, (CompileState state1, String s) -> {
-                                    return DefiningCompiler.parseParameter(state1, s);
-                                }).flatMap((Tuple2<CompileState, List<Parameter>> paramNames) -> {
+                    return values((CompileState state1, String s) -> {
+                        return DefiningCompiler.parseParameter(state1, s);
+                    }).apply(state, withoutEnd).flatMap((Tuple2<CompileState, List<Parameter>> paramNames) -> {
                                     return ValueCompiler.compileLambdaWithParameterNames(paramNames.left(), DefiningCompiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow);
                                 });
                             }).apply(withoutStart);
@@ -288,9 +288,9 @@ final class ValueCompiler {
     }
 
     private static Option<Tuple2<CompileState, Value>> assembleInvokable(CompileState state, Caller oldCaller, String argsString) {
-        return ValueUtils.parseValues(state, argsString, (CompileState state1, String s) -> {
+        return values((CompileState state1, String s) -> {
             return ValueCompiler.parseArgument(state1, s);
-        }).flatMap((Tuple2<CompileState, List<Argument>> argsTuple) -> {
+        }).apply(state, argsString).flatMap((Tuple2<CompileState, List<Argument>> argsTuple) -> {
             var argsState = argsTuple.left();
             var args = retain(argsTuple.right(), (Argument argument) -> {
                 return argument.toValue();
@@ -330,5 +330,9 @@ final class ValueCompiler {
                 createTextRule("\""),
                 createTextRule("'")
         )).apply(state, input);
+    }
+
+    public static <T> Rule<List<T>> values(Rule<T> mapper) {
+        return new DivideRule<>(new ValueFolder(), mapper);
     }
 }

@@ -94,7 +94,6 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -136,10 +135,9 @@ import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Type } from "../../magma/app/compile/type/Type";
 import { None } from "../../magma/api/option/None";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
-import { ValueUtils } from "../../magma/app/compile/ValueUtils";
+import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { Definition } from "../../magma/app/compile/define/Definition";
-import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler";
 import { Stack } from "../../magma/app/compile/Stack";
 import { Joiner } from "../../magma/api/collect/Joiner";
@@ -184,9 +182,9 @@ export class RootCompiler {
 	static compileStructureWithExtends(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
 		let splitter: Splitter = new LocatingSplitter(" extends ", new FirstLocator())/*unknown*/;
 		return new SplitComposable<Tuple2<CompileState, string>>(splitter, Composable.toComposable((beforeExtends: string, afterExtends: string) => {
-			return ValueUtils.parseValues(state, afterExtends, (inner0: CompileState, inner1: string) => {
+			return ValueCompiler.values((inner0: CompileState, inner1: string) => {
 				return TypeCompiler.parseType(inner0, inner1)/*unknown*/;
-			}).flatMap((compileStateListTuple2: Tuple2<CompileState, List<Type>>) => {
+			}).apply(state, afterExtends).flatMap((compileStateListTuple2: Tuple2<CompileState, List<Type>>) => {
 				return RootCompiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent)/*unknown*/;
 			})/*unknown*/;
 		})).apply(beforeContent).or(() => {

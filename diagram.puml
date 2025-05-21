@@ -238,8 +238,6 @@ class StringValue {
 StringValue <|.. Value
 class Symbol {
 }
-class ValueUtils {
-}
 class CompilerUtils {
 }
 class DefiningCompiler {
@@ -564,7 +562,8 @@ FunctionType --> Joiner
 PrimitiveType --> Type
 TemplateType --> Type
 TemplateType --> Iterable
-TemplateType --> ValueUtils
+TemplateType --> Merger
+TemplateType --> ValueMerger
 VariadicType --> Type
 AccessValue --> Value
 AccessValue --> Option
@@ -633,18 +632,6 @@ Symbol --> Value
 Symbol --> Option
 Symbol --> Some
 Symbol --> None
-ValueUtils --> Iterable
-ValueUtils --> Merger
-ValueUtils --> ValueMerger
-ValueUtils --> CompileState
-ValueUtils --> List
-ValueUtils --> Tuple2
-ValueUtils --> Rule
-ValueUtils --> Tuple2Impl
-ValueUtils --> Lists
-ValueUtils --> Option
-ValueUtils --> DivideRule
-ValueUtils --> ValueFolder
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
 DefiningCompiler --> Parameter
@@ -653,9 +640,10 @@ DefiningCompiler --> ListCollector
 DefiningCompiler --> CompileState
 DefiningCompiler --> List
 DefiningCompiler --> Tuple2
-DefiningCompiler --> ValueUtils
+DefiningCompiler --> ValueCompiler
 DefiningCompiler --> Some
 DefiningCompiler --> Tuple2Impl
+DefiningCompiler --> Lists
 DefiningCompiler --> Placeholder
 DefiningCompiler --> Option
 DefiningCompiler --> WhitespaceCompiler
@@ -667,7 +655,6 @@ DefiningCompiler --> Selector
 DefiningCompiler --> FoldingSplitter
 DefiningCompiler --> TypeSeparatorFolder
 DefiningCompiler --> Composable
-DefiningCompiler --> Lists
 DefiningCompiler --> FoldedDivider
 DefiningCompiler --> DecoratedFolder
 DefiningCompiler --> DivideState
@@ -689,9 +676,11 @@ DefinitionCompiler --> Joiner
 DefinitionCompiler --> CompileState
 DefinitionCompiler --> List
 DefinitionCompiler --> Tuple2
-DefinitionCompiler --> ValueUtils
+DefinitionCompiler --> ValueCompiler
 DefinitionCompiler --> Some
 DefinitionCompiler --> DefiningCompiler
+DefinitionCompiler --> Tuple2Impl
+DefinitionCompiler --> Lists
 DivideRule --> List
 DivideRule --> Rule
 DivideRule --> Folder
@@ -725,7 +714,6 @@ FieldCompiler --> SuffixComposable
 FieldCompiler --> FunctionSegmentCompiler
 FieldCompiler --> Stack
 FieldCompiler --> Parameter
-FieldCompiler --> ValueUtils
 FieldCompiler --> ValueCompiler
 FieldCompiler --> List
 FieldCompiler --> Value
@@ -815,10 +803,9 @@ RootCompiler --> TypeCompiler
 RootCompiler --> Type
 RootCompiler --> None
 RootCompiler --> Splitter
-RootCompiler --> ValueUtils
+RootCompiler --> ValueCompiler
 RootCompiler --> Iterable
 RootCompiler --> Definition
-RootCompiler --> ValueCompiler
 RootCompiler --> FunctionSegmentCompiler
 RootCompiler --> Stack
 RootCompiler --> Joiner
@@ -855,9 +842,8 @@ TypeCompiler --> FirstLocator
 TypeCompiler --> Splitter
 TypeCompiler --> SplitComposable
 TypeCompiler --> Composable
-TypeCompiler --> ValueUtils
-TypeCompiler --> TemplateType
 TypeCompiler --> List
+TypeCompiler --> TemplateType
 TypeCompiler --> FunctionType
 TypeCompiler --> WhitespaceCompiler
 TypeCompiler --> Placeholder
@@ -891,7 +877,6 @@ ValueCompiler --> Not
 ValueCompiler --> LocatingSplitter
 ValueCompiler --> FirstLocator
 ValueCompiler --> Splitter
-ValueCompiler --> ValueUtils
 ValueCompiler --> DefiningCompiler
 ValueCompiler --> Parameter
 ValueCompiler --> List
@@ -917,6 +902,8 @@ ValueCompiler --> Iters
 ValueCompiler --> ListCollector
 ValueCompiler --> OrRule
 ValueCompiler --> Lists
+ValueCompiler --> DivideRule
+ValueCompiler --> ValueFolder
 WhitespaceCompiler --> CompileState
 WhitespaceCompiler --> Tuple2
 WhitespaceCompiler --> Option
