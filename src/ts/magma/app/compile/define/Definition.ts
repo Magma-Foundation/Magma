@@ -58,6 +58,7 @@
 	Operation: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	Compiler: magma.app, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
@@ -68,7 +69,7 @@ import { Type } from "../../../../magma/app/compile/type/Type";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
-import { Main } from "../../../../magma/app/Main";
+import { Compiler } from "../../../../magma/app/Compiler";
 import { MethodHeader } from "../../../../magma/app/compile/define/MethodHeader";
 import { Strings } from "../../../../magma/api/text/Strings";
 export class Definition {
@@ -108,7 +109,7 @@ export class Definition {
 		return ": " + this.type.generate()/*unknown*/;
 	}
 	joinTypeParams(): string {
-		return Main.joinTypeParams(this.typeParams)/*unknown*/;
+		return Compiler.joinTypeParams(this.typeParams)/*unknown*/;
 	}
 	hasAnnotation(annotation: string): boolean {
 		return this.annotations.contains(annotation)/*unknown*/;

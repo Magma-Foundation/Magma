@@ -58,6 +58,7 @@
 	Operation: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	Compiler: magma.app, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
@@ -65,7 +66,7 @@
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { List } from "../../../../magma/api/collect/list/List";
-import { Main } from "../../../../magma/app/Main";
+import { Compiler } from "../../../../magma/app/Compiler";
 export class TemplateType implements Type {
 	base: string;
 	args: List<string>;
@@ -74,7 +75,7 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + Main.generateValueStrings(this.args) + ">"/*unknown*/;
+		return this.base + "<" + Compiler.generateValueStrings(this.args) + ">"/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;

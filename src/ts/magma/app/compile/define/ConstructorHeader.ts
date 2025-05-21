@@ -58,6 +58,7 @@
 	Operation: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	Compiler: magma.app, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
