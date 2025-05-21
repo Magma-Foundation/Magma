@@ -70,7 +70,7 @@ public final class Main {
                 .map((Path child) -> new Source(sourceDirectory, child))
                 .collect(new ListCollector<Source>());
 
-        var initial = sources.query().foldWithInitial(Main.createInitial(), (CompileState state, Source source) -> state.addSource(source));
+        var initial = sources.query().foldWithInitial(Main.createInitialCompileState(), (CompileState state, Source source) -> state.addSource(source));
 
         return sources.query()
                 .foldWithInitialToResult(initial, Main::runWithSource)
@@ -158,7 +158,7 @@ public final class Main {
     }
 
     private static Query<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = Main.createInitial(input);
+        var current = Main.createInitialDivideState(input);
 
         while (true) {
             var poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
@@ -1272,11 +1272,11 @@ public final class Main {
         return "/*" + replaced + "*/";
     }
 
-    private static CompileState createInitial() {
+    private static CompileState createInitialCompileState() {
         return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
     }
 
-    private static DivideState createInitial(String input) {
+    private static DivideState createInitialDivideState(String input) {
         return new ImmutableDivideState(Lists.empty(), "", 0, input, 0);
     }
 }

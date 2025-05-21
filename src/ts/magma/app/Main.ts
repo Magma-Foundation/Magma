@@ -116,7 +116,7 @@ export class Main {
 	}
 	static runWithChildren(children: List<Path>, sourceDirectory: Path): Option<IOError> {
 		let sources = children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/).map((child: Path) => new Source(sourceDirectory, child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
-		let initial = sources.query().foldWithInitial(Main.createInitial(), (state: CompileState, source: Source) => state.addSource(source)/*unknown*/)/*unknown*/;
+		let initial = sources.query().foldWithInitial(Main.createInitialCompileState(), (state: CompileState, source: Source) => state.addSource(source)/*unknown*/)/*unknown*/;
 		return sources.query().foldWithInitialToResult(initial, Main.runWithSource).findError()/*unknown*/;
 	}
 	static runWithSource(state: CompileState, source: Source): Result<CompileState, IOError> {
@@ -175,7 +175,7 @@ export class Main {
 		return cache + element/*unknown*/;
 	}
 	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Query<string> {
-		let current = Main.createInitial(input)/*unknown*/;
+		let current = Main.createInitialDivideState(input)/*unknown*/;
 		while (true/*unknown*/){
 			let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, string>(current, "\0"))/*unknown*/;
 			if (!poppedTuple0/*unknown*/.left()/*unknown*/){
@@ -920,10 +920,10 @@ export class Main {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
 		return "/*" + replaced + "*/"/*unknown*/;
 	}
-	static createInitial(): CompileState {
+	static createInitialCompileState(): CompileState {
 		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty())/*unknown*/;
 	}
-	static createInitial(input: string): DivideState {
+	static createInitialDivideState(input: string): DivideState {
 		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
 	}
 }
