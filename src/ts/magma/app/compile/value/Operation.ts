@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -75,18 +77,18 @@ export class Operation implements Value {
 		this.right = right;
 	}
 	generate(): string {
-		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate();
+		return this.left.generate() + " " + this.targetInfix + " " + this.right.generate()/*unknown*/;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this)/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Unknown/*unknown*/;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
+		return new None<string>()/*unknown*/;
 	}
 }

@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -68,9 +70,9 @@ export class ConstructionCaller implements Caller {
 		this.right = right;
 	}
 	generate(): string {
-		return "new " + this.right;
+		return "new " + this.right/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new None<Value>();
+		return new None<Value>()/*unknown*/;
 	}
 }

@@ -5,7 +5,6 @@ import magma.api.collect.head.Head;
 import magma.api.collect.head.HeadedQuery;
 import magma.api.collect.head.SingleHead;
 import magma.api.option.Option;
-import magma.app.Main;
 
 public final class Iterators {
     public static <T> Query<T> fromOption(Option<T> option) {

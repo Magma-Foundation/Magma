@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -65,15 +67,15 @@ export class VariadicType implements Type {
 		this.type = type;
 	}
 	generate(): string {
-		return this.type.generate() + "[]";
+		return this.type.generate() + "[]"/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "...";
+		return "..."/*unknown*/;
 	}
 }

@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -70,16 +72,16 @@ export class FunctionType implements Type {
 		this.returns = returns;
 	}
 	generate(): string {
-		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()).collect(new Joiner(", ")).orElse("");
-		return "(" + joinedArguments + ") => " + this.returns;
+		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		return "(" + joinedArguments + ") => " + this.returns/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return true;
+		return true/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 }

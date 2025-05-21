@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -80,38 +82,38 @@ export class Definition {
 		this.name = name;
 	}
 	findType(): Type {
-		return this.type;
+		return this.type/*unknown*/;
 	}
 	toAssignment(): string {
-		return "\n\t\tthis." + this.name + " = " + this.name + ";";
+		return "\n\t\tthis." + this.name + " = " + this.name + ";"/*unknown*/;
 	}
 	generate(): string {
-		return this.generateWithAfterName("");
+		return this.generateWithAfterName("")/*unknown*/;
 	}
 	asDefinition(): Option<Definition> {
-		return new Some<Definition>(this);
+		return new Some<Definition>(this)/*unknown*/;
 	}
 	generateWithAfterName(afterName: string): string {
-		let joinedTypeParams = this.joinTypeParams();
-		let joinedModifiers = this.modifiers.query().map((value: string) => value + " ").collect(new Joiner("")).orElse("");
-		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType();
+		let joinedTypeParams = this.joinTypeParams()/*unknown*/;
+		let joinedModifiers = this.modifiers.query().map((value: string) => value + " "/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType()/*unknown*/;
 	}
 	generateType(): string {
-		if (this.type.isVar()){
-			return "";
+		if (this.type.isVar()/*unknown*/){
+			return ""/*unknown*/;
 		}
-		return ": " + this.type.generate();
+		return ": " + this.type.generate()/*unknown*/;
 	}
 	joinTypeParams(): string {
-		return Main.joinTypeParams(this.typeParams);
+		return Main.joinTypeParams(this.typeParams)/*unknown*/;
 	}
 	hasAnnotation(annotation: string): boolean {
-		return this.annotations.contains(annotation);
+		return this.annotations.contains(annotation)/*unknown*/;
 	}
 	removeModifier(modifier: string): MethodHeader {
-		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name);
+		return new Definition(this.annotations, this.modifiers.removeValue(modifier), this.typeParams, this.type, this.name)/*unknown*/;
 	}
 	isNamed(name: string): boolean {
-		return Strings.equalsTo(this.name, name);
+		return Strings.equalsTo(this.name, name)/*unknown*/;
 	}
 }

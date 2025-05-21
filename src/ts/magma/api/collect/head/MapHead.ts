@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -68,6 +70,6 @@ export class MapHead<T, R> implements Head<R> {
 		this.mapper = mapper;
 	}
 	next(): Option<R> {
-		return this.head.next().map(this.mapper);
+		return this.head.next().map(this.mapper)/*unknown*/;
 	}
 }

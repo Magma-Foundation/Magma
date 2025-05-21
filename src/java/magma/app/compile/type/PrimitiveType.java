@@ -1,7 +1,5 @@
 package magma.app.compile.type;
 
-import magma.app.Main;
-
 public enum PrimitiveType implements Type {
     String("string"),
     Number("number"),
@@ -10,7 +8,7 @@ public enum PrimitiveType implements Type {
     Void("void"),
     Unknown("unknown");
 
-    final String value;
+    private final String value;
 
     PrimitiveType(String value) {
         this.value = value;

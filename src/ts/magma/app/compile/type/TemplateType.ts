@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -69,15 +71,15 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + Main.generateValueStrings(this.args) + ">";
+		return this.base + "<" + Main.generateValueStrings(this.args) + ">"/*unknown*/;
 	}
 	isFunctional(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	isVar(): boolean {
-		return false;
+		return false/*unknown*/;
 	}
 	generateBeforeName(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 }

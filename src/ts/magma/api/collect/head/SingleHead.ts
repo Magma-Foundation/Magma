@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -66,14 +68,14 @@ export class SingleHead<T> implements Head<T> {
 	element: T;
 	retrieved: boolean;
 	constructor (element: T) {
-		this.element = element;
-		this.retrieved = false;
+		this.element/*unknown*/ = element/*T*/;
+		this.retrieved/*unknown*/ = false/*unknown*/;
 	}
 	next(): Option<T> {
-		if (this.retrieved){
-			return new None<T>();
+		if (this.retrieved/*unknown*/){
+			return new None<T>()/*unknown*/;
 		}
-		this.retrieved = true;
-		return new Some<T>(this.element);
+		this.retrieved/*unknown*/ = true/*unknown*/;
+		return new Some<T>(this.element)/*unknown*/;
 	}
 }

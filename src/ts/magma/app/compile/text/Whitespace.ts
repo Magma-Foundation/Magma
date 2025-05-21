@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -64,9 +66,9 @@ import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";
 export class Whitespace implements Parameter {
 	generate(): string {
-		return "";
+		return ""/*unknown*/;
 	}
 	asDefinition(): Option<Definition> {
-		return new None<Definition>();
+		return new None<Definition>()/*unknown*/;
 	}
 }

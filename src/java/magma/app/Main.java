@@ -24,6 +24,8 @@ import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
+import magma.app.compile.ImmutableCompileState;
+import magma.app.compile.ImmutableDivideState;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.ConstructorHeader;
 import magma.app.compile.define.Definition;
@@ -68,7 +70,7 @@ public final class Main {
                 .map((Path child) -> new Source(sourceDirectory, child))
                 .collect(new ListCollector<Source>());
 
-        var initial = sources.query().foldWithInitial(CompileState.createInitial(), (CompileState state, Source source) -> state.addSource(source));
+        var initial = sources.query().foldWithInitial(Main.createInitial(), (CompileState state, Source source) -> state.addSource(source));
 
         return sources.query()
                 .foldWithInitialToResult(initial, Main::runWithSource)
@@ -115,7 +117,7 @@ public final class Main {
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var joined = compiledState.getJoined(compiled.right());
+        var joined = compiledState.join(compiled.right());
         return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + joined);
     }
 
@@ -156,7 +158,7 @@ public final class Main {
     }
 
     private static Query<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
-        var current = DivideState.createInitial(input);
+        var current = Main.createInitial(input);
 
         while (true) {
             var poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
@@ -409,29 +411,11 @@ public final class Main {
 
     private static Option<Tuple2<CompileState, String>> compileNamespaced(CompileState state, String input) {
         var stripped = Strings.strip(input);
-        if (stripped.startsWith("package ")) {
+        if (stripped.startsWith("package ") || stripped.startsWith("import ")) {
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
         }
 
-        return Main.compileImport(state, stripped);
-    }
-
-    private static Option<Tuple2<CompileState, String>> compileImport(CompileState state, String stripped) {
-        return Main.compilePrefix(stripped, "import ", (String s) -> Main.compileSuffix(s, ";", (String s1) -> {
-            var divisions = Main.divide(s1, (DivideState divideState, Character c) -> Main.foldDelimited(divideState, c, '.'))
-                    .collect(new ListCollector<String>());
-
-            var child = Strings.strip(divisions.findLast().orElse(""));
-            var parent = divisions.subList(0, divisions.size() - 1)
-                    .orElse(Lists.empty());
-
-            if (parent.equalsTo(Lists.of("java", "util", "function"))) {
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-            }
-
-            var compileState = state.addResolvedImport(parent, child);
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-        }));
+        return new None<Tuple2<CompileState, String>>();
     }
 
     private static Tuple2<CompileState, String> compileOrPlaceholder(
@@ -622,11 +606,20 @@ public final class Main {
         return Main.compileOrPlaceholder(state, withoutEnd, Lists.of(
                 Main::compileReturnWithValue,
                 Main::compileAssignment,
-                (CompileState state1, String input) -> Main.parseInvokable(state1, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate())),
+                (CompileState state1, String input) -> Main.parseInvokable(state1, input)
+                        .map((Tuple2<CompileState, Value> tuple) -> Main.generateValue(tuple)),
                 Main.createPostRule("++"),
                 Main.createPostRule("--"),
                 Main::compileBreak
         ));
+    }
+
+    private static Tuple2Impl<CompileState, String> generateValue(Tuple2<CompileState, Value> tuple) {
+        var state = tuple.left();
+        var right = tuple.right();
+        var generated = right.generate();
+        var s = Main.generatePlaceholder(right.resolve(state).generate());
+        return new Tuple2Impl<CompileState, String>(state, generated + s);
     }
 
     private static Option<Tuple2<CompileState, String>> compileBreak(CompileState state, String input) {
@@ -760,7 +753,7 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileValue(CompileState state, String input) {
-        return Main.parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
+        return Main.parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> Main.generateValue(tuple));
     }
 
     private static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, String input) {
@@ -1062,10 +1055,6 @@ public final class Main {
                 .orElseGet(() -> new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
     }
 
-    public static Tuple2<CompileState, String> compileTypeOrPlaceholder(CompileState state, String type) {
-        return Main.compileType(state, type).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, Main.generatePlaceholder(type)));
-    }
-
     private static Option<Tuple2<CompileState, String>> compileType(CompileState state, String type) {
         return Main.parseType(state, type).map((Tuple2<CompileState, Type> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
     }
@@ -1281,5 +1270,13 @@ public final class Main {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
+    }
+
+    private static CompileState createInitial() {
+        return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
+    }
+
+    private static DivideState createInitial(String input) {
+        return new ImmutableDivideState(Lists.empty(), "", 0, input, 0);
     }
 }

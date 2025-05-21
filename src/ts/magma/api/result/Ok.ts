@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -67,12 +69,12 @@ export class Ok<T, X> implements Result<T, X> {
 		this.value = value;
 	}
 	match<R>(whenOk: (arg0 : T) => R, whenErr: (arg0 : X) => R): R {
-		return whenOk(this.value);
+		return whenOk(this.value)/*unknown*/;
 	}
 	flatMapValue<R>(mapper: (arg0 : T) => Result<R, X>): Result<R, X> {
-		return mapper(this.value);
+		return mapper(this.value)/*unknown*/;
 	}
 	findError(): Option<X> {
-		return new None<X>();
+		return new None<X>()/*unknown*/;
 	}
 }

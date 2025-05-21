@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -63,9 +65,9 @@ import { Collector } from "../../../../magma/api/collect/Collector";
 import { Lists } from "../../../../jvm/api/collect/list/Lists";
 export class ListCollector<T> implements Collector<T, List<T>> {
 	createInitial(): List<T> {
-		return Lists.empty();
+		return Lists.empty()/*unknown*/;
 	}
 	fold(current: List<T>, element: T): List<T> {
-		return current.addLast(element);
+		return current.addLast(element)/*unknown*/;
 	}
 }

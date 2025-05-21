@@ -37,6 +37,8 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	DivideState: magma.app.compile, 
+	ImmutableCompileState: magma.app.compile, 
+	ImmutableDivideState: magma.app.compile, 
 	Import: magma.app.compile, 
 	Placeholder: magma.app.compile.text, 
 	Symbol: magma.app.compile.text, 
@@ -73,18 +75,18 @@ export class AccessValue implements Value {
 		this.property = property;
 	}
 	generate(): string {
-		return this.child.generate() + "." + this.property;
+		return this.child.generate() + "." + this.property/*unknown*/;
 	}
 	toValue(): Option<Value> {
-		return new Some<Value>(this);
+		return new Some<Value>(this)/*unknown*/;
 	}
 	findChild(): Option<Value> {
-		return new Some<Value>(this.child);
+		return new Some<Value>(this.child)/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown;
+		return PrimitiveType.Unknown/*unknown*/;
 	}
 	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>();
+		return new None<string>()/*unknown*/;
 	}
 }

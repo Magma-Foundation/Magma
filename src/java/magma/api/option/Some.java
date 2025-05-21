@@ -2,7 +2,6 @@ package magma.api.option;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.app.Main;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
