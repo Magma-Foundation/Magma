@@ -17,7 +17,6 @@ import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
-import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.ImmutableDivideState;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.ConstructorHeader;
@@ -1216,19 +1215,6 @@ public class Compiler {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
-    }
-
-    public static CompileState createInitialCompileState() {
-        return new ImmutableCompileState(
-                Lists.empty(),
-                "",
-                Lists.empty(),
-                0,
-                Lists.empty(),
-                new None<Location>(),
-                Lists.empty(),
-                Platform.TypeScript,
-                Lists.empty());
     }
 
     public static DivideState createInitialDivideState(String input) {

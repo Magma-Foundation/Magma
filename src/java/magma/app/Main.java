@@ -1,7 +1,7 @@
 package magma.app;
 
+import jvm.api.collect.list.Lists;
 import jvm.api.io.Files;
-import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iters;
 import magma.api.collect.Joiner;
@@ -18,6 +18,7 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.app.compile.CompileState;
 import magma.app.compile.Dependency;
+import magma.app.compile.ImmutableCompileState;
 import magma.app.io.Source;
 
 public final class Main {
@@ -30,7 +31,7 @@ public final class Main {
     }
 
     private static Result<CompileState, IOError> runWithSourceDirectory(Path sourceDirectory) {
-        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Compiler.createInitialCompileState(), (CompileState state, Platform platform) -> sourceDirectory.walk().flatMapValue((List<Path> children) -> Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)));
+        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> sourceDirectory.walk().flatMapValue((List<Path> children) -> Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)));
     }
 
     private static Result<CompileState, IOError> runWithChildren(CompileState state, List<Path> children, Path sourceDirectory) {
@@ -85,7 +86,7 @@ public final class Main {
                 .orElse("");
 
         var joined = compiledState.join(compiled.right());
-        var output = (Tuple2<CompileState, String>) new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
+        var output = new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
         return Main.writeTarget(source, output.left().clearImports().clearOutput(), output.right());
     }
 
@@ -113,7 +114,26 @@ public final class Main {
     }
 
     private static String formatSource(Source source) {
-        var joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("");
-        return "\n\t" + source.computeName() + ": " + joinedNamespace;
+        return "\n\t" + source.computeName() + ": " + Main.joinNamespace(source);
+    }
+
+    private static String joinNamespace(Source source) {
+        return source.computeNamespace()
+                .query()
+                .collect(new Joiner("."))
+                .orElse("");
+    }
+
+    private static CompileState createInitialState() {
+        return new ImmutableCompileState(
+                Lists.empty(),
+                "",
+                Lists.empty(),
+                0,
+                Lists.empty(),
+                new None<Location>(),
+                Lists.empty(),
+                Platform.TypeScript,
+                Lists.empty());
     }
 }
