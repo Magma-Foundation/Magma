@@ -17,6 +17,7 @@ import magma.app.compile.Stack;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
+import magma.app.compile.rule.Rule;
 import magma.app.compile.select.FirstSelector;
 import magma.app.compile.select.Selector;
 import magma.app.compile.split.FoldingSplitter;
@@ -61,7 +62,7 @@ final class ValueCompiler {
         });
     }
 
-    static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createTextRule(String slice) {
+    static Rule<Value> createTextRule(String slice) {
         return (CompileState state1, String input1) -> {
             var stripped = Strings.strip(input1);
             return CompilerUtils.compilePrefix(stripped, slice, (String s) -> CompilerUtils.compileSuffix(s, slice, (String s1) -> new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1)))));
@@ -101,11 +102,11 @@ final class ValueCompiler {
         return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)));
     }
 
-    static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRule(String infix) {
+    static Rule<Value> createOperatorRule(String infix) {
         return ValueCompiler.createOperatorRuleWithDifferentInfix(infix, infix);
     }
 
-    static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createAccessRule(String infix) {
+    static Rule<Value> createAccessRule(String infix) {
         return (CompileState state, String input) -> CompilerUtils.compileLast(input, infix, (String childString, String rawProperty) -> {
             var property = Strings.strip(rawProperty);
             if (!ValueCompiler.isSymbol(property)) {
@@ -120,7 +121,7 @@ final class ValueCompiler {
         });
     }
 
-    static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
+    static Rule<Value> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (CompileState state1, String input1) -> {
             return CompilerUtils.compileSplit(input1, (String slice) -> {
                 return new FoldingSplitter(new OperatorFolder(sourceInfix), (List<String> divisions) -> {

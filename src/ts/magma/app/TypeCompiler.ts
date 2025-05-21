@@ -62,6 +62,8 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
 	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
@@ -110,6 +112,7 @@ import { Option } from "../../magma/api/option/Option";
 import { Type } from "../../magma/app/compile/type/Type";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Strings } from "../../magma/api/text/Strings";
 import { Some } from "../../magma/api/option/Some";
@@ -135,7 +138,7 @@ class TypeCompiler {
 		return TypeCompiler.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())/*unknown*/)/*unknown*/;
 	}
 	static parseType(state: CompileState, type: string): Option<Tuple2<CompileState, Type>> {
-		return CompilerUtils.or(state, type, Lists.of(TypeCompiler.parseVarArgs, TypeCompiler.parseGeneric, TypeCompiler.parsePrimitive, TypeCompiler.parseSymbolType))/*unknown*/;
+		return CompilerUtils.or(state, type, new OrRule<Type>(Lists.of(TypeCompiler.parseVarArgs, TypeCompiler.parseGeneric, TypeCompiler.parsePrimitive, TypeCompiler.parseSymbolType)))/*unknown*/;
 	}
 	static parseVarArgs(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		let stripped = Strings.strip(input)/*unknown*/;
@@ -207,7 +210,7 @@ class TypeCompiler {
 		return new None<Type>()/*unknown*/;
 	}
 	static compileTypeArgument(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.or(state, input, Lists.of((state2: CompileState, input1: string) => CompilerUtils.compileWhitespace(state2, input1)/*unknown*/, (state1: CompileState, type: string) => TypeCompiler.compileType(state1, type)/*unknown*/))/*unknown*/;
+		return CompilerUtils.or(state, input, new OrRule<string>(Lists.of((state2: CompileState, input1: string) => CompilerUtils.compileWhitespace(state2, input1)/*unknown*/, (state1: CompileState, type: string) => TypeCompiler.compileType(state1, type)/*unknown*/)))/*unknown*/;
 	}
 	static parseTypeOrPlaceholder(state: CompileState, type: string): Tuple2<CompileState, Type> {
 		return TypeCompiler.parseType(state, type).map((tuple: Tuple2<CompileState, Type>) => new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right())/*unknown*/).orElseGet(() => new Tuple2Impl<CompileState, Type>(state, new Placeholder(type))/*unknown*/)/*unknown*/;

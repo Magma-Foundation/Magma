@@ -62,6 +62,8 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
 	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
@@ -108,13 +110,14 @@ import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Lists } from "../../jvm/api/collect/list/Lists";
-import { Option } from "../../magma/api/option/Option";
+import { Rule } from "../../magma/app/compile/rule/Rule";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { Strings } from "../../magma/api/text/Strings";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Option } from "../../magma/api/option/Option";
 import { List } from "../../magma/api/collect/list/List";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Type } from "../../magma/app/compile/type/Type";
@@ -128,13 +131,14 @@ import { Platform } from "../../magma/app/Platform";
 import { Registry } from "../../magma/app/compile/Registry";
 import { FieldCompiler } from "../../magma/app/FieldCompiler";
 import { Value } from "../../magma/app/compile/value/Value";
+import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Location } from "../../magma/app/Location";
 import { Context } from "../../magma/app/compile/Context";
 export class RootCompiler {
 	static compileRootSegment(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(CompilerUtils.compileWhitespace, RootCompiler.compileNamespaced, RootCompiler.createStructureRule("class ", "class "), RootCompiler.createStructureRule("interface ", "interface "), RootCompiler.createStructureRule("record ", "class "), RootCompiler.createStructureRule("enum ", "class ")))/*unknown*/;
 	}
-	static createStructureRule(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
+	static createStructureRule(sourceInfix: string, targetInfix: string): Rule<string> {
 		return (state: CompileState, input1: string) => CompilerUtils.compileSplit(input1, new LocatingSplitter(sourceInfix, new FirstLocator()), (beforeInfix: string, afterInfix: string) => {
 			return CompilerUtils.compileSplit(afterInfix, new LocatingSplitter("{", new FirstLocator()), (beforeContent: string, withEnd: string) => CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => CompilerUtils.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 				let annotations = DefiningCompiler.parseAnnotations(s)/*unknown*/;
@@ -238,7 +242,7 @@ export class RootCompiler {
 		return CompilerUtils.compileOrPlaceholder(state1, input1, Lists.of(CompilerUtils.compileWhitespace, RootCompiler.createStructureRule("class ", "class "), RootCompiler.createStructureRule("interface ", "interface "), RootCompiler.createStructureRule("record ", "class "), RootCompiler.createStructureRule("enum ", "class "), FieldCompiler.compileMethod, FieldCompiler.compileFieldDefinition, FieldCompiler.compileEnumValues))/*unknown*/;
 	}
 	static parseValue(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return CompilerUtils.or(state, input, Lists.of(ValueCompiler.parseLambda, ValueCompiler.createOperatorRule("+"), ValueCompiler.createOperatorRule("-"), ValueCompiler.createOperatorRule("<="), ValueCompiler.createOperatorRule("<"), ValueCompiler.createOperatorRule("&&"), ValueCompiler.createOperatorRule("||"), ValueCompiler.createOperatorRule(">"), ValueCompiler.createOperatorRule(">="), ValueCompiler.parseInvokable, ValueCompiler.createAccessRule("."), ValueCompiler.createAccessRule("::"), ValueCompiler.parseSymbol, ValueCompiler.parseNot, ValueCompiler.parseNumber, ValueCompiler.createOperatorRuleWithDifferentInfix("==", "==="), ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="), ValueCompiler.createTextRule("\""), ValueCompiler.createTextRule("'")))/*unknown*/;
+		return CompilerUtils.or(state, input, new OrRule<Value>(Lists. < Rule < Value >  > of(ValueCompiler.parseLambda, ValueCompiler.createOperatorRule("+"), ValueCompiler.createOperatorRule("-"), ValueCompiler.createOperatorRule("<="), ValueCompiler.createOperatorRule("<"), ValueCompiler.createOperatorRule("&&"), ValueCompiler.createOperatorRule("||"), ValueCompiler.createOperatorRule(">"), ValueCompiler.createOperatorRule(">="), ValueCompiler.parseInvokable, ValueCompiler.createAccessRule("."), ValueCompiler.createAccessRule("::"), ValueCompiler.parseSymbol, ValueCompiler.parseNot, ValueCompiler.parseNumber, ValueCompiler.createOperatorRuleWithDifferentInfix("==", "==="), ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="), ValueCompiler.createTextRule("\""), ValueCompiler.createTextRule("'"))))/*unknown*/;
 	}
 	static compileRoot(state: CompileState, input: string, location: Location): Tuple2<CompileState, string> {
 		return CompilerUtils.compileStatements(state.mapContext((context2: Context) => context2.withLocation(location)/*unknown*/), input, RootCompiler.compileRootSegment)/*unknown*/;

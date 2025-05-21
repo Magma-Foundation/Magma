@@ -62,6 +62,8 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
 	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
@@ -116,8 +118,10 @@ import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { Option } from "../../magma/api/option/Option";
+import { Rule } from "../../magma/app/compile/rule/Rule";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
+import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Iters } from "../../magma/api/collect/Iters";
 import { None } from "../../magma/api/option/None";
 import { Strings } from "../../magma/api/text/Strings";
@@ -138,22 +142,22 @@ export class CompilerUtils {
 	static generateAll(elements: Iterable<string>, merger: Merger): string {
 		return elements.iter().foldWithInitial("", merger.apply)/*unknown*/;
 	}
-	static parseAll<T>(state: CompileState, input: string, folder: Folder, rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
+	static parseAll<T>(state: CompileState, input: string, folder: Folder, rule: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
 		return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
 			let currentState = current.left()/*unknown*/;
 			let currentElement = current.right()/*unknown*/;
-			return rule(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
+			return rule.apply(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
 				let mappedState = mappedTuple.left()/*unknown*/;
 				let mappedElement = mappedTuple.right()/*unknown*/;
 				return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement))/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/)/*unknown*/;
 	}
-	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>>>): Tuple2<CompileState, string> {
-		return CompilerUtils.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/)/*unknown*/;
+	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<Rule<string>>): Tuple2<CompileState, string> {
+		return CompilerUtils.or(state, input, new OrRule<>(rules)).orElseGet(() => new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/)/*unknown*/;
 	}
-	static or<T>(state: CompileState, input: string, rules: Iterable<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>>): Option<Tuple2<CompileState, T>> {
-		return rules.iter().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>) => rule(state, input)/*unknown*/).flatMap(Iters.fromOption).next()/*unknown*/;
+	static or<T>(state: CompileState, input: string, orRule: OrRule<T>): Option<Tuple2<CompileState, T>> {
+		return orRule.rules().iter().map((rule: Rule<T>) => rule.apply(state, input)/*unknown*/).flatMap(Iters.fromOption).next()/*unknown*/;
 	}
 	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		if (!input/*string*/.startsWith(infix)/*unknown*/){
@@ -174,10 +178,10 @@ export class CompilerUtils {
 	static generateValueStrings(values: Iterable<string>): string {
 		return CompilerUtils.generateAll(values, CompilerUtils.mergeValues)/*unknown*/;
 	}
-	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Tuple2<CompileState, List<T>> {
+	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: Rule<T>): Tuple2<CompileState, List<T>> {
 		return CompilerUtils.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;
 	}
-	static parseValues<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
+	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
 		return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper)/*unknown*/;
 	}
 	static mergeValues(cache: string, element: string): string {

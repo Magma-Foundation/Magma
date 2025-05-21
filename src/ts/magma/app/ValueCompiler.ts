@@ -62,6 +62,8 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
 	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
@@ -111,6 +113,7 @@ import { Tuple2 } from "../../magma/api/Tuple2";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Option } from "../../magma/api/option/Option";
 import { Strings } from "../../magma/api/text/Strings";
+import { Rule } from "../../magma/app/compile/rule/Rule";
 import { Some } from "../../magma/api/option/Some";
 import { StringValue } from "../../magma/app/compile/value/StringValue";
 import { Not } from "../../magma/app/compile/value/Not";
@@ -161,7 +164,7 @@ class ValueCompiler {
             })).or(() -> RootCompiler.parseValue(state, callerString).flatMap((Tuple2<CompileState, Value> callerTuple) -> ValueCompiler.assembleInvokable(callerTuple.left(), callerTuple.right(), args)))))*/;
 		})/*unknown*/;
 	}
-	static createTextRule(slice: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
+	static createTextRule(slice: string): Rule<Value> {
 		return (state1: CompileState, input1: string) => {
 			let stripped = Strings.strip(input1)/*unknown*/;
 			return CompilerUtils.compilePrefix(stripped, slice, (s: string) => CompilerUtils.compileSuffix(s, slice, (s1: string) => new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(state1, new StringValue(s1)))/*unknown*/)/*unknown*/)/*unknown*/;
@@ -195,10 +198,10 @@ class ValueCompiler {
 	static assembleLambda(exited: CompileState, paramNames: Iterable<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)))/*unknown*/;
 	}
-	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
+	static createOperatorRule(infix: string): Rule<Value> {
 		return ValueCompiler.createOperatorRuleWithDifferentInfix(infix, infix)/*unknown*/;
 	}
-	static createAccessRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
+	static createAccessRule(infix: string): Rule<Value> {
 		return (state: CompileState, input: string) => CompilerUtils.compileLast(input, infix, (childString: string, rawProperty: string) => {
 			let property = Strings.strip(rawProperty)/*unknown*/;
 			if (!ValueCompiler/*unknown*/.isSymbol(property)/*unknown*/){
@@ -211,7 +214,7 @@ class ValueCompiler {
 			})/*unknown*/;
 		})/*unknown*//*unknown*/;
 	}
-	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
+	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): Rule<Value> {
 		return (state1: CompileState, input1: string) => {
 			return CompilerUtils.compileSplit(input1, (slice: string) => {
 				return new FoldingSplitter(new OperatorFolder(sourceInfix), (divisions: List<string>) => {

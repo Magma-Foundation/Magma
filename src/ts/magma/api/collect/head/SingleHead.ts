@@ -62,6 +62,8 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
 	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 

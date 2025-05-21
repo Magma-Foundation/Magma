@@ -155,6 +155,10 @@ class StatementsMerger {
 StatementsMerger <|.. Merger
 interface Registry {
 }
+class OrRule<T> {
+}
+interface Rule<T> {
+}
 class FirstSelector {
 }
 FirstSelector <|.. Selector
@@ -447,6 +451,11 @@ StatementsMerger --> Merger
 Registry --> Dependency
 Registry --> Iter
 Registry --> Import
+OrRule --> Rule
+OrRule --> Iterable
+Rule --> CompileState
+Rule --> Tuple2
+Rule --> Option
 FirstSelector --> Selector
 FirstSelector --> Tuple2
 FirstSelector --> Option
@@ -579,8 +588,10 @@ CompilerUtils --> Tuple2Impl
 CompilerUtils --> Lists
 CompilerUtils --> Iterable
 CompilerUtils --> Option
+CompilerUtils --> Rule
 CompilerUtils --> FoldedDivider
 CompilerUtils --> DecoratedFolder
+CompilerUtils --> OrRule
 CompilerUtils --> Iters
 CompilerUtils --> None
 CompilerUtils --> Strings
@@ -658,7 +669,9 @@ FunctionSegmentCompiler --> Tuple2Impl
 FunctionSegmentCompiler --> None
 FunctionSegmentCompiler --> CompilerUtils
 FunctionSegmentCompiler --> DivideState
+FunctionSegmentCompiler --> OrRule
 FunctionSegmentCompiler --> Lists
+FunctionSegmentCompiler --> Rule
 FunctionSegmentCompiler --> ValueCompiler
 FunctionSegmentCompiler --> Value
 FunctionSegmentCompiler --> LocatingSplitter
@@ -703,13 +716,14 @@ RootCompiler --> CompileState
 RootCompiler --> Tuple2
 RootCompiler --> CompilerUtils
 RootCompiler --> Lists
-RootCompiler --> Option
+RootCompiler --> Rule
 RootCompiler --> LocatingSplitter
 RootCompiler --> FirstLocator
 RootCompiler --> Strings
 RootCompiler --> DefiningCompiler
 RootCompiler --> Some
 RootCompiler --> Tuple2Impl
+RootCompiler --> Option
 RootCompiler --> List
 RootCompiler --> TypeCompiler
 RootCompiler --> Type
@@ -723,6 +737,7 @@ RootCompiler --> Platform
 RootCompiler --> Registry
 RootCompiler --> FieldCompiler
 RootCompiler --> Value
+RootCompiler --> OrRule
 RootCompiler --> Location
 RootCompiler --> Context
 Sources --> Source
@@ -739,6 +754,7 @@ TypeCompiler --> Option
 TypeCompiler --> Type
 TypeCompiler --> Tuple2Impl
 TypeCompiler --> CompilerUtils
+TypeCompiler --> OrRule
 TypeCompiler --> Lists
 TypeCompiler --> Strings
 TypeCompiler --> Some
@@ -766,6 +782,7 @@ ValueCompiler --> Tuple2
 ValueCompiler --> CompilerUtils
 ValueCompiler --> Option
 ValueCompiler --> Strings
+ValueCompiler --> Rule
 ValueCompiler --> Some
 ValueCompiler --> StringValue
 ValueCompiler --> Not

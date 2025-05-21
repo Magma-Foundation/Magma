@@ -12,6 +12,7 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Dependency;
 import magma.app.compile.Import;
 import magma.app.compile.Registry;
+import magma.app.compile.rule.OrRule;
 import magma.app.compile.type.FunctionType;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.TemplateType;
@@ -29,12 +30,12 @@ final class TypeCompiler {
     }
 
     public static Option<Tuple2<CompileState, Type>> parseType(CompileState state, String type) {
-        return CompilerUtils.or(state, type, Lists.of(
+        return CompilerUtils.or(state, type, new OrRule<Type>(Lists.of(
                 TypeCompiler::parseVarArgs,
                 TypeCompiler::parseGeneric,
                 TypeCompiler::parsePrimitive,
                 TypeCompiler::parseSymbolType
-        ));
+        )));
     }
 
     private static Option<Tuple2<CompileState, Type>> parseVarArgs(CompileState state, String input) {
@@ -129,10 +130,10 @@ final class TypeCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileTypeArgument(CompileState state, String input) {
-        return CompilerUtils.or(state, input, Lists.of(
+        return CompilerUtils.or(state, input, new OrRule<String>(Lists.of(
                 (CompileState state2, String input1) -> CompilerUtils.compileWhitespace(state2, input1),
                 (CompileState state1, String type) -> TypeCompiler.compileType(state1, type)
-        ));
+        )));
     }
 
     private static Tuple2<CompileState, Type> parseTypeOrPlaceholder(CompileState state, String type) {

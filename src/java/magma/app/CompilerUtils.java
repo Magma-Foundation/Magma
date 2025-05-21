@@ -20,6 +20,8 @@ import magma.app.compile.fold.ValueFolder;
 import magma.app.compile.locate.LastLocator;
 import magma.app.compile.merge.Merger;
 import magma.app.compile.merge.StatementsMerger;
+import magma.app.compile.rule.OrRule;
+import magma.app.compile.rule.Rule;
 import magma.app.compile.split.LocatingSplitter;
 import magma.app.compile.split.Splitter;
 import magma.app.compile.text.Whitespace;
@@ -41,7 +43,7 @@ public final class CompilerUtils {
         return elements.iter().foldWithInitial("", merger::apply);
     }
 
-    private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) {
+    private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, Rule<T> rule) {
         return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
             var currentState = current.left();
             var currentElement = current.right();
@@ -57,18 +59,17 @@ public final class CompilerUtils {
     static Tuple2<CompileState, String> compileOrPlaceholder(
             CompileState state,
             String input,
-            Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>>> rules
+            Iterable<Rule<String>> rules
     ) {
-        return CompilerUtils.or(state, input, rules).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input)));
+        return CompilerUtils.or(state, input, new OrRule<>(rules)).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input)));
     }
 
     public static <T> Option<Tuple2<CompileState, T>> or(
             CompileState state,
             String input,
-            Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>>> rules
-    ) {
-        return rules.iter()
-                .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> rule.apply(state, input))
+            OrRule<T> orRule) {
+        return orRule.rules().iter()
+                .map((Rule<T> rule) -> rule.apply(state, input))
                 .flatMap(Iters::fromOption)
                 .next();
     }
@@ -104,12 +105,12 @@ public final class CompilerUtils {
     static <T> Tuple2<CompileState, List<T>> parseValuesOrEmpty(
             CompileState state,
             String input,
-            BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> mapper
+            Rule<T> mapper
     ) {
         return CompilerUtils.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()));
     }
 
-    static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> mapper) {
+    static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, Rule<T> mapper) {
         return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper);
     }
 

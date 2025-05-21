@@ -10,6 +10,8 @@ import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.define.Definition;
+import magma.app.compile.rule.OrRule;
+import magma.app.compile.rule.Rule;
 import magma.app.compile.select.Selector;
 import magma.app.compile.split.FoldingSplitter;
 import magma.app.compile.value.Value;
@@ -65,14 +67,14 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileBlockHeader(CompileState state, String input) {
-        return CompilerUtils.or(state, input, Lists.of(
+        return CompilerUtils.or(state, input, new OrRule<>(Lists.of(
                 FunctionSegmentCompiler.createConditionalRule("if"),
                 FunctionSegmentCompiler.createConditionalRule("while"),
                 FunctionSegmentCompiler::compileElse
-        ));
+        )));
     }
 
-    private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createConditionalRule(String prefix) {
+    private static Rule<String> createConditionalRule(String prefix) {
         return (CompileState state1, String input1) -> CompilerUtils.compilePrefix(Strings.strip(input1), prefix, (String withoutPrefix) -> {
             var strippedCondition = Strings.strip(withoutPrefix);
             return CompilerUtils.compilePrefix(strippedCondition, "(", (String withoutConditionStart) -> CompilerUtils.compileSuffix(withoutConditionStart, ")", (String withoutConditionEnd) -> {
@@ -119,7 +121,7 @@ final class FunctionSegmentCompiler {
         }
     }
 
-    private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createPostRule(String suffix) {
+    private static Rule<String> createPostRule(String suffix) {
         return (CompileState state1, String input) -> CompilerUtils.compileSuffix(Strings.strip(input), suffix, (String child) -> {
             var tuple = ValueCompiler.compileValueOrPlaceholder(state1, child);
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right() + suffix));

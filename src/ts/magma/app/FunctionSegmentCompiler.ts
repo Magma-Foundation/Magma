@@ -62,6 +62,8 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
 	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
@@ -113,7 +115,9 @@ import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { None } from "../../magma/api/option/None";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { DivideState } from "../../magma/app/compile/DivideState";
+import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Rule } from "../../magma/app/compile/rule/Rule";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Value } from "../../magma/app/compile/value/Value";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
@@ -161,9 +165,9 @@ class FunctionSegmentCompiler {
 		return appended/*unknown*/;
 	}
 	static compileBlockHeader(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.or(state, input, Lists.of(FunctionSegmentCompiler.createConditionalRule("if"), FunctionSegmentCompiler.createConditionalRule("while"), FunctionSegmentCompiler.compileElse))/*unknown*/;
+		return CompilerUtils.or(state, input, new OrRule<>(Lists.of(FunctionSegmentCompiler.createConditionalRule("if"), FunctionSegmentCompiler.createConditionalRule("while"), FunctionSegmentCompiler.compileElse)))/*unknown*/;
 	}
-	static createConditionalRule(prefix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
+	static createConditionalRule(prefix: string): Rule<string> {
 		return (state1: CompileState, input1: string) => CompilerUtils.compilePrefix(Strings.strip(input1), prefix, (withoutPrefix: string) => {
 			let strippedCondition = Strings.strip(withoutPrefix)/*unknown*/;
 			return CompilerUtils.compilePrefix(strippedCondition, "(", (withoutConditionStart: string) => CompilerUtils.compileSuffix(withoutConditionStart, ")", (withoutConditionEnd: string) => {
@@ -197,7 +201,7 @@ class FunctionSegmentCompiler {
 			return new None<Tuple2<CompileState, string>>()/*unknown*/;
 		}
 	}
-	static createPostRule(suffix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
+	static createPostRule(suffix: string): Rule<string> {
 		return (state1: CompileState, input: string) => CompilerUtils.compileSuffix(Strings.strip(input), suffix, (child: string) => {
 			let tuple = ValueCompiler.compileValueOrPlaceholder(state1, child)/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right() + suffix))/*unknown*/;

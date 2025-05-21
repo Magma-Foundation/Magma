@@ -15,6 +15,8 @@ import magma.app.compile.Context;
 import magma.app.compile.Registry;
 import magma.app.compile.Stack;
 import magma.app.compile.define.Definition;
+import magma.app.compile.rule.OrRule;
+import magma.app.compile.rule.Rule;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Value;
 import magma.app.compile.locate.FirstLocator;
@@ -34,7 +36,7 @@ public final class RootCompiler {
         ));
     }
 
-    private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
+    private static Rule<String> createStructureRule(String sourceInfix, String targetInfix) {
         return (CompileState state, String input1) -> CompilerUtils.compileSplit(input1, new LocatingSplitter(sourceInfix, new FirstLocator()), (String beforeInfix, String afterInfix) -> {
             return CompilerUtils.compileSplit(afterInfix, new LocatingSplitter("{", new FirstLocator()), (String beforeContent, String withEnd) -> CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> CompilerUtils.compileLast(beforeInfix, "\n", (String s, String s2) -> {
                 var annotations = DefiningCompiler.parseAnnotations(s);
@@ -215,7 +217,7 @@ public final class RootCompiler {
     }
 
     public static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, String input) {
-        return CompilerUtils.or(state, input, Lists.of(
+        return CompilerUtils.or(state, input, new OrRule<Value>(Lists.<Rule<Value>>of(
                 ValueCompiler::parseLambda,
                 ValueCompiler.createOperatorRule("+"),
                 ValueCompiler.createOperatorRule("-"),
@@ -235,7 +237,7 @@ public final class RootCompiler {
                 ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="),
                 ValueCompiler.createTextRule("\""),
                 ValueCompiler.createTextRule("'")
-        ));
+        )));
     }
 
     public static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {
