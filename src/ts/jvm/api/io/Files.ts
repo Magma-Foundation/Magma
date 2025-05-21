@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { Path } from "../../../magma/api/io/Path";
 export interface FilesInstance {

@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { CompileState } from "../../../magma/app/compile/CompileState";
 import { Import } from "../../../magma/app/compile/Import";

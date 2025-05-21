@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { Argument } from "../../../../magma/app/compile/value/Argument";
 import { Caller } from "../../../../magma/app/compile/value/Caller";

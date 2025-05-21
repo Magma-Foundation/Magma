@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { Option } from "../../../../magma/api/option/Option";
 export interface Head<T> {

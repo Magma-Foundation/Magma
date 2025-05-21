@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";
@@ -80,5 +81,8 @@ export class Err<T, X> implements Result<T, X> {
 	}
 	findError(): Option<X> {
 		return new Some<X>(this.error)/*unknown*/;
+	}
+	mapValue<R>(mapper: (arg0 : T) => R): Result<R, X> {
+		return new Err<>(this.error)/*unknown*/;
 	}
 }

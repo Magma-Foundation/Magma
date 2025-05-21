@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { List } from "../../../../magma/api/collect/list/List";
 import { Type } from "../../../../magma/app/compile/type/Type";

@@ -10,4 +10,6 @@ public interface Result<T, X> {
     <R> Result<R, X> flatMapValue(Function<T, Result<R, X>> mapper);
 
     Option<X> findError();
+
+    <R> Result<R, X> mapValue(Function<T, R> mapper);
 }

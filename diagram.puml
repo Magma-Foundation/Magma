@@ -156,6 +156,8 @@ class Main {
 }
 class Platform {
 }
+class Sources {
+}
 Lists --> List
 Files --> Path
 EmptyHead --> Head
@@ -415,6 +417,7 @@ Source --> List
 Source --> ListCollector
 Location --> List
 Main --> Files
+Main --> Sources
 Main --> IOError
 Main --> Console
 Main --> CompileState
@@ -422,12 +425,11 @@ Main --> Result
 Main --> Path
 Main --> Iters
 Main --> Platform
-Main --> List
 Main --> Source
+Main --> List
 Main --> Dependency
 Main --> Joiner
 Main --> Err
-Main --> ListCollector
 Main --> Location
 Main --> Compiler
 Main --> Ok
@@ -436,4 +438,10 @@ Main --> Option
 Main --> None
 Main --> ImmutableCompileState
 Main --> Lists
+Sources --> Path
+Sources --> Source
+Sources --> List
+Sources --> IOError
+Sources --> Result
+Sources --> ListCollector
 @enduml

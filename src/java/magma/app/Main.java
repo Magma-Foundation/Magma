@@ -6,7 +6,6 @@ import magma.api.Tuple2Impl;
 import magma.api.collect.Iters;
 import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
-import magma.api.collect.list.ListCollector;
 import magma.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.io.Path;
@@ -24,24 +23,24 @@ import magma.app.io.Source;
 public final class Main {
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
-        Main.runWithSourceDirectory(sourceDirectory)
+        var sources = new Sources(sourceDirectory);
+        Main.runWithSourceDirectory(sourceDirectory, sources)
                 .findError()
                 .map((IOError error) -> error.display())
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
 
-    private static Result<CompileState, IOError> runWithSourceDirectory(Path sourceDirectory) {
-        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> sourceDirectory.walk().flatMapValue((List<Path> children) -> Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)));
+    private static Result<CompileState, IOError> runWithSourceDirectory(Path sourceDirectory, Sources sources) {
+        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> {
+            return sources.getListIOErrorResult().flatMapValue((List<Source> children) -> {
+                return Main.runWithChildren(state.withPlatform(platform), children);
+            });
+        });
     }
 
-    private static Result<CompileState, IOError> runWithChildren(CompileState state, List<Path> children, Path sourceDirectory) {
-        var initial = Main.retainSources(children, sourceDirectory)
-                .query()
-                .foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
-
-        var folded = Main.retainSources(children, sourceDirectory)
-                .query()
-                .foldWithInitialToResult(initial, Main::runWithSource);
+    private static Result<CompileState, IOError> runWithChildren(CompileState state, List<Source> sourceList) {
+        var initial = sourceList.query().foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
+        var folded = sourceList.query().foldWithInitialToResult(initial, Main::runWithSource);
 
         if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
             var diagramPath = Files.get(".", "diagram.puml");
@@ -58,13 +57,6 @@ public final class Main {
         }
 
         return folded;
-    }
-
-    private static List<Source> retainSources(List<Path> children, Path sourceDirectory) {
-        return children.query()
-                .filter((Path source) -> source.endsWith(".java"))
-                .map((Path child) -> new Source(sourceDirectory, child))
-                .collect(new ListCollector<Source>());
     }
 
     private static Result<CompileState, IOError> runWithSource(CompileState state, Source source) {

@@ -62,9 +62,11 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { Files } from "../../jvm/api/io/Files";
+import { Sources } from "../../magma/app/Sources";
 import { IOError } from "../../magma/api/io/IOError";
 import { Console } from "../../magma/api/io/Console";
 import { CompileState } from "../../magma/app/compile/CompileState";
@@ -72,12 +74,11 @@ import { Result } from "../../magma/api/result/Result";
 import { Path } from "../../magma/api/io/Path";
 import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
-import { List } from "../../magma/api/collect/list/List";
 import { Source } from "../../magma/app/io/Source";
+import { List } from "../../magma/api/collect/list/List";
 import { Dependency } from "../../magma/app/compile/Dependency";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
-import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Location } from "../../magma/app/Location";
 import { Compiler } from "../../magma/app/Compiler";
 import { Ok } from "../../magma/api/result/Ok";
@@ -89,14 +90,19 @@ import { Lists } from "../../jvm/api/collect/list/Lists";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
-		Main.runWithSourceDirectory(sourceDirectory).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
+		let sources = new Sources(sourceDirectory)/*unknown*/;
+		Main.runWithSourceDirectory(sourceDirectory, sources).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
 	}
-	static runWithSourceDirectory(sourceDirectory: Path): Result<CompileState, IOError> {
-		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => sourceDirectory.walk().flatMapValue((children: List<Path>) => Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)/*unknown*/)/*unknown*/)/*unknown*/;
+	static runWithSourceDirectory(sourceDirectory: Path, sources: Sources): Result<CompileState, IOError> {
+		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => {
+			return sources.getListIOErrorResult().flatMapValue((children: List<Source>) => {
+				return Main.runWithChildren(state.withPlatform(platform), children)/*unknown*/;
+			})/*unknown*/;
+		})/*unknown*/;
 	}
-	static runWithChildren(state: CompileState, children: List<Path>, sourceDirectory: Path): Result<CompileState, IOError> {
-		let initial = Main.retainSources(children, sourceDirectory).query().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
-		let folded = Main.retainSources(children, sourceDirectory).query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
+	static runWithChildren(state: CompileState, sourceList: List<Source>): Result<CompileState, IOError> {
+		let initial = sourceList.query().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
+		let folded = sourceList.query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
 			let joinedDependencies = result.queryDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
@@ -106,9 +112,6 @@ export class Main {
 			}
 		}
 		return folded/*unknown*/;
-	}
-	static retainSources(children: List<Path>, sourceDirectory: Path): List<Source> {
-		return children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/).map((child: Path) => new Source(sourceDirectory, child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
 	}
 	static runWithSource(state: CompileState, source: Source): Result<CompileState, IOError> {
 		return source.read().flatMapValue((input: string) => Main.compileAndWrite(state, source, input)/*unknown*/)/*unknown*/;

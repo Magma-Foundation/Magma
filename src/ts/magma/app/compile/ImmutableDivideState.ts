@@ -62,7 +62,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
-	Platform: magma.app
+	Platform: magma.app, 
+	Sources: magma.app
 ]*/
 import { DivideState } from "../../../magma/app/compile/DivideState";
 import { List } from "../../../magma/api/collect/list/List";

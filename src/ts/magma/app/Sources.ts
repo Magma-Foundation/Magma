@@ -65,11 +65,21 @@
 	Platform: magma.app, 
 	Sources: magma.app
 ]*/
-import { Head } from "../../../../magma/api/collect/head/Head";
-import { Option } from "../../../../magma/api/option/Option";
-import { None } from "../../../../magma/api/option/None";
-export class EmptyHead<T> implements Head<T> {
-	next(): Option<T> {
-		return new None<T>()/*unknown*/;
+import { Path } from "../../magma/api/io/Path";
+import { Source } from "../../magma/app/io/Source";
+import { List } from "../../magma/api/collect/list/List";
+import { IOError } from "../../magma/api/io/IOError";
+import { Result } from "../../magma/api/result/Result";
+import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+export class Sources {
+	sourceDirectory: Path;
+	constructor (sourceDirectory: Path) {
+		this.sourceDirectory = sourceDirectory;
+	}
+	getListIOErrorResult(): Result<List<Source>, IOError> {
+		return this.sourceDirectory().walk().mapValue(children -  > this.retainSources(children))/*unknown*/;
+	}
+	retainSources(children: List<Path>): List<Source> {
+		return children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/).map((child: Path) => new Source(this.sourceDirectory(), child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
 	}
 }
