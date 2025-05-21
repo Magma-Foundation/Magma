@@ -105,7 +105,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public Option<T> findLast() {
         if (this.list.isEmpty()) {
-            return new None<>();
+            return new None<T>();
         }
         return new Some<T>(this.list.getLast());
     }

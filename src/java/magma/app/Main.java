@@ -64,11 +64,7 @@ public final class Main {
     }
 
     private static Result<CompileState, IOError> runWithSourceDirectory(Path sourceDirectory) {
-        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialCompileState(), (CompileState state, Platform platform) -> {
-            return sourceDirectory.walk().flatMapValue((List<Path> children) -> {
-                return Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory);
-            });
-        });
+        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialCompileState(), (CompileState state, Platform platform) -> sourceDirectory.walk().flatMapValue((List<Path> children) -> Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)));
     }
 
     private static Result<CompileState, IOError> runWithChildren(CompileState state, List<Path> children, Path sourceDirectory) {
@@ -90,7 +86,7 @@ public final class Main {
 
             var maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.findOutput() + joinedDependencies + "@enduml");
             if (maybeError instanceof Some(var error)) {
-                return new Err<>(error);
+                return new Err<CompileState, IOError>(error);
             }
         }
 
@@ -114,7 +110,7 @@ public final class Main {
         var compiledState = compiled.left();
 
         if (compiledState.hasPlatform(Platform.PlantUML)) {
-            return new Ok<>(compiledState);
+            return new Ok<CompileState, IOError>(compiledState);
         }
 
         var segment = state.querySources()
@@ -380,7 +376,7 @@ public final class Main {
                     .orElse("");
 
             var generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing;
-            return new Some<>(new Tuple2Impl<>(outputContentState.append(generated), ""));
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
         }
 
         if (annotations.contains("Namespace")) {
@@ -1327,7 +1323,7 @@ public final class Main {
                 Lists.empty(),
                 0,
                 Lists.empty(),
-                new None<>(),
+                new None<Location>(),
                 Lists.empty(),
                 Platform.TypeScript,
                 Lists.empty());

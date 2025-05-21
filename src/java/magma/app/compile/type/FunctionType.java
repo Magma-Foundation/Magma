@@ -33,6 +33,6 @@ public record FunctionType(List<String> args, String returns) implements Type {
 
     @Override
     public String generateSimple() {
-        return generate();
+        return this.generate();
     }
 }

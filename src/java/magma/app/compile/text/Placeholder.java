@@ -58,6 +58,6 @@ public record Placeholder(String input) implements Parameter, Value, Type {
 
     @Override
     public String generateSimple() {
-        return generate();
+        return this.generate();
     }
 }

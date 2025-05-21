@@ -17,6 +17,6 @@ public final class Iters {
     }
 
     public static <T> Iter<T> fromArray(T[] array) {
-        return new HeadedIter<>(new RangeHead(array.length)).map((Integer index) -> array[index]);
+        return new HeadedIter<Integer>(new RangeHead(array.length)).map((Integer index) -> array[index]);
     }
 }

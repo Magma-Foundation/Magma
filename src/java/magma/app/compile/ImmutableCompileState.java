@@ -57,7 +57,7 @@ public record ImmutableCompileState(
     @Override
     public CompileState addResolvedImport(List<String> parent, String child) {
         if (Platform.PlantUML == this.platform) {
-            var name = maybeLocation.map(Location::name).orElse("");
+            var name = this.maybeLocation.map(Location::name).orElse("");
             var dependency = new Dependency(name, child);
             if (!this.dependencies.contains(dependency)) {
                 return new ImmutableCompileState(
@@ -105,7 +105,7 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState withLocation(Location location) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(location), this.sources, this.platform, this.dependencies);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(location), this.sources, this.platform, this.dependencies);
     }
 
     @Override

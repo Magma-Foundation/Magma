@@ -23,6 +23,6 @@ public record VariadicType(Type type) implements Type {
 
     @Override
     public String generateSimple() {
-        return generate();
+        return this.generate();
     }
 }

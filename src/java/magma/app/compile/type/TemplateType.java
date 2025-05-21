@@ -26,6 +26,6 @@ public record TemplateType(String base, List<String> args) implements Type {
 
     @Override
     public String generateSimple() {
-        return base;
+        return this.base;
     }
 }
