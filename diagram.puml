@@ -155,6 +155,9 @@ class StatementsMerger {
 StatementsMerger <|.. Merger
 interface Registry {
 }
+class FirstSelector {
+}
+FirstSelector <|.. Selector
 class LastSelector {
 }
 LastSelector <|.. Selector
@@ -444,6 +447,13 @@ StatementsMerger --> Merger
 Registry --> Dependency
 Registry --> Iter
 Registry --> Import
+FirstSelector --> Selector
+FirstSelector --> Tuple2
+FirstSelector --> Option
+FirstSelector --> List
+FirstSelector --> Joiner
+FirstSelector --> Some
+FirstSelector --> Tuple2Impl
 LastSelector --> Selector
 LastSelector --> Tuple2
 LastSelector --> Option
@@ -579,7 +589,6 @@ CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
 CompilerUtils --> Splitter
-CompilerUtils --> Joiner
 CompilerUtils --> ListCollector
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
@@ -775,6 +784,7 @@ ValueCompiler --> RootCompiler
 ValueCompiler --> AccessValue
 ValueCompiler --> FoldingSplitter
 ValueCompiler --> OperatorFolder
+ValueCompiler --> FirstSelector
 ValueCompiler --> Operation
 ValueCompiler --> TypeCompiler
 ValueCompiler --> Symbol

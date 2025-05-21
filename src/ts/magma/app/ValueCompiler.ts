@@ -62,6 +62,7 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
 	FoldingSplitter: magma.app.compile.split, 
@@ -128,6 +129,7 @@ import { RootCompiler } from "../../magma/app/RootCompiler";
 import { AccessValue } from "../../magma/app/compile/value/AccessValue";
 import { FoldingSplitter } from "../../magma/app/compile/split/FoldingSplitter";
 import { OperatorFolder } from "../../magma/app/compile/fold/OperatorFolder";
+import { FirstSelector } from "../../magma/app/compile/select/FirstSelector";
 import { Operation } from "../../magma/app/compile/value/Operation";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Symbol } from "../../magma/app/compile/value/Symbol";
@@ -211,9 +213,11 @@ class ValueCompiler {
 	}
 	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: string) => {
-			return CompilerUtils.compileSplit(input1, (slice: string) => new FoldingSplitter(new OperatorFolder(sourceInfix), (divisions: List<string>) => {
-				return CompilerUtils.selectFirst(divisions, sourceInfix)/*unknown*/;
-			}).apply(slice)/*unknown*/, (leftString: string, rightString: string) => RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
+			return CompilerUtils.compileSplit(input1, (slice: string) => {
+				return new FoldingSplitter(new OperatorFolder(sourceInfix), (divisions: List<string>) => {
+					return new FirstSelector(sourceInfix).select(divisions)/*unknown*/;
+				}).apply(slice)/*unknown*/;
+			}, (leftString: string, rightString: string) => RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 				let left = leftTuple.right()/*unknown*/;
 				let right = rightTuple.right()/*unknown*/;
 				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)))/*unknown*/;

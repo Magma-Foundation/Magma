@@ -62,6 +62,7 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
 	FoldingSplitter: magma.app.compile.split, 
@@ -125,7 +126,6 @@ import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
-import { Joiner } from "../../magma/api/collect/Joiner";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
@@ -204,11 +204,6 @@ export class CompilerUtils {
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
 		return "/*" + replaced + "*/"/*unknown*/;
-	}
-	static selectFirst(divisions: List<string>, delimiter: string): Option<Tuple2<string, string>> {
-		let first = divisions.findFirst().orElse("")/*unknown*/;
-		let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).iter().collect(new Joiner(delimiter)).orElse("")/*unknown*/;
-		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(first, afterFirst))/*unknown*/;
 	}
 	static retain<T, R>(args: Iterable<T>, mapper: (arg0 : T) => Option<R>): Iterable<R> {
 		return args.iter().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;

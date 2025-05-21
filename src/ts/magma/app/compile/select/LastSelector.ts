@@ -62,6 +62,7 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
 	FoldingSplitter: magma.app.compile.split, 
@@ -115,7 +116,7 @@ export class LastSelector implements Selector {
 	constructor (delimiter: string) {
 		this.delimiter = delimiter;
 	}
-	apply(divisions: List<string>): Option<Tuple2<string, string>> {
+	select(divisions: List<string>): Option<Tuple2<string, string>> {
 		let beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions)/*unknown*/;
 		let last = divisions.findLast().orElse("")/*unknown*/;
 		let joined = beforeLast.iter().collect(new Joiner(this.delimiter)).orElse("")/*unknown*/;

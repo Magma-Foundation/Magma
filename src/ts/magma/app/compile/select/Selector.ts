@@ -62,6 +62,7 @@
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	FirstSelector: magma.app.compile.select, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
 	FoldingSplitter: magma.app.compile.split, 
@@ -107,5 +108,5 @@ import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { Option } from "../../../../magma/api/option/Option";
 import { List } from "../../../../magma/api/collect/list/List";
 export interface Selector {
-	apply(stringList: List<string>): Option<Tuple2<string, string>>;
+	select(divisions: List<string>): Option<Tuple2<string, string>>;
 }
