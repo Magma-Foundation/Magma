@@ -35,6 +35,7 @@
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
 	PrefixComposable: magma.app.compile.compose, 
+	SplitComposable: magma.app.compile.compose, 
 	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 

@@ -35,6 +35,7 @@
 	CompileState: magma.app.compile, 
 	Composable: magma.app.compile.compose, 
 	PrefixComposable: magma.app.compile.compose, 
+	SplitComposable: magma.app.compile.compose, 
 	SuffixComposable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
@@ -134,6 +135,8 @@ import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
+import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
@@ -191,9 +194,12 @@ export class CompilerUtils {
 		return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;
 	}
 	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return splitter.apply(input).flatMap((tuple: Tuple2<string, string>) => {
+		return new SplitComposable<T>(splitter, CompilerUtils.toComposable(mapper)).apply(input)/*unknown*/;
+	}
+	static toComposable<T>(mapper: (arg0 : string, arg1 : string) => Option<T>): Composable<Tuple2<string, string>, T> {
+		return (tuple: Tuple2<string, string>) => {
 			return mapper(tuple.left(), tuple.right())/*unknown*/;
-		})/*unknown*/;
+		}/*unknown*/;
 	}
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;

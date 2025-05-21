@@ -12,6 +12,8 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.compose.Composable;
+import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.divide.FoldedDivider;
 import magma.app.compile.fold.DecoratedFolder;
 import magma.app.compile.fold.Folder;
@@ -105,10 +107,10 @@ public final class CompilerUtils {
     }
 
     static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {
-        return splitter.apply(input).flatMap(toComposable(mapper));
+        return new SplitComposable<T>(splitter, CompilerUtils.toComposable(mapper)).apply(input);
     }
 
-    private static <T> Function<Tuple2<String, String>, Option<T>> toComposable(BiFunction<String, String, Option<T>> mapper) {
+    private static <T> Composable<Tuple2<String, String>, T> toComposable(BiFunction<String, String, Option<T>> mapper) {
         return (Tuple2<String, String> tuple) -> {
             return mapper.apply(tuple.left(), tuple.right());
         };

@@ -85,6 +85,9 @@ interface Composable<T, R> {
 class PrefixComposable<T> {
 }
 PrefixComposable <|.. Composable
+class SplitComposable<T> {
+}
+SplitComposable <|.. Composable
 class SuffixComposable<T> {
 }
 SuffixComposable <|.. Composable
@@ -369,6 +372,10 @@ PrefixComposable --> Composable
 PrefixComposable --> Option
 PrefixComposable --> None
 PrefixComposable --> Strings
+SplitComposable --> Composable
+SplitComposable --> Splitter
+SplitComposable --> Tuple2
+SplitComposable --> Option
 SuffixComposable --> Composable
 SuffixComposable --> Option
 SuffixComposable --> None
@@ -628,6 +635,8 @@ CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
 CompilerUtils --> Splitter
+CompilerUtils --> SplitComposable
+CompilerUtils --> Composable
 CompilerUtils --> Iters
 CompilerUtils --> ListCollector
 DefiningCompiler --> Definition
