@@ -51,7 +51,7 @@ final class ValueCompiler {
         var state = tuple.left();
         var right = tuple.right();
         var generated = right.generate();
-        var s = CompilerUtils.generatePlaceholder(ValueCompiler.resolve(state, right).generate());
+        var s = Placeholder.generatePlaceholder(ValueCompiler.resolve(state, right).generate());
         return new Tuple2Impl<CompileState, String>(state, generated + s);
     }
 
@@ -235,7 +235,7 @@ final class ValueCompiler {
 
     static Tuple2<CompileState, String> compileValueOrPlaceholder(CompileState state, String input) {
         return ValueCompiler.compileValue(state, input).orElseGet(() -> {
-            return new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input));
+            return new Tuple2Impl<CompileState, String>(state, Placeholder.generatePlaceholder(input));
         });
     }
 

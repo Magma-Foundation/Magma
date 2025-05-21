@@ -496,7 +496,7 @@ OrRule --> Iterable
 OrRule --> CompileState
 OrRule --> Tuple2
 OrRule --> Tuple2Impl
-OrRule --> CompilerUtils
+OrRule --> Placeholder
 OrRule --> Option
 OrRule --> Iters
 Rule --> CompileState
@@ -599,7 +599,6 @@ Operation --> None
 Operation --> Type
 Operation --> CompileState
 Operation --> PrimitiveType
-Placeholder --> CompilerUtils
 Placeholder --> Value
 Placeholder --> Option
 Placeholder --> None
@@ -747,8 +746,9 @@ FunctionSegmentCompiler --> LocatingSplitter
 FunctionSegmentCompiler --> FirstLocator
 FunctionSegmentCompiler --> DefiningCompiler
 FunctionSegmentCompiler --> Definition
-FunctionSegmentCompiler --> CompilerUtils
+FunctionSegmentCompiler --> Placeholder
 FunctionSegmentCompiler --> WhitespaceCompiler
+FunctionSegmentCompiler --> CompilerUtils
 FunctionSegmentCompiler --> StatementsFolder
 FunctionSegmentCompiler --> StatementsMerger
 PathSource --> Source
@@ -859,7 +859,7 @@ ValueCompiler --> CompileState
 ValueCompiler --> Tuple2Impl
 ValueCompiler --> Value
 ValueCompiler --> Tuple2
-ValueCompiler --> CompilerUtils
+ValueCompiler --> Placeholder
 ValueCompiler --> Option
 ValueCompiler --> SuffixComposable
 ValueCompiler --> SplitComposable

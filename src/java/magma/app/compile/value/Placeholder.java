@@ -2,7 +2,6 @@ package magma.app.compile.value;
 
 import magma.api.option.None;
 import magma.api.option.Option;
-import magma.app.CompilerUtils;
 import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
@@ -10,9 +9,17 @@ import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
 
 public record Placeholder(String input) implements Parameter, Value, Type {
+    public static String generatePlaceholder(String input) {
+        var replaced = input
+                .replace("/*", "start")
+                .replace("*/", "end");
+
+        return "/*" + replaced + "*/";
+    }
+
     @Override
     public String generate() {
-        return CompilerUtils.generatePlaceholder(this.input);
+        return generatePlaceholder(this.input);
     }
 
     @Override

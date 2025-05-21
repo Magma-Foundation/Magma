@@ -23,12 +23,4 @@ public final class CompilerUtils {
     public static String generateAll(Iterable<String> elements, Merger merger) {
         return elements.iter().foldWithInitial("", merger::merge);
     }
-
-    public static String generatePlaceholder(String input) {
-        var replaced = input
-                .replace("/*", "start")
-                .replace("*/", "end");
-
-        return "/*" + replaced + "*/";
-    }
 }

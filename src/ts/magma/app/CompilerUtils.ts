@@ -134,8 +134,4 @@ export class CompilerUtils {
 	static generateAll(elements: Iterable<string>, merger: Merger): string {
 		return elements.iter().foldWithInitial("", merger.merge)/*unknown*/;
 	}
-	static generatePlaceholder(input: string): string {
-		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
-		return "/*" + replaced + "*/"/*unknown*/;
-	}
 }

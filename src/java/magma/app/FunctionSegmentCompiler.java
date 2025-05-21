@@ -19,6 +19,7 @@ import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
 import magma.app.compile.select.Selector;
 import magma.app.compile.split.FoldingSplitter;
+import magma.app.compile.value.Placeholder;
 import magma.app.compile.value.Value;
 import magma.app.compile.locate.FirstLocator;
 import magma.app.compile.select.LastSelector;
@@ -181,7 +182,7 @@ final class FunctionSegmentCompiler {
                         });
                     })
                     .orElseGet(() -> {
-                        return new Tuple2Impl<CompileState, String>(sourceTuple.left(), CompilerUtils.generatePlaceholder(destination));
+                        return new Tuple2Impl<CompileState, String>(sourceTuple.left(), Placeholder.generatePlaceholder(destination));
                     });
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));

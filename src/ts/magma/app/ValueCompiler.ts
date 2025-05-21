@@ -118,7 +118,7 @@ import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Value } from "../../magma/app/compile/value/Value";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { Placeholder } from "../../magma/app/compile/value/Placeholder";
 import { Option } from "../../magma/api/option/Option";
 import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
@@ -166,7 +166,7 @@ class ValueCompiler {
 		let state = tuple.left()/*unknown*/;
 		let right = tuple.right()/*unknown*/;
 		let generated = right.generate()/*unknown*/;
-		let s = CompilerUtils.generatePlaceholder(ValueCompiler.resolve(state, right).generate())/*unknown*/;
+		let s = Placeholder.generatePlaceholder(ValueCompiler.resolve(state, right).generate())/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(state, generated + s)/*unknown*/;
 	}
 	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
@@ -329,7 +329,7 @@ class ValueCompiler {
 	}
 	static compileValueOrPlaceholder(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return ValueCompiler.compileValue(state, input).orElseGet(() => {
-			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
+			return new Tuple2Impl<CompileState, string>(state, Placeholder.generatePlaceholder(input))/*unknown*/;
 		})/*unknown*/;
 	}
 	static compileValue(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {

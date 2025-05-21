@@ -114,7 +114,6 @@
 	ValueCompiler: magma.app, 
 	WhitespaceCompiler: magma.app
 ]*/
-import { CompilerUtils } from "../../../../magma/app/CompilerUtils";
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";
@@ -127,8 +126,12 @@ export class Placeholder {
 	constructor (input: string) {
 		this.input = input;
 	}
+	static generatePlaceholder(input: string): string {
+		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
+		return "/*" + replaced + "*/"/*unknown*/;
+	}
 	generate(): string {
-		return CompilerUtils.generatePlaceholder(this.input)/*unknown*/;
+		return generatePlaceholder(this.input)/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;
