@@ -4,9 +4,13 @@ import jvm.api.collect.list.Lists;
 import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 
-public record ImmutableRegistry(List<Import> imports, List<Dependency> dependencies, String output) implements Registry {
+public record ImmutableRegistry(
+        List<Import> imports,
+        String output,
+        List<Dependency> dependencies
+) implements Registry {
     static Registry createEmpty() {
-        return new ImmutableRegistry(Lists.empty(), Lists.empty(), "");
+        return new ImmutableRegistry(Lists.empty(), "", Lists.empty());
     }
 
     @Override
@@ -30,22 +34,17 @@ public record ImmutableRegistry(List<Import> imports, List<Dependency> dependenc
 
     @Override
     public Registry addDependency(Dependency dependency) {
-        return new ImmutableRegistry(this.imports(), this.dependencies().addLast(dependency), this.output());
+        return new ImmutableRegistry(this.imports(), this.output(), this.dependencies().addLast(dependency));
     }
 
     @Override
     public Registry addImport(Import import_) {
-        return new ImmutableRegistry(this.imports().addLast(import_), this.dependencies(), this.output());
+        return new ImmutableRegistry(this.imports().addLast(import_), this.output(), this.dependencies());
     }
 
     @Override
     public Registry append(String element) {
-        return new ImmutableRegistry(this.imports(), this.dependencies(), this.output() + element);
-    }
-
-    @Override
-    public Registry clearImports() {
-        return new ImmutableRegistry(Lists.empty(), this.dependencies(), this.output());
+        return new ImmutableRegistry(this.imports(), this.output() + element, this.dependencies());
     }
 
     @Override
@@ -54,7 +53,7 @@ public record ImmutableRegistry(List<Import> imports, List<Dependency> dependenc
     }
 
     @Override
-    public Registry clearOutput() {
-        return new ImmutableRegistry(this.imports, this.dependencies, "");
+    public Registry reset() {
+        return new ImmutableRegistry(Lists.empty(), "", this.dependencies());
     }
 }

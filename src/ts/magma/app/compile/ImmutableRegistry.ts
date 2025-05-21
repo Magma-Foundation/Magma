@@ -85,15 +85,15 @@ import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { Iter } from "../../../magma/api/collect/Iter";
 export class ImmutableRegistry implements Registry {
 	imports: List<Import>;
-	dependencies: List<Dependency>;
 	output: string;
-	constructor (imports: List<Import>, dependencies: List<Dependency>, output: string) {
+	dependencies: List<Dependency>;
+	constructor (imports: List<Import>, output: string, dependencies: List<Dependency>) {
 		this.imports = imports;
-		this.dependencies = dependencies;
 		this.output = output;
+		this.dependencies = dependencies;
 	}
 	static createEmpty(): Registry {
-		return new ImmutableRegistry(Lists.empty(), Lists.empty(), "")/*unknown*/;
+		return new ImmutableRegistry(Lists.empty(), "", Lists.empty())/*unknown*/;
 	}
 	iterDependencies(): Iter<Dependency> {
 		return this.dependencies().iter()/*unknown*/;
@@ -105,21 +105,18 @@ export class ImmutableRegistry implements Registry {
 		return this.imports().iter()/*unknown*/;
 	}
 	addDependency(dependency: Dependency): Registry {
-		return new ImmutableRegistry(this.imports(), this.dependencies().addLast(dependency), this.output())/*unknown*/;
+		return new ImmutableRegistry(this.imports(), this.output(), this.dependencies().addLast(dependency))/*unknown*/;
 	}
 	addImport(import_: Import): Registry {
-		return new ImmutableRegistry(this.imports().addLast(import_), this.dependencies(), this.output())/*unknown*/;
+		return new ImmutableRegistry(this.imports().addLast(import_), this.output(), this.dependencies())/*unknown*/;
 	}
 	append(element: string): Registry {
-		return new ImmutableRegistry(this.imports(), this.dependencies(), this.output() + element)/*unknown*/;
-	}
-	clearImports(): Registry {
-		return new ImmutableRegistry(Lists.empty(), this.dependencies(), this.output())/*unknown*/;
+		return new ImmutableRegistry(this.imports(), this.output() + element, this.dependencies())/*unknown*/;
 	}
 	containsDependency(dependency: Dependency): boolean {
 		return this.dependencies().contains(dependency)/*unknown*/;
 	}
-	clearOutput(): Registry {
-		return new ImmutableRegistry(this.imports, this.dependencies, "")/*unknown*/;
+	reset(): Registry {
+		return new ImmutableRegistry(Lists.empty(), "", this.dependencies())/*unknown*/;
 	}
 }

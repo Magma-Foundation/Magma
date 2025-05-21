@@ -87,8 +87,7 @@ export interface Registry {
 	addDependency(dependency: Dependency): Registry;
 	addImport(import_: Import): Registry;
 	append(element: string): Registry;
-	clearImports(): Registry;
 	containsDependency(dependency: Dependency): boolean;
-	clearOutput(): Registry;
 	output(): string;
+	reset(): Registry;
 }

@@ -15,11 +15,9 @@ public interface Registry {
 
     Registry append(String element);
 
-    Registry clearImports();
-
     boolean containsDependency(Dependency dependency);
 
-    Registry clearOutput();
-
     String output();
+
+    Registry reset();
 }
