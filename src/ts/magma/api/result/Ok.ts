@@ -36,6 +36,7 @@
 	Definition: magma.app.compile.define, 
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
+	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
@@ -58,6 +59,7 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Source: magma.app.io, 
+	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app
 ]*/

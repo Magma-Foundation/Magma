@@ -36,6 +36,7 @@
 	Definition: magma.app.compile.define, 
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
+	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
@@ -58,25 +59,29 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Source: magma.app.io, 
+	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app
 ]*/
 import { Import } from "../../../magma/app/compile/Import";
 import { Iter } from "../../../magma/api/collect/Iter";
+import { Dependency } from "../../../magma/app/compile/Dependency";
 import { Source } from "../../../magma/app/io/Source";
 import { Option } from "../../../magma/api/option/Option";
 import { List } from "../../../magma/api/collect/list/List";
+import { Location } from "../../../magma/app/Location";
 import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Platform } from "../../../magma/app/Platform";
 export interface CompileState {
 	join(otherOutput: string): string;
 	queryImports(): Iter<Import>;
+	queryDependencies(): Iter<Dependency>;
 	querySources(): Iter<Source>;
 	createIndent(): string;
 	findLastStructureName(): Option<string>;
 	isLastWithin(name: string): boolean;
 	addResolvedImport(parent: List<string>, child: string): CompileState;
-	withNamespace(namespace: List<string>): CompileState;
+	withLocation(location: Location): CompileState;
 	append(element: string): CompileState;
 	pushStructureName(name: string): CompileState;
 	enterDepth(): CompileState;

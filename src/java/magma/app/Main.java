@@ -81,7 +81,13 @@ public final class Main {
 
         if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
             var diagramPath = Files.get(".", "diagram.puml");
-            var maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + "@enduml");
+
+            var joinedDependencies = result.queryDependencies()
+                    .map(dependency -> dependency.name() + " --> " + dependency.child() + "\n")
+                    .collect(new Joiner(""))
+                    .orElse("");
+
+            var maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + joinedDependencies + "@enduml");
             if (maybeError instanceof Some(var error)) {
                 return new Err<>(error);
             }
@@ -102,8 +108,8 @@ public final class Main {
     }
 
     private static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, String input) {
-        var namespace = source.computeNamespace();
-        var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
+        var location = new Location(source.computeNamespace(), source.computeName());
+        var compiled = Main.compileStatements(state.withLocation(location), input, Main::compileRootSegment);
         var compiledState = compiled.left();
 
         if (compiledState.hasPlatform(Platform.PlantUML)) {
@@ -1320,10 +1326,10 @@ public final class Main {
                 Lists.empty(),
                 0,
                 Lists.empty(),
-                new None<List<String>>(),
+                new None<>(),
                 Lists.empty(),
-                Platform.TypeScript
-        );
+                Platform.TypeScript,
+                Lists.empty());
     }
 
     private static DivideState createInitialDivideState(String input) {

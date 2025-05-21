@@ -4,8 +4,8 @@ import magma.annotate.Actual;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iter;
-import magma.api.collect.head.RangeHead;
 import magma.api.collect.head.HeadedIter;
+import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -30,10 +30,6 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public int size() {
         return this.list.size();
-    }
-
-    private T getLast() {
-        return this.list.getLast();
     }
 
     private T getFirst() {
@@ -108,7 +104,10 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
 
     @Override
     public Option<T> findLast() {
-        return new Some<T>(this.getLast());
+        if (this.list.isEmpty()) {
+            return new None<>();
+        }
+        return new Some<T>(this.list.getLast());
     }
 
     @Override

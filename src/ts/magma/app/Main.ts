@@ -36,6 +36,7 @@
 	Definition: magma.app.compile.define, 
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
+	Dependency: magma.app.compile, 
 	DivideState: magma.app.compile, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
@@ -58,6 +59,7 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Source: magma.app.io, 
+	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app
 ]*/
@@ -71,10 +73,11 @@ import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
 import { List } from "../../magma/api/collect/list/List";
 import { Source } from "../../magma/app/io/Source";
+import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+import { Location } from "../../magma/app/Location";
 import { Ok } from "../../magma/api/result/Ok";
-import { Joiner } from "../../magma/api/collect/Joiner";
 import { Option } from "../../magma/api/option/Option";
 import { None } from "../../magma/api/option/None";
 import { Tuple2 } from "../../magma/api/Tuple2";
@@ -128,7 +131,8 @@ export class Main {
 		let folded = Main.retainSources(children, sourceDirectory).query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
-			let maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + "@enduml")/*unknown*/;
+			let joinedDependencies = result.queryDependencies().map(dependency -  > dependency.name() + " --> " + dependency.child() + "\n").collect(new Joiner("")).orElse("")/*unknown*/;
+			let maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + joinedDependencies + "@enduml")/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
 				return new Err<>(error)/*unknown*/;
 			}
@@ -142,8 +146,8 @@ export class Main {
 		return source.read().flatMapValue((input: string) => Main.compileAndWrite(state, source, input)/*unknown*/)/*unknown*/;
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string): Result<CompileState, IOError> {
-		let namespace = source.computeNamespace()/*unknown*/;
-		let compiled = Main.compileStatements(state.withNamespace(namespace), input, Main.compileRootSegment)/*unknown*/;
+		let location = new Location(source.computeNamespace(), source.computeName())/*unknown*/;
+		let compiled = Main.compileStatements(state.withLocation(location), input, Main.compileRootSegment)/*unknown*/;
 		let compiledState = compiled.left()/*unknown*/;
 		if (compiledState.hasPlatform(Platform.PlantUML)/*unknown*/){
 			return new Ok<>(compiledState)/*unknown*/;
@@ -951,7 +955,7 @@ export class Main {
 		return "/*" + replaced + "*/"/*unknown*/;
 	}
 	static createInitialCompileState(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<string>>(), Lists.empty(), Platform.TypeScript)/*unknown*/;
+		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;
 	}
 	static createInitialDivideState(input: string): DivideState {
 		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;

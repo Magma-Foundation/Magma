@@ -3,6 +3,7 @@ package magma.app.compile;
 import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
+import magma.app.Location;
 import magma.app.Platform;
 import magma.app.compile.define.Definition;
 import magma.app.io.Source;
@@ -11,6 +12,8 @@ public interface CompileState {
     String join(String otherOutput);
 
     Iter<Import> queryImports();
+
+    Iter<Dependency> queryDependencies();
 
     Iter<Source> querySources();
 
@@ -22,7 +25,7 @@ public interface CompileState {
 
     CompileState addResolvedImport(List<String> parent, String child);
 
-    CompileState withNamespace(List<String> namespace);
+    CompileState withLocation(Location location);
 
     CompileState append(String element);
 
