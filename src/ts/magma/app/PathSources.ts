@@ -120,9 +120,15 @@ export class PathSources implements Sources {
 		this.sourceDirectory = sourceDirectory;
 	}
 	listSources(): Result<Iterable<Source>, IOError> {
-		return this.sourceDirectory().walk().mapValue((children: Iterable<Path>) => this.retainSources(children)/*unknown*/)/*unknown*/;
+		return this.sourceDirectory().walk().mapValue((children: Iterable<Path>) => {
+			return this.retainSources(children)/*unknown*/;
+		})/*unknown*/;
 	}
 	retainSources(children: Iterable<Path>): Iterable<Source> {
-		return children.iter().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
+		return children.iter().filter((source: Path) => {
+			return source.endsWith(".java")/*unknown*/;
+		}). < Source > map((child: Path) => {
+			return new PathSource(this.sourceDirectory, child)/*unknown*/;
+		}).collect(new ListCollector<Source>())/*unknown*/;
 	}
 }

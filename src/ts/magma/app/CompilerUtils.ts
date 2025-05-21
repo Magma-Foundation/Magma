@@ -136,28 +136,36 @@ export class CompilerUtils {
 		return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger())/*unknown*/;
 	}
 	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: Merger): Tuple2<CompileState, string> {
-		let folded = CompilerUtils.parseAll(state, input, folder, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
+		let folded = CompilerUtils.parseAll(state, input, folder, (state1: CompileState, s: string) => {
+			return new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/;
+		}).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(folded.left(), CompilerUtils.generateAll(folded.right(), merger))/*unknown*/;
 	}
 	static generateAll(elements: Iterable<string>, merger: Merger): string {
 		return elements.iter().foldWithInitial("", merger.apply)/*unknown*/;
 	}
 	static parseAll<T>(state: CompileState, input: string, folder: Folder, rule: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
-		return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
-			let currentState = current.left()/*unknown*/;
-			let currentElement = current.right()/*unknown*/;
-			return rule.apply(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
-				let mappedState = mappedTuple.left()/*unknown*/;
-				let mappedElement = mappedTuple.right()/*unknown*/;
-				return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement))/*unknown*/;
+		return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
+			return maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
+				let currentState = current.left()/*unknown*/;
+				let currentElement = current.right()/*unknown*/;
+				return rule.apply(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
+					let mappedState = mappedTuple.left()/*unknown*/;
+					let mappedElement = mappedTuple.right()/*unknown*/;
+					return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement))/*unknown*/;
+				})/*unknown*/;
 			})/*unknown*/;
-		})/*unknown*/)/*unknown*/;
+		})/*unknown*/;
 	}
 	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<Rule<string>>): Tuple2<CompileState, string> {
-		return CompilerUtils.or(state, input, new OrRule<>(rules)).orElseGet(() => new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/)/*unknown*/;
+		return CompilerUtils.or(state, input, new OrRule<string>(rules)).orElseGet(() => {
+			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
+		})/*unknown*/;
 	}
 	static or<T>(state: CompileState, input: string, orRule: OrRule<T>): Option<Tuple2<CompileState, T>> {
-		return orRule.rules().iter().map((rule: Rule<T>) => rule.apply(state, input)/*unknown*/).flatMap(Iters.fromOption).next()/*unknown*/;
+		return orRule.rules().iter().map((rule: Rule<T>) => {
+			return rule.apply(state, input)/*unknown*/;
+		}).flatMap(Iters.fromOption).next()/*unknown*/;
 	}
 	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		if (!input/*string*/.startsWith(infix)/*unknown*/){
@@ -167,7 +175,9 @@ export class CompilerUtils {
 		return mapper(slice)/*unknown*/;
 	}
 	static compileWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())/*unknown*/)/*unknown*/;
+		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {
+			return new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())/*unknown*/;
+		})/*unknown*/;
 	}
 	static parseWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, Whitespace>> {
 		if (Strings.isBlank(input)/*unknown*/){
@@ -203,7 +213,9 @@ export class CompilerUtils {
 		return mapper(content)/*unknown*/;
 	}
 	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return splitter.apply(input).flatMap((tuple: Tuple2<string, string>) => mapper(tuple.left(), tuple.right())/*unknown*/)/*unknown*/;
+		return splitter.apply(input).flatMap((tuple: Tuple2<string, string>) => {
+			return mapper(tuple.left(), tuple.right())/*unknown*/;
+		})/*unknown*/;
 	}
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;

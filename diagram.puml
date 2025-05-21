@@ -297,6 +297,7 @@ Iters --> HeadedIter
 Iters --> EmptyHead
 Iters --> Head
 Iters --> SingleHead
+Iters --> RangeHead
 Joiner --> Option
 Joiner --> Collector
 Joiner --> None
@@ -616,13 +617,17 @@ DefiningCompiler --> Placeholder
 DefiningCompiler --> Option
 DefiningCompiler --> Whitespace
 DefiningCompiler --> Strings
+DefiningCompiler --> LastSelector
+DefiningCompiler --> Selector
+DefiningCompiler --> FoldingSplitter
+DefiningCompiler --> TypeSeparatorFolder
+DefiningCompiler --> Lists
 DefiningCompiler --> FoldedDivider
 DefiningCompiler --> DecoratedFolder
 DefiningCompiler --> DivideState
 DefiningCompiler --> DelimitedFolder
 DefiningCompiler --> LocatingSplitter
 DefiningCompiler --> FirstLocator
-DefiningCompiler --> Lists
 DefiningCompiler --> TypeCompiler
 DefiningCompiler --> Type
 DefiningCompiler --> Joiner
@@ -668,6 +673,9 @@ FunctionSegmentCompiler --> Some
 FunctionSegmentCompiler --> Tuple2Impl
 FunctionSegmentCompiler --> None
 FunctionSegmentCompiler --> CompilerUtils
+FunctionSegmentCompiler --> LastSelector
+FunctionSegmentCompiler --> Selector
+FunctionSegmentCompiler --> FoldingSplitter
 FunctionSegmentCompiler --> DivideState
 FunctionSegmentCompiler --> OrRule
 FunctionSegmentCompiler --> Lists
@@ -782,6 +790,13 @@ ValueCompiler --> Tuple2
 ValueCompiler --> CompilerUtils
 ValueCompiler --> Option
 ValueCompiler --> Strings
+ValueCompiler --> LastSelector
+ValueCompiler --> Selector
+ValueCompiler --> FoldingSplitter
+ValueCompiler --> DivideState
+ValueCompiler --> TypeCompiler
+ValueCompiler --> ConstructionCaller
+ValueCompiler --> RootCompiler
 ValueCompiler --> Rule
 ValueCompiler --> Some
 ValueCompiler --> StringValue
@@ -797,13 +812,10 @@ ValueCompiler --> FunctionSegmentCompiler
 ValueCompiler --> Stack
 ValueCompiler --> Lambda
 ValueCompiler --> None
-ValueCompiler --> RootCompiler
 ValueCompiler --> AccessValue
-ValueCompiler --> FoldingSplitter
 ValueCompiler --> OperatorFolder
 ValueCompiler --> FirstSelector
 ValueCompiler --> Operation
-ValueCompiler --> TypeCompiler
 ValueCompiler --> Symbol
 ValueCompiler --> HeadedIter
 ValueCompiler --> RangeHead
@@ -811,6 +823,5 @@ ValueCompiler --> Characters
 ValueCompiler --> Type
 ValueCompiler --> Argument
 ValueCompiler --> Caller
-ValueCompiler --> DivideState
 ValueCompiler --> Invokable
 @enduml

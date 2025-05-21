@@ -118,7 +118,9 @@ export class PathTargets implements Targets {
 		this.root = root;
 	}
 	static writeTarget(target: Path, output: string): Option<IOError> {
-		return PathTargets.ensureTargetParent(target).or(() => target.writeString(output)/*unknown*/)/*unknown*/;
+		return PathTargets.ensureTargetParent(target).or(() => {
+			return target.writeString(output)/*unknown*/;
+		})/*unknown*/;
 	}
 	static ensureTargetParent(target: Path): Option<IOError> {
 		let parent = target.getParent()/*unknown*/;

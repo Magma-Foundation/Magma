@@ -120,12 +120,20 @@ import { Some } from "../../magma/api/option/Some";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 class DefinitionCompiler {
 	static retainDefinitionsFromParameters(parameters: Iterable<Parameter>): Iterable<Definition> {
-		return parameters.iter().map((parameter: Parameter) => parameter.asDefinition()/*unknown*/).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
+		return parameters.iter().map((parameter: Parameter) => {
+			return parameter.asDefinition()/*unknown*/;
+		}).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
 	}
 	static joinParameters(parameters: Iterable<Definition>): string {
-		return parameters.iter().map((definition: Definition) => definition.generate()/*unknown*/).map((generated: string) => "\n\t" + generated + ";"/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
+		return parameters.iter().map((definition: Definition) => {
+			return definition.generate()/*unknown*/;
+		}).map((generated: string) => {
+			return "\n\t" + generated + ";"/*unknown*/;
+		}).collect(Joiner.empty()).orElse("")/*unknown*/;
 	}
 	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
-		return CompilerUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/)/*unknown*/;
+		return CompilerUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
+			return new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/;
+		})/*unknown*/;
 	}
 }

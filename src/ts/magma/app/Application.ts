@@ -139,17 +139,29 @@ class Application {
 		return source.createLocation().namespace().iter().collect(new Joiner(".")).orElse("")/*unknown*/;
 	}
 	runWith(platform: Platform): Option<IOError> {
-		return this.sources.listSources().flatMapValue((children: Iterable<Source>) => this.runWithChildren(platform, children)/*unknown*/).findError()/*unknown*/;
+		return this.sources.listSources().flatMapValue((children: Iterable<Source>) => {
+			return this.runWithChildren(platform, children)/*unknown*/;
+		}).findError()/*unknown*/;
 	}
 	runWithChildren(platform: Platform, children: Iterable<Source>): Result<CompileState, IOError> {
-		let state: CompileState = ImmutableCompileState.createEmpty().mapContext((context: Context) => context.withPlatform(platform)/*unknown*/)/*unknown*/;
-		let initial = children.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.mapContext((context1: Context) => context1.addSource(source)/*unknown*/)/*unknown*/)/*unknown*/;
-		let folded = children.iter().foldWithInitialToResult(initial, (state1: CompileState, source: Source) => this.runWithSource(state1, source)/*unknown*/)/*unknown*/;
+		let state: CompileState = ImmutableCompileState.createEmpty().mapContext((context: Context) => {
+			return context.withPlatform(platform)/*unknown*/;
+		})/*unknown*/;
+		let initial = children.iter().foldWithInitial(state, (current: CompileState, source: Source) => {
+			return current.mapContext((context1: Context) => {
+				return context1.addSource(source)/*unknown*/;
+			})/*unknown*/;
+		})/*unknown*/;
+		let folded = children.iter().foldWithInitialToResult(initial, (state1: CompileState, source: Source) => {
+			return this.runWithSource(state1, source)/*unknown*/;
+		})/*unknown*/;
 		if (!state/*unknown*/.context().hasPlatform(Platform.PlantUML) || !/*(folded instanceof Ok(var result))*//*unknown*/){
 			return folded/*unknown*/;
 		}
 		let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
-		let joinedDependencies = result.registry().iterDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		let joinedDependencies = result.registry().iterDependencies().map((dependency: Dependency) => {
+			return dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/;
+		}).collect(new Joiner("")).orElse("")/*unknown*/;
 		let maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.registry().output() + joinedDependencies + "@enduml")/*unknown*/;
 		if (!/*(maybeError instanceof Some(var error))*//*unknown*/){
 			return folded/*unknown*/;
@@ -157,7 +169,9 @@ class Application {
 		return new Err<CompileState, IOError>(error)/*unknown*/;
 	}
 	runWithSource(state: CompileState, source: Source): Result<CompileState, IOError> {
-		return source.read().flatMapValue((input: string) => this.runWithInput(state, source, input)/*unknown*/)/*unknown*/;
+		return source.read().flatMapValue((input: string) => {
+			return this.runWithInput(state, source, input)/*unknown*/;
+		})/*unknown*/;
 	}
 	runWithInput(state1: CompileState, source: Source, input: string): Result<CompileState, IOError> {
 		let location = source.createLocation()/*unknown*/;
@@ -166,16 +180,26 @@ class Application {
 		if (compiledState.context().hasPlatform(Platform.PlantUML)/*unknown*/){
 			return new Ok<CompileState, IOError>(compiledState)/*unknown*/;
 		}
-		let segment = state1.context().iterSources().map((source1: Source) => Application.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		let segment = state1.context().iterSources().map((source1: Source) => {
+			return Application.formatSource(source1)/*unknown*/;
+		}).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		let otherOutput = compiled.right()/*unknown*/;
-		let joinedImports = compiledState.registry().queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		let joinedImports = compiledState.registry().queryImports().map((anImport: Import) => {
+			return anImport.generate()/*unknown*/;
+		}).collect(new Joiner("")).orElse("")/*unknown*/;
 		let joined = joinedImports + compiledState.registry().output() + otherOutput/*unknown*/;
-		let cleared = state1.mapRegistry((registry: Registry) => registry.reset()/*unknown*/)/*unknown*/;
+		let cleared = state1.mapRegistry((registry: Registry) => {
+			return registry.reset()/*unknown*/;
+		})/*unknown*/;
 		return this.writeTarget(source, cleared, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
 	}
 	writeTarget(source: Source, cleared: CompileState, output: string): Result<CompileState, IOError> {
 		/*return this.targets().writeSource(source.createLocation(), output)
-                .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
-                .orElseGet(() -> new Ok<CompileState, IOError>(cleared))*/;
+                .<Result<CompileState, IOError>>map((IOError error) -> {
+                    return new Err<CompileState, IOError>(error);
+                })
+                .orElseGet(() -> {
+                    return new Ok<CompileState, IOError>(cleared);
+                })*/;
 	}
 }

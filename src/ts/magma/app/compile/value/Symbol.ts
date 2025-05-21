@@ -123,7 +123,9 @@ export class Symbol {
 		return this.value/*unknown*/;
 	}
 	resolve(state: CompileState): Type {
-		return state.stack().resolveValue(this.value).map((definition: Definition) => definition.findType()/*unknown*/).orElse(PrimitiveType.Unknown)/*unknown*/;
+		return state.stack().resolveValue(this.value).map((definition: Definition) => {
+			return definition.findType()/*unknown*/;
+		}).orElse(PrimitiveType.Unknown)/*unknown*/;
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this)/*unknown*/;

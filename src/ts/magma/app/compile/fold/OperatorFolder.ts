@@ -116,13 +116,15 @@ export class OperatorFolder implements Folder {
 		this.infix/*unknown*/ = infix/*string*/;
 	}
 	apply(state: DivideState, c: string): DivideState {
-		if (c === infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))/*unknown*/){
-			let length = Strings.length(infix) - 1/*unknown*/;
+		if (c === this.infix.charAt(0) && state.startsWith(Strings.sliceFrom(this.infix, 1))/*unknown*/){
+			let length = Strings.length(this.infix) - 1/*unknown*/;
 			let counter = 0/*unknown*/;
 			let current = state/*DivideState*/;
 			while (counter < length/*unknown*/){
 				counter/*unknown*/++;
-				current/*unknown*/ = current.pop().map((tuple: Tuple2<DivideState, string>) => tuple.left()/*unknown*/).orElse(current)/*unknown*/;
+				current/*unknown*/ = current.pop().map((tuple: Tuple2<DivideState, string>) => {
+					return tuple.left()/*unknown*/;
+				}).orElse(current)/*unknown*/;
 			}
 			return current.advance()/*unknown*/;
 		}

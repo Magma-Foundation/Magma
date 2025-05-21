@@ -124,7 +124,9 @@ export class Lambda implements Value {
 		this.content = content;
 	}
 	generate(): string {
-		let joinedParamNames = this.paramNames.iter().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		let joinedParamNames = this.paramNames.iter().map((definition: Definition) => {
+			return definition.generate()/*unknown*/;
+		}).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		return "(" + joinedParamNames + ")" + " => " + this.content/*unknown*/;
 	}
 	toValue(): Option<Value> {

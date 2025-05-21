@@ -128,7 +128,9 @@ export class Invokable implements Value {
 		return this.caller.generate() + "(" + joinedArguments + ")"/*unknown*/;
 	}
 	joinArgs(): string {
-		return this.args.iter().map((value: Value) => value.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		return this.args.iter().map((value: Value) => {
+			return value.generate()/*unknown*/;
+		}).collect(new Joiner(", ")).orElse("")/*unknown*/;
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this)/*unknown*/;

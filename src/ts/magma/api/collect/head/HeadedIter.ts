@@ -135,7 +135,9 @@ export class HeadedIter<T> implements Iter<T> {
 		let result: R = initial/*R*/;
 		while (true/*unknown*/){
 			let finalResult: R = result/*unknown*/;
-			let maybeNext: Tuple2<boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)/*unknown*/).toTuple(finalResult)/*unknown*/;
+			let maybeNext: Tuple2<boolean, R> = this.head.next().map((inner: T) => {
+				return folder(finalResult, inner)/*unknown*/;
+			}).toTuple(finalResult)/*unknown*/;
 			if (maybeNext.left()/*unknown*/){
 				result/*unknown*/ = maybeNext.right()/*unknown*/;
 			}
@@ -145,19 +147,33 @@ export class HeadedIter<T> implements Iter<T> {
 		}
 	}
 	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
-		return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder)/*unknown*/)/*unknown*/;
+		return this.head.next().map(next).map((maybeNext: R) => {
+			return this.foldWithInitial(maybeNext, folder)/*unknown*/;
+		})/*unknown*/;
 	}
 	flatMap<R>(mapper: (arg0 : T) => Iter<R>): Iter<R> {
-		return this.head.next().map(mapper).map((initial: Iter<R>) => new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper))/*unknown*/).orElseGet(() => new HeadedIter<R>(new EmptyHead<R>())/*unknown*/)/*unknown*/;
+		return this.head.next().map(mapper).map((initial: Iter<R>) => {
+			return new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper))/*unknown*/;
+		}).orElseGet(() => {
+			return new HeadedIter<R>(new EmptyHead<R>())/*unknown*/;
+		})/*unknown*/;
 	}
 	allMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => maybeAllTrue && predicate(element)/*unknown*/)/*unknown*/;
+		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => {
+			return maybeAllTrue && predicate(element)/*unknown*/;
+		})/*unknown*/;
 	}
 	anyMatch(predicate: (arg0 : T) => boolean): boolean {
-		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t)/*unknown*/)/*unknown*/;
+		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => {
+			return aBoolean || predicate(t)/*unknown*/;
+		})/*unknown*/;
 	}
 	foldWithInitialToResult<R, X>(initial: R, folder: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
-		return this.foldWithInitial(new Ok<R, X>(initial), (rxResult: Result<R, X>, element: T) => rxResult.flatMapValue((inner: R) => folder(inner, element)/*unknown*/)/*unknown*/)/*unknown*/;
+		return this.foldWithInitial(new Ok<R, X>(initial), (rxResult: Result<R, X>, element: T) => {
+			return rxResult.flatMapValue((inner: R) => {
+				return folder(inner, element)/*unknown*/;
+			})/*unknown*/;
+		})/*unknown*/;
 	}
 	filter(predicate: (arg0 : T) => boolean): Iter<T> {
 		return this.flatMap((element: T) => {

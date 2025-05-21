@@ -142,7 +142,9 @@ export class Definition {
 	}
 	generateWithAfterName(afterName: string): string {
 		let joinedTypeParams = this.joinTypeParams()/*unknown*/;
-		let joinedModifiers = this.modifiers.iter().map((value: string) => value + " "/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		let joinedModifiers = this.modifiers.iter().map((value: string) => {
+			return value + " "/*unknown*/;
+		}).collect(new Joiner("")).orElse("")/*unknown*/;
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType()/*unknown*/;
 	}
 	generateType(): string {

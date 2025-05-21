@@ -146,6 +146,8 @@ export class Some<T> implements Option<T> {
 		return new Tuple2Impl<boolean, T>(true, this.value)/*unknown*/;
 	}
 	and<R>(other: () => Option<R>): Option<Tuple2<T, R>> {
-		return other().map((otherValue: R) => new Tuple2Impl<T, R>(this.value, otherValue)/*unknown*/)/*unknown*/;
+		return other().map((otherValue: R) => {
+			return new Tuple2Impl<T, R>(this.value, otherValue)/*unknown*/;
+		})/*unknown*/;
 	}
 }

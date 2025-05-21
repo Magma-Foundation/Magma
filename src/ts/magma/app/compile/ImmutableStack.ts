@@ -127,13 +127,19 @@ export class ImmutableStack implements Stack {
 		return this.structureNames().findLast()/*unknown*/;
 	}
 	isWithinLast(name: string): boolean {
-		return this.findLastStructureName().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
+		return this.findLastStructureName().filter((anObject: string) => {
+			return Strings.equalsTo(name, anObject)/*unknown*/;
+		}).isPresent()/*unknown*/;
 	}
 	hasAnyStructureName(base: string): boolean {
-		return this.structureNames().iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/;
+		return this.structureNames().iter().anyMatch((inner: string) => {
+			return Strings.equalsTo(inner, base)/*unknown*/;
+		})/*unknown*/;
 	}
 	resolveValue(name: string): Option<Definition> {
-		return this.definitions().iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+		return this.definitions().iterReversed().filter((definition: Definition) => {
+			return definition.isNamed(name)/*unknown*/;
+		}).next()/*unknown*/;
 	}
 	pushStructureName(name: string): Stack {
 		return new ImmutableStack(this.structureNames().addLast(name), this.definitions())/*unknown*/;

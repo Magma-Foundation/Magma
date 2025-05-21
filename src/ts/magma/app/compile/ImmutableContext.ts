@@ -133,10 +133,14 @@ export class ImmutableContext implements Context {
 		return this.sources.iter()/*unknown*/;
 	}
 	hasPlatform(platform: Platform): boolean {
-		return this.maybePlatform.filter((thisPlatform: Platform) => thisPlatform === platform/*unknown*/).isPresent()/*unknown*/;
+		return this.maybePlatform.filter((thisPlatform: Platform) => {
+			return thisPlatform === platform/*unknown*/;
+		}).isPresent()/*unknown*/;
 	}
 	findSource(name: string): Option<Source> {
-		return this.iterSources().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
+		return this.iterSources().filter((source: Source) => {
+			return Strings.equalsTo(source.createLocation().name(), name)/*unknown*/;
+		}).next()/*unknown*/;
 	}
 	withLocation(location: Location): Context {
 		return new ImmutableContext(this.maybePlatform, new Some<Location>(location), this.sources())/*unknown*/;

@@ -158,10 +158,14 @@ export class ImmutableDivideState implements DivideState {
 		return new Some<Tuple2<DivideState, string>>(new Tuple2Impl<DivideState, string>(nextState, c))/*unknown*/;
 	}
 	popAndAppendToTuple(): Option<Tuple2<DivideState, string>> {
-		return this.pop().map((inner: Tuple2<DivideState, string>) => new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right())/*unknown*/)/*unknown*/;
+		return this.pop().map((inner: Tuple2<DivideState, string>) => {
+			return new Tuple2Impl<DivideState, string>(inner.left().append(inner.right()), inner.right())/*unknown*/;
+		})/*unknown*/;
 	}
 	popAndAppendToOption(): Option<DivideState> {
-		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => tuple.left()/*unknown*/)/*unknown*/;
+		return this.popAndAppendToTuple().map((tuple: Tuple2<DivideState, string>) => {
+			return tuple.left()/*unknown*/;
+		})/*unknown*/;
 	}
 	peek(): string {
 		return this.input.charAt(this.index)/*unknown*/;

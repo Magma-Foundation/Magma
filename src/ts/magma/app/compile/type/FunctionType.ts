@@ -118,7 +118,9 @@ export class FunctionType implements Type {
 		this.returns = returns;
 	}
 	generate(): string {
-		let joinedArguments = this.args.iterWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		let joinedArguments = this.args.iterWithIndices().map((tuple: Tuple2<number, string>) => {
+			return "arg" + tuple.left() + " : " + tuple.right()/*unknown*/;
+		}).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		return "(" + joinedArguments + ") => " + this.returns/*unknown*/;
 	}
 	isFunctional(): boolean {

@@ -122,6 +122,8 @@ export class Joiner implements Collector<string, Option<string>> {
 		return new None<string>()/*unknown*/;
 	}
 	fold(maybe: Option<string>, element: string): Option<string> {
-		return new Some<string>(maybe.map((inner: string) => inner + this.delimiter + element/*unknown*/).orElse(element))/*unknown*/;
+		return new Some<string>(maybe.map((inner: string) => {
+			return inner + this.delimiter + element/*unknown*/;
+		}).orElse(element))/*unknown*/;
 	}
 }

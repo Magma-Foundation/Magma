@@ -128,7 +128,9 @@ export class ImmutableRegistry implements Registry {
 		return this.dependencies().iter()/*unknown*/;
 	}
 	doesImportExistAlready(requestedChild: string): boolean {
-		return this.imports().iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
+		return this.imports().iter().filter((node: Import) => {
+			return node.hasSameChild(requestedChild)/*unknown*/;
+		}).next().isPresent()/*unknown*/;
 	}
 	queryImports(): Iter<Import> {
 		return this.imports().iter()/*unknown*/;
