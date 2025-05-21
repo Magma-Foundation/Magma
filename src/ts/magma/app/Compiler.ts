@@ -48,8 +48,6 @@
 	Import: magma.app.compile, 
 	Registry: magma.app.compile, 
 	Stack: magma.app.compile, 
-	Placeholder: magma.app.compile.text, 
-	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
 	PrimitiveType: magma.app.compile.type, 
@@ -63,7 +61,9 @@
 	Lambda: magma.app.compile.value, 
 	Not: magma.app.compile.value, 
 	Operation: magma.app.compile.value, 
+	Placeholder: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
+	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Compiler: magma.app, 
 	PathSource: magma.app.io, 
@@ -105,12 +105,12 @@ import { Not } from "../../magma/app/compile/value/Not";
 import { Lambda } from "../../magma/app/compile/value/Lambda";
 import { AccessValue } from "../../magma/app/compile/value/AccessValue";
 import { Operation } from "../../magma/app/compile/value/Operation";
-import { Symbol } from "../../magma/app/compile/text/Symbol";
+import { Symbol } from "../../magma/app/compile/value/Symbol";
 import { HeadedIter } from "../../magma/api/collect/head/HeadedIter";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
 import { Characters } from "../../magma/api/text/Characters";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
-import { Placeholder } from "../../magma/app/compile/text/Placeholder";
+import { Placeholder } from "../../magma/app/compile/value/Placeholder";
 import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
@@ -446,7 +446,7 @@ export class Compiler {
 		let state = tuple.left()/*unknown*/;
 		let right = tuple.right()/*unknown*/;
 		let generated = right.generate()/*unknown*/;
-		let s = Compiler.generatePlaceholder(right.resolve(state).generate())/*unknown*/;
+		let s = Compiler.generatePlaceholder(Compiler.resolve0(state, right).generate())/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(state, generated + s)/*unknown*/;
 	}
 	static compileBreak(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
@@ -520,7 +520,7 @@ export class Compiler {
 	}
 	static transformCaller(state: CompileState, oldCaller: Caller): Caller {
 		return oldCaller.findChild().flatMap((parent: Value) => {
-			let parentType = parent.resolve(state)/*unknown*/;
+			let parentType = Compiler.resolve0(state, parent)/*unknown*/;
 			if (parentType.isFunctional()/*unknown*/){
 				return new Some<Caller>(parent)/*unknown*/;
 			}
@@ -979,5 +979,16 @@ export class Compiler {
 			let location: Location = source.createLocation()/*unknown*/;
 			return Compiler.getCompileState1(state, location).orElseGet(() => Compiler.getState(state, location)/*unknown*/)/*unknown*/;
 		}).orElse(state)/*unknown*/;
+	}
+	static resolve0(state: CompileState, value: Value): Type {/*return switch (value) {
+            case AccessValue accessValue -> accessValue.resolve(state);
+            case Invokable invokable -> invokable.resolve(state);
+            case Lambda lambda -> lambda.resolve(state);
+            case Not not -> not.resolve(state);
+            case Operation operation -> operation.resolve(state);
+            case Placeholder placeholder -> placeholder.resolve(state);
+            case StringValue stringValue -> stringValue.resolve(state);
+            case Symbol symbol -> symbol.resolve(state);
+        }*/;
 	}
 }

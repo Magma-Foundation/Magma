@@ -28,8 +28,6 @@ import magma.app.compile.define.ConstructorHeader;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.MethodHeader;
 import magma.app.compile.define.Parameter;
-import magma.app.compile.text.Placeholder;
-import magma.app.compile.text.Symbol;
 import magma.app.compile.text.Whitespace;
 import magma.app.compile.type.FunctionType;
 import magma.app.compile.type.PrimitiveType;
@@ -43,7 +41,9 @@ import magma.app.compile.value.Invokable;
 import magma.app.compile.value.Lambda;
 import magma.app.compile.value.Not;
 import magma.app.compile.value.Operation;
+import magma.app.compile.value.Placeholder;
 import magma.app.compile.value.StringValue;
+import magma.app.compile.value.Symbol;
 import magma.app.compile.value.Value;
 import magma.app.io.Source;
 
@@ -563,7 +563,7 @@ public class Compiler {
         var state = tuple.left();
         var right = tuple.right();
         var generated = right.generate();
-        var s = Compiler.generatePlaceholder(right.resolve(state).generate());
+        var s = Compiler.generatePlaceholder(Compiler.resolve0(state, right).generate());
         return new Tuple2Impl<CompileState, String>(state, generated + s);
     }
 
@@ -662,7 +662,7 @@ public class Compiler {
 
     public static Caller transformCaller(CompileState state, Caller oldCaller) {
         return oldCaller.findChild().flatMap((Value parent) -> {
-            var parentType = parent.resolve(state);
+            var parentType = Compiler.resolve0(state, parent);
             if (parentType.isFunctional()) {
                 return new Some<Caller>(parent);
             }
@@ -1318,5 +1318,18 @@ public class Compiler {
                             .orElseGet(() -> Compiler.getState(state, location));
                 })
                 .orElse(state);
+    }
+
+    public static Type resolve0(CompileState state, Value value) {
+        return switch (value) {
+            case AccessValue accessValue -> accessValue.resolve(state);
+            case Invokable invokable -> invokable.resolve(state);
+            case Lambda lambda -> lambda.resolve(state);
+            case Not not -> not.resolve(state);
+            case Operation operation -> operation.resolve(state);
+            case Placeholder placeholder -> placeholder.resolve(state);
+            case StringValue stringValue -> stringValue.resolve(state);
+            case Symbol symbol -> symbol.resolve(state);
+        };
     }
 }

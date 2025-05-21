@@ -48,8 +48,6 @@
 	Import: magma.app.compile, 
 	Registry: magma.app.compile, 
 	Stack: magma.app.compile, 
-	Placeholder: magma.app.compile.text, 
-	Symbol: magma.app.compile.text, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
 	PrimitiveType: magma.app.compile.type, 
@@ -63,7 +61,9 @@
 	Lambda: magma.app.compile.value, 
 	Not: magma.app.compile.value, 
 	Operation: magma.app.compile.value, 
+	Placeholder: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
+	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Compiler: magma.app, 
 	PathSource: magma.app.io, 
@@ -74,12 +74,8 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Argument } from "../../../../magma/app/compile/value/Argument";
-import { Caller } from "../../../../magma/app/compile/value/Caller";
-import { Type } from "../../../../magma/app/compile/type/Type";
-import { CompileState } from "../../../../magma/app/compile/CompileState";
-import { Option } from "../../../../magma/api/option/Option";
-export interface Value extends Argument, Caller {
-	resolve(state: CompileState): Type;
-	generateAsEnumValue(structureName: string): Option<string>;
-}
+/*
+
+public sealed interface Value extends Argument, Caller permits AccessValue, Invokable, Lambda, Not, Operation, Placeholder, StringValue, Symbol {
+    Option<String> generateAsEnumValue(String structureName);
+}*/

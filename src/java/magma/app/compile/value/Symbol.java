@@ -1,24 +1,28 @@
-package magma.app.compile.text;
+package magma.app.compile.value;
 
 import magma.api.option.None;
 import magma.api.option.Option;
-import magma.app.Compiler;
+import magma.api.option.Some;
 import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
-import magma.app.compile.define.Parameter;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
-import magma.app.compile.value.Value;
 
-public record Placeholder(String input) implements Parameter, Value, Type {
+public record Symbol(String value) implements Value, Type {
     @Override
     public String generate() {
-        return Compiler.generatePlaceholder(this.input);
+        return this.value;
+    }
+
+    public Type resolve(CompileState state) {
+        return state.stack().resolveValue(this.value)
+                .map((Definition definition) -> definition.findType())
+                .orElse(PrimitiveType.Unknown);
     }
 
     @Override
-    public boolean isFunctional() {
-        return false;
+    public Option<Value> toValue() {
+        return new Some<Value>(this);
     }
 
     @Override
@@ -27,18 +31,8 @@ public record Placeholder(String input) implements Parameter, Value, Type {
     }
 
     @Override
-    public Option<Definition> asDefinition() {
-        return new None<Definition>();
-    }
-
-    @Override
-    public Option<Value> toValue() {
-        return new None<Value>();
-    }
-
-    @Override
-    public Type resolve(CompileState state) {
-        return PrimitiveType.Unknown;
+    public boolean isFunctional() {
+        return false;
     }
 
     @Override

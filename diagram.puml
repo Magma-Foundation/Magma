@@ -117,10 +117,6 @@ interface Registry {
 }
 interface Stack {
 }
-class Placeholder {
-}
-class Symbol {
-}
 class Whitespace {
 }
 Whitespace <|.. Parameter
@@ -157,13 +153,13 @@ Not <|.. Value
 class Operation {
 }
 Operation <|.. Value
+class Placeholder {
+}
 class StringValue {
 }
 StringValue <|.. Value
-interface Value {
+class Symbol {
 }
-Value <|-- Argument
-Value <|-- Caller
 class Compiler {
 }
 class PathSource {
@@ -325,22 +321,6 @@ Registry --> Import
 Stack --> Option
 Stack --> Definition
 Stack --> Iterable
-Placeholder --> Compiler
-Placeholder --> Value
-Placeholder --> Option
-Placeholder --> None
-Placeholder --> Definition
-Placeholder --> Type
-Placeholder --> CompileState
-Placeholder --> PrimitiveType
-Symbol --> Type
-Symbol --> CompileState
-Symbol --> Definition
-Symbol --> PrimitiveType
-Symbol --> Value
-Symbol --> Option
-Symbol --> Some
-Symbol --> None
 Whitespace --> Parameter
 Whitespace --> Definition
 Whitespace --> Option
@@ -399,6 +379,14 @@ Operation --> None
 Operation --> Type
 Operation --> CompileState
 Operation --> PrimitiveType
+Placeholder --> Compiler
+Placeholder --> Value
+Placeholder --> Option
+Placeholder --> None
+Placeholder --> Definition
+Placeholder --> Type
+Placeholder --> CompileState
+Placeholder --> PrimitiveType
 StringValue --> Value
 StringValue --> Option
 StringValue --> Some
@@ -406,11 +394,14 @@ StringValue --> None
 StringValue --> Type
 StringValue --> CompileState
 StringValue --> PrimitiveType
-Value --> Argument
-Value --> Caller
-Value --> Type
-Value --> CompileState
-Value --> Option
+Symbol --> Type
+Symbol --> CompileState
+Symbol --> Definition
+Symbol --> PrimitiveType
+Symbol --> Value
+Symbol --> Option
+Symbol --> Some
+Symbol --> None
 Compiler --> CompileState
 Compiler --> Tuple2
 Compiler --> DivideState
