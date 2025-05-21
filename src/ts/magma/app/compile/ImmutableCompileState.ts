@@ -75,11 +75,6 @@ import { CompileState } from "../../../magma/app/compile/CompileState";
 import { Context } from "../../../magma/app/compile/Context";
 import { Registry } from "../../../magma/app/compile/Registry";
 import { Stack } from "../../../magma/app/compile/Stack";
-import { Location } from "../../../magma/app/Location";
-import { Definition } from "../../../magma/app/compile/define/Definition";
-import { Iterable } from "../../../magma/api/collect/list/Iterable";
-import { Source } from "../../../magma/app/io/Source";
-import { Platform } from "../../../magma/app/Platform";
 export class ImmutableCompileState implements CompileState {
 	context: Context;
 	registry: Registry;
@@ -95,22 +90,10 @@ export class ImmutableCompileState implements CompileState {
 		return "\n" + "\t".repeat(this.depth)/*unknown*/;
 	}
 	mapRegistry(mapper: (arg0 : Registry) => Registry): CompileState {
-		return this.createWithRegistry(mapper(this.registry()))/*unknown*/;
+		return new ImmutableCompileState(this.context, mapper(this.registry()), this.depth, this.stack)/*unknown*/;
 	}
-	createWithRegistry(registry: Registry): CompileState {
-		return new ImmutableCompileState(this.context, registry, this.depth, this.stack)/*unknown*/;
-	}
-	withLocation(location: Location): CompileState {
-		return this.createWithContext(this.context.withLocation(location))/*unknown*/;
-	}
-	createWithContext(context: Context): CompileState {
-		return new ImmutableCompileState(context, this.registry, this.depth, this.stack)/*unknown*/;
-	}
-	append(element: string): CompileState {
-		return this.createWithRegistry(this.registry().append(element))/*unknown*/;
-	}
-	pushStructureName(name: string): CompileState {
-		return this.createWithStack(this.stack().pushStructureName(name))/*unknown*/;
+	mapContext(mapper: (arg0 : Context) => Context): CompileState {
+		return new ImmutableCompileState(mapper(this.context), this.registry, this.depth, this.stack)/*unknown*/;
 	}
 	enterDepth(): CompileState {
 		return new ImmutableCompileState(this.context, this.registry, this.depth + 1, this.stack)/*unknown*/;
@@ -118,26 +101,8 @@ export class ImmutableCompileState implements CompileState {
 	exitDepth(): CompileState {
 		return new ImmutableCompileState(this.context, this.registry, this.depth - 1, this.stack)/*unknown*/;
 	}
-	defineAll(definitions: Iterable<Definition>): CompileState {
-		return this.createWithStack(this.stack().defineAll(definitions))/*unknown*/;
-	}
-	clearImports(): CompileState {
-		return this.createWithRegistry(this.registry().clearImports())/*unknown*/;
-	}
-	clearOutput(): CompileState {
-		return this.createWithRegistry(new Registry(this.registry().imports(), this.registry().dependencies(), ""))/*unknown*/;
-	}
-	addSource(source: Source): CompileState {
-		return this.createWithContext(this.context().addSource(source))/*unknown*/;
-	}
-	popStructureName(): CompileState {
-		return this.createWithStack(this.stack().popStructureName())/*unknown*/;
-	}
-	createWithStack(stack: Stack): CompileState {
-		return new ImmutableCompileState(this.context, this.registry, this.depth, stack)/*unknown*/;
-	}
-	withPlatform(platform: Platform): CompileState {
-		return new ImmutableCompileState(new Context(platform, this.context().maybeLocation(), this.context().sources()), this.registry, this.depth, this.stack)/*unknown*/;
+	mapStack(mapper: (arg0 : Stack) => Stack): CompileState {
+		return new ImmutableCompileState(this.context, this.registry, this.depth, mapper(this.stack))/*unknown*/;
 	}
 	context(): Context {
 		return this.context/*unknown*/;

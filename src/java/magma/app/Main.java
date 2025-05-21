@@ -35,13 +35,13 @@ public final class Main {
     private static Result<CompileState, IOError> runWithSourceDirectory(Sources sources) {
         return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> {
             return sources.listSources().flatMapValue((Iterable<Source> children) -> {
-                return Main.runWithChildren(state.withPlatform(platform), children);
+                return Main.runWithChildren(state.mapContext(context -> context.withPlatform(platform)), children);
             });
         });
     }
 
     private static Result<CompileState, IOError> runWithChildren(CompileState state, Iterable<Source> sources) {
-        var initial = sources.iter().foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
+        var initial = sources.iter().foldWithInitial(state, (CompileState current, Source source) -> current.mapContext(context -> context.addSource(source)));
         var folded = sources.iter().foldWithInitialToResult(initial, Main::runWithSource);
 
         if (state.context().hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
@@ -87,7 +87,7 @@ public final class Main {
 
         var joined = joinedImports + compiledState.registry().output() + otherOutput;
         var output = new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
-        var cleared = output.left().clearImports().clearOutput();
+        var cleared = output.left().mapRegistry(registry -> registry.clearImports()).mapRegistry(registry1 -> registry1.clearOutput());
         return Main.writeTarget(source, cleared, output.right());
     }
 

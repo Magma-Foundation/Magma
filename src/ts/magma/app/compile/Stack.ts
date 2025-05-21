@@ -87,21 +87,21 @@ export class Stack {
 		return this.structureNames().findLast()/*unknown*/;
 	}
 	isWithinLast(name: string): boolean {
-		return findLastStructureName().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
+		return this.findLastStructureName().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
 	}
 	hasAnyStructureName(base: string): boolean {
-		return structureNames().iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/;
+		return this.structureNames().iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/;
 	}
 	resolveValue(name: string): Option<Definition> {
-		return definitions().iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+		return this.definitions().iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
 	}
 	pushStructureName(name: string): Stack {
-		return new Stack(structureNames().addLast(name), definitions())/*unknown*/;
+		return new Stack(this.structureNames().addLast(name), this.definitions())/*unknown*/;
 	}
 	defineAll(definitions: Iterable<Definition>): Stack {
-		return new Stack(structureNames(), definitions().addAll(definitions))/*unknown*/;
+		return new Stack(this.structureNames(), this.definitions().addAll(definitions))/*unknown*/;
 	}
 	popStructureName(): Stack {
-		return new Stack(structureNames().removeLast().orElse(structureNames()), definitions())/*unknown*/;
+		return new Stack(this.structureNames().removeLast().orElse(this.structureNames()), this.definitions())/*unknown*/;
 	}
 }

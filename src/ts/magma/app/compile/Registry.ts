@@ -86,27 +86,30 @@ export class Registry {
 		this.output = output;
 	}
 	iterDependencies(): Iter<Dependency> {
-		return dependencies().iter()/*unknown*/;
+		return this.dependencies().iter()/*unknown*/;
 	}
 	doesImportExistAlready(requestedChild: string): boolean {
-		return imports().iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
+		return this.imports().iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
 	}
 	queryImports(): Iter<Import> {
-		return imports().iter()/*unknown*/;
+		return this.imports().iter()/*unknown*/;
 	}
 	addDependency(dependency: Dependency): Registry {
-		return new Registry(imports(), dependencies().addLast(dependency), output())/*unknown*/;
+		return new Registry(this.imports(), this.dependencies().addLast(dependency), this.output())/*unknown*/;
 	}
 	addImport(import_: Import): Registry {
-		return new Registry(imports().addLast(import_), dependencies(), output())/*unknown*/;
+		return new Registry(this.imports().addLast(import_), this.dependencies(), this.output())/*unknown*/;
 	}
 	append(element: string): Registry {
-		return new Registry(imports(), dependencies(), output() + element)/*unknown*/;
+		return new Registry(this.imports(), this.dependencies(), this.output() + element)/*unknown*/;
 	}
 	clearImports(): Registry {
-		return new Registry(Lists.empty(), dependencies(), output())/*unknown*/;
+		return new Registry(Lists.empty(), this.dependencies(), this.output())/*unknown*/;
 	}
 	containsDependency(dependency: Dependency): boolean {
-		return dependencies().contains(dependency)/*unknown*/;
+		return this.dependencies().contains(dependency)/*unknown*/;
+	}
+	clearOutput(): Registry {
+		return new Registry(this.imports, this.dependencies, "")/*unknown*/;
 	}
 }

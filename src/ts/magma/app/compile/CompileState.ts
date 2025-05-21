@@ -72,27 +72,15 @@
 	Targets: magma.app
 ]*/
 import { Registry } from "../../../magma/app/compile/Registry";
-import { Location } from "../../../magma/app/Location";
-import { Definition } from "../../../magma/app/compile/define/Definition";
-import { Iterable } from "../../../magma/api/collect/list/Iterable";
-import { Source } from "../../../magma/app/io/Source";
-import { Platform } from "../../../magma/app/Platform";
 import { Context } from "../../../magma/app/compile/Context";
 import { Stack } from "../../../magma/app/compile/Stack";
 export interface CompileState {
 	createIndent(): string;
 	mapRegistry(mapper: (arg0 : Registry) => Registry): CompileState;
-	withLocation(location: Location): CompileState;
-	append(element: string): CompileState;
-	pushStructureName(name: string): CompileState;
+	mapContext(mapper: (arg0 : Context) => Context): CompileState;
 	enterDepth(): CompileState;
 	exitDepth(): CompileState;
-	defineAll(definitions: Iterable<Definition>): CompileState;
-	clearImports(): CompileState;
-	clearOutput(): CompileState;
-	addSource(source: Source): CompileState;
-	popStructureName(): CompileState;
-	withPlatform(platform: Platform): CompileState;
+	mapStack(mapper: (arg0 : Stack) => Stack): CompileState;
 	context(): Context;
 	registry(): Registry;
 	stack(): Stack;

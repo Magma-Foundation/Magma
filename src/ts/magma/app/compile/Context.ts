@@ -99,15 +99,18 @@ export class Context {
 		return this.iterSources().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
 	}
 	withLocation(location: Location): Context {
-		return new Context(platform(), new Some<Location>(location), sources())/*unknown*/;
+		return new Context(this.platform(), new Some<Location>(location), this.sources())/*unknown*/;
 	}
 	addSource(source: Source): Context {
-		return new Context(platform(), maybeLocation(), sources().addLast(source))/*unknown*/;
+		return new Context(this.platform(), this.maybeLocation(), this.sources().addLast(source))/*unknown*/;
 	}
 	findNamespaceOrEmpty(): List<string> {
-		return maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
+		return this.maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
 	}
 	findNameOrEmpty(): string {
-		return maybeLocation().map(Location.name).orElse("")/*unknown*/;
+		return this.maybeLocation().map(Location.name).orElse("")/*unknown*/;
+	}
+	withPlatform(platform: Platform): Context {
+		return new Context(platform, this.maybeLocation(), this.sources())/*unknown*/;
 	}
 }

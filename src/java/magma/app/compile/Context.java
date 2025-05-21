@@ -19,27 +19,31 @@ public record Context(Platform platform, Option<Location> maybeLocation, List<So
         return this.platform() == platform;
     }
 
-    public   Option<Source> findSource(String name) {
+    public Option<Source> findSource(String name) {
         return this.iterSources()
                 .filter((Source source) -> Strings.equalsTo(source.createLocation().name(), name))
                 .next();
     }
 
-    Context withLocation(Location location) {
-        return new Context(platform(), new Some<Location>(location), sources());
+    public Context withLocation(Location location) {
+        return new Context(this.platform(), new Some<Location>(location), this.sources());
     }
 
-    Context addSource(Source source) {
-        return new Context(platform(), maybeLocation(), sources().addLast(source));
+    public Context addSource(Source source) {
+        return new Context(this.platform(), this.maybeLocation(), this.sources().addLast(source));
     }
 
     public List<String> findNamespaceOrEmpty() {
-        return maybeLocation()
+        return this.maybeLocation()
                 .map(Location::namespace)
                 .orElse(Lists.empty());
     }
 
     public String findNameOrEmpty() {
-        return maybeLocation().map(Location::name).orElse("");
+        return this.maybeLocation().map(Location::name).orElse("");
+    }
+
+    public Context withPlatform(Platform platform) {
+        return new Context(platform, this.maybeLocation(), this.sources());
     }
 }

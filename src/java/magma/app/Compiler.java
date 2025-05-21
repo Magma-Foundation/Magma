@@ -17,6 +17,7 @@ import magma.api.option.Some;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.Context;
 import magma.app.compile.Dependency;
 import magma.app.compile.DivideState;
 import magma.app.compile.ImmutableDivideState;
@@ -250,8 +251,8 @@ public class Compiler {
             return new None<Tuple2<CompileState, String>>();
         }
 
-        var outputContentTuple = Compiler.compileStatements(state.pushStructureName(name), content, Compiler::compileClassSegment);
-        var outputContentState = outputContentTuple.left().popStructureName();
+        var outputContentTuple = Compiler.compileStatements(state.mapStack(stack -> stack.pushStructureName(name)), content, Compiler::compileClassSegment);
+        var outputContentState = outputContentTuple.left().mapStack(stack1 -> stack1.popStructureName());
         var outputContent = outputContentTuple.right();
 
         var constructorString = Compiler.generateConstructorFromRecordParameters(parameters);
@@ -277,7 +278,7 @@ public class Compiler {
                     .orElse("");
 
             var generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing;
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.mapRegistry(registry -> registry.append(generated)), ""));
         }
 
         if (annotations.contains("Namespace")) {
@@ -285,13 +286,13 @@ public class Compiler {
             String newName = name + "Instance";
 
             var generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Compiler.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated)
-                    .append("export declare const " + name + ": " + newName + ";\n"), ""));
+            CompileState compileState = outputContentState.mapRegistry(registry -> registry.append(generated));
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(compileState.mapRegistry(registry1 -> registry1.append("export declare const " + name + ": " + newName + ";\n")), ""));
         }
         else {
             var extendsString = Compiler.joinExtends(maybeSuperType);
             var generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Compiler.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
+            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.mapRegistry(registry -> registry.append(generated)), ""));
         }
     }
 
@@ -442,7 +443,8 @@ public class Compiler {
 
             var headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")");
             return Compiler.compilePrefix(Strings.strip(afterParams), "{", (String withoutContentStart) -> Compiler.compileSuffix(Strings.strip(withoutContentStart), "}", (String withoutContentEnd) -> {
-                var statementsTuple = Compiler.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd);
+                CompileState compileState = parametersState.enterDepth().enterDepth();
+                var statementsTuple = Compiler.compileFunctionStatements(compileState.mapStack(stack1 -> stack1.defineAll(definitions)), withoutContentEnd);
 
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"));
             })).or(() -> {
@@ -759,7 +761,8 @@ public class Compiler {
     public static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(CompileState state, Iterable<Definition> paramNames, String afterArrow) {
         var strippedAfterArrow = Strings.strip(afterArrow);
         return Compiler.compilePrefix(strippedAfterArrow, "{", (String withoutContentStart) -> Compiler.compileSuffix(withoutContentStart, "}", (String withoutContentEnd) -> {
-            var statementsTuple = Compiler.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
+            CompileState compileState = state.enterDepth();
+            var statementsTuple = Compiler.compileFunctionStatements(compileState.mapStack(stack1 -> stack1.defineAll(paramNames)), withoutContentEnd);
             var statementsState = statementsTuple.left();
             var statements = statementsTuple.right();
 
@@ -1252,7 +1255,7 @@ public class Compiler {
     }
 
     static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {
-        return Compiler.compileStatements(state.withLocation(location), input, Compiler::compileRootSegment);
+        return Compiler.compileStatements(state.mapContext((Context context2) -> context2.withLocation(location)), input, Compiler::compileRootSegment);
     }
 
     public static List<String> fixNamespace(List<String> requestedNamespace, List<String> thisNamespace) {

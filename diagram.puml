@@ -245,11 +245,6 @@ Ok --> None
 Result --> Option
 Tuple2Impl --> Tuple2
 CompileState --> Registry
-CompileState --> Location
-CompileState --> Definition
-CompileState --> Iterable
-CompileState --> Source
-CompileState --> Platform
 CompileState --> Context
 CompileState --> Stack
 Context --> Platform
@@ -284,11 +279,6 @@ ImmutableCompileState --> CompileState
 ImmutableCompileState --> Context
 ImmutableCompileState --> Registry
 ImmutableCompileState --> Stack
-ImmutableCompileState --> Location
-ImmutableCompileState --> Definition
-ImmutableCompileState --> Iterable
-ImmutableCompileState --> Source
-ImmutableCompileState --> Platform
 ImmutableDivideState --> DivideState
 ImmutableDivideState --> List
 ImmutableDivideState --> Iter
@@ -440,6 +430,7 @@ Compiler --> TemplateType
 Compiler --> FunctionType
 Compiler --> ImmutableDivideState
 Compiler --> Location
+Compiler --> Context
 Compiler --> Dependency
 Compiler --> Registry
 Compiler --> Import

@@ -1,11 +1,5 @@
 package magma.app.compile;
 
-import magma.api.collect.list.Iterable;
-import magma.app.Location;
-import magma.app.Platform;
-import magma.app.compile.define.Definition;
-import magma.app.io.Source;
-
 import java.util.function.Function;
 
 public interface CompileState {
@@ -13,27 +7,13 @@ public interface CompileState {
 
     CompileState mapRegistry(Function<Registry, Registry> mapper);
 
-    CompileState withLocation(Location location);
-
-    CompileState append(String element);
-
-    CompileState pushStructureName(String name);
+    CompileState mapContext(Function<Context, Context> mapper);
 
     CompileState enterDepth();
 
     CompileState exitDepth();
 
-    CompileState defineAll(Iterable<Definition> definitions);
-
-    CompileState clearImports();
-
-    CompileState clearOutput();
-
-    CompileState addSource(Source source);
-
-    CompileState popStructureName();
-
-    CompileState withPlatform(Platform platform);
+    CompileState mapStack(Function<Stack, Stack> mapper);
 
     Context context();
 

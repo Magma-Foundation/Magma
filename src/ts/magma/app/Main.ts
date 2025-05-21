@@ -104,12 +104,12 @@ export class Main {
 	static runWithSourceDirectory(sources: Sources): Result<CompileState, IOError> {
 		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => {
 			return sources.listSources().flatMapValue((children: Iterable<Source>) => {
-				return Main.runWithChildren(state.withPlatform(platform), children)/*unknown*/;
+				return Main.runWithChildren(state.mapContext(context -  > context.withPlatform(platform)), children)/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/;
 	}
 	static runWithChildren(state: CompileState, sources: Iterable<Source>): Result<CompileState, IOError> {
-		let initial = sources.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
+		let initial = sources.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.mapContext(context -  > context.addSource(source))/*unknown*/)/*unknown*/;
 		let folded = sources.iter().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.context().hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
@@ -136,7 +136,7 @@ export class Main {
 		let joinedImports = compiledState.registry().queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 		let joined = joinedImports + compiledState.registry().output() + otherOutput/*unknown*/;
 		let output = new Tuple2Impl<CompileState, string>(state, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
-		let cleared = output.left().clearImports().clearOutput()/*unknown*/;
+		let cleared = output.left().mapRegistry(registry -  > registry.clearImports()).mapRegistry(registry1 -  > registry1.clearOutput())/*unknown*/;
 		return Main.writeTarget(source, cleared, output.right())/*unknown*/;
 	}
 	static writeTarget(source: Source, state: CompileState, output: string): Result<CompileState, IOError> {

@@ -6,11 +6,11 @@ import magma.api.collect.list.List;
 
 public record Registry(List<Import> imports, List<Dependency> dependencies, String output) {
     public Iter<Dependency> iterDependencies() {
-        return dependencies().iter();
+        return this.dependencies().iter();
     }
 
     public boolean doesImportExistAlready(String requestedChild) {
-        return imports()
+        return this.imports()
                 .iter()
                 .filter((Import node) -> node.hasSameChild(requestedChild))
                 .next()
@@ -18,26 +18,30 @@ public record Registry(List<Import> imports, List<Dependency> dependencies, Stri
     }
 
     public Iter<Import> queryImports() {
-        return imports().iter();
+        return this.imports().iter();
     }
 
     public Registry addDependency(Dependency dependency) {
-        return new Registry(imports(), dependencies().addLast(dependency), output());
+        return new Registry(this.imports(), this.dependencies().addLast(dependency), this.output());
     }
 
     public Registry addImport(Import import_) {
-        return new Registry(imports().addLast(import_), dependencies(), output());
+        return new Registry(this.imports().addLast(import_), this.dependencies(), this.output());
     }
 
-    Registry append(String element) {
-        return new Registry(imports(), dependencies(), output() + element);
+    public Registry append(String element) {
+        return new Registry(this.imports(), this.dependencies(), this.output() + element);
     }
 
-    Registry clearImports() {
-        return new Registry(Lists.empty(), dependencies(), output());
+    public   Registry clearImports() {
+        return new Registry(Lists.empty(), this.dependencies(), this.output());
     }
 
     public boolean containsDependency(Dependency dependency) {
-        return dependencies().contains(dependency);
+        return this.dependencies().contains(dependency);
+    }
+
+    public Registry clearOutput() {
+        return new Registry(this.imports, this.dependencies, "");
     }
 }

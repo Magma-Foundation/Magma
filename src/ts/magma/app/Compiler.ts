@@ -114,6 +114,7 @@ import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
 import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
 import { Location } from "../../magma/app/Location";
+import { Context } from "../../magma/app/compile/Context";
 import { Dependency } from "../../magma/app/compile/Dependency";
 import { Registry } from "../../magma/app/compile/Registry";
 import { Import } from "../../magma/app/compile/Import";
@@ -253,8 +254,8 @@ export class Compiler {
 		if (!Compiler/*unknown*/.isSymbol(name)/*unknown*/){
 			return new None<Tuple2<CompileState, string>>()/*unknown*/;
 		}
-		let outputContentTuple = Compiler.compileStatements(state.pushStructureName(name), content, Compiler.compileClassSegment)/*unknown*/;
-		let outputContentState = outputContentTuple.left().popStructureName()/*unknown*/;
+		let outputContentTuple = Compiler.compileStatements(state.mapStack(stack -  > stack.pushStructureName(name)), content, Compiler.compileClassSegment)/*unknown*/;
+		let outputContentState = outputContentTuple.left().mapStack(stack1 -  > stack1.popStructureName())/*unknown*/;
 		let outputContent = outputContentTuple.right()/*unknown*/;
 		let constructorString = Compiler.generateConstructorFromRecordParameters(parameters)/*unknown*/;
 		let joinedTypeParams = Compiler.joinTypeParams(typeParams)/*unknown*/;
@@ -265,18 +266,19 @@ export class Compiler {
 			let joinedImplementing = maybeImplementing.map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|.. " + generated + "\n"/*unknown*/).orElse("")/*unknown*/;
 			let joinedSuperTypes = maybeSuperType.iter().map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|-- " + generated + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 			let generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing/*unknown*/;
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""))/*unknown*/;
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.mapRegistry(registry -  > registry.append(generated)), ""))/*unknown*/;
 		}
 		if (annotations.contains("Namespace")/*unknown*/){
 			let actualInfix: string = "interface "/*unknown*/;
 			let newName: string = name + "Instance"/*unknown*/;
 			let generated = joinedModifiers + actualInfix + newName + joinedTypeParams + implementingString + " {" + Compiler.joinParameters(parameters) + constructorString + outputContent + "\n}\n"/*unknown*/;
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated).append("export declare const " + name + ": " + newName + ";\n"), ""))/*unknown*/;
+			let compileState: CompileState = outputContentState.mapRegistry(registry -  > registry.append(generated))/*unknown*/;
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(compileState.mapRegistry(registry1 -  > registry1.append("export declare const " + name + ": " + newName + ";\n")), ""))/*unknown*/;
 		}
 		else {
 			let extendsString = Compiler.joinExtends(maybeSuperType)/*unknown*/;
 			let generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Compiler.joinParameters(parameters) + constructorString + outputContent + "\n}\n"/*unknown*/;
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""))/*unknown*/;
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.mapRegistry(registry -  > registry.append(generated)), ""))/*unknown*/;
 		}
 	}
 	static joinExtends(maybeSuperType: Iterable<Type>): string {
@@ -355,7 +357,8 @@ export class Compiler {
 			}
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")")/*unknown*/;
 			return Compiler.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => Compiler.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
-				let statementsTuple = Compiler.compileFunctionStatements(parametersState.enterDepth().enterDepth().defineAll(definitions), withoutContentEnd)/*unknown*/;
+				let compileState: CompileState = parametersState.enterDepth().enterDepth()/*unknown*/;
+				let statementsTuple = Compiler.compileFunctionStatements(compileState.mapStack(stack1 -  > stack1.defineAll(definitions)), withoutContentEnd)/*unknown*/;
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"))/*unknown*/;
 			})/*unknown*/).or(() => {
 				if (Strings.equalsTo(";", Strings.strip(afterParams))/*unknown*/){
@@ -574,7 +577,8 @@ export class Compiler {
 	static compileLambdaWithParameterNames(state: CompileState, paramNames: Iterable<Definition>, afterArrow: string): Option<Tuple2<CompileState, Value>> {
 		let strippedAfterArrow = Strings.strip(afterArrow)/*unknown*/;
 		return Compiler.compilePrefix(strippedAfterArrow, "{", (withoutContentStart: string) => Compiler.compileSuffix(withoutContentStart, "}", (withoutContentEnd: string) => {
-			let statementsTuple = Compiler.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd)/*unknown*/;
+			let compileState: CompileState = state.enterDepth()/*unknown*/;
+			let statementsTuple = Compiler.compileFunctionStatements(compileState.mapStack(stack1 -  > stack1.defineAll(paramNames)), withoutContentEnd)/*unknown*/;
 			let statementsState = statementsTuple.left()/*unknown*/;
 			let statements = statementsTuple.right()/*unknown*/;
 			let exited = statementsState.exitDepth()/*unknown*/;
@@ -925,7 +929,7 @@ export class Compiler {
 		return Compiler.compileReturn(input1, (withoutPrefix: string) => Compiler.compileValue(state1, withoutPrefix)/*unknown*/).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), state1.createIndent() + tuple.right())/*unknown*/)/*unknown*/;
 	}
 	static compileRoot(state: CompileState, input: string, location: Location): Tuple2<CompileState, string> {
-		return Compiler.compileStatements(state.withLocation(location), input, Compiler.compileRootSegment)/*unknown*/;
+		return Compiler.compileStatements(state.mapContext((context2: Context) => context2.withLocation(location)/*unknown*/), input, Compiler.compileRootSegment)/*unknown*/;
 	}
 	static fixNamespace(requestedNamespace: List<string>, thisNamespace: List<string>): List<string> {
 		if (thisNamespace.isEmpty()/*unknown*/){
