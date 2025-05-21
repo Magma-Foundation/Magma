@@ -18,7 +18,7 @@
 	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
-	Sequence: magma.api.collect.list, 
+	View: magma.api.collect.list, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
@@ -115,13 +115,7 @@
 	ValueCompiler: magma.app, 
 	WhitespaceCompiler: magma.app
 ]*/
-import { Tuple2 } from "../../../../magma/api/Tuple2";
-import { Option } from "../../../../magma/api/option/Option";
-export interface Composable<T, R> {
-	static toComposable<T>(mapper: (arg0 : string, arg1 : string) => Option<T>): Composable<Tuple2<string, string>, T> {
-		return (tuple: Tuple2<string, string>) => {
-			return mapper(tuple.left(), tuple.right())/*unknown*/;
-		}/*unknown*/;
-	}
-	apply(element: T): Option<R>;
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
+export interface View<T> extends Iterable<T> {
+	size(): number;
 }

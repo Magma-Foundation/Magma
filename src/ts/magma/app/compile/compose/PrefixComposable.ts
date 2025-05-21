@@ -18,6 +18,7 @@
 	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	Sequence: magma.api.collect.list, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 

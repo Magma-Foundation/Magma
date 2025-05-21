@@ -41,10 +41,13 @@ interface Iterable<T> {
 }
 interface List<T> {
 }
-List <|-- Iterable
+List <|-- Sequence
 class ListCollector<T> {
 }
 ListCollector <|.. Collector
+interface Sequence<T> {
+}
+Sequence <|-- Iterable
 class Console {
 }
 interface IOError {
@@ -326,11 +329,14 @@ Joiner --> None
 Joiner --> Some
 Iterable --> Iter
 Iterable --> Tuple2
-List --> Iterable
+List --> Sequence
 List --> Option
+List --> Iterable
 ListCollector --> List
 ListCollector --> Collector
 ListCollector --> Lists
+Sequence --> Iterable
+Sequence --> Option
 Path --> IOError
 Path --> Option
 Path --> Result

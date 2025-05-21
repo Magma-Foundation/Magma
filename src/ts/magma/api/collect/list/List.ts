@@ -18,6 +18,7 @@
 	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
+	Sequence: magma.api.collect.list, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
@@ -114,19 +115,14 @@
 	ValueCompiler: magma.app, 
 	WhitespaceCompiler: magma.app
 ]*/
-import { Iterable } from "../../../../magma/api/collect/list/Iterable";
+import { Sequence } from "../../../../magma/api/collect/list/Sequence";
 import { Option } from "../../../../magma/api/option/Option";
-export interface List<T> extends Iterable<T> {
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
+export interface List<T> extends Sequence<T> {
 	addLast(element: T): List<T>;
-	size(): number;
 	subList(startInclusive: number, endExclusive: number): Option<List<T>>;
-	findLast(): Option<T>;
-	findFirst(): Option<T>;
-	find(index: number): Option<T>;
 	addAll(others: Iterable<T>): List<T>;
-	contains(element: T): boolean;
 	addFirst(element: T): List<T>;
-	isEmpty(): boolean;
 	removeValue(element: T): List<T>;
 	removeLast(): Option<List<T>>;
 }
