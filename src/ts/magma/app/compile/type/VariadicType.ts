@@ -82,6 +82,6 @@ export class VariadicType implements Type {
 		return "..."/*unknown*/;
 	}
 	generateSimple(): string {
-		return generate()/*unknown*/;
+		return this.generate()/*unknown*/;
 	}
 }

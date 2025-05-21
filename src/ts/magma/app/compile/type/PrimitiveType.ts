@@ -88,6 +88,6 @@ export class PrimitiveType implements Type {
 		return ""/*unknown*/;
 	}
 	generateSimple(): string {
-		return generate()/*unknown*/;
+		return this.generate()/*unknown*/;
 	}
 }

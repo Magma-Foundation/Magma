@@ -493,7 +493,8 @@ public final class Main {
                 Main.createStructureRule("record ", "class "),
                 Main.createStructureRule("enum ", "class "),
                 Main::compileMethod,
-                Main::compileFieldDefinition
+                Main::compileFieldDefinition,
+                Main::compileEnumValues
         ));
     }
 
@@ -988,10 +989,21 @@ public final class Main {
     }
 
     private static Option<Tuple2<CompileState, String>> compileEnumValues(CompileState state, String withoutEnd) {
-        return Main.parseValues(state, withoutEnd, (CompileState state1, String s) -> Main.parseInvokable(state1, s).flatMap((Tuple2<CompileState, Value> tuple) -> {
+        return Main.parseValues(state, withoutEnd, (CompileState state1, String segment) -> {
+            var stripped = segment.strip();
+            if (Main.isSymbol(stripped)) {
+                return new Some<>(new Tuple2Impl<>(state1, "\n\t static " + stripped + " = \"" + stripped + "\";"));
+            }
+
+            return Main.getTuple2Option(state, state1, segment);
+        }).map((Tuple2<CompileState, List<String>> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
+    }
+
+    private static Option<Tuple2<CompileState, String>> getTuple2Option(CompileState state, CompileState state1, String segment) {
+        return Main.parseInvokable(state1, segment).flatMap((Tuple2<CompileState, Value> tuple) -> {
             var structureName = state.findLastStructureName().orElse("");
             return tuple.right().generateAsEnumValue(structureName).map((String stringOption) -> new Tuple2Impl<CompileState, String>(tuple.left(), stringOption));
-        })).map((Tuple2<CompileState, List<String>> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
+        });
     }
 
     private static Tuple2<CompileState, Parameter> parseParameterOrPlaceholder(CompileState state, String input) {

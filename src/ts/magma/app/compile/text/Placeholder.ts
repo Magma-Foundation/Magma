@@ -104,6 +104,6 @@ export class Placeholder {
 		return new None<string>()/*unknown*/;
 	}
 	generateSimple(): string {
-		return generate()/*unknown*/;
+		return this.generate()/*unknown*/;
 	}
 }

@@ -77,6 +77,6 @@ export class Iters {
 		return new SingleHead<T>(element)/*unknown*/;
 	}
 	static fromArray<T>(): Iter<T> {
-		/*return new HeadedIter<>(new RangeHead(array.length)).map((Integer index) -> array[index])*/;
+		/*return new HeadedIter<Integer>(new RangeHead(array.length)).map((Integer index) -> array[index])*/;
 	}
 }

@@ -63,7 +63,7 @@
 	Main: magma.app, 
 	Platform: magma.app
 ]*/
-export class Platform {/*TypeScript,
-    PlantUML
-*/
+export class Platform {
+	 static TypeScript = "TypeScript";
+	 static PlantUML = "PlantUML";
 }

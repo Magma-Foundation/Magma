@@ -116,7 +116,7 @@ export class ImmutableCompileState implements CompileState {
 	}
 	addResolvedImport(parent: List<string>, child: string): CompileState {
 		if (Platform.PlantUML === this.platform/*unknown*/){
-			let name = maybeLocation.map(Location.name).orElse("")/*unknown*/;
+			let name = this.maybeLocation.map(Location.name).orElse("")/*unknown*/;
 			let dependency = new Dependency(name, child)/*unknown*/;
 			if (!this/*unknown*/.dependencies.contains(dependency)/*unknown*/){
 				return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies.addLast(dependency))/*unknown*/;
@@ -141,7 +141,7 @@ export class ImmutableCompileState implements CompileState {
 		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
 	}
 	withLocation(location: Location): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<>(location), this.sources, this.platform, this.dependencies)/*unknown*/;
+		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(location), this.sources, this.platform, this.dependencies)/*unknown*/;
 	}
 	append(element: string): CompileState {
 		return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;

@@ -86,6 +86,6 @@ export class TemplateType implements Type {
 		return ""/*unknown*/;
 	}
 	generateSimple(): string {
-		return base/*unknown*/;
+		return this.base/*unknown*/;
 	}
 }

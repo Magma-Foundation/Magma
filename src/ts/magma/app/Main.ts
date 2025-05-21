@@ -121,11 +121,7 @@ export class Main {
 		Main.runWithSourceDirectory(sourceDirectory).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
 	}
 	static runWithSourceDirectory(sourceDirectory: Path): Result<CompileState, IOError> {
-		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialCompileState(), (state: CompileState, platform: Platform) => {
-			return sourceDirectory.walk().flatMapValue((children: List<Path>) => {
-				return Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)/*unknown*/;
-			})/*unknown*/;
-		})/*unknown*/;
+		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialCompileState(), (state: CompileState, platform: Platform) => sourceDirectory.walk().flatMapValue((children: List<Path>) => Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)/*unknown*/)/*unknown*/)/*unknown*/;
 	}
 	static runWithChildren(state: CompileState, children: List<Path>, sourceDirectory: Path): Result<CompileState, IOError> {
 		let initial = Main.retainSources(children, sourceDirectory).query().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
@@ -135,7 +131,7 @@ export class Main {
 			let joinedDependencies = result.queryDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 			let maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.findOutput() + joinedDependencies + "@enduml")/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
-				return new Err<>(error)/*unknown*/;
+				return new Err<CompileState, IOError>(error)/*unknown*/;
 			}
 		}
 		return folded/*unknown*/;
@@ -151,7 +147,7 @@ export class Main {
 		let compiled = Main.compileStatements(state.withLocation(location), input, Main.compileRootSegment)/*unknown*/;
 		let compiledState = compiled.left()/*unknown*/;
 		if (compiledState.hasPlatform(Platform.PlantUML)/*unknown*/){
-			return new Ok<>(compiledState)/*unknown*/;
+			return new Ok<CompileState, IOError>(compiledState)/*unknown*/;
 		}
 		let segment = state.querySources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		let joined = compiledState.join(compiled.right())/*unknown*/;
@@ -320,7 +316,7 @@ export class Main {
 			let joinedImplementing = maybeImplementing.map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|.. " + generated + "\n"/*unknown*/).orElse("")/*unknown*/;
 			let joinedSuperTypes = maybeSuperType.query().map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|-- " + generated + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 			let generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing/*unknown*/;
-			return new Some<>(new Tuple2Impl<>(outputContentState.append(generated), ""))/*unknown*/;
+			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""))/*unknown*/;
 		}
 		if (annotations.contains("Namespace")/*unknown*/){
 			let actualInfix: string = "interface "/*unknown*/;
@@ -379,7 +375,7 @@ export class Main {
 		return rule(state, input)/*unknown*/;
 	}
 	static compileClassSegment(state1: CompileState, input1: string): Tuple2<CompileState, string> {
-		return Main.compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class "), Main.compileMethod, Main.compileFieldDefinition))/*unknown*/;
+		return Main.compileOrPlaceholder(state1, input1, Lists.of(Main.compileWhitespace, Main.createStructureRule("class ", "class "), Main.createStructureRule("interface ", "interface "), Main.createStructureRule("record ", "class "), Main.createStructureRule("enum ", "class "), Main.compileMethod, Main.compileFieldDefinition, Main.compileEnumValues))/*unknown*/;
 	}
 	static compileMethod(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Main.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
@@ -726,10 +722,19 @@ export class Main {
 		return Main.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple2<CompileState, Parameter>) => new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(definitionTuple.left(), "\n\t" + definitionTuple.right().generate() + ";"))/*unknown*/)/*unknown*/;
 	}
 	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
-		return Main.parseValues(state, withoutEnd, (state1: CompileState, s: string) => Main.parseInvokable(state1, s).flatMap((tuple: Tuple2<CompileState, Value>) => {
+		return Main.parseValues(state, withoutEnd, (state1: CompileState, segment: string) => {
+			let stripped = segment.strip()/*unknown*/;
+			if (Main.isSymbol(stripped)/*unknown*/){
+				return new Some<>(new Tuple2Impl<>(state1, "\n\t static " + stripped + " = \"" + stripped + "\";"))/*unknown*/;
+			}
+			return Main.getTuple2Option(state, state1, segment)/*unknown*/;
+		}).map((tuple: Tuple2<CompileState, List<string>>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse(""))/*unknown*/)/*unknown*/;
+	}
+	static getTuple2Option(state: CompileState, state1: CompileState, segment: string): Option<Tuple2<CompileState, string>> {
+		return Main.parseInvokable(state1, segment).flatMap((tuple: Tuple2<CompileState, Value>) => {
 			let structureName = state.findLastStructureName().orElse("")/*unknown*/;
 			return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => new Tuple2Impl<CompileState, string>(tuple.left(), stringOption)/*unknown*/)/*unknown*/;
-		})/*unknown*/).map((tuple: Tuple2<CompileState, List<string>>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse(""))/*unknown*/)/*unknown*/;
+		})/*unknown*/;
 	}
 	static parseParameterOrPlaceholder(state: CompileState, input: string): Tuple2<CompileState, Parameter> {
 		return Main.parseParameter(state, input).orElseGet(() => new Tuple2Impl<CompileState, Parameter>(state, new Placeholder(input))/*unknown*/)/*unknown*/;
@@ -956,7 +961,7 @@ export class Main {
 		return "/*" + replaced + "*/"/*unknown*/;
 	}
 	static createInitialCompileState(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;
+		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;
 	}
 	static createInitialDivideState(input: string): DivideState {
 		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
