@@ -114,24 +114,5 @@
 	ValueCompiler: magma.app, 
 	WhitespaceCompiler: magma.app
 ]*/
-import { CompileState } from "../../magma/app/compile/CompileState";
-import { Tuple2 } from "../../magma/api/Tuple2";
-import { Folder } from "../../magma/app/compile/fold/Folder";
-import { Merger } from "../../magma/app/compile/merge/Merger";
-import { DivideRule } from "../../magma/app/DivideRule";
-import { Some } from "../../magma/api/option/Some";
-import { List } from "../../magma/api/collect/list/List";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Lists } from "../../jvm/api/collect/list/Lists";
-import { Iterable } from "../../magma/api/collect/list/Iterable";
 export class CompilerUtils {
-	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: Merger): Tuple2<CompileState, string> {
-		let folded = new DivideRule<>(folder, (state1: CompileState, s: string) => {
-			return new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/;
-		}).apply(state, input).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
-		return new Tuple2Impl<CompileState, string>(folded.left(), CompilerUtils.generateAll(folded.right(), merger))/*unknown*/;
-	}
-	static generateAll(elements: Iterable<string>, merger: Merger): string {
-		return elements.iter().foldWithInitial("", merger.merge)/*unknown*/;
-	}
 }

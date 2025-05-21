@@ -139,8 +139,9 @@ import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Definition } from "../../magma/app/compile/define/Definition";
 import { Placeholder } from "../../magma/app/compile/value/Placeholder";
 import { WhitespaceCompiler } from "../../magma/app/WhitespaceCompiler";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { DivideRule } from "../../magma/app/DivideRule";
 import { StatementsFolder } from "../../magma/app/compile/fold/StatementsFolder";
+import { Merger } from "../../magma/app/compile/merge/Merger";
 import { StatementsMerger } from "../../magma/app/compile/merge/StatementsMerger";
 class FunctionSegmentCompiler {
 	static compileEmptySegment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
@@ -277,6 +278,6 @@ class FunctionSegmentCompiler {
 		return OrRule.compileOrPlaceholder(state, input, Lists.of(WhitespaceCompiler.compileWhitespace, FunctionSegmentCompiler.compileEmptySegment, FunctionSegmentCompiler.compileBlock, FunctionSegmentCompiler.compileFunctionStatement, FunctionSegmentCompiler.compileReturnWithoutSuffix))/*unknown*/;
 	}
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
-		return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger())/*unknown*/;
+		return new DivideRule<>(new StatementsFolder(), DivideRule.toRule(mapper)).apply(state, input).map(folded -  > Merger.generateAllFromTuple(folded.left(), folded.right(), new StatementsMerger())).orElse(new Tuple2Impl<CompileState, string>(state, ""))/*unknown*/;
 	}
 }

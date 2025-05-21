@@ -14,6 +14,7 @@ import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.Definition;
 import magma.app.compile.fold.StatementsFolder;
+import magma.app.compile.merge.Merger;
 import magma.app.compile.merge.StatementsMerger;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
@@ -204,6 +205,9 @@ final class FunctionSegmentCompiler {
     }
 
     static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
-        return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger());
+        return new DivideRule<>(new StatementsFolder(), DivideRule.toRule(mapper))
+                .apply(state, input)
+                .map(folded -> Merger.generateAllFromTuple(folded.left(), folded.right(), new StatementsMerger()))
+                .orElse(new Tuple2Impl<CompileState, String>(state, ""));
     }
 }

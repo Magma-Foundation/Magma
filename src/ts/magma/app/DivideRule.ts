@@ -114,26 +114,40 @@
 	ValueCompiler: magma.app, 
 	WhitespaceCompiler: magma.app
 ]*/
-import { Iterable } from "../../../magma/api/collect/list/Iterable";
-import { Merger } from "../../../magma/app/compile/merge/Merger";
-import { ValueMerger } from "../../../magma/app/compile/merge/ValueMerger";
-import { CompileState } from "../../../magma/app/compile/CompileState";
-import { List } from "../../../magma/api/collect/list/List";
-import { Tuple2 } from "../../../magma/api/Tuple2";
-import { Rule } from "../../../magma/app/compile/rule/Rule";
-import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
-import { Lists } from "../../../jvm/api/collect/list/Lists";
-import { Option } from "../../../magma/api/option/Option";
-import { DivideRule } from "../../../magma/app/DivideRule";
-import { ValueFolder } from "../../../magma/app/compile/fold/ValueFolder";
-export class ValueUtils {
-	static generateValueStrings(values: Iterable<string>): string {
-		return Merger.generateAll(values, new ValueMerger())/*unknown*/;
+import { List } from "../../magma/api/collect/list/List";
+import { Rule } from "../../magma/app/compile/rule/Rule";
+import { Folder } from "../../magma/app/compile/fold/Folder";
+import { CompileState } from "../../magma/app/compile/CompileState";
+import { Tuple2 } from "../../magma/api/Tuple2";
+import { Some } from "../../magma/api/option/Some";
+import { Option } from "../../magma/api/option/Option";
+import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
+import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Lists } from "../../jvm/api/collect/list/Lists";
+export class DivideRule<T> implements Rule<List<T>> {
+	folder: Folder;
+	rule: Rule<T>;
+	constructor (folder: Folder, rule: Rule<T>) {
+		this.folder = folder;
+		this.rule = rule;
 	}
-	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: Rule<T>): Tuple2<CompileState, List<T>> {
-		return parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;
+	static toRule(mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Rule<string> {
+		return (state1: CompileState, s: string) => {
+			return new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/;
+		}/*unknown*/;
 	}
-	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
-		return new DivideRule<>(new ValueFolder(), mapper).apply(state, input)/*unknown*/;
+	apply(state: CompileState, input: string): Option<Tuple2<CompileState, List<T>>> {
+		return new FoldedDivider(new DecoratedFolder(this.folder())).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
+			return maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
+				let currentState = current.left()/*unknown*/;
+				let currentElement = current.right()/*unknown*/;
+				return this.rule().apply(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
+					let mappedState = mappedTuple.left()/*unknown*/;
+					let mappedElement = mappedTuple.right()/*unknown*/;
+					return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement))/*unknown*/;
+				})/*unknown*/;
+			})/*unknown*/;
+		})/*unknown*/;
 	}
 }
