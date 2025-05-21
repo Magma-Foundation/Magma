@@ -128,15 +128,8 @@ export class SplitComposable<T> implements Composable<string, T> {
 		this.mapper = mapper;
 	}
 	static compileLast<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;
-	}
-	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
-		return new SplitComposable<T>(splitter, toComposable(mapper)).apply(input)/*unknown*/;
-	}
-	static toComposable<T>(mapper: (arg0 : string, arg1 : string) => Option<T>): Composable<Tuple2<string, string>, T> {
-		return (tuple: Tuple2<string, string>) => {
-			return mapper(tuple.left(), tuple.right())/*unknown*/;
-		}/*unknown*/;
+		let splitter1: Splitter = new LocatingSplitter(infix, new LastLocator())/*unknown*/;
+		return new SplitComposable<T>(splitter1, Composable.toComposable(mapper)).apply(input)/*unknown*/;
 	}
 	apply(input: string): Option<T> {
 		return this.splitter().apply(input).flatMap(this.mapper.apply)/*unknown*/;

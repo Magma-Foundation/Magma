@@ -126,6 +126,7 @@ import { LastSelector } from "../../magma/app/compile/select/LastSelector";
 import { Selector } from "../../magma/app/compile/select/Selector";
 import { FoldingSplitter } from "../../magma/app/compile/split/FoldingSplitter";
 import { DivideState } from "../../magma/app/compile/DivideState";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { PrefixComposable } from "../../magma/app/compile/compose/PrefixComposable";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { ConstructionCaller } from "../../magma/app/compile/define/ConstructionCaller";
@@ -137,6 +138,7 @@ import { StringValue } from "../../magma/app/compile/value/StringValue";
 import { Not } from "../../magma/app/compile/value/Not";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
@@ -171,12 +173,12 @@ class ValueCompiler {
 	}
 	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return new SuffixComposable<Tuple2<CompileState, Value>>(")", (withoutEnd: string) => {
-			return SplitComposable.compileSplit(withoutEnd, (withoutEnd0: string) => {
+			return new SplitComposable<Tuple2<CompileState, Value>>((withoutEnd0: string) => {
 				let selector: Selector = new LastSelector("")/*unknown*/;
 				return new FoldingSplitter((state1: DivideState, c: string) => {
 					return ValueCompiler.foldInvocationStarts(state1, c)/*unknown*/;
 				}, selector).apply(withoutEnd0)/*unknown*/;
-			}, (callerWithArgStart: string, args: string) => {
+			}, Composable.toComposable((callerWithArgStart: string, args: string) => {
 				return new SuffixComposable<Tuple2<CompileState, Value>>("(", (callerString: string) => {
 					return new PrefixComposable<Tuple2<CompileState, Value>>("new ", (type: string) => {
 						return TypeCompiler.compileType(state, type).flatMap((callerTuple1: Tuple2<CompileState, string>) => {
@@ -190,7 +192,7 @@ class ValueCompiler {
 						})/*unknown*/;
 					})/*unknown*/;
 				}).apply(callerWithArgStart)/*unknown*/;
-			})/*unknown*/;
+			})).apply(withoutEnd)/*unknown*/;
 		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static createTextRule(slice: string): Rule<Value> {
@@ -212,7 +214,8 @@ class ValueCompiler {
 		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static parseLambda(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return SplitComposable.compileSplit(input, new LocatingSplitter("->", new FirstLocator()), (beforeArrow: string, afterArrow: string) => {
+		let splitter: Splitter = new LocatingSplitter("->", new FirstLocator())/*unknown*/;
+		return new SplitComposable<Tuple2<CompileState, Value>>(splitter, Composable.toComposable((beforeArrow: string, afterArrow: string) => {
 			let strippedBeforeArrow = Strings.strip(beforeArrow)/*unknown*/;
 			return new PrefixComposable<Tuple2<CompileState, Value>>("(", (withoutStart: string) => {
 				return new SuffixComposable<Tuple2<CompileState, Value>>(")", (withoutEnd: string) => {
@@ -223,7 +226,7 @@ class ValueCompiler {
 					})/*unknown*/;
 				}).apply(withoutStart)/*unknown*/;
 			}).apply(strippedBeforeArrow)/*unknown*/;
-		})/*unknown*/;
+		})).apply(input)/*unknown*/;
 	}
 	static compileLambdaWithParameterNames(state: CompileState, paramNames: Iterable<Definition>, afterArrow: string): Option<Tuple2<CompileState, Value>> {
 		let strippedAfterArrow = Strings.strip(afterArrow)/*unknown*/;
@@ -267,11 +270,11 @@ class ValueCompiler {
 	}
 	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): Rule<Value> {
 		return (state1: CompileState, input1: string) => {
-			return SplitComposable.compileSplit(input1, (slice: string) => {
+			return new SplitComposable<Tuple2<CompileState, Value>>((slice: string) => {
 				return new FoldingSplitter(new OperatorFolder(sourceInfix), (divisions: List<string>) => {
 					return new FirstSelector(sourceInfix).select(divisions)/*unknown*/;
 				}).apply(slice)/*unknown*/;
-			}, (leftString: string, rightString: string) => {
+			}, Composable.toComposable((leftString: string, rightString: string) => {
 				return RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => {
 					return RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 						let left = leftTuple.right()/*unknown*/;
@@ -279,7 +282,7 @@ class ValueCompiler {
 						return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)))/*unknown*/;
 					})/*unknown*/;
 				})/*unknown*/;
-			})/*unknown*/;
+			})).apply(input1)/*unknown*/;
 		}/*unknown*/;
 	}
 	static parseSymbol(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {

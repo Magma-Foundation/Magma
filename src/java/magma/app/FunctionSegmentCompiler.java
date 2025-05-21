@@ -9,6 +9,7 @@ import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
+import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.PrefixComposable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
@@ -23,6 +24,7 @@ import magma.app.compile.select.LastSelector;
 import magma.app.compile.select.Selector;
 import magma.app.compile.split.FoldingSplitter;
 import magma.app.compile.split.LocatingSplitter;
+import magma.app.compile.split.Splitter;
 import magma.app.compile.value.Placeholder;
 import magma.app.compile.value.Value;
 
@@ -41,21 +43,21 @@ final class FunctionSegmentCompiler {
 
     private static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
         return new SuffixComposable<Tuple2<CompileState, String>>("}", (String withoutEnd) -> {
-            return SplitComposable.compileSplit(withoutEnd, (String withoutEnd0) -> {
-                Selector selector = new LastSelector("");
-                return new FoldingSplitter((DivideState state1, char c) -> {
-                    return FunctionSegmentCompiler.foldBlockStarts(state1, c);
-                }, selector).apply(withoutEnd0);
-            }, (String beforeContentWithEnd, String content) -> {
-                return new SuffixComposable<Tuple2<CompileState, String>>("{", (String beforeContent) -> {
-                    return FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
-                        var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
+            return new SplitComposable<Tuple2<CompileState, String>>((String withoutEnd0) -> {
+                    Selector selector = new LastSelector("");
+                    return new FoldingSplitter((DivideState state1, char c) -> {
+                        return FunctionSegmentCompiler.foldBlockStarts(state1, c);
+                    }, selector).apply(withoutEnd0);
+                }, Composable.toComposable((String beforeContentWithEnd, String content) -> {
+                    return new SuffixComposable<Tuple2<CompileState, String>>("{", (String beforeContent) -> {
+                        return FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
+                            var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
-                        var indent = state.createIndent();
-                        return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
-                    });
-                }).apply(beforeContentWithEnd);
-            });
+                            var indent = state.createIndent();
+                            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
+                        });
+                    }).apply(beforeContentWithEnd);
+                })).apply(withoutEnd);
         }).apply(Strings.strip(input));
     }
 
@@ -177,7 +179,8 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileAssignment(CompileState state, String input) {
-        return SplitComposable.compileSplit(input, new LocatingSplitter("=", new FirstLocator()), (String destination, String source) -> {
+        Splitter splitter = new LocatingSplitter("=", new FirstLocator());
+        return new SplitComposable<Tuple2<CompileState, String>>(splitter, Composable.toComposable((String destination, String source) -> {
             var sourceTuple = ValueCompiler.compileValueOrPlaceholder(state, source);
 
             var destinationTuple = ValueCompiler.compileValue(sourceTuple.left(), destination)
@@ -191,7 +194,7 @@ final class FunctionSegmentCompiler {
                     });
 
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()));
-        });
+        })).apply(input);
     }
 
     public static Tuple2<CompileState, String> compileFunctionStatements(CompileState state, String input) {

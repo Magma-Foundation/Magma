@@ -117,9 +117,11 @@
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Option } from "../../magma/api/option/Option";
-import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { Splitter } from "../../magma/app/compile/split/Splitter";
+import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { Strings } from "../../magma/api/text/Strings";
 import { ConstructorHeader } from "../../magma/app/compile/define/ConstructorHeader";
 import { None } from "../../magma/api/option/None";
@@ -140,7 +142,8 @@ import { List } from "../../magma/api/collect/list/List";
 import { Value } from "../../magma/app/compile/value/Value";
 class FieldCompiler {
 	static compileMethod(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return SplitComposable.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (beforeParams: string, withParams: string) => {
+		let splitter: Splitter = new LocatingSplitter("(", new FirstLocator())/*unknown*/;
+		return new SplitComposable<Tuple2<CompileState, string>>(splitter, Composable.toComposable((beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams)/*unknown*/;
 			return SplitComposable.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
 				if (state.stack().isWithinLast(name)/*unknown*/){
@@ -159,10 +162,11 @@ class FieldCompiler {
 					return FieldCompiler.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)/*unknown*/;
 				})/*unknown*/;
 			})/*unknown*/;
-		})/*unknown*/;
+		})).apply(input)/*unknown*/;
 	}
 	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple2<CompileState, string>> {
-		return SplitComposable.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (params: string, afterParams: string) => {
+		let splitter: Splitter = new LocatingSplitter(")", new FirstLocator())/*unknown*/;
+		return new SplitComposable<Tuple2<CompileState, string>>(splitter, Composable.toComposable((params: string, afterParams: string) => {
 			let parametersTuple = DefiningCompiler.parseParameters(state, params)/*unknown*/;
 			let parametersState = parametersTuple.left()/*unknown*/;
 			let parameters = parametersTuple.right()/*unknown*/;
@@ -189,7 +193,7 @@ class FieldCompiler {
 				}
 				return new None<Tuple2<CompileState, string>>()/*unknown*/;
 			})/*unknown*/;
-		})/*unknown*/;
+		})).apply(withParams)/*unknown*/;
 	}
 	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return new SuffixComposable<Tuple2<CompileState, string>>(";", (withoutEnd: string) => {

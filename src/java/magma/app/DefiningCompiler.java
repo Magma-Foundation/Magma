@@ -13,6 +13,7 @@ import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.ValueUtils;
+import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.fold.DelimitedFolder;
@@ -21,6 +22,7 @@ import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
 import magma.app.compile.select.Selector;
 import magma.app.compile.split.FoldingSplitter;
+import magma.app.compile.split.Splitter;
 import magma.app.compile.text.Whitespace;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Placeholder;
@@ -71,17 +73,17 @@ final class DefiningCompiler {
 
     public static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return SplitComposable.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> {
-            return SplitComposable.compileSplit(beforeName, (String beforeName0) -> {
+            return new SplitComposable<Tuple2<CompileState, Definition>>((String beforeName0) -> {
                 Selector selector = new LastSelector(" ");
                 return new FoldingSplitter(new TypeSeparatorFolder(), selector).apply(Strings.strip(beforeName0));
-            }, (String beforeType, String type) -> {
+            }, Composable.toComposable((String beforeType, String type) -> {
                 return SplitComposable.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
                     var annotations = DefiningCompiler.parseAnnotations(annotationsString);
                     return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
                 }).or(() -> {
                     return DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name);
                 });
-            }).or(() -> {
+            })).apply(beforeName).or(() -> {
                 return DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name);
             });
         });
@@ -120,10 +122,11 @@ final class DefiningCompiler {
             String name
     ) {
         return new SuffixComposable<Tuple2<CompileState, Definition>>(">", (String withoutTypeParamEnd) -> {
-            return SplitComposable.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String beforeTypeParams, String typeParamsString) -> {
-                var typeParams = DefiningCompiler.divideValues(typeParamsString);
-                return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name);
-            });
+            Splitter splitter = new LocatingSplitter("<", new FirstLocator());
+            return new SplitComposable<Tuple2<CompileState, Definition>>(splitter, Composable.toComposable((String beforeTypeParams, String typeParamsString) -> {
+                    var typeParams = DefiningCompiler.divideValues(typeParamsString);
+                    return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name);
+                })).apply(withoutTypeParamEnd);
         }).apply(Strings.strip(beforeType)).or(() -> {
             var divided = DefiningCompiler.parseModifiers(beforeType);
             return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name);

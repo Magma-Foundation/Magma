@@ -129,9 +129,11 @@ import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Symbol } from "../../magma/app/compile/value/Symbol";
 import { None } from "../../magma/api/option/None";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
-import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { Splitter } from "../../magma/app/compile/split/Splitter";
+import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { List } from "../../magma/api/collect/list/List";
@@ -193,7 +195,8 @@ class TypeCompiler {
 	}
 	static parseGeneric(state: CompileState, input: string): Option<Tuple2<CompileState, Type>> {
 		return new SuffixComposable<Tuple2<CompileState, Type>>(">", (withoutEnd: string) => {
-			return SplitComposable.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (baseString: string, argsString: string) => {
+			let splitter: Splitter = new LocatingSplitter("<", new FirstLocator())/*unknown*/;
+			return new SplitComposable<Tuple2<CompileState, Type>>(splitter, Composable.toComposable((baseString: string, argsString: string) => {
 				let argsTuple = ValueUtils.parseValuesOrEmpty(state, argsString, (state1: CompileState, s: string) => {
 					return TypeCompiler.compileTypeArgument(state1, s)/*unknown*/;
 				})/*unknown*/;
@@ -204,7 +207,7 @@ class TypeCompiler {
 					let compileState = TypeCompiler.addResolvedImportFromCache0(argsState, base)/*unknown*/;
 					return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)))/*unknown*/;
 				})/*unknown*/;
-			})/*unknown*/;
+			})).apply(withoutEnd)/*unknown*/;
 		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static assembleFunctionType(state: CompileState, base: string, args: List<string>): Option<Tuple2<CompileState, Type>> {

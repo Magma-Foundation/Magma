@@ -13,9 +13,11 @@ import magma.app.compile.Dependency;
 import magma.app.compile.Import;
 import magma.app.compile.Registry;
 import magma.app.compile.ValueUtils;
+import magma.app.compile.compose.Composable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.rule.OrRule;
+import magma.app.compile.split.Splitter;
 import magma.app.compile.type.FunctionType;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.TemplateType;
@@ -92,19 +94,20 @@ final class TypeCompiler {
 
     private static Option<Tuple2<CompileState, Type>> parseGeneric(CompileState state, String input) {
         return new SuffixComposable<Tuple2<CompileState, Type>>(">", (String withoutEnd) -> {
-            return SplitComposable.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (String baseString, String argsString) -> {
-                var argsTuple = ValueUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
-                    return TypeCompiler.compileTypeArgument(state1, s);
-                });
-                var argsState = argsTuple.left();
-                var args = argsTuple.right();
+            Splitter splitter = new LocatingSplitter("<", new FirstLocator());
+            return new SplitComposable<Tuple2<CompileState, Type>>(splitter, Composable.toComposable((String baseString, String argsString) -> {
+                    var argsTuple = ValueUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
+                        return TypeCompiler.compileTypeArgument(state1, s);
+                    });
+                    var argsState = argsTuple.left();
+                    var args = argsTuple.right();
 
-                var base = Strings.strip(baseString);
-                return TypeCompiler.assembleFunctionType(argsState, base, args).or(() -> {
-                    var compileState = TypeCompiler.addResolvedImportFromCache0(argsState, base);
-                    return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
-                });
-            });
+                    var base = Strings.strip(baseString);
+                    return TypeCompiler.assembleFunctionType(argsState, base, args).or(() -> {
+                        var compileState = TypeCompiler.addResolvedImportFromCache0(argsState, base);
+                        return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
+                    });
+                })).apply(withoutEnd);
         }).apply(Strings.strip(input));
     }
 

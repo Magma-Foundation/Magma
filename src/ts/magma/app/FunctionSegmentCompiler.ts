@@ -127,6 +127,7 @@ import { LastSelector } from "../../magma/app/compile/select/LastSelector";
 import { Selector } from "../../magma/app/compile/select/Selector";
 import { FoldingSplitter } from "../../magma/app/compile/split/FoldingSplitter";
 import { DivideState } from "../../magma/app/compile/DivideState";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Rule } from "../../magma/app/compile/rule/Rule";
@@ -135,6 +136,7 @@ import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Value } from "../../magma/app/compile/value/Value";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Definition } from "../../magma/app/compile/define/Definition";
 import { Placeholder } from "../../magma/app/compile/value/Placeholder";
@@ -154,12 +156,12 @@ class FunctionSegmentCompiler {
 	}
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return new SuffixComposable<Tuple2<CompileState, string>>("}", (withoutEnd: string) => {
-			return SplitComposable.compileSplit(withoutEnd, (withoutEnd0: string) => {
+			return new SplitComposable<Tuple2<CompileState, string>>((withoutEnd0: string) => {
 				let selector: Selector = new LastSelector("")/*unknown*/;
 				return new FoldingSplitter((state1: DivideState, c: string) => {
 					return FunctionSegmentCompiler.foldBlockStarts(state1, c)/*unknown*/;
 				}, selector).apply(withoutEnd0)/*unknown*/;
-			}, (beforeContentWithEnd: string, content: string) => {
+			}, Composable.toComposable((beforeContentWithEnd: string, content: string) => {
 				return new SuffixComposable<Tuple2<CompileState, string>>("{", (beforeContent: string) => {
 					return FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
 						let contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content)/*unknown*/;
@@ -167,7 +169,7 @@ class FunctionSegmentCompiler {
 						return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"))/*unknown*/;
 					})/*unknown*/;
 				}).apply(beforeContentWithEnd)/*unknown*/;
-			})/*unknown*/;
+			})).apply(withoutEnd)/*unknown*/;
 		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static foldBlockStarts(state: DivideState, c: string): DivideState {
@@ -262,7 +264,8 @@ class FunctionSegmentCompiler {
 		})/*unknown*/;
 	}
 	static compileAssignment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return SplitComposable.compileSplit(input, new LocatingSplitter("=", new FirstLocator()), (destination: string, source: string) => {
+		let splitter: Splitter = new LocatingSplitter("=", new FirstLocator())/*unknown*/;
+		return new SplitComposable<Tuple2<CompileState, string>>(splitter, Composable.toComposable((destination: string, source: string) => {
 			let sourceTuple = ValueCompiler.compileValueOrPlaceholder(state, source)/*unknown*/;
 			let destinationTuple = ValueCompiler.compileValue(sourceTuple.left(), destination).or(() => {
 				return DefiningCompiler.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => {
@@ -272,7 +275,7 @@ class FunctionSegmentCompiler {
 				return new Tuple2Impl<CompileState, string>(sourceTuple.left(), Placeholder.generatePlaceholder(destination))/*unknown*/;
 			})/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()))/*unknown*/;
-		})/*unknown*/;
+		})).apply(input)/*unknown*/;
 	}
 	static compileFunctionStatements(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return FunctionSegmentCompiler.compileStatements(state, input, FunctionSegmentCompiler.compileFunctionSegment)/*unknown*/;

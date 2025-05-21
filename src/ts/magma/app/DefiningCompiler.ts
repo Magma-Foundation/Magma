@@ -135,6 +135,7 @@ import { LastSelector } from "../../magma/app/compile/select/LastSelector";
 import { Selector } from "../../magma/app/compile/select/Selector";
 import { FoldingSplitter } from "../../magma/app/compile/split/FoldingSplitter";
 import { TypeSeparatorFolder } from "../../magma/app/compile/fold/TypeSeparatorFolder";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
@@ -143,6 +144,7 @@ import { DelimitedFolder } from "../../magma/app/compile/fold/DelimitedFolder";
 import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Type } from "../../magma/app/compile/type/Type";
 import { Joiner } from "../../magma/api/collect/Joiner";
@@ -177,17 +179,17 @@ class DefiningCompiler {
 	}
 	static parseDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, Definition>> {
 		return SplitComposable.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => {
-			return SplitComposable.compileSplit(beforeName, (beforeName0: string) => {
+			return new SplitComposable<Tuple2<CompileState, Definition>>((beforeName0: string) => {
 				let selector: Selector = new LastSelector(" ")/*unknown*/;
 				return new FoldingSplitter(new TypeSeparatorFolder(), selector).apply(Strings.strip(beforeName0))/*unknown*/;
-			}, (beforeType: string, type: string) => {
+			}, Composable.toComposable((beforeType: string, type: string) => {
 				return SplitComposable.compileLast(Strings.strip(beforeType), "\n", (annotationsString: string, afterAnnotations: string) => {
 					let annotations = DefiningCompiler.parseAnnotations(annotationsString)/*unknown*/;
 					return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name)/*unknown*/;
 				}).or(() => {
 					return DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name)/*unknown*/;
 				})/*unknown*/;
-			}).or(() => {
+			})).apply(beforeName).or(() => {
 				return DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/;
@@ -211,10 +213,11 @@ class DefiningCompiler {
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
 		return new SuffixComposable<Tuple2<CompileState, Definition>>(">", (withoutTypeParamEnd: string) => {
-			return SplitComposable.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (beforeTypeParams: string, typeParamsString: string) => {
+			let splitter: Splitter = new LocatingSplitter("<", new FirstLocator())/*unknown*/;
+			return new SplitComposable<Tuple2<CompileState, Definition>>(splitter, Composable.toComposable((beforeTypeParams: string, typeParamsString: string) => {
 				let typeParams = DefiningCompiler.divideValues(typeParamsString)/*unknown*/;
 				return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name)/*unknown*/;
-			})/*unknown*/;
+			})).apply(withoutTypeParamEnd)/*unknown*/;
 		}).apply(Strings.strip(beforeType)).or(() => {
 			let divided = DefiningCompiler.parseModifiers(beforeType)/*unknown*/;
 			return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name)/*unknown*/;
