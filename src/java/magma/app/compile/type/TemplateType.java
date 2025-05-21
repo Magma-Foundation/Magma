@@ -23,4 +23,9 @@ public record TemplateType(String base, List<String> args) implements Type {
     public String generateBeforeName() {
         return "";
     }
+
+    @Override
+    public String generateSimple() {
+        return base;
+    }
 }

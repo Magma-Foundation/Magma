@@ -79,4 +79,7 @@ export class VariadicType implements Type {
 	generateBeforeName(): string {
 		return "..."/*unknown*/;
 	}
+	generateSimple(): string {
+		return generate()/*unknown*/;
+	}
 }

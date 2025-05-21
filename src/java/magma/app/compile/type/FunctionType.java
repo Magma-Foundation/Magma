@@ -30,4 +30,9 @@ public record FunctionType(List<String> args, String returns) implements Type {
     public String generateBeforeName() {
         return "";
     }
+
+    @Override
+    public String generateSimple() {
+        return generate();
+    }
 }

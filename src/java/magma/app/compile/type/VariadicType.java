@@ -20,4 +20,9 @@ public record VariadicType(Type type) implements Type {
     public String generateBeforeName() {
         return "...";
     }
+
+    @Override
+    public String generateSimple() {
+        return generate();
+    }
 }

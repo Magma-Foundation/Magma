@@ -51,4 +51,9 @@ public record Symbol(String value) implements Value, Type {
     public Option<String> generateAsEnumValue(String structureName) {
         return new None<String>();
     }
+
+    @Override
+    public String generateSimple() {
+        return generate();
+    }
 }

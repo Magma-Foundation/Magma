@@ -101,4 +101,7 @@ export class Placeholder {
 	generateAsEnumValue(structureName: string): Option<string> {
 		return new None<string>()/*unknown*/;
 	}
+	generateSimple(): string {
+		return generate()/*unknown*/;
+	}
 }

@@ -11,28 +11,36 @@ interface Collector<T, C> {
 }
 class EmptyHead<T> {
 }
+EmptyHead <|.. Head
 class FlatMapHead<T, R> {
 }
+FlatMapHead <|.. Head
 interface Head<T> {
 }
 class HeadedIter<T> {
 }
+HeadedIter <|.. Iter
 class MapHead<T, R> {
 }
+MapHead <|.. Head
 class RangeHead {
 }
+RangeHead <|.. Head
 class SingleHead<T> {
 }
+SingleHead <|.. Head
 interface Iter<T> {
 }
 class Iters {
 }
 class Joiner {
 }
+Joiner <|.. Collector
 interface List<T> {
 }
 class ListCollector<T> {
 }
+ListCollector <|.. Collector
 class Console {
 }
 interface IOError {
@@ -41,14 +49,18 @@ interface Path {
 }
 class None<T> {
 }
+None <|.. Option
 interface Option<T> {
 }
 class Some<T> {
 }
+Some <|.. Option
 class Err<T, X> {
 }
+Err <|.. Result
 class Ok<T, X> {
 }
+Ok <|.. Result
 interface Result<T, X> {
 }
 class Characters {
@@ -59,12 +71,15 @@ interface Tuple2<A, B> {
 }
 class Tuple2Impl<A, B> {
 }
+Tuple2Impl <|.. Tuple2
 interface CompileState {
 }
 class ConstructionCaller {
 }
+ConstructionCaller <|.. Caller
 class ConstructorHeader {
 }
+ConstructorHeader <|.. MethodHeader
 class Definition {
 }
 interface MethodHeader {
@@ -75,8 +90,10 @@ interface DivideState {
 }
 class ImmutableCompileState {
 }
+ImmutableCompileState <|.. CompileState
 class ImmutableDivideState {
 }
+ImmutableDivideState <|.. DivideState
 class Import {
 }
 class Placeholder {
@@ -85,36 +102,47 @@ class Symbol {
 }
 class Whitespace {
 }
+Whitespace <|.. Parameter
 class FunctionType {
 }
+FunctionType <|.. Type
 class PrimitiveType {
 }
+PrimitiveType <|.. Type
 class TemplateType {
 }
+TemplateType <|.. Type
 interface Type {
 }
 class VariadicType {
 }
+VariadicType <|.. Type
 class AccessValue {
 }
+AccessValue <|.. Value
 interface Argument {
 }
 interface Caller {
 }
 class Invokable {
 }
+Invokable <|.. Value
 class Lambda {
 }
+Lambda <|.. Value
 class Not {
 }
+Not <|.. Value
 class Operation {
 }
+Operation <|.. Value
 class StringValue {
 }
+StringValue <|.. Value
 interface Value {
 }
-Value--|>Argument
-Value--|>Caller
+Value <|-- Argument
+Value <|-- Caller
 class Source {
 }
 class Main {

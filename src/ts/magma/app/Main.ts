@@ -312,8 +312,10 @@ export class Main {
 		let newModifiers = Main.modifyModifiers0(oldModifiers)/*unknown*/;
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " "/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
 		if (outputContentState.hasPlatform(Platform.PlantUML)/*unknown*/){
-			let joinedSuperTypes = maybeSuperType.query().map(type -  > type.generate()).map(generated -  > name + "--|>" + generated + "\n").collect(new Joiner("")).orElse("")/*unknown*/;
-			return new Some<>(new Tuple2Impl<>(outputContentState.append(infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes), ""))/*unknown*/;
+			let joinedImplementing = maybeImplementing.map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|.. " + generated + "\n"/*unknown*/).orElse("")/*unknown*/;
+			let joinedSuperTypes = maybeSuperType.query().map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|-- " + generated + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+			let generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing/*unknown*/;
+			return new Some<>(new Tuple2Impl<>(outputContentState.append(generated), ""))/*unknown*/;
 		}
 		if (annotations.contains("Namespace")/*unknown*/){
 			let actualInfix: string = "interface "/*unknown*/;

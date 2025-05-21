@@ -85,4 +85,7 @@ export class PrimitiveType implements Type {
 	generateBeforeName(): string {
 		return ""/*unknown*/;
 	}
+	generateSimple(): string {
+		return generate()/*unknown*/;
+	}
 }

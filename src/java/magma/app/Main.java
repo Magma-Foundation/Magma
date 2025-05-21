@@ -361,13 +361,19 @@ public final class Main {
                 .orElse("");
 
         if (outputContentState.hasPlatform(Platform.PlantUML)) {
+            var joinedImplementing = maybeImplementing
+                    .map((Type type) -> type.generateSimple())
+                    .map((String generated) -> name + " <|.. " + generated + "\n")
+                    .orElse("");
+
             var joinedSuperTypes = maybeSuperType.query()
-                    .map((Type type) -> type.generate())
-                    .map((String generated) -> name + "--|>" + generated + "\n")
+                    .map((Type type) -> type.generateSimple())
+                    .map((String generated) -> name + " <|-- " + generated + "\n")
                     .collect(new Joiner(""))
                     .orElse("");
 
-            return new Some<>(new Tuple2Impl<>(outputContentState.append(infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes), ""));
+            var generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing;
+            return new Some<>(new Tuple2Impl<>(outputContentState.append(generated), ""));
         }
 
         if (annotations.contains("Namespace")) {

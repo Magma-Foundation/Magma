@@ -83,4 +83,7 @@ export class TemplateType implements Type {
 	generateBeforeName(): string {
 		return ""/*unknown*/;
 	}
+	generateSimple(): string {
+		return base/*unknown*/;
+	}
 }
