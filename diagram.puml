@@ -80,6 +80,8 @@ class Application {
 }
 interface CompileState {
 }
+interface Composable<T, R> {
+}
 interface Context {
 }
 class ConstructionCaller {
@@ -352,6 +354,7 @@ Application --> Registry
 CompileState --> Registry
 CompileState --> Context
 CompileState --> Stack
+Composable --> Option
 Context --> Source
 Context --> Iter
 Context --> Platform
@@ -600,6 +603,7 @@ CompilerUtils --> Whitespace
 CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
+CompilerUtils --> Composable
 CompilerUtils --> Splitter
 CompilerUtils --> ListCollector
 DefiningCompiler --> Definition

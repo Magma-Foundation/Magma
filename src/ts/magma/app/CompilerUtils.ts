@@ -33,6 +33,7 @@
 	Tuple2Impl: magma.api, 
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
+	Composable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
@@ -129,6 +130,7 @@ import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
+import { Composable } from "../../magma/app/compile/compose/Composable";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
@@ -203,14 +205,14 @@ export class CompilerUtils {
 	static compileLast<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;
 	}
-	static compileSuffix<T>(input: string, suffix: string, mapper: (arg0 : string) => Option<T>): Option<T> {
+	static compileSuffix<T>(input: string, suffix: string, mapper: Composable<string, T>): Option<T> {
 		if (!input/*string*/.endsWith(suffix)/*unknown*/){
 			return new None<T>()/*unknown*/;
 		}
 		let length = Strings.length(input)/*unknown*/;
 		let length1 = Strings.length(suffix)/*unknown*/;
 		let content = Strings.sliceBetween(input, 0, length - length1)/*unknown*/;
-		return mapper(content)/*unknown*/;
+		return mapper.apply(content)/*unknown*/;
 	}
 	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return splitter.apply(input).flatMap((tuple: Tuple2<string, string>) => {

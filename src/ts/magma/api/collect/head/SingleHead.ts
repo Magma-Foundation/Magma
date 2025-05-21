@@ -33,6 +33,7 @@
 	Tuple2Impl: magma.api, 
 	Application: magma.app, 
 	CompileState: magma.app.compile, 
+	Composable: magma.app.compile.compose, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 

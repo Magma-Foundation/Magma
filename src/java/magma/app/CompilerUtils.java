@@ -12,6 +12,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.compose.Composable;
 import magma.app.compile.divide.FoldedDivider;
 import magma.app.compile.fold.DecoratedFolder;
 import magma.app.compile.fold.Folder;
@@ -135,7 +136,7 @@ public final class CompilerUtils {
         return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper);
     }
 
-    public static <T> Option<T> compileSuffix(String input, String suffix, Function<String, Option<T>> mapper) {
+    public static <T> Option<T> compileSuffix(String input, String suffix, Composable<String, T> mapper) {
         if (!input.endsWith(suffix)) {
             return new None<T>();
         }
