@@ -128,7 +128,7 @@ export class Main {
 		let folded = Main.retainSources(children, sourceDirectory).query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.uml")/*unknown*/;
-			let maybeError = diagramPath.writeString(result.findOutput())/*unknown*/;
+			let maybeError = diagramPath.writeString("@startuml\n" + result.findOutput())/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
 				return new Err<>(error)/*unknown*/;
 			}
@@ -311,6 +311,9 @@ export class Main {
 		let implementingString = Main.generateImplementing(maybeImplementing)/*unknown*/;
 		let newModifiers = Main.modifyModifiers0(oldModifiers)/*unknown*/;
 		let joinedModifiers = newModifiers.query().map((value: string) => value + " "/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
+		if (outputContentState.hasPlatform(Platform.PlantUML)/*unknown*/){
+			return new Some<>(new Tuple2Impl<>(outputContentState.append("class " + name + joinedTypeParams + " {\n}\n"), ""))/*unknown*/;
+		}
 		if (annotations.contains("Namespace")/*unknown*/){
 			let actualInfix: string = "interface "/*unknown*/;
 			let newName: string = name + "Instance"/*unknown*/;
@@ -318,10 +321,13 @@ export class Main {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated).append("export declare const " + name + ": " + newName + ";\n"), ""))/*unknown*/;
 		}
 		else {
-			let extendsString = maybeSuperType.query().map((type: Type) => type.generate()/*unknown*/).collect(new Joiner(", ")).map((inner: string) => " extends " + inner/*unknown*/).orElse("")/*unknown*/;
+			let extendsString = Main.joinExtends(maybeSuperType)/*unknown*/;
 			let generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n"/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""))/*unknown*/;
 		}
+	}
+	static joinExtends(maybeSuperType: List<Type>): string {
+		return maybeSuperType.query().map((type: Type) => type.generate()/*unknown*/).collect(new Joiner(", ")).map((inner: string) => " extends " + inner/*unknown*/).orElse("")/*unknown*/;
 	}
 	static modifyModifiers0(oldModifiers: List<string>): List<string> {
 		if (oldModifiers.contains("public")/*unknown*/){

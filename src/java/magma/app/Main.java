@@ -81,7 +81,7 @@ public final class Main {
 
         if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
             var diagramPath = Files.get(".", "diagram.uml");
-            var maybeError = diagramPath.writeString(result.findOutput());
+            var maybeError = diagramPath.writeString("@startuml\n" + result.findOutput());
             if (maybeError instanceof Some(var error)) {
                 return new Err<>(error);
             }
@@ -360,6 +360,10 @@ public final class Main {
                 .collect(Joiner.empty())
                 .orElse("");
 
+        if(outputContentState.hasPlatform(Platform.PlantUML)) {
+            return new Some<>(new Tuple2Impl<>(outputContentState.append("class " + name + joinedTypeParams + " {\n}\n"), ""));
+        }
+
         if (annotations.contains("Namespace")) {
             String actualInfix = "interface ";
             String newName = name + "Instance";
@@ -369,15 +373,18 @@ public final class Main {
                     .append("export declare const " + name + ": " + newName + ";\n"), ""));
         }
         else {
-            var extendsString = maybeSuperType.query()
-                    .map((Type type) -> type.generate())
-                    .collect(new Joiner(", "))
-                    .map((String inner) -> " extends " + inner)
-                    .orElse("");
-
+            var extendsString = Main.joinExtends(maybeSuperType);
             var generated = joinedModifiers + infix + name + joinedTypeParams + extendsString + implementingString + " {" + Main.joinParameters(parameters) + constructorString + outputContent + "\n}\n";
             return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(outputContentState.append(generated), ""));
         }
+    }
+
+    private static String joinExtends(List<Type> maybeSuperType) {
+        return maybeSuperType.query()
+                .map((Type type) -> type.generate())
+                .collect(new Joiner(", "))
+                .map((String inner) -> " extends " + inner)
+                .orElse("");
     }
 
     private static List<String> modifyModifiers0(List<String> oldModifiers) {
