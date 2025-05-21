@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -70,19 +71,19 @@
 import { IOError } from "../../../magma/api/io/IOError";
 import { Option } from "../../../magma/api/option/Option";
 import { Result } from "../../../magma/api/result/Result";
-import { List } from "../../../magma/api/collect/list/List";
+import { Iterable } from "../../../magma/api/collect/list/Iterable";
 import { Iter } from "../../../magma/api/collect/Iter";
 export interface Path {
 	writeString(output: string): Option<IOError>;
 	readString(): Result<string, IOError>;
 	resolveSibling(siblingName: string): Path;
-	walk(): Result<List<Path>, IOError>;
+	walk(): Result<Iterable<Path>, IOError>;
 	findFileName(): string;
 	endsWith(suffix: string): boolean;
 	relativize(source: Path): Path;
 	getParent(): Path;
 	query(): Iter<string>;
-	resolveChildSegments(children: List<string>): Path;
+	resolveChildSegments(children: Iterable<string>): Path;
 	resolveChild(name: string): Path;
 	exists(): boolean;
 	createDirectories(): Option<IOError>;

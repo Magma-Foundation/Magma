@@ -13,7 +13,7 @@ public record ImmutableDivideState(List<String> segments, String buffer, int dep
                                    int index) implements DivideState {
     @Override
     public Iter<String> query() {
-        return this.segments.query();
+        return this.segments.iter();
     }
 
     @Override

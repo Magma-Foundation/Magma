@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -68,12 +69,12 @@
 	Targets: magma.app
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
-import { List } from "../../../../magma/api/collect/list/List";
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
 import { Compiler } from "../../../../magma/app/Compiler";
 export class TemplateType implements Type {
 	base: string;
-	args: List<string>;
-	constructor (base: string, args: List<string>) {
+	args: Iterable<string>;
+	constructor (base: string, args: Iterable<string>) {
 		this.base = base;
 		this.args = args;
 	}

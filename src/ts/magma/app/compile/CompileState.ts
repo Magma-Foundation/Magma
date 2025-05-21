@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -74,7 +75,7 @@ import { Source } from "../../../magma/app/io/Source";
 import { Option } from "../../../magma/api/option/Option";
 import { Location } from "../../../magma/app/Location";
 import { Definition } from "../../../magma/app/compile/define/Definition";
-import { List } from "../../../magma/api/collect/list/List";
+import { Iterable } from "../../../magma/api/collect/list/Iterable";
 import { Platform } from "../../../magma/app/Platform";
 export interface CompileState {
 	join(otherOutput: string): string;
@@ -90,7 +91,7 @@ export interface CompileState {
 	pushStructureName(name: string): CompileState;
 	enterDepth(): CompileState;
 	exitDepth(): CompileState;
-	defineAll(definitions: List<Definition>): CompileState;
+	defineAll(definitions: Iterable<Definition>): CompileState;
 	resolve(name: string): Option<Definition>;
 	clearImports(): CompileState;
 	clearOutput(): CompileState;

@@ -8,6 +8,7 @@ import magma.api.collect.Iters;
 import magma.api.collect.Joiner;
 import magma.api.collect.head.HeadedIter;
 import magma.api.collect.head.RangeHead;
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
 import magma.api.option.None;
@@ -50,12 +51,14 @@ public class Compiler {
     }
 
     public static Tuple2<CompileState, String> compileAll(CompileState state, String input, BiFunction<DivideState, Character, DivideState> folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, BiFunction<String, String, String> merger) {
-        var folded = Compiler.parseAll(state, input, folder, (CompileState state1, String s) -> new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s))).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
+        var folded = Compiler.parseAll(state, input, folder, (CompileState state1, String s) -> {
+            return new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s));
+        }).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
         return new Tuple2Impl<CompileState, String>(folded.left(), Compiler.generateAll(folded.right(), merger));
     }
 
-    public static String generateAll(List<String> elements, BiFunction<String, String, String> merger) {
-        return elements.query()
+    public static String generateAll(Iterable<String> elements, BiFunction<String, String, String> merger) {
+        return elements.iter()
                 .foldWithInitial("", merger);
     }
 
@@ -201,7 +204,7 @@ public class Compiler {
                 .flatMap((Tuple2<CompileState, List<Type>> compileStateListTuple2) -> Compiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent))).or(() -> Compiler.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, Lists.empty(), maybeImplementing, inputContent));
     }
 
-    public static Option<Tuple2<CompileState, String>> compileStructureWithParameters(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, List<Type> maybeSuperType, Option<Type> maybeImplementing, String inputContent) {
+    public static Option<Tuple2<CompileState, String>> compileStructureWithParameters(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Iterable<Type> maybeSuperType, Option<Type> maybeImplementing, String inputContent) {
         return Compiler.compileFirst(beforeContent, "(", (String rawName, String withParameters) -> Compiler.compileFirst(withParameters, ")", (String parametersString, String _) -> {
             var name = Strings.strip(rawName);
 
@@ -212,14 +215,14 @@ public class Compiler {
         })).or(() -> Compiler.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType));
     }
 
-    public static List<Definition> retainDefinitionsFromParameters(List<Parameter> parameters) {
-        return parameters.query()
+    public static Iterable<Definition> retainDefinitionsFromParameters(Iterable<Parameter> parameters) {
+        return parameters.iter()
                 .map((Parameter parameter) -> parameter.asDefinition())
                 .flatMap(Iters::fromOption)
                 .collect(new ListCollector<Definition>());
     }
 
-    public static Option<Tuple2<CompileState, String>> compileStructureWithTypeParams(CompileState state, String infix, String content, String beforeParams, List<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations, List<String> modifiers, List<Type> maybeSuperType) {
+    public static Option<Tuple2<CompileState, String>> compileStructureWithTypeParams(CompileState state, String infix, String content, String beforeParams, Iterable<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations, List<String> modifiers, Iterable<Type> maybeSuperType) {
         return Compiler.compileSuffix(Strings.strip(beforeParams), ">", (String withoutTypeParamEnd) -> Compiler.compileFirst(withoutTypeParamEnd, "<", (String name, String typeParamsString) -> {
             var typeParams = Compiler.divideValues(typeParamsString);
             return Compiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
@@ -232,11 +235,11 @@ public class Compiler {
             List<String> oldModifiers,
             String infix,
             String rawName,
-            List<String> typeParams,
-            List<Definition> parameters,
+            Iterable<String> typeParams,
+            Iterable<Definition> parameters,
             Option<Type> maybeImplementing,
             String content,
-            List<Type> maybeSuperType
+            Iterable<Type> maybeSuperType
     ) {
         var name = Strings.strip(rawName);
         if (!Compiler.isSymbol(name)) {
@@ -252,7 +255,7 @@ public class Compiler {
         var implementingString = Compiler.generateImplementing(maybeImplementing);
         var newModifiers = Compiler.modifyModifiers0(oldModifiers);
 
-        var joinedModifiers = newModifiers.query()
+        var joinedModifiers = newModifiers.iter()
                 .map((String value) -> value + " ")
                 .collect(Joiner.empty())
                 .orElse("");
@@ -263,7 +266,7 @@ public class Compiler {
                     .map((String generated) -> name + " <|.. " + generated + "\n")
                     .orElse("");
 
-            var joinedSuperTypes = maybeSuperType.query()
+            var joinedSuperTypes = maybeSuperType.iter()
                     .map((Type type) -> type.generateSimple())
                     .map((String generated) -> name + " <|-- " + generated + "\n")
                     .collect(new Joiner(""))
@@ -288,15 +291,15 @@ public class Compiler {
         }
     }
 
-    public static String joinExtends(List<Type> maybeSuperType) {
-        return maybeSuperType.query()
+    public static String joinExtends(Iterable<Type> maybeSuperType) {
+        return maybeSuperType.iter()
                 .map((Type type) -> type.generate())
                 .collect(new Joiner(", "))
                 .map((String inner) -> " extends " + inner)
                 .orElse("");
     }
 
-    public static List<String> modifyModifiers0(List<String> oldModifiers) {
+    public static Iterable<String> modifyModifiers0(List<String> oldModifiers) {
         if (oldModifiers.contains("public")) {
             return Lists.of("export");
         }
@@ -309,22 +312,22 @@ public class Compiler {
                 .orElse("");
     }
 
-    public static String joinTypeParams(List<String> typeParams) {
-        return typeParams.query()
+    public static String joinTypeParams(Iterable<String> typeParams) {
+        return typeParams.iter()
                 .collect(new Joiner(", "))
                 .map((String inner) -> "<" + inner + ">")
                 .orElse("");
     }
 
-    public static String generateConstructorFromRecordParameters(List<Definition> parameters) {
-        return parameters.query()
+    public static String generateConstructorFromRecordParameters(Iterable<Definition> parameters) {
+        return parameters.iter()
                 .map((Definition definition) -> definition.generate())
                 .collect(new Joiner(", "))
                 .map((String generatedParameters) -> Compiler.generateConstructorWithParameterString(parameters, generatedParameters))
                 .orElse("");
     }
 
-    public static String generateConstructorWithParameterString(List<Definition> parameters, String parametersString) {
+    public static String generateConstructorWithParameterString(Iterable<Definition> parameters, String parametersString) {
         var constructorAssignments = Compiler.generateConstructorAssignments(parameters);
 
         return "\n\tconstructor (" + parametersString + ") {" +
@@ -332,15 +335,15 @@ public class Compiler {
                 "\n\t}";
     }
 
-    public static String generateConstructorAssignments(List<Definition> parameters) {
-        return parameters.query()
+    public static String generateConstructorAssignments(Iterable<Definition> parameters) {
+        return parameters.iter()
                 .map((Definition definition) -> definition.toAssignment())
                 .collect(Joiner.empty())
                 .orElse("");
     }
 
-    public static String joinParameters(List<Definition> parameters) {
-        return parameters.query()
+    public static String joinParameters(Iterable<Definition> parameters) {
+        return parameters.iter()
                 .map((Definition definition) -> definition.generate())
                 .map((String generated) -> "\n\t" + generated + ";")
                 .collect(Joiner.empty())
@@ -359,7 +362,7 @@ public class Compiler {
     public static Tuple2<CompileState, String> compileOrPlaceholder(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>>> rules
+            Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>>> rules
     ) {
         return Compiler.or(state, input, rules).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, Compiler.generatePlaceholder(input)));
     }
@@ -367,9 +370,9 @@ public class Compiler {
     public static <T> Option<Tuple2<CompileState, T>> or(
             CompileState state,
             String input,
-            List<BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>>> rules
+            Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState,T>>>> rules
     ) {
-        return rules.query()
+        return rules.iter()
                 .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> Compiler.getApply(state, input, rule))
                 .flatMap(Iters::fromOption)
                 .next();
@@ -420,7 +423,7 @@ public class Compiler {
             var parameters = parametersTuple.right();
             var definitions = Compiler.retainDefinitionsFromParameters(parameters);
 
-            var joinedDefinitions = definitions.query()
+            var joinedDefinitions = definitions.iter()
                     .map((Definition definition) -> definition.generate())
                     .collect(new Joiner(", "))
                     .orElse("");
@@ -449,7 +452,9 @@ public class Compiler {
     }
 
     public static Tuple2<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
-        return Compiler.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> new Some<Tuple2<CompileState, Parameter>>(Compiler.parseParameterOrPlaceholder(state1, s)));
+        return Compiler.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> {
+            return new Some<Tuple2<CompileState, Parameter>>(Compiler.parseParameterOrPlaceholder(state1, s));
+        });
     }
 
     public static Tuple2<CompileState, String> compileFunctionStatements(CompileState state, String input) {
@@ -611,7 +616,7 @@ public class Compiler {
         var beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
         var last = divisions.findLast().orElse("");
 
-        var joined = beforeLast.query()
+        var joined = beforeLast.iter()
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
@@ -638,7 +643,9 @@ public class Compiler {
     }
 
     public static Option<Tuple2<CompileState, Value>> assembleInvokable(CompileState state, Caller oldCaller, String argsString) {
-        return Compiler.parseValues(state, argsString, (CompileState state1, String s) -> Compiler.parseArgument(state1, s)).flatMap((Tuple2<CompileState, List<Argument>> argsTuple) -> {
+        return Compiler.parseValues(state, argsString, (CompileState state1, String s) -> {
+            return Compiler.parseArgument(state1, s);
+        }).flatMap((Tuple2<CompileState, List<Argument>> argsTuple) -> {
             var argsState = argsTuple.left();
             var args = Compiler.retain(argsTuple.right(), (Argument argument) -> argument.toValue());
 
@@ -658,8 +665,8 @@ public class Compiler {
         }).orElse(oldCaller);
     }
 
-    public static <T, R> List<R> retain(List<T> args, Function<T, Option<R>> mapper) {
-        return args.query()
+    public static <T, R> Iterable<R> retain(Iterable<T> args, Function<T, Option<R>> mapper) {
+        return args.iter()
                 .map(mapper)
                 .flatMap(Iters::fromOption)
                 .collect(new ListCollector<R>());
@@ -733,11 +740,19 @@ public class Compiler {
     public static Option<Tuple2<CompileState, Value>> parseLambda(CompileState state, String input) {
         return Compiler.compileFirst(input, "->", (String beforeArrow, String afterArrow) -> {
             var strippedBeforeArrow = Strings.strip(beforeArrow);
-            return Compiler.compilePrefix(strippedBeforeArrow, "(", (String withoutStart) -> Compiler.compileSuffix(withoutStart, ")", (String withoutEnd) -> Compiler.parseValues(state, withoutEnd, (CompileState state1, String s) -> Compiler.parseParameter(state1, s)).flatMap((Tuple2<CompileState, List<Parameter>> paramNames) -> Compiler.compileLambdaWithParameterNames(paramNames.left(), Compiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow))));
+            return Compiler.compilePrefix(strippedBeforeArrow, "(", (String withoutStart) -> {
+                return Compiler.compileSuffix(withoutStart, ")", (String withoutEnd) -> {
+                    return Compiler.parseValues(state, withoutEnd, (CompileState state1, String s) -> {
+                        return Compiler.parseParameter(state1, s);
+                    }).flatMap((Tuple2<CompileState, List<Parameter>> paramNames) -> {
+                        return Compiler.compileLambdaWithParameterNames(paramNames.left(), Compiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow);
+                    });
+                });
+            });
         });
     }
 
-    public static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(CompileState state, List<Definition> paramNames, String afterArrow) {
+    public static Option<Tuple2<CompileState, Value>> compileLambdaWithParameterNames(CompileState state, Iterable<Definition> paramNames, String afterArrow) {
         var strippedAfterArrow = Strings.strip(afterArrow);
         return Compiler.compilePrefix(strippedAfterArrow, "{", (String withoutContentStart) -> Compiler.compileSuffix(withoutContentStart, "}", (String withoutContentEnd) -> {
             var statementsTuple = Compiler.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd);
@@ -749,7 +764,7 @@ public class Compiler {
         })).or(() -> Compiler.compileValue(state, strippedAfterArrow).flatMap((Tuple2<CompileState, String> tuple) -> Compiler.assembleLambda(tuple.left(), paramNames, tuple.right())));
     }
 
-    public static Option<Tuple2<CompileState, Value>> assembleLambda(CompileState exited, List<Definition> paramNames, String content) {
+    public static Option<Tuple2<CompileState, Value>> assembleLambda(CompileState exited, Iterable<Definition> paramNames, String content) {
         return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)));
     }
 
@@ -783,7 +798,7 @@ public class Compiler {
     public static Option<Tuple2<String, String>> selectFirst(List<String> divisions, String delimiter) {
         var first = divisions.findFirst().orElse("");
         var afterFirst = divisions.subList(1, divisions.size()).orElse(divisions)
-                .query()
+                .iter()
                 .collect(new Joiner(delimiter))
                 .orElse("");
 
@@ -885,7 +900,7 @@ public class Compiler {
             }
 
             return Compiler.getTuple2Option(state, state1, segment);
-        }).map((Tuple2<CompileState, List<String>> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse("")));
+        }).map((Tuple2<CompileState, List<String>> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().iter().collect(new Joiner("")).orElse("")));
     }
 
     public static Option<Tuple2<CompileState, String>> getTuple2Option(CompileState state, CompileState state1, String segment) {
@@ -926,7 +941,13 @@ public class Compiler {
                 .collect(new ListCollector<String>());
     }
 
-    public static Option<Tuple2<CompileState, Definition>> parseDefinitionWithAnnotations(CompileState state, List<String> annotations, String beforeType, String type, String name) {
+    public static Option<Tuple2<CompileState, Definition>> parseDefinitionWithAnnotations(
+            CompileState state,
+            List<String> annotations,
+            String beforeType,
+            String type,
+            String name
+    ) {
         return Compiler.compileSuffix(Strings.strip(beforeType), ">", (String withoutTypeParamEnd) -> Compiler.compileFirst(withoutTypeParamEnd, "<", (String beforeTypeParams, String typeParamsString) -> {
             var typeParams = Compiler.divideValues(typeParamsString);
             return Compiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, Compiler.parseModifiers(beforeTypeParams), type, name);
@@ -1111,7 +1132,7 @@ public class Compiler {
         ));
     }
 
-    public static String generateValueStrings(List<String> values) {
+    public static String generateValueStrings(Iterable<String> values) {
         return Compiler.generateAll(values, Compiler::mergeValues);
     }
 

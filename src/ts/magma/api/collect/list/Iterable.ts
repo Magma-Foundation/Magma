@@ -68,9 +68,10 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Value } from "../../../../magma/app/compile/value/Value";
-import { Option } from "../../../../magma/api/option/Option";
-export interface Caller {
-	generate(): string;
-	findChild(): Option<Value>;
+import { Iter } from "../../../../magma/api/collect/Iter";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+export interface Iterable<T> {
+	iter(): Iter<T>;
+	iterWithIndices(): Iter<Tuple2<number, T>>;
+	iterReversed(): Iter<T>;
 }

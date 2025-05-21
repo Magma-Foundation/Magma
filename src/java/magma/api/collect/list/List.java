@@ -1,13 +1,9 @@
 package magma.api.collect.list;
 
-import magma.api.Tuple2;
-import magma.api.collect.Iter;
 import magma.api.option.Option;
 
-public interface List<T> {
+public interface List<T> extends Iterable<T> {
     List<T> addLast(T element);
-
-    Iter<T> query();
 
     int size();
 
@@ -19,13 +15,9 @@ public interface List<T> {
 
     Option<T> find(int index);
 
-    Iter<Tuple2<Integer,T>> queryWithIndices();
-
-    List<T> addAll(List<T> others);
+    List<T> addAll(Iterable<T> others);
 
     boolean contains(T element);
-
-    Iter<T> queryReversed();
 
     List<T> addFirst(T element);
 

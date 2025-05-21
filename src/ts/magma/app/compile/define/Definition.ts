@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -68,6 +69,7 @@
 	Targets: magma.app
 ]*/
 import { List } from "../../../../magma/api/collect/list/List";
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -78,10 +80,10 @@ import { Strings } from "../../../../magma/api/text/Strings";
 export class Definition {
 	annotations: List<string>;
 	modifiers: List<string>;
-	typeParams: List<string>;
+	typeParams: Iterable<string>;
 	type: Type;
 	name: string;
-	constructor (annotations: List<string>, modifiers: List<string>, typeParams: List<string>, type: Type, name: string) {
+	constructor (annotations: List<string>, modifiers: List<string>, typeParams: Iterable<string>, type: Type, name: string) {
 		this.annotations = annotations;
 		this.modifiers = modifiers;
 		this.typeParams = typeParams;
@@ -102,7 +104,7 @@ export class Definition {
 	}
 	generateWithAfterName(afterName: string): string {
 		let joinedTypeParams = this.joinTypeParams()/*unknown*/;
-		let joinedModifiers = this.modifiers.query().map((value: string) => value + " "/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		let joinedModifiers = this.modifiers.iter().map((value: string) => value + " "/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 		return joinedModifiers + this.type.generateBeforeName() + this.name + joinedTypeParams + afterName + this.generateType()/*unknown*/;
 	}
 	generateType(): string {

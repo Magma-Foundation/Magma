@@ -6,6 +6,7 @@ import magma.api.Tuple2Impl;
 import magma.api.collect.Iter;
 import magma.api.collect.head.HeadedIter;
 import magma.api.collect.head.RangeHead;
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -23,8 +24,8 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public Iter<T> query() {
-        return this.queryWithIndices().map((Tuple2<Integer, T> integerTTuple) -> integerTTuple.right());
+    public Iter<T> iter() {
+        return this.iterWithIndices().map((Tuple2<Integer, T> integerTTuple) -> integerTTuple.right());
     }
 
     @Override
@@ -41,14 +42,14 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public Iter<Tuple2<Integer, T>> queryWithIndices() {
+    public Iter<Tuple2<Integer, T>> iterWithIndices() {
         var query = new HeadedIter<Integer>(new RangeHead(this.list.size()));
         return query.map((Integer index) -> new Tuple2Impl<Integer, T>(index, this.list.get(index)));
     }
 
     @Override
-    public List<T> addAll(List<T> others) {
-        return others.query().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.addLast(element));
+    public List<T> addAll(Iterable<T> others) {
+        return others.iter().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.addLast(element));
     }
 
     private List<T> toList() {
@@ -61,7 +62,7 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     }
 
     @Override
-    public Iter<T> queryReversed() {
+    public Iter<T> iterReversed() {
         var query = new HeadedIter<Integer>(new RangeHead(this.list.size()));
         return query.map((Integer index) -> this.list.size() - index - 1).map((Integer index1) -> this.list.get(index1));
     }

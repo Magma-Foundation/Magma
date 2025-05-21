@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 

@@ -37,8 +37,11 @@ class Iters {
 class Joiner {
 }
 Joiner <|.. Collector
+interface Iterable<T> {
+}
 interface List<T> {
 }
+List <|-- Iterable
 class ListCollector<T> {
 }
 ListCollector <|.. Collector
@@ -207,16 +210,17 @@ Joiner --> Option
 Joiner --> Collector
 Joiner --> None
 Joiner --> Some
-List --> Iter
+Iterable --> Iter
+Iterable --> Tuple2
+List --> Iterable
 List --> Option
-List --> Tuple2
 ListCollector --> List
 ListCollector --> Collector
 ListCollector --> Lists
 Path --> IOError
 Path --> Option
 Path --> Result
-Path --> List
+Path --> Iterable
 Path --> Iter
 None --> Option
 None --> Tuple2
@@ -241,7 +245,7 @@ CompileState --> Source
 CompileState --> Option
 CompileState --> Location
 CompileState --> Definition
-CompileState --> List
+CompileState --> Iterable
 CompileState --> Platform
 ConstructionCaller --> Caller
 ConstructionCaller --> Value
@@ -249,6 +253,7 @@ ConstructionCaller --> Option
 ConstructionCaller --> None
 ConstructorHeader --> MethodHeader
 Definition --> List
+Definition --> Iterable
 Definition --> Type
 Definition --> Option
 Definition --> Some
@@ -275,6 +280,7 @@ ImmutableCompileState --> Strings
 ImmutableCompileState --> Location
 ImmutableCompileState --> Lists
 ImmutableCompileState --> Some
+ImmutableCompileState --> Iterable
 ImmutableDivideState --> DivideState
 ImmutableDivideState --> List
 ImmutableDivideState --> Iter
@@ -284,7 +290,7 @@ ImmutableDivideState --> Strings
 ImmutableDivideState --> None
 ImmutableDivideState --> Some
 ImmutableDivideState --> Tuple2Impl
-Import --> List
+Import --> Iterable
 Import --> Joiner
 Import --> Strings
 Placeholder --> Compiler
@@ -308,12 +314,12 @@ Whitespace --> Definition
 Whitespace --> Option
 Whitespace --> None
 FunctionType --> Type
-FunctionType --> List
+FunctionType --> Iterable
 FunctionType --> Tuple2
 FunctionType --> Joiner
 PrimitiveType --> Type
 TemplateType --> Type
-TemplateType --> List
+TemplateType --> Iterable
 TemplateType --> Compiler
 VariadicType --> Type
 AccessValue --> Value
@@ -329,7 +335,7 @@ Caller --> Value
 Caller --> Option
 Invokable --> Value
 Invokable --> Caller
-Invokable --> List
+Invokable --> Iterable
 Invokable --> Joiner
 Invokable --> Option
 Invokable --> Some
@@ -339,7 +345,7 @@ Invokable --> CompileState
 Invokable --> PrimitiveType
 Lambda --> Value
 Lambda --> Definition
-Lambda --> List
+Lambda --> Iterable
 Lambda --> Joiner
 Lambda --> Option
 Lambda --> Some
@@ -380,6 +386,7 @@ Compiler --> Some
 Compiler --> List
 Compiler --> Tuple2Impl
 Compiler --> Lists
+Compiler --> Iterable
 Compiler --> Option
 Compiler --> Iter
 Compiler --> None
@@ -435,7 +442,7 @@ Main --> Result
 Main --> Iters
 Main --> Platform
 Main --> Source
-Main --> List
+Main --> Iterable
 Main --> Dependency
 Main --> Joiner
 Main --> Err
@@ -448,7 +455,7 @@ Main --> Location
 Main --> None
 Sources --> Path
 Sources --> Source
-Sources --> List
+Sources --> Iterable
 Sources --> IOError
 Sources --> Result
 Sources --> PathSource

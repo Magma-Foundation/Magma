@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -69,7 +70,7 @@
 ]*/
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Caller } from "../../../../magma/app/compile/value/Caller";
-import { List } from "../../../../magma/api/collect/list/List";
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
@@ -79,8 +80,8 @@ import { CompileState } from "../../../../magma/app/compile/CompileState";
 import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
 export class Invokable implements Value {
 	caller: Caller;
-	args: List<Value>;
-	constructor (caller: Caller, args: List<Value>) {
+	args: Iterable<Value>;
+	constructor (caller: Caller, args: Iterable<Value>) {
 		this.caller = caller;
 		this.args = args;
 	}
@@ -89,7 +90,7 @@ export class Invokable implements Value {
 		return this.caller.generate() + "(" + joinedArguments + ")"/*unknown*/;
 	}
 	joinArgs(): string {
-		return this.args.query().map((value: Value) => value.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		return this.args.iter().map((value: Value) => value.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 	}
 	toValue(): Option<Value> {
 		return new Some<Value>(this)/*unknown*/;

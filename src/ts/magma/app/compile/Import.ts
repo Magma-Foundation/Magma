@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -67,18 +68,18 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { List } from "../../../magma/api/collect/list/List";
+import { Iterable } from "../../../magma/api/collect/list/Iterable";
 import { Joiner } from "../../../magma/api/collect/Joiner";
 import { Strings } from "../../../magma/api/text/Strings";
 export class Import {
-	namespace: List<string>;
+	namespace: Iterable<string>;
 	child: string;
-	constructor (namespace: List<string>, child: string) {
+	constructor (namespace: Iterable<string>, child: string) {
 		this.namespace = namespace;
 		this.child = child;
 	}
 	generate(): string {
-		let joinedNamespace = this.namespace.query().collect(new Joiner("/")).orElse("")/*unknown*/;
+		let joinedNamespace = this.namespace.iter().collect(new Joiner("/")).orElse("")/*unknown*/;
 		return "import { " + this.child + " } from \"" + joinedNamespace + "\";\n"/*unknown*/;
 	}
 	hasSameChild(child: string): boolean {

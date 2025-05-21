@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -81,6 +82,7 @@ import { Strings } from "../../../magma/api/text/Strings";
 import { Location } from "../../../magma/app/Location";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { Some } from "../../../magma/api/option/Some";
+import { Iterable } from "../../../magma/api/collect/list/Iterable";
 export class ImmutableCompileState implements CompileState {
 	imports: List<Import>;
 	output: string;
@@ -107,7 +109,7 @@ export class ImmutableCompileState implements CompileState {
 		return joinedImports + this.output + otherOutput/*unknown*/;
 	}
 	querySources(): Iter<Source> {
-		return this.sources.query()/*unknown*/;
+		return this.sources.iter()/*unknown*/;
 	}
 	createIndent(): string {
 		return "\n" + "\t".repeat(this.depth)/*unknown*/;
@@ -146,7 +148,7 @@ export class ImmutableCompileState implements CompileState {
 		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
 	}
 	doesImportExistAlready(requestedChild: string): boolean {
-		return this.imports.query().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
+		return this.imports.iter().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
 	}
 	withLocation(location: Location): CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(location), this.sources, this.platform, this.dependencies)/*unknown*/;
@@ -163,11 +165,11 @@ export class ImmutableCompileState implements CompileState {
 	exitDepth(): CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
 	}
-	defineAll(definitions: List<Definition>): CompileState {
+	defineAll(definitions: Iterable<Definition>): CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
 	}
 	resolve(name: string): Option<Definition> {
-		return this.definitions.queryReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+		return this.definitions.iterReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
 	}
 	clearImports(): CompileState {
 		return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
@@ -179,10 +181,10 @@ export class ImmutableCompileState implements CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform, this.dependencies)/*unknown*/;
 	}
 	findSource(name: string): Option<Source> {
-		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
+		return this.sources.iter().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
 	}
 	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
+		if (this.structureNames.iter().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
 			return this/*unknown*/;
 		}
 		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.createLocation())/*unknown*/).orElse(this)/*unknown*/;
@@ -200,9 +202,9 @@ export class ImmutableCompileState implements CompileState {
 		return this.output/*unknown*/;
 	}
 	queryImports(): Iter<Import> {
-		return this.imports.query()/*unknown*/;
+		return this.imports.iter()/*unknown*/;
 	}
 	queryDependencies(): Iter<Dependency> {
-		return this.dependencies.query()/*unknown*/;
+		return this.dependencies.iter()/*unknown*/;
 	}
 }

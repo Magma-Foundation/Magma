@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -74,6 +75,7 @@ import { Some } from "../../magma/api/option/Some";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { Option } from "../../magma/api/option/Option";
 import { Iter } from "../../magma/api/collect/Iter";
 import { None } from "../../magma/api/option/None";
@@ -114,11 +116,13 @@ export class Compiler {
 		return Compiler.compileAll(state, input, Compiler.foldStatements, mapper, Compiler.mergeStatements)/*unknown*/;
 	}
 	static compileAll(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple2<CompileState, string> {
-		let folded = Compiler.parseAll(state, input, folder, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
+		let folded = Compiler.parseAll(state, input, folder, (state1: CompileState, s: string) => {
+			return new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/;
+		}).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(folded.left(), Compiler.generateAll(folded.right(), merger))/*unknown*/;
 	}
-	static generateAll(elements: List<string>, merger: (arg0 : string, arg1 : string) => string): string {
-		return elements.query().foldWithInitial("", merger)/*unknown*/;
+	static generateAll(elements: Iterable<string>, merger: (arg0 : string, arg1 : string) => string): string {
+		return elements.iter().foldWithInitial("", merger)/*unknown*/;
 	}
 	static parseAll<T>(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 		return Compiler.divide(input, folder).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
@@ -220,7 +224,7 @@ export class Compiler {
 	static compileStructureWithExtends(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
 		return Compiler.compileFirst(beforeContent, " extends ", (beforeExtends: string, afterExtends: string) => Compiler.parseValues(state, afterExtends, (inner0: CompileState, inner1: string) => Compiler.parseType(inner0, inner1)/*unknown*/).flatMap((compileStateListTuple2: Tuple2<CompileState, List<Type>>) => Compiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent)/*unknown*/)/*unknown*/).or(() => Compiler.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, Lists.empty(), maybeImplementing, inputContent)/*unknown*/)/*unknown*/;
 	}
-	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeSuperType: List<Type>, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
+	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeSuperType: Iterable<Type>, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
 		return Compiler.compileFirst(beforeContent, "(", (rawName: string, withParameters: string) => Compiler.compileFirst(withParameters, ")", (parametersString: string, _: string) => {
 			let name = Strings.strip(rawName)/*unknown*/;
 			let parametersTuple = Compiler.parseParameters(state, parametersString)/*unknown*/;
@@ -228,16 +232,16 @@ export class Compiler {
 			return Compiler.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType)/*unknown*/;
 		})/*unknown*/).or(() => Compiler.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType)/*unknown*/)/*unknown*/;
 	}
-	static retainDefinitionsFromParameters(parameters: List<Parameter>): List<Definition> {
-		return parameters.query().map((parameter: Parameter) => parameter.asDefinition()/*unknown*/).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
+	static retainDefinitionsFromParameters(parameters: Iterable<Parameter>): Iterable<Definition> {
+		return parameters.iter().map((parameter: Parameter) => parameter.asDefinition()/*unknown*/).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
 	}
-	static compileStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: List<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>, maybeSuperType: List<Type>): Option<Tuple2<CompileState, string>> {
+	static compileStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: Iterable<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>, maybeSuperType: Iterable<Type>): Option<Tuple2<CompileState, string>> {
 		return Compiler.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => Compiler.compileFirst(withoutTypeParamEnd, "<", (name: string, typeParamsString: string) => {
 			let typeParams = Compiler.divideValues(typeParamsString)/*unknown*/;
 			return Compiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType)/*unknown*/;
 		})/*unknown*/).or(() => Compiler.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType)/*unknown*/)/*unknown*/;
 	}
-	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, rawName: string, typeParams: List<string>, parameters: List<Definition>, maybeImplementing: Option<Type>, content: string, maybeSuperType: List<Type>): Option<Tuple2<CompileState, string>> {
+	static assembleStructure(state: CompileState, annotations: List<string>, oldModifiers: List<string>, infix: string, rawName: string, typeParams: Iterable<string>, parameters: Iterable<Definition>, maybeImplementing: Option<Type>, content: string, maybeSuperType: Iterable<Type>): Option<Tuple2<CompileState, string>> {
 		let name = Strings.strip(rawName)/*unknown*/;
 		if (!Compiler/*unknown*/.isSymbol(name)/*unknown*/){
 			return new None<Tuple2<CompileState, string>>()/*unknown*/;
@@ -249,10 +253,10 @@ export class Compiler {
 		let joinedTypeParams = Compiler.joinTypeParams(typeParams)/*unknown*/;
 		let implementingString = Compiler.generateImplementing(maybeImplementing)/*unknown*/;
 		let newModifiers = Compiler.modifyModifiers0(oldModifiers)/*unknown*/;
-		let joinedModifiers = newModifiers.query().map((value: string) => value + " "/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
+		let joinedModifiers = newModifiers.iter().map((value: string) => value + " "/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
 		if (outputContentState.hasPlatform(Platform.PlantUML)/*unknown*/){
 			let joinedImplementing = maybeImplementing.map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|.. " + generated + "\n"/*unknown*/).orElse("")/*unknown*/;
-			let joinedSuperTypes = maybeSuperType.query().map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|-- " + generated + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+			let joinedSuperTypes = maybeSuperType.iter().map((type: Type) => type.generateSimple()/*unknown*/).map((generated: string) => name + " <|-- " + generated + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
 			let generated = infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes + joinedImplementing/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""))/*unknown*/;
 		}
@@ -268,10 +272,10 @@ export class Compiler {
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(outputContentState.append(generated), ""))/*unknown*/;
 		}
 	}
-	static joinExtends(maybeSuperType: List<Type>): string {
-		return maybeSuperType.query().map((type: Type) => type.generate()/*unknown*/).collect(new Joiner(", ")).map((inner: string) => " extends " + inner/*unknown*/).orElse("")/*unknown*/;
+	static joinExtends(maybeSuperType: Iterable<Type>): string {
+		return maybeSuperType.iter().map((type: Type) => type.generate()/*unknown*/).collect(new Joiner(", ")).map((inner: string) => " extends " + inner/*unknown*/).orElse("")/*unknown*/;
 	}
-	static modifyModifiers0(oldModifiers: List<string>): List<string> {
+	static modifyModifiers0(oldModifiers: List<string>): Iterable<string> {
 		if (oldModifiers.contains("public")/*unknown*/){
 			return Lists.of("export")/*unknown*/;
 		}
@@ -280,21 +284,21 @@ export class Compiler {
 	static generateImplementing(maybeImplementing: Option<Type>): string {
 		return maybeImplementing.map((type: Type) => type.generate()/*unknown*/).map((inner: string) => " implements " + inner/*unknown*/).orElse("")/*unknown*/;
 	}
-	static joinTypeParams(typeParams: List<string>): string {
-		return typeParams.query().collect(new Joiner(", ")).map((inner: string) => "<" + inner + ">"/*unknown*/).orElse("")/*unknown*/;
+	static joinTypeParams(typeParams: Iterable<string>): string {
+		return typeParams.iter().collect(new Joiner(", ")).map((inner: string) => "<" + inner + ">"/*unknown*/).orElse("")/*unknown*/;
 	}
-	static generateConstructorFromRecordParameters(parameters: List<Definition>): string {
-		return parameters.query().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).map((generatedParameters: string) => Compiler.generateConstructorWithParameterString(parameters, generatedParameters)/*unknown*/).orElse("")/*unknown*/;
+	static generateConstructorFromRecordParameters(parameters: Iterable<Definition>): string {
+		return parameters.iter().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).map((generatedParameters: string) => Compiler.generateConstructorWithParameterString(parameters, generatedParameters)/*unknown*/).orElse("")/*unknown*/;
 	}
-	static generateConstructorWithParameterString(parameters: List<Definition>, parametersString: string): string {
+	static generateConstructorWithParameterString(parameters: Iterable<Definition>, parametersString: string): string {
 		let constructorAssignments = Compiler.generateConstructorAssignments(parameters)/*unknown*/;
 		return "\n\tconstructor (" + parametersString + ") {" + constructorAssignments + "\n\t}"/*unknown*/;
 	}
-	static generateConstructorAssignments(parameters: List<Definition>): string {
-		return parameters.query().map((definition: Definition) => definition.toAssignment()/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
+	static generateConstructorAssignments(parameters: Iterable<Definition>): string {
+		return parameters.iter().map((definition: Definition) => definition.toAssignment()/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
 	}
-	static joinParameters(parameters: List<Definition>): string {
-		return parameters.query().map((definition: Definition) => definition.generate()/*unknown*/).map((generated: string) => "\n\t" + generated + ";"/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
+	static joinParameters(parameters: Iterable<Definition>): string {
+		return parameters.iter().map((definition: Definition) => definition.generate()/*unknown*/).map((generated: string) => "\n\t" + generated + ";"/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
 	}
 	static compileNamespaced(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		let stripped = Strings.strip(input)/*unknown*/;
@@ -303,11 +307,11 @@ export class Compiler {
 		}
 		return new None<Tuple2<CompileState, string>>()/*unknown*/;
 	}
-	static compileOrPlaceholder(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>>>): Tuple2<CompileState, string> {
+	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>>>): Tuple2<CompileState, string> {
 		return Compiler.or(state, input, rules).orElseGet(() => new Tuple2Impl<CompileState, string>(state, Compiler.generatePlaceholder(input))/*unknown*/)/*unknown*/;
 	}
-	static or<T>(state: CompileState, input: string, rules: List<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>>): Option<Tuple2<CompileState, T>> {
-		return rules.query().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>) => Compiler.getApply(state, input, rule)/*unknown*/).flatMap(Iters.fromOption).next()/*unknown*/;
+	static or<T>(state: CompileState, input: string, rules: Iterable<(arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>>): Option<Tuple2<CompileState, T>> {
+		return rules.iter().map((rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>) => Compiler.getApply(state, input, rule)/*unknown*/).flatMap(Iters.fromOption).next()/*unknown*/;
 	}
 	static getApply<T>(state: CompileState, input: string, rule: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
 		return rule(state, input)/*unknown*/;
@@ -337,7 +341,7 @@ export class Compiler {
 			let parametersState = parametersTuple.left()/*unknown*/;
 			let parameters = parametersTuple.right()/*unknown*/;
 			let definitions = Compiler.retainDefinitionsFromParameters(parameters)/*unknown*/;
-			let joinedDefinitions = definitions.query().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+			let joinedDefinitions = definitions.iter().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 			if (header.hasAnnotation("Actual")/*unknown*/){
 				let headerGenerated = header.removeModifier("static").generateWithAfterName("(" + joinedDefinitions + ")")/*unknown*/;
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"))/*unknown*/;
@@ -355,7 +359,9 @@ export class Compiler {
 		})/*unknown*/;
 	}
 	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
-		return Compiler.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, Parameter>>(Compiler.parseParameterOrPlaceholder(state1, s))/*unknown*/)/*unknown*/;
+		return Compiler.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
+			return new Some<Tuple2<CompileState, Parameter>>(Compiler.parseParameterOrPlaceholder(state1, s))/*unknown*/;
+		})/*unknown*/;
 	}
 	static compileFunctionStatements(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return Compiler.compileStatements(state, input, Compiler.compileFunctionSegment)/*unknown*/;
@@ -470,7 +476,7 @@ export class Compiler {
 	static selectLast(divisions: List<string>, delimiter: string): Option<Tuple2<string, string>> {
 		let beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions)/*unknown*/;
 		let last = divisions.findLast().orElse("")/*unknown*/;
-		let joined = beforeLast.query().collect(new Joiner(delimiter)).orElse("")/*unknown*/;
+		let joined = beforeLast.iter().collect(new Joiner(delimiter)).orElse("")/*unknown*/;
 		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(joined, last))/*unknown*/;
 	}
 	static foldInvocationStarts(state: DivideState, c: string): DivideState {
@@ -490,7 +496,9 @@ export class Compiler {
 		return appended/*unknown*/;
 	}
 	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple2<CompileState, Value>> {
-		return Compiler.parseValues(state, argsString, (state1: CompileState, s: string) => Compiler.parseArgument(state1, s)/*unknown*/).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
+		return Compiler.parseValues(state, argsString, (state1: CompileState, s: string) => {
+			return Compiler.parseArgument(state1, s)/*unknown*/;
+		}).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
 			let argsState = argsTuple.left()/*unknown*/;
 			let args = Compiler.retain(argsTuple.right(), (argument: Argument) => argument.toValue()/*unknown*/)/*unknown*/;
 			let newCaller = Compiler.transformCaller(argsState, oldCaller)/*unknown*/;
@@ -506,8 +514,8 @@ export class Compiler {
 			return new None<Caller>()/*unknown*/;
 		}).orElse(oldCaller)/*unknown*/;
 	}
-	static retain<T, R>(args: List<T>, mapper: (arg0 : T) => Option<R>): List<R> {
-		return args.query().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;
+	static retain<T, R>(args: Iterable<T>, mapper: (arg0 : T) => Option<R>): Iterable<R> {
+		return args.iter().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;
 	}
 	static parseArgument(state1: CompileState, input: string): Option<Tuple2<CompileState, Argument>> {
 		return Compiler.parseValue(state1, input).map((tuple: Tuple2<CompileState, Value>) => new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right())/*unknown*/)/*unknown*/;
@@ -545,10 +553,18 @@ export class Compiler {
 	static parseLambda(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return Compiler.compileFirst(input, "->", (beforeArrow: string, afterArrow: string) => {
 			let strippedBeforeArrow = Strings.strip(beforeArrow)/*unknown*/;
-			return Compiler.compilePrefix(strippedBeforeArrow, "(", (withoutStart: string) => Compiler.compileSuffix(withoutStart, ")", (withoutEnd: string) => Compiler.parseValues(state, withoutEnd, (state1: CompileState, s: string) => Compiler.parseParameter(state1, s)/*unknown*/).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => Compiler.compileLambdaWithParameterNames(paramNames.left(), Compiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow)/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*/;
+			return Compiler.compilePrefix(strippedBeforeArrow, "(", (withoutStart: string) => {
+				return Compiler.compileSuffix(withoutStart, ")", (withoutEnd: string) => {
+					return Compiler.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
+						return Compiler.parseParameter(state1, s)/*unknown*/;
+					}).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => {
+						return Compiler.compileLambdaWithParameterNames(paramNames.left(), Compiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow)/*unknown*/;
+					})/*unknown*/;
+				})/*unknown*/;
+			})/*unknown*/;
 		})/*unknown*/;
 	}
-	static compileLambdaWithParameterNames(state: CompileState, paramNames: List<Definition>, afterArrow: string): Option<Tuple2<CompileState, Value>> {
+	static compileLambdaWithParameterNames(state: CompileState, paramNames: Iterable<Definition>, afterArrow: string): Option<Tuple2<CompileState, Value>> {
 		let strippedAfterArrow = Strings.strip(afterArrow)/*unknown*/;
 		return Compiler.compilePrefix(strippedAfterArrow, "{", (withoutContentStart: string) => Compiler.compileSuffix(withoutContentStart, "}", (withoutContentEnd: string) => {
 			let statementsTuple = Compiler.compileFunctionStatements(state.enterDepth().defineAll(paramNames), withoutContentEnd)/*unknown*/;
@@ -558,7 +574,7 @@ export class Compiler {
 			return Compiler.assembleLambda(exited, paramNames, "{" + statements + exited.createIndent() + "}")/*unknown*/;
 		})/*unknown*/).or(() => Compiler.compileValue(state, strippedAfterArrow).flatMap((tuple: Tuple2<CompileState, string>) => Compiler.assembleLambda(tuple.left(), paramNames, tuple.right())/*unknown*/)/*unknown*/)/*unknown*/;
 	}
-	static assembleLambda(exited: CompileState, paramNames: List<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
+	static assembleLambda(exited: CompileState, paramNames: Iterable<Definition>, content: string): Option<Tuple2<CompileState, Value>> {
 		return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(exited, new Lambda(paramNames, content)))/*unknown*/;
 	}
 	static createOperatorRule(infix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
@@ -586,7 +602,7 @@ export class Compiler {
 	}
 	static selectFirst(divisions: List<string>, delimiter: string): Option<Tuple2<string, string>> {
 		let first = divisions.findFirst().orElse("")/*unknown*/;
-		let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).query().collect(new Joiner(delimiter)).orElse("")/*unknown*/;
+		let afterFirst = divisions.subList(1, divisions.size()).orElse(divisions).iter().collect(new Joiner(delimiter)).orElse("")/*unknown*/;
 		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(first, afterFirst))/*unknown*/;
 	}
 	static foldOperator(infix: string): (arg0 : DivideState, arg1 : string) => DivideState {
@@ -663,7 +679,7 @@ export class Compiler {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state1, "\n\t static " + stripped + " = \"" + stripped + "\";"))/*unknown*/;
 			}
 			return Compiler.getTuple2Option(state, state1, segment)/*unknown*/;
-		}).map((tuple: Tuple2<CompileState, List<string>>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().query().collect(new Joiner("")).orElse(""))/*unknown*/)/*unknown*/;
+		}).map((tuple: Tuple2<CompileState, List<string>>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().iter().collect(new Joiner("")).orElse(""))/*unknown*/)/*unknown*/;
 	}
 	static getTuple2Option(state: CompileState, state1: CompileState, segment: string): Option<Tuple2<CompileState, string>> {
 		return Compiler.parseInvokable(state1, segment).flatMap((tuple: Tuple2<CompileState, Value>) => {
@@ -817,7 +833,7 @@ export class Compiler {
 	static compileTypeArgument(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return Compiler.or(state, input, Lists.of((state2: CompileState, input1: string) => Compiler.compileWhitespace(state2, input1)/*unknown*/, (state1: CompileState, type: string) => Compiler.compileType(state1, type)/*unknown*/))/*unknown*/;
 	}
-	static generateValueStrings(values: List<string>): string {
+	static generateValueStrings(values: Iterable<string>): string {
 		return Compiler.generateAll(values, Compiler.mergeValues)/*unknown*/;
 	}
 	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Tuple2<CompileState, List<T>> {

@@ -1,12 +1,12 @@
 package magma.app.compile;
 
 import magma.api.collect.Joiner;
-import magma.api.collect.list.List;
+import magma.api.collect.list.Iterable;
 import magma.api.text.Strings;
 
-public record Import(List<String> namespace, String child) {
+public record Import(Iterable<String> namespace, String child) {
     public String generate() {
-        var joinedNamespace = this.namespace.query()
+        var joinedNamespace = this.namespace.iter()
                 .collect(new Joiner("/"))
                 .orElse("");
 

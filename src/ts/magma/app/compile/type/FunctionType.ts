@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -68,18 +69,18 @@
 	Targets: magma.app
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
-import { List } from "../../../../magma/api/collect/list/List";
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
 export class FunctionType implements Type {
-	args: List<string>;
+	args: Iterable<string>;
 	returns: string;
-	constructor (args: List<string>, returns: string) {
+	constructor (args: Iterable<string>, returns: string) {
 		this.args = args;
 		this.returns = returns;
 	}
 	generate(): string {
-		let joinedArguments = this.args.queryWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
+		let joinedArguments = this.args.iterWithIndices().map((tuple: Tuple2<number, string>) => "arg" + tuple.left() + " : " + tuple.right()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		return "(" + joinedArguments + ") => " + this.returns/*unknown*/;
 	}
 	isFunctional(): boolean {

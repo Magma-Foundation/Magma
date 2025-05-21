@@ -1,7 +1,7 @@
 package magma.app.compile;
 
 import magma.api.collect.Iter;
-import magma.api.collect.list.List;
+import magma.api.collect.list.Iterable;
 import magma.api.option.Option;
 import magma.app.Location;
 import magma.app.Platform;
@@ -35,7 +35,7 @@ public interface CompileState {
 
     CompileState exitDepth();
 
-    CompileState defineAll(List<Definition> definitions);
+    CompileState defineAll(Iterable<Definition> definitions);
 
     Option<Definition> resolve(String name);
 

@@ -3,6 +3,7 @@ package jvm.api.io;
 import magma.annotate.Actual;
 import magma.annotate.Namespace;
 import jvm.api.collect.list.JVMList;
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.head.HeadedIter;
@@ -66,11 +67,11 @@ public final class Files {
         }
 
         @Override
-        public Result<List<Path>, IOError> walk() {
+        public Result<Iterable<Path>, IOError> walk() {
             try (Stream<java.nio.file.Path> stream = java.nio.file.Files.walk(this.path)) {
-                return new Ok<List<Path>, IOError>(new JVMList<Path>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
+                return new Ok<Iterable<Path>, IOError>(new JVMList<Path>(stream.<magma.api.io.Path>map(JVMPath::new).toList()));
             } catch (IOException e) {
-                return new Err<List<Path>, IOError>(new JVMPath.JVMIOError(e));
+                return new Err<Iterable<Path>, IOError>(new JVMPath.JVMIOError(e));
             }
         }
 
@@ -101,8 +102,8 @@ public final class Files {
         }
 
         @Override
-        public Path resolveChildSegments(List<String> children) {
-            return children.query().foldWithInitial(this, Path::resolveChild);
+        public Path resolveChildSegments(Iterable<String> children) {
+            return children.iter().foldWithInitial(this, Path::resolveChild);
         }
 
         @Override

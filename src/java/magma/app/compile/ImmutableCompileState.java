@@ -3,6 +3,7 @@ package magma.app.compile;
 import jvm.api.collect.list.Lists;
 import magma.api.collect.Iter;
 import magma.api.collect.Joiner;
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -34,7 +35,7 @@ public record ImmutableCompileState(
 
     @Override
     public Iter<Source> querySources() {
-        return this.sources.query();
+        return this.sources.iter();
     }
 
     @Override
@@ -103,7 +104,7 @@ public record ImmutableCompileState(
 
     private boolean doesImportExistAlready(String requestedChild) {
         return this.imports
-                .query()
+                .iter()
                 .filter((Import node) -> node.hasSameChild(requestedChild))
                 .next()
                 .isPresent();
@@ -135,13 +136,13 @@ public record ImmutableCompileState(
     }
 
     @Override
-    public CompileState defineAll(List<Definition> definitions) {
+    public CompileState defineAll(Iterable<Definition> definitions) {
         return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeLocation, this.sources, this.platform, this.dependencies);
     }
 
     @Override
     public Option<Definition> resolve(String name) {
-        return this.definitions.queryReversed()
+        return this.definitions.iterReversed()
                 .filter((Definition definition) -> definition.isNamed(name))
                 .next();
     }
@@ -163,14 +164,14 @@ public record ImmutableCompileState(
 
     @Override
     public Option<Source> findSource(String name) {
-        return this.sources.query()
+        return this.sources.iter()
                 .filter((Source source) -> Strings.equalsTo(source.createLocation().name(), name))
                 .next();
     }
 
     @Override
     public CompileState addResolvedImportFromCache(String base) {
-        if (this.structureNames.query().anyMatch((String inner) -> Strings.equalsTo(inner, base))) {
+        if (this.structureNames.iter().anyMatch((String inner) -> Strings.equalsTo(inner, base))) {
             return this;
         }
 
@@ -201,11 +202,11 @@ public record ImmutableCompileState(
 
     @Override
     public Iter<Import> queryImports() {
-        return this.imports.query();
+        return this.imports.iter();
     }
 
     @Override
     public Iter<Dependency> queryDependencies() {
-        return this.dependencies.query();
+        return this.dependencies.iter();
     }
 }

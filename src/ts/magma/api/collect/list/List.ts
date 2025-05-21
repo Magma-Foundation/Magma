@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -67,21 +68,17 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Iter } from "../../../../magma/api/collect/Iter";
+import { Iterable } from "../../../../magma/api/collect/list/Iterable";
 import { Option } from "../../../../magma/api/option/Option";
-import { Tuple2 } from "../../../../magma/api/Tuple2";
-export interface List<T> {
+export interface List<T> extends Iterable<T> {
 	addLast(element: T): List<T>;
-	query(): Iter<T>;
 	size(): number;
 	subList(startInclusive: number, endExclusive: number): Option<List<T>>;
 	findLast(): Option<T>;
 	findFirst(): Option<T>;
 	find(index: number): Option<T>;
-	queryWithIndices(): Iter<Tuple2<number, T>>;
-	addAll(others: List<T>): List<T>;
+	addAll(others: Iterable<T>): List<T>;
 	contains(element: T): boolean;
-	queryReversed(): Iter<T>;
 	addFirst(element: T): List<T>;
 	isEmpty(): boolean;
 	removeValue(element: T): List<T>;

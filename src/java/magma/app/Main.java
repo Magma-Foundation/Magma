@@ -5,7 +5,7 @@ import jvm.api.io.Files;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iters;
 import magma.api.collect.Joiner;
-import magma.api.collect.list.List;
+import magma.api.collect.list.Iterable;
 import magma.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.option.None;
@@ -30,15 +30,15 @@ public final class Main {
 
     private static Result<CompileState, IOError> runWithSourceDirectory(Sources sources) {
         return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> {
-            return sources.listSources().flatMapValue((List<Source> children) -> {
+            return sources.listSources().flatMapValue((Iterable<Source> children) -> {
                 return Main.runWithChildren(state.withPlatform(platform), children);
             });
         });
     }
 
-    private static Result<CompileState, IOError> runWithChildren(CompileState state, List<Source> sourceList) {
-        var initial = sourceList.query().foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
-        var folded = sourceList.query().foldWithInitialToResult(initial, Main::runWithSource);
+    private static Result<CompileState, IOError> runWithChildren(CompileState state, Iterable<Source> sources) {
+        var initial = sources.iter().foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
+        var folded = sources.iter().foldWithInitialToResult(initial, Main::runWithSource);
 
         if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
             var diagramPath = Files.get(".", "diagram.puml");
@@ -94,7 +94,7 @@ public final class Main {
 
     private static String joinNamespace(Source source) {
         return source.createLocation().namespace()
-                .query()
+                .iter()
                 .collect(new Joiner("."))
                 .orElse("");
     }

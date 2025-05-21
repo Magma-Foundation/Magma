@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -76,7 +77,7 @@ import { Result } from "../../magma/api/result/Result";
 import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
 import { Source } from "../../magma/app/io/Source";
-import { List } from "../../magma/api/collect/list/List";
+import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { Dependency } from "../../magma/app/compile/Dependency";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
@@ -95,14 +96,14 @@ export class Main {
 	}
 	static runWithSourceDirectory(sources: Sources): Result<CompileState, IOError> {
 		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => {
-			return sources.listSources().flatMapValue((children: List<Source>) => {
+			return sources.listSources().flatMapValue((children: Iterable<Source>) => {
 				return Main.runWithChildren(state.withPlatform(platform), children)/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/;
 	}
-	static runWithChildren(state: CompileState, sourceList: List<Source>): Result<CompileState, IOError> {
-		let initial = sourceList.query().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
-		let folded = sourceList.query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
+	static runWithChildren(state: CompileState, sources: Iterable<Source>): Result<CompileState, IOError> {
+		let initial = sources.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
+		let folded = sources.iter().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
 			let joinedDependencies = result.queryDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
@@ -139,7 +140,7 @@ export class Main {
 		return "\n\t" + source.createLocation().name() + ": " + Main.joinNamespace(source)/*unknown*/;
 	}
 	static joinNamespace(source: Source): string {
-		return source.createLocation().namespace().query().collect(new Joiner(".")).orElse("")/*unknown*/;
+		return source.createLocation().namespace().iter().collect(new Joiner(".")).orElse("")/*unknown*/;
 	}
 	static createInitialState(): CompileState {
 		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;

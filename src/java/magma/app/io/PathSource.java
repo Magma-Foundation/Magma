@@ -1,5 +1,6 @@
 package magma.app.io;
 
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
 import magma.api.io.IOError;

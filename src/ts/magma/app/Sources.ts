@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -69,7 +70,7 @@
 ]*/
 import { Path } from "../../magma/api/io/Path";
 import { Source } from "../../magma/app/io/Source";
-import { List } from "../../magma/api/collect/list/List";
+import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { IOError } from "../../magma/api/io/IOError";
 import { Result } from "../../magma/api/result/Result";
 import { PathSource } from "../../magma/app/io/PathSource";
@@ -79,10 +80,10 @@ export class Sources {
 	constructor (sourceDirectory: Path) {
 		this.sourceDirectory = sourceDirectory;
 	}
-	listSources(): Result<List<Source>, IOError> {
-		return this.sourceDirectory().walk().mapValue((children: List<Path>) => this.retainSources(children)/*unknown*/)/*unknown*/;
+	listSources(): Result<Iterable<Source>, IOError> {
+		return this.sourceDirectory().walk().mapValue((children: Iterable<Path>) => this.retainSources(children)/*unknown*/)/*unknown*/;
 	}
-	retainSources(children: List<Path>): List<Source> {
-		return children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<>())/*unknown*/;
+	retainSources(children: Iterable<Path>): Iterable<Source> {
+		return children.iter().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<>())/*unknown*/;
 	}
 }

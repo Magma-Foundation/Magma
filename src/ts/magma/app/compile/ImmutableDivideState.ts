@@ -15,6 +15,7 @@
 	Iter: magma.api.collect, 
 	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
 	Console: magma.api.io, 
@@ -90,7 +91,7 @@ export class ImmutableDivideState implements DivideState {
 		this.index = index;
 	}
 	query(): Iter<string> {
-		return this.segments.query()/*unknown*/;
+		return this.segments.iter()/*unknown*/;
 	}
 	advance(): DivideState {
 		return new ImmutableDivideState(this.segments.addLast(this.buffer), "", this.depth, this.input, this.index)/*unknown*/;
