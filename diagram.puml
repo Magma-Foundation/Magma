@@ -170,6 +170,8 @@ class DefinitionCompiler {
 }
 class FieldCompiler {
 }
+interface Folder {
+}
 class FunctionSegmentCompiler {
 }
 class PathSource {
@@ -178,6 +180,8 @@ PathSource <|.. Source
 interface Source {
 }
 class Location {
+}
+interface Locator {
 }
 class Main {
 }
@@ -190,6 +194,8 @@ PathTargets <|.. Targets
 class Platform {
 }
 class RootCompiler {
+}
+interface Selector {
 }
 interface Sources {
 }
@@ -450,7 +456,7 @@ Symbol --> Some
 Symbol --> None
 CompilerUtils --> CompileState
 CompilerUtils --> Tuple2
-CompilerUtils --> DivideState
+CompilerUtils --> Folder
 CompilerUtils --> Some
 CompilerUtils --> List
 CompilerUtils --> Tuple2Impl
@@ -459,13 +465,16 @@ CompilerUtils --> Iterable
 CompilerUtils --> Option
 CompilerUtils --> Iter
 CompilerUtils --> RootCompiler
+CompilerUtils --> DivideState
 CompilerUtils --> None
 CompilerUtils --> Iters
 CompilerUtils --> FunctionSegmentCompiler
 CompilerUtils --> Strings
 CompilerUtils --> Whitespace
 CompilerUtils --> ListCollector
+CompilerUtils --> Locator
 CompilerUtils --> Joiner
+CompilerUtils --> Selector
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
 DefiningCompiler --> Parameter
@@ -517,6 +526,7 @@ FieldCompiler --> Parameter
 FieldCompiler --> ValueCompiler
 FieldCompiler --> List
 FieldCompiler --> Value
+Folder --> DivideState
 FunctionSegmentCompiler --> CompileState
 FunctionSegmentCompiler --> Tuple2
 FunctionSegmentCompiler --> Option
@@ -591,6 +601,9 @@ RootCompiler --> DivideState
 RootCompiler --> ImmutableDivideState
 RootCompiler --> Location
 RootCompiler --> Context
+Selector --> Tuple2
+Selector --> Option
+Selector --> List
 Sources --> Source
 Sources --> Iterable
 Sources --> IOError

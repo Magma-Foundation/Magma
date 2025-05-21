@@ -70,15 +70,18 @@
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
 	FieldCompiler: magma.app, 
+	Folder: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
+	Locator: magma.app, 
 	Main: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
+	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
@@ -86,7 +89,7 @@
 ]*/
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { DivideState } from "../../magma/app/compile/DivideState";
+import { Folder } from "../../magma/app/Folder";
 import { Some } from "../../magma/api/option/Some";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
@@ -95,25 +98,28 @@ import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { Option } from "../../magma/api/option/Option";
 import { Iter } from "../../magma/api/collect/Iter";
 import { RootCompiler } from "../../magma/app/RootCompiler";
+import { DivideState } from "../../magma/app/compile/DivideState";
 import { None } from "../../magma/api/option/None";
 import { Iters } from "../../magma/api/collect/Iters";
 import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler";
 import { Strings } from "../../magma/api/text/Strings";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+import { Locator } from "../../magma/app/Locator";
 import { Joiner } from "../../magma/api/collect/Joiner";
+import { Selector } from "../../magma/app/Selector";
 export class CompilerUtils {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return CompilerUtils.compileAll(state, input, CompilerUtils.foldStatements, mapper, CompilerUtils.mergeStatements)/*unknown*/;
 	}
-	static compileAll(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple2<CompileState, string> {
+	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple2<CompileState, string> {
 		let folded = CompilerUtils.parseAll(state, input, folder, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(folded.left(), CompilerUtils.generateAll(folded.right(), merger))/*unknown*/;
 	}
 	static generateAll(elements: Iterable<string>, merger: (arg0 : string, arg1 : string) => string): string {
 		return elements.iter().foldWithInitial("", merger)/*unknown*/;
 	}
-	static parseAll<T>(state: CompileState, input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
+	static parseAll<T>(state: CompileState, input: string, folder: Folder, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 		return CompilerUtils.divide(input, folder).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
 			let currentState = current.left()/*unknown*/;
 			let currentElement = current.right()/*unknown*/;
@@ -127,7 +133,7 @@ export class CompilerUtils {
 	static mergeStatements(cache: string, element: string): string {
 		return cache + element/*unknown*/;
 	}
-	static divide(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Iter<string> {
+	static divide(input: string, folder: Folder): Iter<string> {
 		let current = RootCompiler.createInitialDivideState(input)/*unknown*/;
 		while (true/*unknown*/){
 			let poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, string>(current, "\0"))/*unknown*/;
@@ -137,7 +143,7 @@ export class CompilerUtils {
 			let poppedTuple = poppedTuple0.right()/*unknown*/;
 			let poppedState = poppedTuple.left()/*unknown*/;
 			let popped = poppedTuple.right()/*unknown*/;
-			current/*Tuple2<CompileState, List<T>>*/ = CompilerUtils.foldSingleQuotes(poppedState, popped).or(() => CompilerUtils.foldDoubleQuotes(poppedState, popped)/*unknown*/).orElseGet(() => folder(poppedState, popped)/*unknown*/)/*unknown*/;
+			current/*Tuple2<CompileState, List<T>>*/ = CompilerUtils.foldSingleQuotes(poppedState, popped).or(() => CompilerUtils.foldDoubleQuotes(poppedState, popped)/*unknown*/).orElseGet(() => folder.apply(poppedState, popped)/*unknown*/)/*unknown*/;
 		}
 		return current.advance().query()/*unknown*/;
 	}
@@ -284,14 +290,14 @@ export class CompilerUtils {
 	static compileFirst<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return CompilerUtils.compileInfix(input, infix, CompilerUtils.findFirst, mapper)/*unknown*/;
 	}
-	static compileInfix<T>(input: string, infix: string, locator: (arg0 : string, arg1 : string) => number, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
+	static compileInfix<T>(input: string, infix: string, locator: Locator, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return CompilerUtils.compileSplit(CompilerUtils.split(input, infix, locator), mapper)/*unknown*/;
 	}
 	static compileSplit<T>(splitter: Option<Tuple2<string, string>>, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return splitter.flatMap((tuple: Tuple2<string, string>) => mapper(tuple.left(), tuple.right())/*unknown*/)/*unknown*/;
 	}
-	static split(input: string, infix: string, locator: (arg0 : string, arg1 : string) => number): Option<Tuple2<string, string>> {
-		let index = locator(input, infix)/*unknown*/;
+	static split(input: string, infix: string, locator: Locator): Option<Tuple2<string, string>> {
+		let index = locator.apply(input, infix)/*unknown*/;
 		if (0 > index/*unknown*/){
 			return new None<Tuple2<string, string>>()/*unknown*/;
 		}
@@ -307,7 +313,7 @@ export class CompilerUtils {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
 		return "/*" + replaced + "*/"/*unknown*/;
 	}
-	static foldOperator(infix: string): (arg0 : DivideState, arg1 : string) => DivideState {
+	static foldOperator(infix: string): Folder {
 		return (state: DivideState, c: string) => {
 			if (c === infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))/*unknown*/){
 				let length = Strings.length(infix) - 1/*unknown*/;
@@ -336,14 +342,14 @@ export class CompilerUtils {
 		let joined = beforeLast.iter().collect(new Joiner(delimiter)).orElse("")/*unknown*/;
 		return new Some<Tuple2<string, string>>(new Tuple2Impl<string, string>(joined, last))/*unknown*/;
 	}
-	static splitFoldedLast(input: string, delimiter: string, folder: (arg0 : DivideState, arg1 : string) => DivideState): Option<Tuple2<string, string>> {
+	static splitFoldedLast(input: string, delimiter: string, folder: Folder): Option<Tuple2<string, string>> {
 		return CompilerUtils.splitFolded(input, folder, (divisions1: List<string>) => CompilerUtils.selectLast(divisions1, delimiter)/*unknown*/)/*unknown*/;
 	}
-	static splitFolded(input: string, folder: (arg0 : DivideState, arg1 : string) => DivideState, selector: (arg0 : List<string>) => Option<Tuple2<string, string>>): Option<Tuple2<string, string>> {
+	static splitFolded(input: string, folder: Folder, selector: Selector): Option<Tuple2<string, string>> {
 		let divisions = CompilerUtils.divide(input, folder).collect(new ListCollector<string>())/*unknown*/;
 		if (2 > divisions.size()/*unknown*/){
 			return new None<Tuple2<string, string>>()/*unknown*/;
 		}
-		return selector(divisions)/*unknown*/;
+		return selector.apply(divisions)/*unknown*/;
 	}
 }
