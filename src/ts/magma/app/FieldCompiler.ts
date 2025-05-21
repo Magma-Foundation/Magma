@@ -40,14 +40,32 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	Dependency: magma.app.compile, 
+	Divider: magma.app.compile.divide, 
+	FoldedDivider: magma.app.compile.divide, 
 	DivideState: magma.app.compile, 
+	DecoratedFolder: magma.app.compile.fold, 
+	DelimitedFolder: magma.app.compile.fold, 
+	Folder: magma.app.compile.fold, 
+	OperatorFolder: magma.app.compile.fold, 
+	StatementsFolder: magma.app.compile.fold, 
+	TypeSeparatorFolder: magma.app.compile.fold, 
+	ValueFolder: magma.app.compile.fold, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	ImmutableRegistry: magma.app.compile, 
 	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
+	FirstLocator: magma.app.compile.locate, 
+	LastLocator: magma.app.compile.locate, 
+	Locator: magma.app.compile.locate, 
+	Merger: magma.app.compile.merge, 
+	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	LastSelector: magma.app.compile.select, 
+	Selector: magma.app.compile.select, 
+	LocatingSplitter: magma.app.compile.split, 
+	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
@@ -69,25 +87,16 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
-	DecoratedFolder: magma.app.divide, 
-	Divider: magma.app.divide, 
-	FoldedDivider: magma.app.divide, 
-	Folder: magma.app.divide, 
-	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
-	Locator: magma.app, 
 	Main: magma.app, 
-	Merger: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
-	LastSelector: magma.app.select, 
-	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
@@ -97,6 +106,8 @@ import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Option } from "../../magma/api/option/Option";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
+import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { Strings } from "../../magma/api/text/Strings";
 import { ConstructorHeader } from "../../magma/app/compile/define/ConstructorHeader";
 import { None } from "../../magma/api/option/None";
@@ -114,7 +125,7 @@ import { List } from "../../magma/api/collect/list/List";
 import { Value } from "../../magma/app/compile/value/Value";
 class FieldCompiler {
 	static compileMethod(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
+		return CompilerUtils.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams)/*unknown*/;
 			return CompilerUtils.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
 				if (state.stack().isWithinLast(name)/*unknown*/){
@@ -130,7 +141,7 @@ class FieldCompiler {
 		})/*unknown*/;
 	}
 	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileFirst(withParams, ")", (params: string, afterParams: string) => {
+		return CompilerUtils.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (params: string, afterParams: string) => {
 			let parametersTuple = DefiningCompiler.parseParameters(state, params)/*unknown*/;
 			let parametersState = parametersTuple.left()/*unknown*/;
 			let parameters = parametersTuple.right()/*unknown*/;

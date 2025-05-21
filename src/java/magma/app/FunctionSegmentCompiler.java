@@ -11,6 +11,9 @@ import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.value.Value;
+import magma.app.compile.locate.FirstLocator;
+import magma.app.compile.select.LastSelector;
+import magma.app.compile.split.LocatingSplitter;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -26,12 +29,18 @@ final class FunctionSegmentCompiler {
     }
 
     public static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), "}", (String withoutEnd) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -> foldBlockStarts(state1, c)), (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
-            var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
+        return CompilerUtils.compileSuffix(Strings.strip(input), "}", (String withoutEnd) -> {
+            return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
+                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> {
+                    return foldBlockStarts(state1, c);
+                }, new LastSelector(""));
+            }, (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
+                var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
-            var indent = state.createIndent();
-            return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
-        }))));
+                var indent = state.createIndent();
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
+            })));
+        });
     }
 
     private static DivideState foldBlockStarts(DivideState state, char c) {
@@ -128,7 +137,7 @@ final class FunctionSegmentCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileAssignment(CompileState state, String input) {
-        return CompilerUtils.compileFirst(input, "=", (String destination, String source) -> {
+        return CompilerUtils.compileSplit(input, new LocatingSplitter("=", new FirstLocator()), (String destination, String source) -> {
             var sourceTuple = ValueCompiler.compileValueOrPlaceholder(state, source);
 
             var destinationTuple = ValueCompiler.compileValue(sourceTuple.left(), destination)
@@ -140,6 +149,16 @@ final class FunctionSegmentCompiler {
     }
 
     public static Tuple2<CompileState, String> compileFunctionStatements(CompileState state, String input) {
-        return CompilerUtils.compileStatements(state, input, CompilerUtils::compileFunctionSegment);
+        return CompilerUtils.compileStatements(state, input, FunctionSegmentCompiler::compileFunctionSegment);
+    }
+
+    static Tuple2<CompileState, String> compileFunctionSegment(CompileState state, String input) {
+        return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(
+                CompilerUtils::compileWhitespace,
+                FunctionSegmentCompiler::compileEmptySegment,
+                FunctionSegmentCompiler::compileBlock,
+                FunctionSegmentCompiler::compileFunctionStatement,
+                FunctionSegmentCompiler::compileReturnWithoutSuffix
+        ));
     }
 }

@@ -96,8 +96,33 @@ interface Parameter {
 }
 class Dependency {
 }
+interface Divider {
+}
+class FoldedDivider {
+}
+FoldedDivider <|.. Divider
 interface DivideState {
 }
+class DecoratedFolder {
+}
+DecoratedFolder <|.. Folder
+class DelimitedFolder {
+}
+DelimitedFolder <|.. Folder
+interface Folder {
+}
+class OperatorFolder {
+}
+OperatorFolder <|.. Folder
+class StatementsFolder {
+}
+StatementsFolder <|.. Folder
+class TypeSeparatorFolder {
+}
+TypeSeparatorFolder <|.. Folder
+class ValueFolder {
+}
+ValueFolder <|.. Folder
 class ImmutableCompileState {
 }
 ImmutableCompileState <|.. CompileState
@@ -115,7 +140,30 @@ class ImmutableStack {
 ImmutableStack <|.. Stack
 class Import {
 }
+class FirstLocator {
+}
+FirstLocator <|.. Locator
+class LastLocator {
+}
+LastLocator <|.. Locator
+interface Locator {
+}
+interface Merger {
+}
+class StatementsMerger {
+}
+StatementsMerger <|.. Merger
 interface Registry {
+}
+class LastSelector {
+}
+LastSelector <|.. Selector
+interface Selector {
+}
+class LocatingSplitter {
+}
+LocatingSplitter <|.. Splitter
+interface Splitter {
 }
 interface Stack {
 }
@@ -168,19 +216,6 @@ class DefiningCompiler {
 }
 class DefinitionCompiler {
 }
-class DecoratedFolder {
-}
-DecoratedFolder <|.. Folder
-interface Divider {
-}
-class FoldedDivider {
-}
-FoldedDivider <|.. Divider
-interface Folder {
-}
-class StatementsFolder {
-}
-StatementsFolder <|.. Folder
 class FieldCompiler {
 }
 class FunctionSegmentCompiler {
@@ -192,11 +227,7 @@ interface Source {
 }
 class Location {
 }
-interface Locator {
-}
 class Main {
-}
-interface Merger {
 }
 class PathSources {
 }
@@ -207,11 +238,6 @@ PathTargets <|.. Targets
 class Platform {
 }
 class RootCompiler {
-}
-class LastSelector {
-}
-LastSelector <|.. Selector
-interface Selector {
 }
 interface Sources {
 }
@@ -337,9 +363,35 @@ Definition --> MethodHeader
 Definition --> Strings
 Parameter --> Definition
 Parameter --> Option
+Divider --> Iter
+FoldedDivider --> Divider
+FoldedDivider --> Folder
+FoldedDivider --> Iter
+FoldedDivider --> DivideState
+FoldedDivider --> Tuple2Impl
 DivideState --> Iter
 DivideState --> Tuple2
 DivideState --> Option
+DecoratedFolder --> Folder
+DecoratedFolder --> DivideState
+DecoratedFolder --> Option
+DecoratedFolder --> None
+DecoratedFolder --> Tuple2
+DecoratedFolder --> Some
+DecoratedFolder --> Tuple2Impl
+DelimitedFolder --> Folder
+DelimitedFolder --> DivideState
+Folder --> DivideState
+OperatorFolder --> Folder
+OperatorFolder --> DivideState
+OperatorFolder --> Strings
+OperatorFolder --> Tuple2
+StatementsFolder --> Folder
+StatementsFolder --> DivideState
+TypeSeparatorFolder --> Folder
+TypeSeparatorFolder --> DivideState
+ValueFolder --> Folder
+ValueFolder --> DivideState
 ImmutableCompileState --> CompileState
 ImmutableCompileState --> Context
 ImmutableCompileState --> Registry
@@ -383,9 +435,32 @@ ImmutableStack --> Iterable
 Import --> Iterable
 Import --> Joiner
 Import --> Strings
+FirstLocator --> Locator
+LastLocator --> Locator
+StatementsMerger --> Merger
 Registry --> Dependency
 Registry --> Iter
 Registry --> Import
+LastSelector --> Selector
+LastSelector --> Tuple2
+LastSelector --> Option
+LastSelector --> List
+LastSelector --> Joiner
+LastSelector --> Some
+LastSelector --> Tuple2Impl
+Selector --> Tuple2
+Selector --> Option
+Selector --> List
+LocatingSplitter --> Splitter
+LocatingSplitter --> Locator
+LocatingSplitter --> Tuple2
+LocatingSplitter --> Option
+LocatingSplitter --> None
+LocatingSplitter --> Strings
+LocatingSplitter --> Some
+LocatingSplitter --> Tuple2Impl
+Splitter --> Tuple2
+Splitter --> Option
 Stack --> Option
 Stack --> Definition
 Stack --> Iterable
@@ -473,6 +548,7 @@ Symbol --> None
 CompilerUtils --> CompileState
 CompilerUtils --> Tuple2
 CompilerUtils --> StatementsFolder
+CompilerUtils --> StatementsMerger
 CompilerUtils --> Folder
 CompilerUtils --> Merger
 CompilerUtils --> Some
@@ -484,15 +560,15 @@ CompilerUtils --> Option
 CompilerUtils --> FoldedDivider
 CompilerUtils --> DecoratedFolder
 CompilerUtils --> Iters
-CompilerUtils --> FunctionSegmentCompiler
 CompilerUtils --> None
 CompilerUtils --> Strings
 CompilerUtils --> Whitespace
-CompilerUtils --> DivideState
-CompilerUtils --> ListCollector
-CompilerUtils --> Locator
+CompilerUtils --> ValueFolder
+CompilerUtils --> LocatingSplitter
+CompilerUtils --> LastLocator
+CompilerUtils --> Splitter
 CompilerUtils --> Joiner
-CompilerUtils --> LastSelector
+CompilerUtils --> ListCollector
 CompilerUtils --> Selector
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
@@ -509,13 +585,17 @@ DefiningCompiler --> Placeholder
 DefiningCompiler --> Option
 DefiningCompiler --> Whitespace
 DefiningCompiler --> Strings
-DefiningCompiler --> Lists
 DefiningCompiler --> FoldedDivider
 DefiningCompiler --> DecoratedFolder
 DefiningCompiler --> DivideState
+DefiningCompiler --> DelimitedFolder
+DefiningCompiler --> LocatingSplitter
+DefiningCompiler --> FirstLocator
+DefiningCompiler --> Lists
 DefiningCompiler --> TypeCompiler
 DefiningCompiler --> Type
 DefiningCompiler --> Joiner
+DefiningCompiler --> ValueFolder
 DefinitionCompiler --> Definition
 DefinitionCompiler --> Iterable
 DefinitionCompiler --> Parameter
@@ -528,26 +608,12 @@ DefinitionCompiler --> Tuple2
 DefinitionCompiler --> CompilerUtils
 DefinitionCompiler --> Some
 DefinitionCompiler --> DefiningCompiler
-DecoratedFolder --> Folder
-DecoratedFolder --> DivideState
-DecoratedFolder --> Option
-DecoratedFolder --> None
-DecoratedFolder --> Tuple2
-DecoratedFolder --> Some
-DecoratedFolder --> Tuple2Impl
-Divider --> Iter
-FoldedDivider --> Divider
-FoldedDivider --> Folder
-FoldedDivider --> Iter
-FoldedDivider --> DivideState
-FoldedDivider --> Tuple2Impl
-Folder --> DivideState
-StatementsFolder --> Folder
-StatementsFolder --> DivideState
 FieldCompiler --> CompileState
 FieldCompiler --> Tuple2
 FieldCompiler --> Option
 FieldCompiler --> CompilerUtils
+FieldCompiler --> LocatingSplitter
+FieldCompiler --> FirstLocator
 FieldCompiler --> Strings
 FieldCompiler --> ConstructorHeader
 FieldCompiler --> None
@@ -575,6 +641,8 @@ FunctionSegmentCompiler --> DivideState
 FunctionSegmentCompiler --> Lists
 FunctionSegmentCompiler --> ValueCompiler
 FunctionSegmentCompiler --> Value
+FunctionSegmentCompiler --> LocatingSplitter
+FunctionSegmentCompiler --> FirstLocator
 FunctionSegmentCompiler --> DefiningCompiler
 FunctionSegmentCompiler --> Definition
 PathSource --> Source
@@ -616,6 +684,8 @@ RootCompiler --> Tuple2
 RootCompiler --> CompilerUtils
 RootCompiler --> Lists
 RootCompiler --> Option
+RootCompiler --> LocatingSplitter
+RootCompiler --> FirstLocator
 RootCompiler --> Strings
 RootCompiler --> DefiningCompiler
 RootCompiler --> Some
@@ -635,16 +705,6 @@ RootCompiler --> FieldCompiler
 RootCompiler --> Value
 RootCompiler --> Location
 RootCompiler --> Context
-LastSelector --> Selector
-LastSelector --> Tuple2
-LastSelector --> Option
-LastSelector --> List
-LastSelector --> Joiner
-LastSelector --> Some
-LastSelector --> Tuple2Impl
-Selector --> Tuple2
-Selector --> Option
-Selector --> List
 Sources --> Source
 Sources --> Iterable
 Sources --> IOError
@@ -667,6 +727,8 @@ TypeCompiler --> ValueCompiler
 TypeCompiler --> Symbol
 TypeCompiler --> None
 TypeCompiler --> PrimitiveType
+TypeCompiler --> LocatingSplitter
+TypeCompiler --> FirstLocator
 TypeCompiler --> TemplateType
 TypeCompiler --> List
 TypeCompiler --> FunctionType
@@ -684,12 +746,11 @@ ValueCompiler --> Tuple2
 ValueCompiler --> CompilerUtils
 ValueCompiler --> Option
 ValueCompiler --> Strings
-ValueCompiler --> TypeCompiler
-ValueCompiler --> ConstructionCaller
-ValueCompiler --> RootCompiler
 ValueCompiler --> Some
 ValueCompiler --> StringValue
 ValueCompiler --> Not
+ValueCompiler --> LocatingSplitter
+ValueCompiler --> FirstLocator
 ValueCompiler --> DefiningCompiler
 ValueCompiler --> Parameter
 ValueCompiler --> List
@@ -699,8 +760,11 @@ ValueCompiler --> FunctionSegmentCompiler
 ValueCompiler --> Stack
 ValueCompiler --> Lambda
 ValueCompiler --> None
+ValueCompiler --> RootCompiler
 ValueCompiler --> AccessValue
+ValueCompiler --> OperatorFolder
 ValueCompiler --> Operation
+ValueCompiler --> TypeCompiler
 ValueCompiler --> Symbol
 ValueCompiler --> HeadedIter
 ValueCompiler --> RangeHead

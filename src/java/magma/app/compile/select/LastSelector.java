@@ -1,4 +1,4 @@
-package magma.app.select;
+package magma.app.compile.select;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
@@ -6,7 +6,6 @@ import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.app.Selector;
 
 public record LastSelector(String delimiter) implements Selector {
     @Override

@@ -1,4 +1,4 @@
-package magma.app.divide;
+package magma.app.compile.divide;
 
 import magma.api.collect.Iter;
 

@@ -17,6 +17,8 @@ import magma.app.compile.Stack;
 import magma.app.compile.define.Definition;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Value;
+import magma.app.compile.locate.FirstLocator;
+import magma.app.compile.split.LocatingSplitter;
 
 import java.util.function.BiFunction;
 
@@ -33,17 +35,19 @@ public final class RootCompiler {
     }
 
     private static BiFunction<CompileState, String, Option<Tuple2<CompileState, String>>> createStructureRule(String sourceInfix, String targetInfix) {
-        return (CompileState state, String input1) -> CompilerUtils.compileFirst(input1, sourceInfix, (String beforeInfix, String afterInfix) -> CompilerUtils.compileFirst(afterInfix, "{", (String beforeContent, String withEnd) -> CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> CompilerUtils.compileLast(beforeInfix, "\n", (String s, String s2) -> {
-            var annotations = DefiningCompiler.parseAnnotations(s);
-            if (annotations.contains("Actual")) {
-                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-            }
+        return (CompileState state, String input1) -> CompilerUtils.compileSplit(input1, new LocatingSplitter(sourceInfix, new FirstLocator()), (String beforeInfix, String afterInfix) -> {
+            return CompilerUtils.compileSplit(afterInfix, new LocatingSplitter("{", new FirstLocator()), (String beforeContent, String withEnd) -> CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (String inputContent) -> CompilerUtils.compileLast(beforeInfix, "\n", (String s, String s2) -> {
+                var annotations = DefiningCompiler.parseAnnotations(s);
+                if (annotations.contains("Actual")) {
+                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
+                }
 
-            return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent);
-        }).or(() -> {
-            var modifiers = DefiningCompiler.parseModifiers(beforeContent);
-            return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
-        }))));
+                return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent);
+            }).or(() -> {
+                var modifiers = DefiningCompiler.parseModifiers(beforeContent);
+                return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
+            })));
+        });
     }
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithImplementing(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, String content) {
@@ -51,24 +55,26 @@ public final class RootCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithExtends(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Option<Type> maybeImplementing, String inputContent) {
-        return CompilerUtils.compileFirst(beforeContent, " extends ", (String beforeExtends, String afterExtends) -> CompilerUtils.parseValues(state, afterExtends, (CompileState inner0, String inner1) -> TypeCompiler.parseType(inner0, inner1))
+        return CompilerUtils.compileSplit(beforeContent, new LocatingSplitter(" extends ", new FirstLocator()), (String beforeExtends, String afterExtends) -> CompilerUtils.parseValues(state, afterExtends, (CompileState inner0, String inner1) -> TypeCompiler.parseType(inner0, inner1))
                 .flatMap((Tuple2<CompileState, List<Type>> compileStateListTuple2) -> RootCompiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent))).or(() -> RootCompiler.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, Lists.empty(), maybeImplementing, inputContent));
     }
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithParameters(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Iterable<Type> maybeSuperType, Option<Type> maybeImplementing, String inputContent) {
-        return CompilerUtils.compileFirst(beforeContent, "(", (String rawName, String withParameters) -> CompilerUtils.compileFirst(withParameters, ")", (String parametersString, String _) -> {
-            var name = Strings.strip(rawName);
+        return CompilerUtils.compileSplit(beforeContent, new LocatingSplitter("(", new FirstLocator()), (String rawName, String withParameters) -> {
+            return CompilerUtils.compileSplit(withParameters, new LocatingSplitter(")", new FirstLocator()), (String parametersString, String _) -> {
+                var name = Strings.strip(rawName);
 
-            var parametersTuple = DefiningCompiler.parseParameters(state, parametersString);
-            var parameters = DefiningCompiler.retainDefinitionsFromParameters(parametersTuple.right());
+                var parametersTuple = DefiningCompiler.parseParameters(state, parametersString);
+                var parameters = DefiningCompiler.retainDefinitionsFromParameters(parametersTuple.right());
 
-            return RootCompiler.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType);
-        })).or(() -> RootCompiler.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType));
+                return RootCompiler.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType);
+            });
+        }).or(() -> RootCompiler.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType));
     }
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithTypeParams(CompileState state, String infix, String content, String beforeParams, Iterable<Definition> parameters, Option<Type> maybeImplementing, List<String> annotations, List<String> modifiers, Iterable<Type> maybeSuperType) {
-        return CompilerUtils.compileSuffix(Strings.strip(beforeParams), ">", (String withoutTypeParamEnd) -> CompilerUtils.compileFirst(withoutTypeParamEnd, "<", (String name, String typeParamsString) -> {
-            var typeParams = CompilerUtils.divideValues(typeParamsString);
+        return CompilerUtils.compileSuffix(Strings.strip(beforeParams), ">", (String withoutTypeParamEnd) -> CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String name, String typeParamsString) -> {
+            var typeParams = DefiningCompiler.divideValues(typeParamsString);
             return RootCompiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
         })).or(() -> RootCompiler.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType));
     }

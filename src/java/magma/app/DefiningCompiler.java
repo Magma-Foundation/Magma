@@ -12,14 +12,20 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.fold.DelimitedFolder;
 import magma.app.compile.DivideState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
 import magma.app.compile.text.Whitespace;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Placeholder;
-import magma.app.divide.DecoratedFolder;
-import magma.app.divide.FoldedDivider;
+import magma.app.compile.divide.FoldedDivider;
+import magma.app.compile.fold.DecoratedFolder;
+import magma.app.compile.fold.TypeSeparatorFolder;
+import magma.app.compile.fold.ValueFolder;
+import magma.app.compile.locate.FirstLocator;
+import magma.app.compile.select.LastSelector;
+import magma.app.compile.split.LocatingSplitter;
 
 final class DefiningCompiler {
     public static Iterable<Definition> retainDefinitionsFromParameters(Iterable<Parameter> parameters) {
@@ -47,14 +53,18 @@ final class DefiningCompiler {
     }
 
     public static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
-        return CompilerUtils.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(Strings.strip(beforeName), " ", (state1, c) -> foldTypeSeparators(state1, c)), (String beforeType, String type) -> CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
-            var annotations = DefiningCompiler.parseAnnotations(annotationsString);
-            return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
-        }).or(() -> DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() -> DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)));
+        return CompilerUtils.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> {
+            return CompilerUtils.compileSplit(beforeName, (beforeName0) -> {
+                return CompilerUtils.splitFolded(Strings.strip(beforeName0), new TypeSeparatorFolder(), new LastSelector(" "));
+            }, (String beforeType, String type) -> CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
+                var annotations = DefiningCompiler.parseAnnotations(annotationsString);
+                return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
+            }).or(() -> DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() -> DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name));
+        });
     }
 
     public static List<String> parseAnnotations(String s) {
-        return new FoldedDivider(new DecoratedFolder((DivideState state1, char c) -> CompilerUtils.foldDelimited(state1, c, '\n'))).divide(s)
+        return new FoldedDivider(new DecoratedFolder((DivideState state1, char c) -> new DelimitedFolder('\n').apply(state1, c))).divide(s)
                 .map((String s2) -> Strings.strip(s2))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .filter((String value) -> 1 <= Strings.length(value))
@@ -71,8 +81,8 @@ final class DefiningCompiler {
             String type,
             String name
     ) {
-        return CompilerUtils.compileSuffix(Strings.strip(beforeType), ">", (String withoutTypeParamEnd) -> CompilerUtils.compileFirst(withoutTypeParamEnd, "<", (String beforeTypeParams, String typeParamsString) -> {
-            var typeParams = CompilerUtils.divideValues(typeParamsString);
+        return CompilerUtils.compileSuffix(Strings.strip(beforeType), ">", (String withoutTypeParamEnd) -> CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (String beforeTypeParams, String typeParamsString) -> {
+            var typeParams = divideValues(typeParamsString);
             return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name);
         })).or(() -> {
             var divided = DefiningCompiler.parseModifiers(beforeType);
@@ -81,25 +91,10 @@ final class DefiningCompiler {
     }
 
     public static List<String> parseModifiers(String beforeType) {
-        return new FoldedDivider(new DecoratedFolder((DivideState state1, char c) -> CompilerUtils.foldDelimited(state1, c, ' '))).divide(Strings.strip(beforeType))
+        return new FoldedDivider(new DecoratedFolder((DivideState state1, char c) -> new DelimitedFolder(' ').apply(state1, c))).divide(Strings.strip(beforeType))
                 .map((String s) -> Strings.strip(s))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());
-    }
-
-    private static DivideState foldTypeSeparators(DivideState state, char c) {
-        if (' ' == c && state.isLevel()) {
-            return state.advance();
-        }
-
-        var appended = state.append(c);
-        if ('<' == c) {
-            return appended.enter();
-        }
-        if ('>' == c) {
-            return appended.exit();
-        }
-        return appended;
     }
 
     private static Option<Tuple2<CompileState, Definition>> parseDefinitionWithTypeParameters(
@@ -130,5 +125,12 @@ final class DefiningCompiler {
             return Lists.of("static");
         }
         return Lists.empty();
+    }
+
+    static List<String> divideValues(String input) {
+        return new FoldedDivider(new DecoratedFolder(new ValueFolder())).divide(input)
+                .map((String input1) -> Strings.strip(input1))
+                .filter((String value) -> !Strings.isEmpty(value))
+                .collect(new ListCollector<String>());
     }
 }

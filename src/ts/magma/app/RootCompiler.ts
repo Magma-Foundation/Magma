@@ -40,14 +40,32 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	Dependency: magma.app.compile, 
+	Divider: magma.app.compile.divide, 
+	FoldedDivider: magma.app.compile.divide, 
 	DivideState: magma.app.compile, 
+	DecoratedFolder: magma.app.compile.fold, 
+	DelimitedFolder: magma.app.compile.fold, 
+	Folder: magma.app.compile.fold, 
+	OperatorFolder: magma.app.compile.fold, 
+	StatementsFolder: magma.app.compile.fold, 
+	TypeSeparatorFolder: magma.app.compile.fold, 
+	ValueFolder: magma.app.compile.fold, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	ImmutableRegistry: magma.app.compile, 
 	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
+	FirstLocator: magma.app.compile.locate, 
+	LastLocator: magma.app.compile.locate, 
+	Locator: magma.app.compile.locate, 
+	Merger: magma.app.compile.merge, 
+	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	LastSelector: magma.app.compile.select, 
+	Selector: magma.app.compile.select, 
+	LocatingSplitter: magma.app.compile.split, 
+	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
@@ -69,25 +87,16 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
-	DecoratedFolder: magma.app.divide, 
-	Divider: magma.app.divide, 
-	FoldedDivider: magma.app.divide, 
-	Folder: magma.app.divide, 
-	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
-	Locator: magma.app, 
 	Main: magma.app, 
-	Merger: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
-	LastSelector: magma.app.select, 
-	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
@@ -98,6 +107,8 @@ import { Tuple2 } from "../../magma/api/Tuple2";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Option } from "../../magma/api/option/Option";
+import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
+import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { Strings } from "../../magma/api/text/Strings";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Some } from "../../magma/api/option/Some";
@@ -122,34 +133,38 @@ export class RootCompiler {
 		return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(CompilerUtils.compileWhitespace, RootCompiler.compileNamespaced, RootCompiler.createStructureRule("class ", "class "), RootCompiler.createStructureRule("interface ", "interface "), RootCompiler.createStructureRule("record ", "class "), RootCompiler.createStructureRule("enum ", "class ")))/*unknown*/;
 	}
 	static createStructureRule(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, string>> {
-		return (state: CompileState, input1: string) => CompilerUtils.compileFirst(input1, sourceInfix, (beforeInfix: string, afterInfix: string) => CompilerUtils.compileFirst(afterInfix, "{", (beforeContent: string, withEnd: string) => CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => CompilerUtils.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
-			let annotations = DefiningCompiler.parseAnnotations(s)/*unknown*/;
-			if (annotations.contains("Actual")/*unknown*/){
-				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""))/*unknown*/;
-			}
-			return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent)/*unknown*/;
-		}).or(() => {
-			let modifiers = DefiningCompiler.parseModifiers(beforeContent)/*unknown*/;
-			return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent)/*unknown*/;
-		})/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*//*unknown*/;
+		return (state: CompileState, input1: string) => CompilerUtils.compileSplit(input1, new LocatingSplitter(sourceInfix, new FirstLocator()), (beforeInfix: string, afterInfix: string) => {
+			return CompilerUtils.compileSplit(afterInfix, new LocatingSplitter("{", new FirstLocator()), (beforeContent: string, withEnd: string) => CompilerUtils.compileSuffix(Strings.strip(withEnd), "}", (inputContent: string) => CompilerUtils.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
+				let annotations = DefiningCompiler.parseAnnotations(s)/*unknown*/;
+				if (annotations.contains("Actual")/*unknown*/){
+					return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state, ""))/*unknown*/;
+				}
+				return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent)/*unknown*/;
+			}).or(() => {
+				let modifiers = DefiningCompiler.parseModifiers(beforeContent)/*unknown*/;
+				return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent)/*unknown*/;
+			})/*unknown*/)/*unknown*/)/*unknown*/;
+		})/*unknown*//*unknown*/;
 	}
 	static compileStructureWithImplementing(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, content: string): Option<Tuple2<CompileState, string>> {
 		return CompilerUtils.compileLast(beforeContent, " implements ", (s: string, s2: string) => TypeCompiler.parseType(state, s2).flatMap((implementingTuple: Tuple2<CompileState, Type>) => RootCompiler.compileStructureWithExtends(implementingTuple.left(), annotations, modifiers, targetInfix, s, new Some<Type>(implementingTuple.right()), content)/*unknown*/)/*unknown*/).or(() => RootCompiler.compileStructureWithExtends(state, annotations, modifiers, targetInfix, beforeContent, new None<Type>(), content)/*unknown*/)/*unknown*/;
 	}
 	static compileStructureWithExtends(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileFirst(beforeContent, " extends ", (beforeExtends: string, afterExtends: string) => CompilerUtils.parseValues(state, afterExtends, (inner0: CompileState, inner1: string) => TypeCompiler.parseType(inner0, inner1)/*unknown*/).flatMap((compileStateListTuple2: Tuple2<CompileState, List<Type>>) => RootCompiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent)/*unknown*/)/*unknown*/).or(() => RootCompiler.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, Lists.empty(), maybeImplementing, inputContent)/*unknown*/)/*unknown*/;
+		return CompilerUtils.compileSplit(beforeContent, new LocatingSplitter(" extends ", new FirstLocator()), (beforeExtends: string, afterExtends: string) => CompilerUtils.parseValues(state, afterExtends, (inner0: CompileState, inner1: string) => TypeCompiler.parseType(inner0, inner1)/*unknown*/).flatMap((compileStateListTuple2: Tuple2<CompileState, List<Type>>) => RootCompiler.compileStructureWithParameters(compileStateListTuple2.left(), annotations, modifiers, targetInfix, beforeExtends, compileStateListTuple2.right(), maybeImplementing, inputContent)/*unknown*/)/*unknown*/).or(() => RootCompiler.compileStructureWithParameters(state, annotations, modifiers, targetInfix, beforeContent, Lists.empty(), maybeImplementing, inputContent)/*unknown*/)/*unknown*/;
 	}
 	static compileStructureWithParameters(state: CompileState, annotations: List<string>, modifiers: List<string>, targetInfix: string, beforeContent: string, maybeSuperType: Iterable<Type>, maybeImplementing: Option<Type>, inputContent: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileFirst(beforeContent, "(", (rawName: string, withParameters: string) => CompilerUtils.compileFirst(withParameters, ")", (parametersString: string, _: string) => {
-			let name = Strings.strip(rawName)/*unknown*/;
-			let parametersTuple = DefiningCompiler.parseParameters(state, parametersString)/*unknown*/;
-			let parameters = DefiningCompiler.retainDefinitionsFromParameters(parametersTuple.right())/*unknown*/;
-			return RootCompiler.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType)/*unknown*/;
-		})/*unknown*/).or(() => RootCompiler.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType)/*unknown*/)/*unknown*/;
+		return CompilerUtils.compileSplit(beforeContent, new LocatingSplitter("(", new FirstLocator()), (rawName: string, withParameters: string) => {
+			return CompilerUtils.compileSplit(withParameters, new LocatingSplitter(")", new FirstLocator()), (parametersString: string, _: string) => {
+				let name = Strings.strip(rawName)/*unknown*/;
+				let parametersTuple = DefiningCompiler.parseParameters(state, parametersString)/*unknown*/;
+				let parameters = DefiningCompiler.retainDefinitionsFromParameters(parametersTuple.right())/*unknown*/;
+				return RootCompiler.compileStructureWithTypeParams(parametersTuple.left(), targetInfix, inputContent, name, parameters, maybeImplementing, annotations, modifiers, maybeSuperType)/*unknown*/;
+			})/*unknown*/;
+		}).or(() => RootCompiler.compileStructureWithTypeParams(state, targetInfix, inputContent, beforeContent, Lists.empty(), maybeImplementing, annotations, modifiers, maybeSuperType)/*unknown*/)/*unknown*/;
 	}
 	static compileStructureWithTypeParams(state: CompileState, infix: string, content: string, beforeParams: string, parameters: Iterable<Definition>, maybeImplementing: Option<Type>, annotations: List<string>, modifiers: List<string>, maybeSuperType: Iterable<Type>): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => CompilerUtils.compileFirst(withoutTypeParamEnd, "<", (name: string, typeParamsString: string) => {
-			let typeParams = CompilerUtils.divideValues(typeParamsString)/*unknown*/;
+		return CompilerUtils.compileSuffix(Strings.strip(beforeParams), ">", (withoutTypeParamEnd: string) => CompilerUtils.compileSplit(withoutTypeParamEnd, new LocatingSplitter("<", new FirstLocator()), (name: string, typeParamsString: string) => {
+			let typeParams = DefiningCompiler.divideValues(typeParamsString)/*unknown*/;
 			return RootCompiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType)/*unknown*/;
 		})/*unknown*/).or(() => RootCompiler.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType)/*unknown*/)/*unknown*/;
 	}

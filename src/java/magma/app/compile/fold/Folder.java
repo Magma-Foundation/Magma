@@ -1,4 +1,4 @@
-package magma.app.divide;
+package magma.app.compile.fold;
 
 import magma.app.compile.DivideState;
 

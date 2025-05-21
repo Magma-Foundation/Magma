@@ -15,10 +15,12 @@ import magma.app.compile.define.Definition;
 import magma.app.compile.define.MethodHeader;
 import magma.app.compile.define.Parameter;
 import magma.app.compile.value.Value;
+import magma.app.compile.locate.FirstLocator;
+import magma.app.compile.split.LocatingSplitter;
 
 final class FieldCompiler {
     public static Option<Tuple2<CompileState, String>> compileMethod(CompileState state, String input) {
-        return CompilerUtils.compileFirst(input, "(", (String beforeParams, String withParams) -> {
+        return CompilerUtils.compileSplit(input, new LocatingSplitter("(", new FirstLocator()), (String beforeParams, String withParams) -> {
             var strippedBeforeParams = Strings.strip(beforeParams);
             return CompilerUtils.compileLast(strippedBeforeParams, " ", (String _, String name) -> {
                 if (state.stack().isWithinLast(name)) {
@@ -38,7 +40,7 @@ final class FieldCompiler {
     }
 
     private static Option<Tuple2<CompileState, String>> compileMethodWithBeforeParams(CompileState state, MethodHeader header, String withParams) {
-        return CompilerUtils.compileFirst(withParams, ")", (String params, String afterParams) -> {
+        return CompilerUtils.compileSplit(withParams, new LocatingSplitter(")", new FirstLocator()), (String params, String afterParams) -> {
             var parametersTuple = DefiningCompiler.parseParameters(state, params);
 
             var parametersState = parametersTuple.left();

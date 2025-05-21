@@ -13,20 +13,25 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
-import magma.app.compile.DivideState;
+import magma.app.compile.merge.Merger;
+import magma.app.compile.select.Selector;
 import magma.app.compile.text.Whitespace;
-import magma.app.divide.DecoratedFolder;
-import magma.app.divide.FoldedDivider;
-import magma.app.divide.Folder;
-import magma.app.divide.StatementsFolder;
-import magma.app.select.LastSelector;
+import magma.app.compile.divide.FoldedDivider;
+import magma.app.compile.fold.DecoratedFolder;
+import magma.app.compile.fold.Folder;
+import magma.app.compile.fold.StatementsFolder;
+import magma.app.compile.fold.ValueFolder;
+import magma.app.compile.locate.LastLocator;
+import magma.app.compile.merge.StatementsMerger;
+import magma.app.compile.split.LocatingSplitter;
+import magma.app.compile.split.Splitter;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class CompilerUtils {
     static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
-        return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, CompilerUtils::mergeStatements);
+        return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger());
     }
 
     private static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, Merger merger) {
@@ -38,21 +43,17 @@ public final class CompilerUtils {
         return elements.iter().foldWithInitial("", merger::apply);
     }
 
-    private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> biFunction) {
+    private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) {
         return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
             var currentState = current.left();
             var currentElement = current.right();
 
-            return biFunction.apply(currentState, segment).map((Tuple2<CompileState, T> mappedTuple) -> {
+            return rule.apply(currentState, segment).map((Tuple2<CompileState, T> mappedTuple) -> {
                 var mappedState = mappedTuple.left();
                 var mappedElement = mappedTuple.right();
                 return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
             });
         }));
-    }
-
-    private static String mergeStatements(String cache, String element) {
-        return cache + element;
     }
 
     static Tuple2<CompileState, String> compileOrPlaceholder(
@@ -69,23 +70,9 @@ public final class CompilerUtils {
             Iterable<BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>>> rules
     ) {
         return rules.iter()
-                .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> CompilerUtils.getApply(state, input, rule))
+                .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> rule.apply(state, input))
                 .flatMap(Iters::fromOption)
                 .next();
-    }
-
-    private static <T> Option<Tuple2<CompileState, T>> getApply(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) {
-        return rule.apply(state, input);
-    }
-
-    static Tuple2<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(
-                CompilerUtils::compileWhitespace,
-                FunctionSegmentCompiler::compileEmptySegment,
-                FunctionSegmentCompiler::compileBlock,
-                FunctionSegmentCompiler::compileFunctionStatement,
-                FunctionSegmentCompiler::compileReturnWithoutSuffix
-        ));
     }
 
     static <T> Option<Tuple2<CompileState, T>> compilePrefix(
@@ -112,20 +99,6 @@ public final class CompilerUtils {
         return new None<Tuple2<CompileState, Whitespace>>();
     }
 
-    static DivideState foldDelimited(DivideState state1, char c, char delimiter) {
-        if (delimiter == c) {
-            return state1.advance();
-        }
-        return state1.append(c);
-    }
-
-    static List<String> divideValues(String input) {
-        return new FoldedDivider(new DecoratedFolder((state, c) -> CompilerUtils.foldValues(state, c))).divide(input)
-                .map((String input1) -> Strings.strip(input1))
-                .filter((String value) -> !Strings.isEmpty(value))
-                .collect(new ListCollector<String>());
-    }
-
     public static String generateValueStrings(Iterable<String> values) {
         return CompilerUtils.generateAll(values, CompilerUtils::mergeValues);
     }
@@ -139,7 +112,7 @@ public final class CompilerUtils {
     }
 
     static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> mapper) {
-        return CompilerUtils.parseAll(state, input, (state1, c) -> CompilerUtils.foldValues(state1, c), mapper);
+        return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper);
     }
 
     private static String mergeValues(String cache, String element) {
@@ -149,39 +122,8 @@ public final class CompilerUtils {
         return cache + ", " + element;
     }
 
-    private static DivideState foldValues(DivideState state, char c) {
-        if (',' == c && state.isLevel()) {
-            return state.advance();
-        }
-
-        var appended = state.append(c);
-        if ('-' == c) {
-            var peeked = appended.peek();
-            if ('>' == peeked) {
-                return appended.popAndAppendToOption().orElse(appended);
-            }
-            else {
-                return appended;
-            }
-        }
-
-        if ('<' == c || '(' == c) {
-            return appended.enter();
-        }
-
-        if ('>' == c || ')' == c) {
-            return appended.exit();
-        }
-
-        return appended;
-    }
-
     public static <T> Option<T> compileLast(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return CompilerUtils.compileInfix(input, infix, CompilerUtils::findLast, mapper);
-    }
-
-    private static int findLast(String input, String infix) {
-        return input.lastIndexOf(infix);
+        return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper);
     }
 
     public static <T> Option<T> compileSuffix(String input, String suffix, Function<String, Option<T>> mapper) {
@@ -195,33 +137,8 @@ public final class CompilerUtils {
         return mapper.apply(content);
     }
 
-    public static <T> Option<T> compileFirst(String input, String infix, BiFunction<String, String, Option<T>> mapper) {
-        return CompilerUtils.compileInfix(input, infix, CompilerUtils::findFirst, mapper);
-    }
-
-    private static <T> Option<T> compileInfix(String input, String infix, Locator locator, BiFunction<String, String, Option<T>> mapper) {
-        return CompilerUtils.compileSplit(CompilerUtils.split(input, infix, locator), mapper);
-    }
-
-    static <T> Option<T> compileSplit(Option<Tuple2<String, String>> splitter, BiFunction<String, String, Option<T>> mapper) {
-        return splitter.flatMap((Tuple2<String, String> tuple) -> mapper.apply(tuple.left(), tuple.right()));
-    }
-
-    private static Option<Tuple2<String, String>> split(String input, String infix, Locator locator) {
-        var index = locator.apply(input, infix);
-        if (0 > index) {
-            return new None<Tuple2<String, String>>();
-        }
-
-        var left = Strings.sliceBetween(input, 0, index);
-
-        var length = Strings.length(infix);
-        var right = Strings.sliceFrom(input, index + length);
-        return new Some<Tuple2<String, String>>(new Tuple2Impl<String, String>(left, right));
-    }
-
-    private static int findFirst(String input, String infix) {
-        return input.indexOf(infix);
+    static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {
+        return splitter.apply(input).flatMap((Tuple2<String, String> tuple) -> mapper.apply(tuple.left(), tuple.right()));
     }
 
     public static String generatePlaceholder(String input) {
@@ -230,24 +147,6 @@ public final class CompilerUtils {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
-    }
-
-    static Folder foldOperator(String infix) {
-        return (DivideState state, char c) -> {
-            if (c == infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
-                var length = Strings.length(infix) - 1;
-                var counter = 0;
-                var current = state;
-                while (counter < length) {
-                    counter++;
-
-                    current = current.pop().map((Tuple2<DivideState, Character> tuple) -> tuple.left()).orElse(current);
-                }
-                return current.advance();
-            }
-
-            return state.append(c);
-        };
     }
 
     static Option<Tuple2<String, String>> selectFirst(List<String> divisions, String delimiter) {
@@ -265,10 +164,6 @@ public final class CompilerUtils {
                 .map(mapper)
                 .flatMap(Iters::fromOption)
                 .collect(new ListCollector<R>());
-    }
-
-    static Option<Tuple2<String, String>> splitFoldedLast(String input, String delimiter, Folder folder) {
-        return CompilerUtils.splitFolded(input, folder, new LastSelector(delimiter));
     }
 
     public static Option<Tuple2<String, String>> splitFolded(

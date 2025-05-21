@@ -40,14 +40,32 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	Dependency: magma.app.compile, 
+	Divider: magma.app.compile.divide, 
+	FoldedDivider: magma.app.compile.divide, 
 	DivideState: magma.app.compile, 
+	DecoratedFolder: magma.app.compile.fold, 
+	DelimitedFolder: magma.app.compile.fold, 
+	Folder: magma.app.compile.fold, 
+	OperatorFolder: magma.app.compile.fold, 
+	StatementsFolder: magma.app.compile.fold, 
+	TypeSeparatorFolder: magma.app.compile.fold, 
+	ValueFolder: magma.app.compile.fold, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	ImmutableRegistry: magma.app.compile, 
 	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
+	FirstLocator: magma.app.compile.locate, 
+	LastLocator: magma.app.compile.locate, 
+	Locator: magma.app.compile.locate, 
+	Merger: magma.app.compile.merge, 
+	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	LastSelector: magma.app.compile.select, 
+	Selector: magma.app.compile.select, 
+	LocatingSplitter: magma.app.compile.split, 
+	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
@@ -69,25 +87,16 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
-	DecoratedFolder: magma.app.divide, 
-	Divider: magma.app.divide, 
-	FoldedDivider: magma.app.divide, 
-	Folder: magma.app.divide, 
-	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
-	Locator: magma.app, 
 	Main: magma.app, 
-	Merger: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
-	LastSelector: magma.app.select, 
-	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
@@ -100,12 +109,11 @@ import { Tuple2 } from "../../magma/api/Tuple2";
 import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Option } from "../../magma/api/option/Option";
 import { Strings } from "../../magma/api/text/Strings";
-import { TypeCompiler } from "../../magma/app/TypeCompiler";
-import { ConstructionCaller } from "../../magma/app/compile/define/ConstructionCaller";
-import { RootCompiler } from "../../magma/app/RootCompiler";
 import { Some } from "../../magma/api/option/Some";
 import { StringValue } from "../../magma/app/compile/value/StringValue";
 import { Not } from "../../magma/app/compile/value/Not";
+import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
+import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
 import { List } from "../../magma/api/collect/list/List";
@@ -115,8 +123,11 @@ import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler
 import { Stack } from "../../magma/app/compile/Stack";
 import { Lambda } from "../../magma/app/compile/value/Lambda";
 import { None } from "../../magma/api/option/None";
+import { RootCompiler } from "../../magma/app/RootCompiler";
 import { AccessValue } from "../../magma/app/compile/value/AccessValue";
+import { OperatorFolder } from "../../magma/app/compile/fold/OperatorFolder";
 import { Operation } from "../../magma/app/compile/value/Operation";
+import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Symbol } from "../../magma/app/compile/value/Symbol";
 import { HeadedIter } from "../../magma/api/collect/head/HeadedIter";
 import { RangeHead } from "../../magma/api/collect/head/RangeHead";
@@ -135,11 +146,15 @@ class ValueCompiler {
 		return new Tuple2Impl<CompileState, string>(state, generated + s)/*unknown*/;
 	}
 	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return CompilerUtils.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -  > foldInvocationStarts(state1, c)), (callerWithArgStart: string, args: string) => CompilerUtils.compileSuffix(callerWithArgStart, "(", (callerString: string) => CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (type: string) => TypeCompiler.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, string>) => {
-			let callerState = callerTuple.right()/*unknown*/;
-			let caller = callerTuple.left()/*unknown*/;
-			return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args)/*unknown*/;
-		})/*unknown*/).or(() => RootCompiler.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => ValueCompiler.assembleInvokable(callerTuple.left(), callerTuple.right(), args)/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*/;
+		return CompilerUtils.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => {
+			/*return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
+                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> ValueCompiler.foldInvocationStarts(state1, c), new LastSelector(""));
+            }, (String callerWithArgStart, String args) -> CompilerUtils.compileSuffix(callerWithArgStart, "(", (String callerString) -> CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (String type) -> TypeCompiler.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple) -> {
+                var callerState */ = /* callerTuple.right();
+                var caller = callerTuple.left();
+                return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args);
+            })).or(() -> RootCompiler.parseValue(state, callerString).flatMap((Tuple2<CompileState, Value> callerTuple) -> ValueCompiler.assembleInvokable(callerTuple.left(), callerTuple.right(), args)))))*/;
+		})/*unknown*/;
 	}
 	static createTextRule(slice: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: string) => {
@@ -156,7 +171,7 @@ class ValueCompiler {
 		})/*unknown*/;
 	}
 	static parseLambda(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return CompilerUtils.compileFirst(input, "->", (beforeArrow: string, afterArrow: string) => {
+		return CompilerUtils.compileSplit(input, new LocatingSplitter("->", new FirstLocator()), (beforeArrow: string, afterArrow: string) => {
 			let strippedBeforeArrow = Strings.strip(beforeArrow)/*unknown*/;
 			return CompilerUtils.compilePrefix(strippedBeforeArrow, "(", (withoutStart: string) => CompilerUtils.compileSuffix(withoutStart, ")", (withoutEnd: string) => CompilerUtils.parseValues(state, withoutEnd, (state1: CompileState, s: string) => DefiningCompiler.parseParameter(state1, s)/*unknown*/).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => ValueCompiler.compileLambdaWithParameterNames(paramNames.left(), DefiningCompiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow)/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*/;
 		})/*unknown*/;
@@ -192,11 +207,15 @@ class ValueCompiler {
 		})/*unknown*//*unknown*/;
 	}
 	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
-		return (state1: CompileState, input1: string) => CompilerUtils.compileSplit(CompilerUtils.splitFolded(input1, CompilerUtils.foldOperator(sourceInfix), (divisions: List<string>) => CompilerUtils.selectFirst(divisions, sourceInfix)/*unknown*/), (leftString: string, rightString: string) => RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
-			let left = leftTuple.right()/*unknown*/;
-			let right = rightTuple.right()/*unknown*/;
-			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)))/*unknown*/;
-		})/*unknown*/)/*unknown*/)/*unknown*//*unknown*/;
+		return (state1: CompileState, input1: string) => {
+			return CompilerUtils.compileSplit(input1, (slice: string) => CompilerUtils.splitFolded(slice, new OperatorFolder(sourceInfix), (divisions: List<string>) => {
+				return CompilerUtils.selectFirst(divisions, sourceInfix)/*unknown*/;
+			})/*unknown*/, (leftString: string, rightString: string) => RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
+				let left = leftTuple.right()/*unknown*/;
+				let right = rightTuple.right()/*unknown*/;
+				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)))/*unknown*/;
+			})/*unknown*/)/*unknown*/)/*unknown*/;
+		}/*unknown*/;
 	}
 	static parseSymbol(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		let stripped = Strings.strip(input)/*unknown*/;

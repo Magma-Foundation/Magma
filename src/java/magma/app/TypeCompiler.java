@@ -20,6 +20,8 @@ import magma.app.compile.type.VariadicType;
 import magma.app.compile.value.Placeholder;
 import magma.app.compile.value.Symbol;
 import magma.app.io.Source;
+import magma.app.compile.locate.FirstLocator;
+import magma.app.compile.split.LocatingSplitter;
 
 final class TypeCompiler {
     public static Option<Tuple2<CompileState, String>> compileType(CompileState state, String type) {
@@ -81,7 +83,7 @@ final class TypeCompiler {
     }
 
     private static Option<Tuple2<CompileState, Type>> parseGeneric(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> CompilerUtils.compileFirst(withoutEnd, "<", (String baseString, String argsString) -> {
+        return CompilerUtils.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (String baseString, String argsString) -> {
             var argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> TypeCompiler.compileTypeArgument(state1, s));
             var argsState = argsTuple.left();
             var args = argsTuple.right();

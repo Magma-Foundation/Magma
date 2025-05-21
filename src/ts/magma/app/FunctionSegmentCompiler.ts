@@ -40,14 +40,32 @@
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
 	Dependency: magma.app.compile, 
+	Divider: magma.app.compile.divide, 
+	FoldedDivider: magma.app.compile.divide, 
 	DivideState: magma.app.compile, 
+	DecoratedFolder: magma.app.compile.fold, 
+	DelimitedFolder: magma.app.compile.fold, 
+	Folder: magma.app.compile.fold, 
+	OperatorFolder: magma.app.compile.fold, 
+	StatementsFolder: magma.app.compile.fold, 
+	TypeSeparatorFolder: magma.app.compile.fold, 
+	ValueFolder: magma.app.compile.fold, 
 	ImmutableCompileState: magma.app.compile, 
 	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
 	ImmutableRegistry: magma.app.compile, 
 	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
+	FirstLocator: magma.app.compile.locate, 
+	LastLocator: magma.app.compile.locate, 
+	Locator: magma.app.compile.locate, 
+	Merger: magma.app.compile.merge, 
+	StatementsMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
+	LastSelector: magma.app.compile.select, 
+	Selector: magma.app.compile.select, 
+	LocatingSplitter: magma.app.compile.split, 
+	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
@@ -69,25 +87,16 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
-	DecoratedFolder: magma.app.divide, 
-	Divider: magma.app.divide, 
-	FoldedDivider: magma.app.divide, 
-	Folder: magma.app.divide, 
-	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
-	Locator: magma.app, 
 	Main: magma.app, 
-	Merger: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
-	LastSelector: magma.app.select, 
-	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
@@ -105,6 +114,8 @@ import { DivideState } from "../../magma/app/compile/DivideState";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { Value } from "../../magma/app/compile/value/Value";
+import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
+import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Definition } from "../../magma/app/compile/define/Definition";
 class FunctionSegmentCompiler {
@@ -117,11 +128,18 @@ class FunctionSegmentCompiler {
 		}
 	}
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -  > foldBlockStarts(state1, c)), (beforeContentWithEnd: string, content: string) => CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
-			let contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content)/*unknown*/;
-			let indent = state.createIndent()/*unknown*/;
-			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"))/*unknown*/;
-		})/*unknown*/)/*unknown*/)/*unknown*/)/*unknown*/;
+		return CompilerUtils.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => {
+			/*return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
+                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> {
+                    return foldBlockStarts(state1, c);
+                }, new LastSelector(""));
+            }, (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
+                var contentTuple */ = /* FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
+
+                var indent = state.createIndent();
+                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));
+            })))*/;
+		})/*unknown*/;
 	}
 	static foldBlockStarts(state: DivideState, c: string): DivideState {
 		let appended = state.append(c)/*unknown*/;
@@ -192,13 +210,16 @@ class FunctionSegmentCompiler {
 		return FunctionSegmentCompiler.compileReturn(input1, (withoutPrefix: string) => ValueCompiler.compileValue(state1, withoutPrefix)/*unknown*/).map((tuple: Tuple2<CompileState, string>) => new Tuple2Impl<CompileState, string>(tuple.left(), state1.createIndent() + tuple.right())/*unknown*/)/*unknown*/;
 	}
 	static compileAssignment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileFirst(input, "=", (destination: string, source: string) => {
+		return CompilerUtils.compileSplit(input, new LocatingSplitter("=", new FirstLocator()), (destination: string, source: string) => {
 			let sourceTuple = ValueCompiler.compileValueOrPlaceholder(state, source)/*unknown*/;
 			let destinationTuple = ValueCompiler.compileValue(sourceTuple.left(), destination).or(() => DefiningCompiler.parseDefinition(sourceTuple.left(), destination).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, string>(tuple.left(), "let " + tuple.right().generate())/*unknown*/)/*unknown*/).orElseGet(() => new Tuple2Impl<CompileState, string>(sourceTuple.left(), CompilerUtils.generatePlaceholder(destination))/*unknown*/)/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(destinationTuple.left(), destinationTuple.right() + " = " + sourceTuple.right()))/*unknown*/;
 		})/*unknown*/;
 	}
 	static compileFunctionStatements(state: CompileState, input: string): Tuple2<CompileState, string> {
-		return CompilerUtils.compileStatements(state, input, CompilerUtils.compileFunctionSegment)/*unknown*/;
+		return CompilerUtils.compileStatements(state, input, FunctionSegmentCompiler.compileFunctionSegment)/*unknown*/;
+	}
+	static compileFunctionSegment(state: CompileState, input: string): Tuple2<CompileState, string> {
+		return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(CompilerUtils.compileWhitespace, FunctionSegmentCompiler.compileEmptySegment, FunctionSegmentCompiler.compileBlock, FunctionSegmentCompiler.compileFunctionStatement, FunctionSegmentCompiler.compileReturnWithoutSuffix))/*unknown*/;
 	}
 }

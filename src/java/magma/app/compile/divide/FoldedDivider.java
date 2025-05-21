@@ -1,10 +1,11 @@
-package magma.app.divide;
+package magma.app.compile.divide;
 
 import jvm.api.collect.list.Lists;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iter;
 import magma.app.compile.DivideState;
 import magma.app.compile.ImmutableDivideState;
+import magma.app.compile.fold.Folder;
 
 public record FoldedDivider(Folder folder) implements Divider {
     @Override

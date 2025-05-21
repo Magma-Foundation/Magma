@@ -1,4 +1,4 @@
-package magma.app.divide;
+package magma.app.compile.fold;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
