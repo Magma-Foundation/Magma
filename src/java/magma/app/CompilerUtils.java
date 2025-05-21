@@ -137,14 +137,7 @@ public final class CompilerUtils {
     }
 
     public static <T> Option<T> compileSuffix(String input, String suffix, Composable<String, T> mapper) {
-        if (!input.endsWith(suffix)) {
-            return new None<T>();
-        }
-
-        var length = Strings.length(input);
-        var length1 = Strings.length(suffix);
-        var content = Strings.sliceBetween(input, 0, length - length1);
-        return mapper.apply(content);
+        return new SuffixComposable<>(suffix, mapper).apply(input);
     }
 
     static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {

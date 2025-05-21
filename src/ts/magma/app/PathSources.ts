@@ -103,6 +103,7 @@
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
+	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app

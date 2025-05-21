@@ -253,6 +253,9 @@ class RootCompiler {
 }
 interface Sources {
 }
+class SuffixComposable<T> {
+}
+SuffixComposable <|.. Composable
 interface Targets {
 }
 class TypeCompiler {
@@ -604,6 +607,7 @@ CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
 CompilerUtils --> Composable
+CompilerUtils --> SuffixComposable
 CompilerUtils --> Splitter
 CompilerUtils --> ListCollector
 DefiningCompiler --> Definition
@@ -757,6 +761,10 @@ Sources --> Iterable
 Sources --> IOError
 Sources --> Result
 Sources --> Path
+SuffixComposable --> Composable
+SuffixComposable --> Option
+SuffixComposable --> None
+SuffixComposable --> Strings
 Targets --> IOError
 Targets --> Option
 Targets --> Location

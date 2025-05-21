@@ -103,6 +103,7 @@
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
+	SuffixComposable: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
@@ -131,6 +132,7 @@ import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
 import { Composable } from "../../magma/app/compile/compose/Composable";
+import { SuffixComposable } from "../../magma/app/SuffixComposable";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
@@ -206,13 +208,7 @@ export class CompilerUtils {
 		return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;
 	}
 	static compileSuffix<T>(input: string, suffix: string, mapper: Composable<string, T>): Option<T> {
-		if (!input/*string*/.endsWith(suffix)/*unknown*/){
-			return new None<T>()/*unknown*/;
-		}
-		let length = Strings.length(input)/*unknown*/;
-		let length1 = Strings.length(suffix)/*unknown*/;
-		let content = Strings.sliceBetween(input, 0, length - length1)/*unknown*/;
-		return mapper.apply(content)/*unknown*/;
+		return new SuffixComposable<>(suffix, mapper).apply(input)/*unknown*/;
 	}
 	static compileSplit<T>(input: string, splitter: Splitter, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return splitter.apply(input).flatMap((tuple: Tuple2<string, string>) => {
