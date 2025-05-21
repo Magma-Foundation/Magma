@@ -1,61 +1,3 @@
-import { List } from "../../../../magma/api/collect/list/List";
-import { Path } from "../../../magma/api/io/Path";
-import { Head } from "../../../../magma/api/collect/head/Head";
-import { Option } from "../../../../magma/api/option/Option";
-import { None } from "../../../../magma/api/option/None";
-import { Iter } from "../../../../magma/api/collect/Iter";
-import { Collector } from "../../../../magma/api/collect/Collector";
-import { MapHead } from "../../../../magma/api/collect/head/MapHead";
-import { Tuple2 } from "../../../../magma/api/Tuple2";
-import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
-import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
-import { Result } from "../../../../magma/api/result/Result";
-import { Ok } from "../../../../magma/api/result/Ok";
-import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
-import { Some } from "../../../../magma/api/option/Some";
-import { HeadedIter } from "../../../magma/api/collect/head/HeadedIter";
-import { Lists } from "../../../../jvm/api/collect/list/Lists";
-import { IOError } from "../../../magma/api/io/IOError";
-import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
-import { Import } from "../../../magma/app/compile/Import";
-import { Source } from "../../../magma/app/io/Source";
-import { Definition } from "../../../magma/app/compile/define/Definition";
-import { Platform } from "../../../magma/app/Platform";
-import { Caller } from "../../../../magma/app/compile/value/Caller";
-import { Value } from "../../../../magma/app/compile/value/Value";
-import { MethodHeader } from "../../../../magma/app/compile/define/MethodHeader";
-import { Type } from "../../../../magma/app/compile/type/Type";
-import { Joiner } from "../../../../magma/api/collect/Joiner";
-import { Main } from "../../../../magma/app/Main";
-import { Strings } from "../../../../magma/api/text/Strings";
-import { CompileState } from "../../../magma/app/compile/CompileState";
-import { DivideState } from "../../../magma/app/compile/DivideState";
-import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
-import { Parameter } from "../../../../magma/app/compile/define/Parameter";
-import { Argument } from "../../../../magma/app/compile/value/Argument";
-import { ListCollector } from "../../../magma/api/collect/list/ListCollector";
-import { Files } from "../../jvm/api/io/Files";
-import { Console } from "../../magma/api/io/Console";
-import { Iters } from "../../magma/api/collect/Iters";
-import { Err } from "../../magma/api/result/Err";
-import { ConstructorHeader } from "../../magma/app/compile/define/ConstructorHeader";
-import { ConstructionCaller } from "../../magma/app/compile/define/ConstructionCaller";
-import { Invokable } from "../../magma/app/compile/value/Invokable";
-import { StringValue } from "../../magma/app/compile/value/StringValue";
-import { Not } from "../../magma/app/compile/value/Not";
-import { Lambda } from "../../magma/app/compile/value/Lambda";
-import { AccessValue } from "../../magma/app/compile/value/AccessValue";
-import { Operation } from "../../magma/app/compile/value/Operation";
-import { Symbol } from "../../magma/app/compile/text/Symbol";
-import { RangeHead } from "../../magma/api/collect/head/RangeHead";
-import { Characters } from "../../magma/api/text/Characters";
-import { Whitespace } from "../../magma/app/compile/text/Whitespace";
-import { Placeholder } from "../../magma/app/compile/text/Placeholder";
-import { VariadicType } from "../../magma/app/compile/type/VariadicType";
-import { TemplateType } from "../../magma/app/compile/type/TemplateType";
-import { FunctionType } from "../../magma/app/compile/type/FunctionType";
-import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
-import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
 export interface ListsInstance {
 	empty<T>(): List<T>;
 
@@ -472,6 +414,7 @@ export interface CompileState {
 	popStructureName(): CompileState;
 	withPlatform(platform: Platform): CompileState;
 	hasPlatform(platform: Platform): boolean;
+	findOutput(): string;
 }
 export class ConstructionCaller implements Caller {
 	right: string;
@@ -669,6 +612,9 @@ export class ImmutableCompileState implements CompileState {
 	}
 	hasPlatform(platform: Platform): boolean {
 		return this.platform === platform/*unknown*/;
+	}
+	findOutput(): string {
+		return this.output/*unknown*/;
 	}
 	queryImports(): Iter<Import> {
 		return this.imports.query()/*unknown*/;
@@ -1092,7 +1038,7 @@ export class Main {
 		let folded = Main.retainSources(children, sourceDirectory).query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.uml")/*unknown*/;
-			let maybeError = diagramPath.writeString(result.join(""))/*unknown*/;
+			let maybeError = diagramPath.writeString(result.findOutput())/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
 				return new Err<>(error)/*unknown*/;
 			}

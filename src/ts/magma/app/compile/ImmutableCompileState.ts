@@ -175,6 +175,9 @@ export class ImmutableCompileState implements CompileState {
 	hasPlatform(platform: Platform): boolean {
 		return this.platform === platform/*unknown*/;
 	}
+	findOutput(): string {
+		return this.output/*unknown*/;
+	}
 	queryImports(): Iter<Import> {
 		return this.imports.query()/*unknown*/;
 	}

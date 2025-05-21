@@ -91,4 +91,5 @@ export interface CompileState {
 	popStructureName(): CompileState;
 	withPlatform(platform: Platform): CompileState;
 	hasPlatform(platform: Platform): boolean;
+	findOutput(): string;
 }

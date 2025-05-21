@@ -51,4 +51,6 @@ public interface CompileState {
     CompileState withPlatform(Platform platform);
 
     boolean hasPlatform(Platform platform);
+
+    String findOutput();
 }

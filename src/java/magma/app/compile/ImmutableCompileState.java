@@ -167,6 +167,11 @@ public record ImmutableCompileState(
     }
 
     @Override
+    public String findOutput() {
+        return this.output;
+    }
+
+    @Override
     public Iter<Import> queryImports() {
         return this.imports.query();
     }
