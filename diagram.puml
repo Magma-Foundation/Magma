@@ -76,6 +76,8 @@ interface Tuple2<A, B> {
 class Tuple2Impl<A, B> {
 }
 Tuple2Impl <|.. Tuple2
+class Application {
+}
 interface CompileState {
 }
 interface Context {
@@ -171,11 +173,17 @@ class Location {
 }
 class Main {
 }
+class PathSources {
+}
+PathSources <|.. Sources
+class PathTargets {
+}
+PathTargets <|.. Targets
 class Platform {
 }
-class Sources {
+interface Sources {
 }
-class Targets {
+interface Targets {
 }
 Lists --> List
 Files --> Path
@@ -249,6 +257,25 @@ Ok --> Option
 Ok --> None
 Result --> Option
 Tuple2Impl --> Tuple2
+Application --> Sources
+Application --> Targets
+Application --> CompileState
+Application --> IOError
+Application --> Result
+Application --> Iters
+Application --> Platform
+Application --> ImmutableCompileState
+Application --> Source
+Application --> Iterable
+Application --> Context
+Application --> Files
+Application --> Dependency
+Application --> Joiner
+Application --> Err
+Application --> Compiler
+Application --> Ok
+Application --> Import
+Application --> Tuple2Impl
 CompileState --> Registry
 CompileState --> Context
 CompileState --> Stack
@@ -467,34 +494,31 @@ Source --> Result
 Source --> Location
 Location --> List
 Main --> Files
-Main --> Sources
+Main --> PathSources
+Main --> PathTargets
+Main --> Application
 Main --> IOError
 Main --> Console
-Main --> CompileState
-Main --> Result
-Main --> Iters
-Main --> Platform
-Main --> ImmutableCompileState
-Main --> Source
-Main --> Iterable
-Main --> Context
-Main --> Dependency
-Main --> Joiner
-Main --> Err
-Main --> Compiler
-Main --> Ok
-Main --> Import
-Main --> Tuple2Impl
-Sources --> Path
+PathSources --> Sources
+PathSources --> Path
+PathSources --> Source
+PathSources --> Iterable
+PathSources --> IOError
+PathSources --> Result
+PathSources --> PathSource
+PathSources --> ListCollector
+PathTargets --> Targets
+PathTargets --> Path
+PathTargets --> IOError
+PathTargets --> Option
+PathTargets --> None
+PathTargets --> Location
 Sources --> Source
 Sources --> Iterable
 Sources --> IOError
 Sources --> Result
-Sources --> PathSource
-Sources --> ListCollector
-Targets --> Path
+Sources --> Path
 Targets --> IOError
 Targets --> Option
-Targets --> None
 Targets --> Location
 @enduml

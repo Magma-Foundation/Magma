@@ -31,6 +31,7 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
@@ -70,83 +71,23 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
+	PathSources: magma.app, 
+	PathTargets: magma.app, 
 	Platform: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
 import { Files } from "../../jvm/api/io/Files";
-import { Sources } from "../../magma/app/Sources";
+import { PathSources } from "../../magma/app/PathSources";
+import { PathTargets } from "../../magma/app/PathTargets";
+import { Application } from "../../magma/app/Application";
 import { IOError } from "../../magma/api/io/IOError";
 import { Console } from "../../magma/api/io/Console";
-import { CompileState } from "../../magma/app/compile/CompileState";
-import { Result } from "../../magma/api/result/Result";
-import { Iters } from "../../magma/api/collect/Iters";
-import { Platform } from "../../magma/app/Platform";
-import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
-import { Source } from "../../magma/app/io/Source";
-import { Iterable } from "../../magma/api/collect/list/Iterable";
-import { Context } from "../../magma/app/compile/Context";
-import { Dependency } from "../../magma/app/compile/Dependency";
-import { Joiner } from "../../magma/api/collect/Joiner";
-import { Err } from "../../magma/api/result/Err";
-import { Compiler } from "../../magma/app/Compiler";
-import { Ok } from "../../magma/api/result/Ok";
-import { Import } from "../../magma/app/compile/Import";
-import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
-		let sources = new Sources(sourceDirectory)/*unknown*/;
-		Main.runWithSourceDirectory(sources).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
-	}
-	static runWithSourceDirectory(sources: Sources): Result<CompileState, IOError> {
-		return Iters.fromArray(Platform.values()).foldWithInitialToResult(ImmutableCompileState.createEmpty(), (state: CompileState, platform: Platform) => {
-			return sources.listSources().flatMapValue((children: Iterable<Source>) => {
-				return Main.runWithChildren(state.mapContext((context: Context) => context.withPlatform(platform)/*unknown*/), children)/*unknown*/;
-			})/*unknown*/;
-		})/*unknown*/;
-	}
-	static runWithChildren(state: CompileState, sources: Iterable<Source>): Result<CompileState, IOError> {
-		let initial = sources.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.mapContext(context -  > context.addSource(source))/*unknown*/)/*unknown*/;
-		let folded = sources.iter().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
-		if (/*state.context().hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
-			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
-			let joinedDependencies = result.registry().iterDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
-			let maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.registry().output() + joinedDependencies + "@enduml")/*unknown*/;
-			if (/*maybeError instanceof Some(var error)*/){
-				return new Err<CompileState, IOError>(error)/*unknown*/;
-			}
-		}
-		return folded/*unknown*/;
-	}
-	static runWithSource(state: CompileState, source: Source): Result<CompileState, IOError> {
-		return source.read().flatMapValue((input: string) => Main.compileAndWrite(state, source, input)/*unknown*/)/*unknown*/;
-	}
-	static compileAndWrite(state: CompileState, source: Source, input: string): Result<CompileState, IOError> {
-		let location = source.createLocation()/*unknown*/;
-		let compiled = Compiler.compileRoot(state, input, location)/*unknown*/;
-		let compiledState = compiled.left()/*unknown*/;
-		if (compiledState.context().hasPlatform(Platform.PlantUML)/*unknown*/){
-			return new Ok<CompileState, IOError>(compiledState)/*unknown*/;
-		}
-		let segment = state.context().iterSources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
-		let otherOutput = compiled.right()/*unknown*/;
-		let joinedImports = compiledState.registry().queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
-		let joined = joinedImports + compiledState.registry().output() + otherOutput/*unknown*/;
-		let output = new Tuple2Impl<CompileState, string>(state, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
-		let cleared = output.left().mapRegistry(registry -  > registry.clearImports()).mapRegistry(registry1 -  > registry1.clearOutput())/*unknown*/;
-		return Main.writeTarget(source, cleared, output.right())/*unknown*/;
-	}
-	static writeTarget(source: Source, state: CompileState, output: string): Result<CompileState, IOError> {
-		/*return new Targets(Files.get(".", "src", "ts"))
-                .writeSource(source.createLocation(), output)
-                .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
-                .orElseGet(() -> new Ok<CompileState, IOError>(state))*/;
-	}
-	static formatSource(source: Source): string {
-		return "\n\t" + source.createLocation().name() + ": " + Main.joinNamespace(source)/*unknown*/;
-	}
-	static joinNamespace(source: Source): string {
-		return source.createLocation().namespace().iter().collect(new Joiner(".")).orElse("")/*unknown*/;
+		let sources = new PathSources(sourceDirectory)/*unknown*/;
+		let targets = new PathTargets(Files.get(".", "src", "ts"))/*unknown*/;
+		Application.run(new Application(sources, targets)).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
 	}
 }

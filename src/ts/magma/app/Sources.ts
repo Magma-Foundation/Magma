@@ -31,6 +31,7 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
@@ -70,26 +71,18 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
+	PathSources: magma.app, 
+	PathTargets: magma.app, 
 	Platform: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Path } from "../../magma/api/io/Path";
 import { Source } from "../../magma/app/io/Source";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { IOError } from "../../magma/api/io/IOError";
 import { Result } from "../../magma/api/result/Result";
-import { PathSource } from "../../magma/app/io/PathSource";
-import { ListCollector } from "../../magma/api/collect/list/ListCollector";
-export class Sources {
-	sourceDirectory: Path;
-	constructor (sourceDirectory: Path) {
-		this.sourceDirectory = sourceDirectory;
-	}
-	listSources(): Result<Iterable<Source>, IOError> {
-		return this.sourceDirectory().walk().mapValue((children: Iterable<Path>) => this.retainSources(children)/*unknown*/)/*unknown*/;
-	}
-	retainSources(children: Iterable<Path>): Iterable<Source> {
-		return children.iter().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<>())/*unknown*/;
-	}
+import { Path } from "../../magma/api/io/Path";
+export interface Sources {
+	listSources(): Result<Iterable<Source>, IOError>;
+	retainSources(children: Iterable<Path>): Iterable<Source>;
 }

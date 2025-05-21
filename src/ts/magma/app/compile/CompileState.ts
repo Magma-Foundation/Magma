@@ -31,6 +31,7 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
@@ -70,6 +71,8 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
+	PathSources: magma.app, 
+	PathTargets: magma.app, 
 	Platform: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app

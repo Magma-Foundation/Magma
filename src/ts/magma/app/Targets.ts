@@ -31,6 +31,7 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Application: magma.app, 
 	CompileState: magma.app.compile, 
 	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
@@ -70,32 +71,15 @@
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
+	PathSources: magma.app, 
+	PathTargets: magma.app, 
 	Platform: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Path } from "../../magma/api/io/Path";
 import { IOError } from "../../magma/api/io/IOError";
 import { Option } from "../../magma/api/option/Option";
-import { None } from "../../magma/api/option/None";
 import { Location } from "../../magma/app/Location";
-export class Targets {
-	root: Path;
-	constructor (root: Path) {
-		this.root = root;
-	}
-	static writeTarget(target: Path, output: string): Option<IOError> {
-		return Targets.ensureTargetParent(target).or(() => target.writeString(output)/*unknown*/)/*unknown*/;
-	}
-	static ensureTargetParent(target: Path): Option<IOError> {
-		let parent = target.getParent()/*unknown*/;
-		if (parent.exists()/*unknown*/){
-			return new None<IOError>()/*unknown*/;
-		}
-		return parent.createDirectories()/*unknown*/;
-	}
-	writeSource(location: Location, output: string): Option<IOError> {
-		let target = this.root.resolveChildSegments(location.namespace()).resolveChild(location.name() + ".ts")/*unknown*/;
-		return Targets.writeTarget(target, output)/*unknown*/;
-	}
+export interface Targets {
+	writeSource(location: Location, output: string): Option<IOError>;
 }
