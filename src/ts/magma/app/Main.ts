@@ -72,7 +72,6 @@ import { Result } from "../../magma/api/result/Result";
 import { Path } from "../../magma/api/io/Path";
 import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
-import { Compiler } from "../../magma/app/Compiler";
 import { List } from "../../magma/api/collect/list/List";
 import { Source } from "../../magma/app/io/Source";
 import { Dependency } from "../../magma/app/compile/Dependency";
@@ -80,16 +79,20 @@ import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { Location } from "../../magma/app/Location";
+import { Compiler } from "../../magma/app/Compiler";
 import { Ok } from "../../magma/api/result/Ok";
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Option } from "../../magma/api/option/Option";
 import { None } from "../../magma/api/option/None";
+import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
+import { Lists } from "../../jvm/api/collect/list/Lists";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
 		Main.runWithSourceDirectory(sourceDirectory).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
 	}
 	static runWithSourceDirectory(sourceDirectory: Path): Result<CompileState, IOError> {
-		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Compiler.createInitialCompileState(), (state: CompileState, platform: Platform) => sourceDirectory.walk().flatMapValue((children: List<Path>) => Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)/*unknown*/)/*unknown*/)/*unknown*/;
+		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => sourceDirectory.walk().flatMapValue((children: List<Path>) => Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory)/*unknown*/)/*unknown*/)/*unknown*/;
 	}
 	static runWithChildren(state: CompileState, children: List<Path>, sourceDirectory: Path): Result<CompileState, IOError> {
 		let initial = Main.retainSources(children, sourceDirectory).query().foldWithInitial(state, (current: CompileState, source: Source) => current.addSource(source)/*unknown*/)/*unknown*/;
@@ -119,7 +122,7 @@ export class Main {
 		}
 		let segment = state.querySources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		let joined = compiledState.join(compiled.right())/*unknown*/;
-		let output = /* (Tuple2<CompileState, String>) new Tuple2Impl<CompileState, String>(state, "start[" + segment + "\n]end\n" + joined)*/;
+		let output = new Tuple2Impl<CompileState, string>(state, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
 		return Main.writeTarget(source, output.left().clearImports().clearOutput(), output.right())/*unknown*/;
 	}
 	static writeTarget(source: Source, state: CompileState, output: string): Result<CompileState, IOError> {
@@ -137,7 +140,12 @@ export class Main {
 		return parent.createDirectories()/*unknown*/;
 	}
 	static formatSource(source: Source): string {
-		let joinedNamespace = source.computeNamespace().query().collect(new Joiner(".")).orElse("")/*unknown*/;
-		return "\n\t" + source.computeName() + ": " + joinedNamespace/*unknown*/;
+		return "\n\t" + source.computeName() + ": " + Main.joinNamespace(source)/*unknown*/;
+	}
+	static joinNamespace(source: Source): string {
+		return source.computeNamespace().query().collect(new Joiner(".")).orElse("")/*unknown*/;
+	}
+	static createInitialState(): CompileState {
+		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;
 	}
 }

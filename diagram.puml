@@ -406,9 +406,8 @@ Compiler --> VariadicType
 Compiler --> PrimitiveType
 Compiler --> TemplateType
 Compiler --> FunctionType
-Compiler --> ImmutableCompileState
-Compiler --> Location
 Compiler --> ImmutableDivideState
+Compiler --> Location
 Source --> Path
 Source --> IOError
 Source --> Result
@@ -423,7 +422,6 @@ Main --> Result
 Main --> Path
 Main --> Iters
 Main --> Platform
-Main --> Compiler
 Main --> List
 Main --> Source
 Main --> Dependency
@@ -431,7 +429,11 @@ Main --> Joiner
 Main --> Err
 Main --> ListCollector
 Main --> Location
+Main --> Compiler
 Main --> Ok
+Main --> Tuple2Impl
 Main --> Option
 Main --> None
+Main --> ImmutableCompileState
+Main --> Lists
 @enduml

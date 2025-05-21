@@ -104,9 +104,8 @@ import { VariadicType } from "../../magma/app/compile/type/VariadicType";
 import { PrimitiveType } from "../../magma/app/compile/type/PrimitiveType";
 import { TemplateType } from "../../magma/app/compile/type/TemplateType";
 import { FunctionType } from "../../magma/app/compile/type/FunctionType";
-import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
-import { Location } from "../../magma/app/Location";
 import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
+import { Location } from "../../magma/app/Location";
 export class Compiler {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return Compiler.compileAll(state, input, Compiler.foldStatements, mapper, Compiler.mergeStatements)/*unknown*/;
@@ -892,9 +891,6 @@ export class Compiler {
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
 		return "/*" + replaced + "*/"/*unknown*/;
-	}
-	static createInitialCompileState(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;
 	}
 	static createInitialDivideState(input: string): DivideState {
 		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
