@@ -33,4 +33,9 @@ public enum PrimitiveType implements Type {
     public String generateBeforeName() {
         return "";
     }
+
+    @Override
+    public String generateSimple() {
+        return this.generate();
+    }
 }

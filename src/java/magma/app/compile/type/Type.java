@@ -8,4 +8,6 @@ public interface Type {
     boolean isVar();
 
     String generateBeforeName();
+
+    String generateSimple();
 }

@@ -16,6 +16,8 @@ public record Joiner(String delimiter) implements Collector<String, Option<Strin
 
     @Override
     public Option<String> fold(Option<String> maybe, String element) {
-        return new Some<String>(maybe.map((String inner) -> inner + this.delimiter + element).orElse(element));
+        return new Some<String>(maybe.map((String inner) -> {
+            return inner + this.delimiter + element;
+        }).orElse(element));
     }
 }

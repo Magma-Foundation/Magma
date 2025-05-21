@@ -2,7 +2,7 @@ package magma.app.compile;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.api.collect.Query;
+import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -12,8 +12,8 @@ import magma.api.text.Strings;
 public record ImmutableDivideState(List<String> segments, String buffer, int depth, String input,
                                    int index) implements DivideState {
     @Override
-    public Query<String> query() {
-        return this.segments.query();
+    public Iter<String> query() {
+        return this.segments.iter();
     }
 
     @Override
@@ -59,12 +59,16 @@ public record ImmutableDivideState(List<String> segments, String buffer, int dep
 
     @Override
     public Option<Tuple2<DivideState, Character>> popAndAppendToTuple() {
-        return this.pop().map((Tuple2<DivideState, Character> inner) -> new Tuple2Impl<DivideState, Character>(inner.left().append(inner.right()), inner.right()));
+        return this.pop().map((Tuple2<DivideState, Character> inner) -> {
+            return new Tuple2Impl<DivideState, Character>(inner.left().append(inner.right()), inner.right());
+        });
     }
 
     @Override
     public Option<DivideState> popAndAppendToOption() {
-        return this.popAndAppendToTuple().map((Tuple2<DivideState, Character> tuple) -> tuple.left());
+        return this.popAndAppendToTuple().map((Tuple2<DivideState, Character> tuple) -> {
+            return tuple.left();
+        });
     }
 
     @Override

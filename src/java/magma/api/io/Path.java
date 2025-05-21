@@ -1,7 +1,7 @@
 package magma.api.io;
 
-import magma.api.collect.list.List;
-import magma.api.collect.Query;
+import magma.api.collect.list.Iterable;
+import magma.api.collect.Iter;
 import magma.api.result.Result;
 import magma.api.option.Option;
 
@@ -12,7 +12,7 @@ public interface Path {
 
     Path resolveSibling(String siblingName);
 
-    Result<List<Path>, IOError> walk();
+    Result<Iterable<Path>, IOError> walk();
 
     String findFileName();
 
@@ -22,9 +22,9 @@ public interface Path {
 
     Path getParent();
 
-    Query<String> query();
+    Iter<String> query();
 
-    Path resolveChildSegments(List<String> children);
+    Path resolveChildSegments(Iterable<String> children);
 
     Path resolveChild(String name);
 

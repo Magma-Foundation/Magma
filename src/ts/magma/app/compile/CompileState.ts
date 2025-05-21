@@ -8,15 +8,17 @@
 	EmptyHead: magma.api.collect.head, 
 	FlatMapHead: magma.api.collect.head, 
 	Head: magma.api.collect.head, 
-	HeadedQuery: magma.api.collect.head, 
+	HeadedIter: magma.api.collect.head, 
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
-	Iterators: magma.api.collect, 
+	Iter: magma.api.collect, 
+	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
-	Query: magma.api.collect, 
+	Sequence: magma.api.collect.list, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
@@ -30,18 +32,51 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Application: magma.app, 
 	CompileState: magma.app.compile, 
+	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SplitComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
+	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
 	Definition: magma.app.compile.define, 
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
+	Dependency: magma.app.compile, 
+	Divider: magma.app.compile.divide, 
+	FoldedDivider: magma.app.compile.divide, 
 	DivideState: magma.app.compile, 
+	DecoratedFolder: magma.app.compile.fold, 
+	DelimitedFolder: magma.app.compile.fold, 
+	Folder: magma.app.compile.fold, 
+	OperatorFolder: magma.app.compile.fold, 
+	StatementsFolder: magma.app.compile.fold, 
+	TypeSeparatorFolder: magma.app.compile.fold, 
+	ValueFolder: magma.app.compile.fold, 
 	ImmutableCompileState: magma.app.compile, 
+	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
+	ImmutableRegistry: magma.app.compile, 
+	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
-	Placeholder: magma.app.compile.text, 
-	Symbol: magma.app.compile.text, 
+	FirstLocator: magma.app.compile.locate, 
+	LastLocator: magma.app.compile.locate, 
+	Locator: magma.app.compile.locate, 
+	Merger: magma.app.compile.merge, 
+	StatementsMerger: magma.app.compile.merge, 
+	ValueMerger: magma.app.compile.merge, 
+	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
+	FirstSelector: magma.app.compile.select, 
+	LastSelector: magma.app.compile.select, 
+	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
+	LocatingSplitter: magma.app.compile.split, 
+	Splitter: magma.app.compile.split, 
+	Stack: magma.app.compile, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
 	PrimitiveType: magma.app.compile.type, 
@@ -55,36 +90,41 @@
 	Lambda: magma.app.compile.value, 
 	Not: magma.app.compile.value, 
 	Operation: magma.app.compile.value, 
+	Placeholder: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
+	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	DivideRule: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
+	PathSource: magma.app.io, 
 	Source: magma.app.io, 
-	Main: magma.app
+	Location: magma.app, 
+	Main: magma.app, 
+	PathSources: magma.app, 
+	PathTargets: magma.app, 
+	Platform: magma.app, 
+	RootCompiler: magma.app, 
+	Sources: magma.app, 
+	Targets: magma.app, 
+	TypeCompiler: magma.app, 
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
-import { Import } from "../../../magma/app/compile/Import";
-import { Query } from "../../../magma/api/collect/Query";
-import { Source } from "../../../magma/app/io/Source";
-import { Option } from "../../../magma/api/option/Option";
-import { List } from "../../../magma/api/collect/list/List";
-import { Definition } from "../../../magma/app/compile/define/Definition";
+import { Registry } from "../../../magma/app/compile/Registry";
+import { Context } from "../../../magma/app/compile/Context";
+import { Stack } from "../../../magma/app/compile/Stack";
 export interface CompileState {
-	join(otherOutput: string): string;
-	queryImports(): Query<Import>;
-	querySources(): Query<Source>;
 	createIndent(): string;
-	findLastStructureName(): Option<string>;
-	isLastWithin(name: string): boolean;
-	addResolvedImport(parent: List<string>, child: string): CompileState;
-	withNamespace(namespace: List<string>): CompileState;
-	append(element: string): CompileState;
-	pushStructureName(name: string): CompileState;
+	mapRegistry(mapper: (arg0 : Registry) => Registry): CompileState;
+	mapContext(mapper: (arg0 : Context) => Context): CompileState;
 	enterDepth(): CompileState;
 	exitDepth(): CompileState;
-	defineAll(definitions: List<Definition>): CompileState;
-	resolve(name: string): Option<Definition>;
-	clearImports(): CompileState;
-	clearOutput(): CompileState;
-	addSource(source: Source): CompileState;
-	findSource(name: string): Option<Source>;
-	addResolvedImportFromCache(base: string): CompileState;
-	popStructureName(): CompileState;
+	mapStack(mapper: (arg0 : Stack) => Stack): CompileState;
+	context(): Context;
+	registry(): Registry;
+	stack(): Stack;
 }

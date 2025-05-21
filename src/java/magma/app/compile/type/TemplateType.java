@@ -1,12 +1,13 @@
 package magma.app.compile.type;
 
-import magma.api.collect.list.List;
-import magma.app.Main;
+import magma.api.collect.list.Iterable;
+import magma.app.compile.merge.Merger;
+import magma.app.compile.merge.ValueMerger;
 
-public record TemplateType(String base, List<String> args) implements Type {
+public record TemplateType(String base, Iterable<String> args) implements Type {
     @Override
     public String generate() {
-        return this.base + "<" + Main.generateValueStrings(this.args) + ">";
+        return this.base + "<" + Merger.generateAll(this.args, new ValueMerger()) + ">";
     }
 
     @Override
@@ -22,5 +23,10 @@ public record TemplateType(String base, List<String> args) implements Type {
     @Override
     public String generateBeforeName() {
         return "";
+    }
+
+    @Override
+    public String generateSimple() {
+        return this.base;
     }
 }

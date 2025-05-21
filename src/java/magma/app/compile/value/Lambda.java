@@ -1,7 +1,7 @@
 package magma.app.compile.value;
 
 import magma.api.collect.Joiner;
-import magma.api.collect.list.List;
+import magma.api.collect.list.Iterable;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -10,11 +10,13 @@ import magma.app.compile.define.Definition;
 import magma.app.compile.type.PrimitiveType;
 import magma.app.compile.type.Type;
 
-public record Lambda(List<Definition> paramNames, String content) implements Value {
+public record Lambda(Iterable<Definition> paramNames, String content) implements Value {
     @Override
     public String generate() {
-        var joinedParamNames = this.paramNames.query()
-                .map((Definition definition) -> definition.generate())
+        var joinedParamNames = this.paramNames.iter()
+                .map((Definition definition) -> {
+                    return definition.generate();
+                })
                 .collect(new Joiner(", "))
                 .orElse("");
 

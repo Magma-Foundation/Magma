@@ -1,0 +1,915 @@
+@startuml
+skinparam linetype ortho
+class Lists {
+}
+class Files {
+}
+interface Actual {
+}
+interface Namespace {
+}
+interface Collector<T, C> {
+}
+class EmptyHead<T> {
+}
+EmptyHead <|.. Head
+class FlatMapHead<T, R> {
+}
+FlatMapHead <|.. Head
+interface Head<T> {
+}
+class HeadedIter<T> {
+}
+HeadedIter <|.. Iter
+class MapHead<T, R> {
+}
+MapHead <|.. Head
+class RangeHead {
+}
+RangeHead <|.. Head
+class SingleHead<T> {
+}
+SingleHead <|.. Head
+interface Iter<T> {
+}
+class Iters {
+}
+class Joiner {
+}
+Joiner <|.. Collector
+interface Iterable<T> {
+}
+interface List<T> {
+}
+List <|-- Sequence
+class ListCollector<T> {
+}
+ListCollector <|.. Collector
+interface Sequence<T> {
+}
+Sequence <|-- Iterable
+class Console {
+}
+interface IOError {
+}
+interface Path {
+}
+class None<T> {
+}
+None <|.. Option
+interface Option<T> {
+}
+class Some<T> {
+}
+Some <|.. Option
+class Err<T, X> {
+}
+Err <|.. Result
+class Ok<T, X> {
+}
+Ok <|.. Result
+interface Result<T, X> {
+}
+class Characters {
+}
+class Strings {
+}
+interface Tuple2<A, B> {
+}
+class Tuple2Impl<A, B> {
+}
+Tuple2Impl <|.. Tuple2
+class Application {
+}
+interface CompileState {
+}
+interface Composable<T, R> {
+}
+class PrefixComposable<T> {
+}
+PrefixComposable <|.. Composable
+class SplitComposable<T> {
+}
+SplitComposable <|.. Composable
+class SuffixComposable<T> {
+}
+SuffixComposable <|.. Composable
+interface Context {
+}
+class ConstructionCaller {
+}
+ConstructionCaller <|.. Caller
+class ConstructorHeader {
+}
+ConstructorHeader <|.. MethodHeader
+class Definition {
+}
+interface MethodHeader {
+}
+interface Parameter {
+}
+class Dependency {
+}
+interface Divider {
+}
+class FoldedDivider {
+}
+FoldedDivider <|.. Divider
+interface DivideState {
+}
+class DecoratedFolder {
+}
+DecoratedFolder <|.. Folder
+class DelimitedFolder {
+}
+DelimitedFolder <|.. Folder
+interface Folder {
+}
+class OperatorFolder {
+}
+OperatorFolder <|.. Folder
+class StatementsFolder {
+}
+StatementsFolder <|.. Folder
+class TypeSeparatorFolder {
+}
+TypeSeparatorFolder <|.. Folder
+class ValueFolder {
+}
+ValueFolder <|.. Folder
+class ImmutableCompileState {
+}
+ImmutableCompileState <|.. CompileState
+class ImmutableContext {
+}
+ImmutableContext <|.. Context
+class ImmutableDivideState {
+}
+ImmutableDivideState <|.. DivideState
+class ImmutableRegistry {
+}
+ImmutableRegistry <|.. Registry
+class ImmutableStack {
+}
+ImmutableStack <|.. Stack
+class Import {
+}
+class FirstLocator {
+}
+FirstLocator <|.. Locator
+class LastLocator {
+}
+LastLocator <|.. Locator
+interface Locator {
+}
+interface Merger {
+}
+class StatementsMerger {
+}
+StatementsMerger <|.. Merger
+class ValueMerger {
+}
+ValueMerger <|.. Merger
+interface Registry {
+}
+class OrRule<T> {
+}
+OrRule <|.. Rule
+interface Rule<T> {
+}
+class FirstSelector {
+}
+FirstSelector <|.. Selector
+class LastSelector {
+}
+LastSelector <|.. Selector
+interface Selector {
+}
+class FoldingSplitter {
+}
+FoldingSplitter <|.. Splitter
+class LocatingSplitter {
+}
+LocatingSplitter <|.. Splitter
+interface Splitter {
+}
+interface Stack {
+}
+class Whitespace {
+}
+Whitespace <|.. Parameter
+class FunctionType {
+}
+FunctionType <|.. Type
+class PrimitiveType {
+}
+PrimitiveType <|.. Type
+class TemplateType {
+}
+TemplateType <|.. Type
+interface Type {
+}
+class VariadicType {
+}
+VariadicType <|.. Type
+class AccessValue {
+}
+AccessValue <|.. Value
+interface Argument {
+}
+interface Caller {
+}
+class Invokable {
+}
+Invokable <|.. Value
+class Lambda {
+}
+Lambda <|.. Value
+class Not {
+}
+Not <|.. Value
+class Operation {
+}
+Operation <|.. Value
+class Placeholder {
+}
+class StringValue {
+}
+StringValue <|.. Value
+class Symbol {
+}
+class CompilerUtils {
+}
+class DefiningCompiler {
+}
+class DefinitionCompiler {
+}
+class DivideRule<T> {
+}
+DivideRule <|.. Rule
+class FieldCompiler {
+}
+class FunctionSegmentCompiler {
+}
+class PathSource {
+}
+PathSource <|.. Source
+interface Source {
+}
+class Location {
+}
+class Main {
+}
+class PathSources {
+}
+PathSources <|.. Sources
+class PathTargets {
+}
+PathTargets <|.. Targets
+class Platform {
+}
+class RootCompiler {
+}
+interface Sources {
+}
+interface Targets {
+}
+class TypeCompiler {
+}
+class ValueCompiler {
+}
+class WhitespaceCompiler {
+}
+Lists --> List
+Files --> Path
+EmptyHead --> Head
+EmptyHead --> Option
+EmptyHead --> None
+FlatMapHead --> Head
+FlatMapHead --> Iter
+FlatMapHead --> Option
+FlatMapHead --> None
+Head --> Option
+HeadedIter --> Iter
+HeadedIter --> Head
+HeadedIter --> Option
+HeadedIter --> Collector
+HeadedIter --> MapHead
+HeadedIter --> Tuple2
+HeadedIter --> FlatMapHead
+HeadedIter --> EmptyHead
+HeadedIter --> Result
+HeadedIter --> Ok
+HeadedIter --> SingleHead
+MapHead --> Head
+MapHead --> Option
+RangeHead --> Head
+RangeHead --> Option
+RangeHead --> None
+RangeHead --> Some
+SingleHead --> Head
+SingleHead --> Option
+SingleHead --> None
+SingleHead --> Some
+Iter --> Collector
+Iter --> Option
+Iter --> Result
+Iters --> Iter
+Iters --> Option
+Iters --> HeadedIter
+Iters --> EmptyHead
+Iters --> Head
+Iters --> SingleHead
+Iters --> RangeHead
+Joiner --> Option
+Joiner --> Collector
+Joiner --> None
+Joiner --> Some
+Iterable --> Iter
+Iterable --> Tuple2
+List --> Sequence
+List --> Option
+List --> Iterable
+ListCollector --> List
+ListCollector --> Collector
+ListCollector --> Lists
+Sequence --> Iterable
+Sequence --> Option
+Path --> IOError
+Path --> Option
+Path --> Result
+Path --> Iterable
+Path --> Iter
+None --> Option
+None --> Tuple2
+None --> Tuple2Impl
+Option --> Tuple2
+Some --> Option
+Some --> None
+Some --> Tuple2
+Some --> Tuple2Impl
+Err --> Result
+Err --> Option
+Err --> Some
+Ok --> Result
+Ok --> Option
+Ok --> None
+Result --> Option
+Tuple2Impl --> Tuple2
+Application --> Sources
+Application --> Targets
+Application --> Source
+Application --> Joiner
+Application --> IOError
+Application --> Option
+Application --> Platform
+Application --> Iterable
+Application --> CompileState
+Application --> Result
+Application --> ImmutableCompileState
+Application --> Context
+Application --> Files
+Application --> Dependency
+Application --> Err
+Application --> RootCompiler
+Application --> Ok
+Application --> Import
+Application --> Registry
+CompileState --> Registry
+CompileState --> Context
+CompileState --> Stack
+Composable --> Tuple2
+Composable --> Option
+PrefixComposable --> Composable
+PrefixComposable --> Option
+PrefixComposable --> None
+PrefixComposable --> Strings
+SplitComposable --> Composable
+SplitComposable --> Splitter
+SplitComposable --> Tuple2
+SplitComposable --> Option
+SplitComposable --> LocatingSplitter
+SplitComposable --> LastLocator
+SuffixComposable --> Composable
+SuffixComposable --> Option
+SuffixComposable --> None
+SuffixComposable --> Strings
+Context --> Source
+Context --> Iter
+Context --> Platform
+Context --> Option
+Context --> Location
+Context --> List
+ConstructionCaller --> Caller
+ConstructionCaller --> Value
+ConstructionCaller --> Option
+ConstructionCaller --> None
+ConstructorHeader --> MethodHeader
+Definition --> List
+Definition --> Iterable
+Definition --> Type
+Definition --> Option
+Definition --> Some
+Definition --> Joiner
+Definition --> RootCompiler
+Definition --> MethodHeader
+Definition --> Strings
+Parameter --> Definition
+Parameter --> Option
+Divider --> Iter
+FoldedDivider --> Divider
+FoldedDivider --> Folder
+FoldedDivider --> Iter
+FoldedDivider --> DivideState
+FoldedDivider --> Tuple2Impl
+DivideState --> Iter
+DivideState --> Tuple2
+DivideState --> Option
+DecoratedFolder --> Folder
+DecoratedFolder --> DivideState
+DecoratedFolder --> Option
+DecoratedFolder --> None
+DecoratedFolder --> Tuple2
+DecoratedFolder --> Some
+DecoratedFolder --> Tuple2Impl
+DelimitedFolder --> Folder
+DelimitedFolder --> DivideState
+Folder --> DivideState
+OperatorFolder --> Folder
+OperatorFolder --> DivideState
+OperatorFolder --> Strings
+OperatorFolder --> Tuple2
+StatementsFolder --> Folder
+StatementsFolder --> DivideState
+TypeSeparatorFolder --> Folder
+TypeSeparatorFolder --> DivideState
+ValueFolder --> Folder
+ValueFolder --> DivideState
+ImmutableCompileState --> CompileState
+ImmutableCompileState --> Context
+ImmutableCompileState --> Registry
+ImmutableCompileState --> Stack
+ImmutableCompileState --> ImmutableContext
+ImmutableCompileState --> ImmutableRegistry
+ImmutableCompileState --> ImmutableStack
+ImmutableContext --> Context
+ImmutableContext --> Platform
+ImmutableContext --> Option
+ImmutableContext --> Location
+ImmutableContext --> Source
+ImmutableContext --> List
+ImmutableContext --> None
+ImmutableContext --> Lists
+ImmutableContext --> Iter
+ImmutableContext --> Strings
+ImmutableContext --> Some
+ImmutableDivideState --> DivideState
+ImmutableDivideState --> List
+ImmutableDivideState --> Iter
+ImmutableDivideState --> Tuple2
+ImmutableDivideState --> Option
+ImmutableDivideState --> Strings
+ImmutableDivideState --> None
+ImmutableDivideState --> Some
+ImmutableDivideState --> Tuple2Impl
+ImmutableRegistry --> Registry
+ImmutableRegistry --> Import
+ImmutableRegistry --> List
+ImmutableRegistry --> Dependency
+ImmutableRegistry --> Lists
+ImmutableRegistry --> Iter
+ImmutableStack --> Stack
+ImmutableStack --> List
+ImmutableStack --> Definition
+ImmutableStack --> Lists
+ImmutableStack --> Option
+ImmutableStack --> Strings
+ImmutableStack --> Iterable
+Import --> Iterable
+Import --> Joiner
+Import --> Strings
+FirstLocator --> Locator
+LastLocator --> Locator
+Merger --> CompileState
+Merger --> Tuple2
+Merger --> List
+Merger --> Tuple2Impl
+Merger --> Iterable
+StatementsMerger --> Merger
+ValueMerger --> Merger
+ValueMerger --> Strings
+Registry --> Dependency
+Registry --> Iter
+Registry --> Import
+OrRule --> Rule
+OrRule --> Iterable
+OrRule --> CompileState
+OrRule --> Tuple2
+OrRule --> Tuple2Impl
+OrRule --> Placeholder
+OrRule --> Option
+OrRule --> Iters
+Rule --> CompileState
+Rule --> Tuple2
+Rule --> Option
+FirstSelector --> Selector
+FirstSelector --> Tuple2
+FirstSelector --> Option
+FirstSelector --> List
+FirstSelector --> Joiner
+FirstSelector --> Some
+FirstSelector --> Tuple2Impl
+LastSelector --> Selector
+LastSelector --> Tuple2
+LastSelector --> Option
+LastSelector --> List
+LastSelector --> Joiner
+LastSelector --> Some
+LastSelector --> Tuple2Impl
+Selector --> Tuple2
+Selector --> Option
+Selector --> List
+FoldingSplitter --> Splitter
+FoldingSplitter --> Folder
+FoldingSplitter --> Selector
+FoldingSplitter --> Tuple2
+FoldingSplitter --> Option
+FoldingSplitter --> FoldedDivider
+FoldingSplitter --> DecoratedFolder
+FoldingSplitter --> ListCollector
+FoldingSplitter --> None
+LocatingSplitter --> Splitter
+LocatingSplitter --> Locator
+LocatingSplitter --> Tuple2
+LocatingSplitter --> Option
+LocatingSplitter --> None
+LocatingSplitter --> Strings
+LocatingSplitter --> Some
+LocatingSplitter --> Tuple2Impl
+Splitter --> Tuple2
+Splitter --> Option
+Stack --> Option
+Stack --> Definition
+Stack --> Iterable
+Whitespace --> Parameter
+Whitespace --> Definition
+Whitespace --> Option
+Whitespace --> None
+FunctionType --> Type
+FunctionType --> Iterable
+FunctionType --> Tuple2
+FunctionType --> Joiner
+PrimitiveType --> Type
+TemplateType --> Type
+TemplateType --> Iterable
+TemplateType --> Merger
+TemplateType --> ValueMerger
+VariadicType --> Type
+AccessValue --> Value
+AccessValue --> Option
+AccessValue --> Some
+AccessValue --> Type
+AccessValue --> CompileState
+AccessValue --> PrimitiveType
+AccessValue --> None
+Argument --> Value
+Argument --> Option
+Caller --> Value
+Caller --> Option
+Invokable --> Value
+Invokable --> Caller
+Invokable --> Iterable
+Invokable --> Joiner
+Invokable --> Option
+Invokable --> Some
+Invokable --> None
+Invokable --> Type
+Invokable --> CompileState
+Invokable --> PrimitiveType
+Lambda --> Value
+Lambda --> Definition
+Lambda --> Iterable
+Lambda --> Joiner
+Lambda --> Option
+Lambda --> Some
+Lambda --> None
+Lambda --> Type
+Lambda --> CompileState
+Lambda --> PrimitiveType
+Not --> Value
+Not --> Option
+Not --> Some
+Not --> None
+Not --> Type
+Not --> CompileState
+Not --> PrimitiveType
+Operation --> Value
+Operation --> Option
+Operation --> Some
+Operation --> None
+Operation --> Type
+Operation --> CompileState
+Operation --> PrimitiveType
+Placeholder --> Value
+Placeholder --> Option
+Placeholder --> None
+Placeholder --> Definition
+Placeholder --> Type
+Placeholder --> CompileState
+Placeholder --> PrimitiveType
+StringValue --> Value
+StringValue --> Option
+StringValue --> Some
+StringValue --> None
+StringValue --> Type
+StringValue --> CompileState
+StringValue --> PrimitiveType
+Symbol --> Type
+Symbol --> CompileState
+Symbol --> Definition
+Symbol --> PrimitiveType
+Symbol --> Value
+Symbol --> Option
+Symbol --> Some
+Symbol --> None
+DefiningCompiler --> Definition
+DefiningCompiler --> Iterable
+DefiningCompiler --> Parameter
+DefiningCompiler --> Iters
+DefiningCompiler --> ListCollector
+DefiningCompiler --> CompileState
+DefiningCompiler --> List
+DefiningCompiler --> Tuple2
+DefiningCompiler --> ValueCompiler
+DefiningCompiler --> Some
+DefiningCompiler --> Tuple2Impl
+DefiningCompiler --> Lists
+DefiningCompiler --> Placeholder
+DefiningCompiler --> Option
+DefiningCompiler --> WhitespaceCompiler
+DefiningCompiler --> Whitespace
+DefiningCompiler --> SplitComposable
+DefiningCompiler --> Strings
+DefiningCompiler --> LastSelector
+DefiningCompiler --> Selector
+DefiningCompiler --> FoldingSplitter
+DefiningCompiler --> TypeSeparatorFolder
+DefiningCompiler --> Composable
+DefiningCompiler --> FoldedDivider
+DefiningCompiler --> DecoratedFolder
+DefiningCompiler --> DivideState
+DefiningCompiler --> DelimitedFolder
+DefiningCompiler --> SuffixComposable
+DefiningCompiler --> LocatingSplitter
+DefiningCompiler --> FirstLocator
+DefiningCompiler --> Splitter
+DefiningCompiler --> TypeCompiler
+DefiningCompiler --> Type
+DefiningCompiler --> Joiner
+DefiningCompiler --> ValueFolder
+DefinitionCompiler --> Definition
+DefinitionCompiler --> Iterable
+DefinitionCompiler --> Parameter
+DefinitionCompiler --> Iters
+DefinitionCompiler --> ListCollector
+DefinitionCompiler --> Joiner
+DefinitionCompiler --> CompileState
+DefinitionCompiler --> List
+DefinitionCompiler --> Tuple2
+DefinitionCompiler --> ValueCompiler
+DefinitionCompiler --> Some
+DefinitionCompiler --> DefiningCompiler
+DefinitionCompiler --> Tuple2Impl
+DefinitionCompiler --> Lists
+DivideRule --> List
+DivideRule --> Rule
+DivideRule --> Folder
+DivideRule --> CompileState
+DivideRule --> Tuple2
+DivideRule --> Some
+DivideRule --> Option
+DivideRule --> FoldedDivider
+DivideRule --> DecoratedFolder
+DivideRule --> Tuple2Impl
+DivideRule --> Lists
+FieldCompiler --> CompileState
+FieldCompiler --> Tuple2
+FieldCompiler --> Option
+FieldCompiler --> LocatingSplitter
+FieldCompiler --> FirstLocator
+FieldCompiler --> Splitter
+FieldCompiler --> SplitComposable
+FieldCompiler --> Composable
+FieldCompiler --> Strings
+FieldCompiler --> ConstructorHeader
+FieldCompiler --> None
+FieldCompiler --> DefiningCompiler
+FieldCompiler --> Definition
+FieldCompiler --> MethodHeader
+FieldCompiler --> Joiner
+FieldCompiler --> Some
+FieldCompiler --> Tuple2Impl
+FieldCompiler --> PrefixComposable
+FieldCompiler --> SuffixComposable
+FieldCompiler --> FunctionSegmentCompiler
+FieldCompiler --> Stack
+FieldCompiler --> Parameter
+FieldCompiler --> ValueCompiler
+FieldCompiler --> List
+FieldCompiler --> Value
+FunctionSegmentCompiler --> CompileState
+FunctionSegmentCompiler --> Tuple2
+FunctionSegmentCompiler --> Option
+FunctionSegmentCompiler --> Strings
+FunctionSegmentCompiler --> Some
+FunctionSegmentCompiler --> Tuple2Impl
+FunctionSegmentCompiler --> None
+FunctionSegmentCompiler --> SuffixComposable
+FunctionSegmentCompiler --> SplitComposable
+FunctionSegmentCompiler --> LastSelector
+FunctionSegmentCompiler --> Selector
+FunctionSegmentCompiler --> FoldingSplitter
+FunctionSegmentCompiler --> DivideState
+FunctionSegmentCompiler --> Composable
+FunctionSegmentCompiler --> OrRule
+FunctionSegmentCompiler --> Lists
+FunctionSegmentCompiler --> Rule
+FunctionSegmentCompiler --> PrefixComposable
+FunctionSegmentCompiler --> ValueCompiler
+FunctionSegmentCompiler --> Value
+FunctionSegmentCompiler --> LocatingSplitter
+FunctionSegmentCompiler --> FirstLocator
+FunctionSegmentCompiler --> Splitter
+FunctionSegmentCompiler --> DefiningCompiler
+FunctionSegmentCompiler --> Definition
+FunctionSegmentCompiler --> Placeholder
+FunctionSegmentCompiler --> WhitespaceCompiler
+FunctionSegmentCompiler --> DivideRule
+FunctionSegmentCompiler --> StatementsFolder
+FunctionSegmentCompiler --> Merger
+FunctionSegmentCompiler --> StatementsMerger
+PathSource --> Source
+PathSource --> Path
+PathSource --> IOError
+PathSource --> Result
+PathSource --> List
+PathSource --> ListCollector
+PathSource --> Location
+Source --> IOError
+Source --> Result
+Source --> Location
+Location --> List
+Main --> Files
+Main --> PathSources
+Main --> PathTargets
+Main --> Application
+Main --> IOError
+Main --> Console
+Main --> Option
+Main --> Iters
+Main --> Platform
+PathSources --> Sources
+PathSources --> Path
+PathSources --> Source
+PathSources --> Iterable
+PathSources --> IOError
+PathSources --> Result
+PathSources --> PathSource
+PathSources --> ListCollector
+PathTargets --> Targets
+PathTargets --> Path
+PathTargets --> IOError
+PathTargets --> Option
+PathTargets --> None
+PathTargets --> Location
+RootCompiler --> CompileState
+RootCompiler --> Tuple2
+RootCompiler --> OrRule
+RootCompiler --> Lists
+RootCompiler --> WhitespaceCompiler
+RootCompiler --> Rule
+RootCompiler --> SplitComposable
+RootCompiler --> LocatingSplitter
+RootCompiler --> FirstLocator
+RootCompiler --> Composable
+RootCompiler --> SuffixComposable
+RootCompiler --> DefiningCompiler
+RootCompiler --> Some
+RootCompiler --> Tuple2Impl
+RootCompiler --> Strings
+RootCompiler --> Option
+RootCompiler --> List
+RootCompiler --> TypeCompiler
+RootCompiler --> Type
+RootCompiler --> None
+RootCompiler --> Splitter
+RootCompiler --> ValueCompiler
+RootCompiler --> Iterable
+RootCompiler --> Definition
+RootCompiler --> FunctionSegmentCompiler
+RootCompiler --> Stack
+RootCompiler --> Joiner
+RootCompiler --> Platform
+RootCompiler --> Registry
+RootCompiler --> FieldCompiler
+RootCompiler --> Location
+RootCompiler --> Context
+Sources --> Source
+Sources --> Iterable
+Sources --> IOError
+Sources --> Result
+Sources --> Path
+Targets --> IOError
+Targets --> Option
+Targets --> Location
+TypeCompiler --> CompileState
+TypeCompiler --> Tuple2
+TypeCompiler --> Option
+TypeCompiler --> Type
+TypeCompiler --> Tuple2Impl
+TypeCompiler --> OrRule
+TypeCompiler --> Lists
+TypeCompiler --> Strings
+TypeCompiler --> SuffixComposable
+TypeCompiler --> Some
+TypeCompiler --> VariadicType
+TypeCompiler --> ValueCompiler
+TypeCompiler --> Symbol
+TypeCompiler --> None
+TypeCompiler --> PrimitiveType
+TypeCompiler --> LocatingSplitter
+TypeCompiler --> FirstLocator
+TypeCompiler --> Splitter
+TypeCompiler --> SplitComposable
+TypeCompiler --> Composable
+TypeCompiler --> List
+TypeCompiler --> TemplateType
+TypeCompiler --> FunctionType
+TypeCompiler --> WhitespaceCompiler
+TypeCompiler --> Placeholder
+TypeCompiler --> Location
+TypeCompiler --> Import
+TypeCompiler --> Registry
+TypeCompiler --> Source
+TypeCompiler --> Platform
+TypeCompiler --> Dependency
+ValueCompiler --> CompileState
+ValueCompiler --> Tuple2Impl
+ValueCompiler --> Value
+ValueCompiler --> Tuple2
+ValueCompiler --> Placeholder
+ValueCompiler --> Option
+ValueCompiler --> SuffixComposable
+ValueCompiler --> SplitComposable
+ValueCompiler --> LastSelector
+ValueCompiler --> Selector
+ValueCompiler --> FoldingSplitter
+ValueCompiler --> DivideState
+ValueCompiler --> Composable
+ValueCompiler --> PrefixComposable
+ValueCompiler --> TypeCompiler
+ValueCompiler --> ConstructionCaller
+ValueCompiler --> Strings
+ValueCompiler --> Rule
+ValueCompiler --> Some
+ValueCompiler --> StringValue
+ValueCompiler --> Not
+ValueCompiler --> LocatingSplitter
+ValueCompiler --> FirstLocator
+ValueCompiler --> Splitter
+ValueCompiler --> DefiningCompiler
+ValueCompiler --> Parameter
+ValueCompiler --> List
+ValueCompiler --> Definition
+ValueCompiler --> Iterable
+ValueCompiler --> FunctionSegmentCompiler
+ValueCompiler --> Stack
+ValueCompiler --> Lambda
+ValueCompiler --> None
+ValueCompiler --> AccessValue
+ValueCompiler --> OperatorFolder
+ValueCompiler --> FirstSelector
+ValueCompiler --> Operation
+ValueCompiler --> Symbol
+ValueCompiler --> HeadedIter
+ValueCompiler --> RangeHead
+ValueCompiler --> Characters
+ValueCompiler --> Type
+ValueCompiler --> Argument
+ValueCompiler --> Caller
+ValueCompiler --> Invokable
+ValueCompiler --> Iters
+ValueCompiler --> ListCollector
+ValueCompiler --> OrRule
+ValueCompiler --> Lists
+ValueCompiler --> DivideRule
+ValueCompiler --> ValueFolder
+WhitespaceCompiler --> CompileState
+WhitespaceCompiler --> Tuple2
+WhitespaceCompiler --> Option
+WhitespaceCompiler --> Whitespace
+WhitespaceCompiler --> Tuple2Impl
+WhitespaceCompiler --> Strings
+WhitespaceCompiler --> Some
+WhitespaceCompiler --> None
+@enduml

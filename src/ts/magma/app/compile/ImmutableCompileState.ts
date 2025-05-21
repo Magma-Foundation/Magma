@@ -8,15 +8,17 @@
 	EmptyHead: magma.api.collect.head, 
 	FlatMapHead: magma.api.collect.head, 
 	Head: magma.api.collect.head, 
-	HeadedQuery: magma.api.collect.head, 
+	HeadedIter: magma.api.collect.head, 
 	MapHead: magma.api.collect.head, 
 	RangeHead: magma.api.collect.head, 
 	SingleHead: magma.api.collect.head, 
-	Iterators: magma.api.collect, 
+	Iter: magma.api.collect, 
+	Iters: magma.api.collect, 
 	Joiner: magma.api.collect, 
+	Iterable: magma.api.collect.list, 
 	List: magma.api.collect.list, 
 	ListCollector: magma.api.collect.list, 
-	Query: magma.api.collect, 
+	Sequence: magma.api.collect.list, 
 	Console: magma.api.io, 
 	IOError: magma.api.io, 
 	Path: magma.api.io, 
@@ -30,18 +32,51 @@
 	Strings: magma.api.text, 
 	Tuple2: magma.api, 
 	Tuple2Impl: magma.api, 
+	Application: magma.app, 
 	CompileState: magma.app.compile, 
+	Composable: magma.app.compile.compose, 
+	PrefixComposable: magma.app.compile.compose, 
+	SplitComposable: magma.app.compile.compose, 
+	SuffixComposable: magma.app.compile.compose, 
+	Context: magma.app.compile, 
 	ConstructionCaller: magma.app.compile.define, 
 	ConstructorHeader: magma.app.compile.define, 
 	Definition: magma.app.compile.define, 
 	MethodHeader: magma.app.compile.define, 
 	Parameter: magma.app.compile.define, 
+	Dependency: magma.app.compile, 
+	Divider: magma.app.compile.divide, 
+	FoldedDivider: magma.app.compile.divide, 
 	DivideState: magma.app.compile, 
+	DecoratedFolder: magma.app.compile.fold, 
+	DelimitedFolder: magma.app.compile.fold, 
+	Folder: magma.app.compile.fold, 
+	OperatorFolder: magma.app.compile.fold, 
+	StatementsFolder: magma.app.compile.fold, 
+	TypeSeparatorFolder: magma.app.compile.fold, 
+	ValueFolder: magma.app.compile.fold, 
 	ImmutableCompileState: magma.app.compile, 
+	ImmutableContext: magma.app.compile, 
 	ImmutableDivideState: magma.app.compile, 
+	ImmutableRegistry: magma.app.compile, 
+	ImmutableStack: magma.app.compile, 
 	Import: magma.app.compile, 
-	Placeholder: magma.app.compile.text, 
-	Symbol: magma.app.compile.text, 
+	FirstLocator: magma.app.compile.locate, 
+	LastLocator: magma.app.compile.locate, 
+	Locator: magma.app.compile.locate, 
+	Merger: magma.app.compile.merge, 
+	StatementsMerger: magma.app.compile.merge, 
+	ValueMerger: magma.app.compile.merge, 
+	Registry: magma.app.compile, 
+	OrRule: magma.app.compile.rule, 
+	Rule: magma.app.compile.rule, 
+	FirstSelector: magma.app.compile.select, 
+	LastSelector: magma.app.compile.select, 
+	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
+	LocatingSplitter: magma.app.compile.split, 
+	Splitter: magma.app.compile.split, 
+	Stack: magma.app.compile, 
 	Whitespace: magma.app.compile.text, 
 	FunctionType: magma.app.compile.type, 
 	PrimitiveType: magma.app.compile.type, 
@@ -55,117 +90,76 @@
 	Lambda: magma.app.compile.value, 
 	Not: magma.app.compile.value, 
 	Operation: magma.app.compile.value, 
+	Placeholder: magma.app.compile.value, 
 	StringValue: magma.app.compile.value, 
+	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	DivideRule: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
+	PathSource: magma.app.io, 
 	Source: magma.app.io, 
-	Main: magma.app
+	Location: magma.app, 
+	Main: magma.app, 
+	PathSources: magma.app, 
+	PathTargets: magma.app, 
+	Platform: magma.app, 
+	RootCompiler: magma.app, 
+	Sources: magma.app, 
+	Targets: magma.app, 
+	TypeCompiler: magma.app, 
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { CompileState } from "../../../magma/app/compile/CompileState";
-import { Import } from "../../../magma/app/compile/Import";
-import { List } from "../../../magma/api/collect/list/List";
-import { Definition } from "../../../magma/app/compile/define/Definition";
-import { Option } from "../../../magma/api/option/Option";
-import { Source } from "../../../magma/app/io/Source";
-import { Joiner } from "../../../magma/api/collect/Joiner";
-import { Query } from "../../../magma/api/collect/Query";
-import { Strings } from "../../../magma/api/text/Strings";
-import { Lists } from "../../../jvm/api/collect/list/Lists";
-import { Some } from "../../../magma/api/option/Some";
+import { Context } from "../../../magma/app/compile/Context";
+import { Registry } from "../../../magma/app/compile/Registry";
+import { Stack } from "../../../magma/app/compile/Stack";
+import { ImmutableContext } from "../../../magma/app/compile/ImmutableContext";
+import { ImmutableRegistry } from "../../../magma/app/compile/ImmutableRegistry";
+import { ImmutableStack } from "../../../magma/app/compile/ImmutableStack";
 export class ImmutableCompileState implements CompileState {
-	imports: List<Import>;
-	output: string;
-	structureNames: List<string>;
+	context: Context;
+	registry: Registry;
 	depth: number;
-	definitions: List<Definition>;
-	maybeNamespace: Option<List<string>>;
-	sources: List<Source>;
-	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeNamespace: Option<List<string>>, sources: List<Source>) {
-		this.imports = imports;
-		this.output = output;
-		this.structureNames = structureNames;
-		this.depth = depth;
-		this.definitions = definitions;
-		this.maybeNamespace = maybeNamespace;
-		this.sources = sources;
+	stack: Stack;
+	constructor (context: Context, registry: Registry, stack: Stack, depth: number) {
+		this.context/*unknown*/ = context/*Context*/;
+		this.registry/*unknown*/ = registry/*Registry*/;
+		this.depth/*unknown*/ = depth/*number*/;
+		this.stack/*unknown*/ = stack/*Stack*/;
 	}
-	join(otherOutput: string): string {
-		let joinedImports = this.queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
-		return joinedImports + this.output + otherOutput/*unknown*/;
-	}
-	querySources(): Query<Source> {
-		return this.sources.query()/*unknown*/;
+	static createEmpty(): CompileState {
+		return new ImmutableCompileState(ImmutableContext.createEmpty(), ImmutableRegistry.createEmpty(), ImmutableStack.createEmpty(), 0)/*unknown*/;
 	}
 	createIndent(): string {
 		return "\n" + "\t".repeat(this.depth)/*unknown*/;
 	}
-	findLastStructureName(): Option<string> {
-		return this.structureNames.findLast()/*unknown*/;
+	mapRegistry(mapper: (arg0 : Registry) => Registry): CompileState {
+		return new ImmutableCompileState(this.context, mapper(this.registry()), this.stack, this.depth)/*unknown*/;
 	}
-	isLastWithin(name: string): boolean {
-		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
-	}
-	addResolvedImport(parent: List<string>, child: string): CompileState {
-		let parent1 = parent/*List<string>*/;
-		let namespace = this.maybeNamespace.orElse(Lists.empty())/*unknown*/;
-		if (namespace.isEmpty()/*unknown*/){
-			parent1/*unknown*/ = parent1.addFirst(".")/*unknown*/;
-		}
-		let i = 0/*unknown*/;
-		let size = namespace.size()/*unknown*/;
-		while (i < size/*unknown*/){
-			parent1/*unknown*/ = parent1.addFirst("..")/*unknown*/;
-			i/*unknown*/++;
-		}
-		let stringList = parent1.addLast(child)/*unknown*/;
-		if (this.imports.query().filter((node: Import) => node.hasSameChild(child)/*unknown*/).next().isPresent()/*unknown*/){
-			return this/*unknown*/;
-		}
-		let importString = new Import(stringList, child)/*unknown*/;
-		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
-	}
-	withNamespace(namespace: List<string>): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<string>>(namespace), this.sources)/*unknown*/;
-	}
-	append(element: string): CompileState {
-		return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
-	}
-	pushStructureName(name: string): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
+	mapContext(mapper: (arg0 : Context) => Context): CompileState {
+		return new ImmutableCompileState(mapper(this.context), this.registry, this.stack, this.depth)/*unknown*/;
 	}
 	enterDepth(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.stack, this.depth + 1)/*unknown*/;
 	}
 	exitDepth(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
+		return new ImmutableCompileState(this.context, this.registry, this.stack, this.depth - 1)/*unknown*/;
 	}
-	defineAll(definitions: List<Definition>): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources)/*unknown*/;
+	mapStack(mapper: (arg0 : Stack) => Stack): CompileState {
+		return new ImmutableCompileState(this.context, this.registry, mapper(this.stack), this.depth)/*unknown*/;
 	}
-	resolve(name: string): Option<Definition> {
-		return this.definitions.queryReversed().filter((definition: Definition) => definition.isNamed(name)/*unknown*/).next()/*unknown*/;
+	context(): Context {
+		return this.context/*unknown*/;
 	}
-	clearImports(): CompileState {
-		return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
+	registry(): Registry {
+		return this.registry/*unknown*/;
 	}
-	clearOutput(): CompileState {
-		return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
-	}
-	addSource(source: Source): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source))/*unknown*/;
-	}
-	findSource(name: string): Option<Source> {
-		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)/*unknown*/).next()/*unknown*/;
-	}
-	addResolvedImportFromCache(base: string): CompileState {
-		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
-			return this/*unknown*/;
-		}
-		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())/*unknown*/).orElse(this)/*unknown*/;
-	}
-	popStructureName(): CompileState {
-		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources)/*unknown*/;
-	}
-	queryImports(): Query<Import> {
-		return this.imports.query()/*unknown*/;
+	stack(): Stack {
+		return this.stack/*unknown*/;
 	}
 }

@@ -23,7 +23,6 @@ public record AccessValue(Value child, String property) implements Value {
         return new Some<Value>(this.child);
     }
 
-    @Override
     public Type resolve(CompileState state) {
         return PrimitiveType.Unknown;
     }

@@ -1,17 +1,18 @@
 package magma.app.compile.define;
 
 import magma.api.collect.Joiner;
+import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
-import magma.app.Main;
+import magma.app.RootCompiler;
 import magma.app.compile.type.Type;
 
 public record Definition(
         List<String> annotations,
         List<String> modifiers,
-        List<String> typeParams,
+        Iterable<String> typeParams,
         Type type,
         String name
 ) implements MethodHeader, Parameter {
@@ -36,8 +37,10 @@ public record Definition(
     @Override
     public String generateWithAfterName(String afterName) {
         var joinedTypeParams = this.joinTypeParams();
-        var joinedModifiers = this.modifiers.query()
-                .map((String value) -> value + " ")
+        var joinedModifiers = this.modifiers.iter()
+                .map((String value) -> {
+                    return value + " ";
+                })
                 .collect(new Joiner(""))
                 .orElse("");
 
@@ -53,7 +56,7 @@ public record Definition(
     }
 
     private String joinTypeParams() {
-        return Main.joinTypeParams(this.typeParams);
+        return RootCompiler.joinTypeParams(this.typeParams);
     }
 
     @Override
