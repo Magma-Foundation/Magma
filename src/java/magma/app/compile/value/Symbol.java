@@ -16,7 +16,9 @@ public record Symbol(String value) implements Value, Type {
 
     public Type resolve(CompileState state) {
         return state.stack().resolveValue(this.value)
-                .map((Definition definition) -> definition.findType())
+                .map((Definition definition) -> {
+                    return definition.findType();
+                })
                 .orElse(PrimitiveType.Unknown);
     }
 

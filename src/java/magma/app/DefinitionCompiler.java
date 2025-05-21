@@ -14,20 +14,28 @@ import magma.app.compile.define.Parameter;
 final class DefinitionCompiler {
     public static Iterable<Definition> retainDefinitionsFromParameters(Iterable<Parameter> parameters) {
         return parameters.iter()
-                .map((Parameter parameter) -> parameter.asDefinition())
+                .map((Parameter parameter) -> {
+                    return parameter.asDefinition();
+                })
                 .flatMap(Iters::fromOption)
                 .collect(new ListCollector<Definition>());
     }
 
     public static String joinParameters(Iterable<Definition> parameters) {
         return parameters.iter()
-                .map((Definition definition) -> definition.generate())
-                .map((String generated) -> "\n\t" + generated + ";")
+                .map((Definition definition) -> {
+                    return definition.generate();
+                })
+                .map((String generated) -> {
+                    return "\n\t" + generated + ";";
+                })
                 .collect(Joiner.empty())
                 .orElse("");
     }
 
     public static Tuple2<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
-        return CompilerUtils.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s)));
+        return CompilerUtils.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> {
+            return new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s));
+        });
     }
 }

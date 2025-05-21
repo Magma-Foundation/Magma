@@ -13,14 +13,20 @@ public record PathSources(Path sourceDirectory) implements Sources {
     public Result<Iterable<Source>, IOError> listSources() {
         return this.sourceDirectory()
                 .walk()
-                .mapValue((Iterable<Path> children) -> this.retainSources(children));
+                .mapValue((Iterable<Path> children) -> {
+                    return this.retainSources(children);
+                });
     }
 
     @Override
     public Iterable<Source> retainSources(Iterable<Path> children) {
         return children.iter()
-                .filter((Path source) -> source.endsWith(".java"))
-                .<Source>map((Path child) -> new PathSource(this.sourceDirectory, child))
+                .filter((Path source) -> {
+                    return source.endsWith(".java");
+                })
+                .<Source>map((Path child) -> {
+                    return new PathSource(this.sourceDirectory, child);
+                })
                 .collect(new ListCollector<Source>());
     }
 }

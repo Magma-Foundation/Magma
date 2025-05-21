@@ -26,7 +26,9 @@ import magma.app.compile.split.LocatingSplitter;
 
 final class TypeCompiler {
     public static Option<Tuple2<CompileState, String>> compileType(CompileState state, String type) {
-        return TypeCompiler.parseType(state, type).map((Tuple2<CompileState, Type> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
+        return TypeCompiler.parseType(state, type).map((Tuple2<CompileState, Type> tuple) -> {
+            return new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate());
+        });
     }
 
     public static Option<Tuple2<CompileState, Type>> parseType(CompileState state, String type) {
@@ -55,7 +57,9 @@ final class TypeCompiler {
     }
 
     private static Option<Tuple2<CompileState, Type>> parsePrimitive(CompileState state, String input) {
-        return TypeCompiler.findPrimitiveValue(Strings.strip(input)).map((Type result) -> new Tuple2Impl<CompileState, Type>(state, result));
+        return TypeCompiler.findPrimitiveValue(Strings.strip(input)).map((Type result) -> {
+            return new Tuple2Impl<CompileState, Type>(state, result);
+        });
     }
 
     private static Option<Type> findPrimitiveValue(String input) {
@@ -84,46 +88,68 @@ final class TypeCompiler {
     }
 
     private static Option<Tuple2<CompileState, Type>> parseGeneric(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (String baseString, String argsString) -> {
-            var argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> TypeCompiler.compileTypeArgument(state1, s));
-            var argsState = argsTuple.left();
-            var args = argsTuple.right();
+        return CompilerUtils.compileSuffix(Strings.strip(input), ">", (String withoutEnd) -> {
+            return CompilerUtils.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (String baseString, String argsString) -> {
+                var argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
+                    return TypeCompiler.compileTypeArgument(state1, s);
+                });
+                var argsState = argsTuple.left();
+                var args = argsTuple.right();
 
-            var base = Strings.strip(baseString);
-            return TypeCompiler.assembleFunctionType(argsState, base, args).or(() -> {
-                var compileState = TypeCompiler.addResolvedImportFromCache0(argsState, base);
-                return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
+                var base = Strings.strip(baseString);
+                return TypeCompiler.assembleFunctionType(argsState, base, args).or(() -> {
+                    var compileState = TypeCompiler.addResolvedImportFromCache0(argsState, base);
+                    return new Some<Tuple2<CompileState, Type>>(new Tuple2Impl<CompileState, Type>(compileState, new TemplateType(base, args)));
+                });
             });
-        }));
+        });
     }
 
     private static Option<Tuple2<CompileState, Type>> assembleFunctionType(CompileState state, String base, List<String> args) {
-        return TypeCompiler.mapFunctionType(base, args).map((Type generated) -> new Tuple2Impl<CompileState, Type>(state, generated));
+        return TypeCompiler.mapFunctionType(base, args).map((Type generated) -> {
+            return new Tuple2Impl<CompileState, Type>(state, generated);
+        });
     }
 
     private static Option<Type> mapFunctionType(String base, List<String> args) {
         if (Strings.equalsTo("Function", base)) {
-            return args.findFirst().and(() -> args.find(1))
-                    .map((Tuple2<String, String> tuple) -> new FunctionType(Lists.of(tuple.left()), tuple.right()));
+            return args.findFirst().and(() -> {
+                        return args.find(1);
+                    })
+                    .map((Tuple2<String, String> tuple) -> {
+                        return new FunctionType(Lists.of(tuple.left()), tuple.right());
+                    });
         }
 
         if (Strings.equalsTo("BiFunction", base)) {
             return args.find(0)
-                    .and(() -> args.find(1))
-                    .and(() -> args.find(2))
-                    .map((Tuple2<Tuple2<String, String>, String> tuple) -> new FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right()));
+                    .and(() -> {
+                        return args.find(1);
+                    })
+                    .and(() -> {
+                        return args.find(2);
+                    })
+                    .map((Tuple2<Tuple2<String, String>, String> tuple) -> {
+                        return new FunctionType(Lists.of(tuple.left().left(), tuple.left().right()), tuple.right());
+                    });
         }
 
         if (Strings.equalsTo("Supplier", base)) {
-            return args.findFirst().map((String first) -> new FunctionType(Lists.empty(), first));
+            return args.findFirst().map((String first) -> {
+                return new FunctionType(Lists.empty(), first);
+            });
         }
 
         if (Strings.equalsTo("Consumer", base)) {
-            return args.findFirst().map((String first) -> new FunctionType(Lists.of(first), "void"));
+            return args.findFirst().map((String first) -> {
+                return new FunctionType(Lists.of(first), "void");
+            });
         }
 
         if (Strings.equalsTo("Predicate", base)) {
-            return args.findFirst().map((String first) -> new FunctionType(Lists.of(first), "boolean"));
+            return args.findFirst().map((String first) -> {
+                return new FunctionType(Lists.of(first), "boolean");
+            });
         }
 
         return new None<Type>();
@@ -131,15 +157,23 @@ final class TypeCompiler {
 
     private static Option<Tuple2<CompileState, String>> compileTypeArgument(CompileState state, String input) {
         return CompilerUtils.or(state, input, new OrRule<String>(Lists.of(
-                (CompileState state2, String input1) -> CompilerUtils.compileWhitespace(state2, input1),
-                (CompileState state1, String type) -> TypeCompiler.compileType(state1, type)
+                (CompileState state2, String input1) -> {
+                    return CompilerUtils.compileWhitespace(state2, input1);
+                },
+                (CompileState state1, String type) -> {
+                    return TypeCompiler.compileType(state1, type);
+                }
         )));
     }
 
     private static Tuple2<CompileState, Type> parseTypeOrPlaceholder(CompileState state, String type) {
         return TypeCompiler.parseType(state, type)
-                .map((Tuple2<CompileState, Type> tuple) -> new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right()))
-                .orElseGet(() -> new Tuple2Impl<CompileState, Type>(state, new Placeholder(type)));
+                .map((Tuple2<CompileState, Type> tuple) -> {
+                    return new Tuple2Impl<CompileState, Type>(tuple.left(), tuple.right());
+                })
+                .orElseGet(() -> {
+                    return new Tuple2Impl<CompileState, Type>(state, new Placeholder(type));
+                });
     }
 
     private static CompileState getState(CompileState immutableCompileState, Location location) {
@@ -153,7 +187,9 @@ final class TypeCompiler {
 
         var namespaceWithChild = namespace.addLast(requestedChild);
         var anImport = new Import(namespaceWithChild, requestedChild);
-        return immutableCompileState.mapRegistry((Registry registry) -> registry.addImport(anImport));
+        return immutableCompileState.mapRegistry((Registry registry) -> {
+            return registry.addImport(anImport);
+        });
     }
 
     public static CompileState addResolvedImportFromCache0(CompileState state, String base) {
@@ -166,7 +202,9 @@ final class TypeCompiler {
                 .map((Source source) -> {
                     Location location = source.createLocation();
                     return TypeCompiler.getCompileState1(state, location)
-                            .orElseGet(() -> TypeCompiler.getState(state, location));
+                            .orElseGet(() -> {
+                                return TypeCompiler.getState(state, location);
+                            });
                 })
                 .orElse(state);
     }
@@ -182,7 +220,9 @@ final class TypeCompiler {
             return new None<CompileState>();
         }
 
-        return new Some<CompileState>(immutableCompileState.mapRegistry((Registry registry1) -> registry1.addDependency(dependency)));
+        return new Some<CompileState>(immutableCompileState.mapRegistry((Registry registry1) -> {
+            return registry1.addDependency(dependency);
+        }));
     }
 
     private static List<String> fixNamespace(List<String> requestedNamespace, List<String> thisNamespace) {

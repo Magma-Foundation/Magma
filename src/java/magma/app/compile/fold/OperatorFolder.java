@@ -13,14 +13,16 @@ public class OperatorFolder implements Folder {
 
     @Override
     public DivideState apply(DivideState state, char c) {
-        if (c == infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
-            var length = Strings.length(infix) - 1;
+        if (c == this.infix.charAt(0) && state.startsWith(Strings.sliceFrom(this.infix, 1))) {
+            var length = Strings.length(this.infix) - 1;
             var counter = 0;
             var current = state;
             while (counter < length) {
                 counter++;
 
-                current = current.pop().map((Tuple2<DivideState, Character> tuple) -> tuple.left()).orElse(current);
+                current = current.pop().map((Tuple2<DivideState, Character> tuple) -> {
+                    return tuple.left();
+                }).orElse(current);
             }
             return current.advance();
         }

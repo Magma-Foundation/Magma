@@ -7,7 +7,9 @@ import magma.api.option.Option;
 
 public record PathTargets(Path root) implements Targets {
     private static Option<IOError> writeTarget(Path target, String output) {
-        return PathTargets.ensureTargetParent(target).or(() -> target.writeString(output));
+        return PathTargets.ensureTargetParent(target).or(() -> {
+            return target.writeString(output);
+        });
     }
 
     private static Option<IOError> ensureTargetParent(Path target) {

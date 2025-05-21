@@ -22,7 +22,9 @@ public record ImmutableRegistry(
     public boolean doesImportExistAlready(String requestedChild) {
         return this.imports()
                 .iter()
-                .filter((Import node) -> node.hasSameChild(requestedChild))
+                .filter((Import node) -> {
+                    return node.hasSameChild(requestedChild);
+                })
                 .next()
                 .isPresent();
     }

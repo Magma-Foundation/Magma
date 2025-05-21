@@ -38,7 +38,9 @@ public record Definition(
     public String generateWithAfterName(String afterName) {
         var joinedTypeParams = this.joinTypeParams();
         var joinedModifiers = this.modifiers.iter()
-                .map((String value) -> value + " ")
+                .map((String value) -> {
+                    return value + " ";
+                })
                 .collect(new Joiner(""))
                 .orElse("");
 

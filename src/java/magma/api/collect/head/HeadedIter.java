@@ -33,7 +33,9 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
         while (true) {
             R finalResult = result;
             Tuple2<Boolean, R> maybeNext = this.head.next()
-                    .map((T inner) -> folder.apply(finalResult, inner))
+                    .map((T inner) -> {
+                        return folder.apply(finalResult, inner);
+                    })
                     .toTuple(finalResult);
 
             if (maybeNext.left()) {
@@ -47,32 +49,46 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public <R> Option<R> foldWithMapper(Function<T, R> next, BiFunction<R, T, R> folder) {
-        return this.head.next().map(next).map((R maybeNext) -> this.foldWithInitial(maybeNext, folder));
+        return this.head.next().map(next).map((R maybeNext) -> {
+            return this.foldWithInitial(maybeNext, folder);
+        });
     }
 
     @Override
     public <R> Iter<R> flatMap(Function<T, Iter<R>> mapper) {
         return this.head.next()
                 .map(mapper)
-                .map((Iter<R> initial) -> new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper)))
-                .orElseGet(() -> new HeadedIter<R>(new EmptyHead<R>()));
+                .map((Iter<R> initial) -> {
+                    return new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper));
+                })
+                .orElseGet(() -> {
+                    return new HeadedIter<R>(new EmptyHead<R>());
+                });
     }
 
     @Override
     public boolean allMatch(Predicate<T> predicate) {
-        return this.foldWithInitial(true, (Boolean maybeAllTrue, T element) -> maybeAllTrue && predicate.test(element));
+        return this.foldWithInitial(true, (Boolean maybeAllTrue, T element) -> {
+            return maybeAllTrue && predicate.test(element);
+        });
     }
 
     @Override
     public boolean anyMatch(Predicate<T> predicate) {
-        return this.foldWithInitial(false, (Boolean aBoolean, T t) -> aBoolean || predicate.test(t));
+        return this.foldWithInitial(false, (Boolean aBoolean, T t) -> {
+            return aBoolean || predicate.test(t);
+        });
     }
 
     @Override
     public <R, X> Result<R, X> foldWithInitialToResult(R initial, BiFunction<R, T, Result<R, X>> folder) {
         return this.foldWithInitial(new Ok<R, X>(initial),
-                (Result<R, X> rxResult, T element) -> rxResult.flatMapValue(
-                        (R inner) -> folder.apply(inner, element)));
+                (Result<R, X> rxResult, T element) -> {
+                    return rxResult.flatMapValue(
+                            (R inner) -> {
+                                return folder.apply(inner, element);
+                            });
+                });
     }
 
     @Override

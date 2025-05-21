@@ -16,7 +16,9 @@ public record DecoratedFolder(Folder folder) implements Folder {
         return state.append(c)
                 .popAndAppendToTuple()
                 .flatMap(DecoratedFolder::foldEscaped)
-                .flatMap((DivideState state1) -> state1.popAndAppendToOption());
+                .flatMap((DivideState state1) -> {
+                    return state1.popAndAppendToOption();
+                });
     }
 
     private static Option<DivideState> foldEscaped(Tuple2<DivideState, Character> tuple) {
@@ -60,7 +62,11 @@ public record DecoratedFolder(Folder folder) implements Folder {
     @Override
     public DivideState apply(DivideState divideState, char c) {
         return DecoratedFolder.foldSingleQuotes(divideState, c)
-                .or(() -> DecoratedFolder.foldDoubleQuotes(divideState, c))
-                .orElseGet(() -> this.folder.apply(divideState, c));
+                .or(() -> {
+                    return DecoratedFolder.foldDoubleQuotes(divideState, c);
+                })
+                .orElseGet(() -> {
+                    return this.folder.apply(divideState, c);
+                });
     }
 }

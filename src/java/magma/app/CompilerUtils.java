@@ -35,7 +35,9 @@ public final class CompilerUtils {
     }
 
     private static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, Merger merger) {
-        var folded = CompilerUtils.parseAll(state, input, folder, (CompileState state1, String s) -> new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s))).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
+        var folded = CompilerUtils.parseAll(state, input, folder, (CompileState state1, String s) -> {
+            return new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s));
+        }).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
         return new Tuple2Impl<CompileState, String>(folded.left(), CompilerUtils.generateAll(folded.right(), merger));
     }
 
@@ -44,16 +46,18 @@ public final class CompilerUtils {
     }
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, Rule<T> rule) {
-        return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
-            var currentState = current.left();
-            var currentElement = current.right();
+        return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> {
+            return maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
+                var currentState = current.left();
+                var currentElement = current.right();
 
-            return rule.apply(currentState, segment).map((Tuple2<CompileState, T> mappedTuple) -> {
-                var mappedState = mappedTuple.left();
-                var mappedElement = mappedTuple.right();
-                return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
+                return rule.apply(currentState, segment).map((Tuple2<CompileState, T> mappedTuple) -> {
+                    var mappedState = mappedTuple.left();
+                    var mappedElement = mappedTuple.right();
+                    return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement));
+                });
             });
-        }));
+        });
     }
 
     static Tuple2<CompileState, String> compileOrPlaceholder(
@@ -61,7 +65,9 @@ public final class CompilerUtils {
             String input,
             Iterable<Rule<String>> rules
     ) {
-        return CompilerUtils.or(state, input, new OrRule<>(rules)).orElseGet(() -> new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input)));
+        return CompilerUtils.or(state, input, new OrRule<String>(rules)).orElseGet(() -> {
+            return new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input));
+        });
     }
 
     public static <T> Option<Tuple2<CompileState, T>> or(
@@ -69,7 +75,9 @@ public final class CompilerUtils {
             String input,
             OrRule<T> orRule) {
         return orRule.rules().iter()
-                .map((Rule<T> rule) -> rule.apply(state, input))
+                .map((Rule<T> rule) -> {
+                    return rule.apply(state, input);
+                })
                 .flatMap(Iters::fromOption)
                 .next();
     }
@@ -88,7 +96,9 @@ public final class CompilerUtils {
     }
 
     static Option<Tuple2<CompileState, String>> compileWhitespace(CompileState state, String input) {
-        return CompilerUtils.parseWhitespace(state, input).map((Tuple2<CompileState, Whitespace> tuple) -> new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate()));
+        return CompilerUtils.parseWhitespace(state, input).map((Tuple2<CompileState, Whitespace> tuple) -> {
+            return new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate());
+        });
     }
 
     static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
@@ -137,7 +147,9 @@ public final class CompilerUtils {
     }
 
     static <T> Option<T> compileSplit(String input, Splitter splitter, BiFunction<String, String, Option<T>> mapper) {
-        return splitter.apply(input).flatMap((Tuple2<String, String> tuple) -> mapper.apply(tuple.left(), tuple.right()));
+        return splitter.apply(input).flatMap((Tuple2<String, String> tuple) -> {
+            return mapper.apply(tuple.left(), tuple.right());
+        });
     }
 
     public static String generatePlaceholder(String input) {

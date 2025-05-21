@@ -9,7 +9,9 @@ public record FunctionType(Iterable<String> args, String returns) implements Typ
     public String generate() {
         var joinedArguments = this.args
                 .iterWithIndices()
-                .map((Tuple2<Integer, String> tuple) -> "arg" + tuple.left() + " : " + tuple.right())
+                .map((Tuple2<Integer, String> tuple) -> {
+                    return "arg" + tuple.left() + " : " + tuple.right();
+                })
                 .collect(new Joiner(", "))
                 .orElse("");
 

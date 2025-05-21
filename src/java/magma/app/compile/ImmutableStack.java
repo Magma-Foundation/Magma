@@ -20,19 +20,25 @@ public record ImmutableStack(List<String> structureNames, List<Definition> defin
     @Override
     public boolean isWithinLast(String name) {
         return this.findLastStructureName()
-                .filter((String anObject) -> Strings.equalsTo(name, anObject))
+                .filter((String anObject) -> {
+                    return Strings.equalsTo(name, anObject);
+                })
                 .isPresent();
     }
 
     @Override
     public boolean hasAnyStructureName(String base) {
-        return this.structureNames().iter().anyMatch((String inner) -> Strings.equalsTo(inner, base));
+        return this.structureNames().iter().anyMatch((String inner) -> {
+            return Strings.equalsTo(inner, base);
+        });
     }
 
     @Override
     public Option<Definition> resolveValue(String name) {
         return this.definitions().iterReversed()
-                .filter((Definition definition) -> definition.isNamed(name))
+                .filter((Definition definition) -> {
+                    return definition.isNamed(name);
+                })
                 .next();
     }
 

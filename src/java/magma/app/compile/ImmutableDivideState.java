@@ -59,12 +59,16 @@ public record ImmutableDivideState(List<String> segments, String buffer, int dep
 
     @Override
     public Option<Tuple2<DivideState, Character>> popAndAppendToTuple() {
-        return this.pop().map((Tuple2<DivideState, Character> inner) -> new Tuple2Impl<DivideState, Character>(inner.left().append(inner.right()), inner.right()));
+        return this.pop().map((Tuple2<DivideState, Character> inner) -> {
+            return new Tuple2Impl<DivideState, Character>(inner.left().append(inner.right()), inner.right());
+        });
     }
 
     @Override
     public Option<DivideState> popAndAppendToOption() {
-        return this.popAndAppendToTuple().map((Tuple2<DivideState, Character> tuple) -> tuple.left());
+        return this.popAndAppendToTuple().map((Tuple2<DivideState, Character> tuple) -> {
+            return tuple.left();
+        });
     }
 
     @Override

@@ -97,7 +97,9 @@ public final class Files {
         @Override
         public Iter<String> query() {
             return new HeadedIter<Integer>(new RangeHead(this.path.getNameCount()))
-                    .map((Integer index) -> this.path.getName(index).toString());
+                    .map((Integer index) -> {
+                        return this.path.getName(index).toString();
+                    });
         }
 
         @Override

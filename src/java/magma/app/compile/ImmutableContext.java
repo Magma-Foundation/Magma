@@ -28,14 +28,18 @@ public record ImmutableContext(
     @Override
     public boolean hasPlatform(Platform platform) {
         return this.maybePlatform
-                .filter((Platform thisPlatform) -> thisPlatform == platform)
+                .filter((Platform thisPlatform) -> {
+                    return thisPlatform == platform;
+                })
                 .isPresent();
     }
 
     @Override
     public Option<Source> findSource(String name) {
         return this.iterSources()
-                .filter((Source source) -> Strings.equalsTo(source.createLocation().name(), name))
+                .filter((Source source) -> {
+                    return Strings.equalsTo(source.createLocation().name(), name);
+                })
                 .next();
     }
 

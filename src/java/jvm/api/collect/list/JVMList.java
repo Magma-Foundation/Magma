@@ -25,7 +25,9 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
 
     @Override
     public Iter<T> iter() {
-        return this.iterWithIndices().map((Tuple2<Integer, T> integerTTuple) -> integerTTuple.right());
+        return this.iterWithIndices().map((Tuple2<Integer, T> integerTTuple) -> {
+            return integerTTuple.right();
+        });
     }
 
     @Override
@@ -44,12 +46,16 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public Iter<Tuple2<Integer, T>> iterWithIndices() {
         var query = new HeadedIter<Integer>(new RangeHead(this.list.size()));
-        return query.map((Integer index) -> new Tuple2Impl<Integer, T>(index, this.list.get(index)));
+        return query.map((Integer index) -> {
+            return new Tuple2Impl<Integer, T>(index, this.list.get(index));
+        });
     }
 
     @Override
     public List<T> addAll(Iterable<T> others) {
-        return others.iter().foldWithInitial(this.toList(), (List<T> list1, T element) -> list1.addLast(element));
+        return others.iter().foldWithInitial(this.toList(), (List<T> list1, T element) -> {
+            return list1.addLast(element);
+        });
     }
 
     private List<T> toList() {
@@ -64,7 +70,11 @@ public record JVMList<T>(java.util.List<T> list) implements List<T> {
     @Override
     public Iter<T> iterReversed() {
         var query = new HeadedIter<Integer>(new RangeHead(this.list.size()));
-        return query.map((Integer index) -> this.list.size() - index - 1).map((Integer index1) -> this.list.get(index1));
+        return query.map((Integer index) -> {
+            return this.list.size() - index - 1;
+        }).map((Integer index1) -> {
+            return this.list.get(index1);
+        });
     }
 
     @Override
