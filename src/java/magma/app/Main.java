@@ -4,10 +4,10 @@ import jvm.api.collect.list.Lists;
 import jvm.api.io.Files;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.api.collect.Iterators;
+import magma.api.collect.Iter;
+import magma.api.collect.Iters;
 import magma.api.collect.Joiner;
-import magma.api.collect.Query;
-import magma.api.collect.head.HeadedQuery;
+import magma.api.collect.head.HeadedIter;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
@@ -56,25 +56,35 @@ import java.util.function.Function;
 public final class Main {
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
-        sourceDirectory.walk()
-                .match(
-                        (List<Path> children) -> Main.runWithChildren(children, sourceDirectory),
-                        (IOError value) -> new Some<IOError>(value))
+        Main.runWithSourceDirectory(sourceDirectory)
+                .findError()
                 .map((IOError error) -> error.display())
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
 
-    private static Option<IOError> runWithChildren(List<Path> children, Path sourceDirectory) {
-        var sources = children.query()
+    private static Result<CompileState, IOError> runWithSourceDirectory(Path sourceDirectory) {
+        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialCompileState(), (CompileState state, Platform platform) -> {
+            return sourceDirectory.walk().flatMapValue((List<Path> children) -> {
+                return Main.runWithChildren(state.withPlatform(platform), children, sourceDirectory);
+            });
+        });
+    }
+
+    private static Result<CompileState, IOError> runWithChildren(CompileState state, List<Path> children, Path sourceDirectory) {
+        var initial = Main.retainSources(children, sourceDirectory)
+                .query()
+                .foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
+
+        return Main.retainSources(children, sourceDirectory)
+                .query()
+                .foldWithInitialToResult(initial, Main::runWithSource);
+    }
+
+    private static List<Source> retainSources(List<Path> children, Path sourceDirectory) {
+        return children.query()
                 .filter((Path source) -> source.endsWith(".java"))
                 .map((Path child) -> new Source(sourceDirectory, child))
                 .collect(new ListCollector<Source>());
-
-        var initial = sources.query().foldWithInitial(Main.createInitialCompileState(), (CompileState state, Source source) -> state.addSource(source));
-
-        return sources.query()
-                .foldWithInitialToResult(initial, Main::runWithSource)
-                .findError();
     }
 
     private static Result<CompileState, IOError> runWithSource(CompileState state, Source source) {
@@ -157,7 +167,7 @@ public final class Main {
         return cache + element;
     }
 
-    private static Query<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
+    private static Iter<String> divide(String input, BiFunction<DivideState, Character, DivideState> folder) {
         var current = Main.createInitialDivideState(input);
 
         while (true) {
@@ -296,7 +306,7 @@ public final class Main {
     private static List<Definition> retainDefinitionsFromParameters(List<Parameter> parameters) {
         return parameters.query()
                 .map((Parameter parameter) -> parameter.asDefinition())
-                .flatMap(Iterators::fromOption)
+                .flatMap(Iters::fromOption)
                 .collect(new ListCollector<Definition>());
     }
 
@@ -433,7 +443,7 @@ public final class Main {
     ) {
         return rules.query()
                 .map((BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> rule) -> Main.getApply(state, input, rule))
-                .flatMap(Iterators::fromOption)
+                .flatMap(Iters::fromOption)
                 .next();
     }
 
@@ -727,7 +737,7 @@ public final class Main {
     private static <T, R> List<R> retain(List<T> args, Function<T, Option<R>> mapper) {
         return args.query()
                 .map(mapper)
-                .flatMap(Iterators::fromOption)
+                .flatMap(Iters::fromOption)
                 .collect(new ListCollector<R>());
     }
 
@@ -885,7 +895,7 @@ public final class Main {
     }
 
     private static boolean isNumber(String input) {
-        var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
+        var query = new HeadedIter<Integer>(new RangeHead(Strings.length(input)));
         return query.map(input::charAt).allMatch((Character c) -> Characters.isDigit(c));
     }
 
@@ -901,7 +911,7 @@ public final class Main {
     }
 
     private static boolean isSymbol(String input) {
-        var query = new HeadedQuery<Integer>(new RangeHead(Strings.length(input)));
+        var query = new HeadedIter<Integer>(new RangeHead(Strings.length(input)));
         return query.allMatch((Integer index) -> Main.isSymbolChar(index, input.charAt(index)));
     }
 
@@ -1273,7 +1283,16 @@ public final class Main {
     }
 
     private static CompileState createInitialCompileState() {
-        return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<List<String>>(), Lists.empty());
+        return new ImmutableCompileState(
+                Lists.empty(),
+                "",
+                Lists.empty(),
+                0,
+                Lists.empty(),
+                new None<List<String>>(),
+                Lists.empty(),
+                Platform.TypeScript
+        );
     }
 
     private static DivideState createInitialDivideState(String input) {

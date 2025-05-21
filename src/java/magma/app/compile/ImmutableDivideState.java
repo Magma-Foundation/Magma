@@ -2,7 +2,7 @@ package magma.app.compile;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.api.collect.Query;
+import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -12,7 +12,7 @@ import magma.api.text.Strings;
 public record ImmutableDivideState(List<String> segments, String buffer, int depth, String input,
                                    int index) implements DivideState {
     @Override
-    public Query<String> query() {
+    public Iter<String> query() {
         return this.segments.query();
     }
 

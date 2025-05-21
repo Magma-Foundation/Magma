@@ -1,17 +1,18 @@
 package magma.app.compile;
 
-import magma.api.collect.Query;
+import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
+import magma.app.Platform;
 import magma.app.compile.define.Definition;
 import magma.app.io.Source;
 
 public interface CompileState {
     String join(String otherOutput);
 
-    Query<Import> queryImports();
+    Iter<Import> queryImports();
 
-    Query<Source> querySources();
+    Iter<Source> querySources();
 
     String createIndent();
 
@@ -46,4 +47,6 @@ public interface CompileState {
     CompileState addResolvedImportFromCache(String base);
 
     CompileState popStructureName();
+
+    CompileState withPlatform(Platform platform);
 }

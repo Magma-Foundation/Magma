@@ -2,7 +2,7 @@ package magma.api.collect.head;
 
 import magma.api.Tuple2;
 import magma.api.collect.Collector;
-import magma.api.collect.Query;
+import magma.api.collect.Iter;
 import magma.api.option.Option;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -11,7 +11,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public record HeadedQuery<T>(Head<T> head) implements Query<T> {
+public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     @Override
     public Option<T> next() {
         return this.head.next();
@@ -23,8 +23,8 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public <R> Query<R> map(Function<T, R> mapper) {
-        return new HeadedQuery<R>(new MapHead<T, R>(this.head, mapper));
+    public <R> Iter<R> map(Function<T, R> mapper) {
+        return new HeadedIter<R>(new MapHead<T, R>(this.head, mapper));
     }
 
     @Override
@@ -51,11 +51,11 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public <R> Query<R> flatMap(Function<T, Query<R>> mapper) {
+    public <R> Iter<R> flatMap(Function<T, Iter<R>> mapper) {
         return this.head.next()
                 .map(mapper)
-                .map((Query<R> initial) -> new HeadedQuery<R>(new FlatMapHead<T, R>(this.head, initial, mapper)))
-                .orElseGet(() -> new HeadedQuery<R>(new EmptyHead<R>()));
+                .map((Iter<R> initial) -> new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper)))
+                .orElseGet(() -> new HeadedIter<R>(new EmptyHead<R>()));
     }
 
     @Override
@@ -76,13 +76,13 @@ public record HeadedQuery<T>(Head<T> head) implements Query<T> {
     }
 
     @Override
-    public Query<T> filter(Predicate<T> predicate) {
+    public Iter<T> filter(Predicate<T> predicate) {
         return this.flatMap((T element) -> {
             if (predicate.test(element)) {
-                return new HeadedQuery<T>(new SingleHead<T>(element));
+                return new HeadedIter<T>(new SingleHead<T>(element));
             }
             else {
-                return new HeadedQuery<T>(new EmptyHead<T>());
+                return new HeadedIter<T>(new EmptyHead<T>());
             }
         });
     }

@@ -1,12 +1,13 @@
 package magma.app.compile;
 
 import jvm.api.collect.list.Lists;
+import magma.api.collect.Iter;
 import magma.api.collect.Joiner;
-import magma.api.collect.Query;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
+import magma.app.Platform;
 import magma.app.compile.define.Definition;
 import magma.app.io.Source;
 
@@ -17,7 +18,8 @@ public record ImmutableCompileState(
         int depth,
         List<Definition> definitions,
         Option<List<String>> maybeNamespace,
-        List<Source> sources
+        List<Source> sources,
+        Platform platform
 ) implements CompileState {
     @Override
     public String join(String otherOutput) {
@@ -30,7 +32,7 @@ public record ImmutableCompileState(
     }
 
     @Override
-    public Query<Source> querySources() {
+    public Iter<Source> querySources() {
         return this.sources.query();
     }
 
@@ -76,37 +78,37 @@ public record ImmutableCompileState(
         }
 
         var importString = new Import(stringList, child);
-        return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState withNamespace(List<String> namespace) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<String>>(namespace), this.sources);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<List<String>>(namespace), this.sources, this.platform);
     }
 
     @Override
     public CompileState append(String element) {
-        return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, this.output + element, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState pushStructureName(String name) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames.addLast(name), this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState enterDepth() {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth + 1, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState exitDepth() {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth - 1, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState defineAll(List<Definition> definitions) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions.addAll(definitions), this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
@@ -118,17 +120,17 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState clearImports() {
-        return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(Lists.empty(), this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState clearOutput() {
-        return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, "", this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
     public CompileState addSource(Source source) {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source));
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeNamespace, this.sources.addLast(source), this.platform);
     }
 
     @Override
@@ -151,11 +153,16 @@ public record ImmutableCompileState(
 
     @Override
     public CompileState popStructureName() {
-        return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources);
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources, this.platform);
     }
 
     @Override
-    public Query<Import> queryImports() {
+    public CompileState withPlatform(Platform platform) {
+        return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeNamespace, this.sources, platform);
+    }
+
+    @Override
+    public Iter<Import> queryImports() {
         return this.imports.query();
     }
 }

@@ -1,11 +1,11 @@
 package magma.app.compile;
 
 import magma.api.Tuple2;
-import magma.api.collect.Query;
+import magma.api.collect.Iter;
 import magma.api.option.Option;
 
 public interface DivideState {
-    Query<String> query();
+    Iter<String> query();
 
     DivideState advance();
 

@@ -122,9 +122,67 @@
 	Main: magma.app, 
 	Platform: magma.app
 ]*/
-import { Value } from "../../../../magma/app/compile/value/Value";
+import { Iter } from "../../../../magma/api/collect/Iter";
+import { Head } from "../../../../magma/api/collect/head/Head";
 import { Option } from "../../../../magma/api/option/Option";
-export interface Caller {
-	generate(): string;
-	findChild(): Option<Value>;
+import { Collector } from "../../../../magma/api/collect/Collector";
+import { MapHead } from "../../../../magma/api/collect/head/MapHead";
+import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { FlatMapHead } from "../../../../magma/api/collect/head/FlatMapHead";
+import { EmptyHead } from "../../../../magma/api/collect/head/EmptyHead";
+import { Result } from "../../../../magma/api/result/Result";
+import { Ok } from "../../../../magma/api/result/Ok";
+import { SingleHead } from "../../../../magma/api/collect/head/SingleHead";
+export class HeadedIter<T> implements Iter<T> {
+	head: Head<T>;
+	constructor (head: Head<T>) {
+		this.head = head;
+	}
+	next(): Option<T> {
+		return this.head.next()/*unknown*/;
+	}
+	collect<C>(collector: Collector<T, C>): C {
+		return this.foldWithInitial(collector.createInitial(), collector.fold)/*unknown*/;
+	}
+	map<R>(mapper: (arg0 : T) => R): Iter<R> {
+		return new HeadedIter<R>(new MapHead<T, R>(this.head, mapper))/*unknown*/;
+	}
+	foldWithInitial<R>(initial: R, folder: (arg0 : R, arg1 : T) => R): R {
+		let result: R = initial/*R*/;
+		while (true/*unknown*/){
+			let finalResult: R = result/*unknown*/;
+			let maybeNext: Tuple2<boolean, R> = this.head.next().map((inner: T) => folder(finalResult, inner)/*unknown*/).toTuple(finalResult)/*unknown*/;
+			if (maybeNext.left()/*unknown*/){
+				result/*unknown*/ = maybeNext.right()/*unknown*/;
+			}
+			else {
+				return result/*unknown*/;
+			}
+		}
+	}
+	foldWithMapper<R>(next: (arg0 : T) => R, folder: (arg0 : R, arg1 : T) => R): Option<R> {
+		return this.head.next().map(next).map((maybeNext: R) => this.foldWithInitial(maybeNext, folder)/*unknown*/)/*unknown*/;
+	}
+	flatMap<R>(mapper: (arg0 : T) => Iter<R>): Iter<R> {
+		return this.head.next().map(mapper).map((initial: Iter<R>) => new HeadedIter<R>(new FlatMapHead<T, R>(this.head, initial, mapper))/*unknown*/).orElseGet(() => new HeadedIter<R>(new EmptyHead<R>())/*unknown*/)/*unknown*/;
+	}
+	allMatch(predicate: (arg0 : T) => boolean): boolean {
+		return this.foldWithInitial(true, (maybeAllTrue: boolean, element: T) => maybeAllTrue && predicate(element)/*unknown*/)/*unknown*/;
+	}
+	anyMatch(predicate: (arg0 : T) => boolean): boolean {
+		return this.foldWithInitial(false, (aBoolean: boolean, t: T) => aBoolean || predicate(t)/*unknown*/)/*unknown*/;
+	}
+	foldWithInitialToResult<R, X>(initial: R, folder: (arg0 : R, arg1 : T) => Result<R, X>): Result<R, X> {
+		return this.foldWithInitial(new Ok<R, X>(initial), (rxResult: Result<R, X>, element: T) => rxResult.flatMapValue((inner: R) => folder(inner, element)/*unknown*/)/*unknown*/)/*unknown*/;
+	}
+	filter(predicate: (arg0 : T) => boolean): Iter<T> {
+		return this.flatMap((element: T) => {
+			if (predicate(element)/*unknown*/){
+				return new HeadedIter<T>(new SingleHead<T>(element))/*unknown*/;
+			}
+			else {
+				return new HeadedIter<T>(new EmptyHead<T>())/*unknown*/;
+			}
+		})/*unknown*/;
+	}
 }

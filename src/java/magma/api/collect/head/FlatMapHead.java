@@ -1,17 +1,17 @@
 package magma.api.collect.head;
 
-import magma.api.collect.Query;
+import magma.api.collect.Iter;
 import magma.api.option.None;
 import magma.api.option.Option;
 
 import java.util.function.Function;
 
 public final class FlatMapHead<T, R> implements Head<R> {
-    private final Function<T, Query<R>> mapper;
+    private final Function<T, Iter<R>> mapper;
     private final Head<T> head;
-    private Query<R> current;
+    private Iter<R> current;
 
-    public FlatMapHead(Head<T> head, Query<R> initial, Function<T, Query<R>> mapper) {
+    public FlatMapHead(Head<T> head, Iter<R> initial, Function<T, Iter<R>> mapper) {
         this.head = head;
         this.current = initial;
         this.mapper = mapper;

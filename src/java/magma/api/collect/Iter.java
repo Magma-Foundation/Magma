@@ -7,22 +7,22 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface Query<T> {
+public interface Iter<T> {
     <C> C collect(Collector<T, C> collector);
 
-    <R> Query<R> map(Function<T, R> mapper);
+    <R> Iter<R> map(Function<T, R> mapper);
 
     <R> R foldWithInitial(R initial, BiFunction<R, T, R> folder);
 
     <R> Option<R> foldWithMapper(Function<T, R> mapper, BiFunction<R, T, R> folder);
 
-    <R> Query<R> flatMap(Function<T, Query<R>> mapper);
+    <R> Iter<R> flatMap(Function<T, Iter<R>> mapper);
 
     Option<T> next();
 
     boolean allMatch(Predicate<T> predicate);
 
-    Query<T> filter(Predicate<T> predicate);
+    Iter<T> filter(Predicate<T> predicate);
 
     boolean anyMatch(Predicate<T> predicate);
 

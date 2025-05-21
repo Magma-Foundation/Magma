@@ -5,8 +5,8 @@ import magma.annotate.Namespace;
 import jvm.api.collect.list.JVMList;
 import magma.api.collect.list.List;
 import magma.api.collect.head.RangeHead;
-import magma.api.collect.head.HeadedQuery;
-import magma.api.collect.Query;
+import magma.api.collect.head.HeadedIter;
+import magma.api.collect.Iter;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.option.None;
@@ -95,8 +95,8 @@ public final class Files {
         }
 
         @Override
-        public Query<String> query() {
-            return new HeadedQuery<Integer>(new RangeHead(this.path.getNameCount()))
+        public Iter<String> query() {
+            return new HeadedIter<Integer>(new RangeHead(this.path.getNameCount()))
                     .map((Integer index) -> this.path.getName(index).toString());
         }
 
