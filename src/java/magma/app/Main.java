@@ -8,9 +8,7 @@ import magma.api.collect.Joiner;
 import magma.api.collect.list.List;
 import magma.api.io.Console;
 import magma.api.io.IOError;
-import magma.api.io.Path;
 import magma.api.option.None;
-import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
@@ -24,13 +22,13 @@ public final class Main {
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         var sources = new Sources(sourceDirectory);
-        Main.runWithSourceDirectory(sourceDirectory, sources)
+        Main.runWithSourceDirectory(sources)
                 .findError()
                 .map((IOError error) -> error.display())
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
 
-    private static Result<CompileState, IOError> runWithSourceDirectory(Path sourceDirectory, Sources sources) {
+    private static Result<CompileState, IOError> runWithSourceDirectory(Sources sources) {
         return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> {
             return sources.getListIOErrorResult().flatMapValue((List<Source> children) -> {
                 return Main.runWithChildren(state.withPlatform(platform), children);
@@ -79,30 +77,15 @@ public final class Main {
 
         var joined = compiledState.join(compiled.right());
         var output = new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
-        return Main.writeTarget(source, output.left().clearImports().clearOutput(), output.right());
+        var cleared = output.left().clearImports().clearOutput();
+        return Main.writeTarget(source, cleared, output.right());
     }
 
     private static Result<CompileState, IOError> writeTarget(Source source, CompileState state, String output) {
-        var target = Files.get(".", "src", "ts")
-                .resolveChildSegments(source.computeNamespace())
-                .resolveChild(source.computeName() + ".ts");
-
-        return Main.writeTarget(target, output).orElseGet(() -> new Ok<CompileState, IOError>(state));
-    }
-
-    private static Option<Result<CompileState, IOError>> writeTarget(Path target, String output) {
-        return Main.ensureTargetParent(target)
-                .or(() -> target.writeString(output))
-                .map((IOError error) -> new Err<CompileState, IOError>(error));
-    }
-
-    private static Option<IOError> ensureTargetParent(Path target) {
-        var parent = target.getParent();
-        if (parent.exists()) {
-            return new None<IOError>();
-        }
-
-        return parent.createDirectories();
+        return new Targets(Files.get(".", "src", "ts"))
+                .writeSource(source.createLocation(), output)
+                .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
+                .orElseGet(() -> new Ok<CompileState, IOError>(state));
     }
 
     private static String formatSource(Source source) {

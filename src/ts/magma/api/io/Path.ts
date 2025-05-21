@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { IOError } from "../../../magma/api/io/IOError";
 import { Option } from "../../../magma/api/option/Option";

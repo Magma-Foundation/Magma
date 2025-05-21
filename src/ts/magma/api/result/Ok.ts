@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Result } from "../../../magma/api/result/Result";
 import { Option } from "../../../magma/api/option/Option";

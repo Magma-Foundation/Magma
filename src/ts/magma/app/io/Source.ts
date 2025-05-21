@@ -63,13 +63,15 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Path } from "../../../magma/api/io/Path";
 import { IOError } from "../../../magma/api/io/IOError";
 import { Result } from "../../../magma/api/result/Result";
 import { List } from "../../../magma/api/collect/list/List";
 import { ListCollector } from "../../../magma/api/collect/list/ListCollector";
+import { Location } from "../../../magma/app/Location";
 export class Source {
 	sourceDirectory: Path;
 	source: Path;
@@ -87,5 +89,8 @@ export class Source {
 	}
 	computeNamespace(): List<string> {
 		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>())/*unknown*/;
+	}
+	createLocation(): Location {
+		return new Location(this.computeNamespace(), this.computeName())/*unknown*/;
 	}
 }

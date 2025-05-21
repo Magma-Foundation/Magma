@@ -5,6 +5,7 @@ import magma.api.collect.list.ListCollector;
 import magma.api.io.IOError;
 import magma.api.io.Path;
 import magma.api.result.Result;
+import magma.app.Location;
 
 public record Source(Path sourceDirectory, Path source) {
     public Result<String, IOError> read() {
@@ -22,5 +23,9 @@ public record Source(Path sourceDirectory, Path source) {
                 .getParent()
                 .query()
                 .collect(new ListCollector<String>());
+    }
+
+    public Location createLocation() {
+        return new Location(this.computeNamespace(), this.computeName());
     }
 }

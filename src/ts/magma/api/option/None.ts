@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Option } from "../../../magma/api/option/Option";
 import { Tuple2 } from "../../../magma/api/Tuple2";

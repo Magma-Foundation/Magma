@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { List } from "../../../magma/api/collect/list/List";
 import { Joiner } from "../../../magma/api/collect/Joiner";

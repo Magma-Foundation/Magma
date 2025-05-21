@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Iter } from "../../../magma/api/collect/Iter";
 import { Option } from "../../../magma/api/option/Option";

@@ -158,6 +158,8 @@ class Platform {
 }
 class Sources {
 }
+class Targets {
+}
 Lists --> List
 Files --> Path
 EmptyHead --> Head
@@ -415,6 +417,7 @@ Source --> IOError
 Source --> Result
 Source --> List
 Source --> ListCollector
+Source --> Location
 Location --> List
 Main --> Files
 Main --> Sources
@@ -422,7 +425,6 @@ Main --> IOError
 Main --> Console
 Main --> CompileState
 Main --> Result
-Main --> Path
 Main --> Iters
 Main --> Platform
 Main --> Source
@@ -434,14 +436,18 @@ Main --> Location
 Main --> Compiler
 Main --> Ok
 Main --> Tuple2Impl
-Main --> Option
-Main --> None
 Main --> ImmutableCompileState
 Main --> Lists
+Main --> None
 Sources --> Path
 Sources --> Source
 Sources --> List
 Sources --> IOError
 Sources --> Result
 Sources --> ListCollector
+Targets --> Path
+Targets --> IOError
+Targets --> Option
+Targets --> None
+Targets --> Location
 @enduml

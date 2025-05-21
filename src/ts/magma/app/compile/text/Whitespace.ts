@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Parameter } from "../../../../magma/app/compile/define/Parameter";
 import { Definition } from "../../../../magma/app/compile/define/Definition";

@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Head } from "../../../../magma/api/collect/head/Head";
 import { Iter } from "../../../../magma/api/collect/Iter";

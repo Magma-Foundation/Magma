@@ -63,7 +63,8 @@
 	Location: magma.app, 
 	Main: magma.app, 
 	Platform: magma.app, 
-	Sources: magma.app
+	Sources: magma.app, 
+	Targets: magma.app
 ]*/
 import { Files } from "../../jvm/api/io/Files";
 import { Sources } from "../../magma/app/Sources";
@@ -71,7 +72,6 @@ import { IOError } from "../../magma/api/io/IOError";
 import { Console } from "../../magma/api/io/Console";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Result } from "../../magma/api/result/Result";
-import { Path } from "../../magma/api/io/Path";
 import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
 import { Source } from "../../magma/app/io/Source";
@@ -83,17 +83,16 @@ import { Location } from "../../magma/app/Location";
 import { Compiler } from "../../magma/app/Compiler";
 import { Ok } from "../../magma/api/result/Ok";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { Option } from "../../magma/api/option/Option";
-import { None } from "../../magma/api/option/None";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { None } from "../../magma/api/option/None";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
 		let sources = new Sources(sourceDirectory)/*unknown*/;
-		Main.runWithSourceDirectory(sourceDirectory, sources).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
+		Main.runWithSourceDirectory(sources).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
 	}
-	static runWithSourceDirectory(sourceDirectory: Path, sources: Sources): Result<CompileState, IOError> {
+	static runWithSourceDirectory(sources: Sources): Result<CompileState, IOError> {
 		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => {
 			return sources.getListIOErrorResult().flatMapValue((children: List<Source>) => {
 				return Main.runWithChildren(state.withPlatform(platform), children)/*unknown*/;
@@ -126,21 +125,14 @@ export class Main {
 		let segment = state.querySources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
 		let joined = compiledState.join(compiled.right())/*unknown*/;
 		let output = new Tuple2Impl<CompileState, string>(state, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
-		return Main.writeTarget(source, output.left().clearImports().clearOutput(), output.right())/*unknown*/;
+		let cleared = output.left().clearImports().clearOutput()/*unknown*/;
+		return Main.writeTarget(source, cleared, output.right())/*unknown*/;
 	}
 	static writeTarget(source: Source, state: CompileState, output: string): Result<CompileState, IOError> {
-		let target = Files.get(".", "src", "ts").resolveChildSegments(source.computeNamespace()).resolveChild(source.computeName() + ".ts")/*unknown*/;
-		return Main.writeTarget(target, output).orElseGet(() => new Ok<CompileState, IOError>(state)/*unknown*/)/*unknown*/;
-	}
-	static writeTarget(target: Path, output: string): Option<Result<CompileState, IOError>> {
-		return Main.ensureTargetParent(target).or(() => target.writeString(output)/*unknown*/).map((error: IOError) => new Err<CompileState, IOError>(error)/*unknown*/)/*unknown*/;
-	}
-	static ensureTargetParent(target: Path): Option<IOError> {
-		let parent = target.getParent()/*unknown*/;
-		if (parent.exists()/*unknown*/){
-			return new None<IOError>()/*unknown*/;
-		}
-		return parent.createDirectories()/*unknown*/;
+		/*return new Targets(Files.get(".", "src", "ts"))
+                .writeSource(source.createLocation(), output)
+                .<Result<CompileState, IOError>>map((IOError error) -> new Err<CompileState, IOError>(error))
+                .orElseGet(() -> new Ok<CompileState, IOError>(state))*/;
 	}
 	static formatSource(source: Source): string {
 		return "\n\t" + source.computeName() + ": " + Main.joinNamespace(source)/*unknown*/;
