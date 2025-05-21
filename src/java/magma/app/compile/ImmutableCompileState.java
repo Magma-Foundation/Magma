@@ -19,10 +19,11 @@ public record ImmutableCompileState(
         List<String> structureNames,
         int depth,
         List<Definition> definitions,
-        Option<magma.app.Location> maybeLocation,
+        Option<Location> maybeLocation,
         List<Source> sources,
         Platform platform,
-        List<Dependency> dependencies) implements CompileState {
+        List<Dependency> dependencies
+) implements CompileState {
     @Override
     public String join(String otherOutput) {
         var joinedImports = this.queryImports()

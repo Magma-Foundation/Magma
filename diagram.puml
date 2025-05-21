@@ -270,6 +270,7 @@ ImmutableCompileState --> CompileState
 ImmutableCompileState --> Import
 ImmutableCompileState --> List
 ImmutableCompileState --> Definition
+ImmutableCompileState --> Location
 ImmutableCompileState --> Option
 ImmutableCompileState --> Source
 ImmutableCompileState --> Platform
@@ -277,7 +278,6 @@ ImmutableCompileState --> Dependency
 ImmutableCompileState --> Joiner
 ImmutableCompileState --> Iter
 ImmutableCompileState --> Strings
-ImmutableCompileState --> Location
 ImmutableCompileState --> Lists
 ImmutableCompileState --> Some
 ImmutableCompileState --> Iterable

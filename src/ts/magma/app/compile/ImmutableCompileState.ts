@@ -72,6 +72,7 @@ import { CompileState } from "../../../magma/app/compile/CompileState";
 import { Import } from "../../../magma/app/compile/Import";
 import { List } from "../../../magma/api/collect/list/List";
 import { Definition } from "../../../magma/app/compile/define/Definition";
+import { Location } from "../../../magma/app/Location";
 import { Option } from "../../../magma/api/option/Option";
 import { Source } from "../../../magma/app/io/Source";
 import { Platform } from "../../../magma/app/Platform";
@@ -79,7 +80,6 @@ import { Dependency } from "../../../magma/app/compile/Dependency";
 import { Joiner } from "../../../magma/api/collect/Joiner";
 import { Iter } from "../../../magma/api/collect/Iter";
 import { Strings } from "../../../magma/api/text/Strings";
-import { Location } from "../../../magma/app/Location";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { Some } from "../../../magma/api/option/Some";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
@@ -89,11 +89,11 @@ export class ImmutableCompileState implements CompileState {
 	structureNames: List<string>;
 	depth: number;
 	definitions: List<Definition>;
-	maybeLocation: Option<>;
+	maybeLocation: Option<Location>;
 	sources: List<Source>;
 	platform: Platform;
 	dependencies: List<Dependency>;
-	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<>, sources: List<Source>, platform: Platform, dependencies: List<Dependency>) {
+	constructor (imports: List<Import>, output: string, structureNames: List<string>, depth: number, definitions: List<Definition>, maybeLocation: Option<Location>, sources: List<Source>, platform: Platform, dependencies: List<Dependency>) {
 		this.imports = imports;
 		this.output = output;
 		this.structureNames = structureNames;
