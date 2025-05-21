@@ -8,6 +8,7 @@ import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
 import magma.api.option.Some;
 import magma.app.compile.CompileState;
+import magma.app.compile.ValueUtils;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
 
@@ -34,7 +35,7 @@ final class DefinitionCompiler {
     }
 
     public static Tuple2<CompileState, List<Parameter>> parseParameters(CompileState state, String params) {
-        return CompilerUtils.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> {
+        return ValueUtils.parseValuesOrEmpty(state, params, (CompileState state1, String s) -> {
             return new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s));
         });
     }

@@ -93,6 +93,7 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -109,7 +110,8 @@
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
-	ValueCompiler: magma.app
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
@@ -129,12 +131,15 @@ import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Rule } from "../../magma/app/compile/rule/Rule";
 import { PrefixComposable } from "../../magma/app/compile/compose/PrefixComposable";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Value } from "../../magma/app/compile/value/Value";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Definition } from "../../magma/app/compile/define/Definition";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { WhitespaceCompiler } from "../../magma/app/WhitespaceCompiler";
+import { StatementsFolder } from "../../magma/app/compile/fold/StatementsFolder";
+import { StatementsMerger } from "../../magma/app/compile/merge/StatementsMerger";
 class FunctionSegmentCompiler {
 	static compileEmptySegment(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		if (Strings.equalsTo(";", Strings.strip(input))/*unknown*/){
@@ -209,7 +214,7 @@ class FunctionSegmentCompiler {
 		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static compileFunctionStatementValue(state: CompileState, withoutEnd: string): Tuple2<CompileState, string> {
-		return CompilerUtils.compileOrPlaceholder(state, withoutEnd, Lists.of(FunctionSegmentCompiler.compileReturnWithValue, FunctionSegmentCompiler.compileAssignment, (state1: CompileState, input: string) => {
+		return OrRule.compileOrPlaceholder(state, withoutEnd, Lists.of(FunctionSegmentCompiler.compileReturnWithValue, FunctionSegmentCompiler.compileAssignment, (state1: CompileState, input: string) => {
 			return ValueCompiler.parseInvokable(state1, input).map((tuple: Tuple2<CompileState, Value>) => {
 				return ValueCompiler.generateValue(tuple)/*unknown*/;
 			})/*unknown*/;
@@ -264,9 +269,12 @@ class FunctionSegmentCompiler {
 		})/*unknown*/;
 	}
 	static compileFunctionStatements(state: CompileState, input: string): Tuple2<CompileState, string> {
-		return CompilerUtils.compileStatements(state, input, FunctionSegmentCompiler.compileFunctionSegment)/*unknown*/;
+		return compileStatements(state, input, FunctionSegmentCompiler.compileFunctionSegment)/*unknown*/;
 	}
 	static compileFunctionSegment(state: CompileState, input: string): Tuple2<CompileState, string> {
-		return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(CompilerUtils.compileWhitespace, FunctionSegmentCompiler.compileEmptySegment, FunctionSegmentCompiler.compileBlock, FunctionSegmentCompiler.compileFunctionStatement, FunctionSegmentCompiler.compileReturnWithoutSuffix))/*unknown*/;
+		return OrRule.compileOrPlaceholder(state, input, Lists.of(WhitespaceCompiler.compileWhitespace, FunctionSegmentCompiler.compileEmptySegment, FunctionSegmentCompiler.compileBlock, FunctionSegmentCompiler.compileFunctionStatement, FunctionSegmentCompiler.compileReturnWithoutSuffix))/*unknown*/;
+	}
+	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
+		return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger())/*unknown*/;
 	}
 }

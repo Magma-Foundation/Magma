@@ -93,6 +93,7 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -109,7 +110,8 @@
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
-	ValueCompiler: magma.app
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { Definition } from "../../magma/app/compile/define/Definition";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
@@ -119,11 +121,12 @@ import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Placeholder } from "../../magma/app/compile/value/Placeholder";
 import { Option } from "../../magma/api/option/Option";
+import { WhitespaceCompiler } from "../../magma/app/WhitespaceCompiler";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { Strings } from "../../magma/api/text/Strings";
@@ -150,7 +153,7 @@ class DefiningCompiler {
 		}).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
 	}
 	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
-		return CompilerUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
+		return ValueUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
 			return new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/;
 		})/*unknown*/;
 	}
@@ -160,7 +163,7 @@ class DefiningCompiler {
 		})/*unknown*/;
 	}
 	static parseParameter(state: CompileState, input: string): Option<Tuple2<CompileState, Parameter>> {
-		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {
+		return WhitespaceCompiler.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {
 			return DefiningCompiler.getCompileStateParameterTuple2(tuple)/*unknown*/;
 		}).or(() => {
 			return DefiningCompiler.parseDefinition(state, input).map((tuple: Tuple2<CompileState, Definition>) => {

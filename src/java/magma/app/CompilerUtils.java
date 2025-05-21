@@ -7,43 +7,31 @@ import magma.api.collect.Iters;
 import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
-import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.divide.FoldedDivider;
 import magma.app.compile.fold.DecoratedFolder;
 import magma.app.compile.fold.Folder;
-import magma.app.compile.fold.StatementsFolder;
-import magma.app.compile.fold.ValueFolder;
 import magma.app.compile.merge.Merger;
-import magma.app.compile.merge.StatementsMerger;
-import magma.app.compile.merge.ValueMerger;
-import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
-import magma.app.compile.text.Whitespace;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class CompilerUtils {
-    static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
-        return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger());
-    }
-
-    private static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, Merger merger) {
+    public static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, Merger merger) {
         var folded = CompilerUtils.parseAll(state, input, folder, (CompileState state1, String s) -> {
             return new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s));
         }).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
         return new Tuple2Impl<CompileState, String>(folded.left(), CompilerUtils.generateAll(folded.right(), merger));
     }
 
-    private static String generateAll(Iterable<String> elements, Merger merger) {
+    public static String generateAll(Iterable<String> elements, Merger merger) {
         return elements.iter().foldWithInitial("", merger::merge);
     }
 
-    private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, Rule<T> rule) {
+    public static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, Rule<T> rule) {
         return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> {
             return maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
                 var currentState = current.left();
@@ -56,45 +44,6 @@ public final class CompilerUtils {
                 });
             });
         });
-    }
-
-    static Tuple2<CompileState, String> compileOrPlaceholder(
-            CompileState state,
-            String input,
-            Iterable<Rule<String>> rules
-    ) {
-        return new OrRule<String>(rules).apply(state, input).orElseGet(() -> {
-            return new Tuple2Impl<CompileState, String>(state, CompilerUtils.generatePlaceholder(input));
-        });
-    }
-
-    static Option<Tuple2<CompileState, String>> compileWhitespace(CompileState state, String input) {
-        return CompilerUtils.parseWhitespace(state, input).map((Tuple2<CompileState, Whitespace> tuple) -> {
-            return new Tuple2Impl<CompileState, String>(tuple.left(), tuple.right().generate());
-        });
-    }
-
-    static Option<Tuple2<CompileState, Whitespace>> parseWhitespace(CompileState state, String input) {
-        if (Strings.isBlank(input)) {
-            return new Some<Tuple2<CompileState, Whitespace>>(new Tuple2Impl<CompileState, Whitespace>(state, new Whitespace()));
-        }
-        return new None<Tuple2<CompileState, Whitespace>>();
-    }
-
-    public static String generateValueStrings(Iterable<String> values) {
-        return CompilerUtils.generateAll(values, new ValueMerger());
-    }
-
-    static <T> Tuple2<CompileState, List<T>> parseValuesOrEmpty(
-            CompileState state,
-            String input,
-            Rule<T> mapper
-    ) {
-        return CompilerUtils.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()));
-    }
-
-    static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, Rule<T> mapper) {
-        return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper);
     }
 
     public static String generatePlaceholder(String input) {

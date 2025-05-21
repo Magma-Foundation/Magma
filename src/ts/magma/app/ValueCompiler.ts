@@ -93,6 +93,7 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -109,7 +110,8 @@
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
-	ValueCompiler: magma.app
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
@@ -134,6 +136,7 @@ import { StringValue } from "../../magma/app/compile/value/StringValue";
 import { Not } from "../../magma/app/compile/value/Not";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
+import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
 import { List } from "../../magma/api/collect/list/List";
@@ -210,7 +213,7 @@ class ValueCompiler {
 			let strippedBeforeArrow = Strings.strip(beforeArrow)/*unknown*/;
 			return new PrefixComposable<Tuple2<CompileState, Value>>("(", (withoutStart: string) => {
 				return new SuffixComposable<Tuple2<CompileState, Value>>(")", (withoutEnd: string) => {
-					return CompilerUtils.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
+					return ValueUtils.parseValues(state, withoutEnd, (state1: CompileState, s: string) => {
 						return DefiningCompiler.parseParameter(state1, s)/*unknown*/;
 					}).flatMap((paramNames: Tuple2<CompileState, List<Parameter>>) => {
 						return ValueCompiler.compileLambdaWithParameterNames(paramNames.left(), DefiningCompiler.retainDefinitionsFromParameters(paramNames.right()), afterArrow)/*unknown*/;
@@ -362,7 +365,7 @@ class ValueCompiler {
 		return appended/*unknown*/;
 	}
 	static assembleInvokable(state: CompileState, oldCaller: Caller, argsString: string): Option<Tuple2<CompileState, Value>> {
-		return CompilerUtils.parseValues(state, argsString, (state1: CompileState, s: string) => {
+		return ValueUtils.parseValues(state, argsString, (state1: CompileState, s: string) => {
 			return ValueCompiler.parseArgument(state1, s)/*unknown*/;
 		}).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
 			let argsState = argsTuple.left()/*unknown*/;

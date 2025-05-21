@@ -93,6 +93,7 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -109,18 +110,26 @@
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
-	ValueCompiler: magma.app
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { Rule } from "../../../../magma/app/compile/rule/Rule";
 import { Iterable } from "../../../../magma/api/collect/list/Iterable";
 import { CompileState } from "../../../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../../../magma/api/Tuple2";
+import { Tuple2Impl } from "../../../../magma/api/Tuple2Impl";
+import { CompilerUtils } from "../../../../magma/app/CompilerUtils";
 import { Option } from "../../../../magma/api/option/Option";
 import { Iters } from "../../../../magma/api/collect/Iters";
 export class OrRule<T> implements Rule<T> {
 	rules: Iterable<Rule<T>>;
 	constructor (rules: Iterable<Rule<T>>) {
 		this.rules = rules;
+	}
+	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<Rule<string>>): Tuple2<CompileState, string> {
+		return new OrRule<string>(rules).apply(state, input).orElseGet(() => {
+			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
+		})/*unknown*/;
 	}
 	apply(state: CompileState, input: string): Option<Tuple2<CompileState, T>> {
 		return this.rules.iter().map((rule: Rule<T>) => {

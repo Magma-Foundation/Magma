@@ -93,6 +93,7 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -109,12 +110,11 @@
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
-	ValueCompiler: magma.app
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { StatementsFolder } from "../../magma/app/compile/fold/StatementsFolder";
-import { StatementsMerger } from "../../magma/app/compile/merge/StatementsMerger";
 import { Folder } from "../../magma/app/compile/fold/Folder";
 import { Merger } from "../../magma/app/compile/merge/Merger";
 import { Some } from "../../magma/api/option/Some";
@@ -126,18 +126,9 @@ import { Option } from "../../magma/api/option/Option";
 import { Rule } from "../../magma/app/compile/rule/Rule";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
-import { OrRule } from "../../magma/app/compile/rule/OrRule";
-import { Whitespace } from "../../magma/app/compile/text/Whitespace";
-import { Strings } from "../../magma/api/text/Strings";
-import { None } from "../../magma/api/option/None";
-import { ValueMerger } from "../../magma/app/compile/merge/ValueMerger";
-import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
-	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
-		return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger())/*unknown*/;
-	}
 	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: Merger): Tuple2<CompileState, string> {
 		let folded = CompilerUtils.parseAll(state, input, folder, (state1: CompileState, s: string) => {
 			return new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/;
@@ -159,31 +150,6 @@ export class CompilerUtils {
 				})/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/;
-	}
-	static compileOrPlaceholder(state: CompileState, input: string, rules: Iterable<Rule<string>>): Tuple2<CompileState, string> {
-		return new OrRule<string>(rules).apply(state, input).orElseGet(() => {
-			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
-		})/*unknown*/;
-	}
-	static compileWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {
-			return new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().generate())/*unknown*/;
-		})/*unknown*/;
-	}
-	static parseWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, Whitespace>> {
-		if (Strings.isBlank(input)/*unknown*/){
-			return new Some<Tuple2<CompileState, Whitespace>>(new Tuple2Impl<CompileState, Whitespace>(state, new Whitespace()))/*unknown*/;
-		}
-		return new None<Tuple2<CompileState, Whitespace>>()/*unknown*/;
-	}
-	static generateValueStrings(values: Iterable<string>): string {
-		return CompilerUtils.generateAll(values, new ValueMerger())/*unknown*/;
-	}
-	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: Rule<T>): Tuple2<CompileState, List<T>> {
-		return CompilerUtils.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;
-	}
-	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
-		return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper)/*unknown*/;
 	}
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;

@@ -12,6 +12,7 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Dependency;
 import magma.app.compile.Import;
 import magma.app.compile.Registry;
+import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.rule.OrRule;
@@ -92,7 +93,7 @@ final class TypeCompiler {
     private static Option<Tuple2<CompileState, Type>> parseGeneric(CompileState state, String input) {
         return new SuffixComposable<Tuple2<CompileState, Type>>(">", (String withoutEnd) -> {
             return SplitComposable.compileSplit(withoutEnd, new LocatingSplitter("<", new FirstLocator()), (String baseString, String argsString) -> {
-                var argsTuple = CompilerUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
+                var argsTuple = ValueUtils.parseValuesOrEmpty(state, argsString, (CompileState state1, String s) -> {
                     return TypeCompiler.compileTypeArgument(state1, s);
                 });
                 var argsState = argsTuple.left();
@@ -160,7 +161,7 @@ final class TypeCompiler {
     private static Option<Tuple2<CompileState, String>> compileTypeArgument(CompileState state, String input) {
         return new OrRule<String>(Lists.of(
                 (CompileState state2, String input1) -> {
-                    return CompilerUtils.compileWhitespace(state2, input1);
+                    return WhitespaceCompiler.compileWhitespace(state2, input1);
                 },
                 (CompileState state1, String type) -> {
                     return TypeCompiler.compileType(state1, type);

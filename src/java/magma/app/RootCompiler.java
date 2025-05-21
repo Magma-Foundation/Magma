@@ -14,6 +14,7 @@ import magma.app.compile.CompileState;
 import magma.app.compile.Context;
 import magma.app.compile.Registry;
 import magma.app.compile.Stack;
+import magma.app.compile.ValueUtils;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.Definition;
@@ -26,8 +27,8 @@ import magma.app.compile.value.Value;
 
 public final class RootCompiler {
     private static Tuple2<CompileState, String> compileRootSegment(CompileState state, String input) {
-        return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(
-                CompilerUtils::compileWhitespace,
+        return OrRule.compileOrPlaceholder(state, input, Lists.of(
+                WhitespaceCompiler::compileWhitespace,
                 RootCompiler::compileNamespaced,
                 RootCompiler.createStructureRule("class ", "class "),
                 RootCompiler.createStructureRule("interface ", "interface "),
@@ -70,7 +71,7 @@ public final class RootCompiler {
 
     private static Option<Tuple2<CompileState, String>> compileStructureWithExtends(CompileState state, List<String> annotations, List<String> modifiers, String targetInfix, String beforeContent, Option<Type> maybeImplementing, String inputContent) {
         return SplitComposable.compileSplit(beforeContent, new LocatingSplitter(" extends ", new FirstLocator()), (String beforeExtends, String afterExtends) -> {
-            return CompilerUtils.parseValues(state, afterExtends, (CompileState inner0, String inner1) -> {
+            return ValueUtils.parseValues(state, afterExtends, (CompileState inner0, String inner1) -> {
                         return TypeCompiler.parseType(inner0, inner1);
                     })
                     .flatMap((Tuple2<CompileState, List<Type>> compileStateListTuple2) -> {
@@ -124,7 +125,7 @@ public final class RootCompiler {
             return new None<Tuple2<CompileState, String>>();
         }
 
-        var outputContentTuple = CompilerUtils.compileStatements(state.mapStack((Stack stack) -> {
+        var outputContentTuple = FunctionSegmentCompiler.compileStatements(state.mapStack((Stack stack) -> {
             return stack.pushStructureName(name);
         }), content, RootCompiler::compileClassSegment);
         var outputContentState = outputContentTuple.left().mapStack((Stack stack1) -> {
@@ -268,8 +269,8 @@ public final class RootCompiler {
     }
 
     private static Tuple2<CompileState, String> compileClassSegment(CompileState state1, String input1) {
-        return CompilerUtils.compileOrPlaceholder(state1, input1, Lists.of(
-                CompilerUtils::compileWhitespace,
+        return OrRule.compileOrPlaceholder(state1, input1, Lists.of(
+                WhitespaceCompiler::compileWhitespace,
                 RootCompiler.createStructureRule("class ", "class "),
                 RootCompiler.createStructureRule("interface ", "interface "),
                 RootCompiler.createStructureRule("record ", "class "),
@@ -305,7 +306,7 @@ public final class RootCompiler {
     }
 
     public static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {
-        return CompilerUtils.compileStatements(state.mapContext((Context context2) -> {
+        return FunctionSegmentCompiler.compileStatements(state.mapContext((Context context2) -> {
             return context2.withLocation(location);
         }), input, RootCompiler::compileRootSegment);
     }

@@ -113,5 +113,25 @@
 	ValueCompiler: magma.app, 
 	WhitespaceCompiler: magma.app
 ]*/
-export interface Namespace {
+import { Iterable } from "../../../magma/api/collect/list/Iterable";
+import { CompilerUtils } from "../../../magma/app/CompilerUtils";
+import { ValueMerger } from "../../../magma/app/compile/merge/ValueMerger";
+import { CompileState } from "../../../magma/app/compile/CompileState";
+import { List } from "../../../magma/api/collect/list/List";
+import { Tuple2 } from "../../../magma/api/Tuple2";
+import { Rule } from "../../../magma/app/compile/rule/Rule";
+import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
+import { Lists } from "../../../jvm/api/collect/list/Lists";
+import { Option } from "../../../magma/api/option/Option";
+import { ValueFolder } from "../../../magma/app/compile/fold/ValueFolder";
+export class ValueUtils {
+	static generateValueStrings(values: Iterable<string>): string {
+		return CompilerUtils.generateAll(values, new ValueMerger())/*unknown*/;
+	}
+	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: Rule<T>): Tuple2<CompileState, List<T>> {
+		return parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;
+	}
+	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
+		return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper)/*unknown*/;
+	}
 }

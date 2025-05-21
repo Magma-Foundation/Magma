@@ -13,6 +13,8 @@ import magma.app.compile.compose.PrefixComposable;
 import magma.app.compile.compose.SplitComposable;
 import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.Definition;
+import magma.app.compile.fold.StatementsFolder;
+import magma.app.compile.merge.StatementsMerger;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
 import magma.app.compile.select.Selector;
@@ -22,6 +24,7 @@ import magma.app.compile.locate.FirstLocator;
 import magma.app.compile.select.LastSelector;
 import magma.app.compile.split.LocatingSplitter;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 final class FunctionSegmentCompiler {
@@ -111,7 +114,7 @@ final class FunctionSegmentCompiler {
     }
 
     private static Tuple2<CompileState, String> compileFunctionStatementValue(CompileState state, String withoutEnd) {
-        return CompilerUtils.compileOrPlaceholder(state, withoutEnd, Lists.of(
+        return OrRule.compileOrPlaceholder(state, withoutEnd, Lists.of(
                 FunctionSegmentCompiler::compileReturnWithValue,
                 FunctionSegmentCompiler::compileAssignment,
                 (CompileState state1, String input) -> {
@@ -186,16 +189,20 @@ final class FunctionSegmentCompiler {
     }
 
     public static Tuple2<CompileState, String> compileFunctionStatements(CompileState state, String input) {
-        return CompilerUtils.compileStatements(state, input, FunctionSegmentCompiler::compileFunctionSegment);
+        return compileStatements(state, input, FunctionSegmentCompiler::compileFunctionSegment);
     }
 
     private static Tuple2<CompileState, String> compileFunctionSegment(CompileState state, String input) {
-        return CompilerUtils.compileOrPlaceholder(state, input, Lists.of(
-                CompilerUtils::compileWhitespace,
+        return OrRule.compileOrPlaceholder(state, input, Lists.of(
+                WhitespaceCompiler::compileWhitespace,
                 FunctionSegmentCompiler::compileEmptySegment,
                 FunctionSegmentCompiler::compileBlock,
                 FunctionSegmentCompiler::compileFunctionStatement,
                 FunctionSegmentCompiler::compileReturnWithoutSuffix
         ));
+    }
+
+    static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
+        return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger());
     }
 }

@@ -93,6 +93,7 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
+	ValueUtils: magma.app.compile, 
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
@@ -109,7 +110,8 @@
 	Sources: magma.app, 
 	Targets: magma.app, 
 	TypeCompiler: magma.app, 
-	ValueCompiler: magma.app
+	ValueCompiler: magma.app, 
+	WhitespaceCompiler: magma.app
 ]*/
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
@@ -131,7 +133,7 @@ import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposab
 import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler";
 import { Stack } from "../../magma/app/compile/Stack";
 import { Parameter } from "../../magma/app/compile/define/Parameter";
-import { CompilerUtils } from "../../magma/app/CompilerUtils";
+import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { ValueCompiler } from "../../magma/app/ValueCompiler";
 import { List } from "../../magma/api/collect/list/List";
 import { Value } from "../../magma/app/compile/value/Value";
@@ -201,7 +203,7 @@ class FieldCompiler {
 		})/*unknown*/;
 	}
 	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.parseValues(state, withoutEnd, (state1: CompileState, segment: string) => {
+		return ValueUtils.parseValues(state, withoutEnd, (state1: CompileState, segment: string) => {
 			let stripped = segment.strip()/*unknown*/;
 			if (ValueCompiler.isSymbol(stripped)/*unknown*/){
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state1, "\n\t static " + stripped + " = \"" + stripped + "\";"))/*unknown*/;
