@@ -49,4 +49,6 @@ public interface CompileState {
     CompileState popStructureName();
 
     CompileState withPlatform(Platform platform);
+
+    boolean hasPlatform(Platform platform);
 }

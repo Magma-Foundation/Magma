@@ -75,9 +75,19 @@ public final class Main {
                 .query()
                 .foldWithInitial(state, (CompileState current, Source source) -> current.addSource(source));
 
-        return Main.retainSources(children, sourceDirectory)
+        var folded = Main.retainSources(children, sourceDirectory)
                 .query()
                 .foldWithInitialToResult(initial, Main::runWithSource);
+
+        if (state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)) {
+            var diagramPath = Files.get(".", "diagram.uml");
+            var maybeError = diagramPath.writeString(result.join(""));
+            if (maybeError instanceof Some(var error)) {
+                return new Err<>(error);
+            }
+        }
+
+        return folded;
     }
 
     private static List<Source> retainSources(List<Path> children, Path sourceDirectory) {
@@ -88,18 +98,26 @@ public final class Main {
     }
 
     private static Result<CompileState, IOError> runWithSource(CompileState state, Source source) {
+        return source.read().flatMapValue((String input) -> Main.compileAndWrite(state, source, input));
+    }
+
+    private static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, String input) {
+        var namespace = source.computeNamespace();
+        var output = Main.compileRoot(state, input, namespace);
+
+        if (state.hasPlatform(Platform.PlantUML)) {
+            return new Ok<>(output.left());
+        }
+
+        return Main.writeTarget(source, output.left().clearImports().clearOutput(), output.right());
+    }
+
+    private static Result<CompileState, IOError> writeTarget(Source source, CompileState state, String output) {
         var target = Files.get(".", "src", "ts")
                 .resolveChildSegments(source.computeNamespace())
                 .resolveChild(source.computeName() + ".ts");
 
-        return source.read().flatMapValue((String input) -> Main.compileAndWrite(state, source, input, target));
-    }
-
-    private static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, String input, Path target) {
-        var namespace = source.computeNamespace();
-        var output = Main.compileRoot(state, input, namespace);
-
-        return Main.writeTarget(target, output.right()).orElseGet(() -> new Ok<CompileState, IOError>(output.left()));
+        return Main.writeTarget(target, output).orElseGet(() -> new Ok<CompileState, IOError>(state));
     }
 
     private static Option<Result<CompileState, IOError>> writeTarget(Path target, String output) {
@@ -117,18 +135,17 @@ public final class Main {
         return parent.createDirectories();
     }
 
-    private static Tuple2Impl<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
+    private static Tuple2<CompileState, String> compileRoot(CompileState state, String input, List<String> namespace) {
         var compiled = Main.compileStatements(state.withNamespace(namespace), input, Main::compileRootSegment);
         var compiledState = compiled.left();
 
-        var compileState = state.clearImports().clearOutput();
-        var segment = compileState.querySources()
+        var segment = state.querySources()
                 .map((Source source) -> Main.formatSource(source))
                 .collect(new Joiner(", "))
                 .orElse("");
 
         var joined = compiledState.join(compiled.right());
-        return new Tuple2Impl<CompileState, String>(compileState, "/*[" + segment + "\n]*/\n" + joined);
+        return new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
     }
 
     private static String formatSource(Source source) {

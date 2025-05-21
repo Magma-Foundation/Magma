@@ -162,6 +162,11 @@ public record ImmutableCompileState(
     }
 
     @Override
+    public boolean hasPlatform(Platform platform) {
+        return this.platform == platform;
+    }
+
+    @Override
     public Iter<Import> queryImports() {
         return this.imports.query();
     }
