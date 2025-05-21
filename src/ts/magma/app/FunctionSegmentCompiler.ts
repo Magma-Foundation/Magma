@@ -217,11 +217,14 @@ class FunctionSegmentCompiler {
 		}).apply(Strings.strip(input))/*unknown*/;
 	}
 	static compileFunctionStatementValue(state: CompileState, withoutEnd: string): Tuple2<CompileState, string> {
-		return OrRule.compileOrPlaceholder(state, withoutEnd, Lists.of(FunctionSegmentCompiler.compileReturnWithValue, FunctionSegmentCompiler.compileAssignment, (state1: CompileState, input: string) => {
+		return OrRule.compileOrPlaceholder(state, withoutEnd, Lists.of(FunctionSegmentCompiler.compileReturnWithValue, FunctionSegmentCompiler.compileAssignment, FunctionSegmentCompiler.createInvokableRule(), FunctionSegmentCompiler.createPostRule("++"), FunctionSegmentCompiler.createPostRule("--"), FunctionSegmentCompiler.compileBreak))/*unknown*/;
+	}
+	static createInvokableRule(): Rule<string> {
+		return (state1: CompileState, input: string) => {
 			return ValueCompiler.parseInvokable(state1, input).map((tuple: Tuple2<CompileState, Value>) => {
 				return ValueCompiler.generateValue(tuple)/*unknown*/;
 			})/*unknown*/;
-		}, FunctionSegmentCompiler.createPostRule("++"), FunctionSegmentCompiler.createPostRule("--"), FunctionSegmentCompiler.compileBreak))/*unknown*/;
+		}/*unknown*/;
 	}
 	static compileBreak(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		if (Strings.equalsTo("break", Strings.strip(input))/*unknown*/){
@@ -272,7 +275,7 @@ class FunctionSegmentCompiler {
 		})/*unknown*/;
 	}
 	static compileFunctionStatements(state: CompileState, input: string): Tuple2<CompileState, string> {
-		return compileStatements(state, input, FunctionSegmentCompiler.compileFunctionSegment)/*unknown*/;
+		return FunctionSegmentCompiler.compileStatements(state, input, FunctionSegmentCompiler.compileFunctionSegment)/*unknown*/;
 	}
 	static compileFunctionSegment(state: CompileState, input: string): Tuple2<CompileState, string> {
 		return OrRule.compileOrPlaceholder(state, input, Lists.of(WhitespaceCompiler.compileWhitespace, FunctionSegmentCompiler.compileEmptySegment, FunctionSegmentCompiler.compileBlock, FunctionSegmentCompiler.compileFunctionStatement, FunctionSegmentCompiler.compileReturnWithoutSuffix))/*unknown*/;
