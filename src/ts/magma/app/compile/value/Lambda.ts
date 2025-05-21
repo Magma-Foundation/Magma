@@ -77,6 +77,7 @@
 	Location: magma.app, 
 	Locator: magma.app, 
 	Main: magma.app, 
+	Merger: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 

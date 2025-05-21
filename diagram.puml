@@ -185,6 +185,8 @@ interface Locator {
 }
 class Main {
 }
+interface Merger {
+}
 class PathSources {
 }
 PathSources <|.. Sources
@@ -457,6 +459,7 @@ Symbol --> None
 CompilerUtils --> CompileState
 CompilerUtils --> Tuple2
 CompilerUtils --> Folder
+CompilerUtils --> Merger
 CompilerUtils --> Some
 CompilerUtils --> List
 CompilerUtils --> Tuple2Impl

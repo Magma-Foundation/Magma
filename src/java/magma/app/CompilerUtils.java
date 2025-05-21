@@ -25,14 +25,13 @@ public final class CompilerUtils {
         return CompilerUtils.compileAll(state, input, CompilerUtils::foldStatements, mapper, CompilerUtils::mergeStatements);
     }
 
-    private static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, BiFunction<String, String, String> merger) {
+    private static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, Merger merger) {
         var folded = CompilerUtils.parseAll(state, input, folder, (CompileState state1, String s) -> new Some<Tuple2<CompileState, String>>(mapper.apply(state1, s))).orElse(new Tuple2Impl<CompileState, List<String>>(state, Lists.empty()));
         return new Tuple2Impl<CompileState, String>(folded.left(), CompilerUtils.generateAll(folded.right(), merger));
     }
 
-    private static String generateAll(Iterable<String> elements, BiFunction<String, String, String> merger) {
-        return elements.iter()
-                .foldWithInitial("", merger);
+    private static String generateAll(Iterable<String> elements, Merger merger) {
+        return elements.iter().foldWithInitial("", merger::apply);
     }
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> biFunction) {

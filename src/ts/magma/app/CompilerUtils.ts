@@ -77,6 +77,7 @@
 	Location: magma.app, 
 	Locator: magma.app, 
 	Main: magma.app, 
+	Merger: magma.app, 
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
@@ -90,6 +91,7 @@
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Folder } from "../../magma/app/Folder";
+import { Merger } from "../../magma/app/Merger";
 import { Some } from "../../magma/api/option/Some";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
@@ -112,12 +114,12 @@ export class CompilerUtils {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return CompilerUtils.compileAll(state, input, CompilerUtils.foldStatements, mapper, CompilerUtils.mergeStatements)/*unknown*/;
 	}
-	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: (arg0 : string, arg1 : string) => string): Tuple2<CompileState, string> {
+	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: Merger): Tuple2<CompileState, string> {
 		let folded = CompilerUtils.parseAll(state, input, folder, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(folded.left(), CompilerUtils.generateAll(folded.right(), merger))/*unknown*/;
 	}
-	static generateAll(elements: Iterable<string>, merger: (arg0 : string, arg1 : string) => string): string {
-		return elements.iter().foldWithInitial("", merger)/*unknown*/;
+	static generateAll(elements: Iterable<string>, merger: Merger): string {
+		return elements.iter().foldWithInitial("", merger.apply)/*unknown*/;
 	}
 	static parseAll<T>(state: CompileState, input: string, folder: Folder, biFunction: (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, List<T>>> {
 		return CompilerUtils.divide(input, folder).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
