@@ -3,17 +3,17 @@ class Lists {
 }
 class Files {
 }
-class Actual {
+interface Actual {
 }
-class Namespace {
+interface Namespace {
 }
-class Collector<T, C> {
+interface Collector<T, C> {
 }
 class EmptyHead<T> {
 }
 class FlatMapHead<T, R> {
 }
-class Head<T> {
+interface Head<T> {
 }
 class HeadedIter<T> {
 }
@@ -23,25 +23,25 @@ class RangeHead {
 }
 class SingleHead<T> {
 }
-class Iter<T> {
+interface Iter<T> {
 }
 class Iters {
 }
 class Joiner {
 }
-class List<T> {
+interface List<T> {
 }
 class ListCollector<T> {
 }
 class Console {
 }
-class IOError {
+interface IOError {
 }
-class Path {
+interface Path {
 }
 class None<T> {
 }
-class Option<T> {
+interface Option<T> {
 }
 class Some<T> {
 }
@@ -49,17 +49,17 @@ class Err<T, X> {
 }
 class Ok<T, X> {
 }
-class Result<T, X> {
+interface Result<T, X> {
 }
 class Characters {
 }
 class Strings {
 }
-class Tuple2<A, B> {
+interface Tuple2<A, B> {
 }
 class Tuple2Impl<A, B> {
 }
-class CompileState {
+interface CompileState {
 }
 class ConstructionCaller {
 }
@@ -67,11 +67,11 @@ class ConstructorHeader {
 }
 class Definition {
 }
-class MethodHeader {
+interface MethodHeader {
 }
-class Parameter {
+interface Parameter {
 }
-class DivideState {
+interface DivideState {
 }
 class ImmutableCompileState {
 }
@@ -91,15 +91,15 @@ class PrimitiveType {
 }
 class TemplateType {
 }
-class Type {
+interface Type {
 }
 class VariadicType {
 }
 class AccessValue {
 }
-class Argument {
+interface Argument {
 }
-class Caller {
+interface Caller {
 }
 class Invokable {
 }
@@ -111,7 +111,7 @@ class Operation {
 }
 class StringValue {
 }
-class Value {
+interface Value {
 }
 class Source {
 }

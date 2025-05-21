@@ -361,7 +361,7 @@ public final class Main {
                 .orElse("");
 
         if(outputContentState.hasPlatform(Platform.PlantUML)) {
-            return new Some<>(new Tuple2Impl<>(outputContentState.append("class " + name + joinedTypeParams + " {\n}\n"), ""));
+            return new Some<>(new Tuple2Impl<>(outputContentState.append(infix + name + joinedTypeParams + " {\n}\n"), ""));
         }
 
         if (annotations.contains("Namespace")) {
