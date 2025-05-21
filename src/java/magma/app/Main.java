@@ -360,8 +360,14 @@ public final class Main {
                 .collect(Joiner.empty())
                 .orElse("");
 
-        if(outputContentState.hasPlatform(Platform.PlantUML)) {
-            return new Some<>(new Tuple2Impl<>(outputContentState.append(infix + name + joinedTypeParams + " {\n}\n"), ""));
+        if (outputContentState.hasPlatform(Platform.PlantUML)) {
+            var joinedSuperTypes = maybeSuperType.query()
+                    .map((Type type) -> type.generate())
+                    .map((String generated) -> name + "--|>" + generated + "\n")
+                    .collect(new Joiner(""))
+                    .orElse("");
+
+            return new Some<>(new Tuple2Impl<>(outputContentState.append(infix + name + joinedTypeParams + " {\n}\n" + joinedSuperTypes), ""));
         }
 
         if (annotations.contains("Namespace")) {
