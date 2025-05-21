@@ -59,6 +59,7 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Compiler: magma.app, 
+	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
@@ -71,16 +72,17 @@ import { Source } from "../../magma/app/io/Source";
 import { List } from "../../magma/api/collect/list/List";
 import { IOError } from "../../magma/api/io/IOError";
 import { Result } from "../../magma/api/result/Result";
+import { PathSource } from "../../magma/app/io/PathSource";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class Sources {
 	sourceDirectory: Path;
 	constructor (sourceDirectory: Path) {
 		this.sourceDirectory = sourceDirectory;
 	}
-	getListIOErrorResult(): Result<List<Source>, IOError> {
-		return this.sourceDirectory().walk().mapValue(children -  > this.retainSources(children))/*unknown*/;
+	listSources(): Result<List<Source>, IOError> {
+		return this.sourceDirectory().walk().mapValue((children: List<Path>) => this.retainSources(children)/*unknown*/)/*unknown*/;
 	}
 	retainSources(children: List<Path>): List<Source> {
-		return children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/).map((child: Path) => new Source(this.sourceDirectory(), child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
+		return children.query().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<>())/*unknown*/;
 	}
 }

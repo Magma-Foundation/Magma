@@ -59,6 +59,7 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Compiler: magma.app, 
+	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
@@ -79,12 +80,12 @@ import { List } from "../../magma/api/collect/list/List";
 import { Dependency } from "../../magma/app/compile/Dependency";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
-import { Location } from "../../magma/app/Location";
 import { Compiler } from "../../magma/app/Compiler";
 import { Ok } from "../../magma/api/result/Ok";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { Location } from "../../magma/app/Location";
 import { None } from "../../magma/api/option/None";
 export class Main {
 	static main(): void {
@@ -94,7 +95,7 @@ export class Main {
 	}
 	static runWithSourceDirectory(sources: Sources): Result<CompileState, IOError> {
 		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => {
-			return sources.getListIOErrorResult().flatMapValue((children: List<Source>) => {
+			return sources.listSources().flatMapValue((children: List<Source>) => {
 				return Main.runWithChildren(state.withPlatform(platform), children)/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/;
@@ -116,7 +117,7 @@ export class Main {
 		return source.read().flatMapValue((input: string) => Main.compileAndWrite(state, source, input)/*unknown*/)/*unknown*/;
 	}
 	static compileAndWrite(state: CompileState, source: Source, input: string): Result<CompileState, IOError> {
-		let location = new Location(source.computeNamespace(), source.computeName())/*unknown*/;
+		let location = source.createLocation()/*unknown*/;
 		let compiled = Compiler.compileRoot(state, input, location)/*unknown*/;
 		let compiledState = compiled.left()/*unknown*/;
 		if (compiledState.hasPlatform(Platform.PlantUML)/*unknown*/){
@@ -135,10 +136,10 @@ export class Main {
                 .orElseGet(() -> new Ok<CompileState, IOError>(state))*/;
 	}
 	static formatSource(source: Source): string {
-		return "\n\t" + source.computeName() + ": " + Main.joinNamespace(source)/*unknown*/;
+		return "\n\t" + source.createLocation().name() + ": " + Main.joinNamespace(source)/*unknown*/;
 	}
 	static joinNamespace(source: Source): string {
-		return source.computeNamespace().query().collect(new Joiner(".")).orElse("")/*unknown*/;
+		return source.createLocation().namespace().query().collect(new Joiner(".")).orElse("")/*unknown*/;
 	}
 	static createInitialState(): CompileState {
 		return new ImmutableCompileState(Lists.empty(), "", Lists.empty(), 0, Lists.empty(), new None<Location>(), Lists.empty(), Platform.TypeScript, Lists.empty())/*unknown*/;

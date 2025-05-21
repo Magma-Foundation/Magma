@@ -148,7 +148,10 @@ Value <|-- Argument
 Value <|-- Caller
 class Compiler {
 }
-class Source {
+class PathSource {
+}
+PathSource <|.. Source
+interface Source {
 }
 class Location {
 }
@@ -236,9 +239,9 @@ CompileState --> Iter
 CompileState --> Dependency
 CompileState --> Source
 CompileState --> Option
-CompileState --> List
 CompileState --> Location
 CompileState --> Definition
+CompileState --> List
 CompileState --> Platform
 ConstructionCaller --> Caller
 ConstructionCaller --> Value
@@ -412,11 +415,15 @@ Compiler --> TemplateType
 Compiler --> FunctionType
 Compiler --> ImmutableDivideState
 Compiler --> Location
-Source --> Path
+PathSource --> Source
+PathSource --> Path
+PathSource --> IOError
+PathSource --> Result
+PathSource --> List
+PathSource --> ListCollector
+PathSource --> Location
 Source --> IOError
 Source --> Result
-Source --> List
-Source --> ListCollector
 Source --> Location
 Location --> List
 Main --> Files
@@ -432,18 +439,19 @@ Main --> List
 Main --> Dependency
 Main --> Joiner
 Main --> Err
-Main --> Location
 Main --> Compiler
 Main --> Ok
 Main --> Tuple2Impl
 Main --> ImmutableCompileState
 Main --> Lists
+Main --> Location
 Main --> None
 Sources --> Path
 Sources --> Source
 Sources --> List
 Sources --> IOError
 Sources --> Result
+Sources --> PathSource
 Sources --> ListCollector
 Targets --> Path
 Targets --> IOError

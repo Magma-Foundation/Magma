@@ -30,7 +30,7 @@ public final class Main {
 
     private static Result<CompileState, IOError> runWithSourceDirectory(Sources sources) {
         return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> {
-            return sources.getListIOErrorResult().flatMapValue((List<Source> children) -> {
+            return sources.listSources().flatMapValue((List<Source> children) -> {
                 return Main.runWithChildren(state.withPlatform(platform), children);
             });
         });
@@ -62,7 +62,7 @@ public final class Main {
     }
 
     private static Result<CompileState, IOError> compileAndWrite(CompileState state, Source source, String input) {
-        var location = new Location(source.computeNamespace(), source.computeName());
+        var location = source.createLocation();
         var compiled = Compiler.compileRoot(state, input, location);
         var compiledState = compiled.left();
 
@@ -89,11 +89,11 @@ public final class Main {
     }
 
     private static String formatSource(Source source) {
-        return "\n\t" + source.computeName() + ": " + Main.joinNamespace(source);
+        return "\n\t" + source.createLocation().name() + ": " + Main.joinNamespace(source);
     }
 
     private static String joinNamespace(Source source) {
-        return source.computeNamespace()
+        return source.createLocation().namespace()
                 .query()
                 .collect(new Joiner("."))
                 .orElse("");

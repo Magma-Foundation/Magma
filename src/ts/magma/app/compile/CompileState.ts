@@ -59,6 +59,7 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Compiler: magma.app, 
+	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
@@ -71,9 +72,9 @@ import { Iter } from "../../../magma/api/collect/Iter";
 import { Dependency } from "../../../magma/app/compile/Dependency";
 import { Source } from "../../../magma/app/io/Source";
 import { Option } from "../../../magma/api/option/Option";
-import { List } from "../../../magma/api/collect/list/List";
 import { Location } from "../../../magma/app/Location";
 import { Definition } from "../../../magma/app/compile/define/Definition";
+import { List } from "../../../magma/api/collect/list/List";
 import { Platform } from "../../../magma/app/Platform";
 export interface CompileState {
 	join(otherOutput: string): string;
@@ -83,7 +84,7 @@ export interface CompileState {
 	createIndent(): string;
 	findLastStructureName(): Option<string>;
 	isLastWithin(name: string): boolean;
-	addResolvedImport(parent: List<string>, child: string): CompileState;
+	addResolvedImport(location: Location): CompileState;
 	withLocation(location: Location): CompileState;
 	append(element: string): CompileState;
 	pushStructureName(name: string): CompileState;

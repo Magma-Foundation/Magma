@@ -67,37 +67,32 @@
 	Sources: magma.app, 
 	Targets: magma.app
 ]*/
-import { Value } from "../../../../magma/app/compile/value/Value";
-import { Definition } from "../../../../magma/app/compile/define/Definition";
-import { List } from "../../../../magma/api/collect/list/List";
-import { Joiner } from "../../../../magma/api/collect/Joiner";
-import { Option } from "../../../../magma/api/option/Option";
-import { Some } from "../../../../magma/api/option/Some";
-import { None } from "../../../../magma/api/option/None";
-import { Type } from "../../../../magma/app/compile/type/Type";
-import { CompileState } from "../../../../magma/app/compile/CompileState";
-import { PrimitiveType } from "../../../../magma/app/compile/type/PrimitiveType";
-export class Lambda implements Value {
-	paramNames: List<Definition>;
-	content: string;
-	constructor (paramNames: List<Definition>, content: string) {
-		this.paramNames = paramNames;
-		this.content = content;
+import { Source } from "../../../magma/app/io/Source";
+import { Path } from "../../../magma/api/io/Path";
+import { IOError } from "../../../magma/api/io/IOError";
+import { Result } from "../../../magma/api/result/Result";
+import { List } from "../../../magma/api/collect/list/List";
+import { ListCollector } from "../../../magma/api/collect/list/ListCollector";
+import { Location } from "../../../magma/app/Location";
+export class PathSource implements Source {
+	sourceDirectory: Path;
+	source: Path;
+	constructor (sourceDirectory: Path, source: Path) {
+		this.sourceDirectory = sourceDirectory;
+		this.source = source;
 	}
-	generate(): string {
-		let joinedParamNames = this.paramNames.query().map((definition: Definition) => definition.generate()/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
-		return "(" + joinedParamNames + ")" + " => " + this.content/*unknown*/;
+	read(): Result<string, IOError> {
+		return this.source.readString()/*unknown*/;
 	}
-	toValue(): Option<Value> {
-		return new Some<Value>(this)/*unknown*/;
+	computeName(): string {
+		let fileName = this.source.findFileName()/*unknown*/;
+		let separator = fileName.lastIndexOf(".")/*unknown*/;
+		return fileName.substring(0, separator)/*unknown*/;
 	}
-	findChild(): Option<Value> {
-		return new None<Value>()/*unknown*/;
+	computeNamespace(): List<string> {
+		return this.sourceDirectory.relativize(this.source).getParent().query().collect(new ListCollector<string>())/*unknown*/;
 	}
-	resolve(state: CompileState): Type {
-		return PrimitiveType.Unknown/*unknown*/;
-	}
-	generateAsEnumValue(structureName: string): Option<string> {
-		return new None<string>()/*unknown*/;
+	createLocation(): Location {
+		return new Location(this.computeNamespace(), this.computeName())/*unknown*/;
 	}
 }

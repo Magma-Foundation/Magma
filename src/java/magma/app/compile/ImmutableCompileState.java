@@ -55,10 +55,10 @@ public record ImmutableCompileState(
     }
 
     @Override
-    public CompileState addResolvedImport(List<String> parent, String child) {
+    public CompileState addResolvedImport(Location location) {
         if (Platform.PlantUML == this.platform) {
             var name = this.maybeLocation.map(Location::name).orElse("");
-            var dependency = new Dependency(name, child);
+            var dependency = new Dependency(name, location.name());
             if (!this.dependencies.contains(dependency)) {
                 return new ImmutableCompileState(
                         this.imports,
@@ -74,33 +74,39 @@ public record ImmutableCompileState(
             }
         }
 
-        var parent1 = parent;
-        var namespace = this.maybeLocation
+        var requestedNamespace = location.namespace();
+        var requestedChild = location.name();
+
+        var thisNamespace = this.maybeLocation
                 .map(Location::namespace)
                 .orElse(Lists.empty());
 
-        if (namespace.isEmpty()) {
-            parent1 = parent1.addFirst(".");
+        if (thisNamespace.isEmpty()) {
+            requestedNamespace = requestedNamespace.addFirst(".");
         }
 
         var i = 0;
-        var size = namespace.size();
+        var size = thisNamespace.size();
         while (i < size) {
-            parent1 = parent1.addFirst("..");
+            requestedNamespace = requestedNamespace.addFirst("..");
             i++;
         }
 
-        var stringList = parent1.addLast(child);
-        if (this.imports
-                .query()
-                .filter((Import node) -> node.hasSameChild(child))
-                .next()
-                .isPresent()) {
+        var stringList = requestedNamespace.addLast(requestedChild);
+        if (doesImportExistAlready(requestedChild)) {
             return this;
         }
 
-        var importString = new Import(stringList, child);
+        var importString = new Import(stringList, requestedChild);
         return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies);
+    }
+
+    private boolean doesImportExistAlready(String requestedChild) {
+        return this.imports
+                .query()
+                .filter((Import node) -> node.hasSameChild(requestedChild))
+                .next()
+                .isPresent();
     }
 
     @Override
@@ -158,7 +164,7 @@ public record ImmutableCompileState(
     @Override
     public Option<Source> findSource(String name) {
         return this.sources.query()
-                .filter((Source source) -> Strings.equalsTo(source.computeName(), name))
+                .filter((Source source) -> Strings.equalsTo(source.createLocation().name(), name))
                 .next();
     }
 
@@ -169,7 +175,7 @@ public record ImmutableCompileState(
         }
 
         return this.findSource(base)
-                .map((Source source) -> this.addResolvedImport(source.computeNamespace(), source.computeName()))
+                .map((Source source) -> this.addResolvedImport(source.createLocation()))
                 .orElse(this);
     }
 

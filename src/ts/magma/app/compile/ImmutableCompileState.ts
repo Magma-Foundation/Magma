@@ -59,6 +59,7 @@
 	StringValue: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	Compiler: magma.app, 
+	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
 	Main: magma.app, 
@@ -117,31 +118,35 @@ export class ImmutableCompileState implements CompileState {
 	isLastWithin(name: string): boolean {
 		return this.structureNames.findLast().filter((anObject: string) => Strings.equalsTo(name, anObject)/*unknown*/).isPresent()/*unknown*/;
 	}
-	addResolvedImport(parent: List<string>, child: string): CompileState {
+	addResolvedImport(location: Location): CompileState {
 		if (Platform.PlantUML === this.platform/*unknown*/){
 			let name = this.maybeLocation.map(Location.name).orElse("")/*unknown*/;
-			let dependency = new Dependency(name, child)/*unknown*/;
+			let dependency = new Dependency(name, location.name())/*unknown*/;
 			if (!this/*unknown*/.dependencies.contains(dependency)/*unknown*/){
 				return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies.addLast(dependency))/*unknown*/;
 			}
 		}
-		let parent1 = parent/*List<string>*/;
-		let namespace = this.maybeLocation.map(Location.namespace).orElse(Lists.empty())/*unknown*/;
-		if (namespace.isEmpty()/*unknown*/){
-			parent1/*unknown*/ = parent1.addFirst(".")/*unknown*/;
+		let requestedNamespace = location.namespace()/*unknown*/;
+		let requestedChild = location.name()/*unknown*/;
+		let thisNamespace = this.maybeLocation.map(Location.namespace).orElse(Lists.empty())/*unknown*/;
+		if (thisNamespace.isEmpty()/*unknown*/){
+			requestedNamespace/*unknown*/ = requestedNamespace.addFirst(".")/*unknown*/;
 		}
 		let i = 0/*unknown*/;
-		let size = namespace.size()/*unknown*/;
+		let size = thisNamespace.size()/*unknown*/;
 		while (i < size/*unknown*/){
-			parent1/*unknown*/ = parent1.addFirst("..")/*unknown*/;
+			requestedNamespace/*unknown*/ = requestedNamespace.addFirst("..")/*unknown*/;
 			i/*unknown*/++;
 		}
-		let stringList = parent1.addLast(child)/*unknown*/;
-		if (this.imports.query().filter((node: Import) => node.hasSameChild(child)/*unknown*/).next().isPresent()/*unknown*/){
+		let stringList = requestedNamespace.addLast(requestedChild)/*unknown*/;
+		if (doesImportExistAlready(requestedChild)/*unknown*/){
 			return this/*unknown*/;
 		}
-		let importString = new Import(stringList, child)/*unknown*/;
+		let importString = new Import(stringList, requestedChild)/*unknown*/;
 		return new ImmutableCompileState(this.imports.addLast(importString), this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;
+	}
+	doesImportExistAlready(requestedChild: string): boolean {
+		return this.imports.query().filter((node: Import) => node.hasSameChild(requestedChild)/*unknown*/).next().isPresent()/*unknown*/;
 	}
 	withLocation(location: Location): CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, new Some<Location>(location), this.sources, this.platform, this.dependencies)/*unknown*/;
@@ -174,13 +179,13 @@ export class ImmutableCompileState implements CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames, this.depth, this.definitions, this.maybeLocation, this.sources.addLast(source), this.platform, this.dependencies)/*unknown*/;
 	}
 	findSource(name: string): Option<Source> {
-		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.computeName(), name)/*unknown*/).next()/*unknown*/;
+		return this.sources.query().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
 	}
 	addResolvedImportFromCache(base: string): CompileState {
 		if (this.structureNames.query().anyMatch((inner: string) => Strings.equalsTo(inner, base)/*unknown*/)/*unknown*/){
 			return this/*unknown*/;
 		}
-		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.computeNamespace(), source.computeName())/*unknown*/).orElse(this)/*unknown*/;
+		return this.findSource(base).map((source: Source) => this.addResolvedImport(source.createLocation())/*unknown*/).orElse(this)/*unknown*/;
 	}
 	popStructureName(): CompileState {
 		return new ImmutableCompileState(this.imports, this.output, this.structureNames.removeLast().orElse(this.structureNames), this.depth, this.definitions, this.maybeLocation, this.sources, this.platform, this.dependencies)/*unknown*/;

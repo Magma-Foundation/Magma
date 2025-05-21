@@ -23,7 +23,7 @@ public interface CompileState {
 
     boolean isLastWithin(String name);
 
-    CompileState addResolvedImport(List<String> parent, String child);
+    CompileState addResolvedImport(Location location);
 
     CompileState withLocation(Location location);
 
