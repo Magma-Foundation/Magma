@@ -42,7 +42,7 @@ final class ValueCompiler {
     }
 
     static Option<Tuple2<CompileState, Value>> parseInvokable(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), ")", (String withoutEnd) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", ValueCompiler::foldInvocationStarts), (String callerWithArgStart, String args) -> CompilerUtils.compileSuffix(callerWithArgStart, "(", (String callerString) -> CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (String type) -> TypeCompiler.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple) -> {
+        return CompilerUtils.compileSuffix(Strings.strip(input), ")", (String withoutEnd) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -> foldInvocationStarts(state1, c)), (String callerWithArgStart, String args) -> CompilerUtils.compileSuffix(callerWithArgStart, "(", (String callerString) -> CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (String type) -> TypeCompiler.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple) -> {
             var callerState = callerTuple.right();
             var caller = callerTuple.left();
             return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args);

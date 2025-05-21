@@ -12,8 +12,6 @@ import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.Context;
-import magma.app.compile.DivideState;
-import magma.app.compile.ImmutableDivideState;
 import magma.app.compile.Registry;
 import magma.app.compile.Stack;
 import magma.app.compile.define.Definition;
@@ -232,10 +230,6 @@ public final class RootCompiler {
                 ValueCompiler.createTextRule("\""),
                 ValueCompiler.createTextRule("'")
         ));
-    }
-
-    public static DivideState createInitialDivideState(String input) {
-        return new ImmutableDivideState(Lists.empty(), "", 0, input, 0);
     }
 
     public static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {

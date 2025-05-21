@@ -69,8 +69,12 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DecoratedFolder: magma.app.divide, 
+	Divider: magma.app.divide, 
+	FoldedDivider: magma.app.divide, 
+	Folder: magma.app.divide, 
+	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
-	Folder: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
@@ -82,6 +86,7 @@
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
+	LastSelector: magma.app.select, 
 	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
@@ -91,6 +96,6 @@
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Option } from "../../magma/api/option/Option";
 import { List } from "../../magma/api/collect/list/List";
-interface Selector {
+export interface Selector {
 	apply(stringList: List<string>): Option<Tuple2<string, string>>;
 }

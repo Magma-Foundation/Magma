@@ -69,8 +69,12 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DecoratedFolder: magma.app.divide, 
+	Divider: magma.app.divide, 
+	FoldedDivider: magma.app.divide, 
+	Folder: magma.app.divide, 
+	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
-	Folder: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
@@ -82,6 +86,7 @@
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
+	LastSelector: magma.app.select, 
 	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
@@ -104,6 +109,8 @@ import { Option } from "../../magma/api/option/Option";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { Strings } from "../../magma/api/text/Strings";
 import { Lists } from "../../jvm/api/collect/list/Lists";
+import { FoldedDivider } from "../../magma/app/divide/FoldedDivider";
+import { DecoratedFolder } from "../../magma/app/divide/DecoratedFolder";
 import { DivideState } from "../../magma/app/compile/DivideState";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Type } from "../../magma/app/compile/type/Type";
@@ -125,13 +132,13 @@ class DefiningCompiler {
 		return new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right())/*unknown*/;
 	}
 	static parseDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, Definition>> {
-		return CompilerUtils.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(Strings.strip(beforeName), " ", DefiningCompiler.foldTypeSeparators), (beforeType: string, type: string) => CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (annotationsString: string, afterAnnotations: string) => {
+		return CompilerUtils.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(Strings.strip(beforeName), " ", (state1, c) -  > foldTypeSeparators(state1, c)), (beforeType: string, type: string) => CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (annotationsString: string, afterAnnotations: string) => {
 			let annotations = DefiningCompiler.parseAnnotations(annotationsString)/*unknown*/;
 			return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name)/*unknown*/;
 		}).or(() => DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name)/*unknown*/)/*unknown*/).or(() => DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)/*unknown*/)/*unknown*/)/*unknown*/;
 	}
 	static parseAnnotations(s: string): List<string> {
-		return CompilerUtils.divide(s, (state1: DivideState, c: string) => CompilerUtils.foldDelimited(state1, c, "\n")/*unknown*/).map((s2: string) => Strings.strip(s2)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).filter((value: string) => 1 <= Strings.length(value)/*unknown*/).map((value: string) => Strings.sliceFrom(value, 1)/*unknown*/).map((s1: string) => Strings.strip(s1)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
+		return new FoldedDivider(new DecoratedFolder((state1: DivideState, c: string) => CompilerUtils.foldDelimited(state1, c, "\n")/*unknown*/)).divide(s).map((s2: string) => Strings.strip(s2)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).filter((value: string) => 1 <= Strings.length(value)/*unknown*/).map((value: string) => Strings.sliceFrom(value, 1)/*unknown*/).map((s1: string) => Strings.strip(s1)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
 	}
 	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
 		return CompilerUtils.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: string) => CompilerUtils.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams: string, typeParamsString: string) => {
@@ -143,7 +150,7 @@ class DefiningCompiler {
 		})/*unknown*/;
 	}
 	static parseModifiers(beforeType: string): List<string> {
-		return CompilerUtils.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => CompilerUtils.foldDelimited(state1, c, " ")/*unknown*/).map((s: string) => Strings.strip(s)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
+		return new FoldedDivider(new DecoratedFolder((state1: DivideState, c: string) => CompilerUtils.foldDelimited(state1, c, " ")/*unknown*/)).divide(Strings.strip(beforeType)).map((s: string) => Strings.strip(s)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
 	}
 	static foldTypeSeparators(state: DivideState, c: string): DivideState {
 		if (" " === c && state.isLevel()/*unknown*/){

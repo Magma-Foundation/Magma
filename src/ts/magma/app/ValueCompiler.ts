@@ -69,8 +69,12 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DecoratedFolder: magma.app.divide, 
+	Divider: magma.app.divide, 
+	FoldedDivider: magma.app.divide, 
+	Folder: magma.app.divide, 
+	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
-	Folder: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
@@ -82,6 +86,7 @@
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
+	LastSelector: magma.app.select, 
 	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
@@ -130,7 +135,7 @@ class ValueCompiler {
 		return new Tuple2Impl<CompileState, string>(state, generated + s)/*unknown*/;
 	}
 	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return CompilerUtils.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", ValueCompiler.foldInvocationStarts), (callerWithArgStart: string, args: string) => CompilerUtils.compileSuffix(callerWithArgStart, "(", (callerString: string) => CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (type: string) => TypeCompiler.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, string>) => {
+		return CompilerUtils.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -  > foldInvocationStarts(state1, c)), (callerWithArgStart: string, args: string) => CompilerUtils.compileSuffix(callerWithArgStart, "(", (callerString: string) => CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (type: string) => TypeCompiler.compileType(state, type).flatMap((callerTuple: Tuple2<CompileState, string>) => {
 			let callerState = callerTuple.right()/*unknown*/;
 			let caller = callerTuple.left()/*unknown*/;
 			return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args)/*unknown*/;

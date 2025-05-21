@@ -18,6 +18,8 @@ import magma.app.compile.define.Parameter;
 import magma.app.compile.text.Whitespace;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Placeholder;
+import magma.app.divide.DecoratedFolder;
+import magma.app.divide.FoldedDivider;
 
 final class DefiningCompiler {
     public static Iterable<Definition> retainDefinitionsFromParameters(Iterable<Parameter> parameters) {
@@ -45,14 +47,14 @@ final class DefiningCompiler {
     }
 
     public static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
-        return CompilerUtils.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(Strings.strip(beforeName), " ", DefiningCompiler::foldTypeSeparators), (String beforeType, String type) -> CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
+        return CompilerUtils.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(Strings.strip(beforeName), " ", (state1, c) -> foldTypeSeparators(state1, c)), (String beforeType, String type) -> CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
             var annotations = DefiningCompiler.parseAnnotations(annotationsString);
             return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
         }).or(() -> DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() -> DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)));
     }
 
     public static List<String> parseAnnotations(String s) {
-        return CompilerUtils.divide(s, (DivideState state1, Character c) -> CompilerUtils.foldDelimited(state1, c, '\n'))
+        return new FoldedDivider(new DecoratedFolder((DivideState state1, char c) -> CompilerUtils.foldDelimited(state1, c, '\n'))).divide(s)
                 .map((String s2) -> Strings.strip(s2))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .filter((String value) -> 1 <= Strings.length(value))
@@ -79,7 +81,7 @@ final class DefiningCompiler {
     }
 
     public static List<String> parseModifiers(String beforeType) {
-        return CompilerUtils.divide(Strings.strip(beforeType), (DivideState state1, Character c) -> CompilerUtils.foldDelimited(state1, c, ' '))
+        return new FoldedDivider(new DecoratedFolder((DivideState state1, char c) -> CompilerUtils.foldDelimited(state1, c, ' '))).divide(Strings.strip(beforeType))
                 .map((String s) -> Strings.strip(s))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());

@@ -6,6 +6,6 @@ import magma.api.option.Option;
 
 import java.util.function.Function;
 
-interface Selector {
+public interface Selector {
     Option<Tuple2<String, String>> apply(List<String> stringList);
 }

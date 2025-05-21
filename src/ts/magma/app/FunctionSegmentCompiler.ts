@@ -69,8 +69,12 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DecoratedFolder: magma.app.divide, 
+	Divider: magma.app.divide, 
+	FoldedDivider: magma.app.divide, 
+	Folder: magma.app.divide, 
+	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
-	Folder: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
@@ -82,6 +86,7 @@
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
+	LastSelector: magma.app.select, 
 	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
@@ -112,7 +117,7 @@ class FunctionSegmentCompiler {
 		}
 	}
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return CompilerUtils.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", FunctionSegmentCompiler.foldBlockStarts), (beforeContentWithEnd: string, content: string) => CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
+		return CompilerUtils.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -  > foldBlockStarts(state1, c)), (beforeContentWithEnd: string, content: string) => CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (beforeContent: string) => FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((headerTuple: Tuple2<CompileState, string>) => {
 			let contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content)/*unknown*/;
 			let indent = state.createIndent()/*unknown*/;
 			return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"))/*unknown*/;

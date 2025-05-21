@@ -67,6 +67,7 @@
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
 	CompilerUtils: magma.app, 
+	DecoratedFolder: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
 	FieldCompiler: magma.app, 

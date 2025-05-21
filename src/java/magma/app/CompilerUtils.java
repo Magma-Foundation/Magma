@@ -3,7 +3,6 @@ package magma.app;
 import jvm.api.collect.list.Lists;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
-import magma.api.collect.Iter;
 import magma.api.collect.Iters;
 import magma.api.collect.Joiner;
 import magma.api.collect.list.Iterable;
@@ -16,13 +15,18 @@ import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.text.Whitespace;
+import magma.app.divide.DecoratedFolder;
+import magma.app.divide.FoldedDivider;
+import magma.app.divide.Folder;
+import magma.app.divide.StatementsFolder;
+import magma.app.select.LastSelector;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class CompilerUtils {
     static Tuple2<CompileState, String> compileStatements(CompileState state, String input, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper) {
-        return CompilerUtils.compileAll(state, input, CompilerUtils::foldStatements, mapper, CompilerUtils::mergeStatements);
+        return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, CompilerUtils::mergeStatements);
     }
 
     private static Tuple2<CompileState, String> compileAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Tuple2<CompileState, String>> mapper, Merger merger) {
@@ -35,7 +39,7 @@ public final class CompilerUtils {
     }
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> biFunction) {
-        return CompilerUtils.divide(input, folder).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
+        return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (Option<Tuple2<CompileState, List<T>>> maybeCurrent, String segment) -> maybeCurrent.flatMap((Tuple2<CompileState, List<T>> current) -> {
             var currentState = current.left();
             var currentElement = current.right();
 
@@ -49,97 +53,6 @@ public final class CompilerUtils {
 
     private static String mergeStatements(String cache, String element) {
         return cache + element;
-    }
-
-    static Iter<String> divide(String input, Folder folder) {
-        var current = RootCompiler.createInitialDivideState(input);
-
-        while (true) {
-            var poppedTuple0 = current.pop().toTuple(new Tuple2Impl<DivideState, Character>(current, '\0'));
-            if (!poppedTuple0.left()) {
-                break;
-            }
-
-            var poppedTuple = poppedTuple0.right();
-            var poppedState = poppedTuple.left();
-            var popped = poppedTuple.right();
-
-            current = CompilerUtils.foldSingleQuotes(poppedState, popped)
-                    .or(() -> CompilerUtils.foldDoubleQuotes(poppedState, popped))
-                    .orElseGet(() -> folder.apply(poppedState, popped));
-        }
-
-        return current.advance().query();
-    }
-
-    private static Option<DivideState> foldDoubleQuotes(DivideState state, char c) {
-        if ('\"' != c) {
-            return new None<DivideState>();
-        }
-
-        var appended = state.append(c);
-        while (true) {
-            var maybeTuple = appended.popAndAppendToTuple()
-                    .toTuple(new Tuple2Impl<DivideState, Character>(appended, '\0'));
-
-            if (!maybeTuple.left()) {
-                break;
-            }
-
-            var tuple = maybeTuple.right();
-            appended = tuple.left();
-
-            if ('\\' == tuple.right()) {
-                appended = appended.popAndAppendToOption().orElse(appended);
-            }
-            if ('\"' == tuple.right()) {
-                break;
-            }
-        }
-        return new Some<DivideState>(appended);
-    }
-
-    private static Option<DivideState> foldSingleQuotes(DivideState state, char c) {
-        if ('\'' != c) {
-            return new None<DivideState>();
-        }
-
-        return state.append(c)
-                .popAndAppendToTuple()
-                .flatMap(CompilerUtils::foldEscaped)
-                .flatMap((DivideState state1) -> state1.popAndAppendToOption());
-    }
-
-    private static Option<DivideState> foldEscaped(Tuple2<DivideState, Character> tuple) {
-        var state = tuple.left();
-        var c = tuple.right();
-
-        if ('\\' == c) {
-            return state.popAndAppendToOption();
-        }
-
-        return new Some<DivideState>(state);
-    }
-
-    private static DivideState foldStatements(DivideState state, char c) {
-        var appended = state.append(c);
-        if (';' == c && appended.isLevel()) {
-            return appended.advance();
-        }
-
-        if ('}' == c && appended.isShallow()) {
-            return appended.advance().exit();
-        }
-
-        if ('{' == c || '(' == c) {
-            return appended.enter();
-        }
-
-        if ('}' == c || ')' == c) {
-            return appended.exit();
-        }
-
-        return appended;
     }
 
     static Tuple2<CompileState, String> compileOrPlaceholder(
@@ -207,7 +120,7 @@ public final class CompilerUtils {
     }
 
     static List<String> divideValues(String input) {
-        return CompilerUtils.divide(input, CompilerUtils::foldValues)
+        return new FoldedDivider(new DecoratedFolder((state, c) -> CompilerUtils.foldValues(state, c))).divide(input)
                 .map((String input1) -> Strings.strip(input1))
                 .filter((String value) -> !Strings.isEmpty(value))
                 .collect(new ListCollector<String>());
@@ -226,7 +139,7 @@ public final class CompilerUtils {
     }
 
     static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, BiFunction<CompileState, String, Option<Tuple2<CompileState, T>>> mapper) {
-        return CompilerUtils.parseAll(state, input, CompilerUtils::foldValues, mapper);
+        return CompilerUtils.parseAll(state, input, (state1, c) -> CompilerUtils.foldValues(state1, c), mapper);
     }
 
     private static String mergeValues(String cache, String element) {
@@ -320,7 +233,7 @@ public final class CompilerUtils {
     }
 
     static Folder foldOperator(String infix) {
-        return (DivideState state, Character c) -> {
+        return (DivideState state, char c) -> {
             if (c == infix.charAt(0) && state.startsWith(Strings.sliceFrom(infix, 1))) {
                 var length = Strings.length(infix) - 1;
                 var counter = 0;
@@ -354,27 +267,16 @@ public final class CompilerUtils {
                 .collect(new ListCollector<R>());
     }
 
-    private static Option<Tuple2<String, String>> selectLast(List<String> divisions, String delimiter) {
-        var beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
-        var last = divisions.findLast().orElse("");
-
-        var joined = beforeLast.iter()
-                .collect(new Joiner(delimiter))
-                .orElse("");
-
-        return new Some<Tuple2<String, String>>(new Tuple2Impl<String, String>(joined, last));
-    }
-
     static Option<Tuple2<String, String>> splitFoldedLast(String input, String delimiter, Folder folder) {
-        return CompilerUtils.splitFolded(input, folder, (List<String> divisions1) -> CompilerUtils.selectLast(divisions1, delimiter));
+        return CompilerUtils.splitFolded(input, folder, new LastSelector(delimiter));
     }
 
-    static Option<Tuple2<String, String>> splitFolded(
+    public static Option<Tuple2<String, String>> splitFolded(
             String input,
             Folder folder,
             Selector selector
     ) {
-        var divisions = CompilerUtils.divide(input, folder)
+        var divisions = new FoldedDivider(new DecoratedFolder(folder)).divide(input)
                 .collect(new ListCollector<String>());
 
         if (2 > divisions.size()) {

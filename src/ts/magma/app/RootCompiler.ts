@@ -69,8 +69,12 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DecoratedFolder: magma.app.divide, 
+	Divider: magma.app.divide, 
+	FoldedDivider: magma.app.divide, 
+	Folder: magma.app.divide, 
+	StatementsFolder: magma.app.divide, 
 	FieldCompiler: magma.app, 
-	Folder: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
@@ -82,6 +86,7 @@
 	PathTargets: magma.app, 
 	Platform: magma.app, 
 	RootCompiler: magma.app, 
+	LastSelector: magma.app.select, 
 	Selector: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
@@ -110,8 +115,6 @@ import { Platform } from "../../magma/app/Platform";
 import { Registry } from "../../magma/app/compile/Registry";
 import { FieldCompiler } from "../../magma/app/FieldCompiler";
 import { Value } from "../../magma/app/compile/value/Value";
-import { DivideState } from "../../magma/app/compile/DivideState";
-import { ImmutableDivideState } from "../../magma/app/compile/ImmutableDivideState";
 import { Location } from "../../magma/app/Location";
 import { Context } from "../../magma/app/compile/Context";
 export class RootCompiler {
@@ -219,9 +222,6 @@ export class RootCompiler {
 	}
 	static parseValue(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return CompilerUtils.or(state, input, Lists.of(ValueCompiler.parseLambda, ValueCompiler.createOperatorRule("+"), ValueCompiler.createOperatorRule("-"), ValueCompiler.createOperatorRule("<="), ValueCompiler.createOperatorRule("<"), ValueCompiler.createOperatorRule("&&"), ValueCompiler.createOperatorRule("||"), ValueCompiler.createOperatorRule(">"), ValueCompiler.createOperatorRule(">="), ValueCompiler.parseInvokable, ValueCompiler.createAccessRule("."), ValueCompiler.createAccessRule("::"), ValueCompiler.parseSymbol, ValueCompiler.parseNot, ValueCompiler.parseNumber, ValueCompiler.createOperatorRuleWithDifferentInfix("==", "==="), ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="), ValueCompiler.createTextRule("\""), ValueCompiler.createTextRule("'")))/*unknown*/;
-	}
-	static createInitialDivideState(input: string): DivideState {
-		return new ImmutableDivideState(Lists.empty(), "", 0, input, 0)/*unknown*/;
 	}
 	static compileRoot(state: CompileState, input: string, location: Location): Tuple2<CompileState, string> {
 		return CompilerUtils.compileStatements(state.mapContext((context2: Context) => context2.withLocation(location)/*unknown*/), input, RootCompiler.compileRootSegment)/*unknown*/;

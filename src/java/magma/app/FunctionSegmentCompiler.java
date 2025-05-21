@@ -26,7 +26,7 @@ final class FunctionSegmentCompiler {
     }
 
     public static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
-        return CompilerUtils.compileSuffix(Strings.strip(input), "}", (String withoutEnd) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", FunctionSegmentCompiler::foldBlockStarts), (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
+        return CompilerUtils.compileSuffix(Strings.strip(input), "}", (String withoutEnd) -> CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(withoutEnd, "", (state1, c) -> foldBlockStarts(state1, c)), (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
             var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
             var indent = state.createIndent();
