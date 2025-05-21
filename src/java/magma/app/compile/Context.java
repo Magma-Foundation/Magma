@@ -24,8 +24,6 @@ public interface Context {
 
     Context withPlatform(Platform platform);
 
-    Platform platform();
-
     Option<Location> maybeLocation();
 
     List<Source> sources();

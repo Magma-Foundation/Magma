@@ -11,13 +11,21 @@ public final class ImmutableCompileState implements CompileState {
     public ImmutableCompileState(
             Context context,
             Registry registry,
-            int depth,
-            Stack stack
+            Stack stack, int depth
     ) {
         this.context = context;
         this.registry = registry;
         this.depth = depth;
         this.stack = stack;
+    }
+
+    public static CompileState createEmpty() {
+        return new ImmutableCompileState(
+                ImmutableContext.createEmpty(),
+                ImmutableRegistry.createEmpty(),
+                ImmutableStack.createEmpty(),
+                0
+        );
     }
 
     @Override
@@ -27,27 +35,27 @@ public final class ImmutableCompileState implements CompileState {
 
     @Override
     public CompileState mapRegistry(Function<Registry, Registry> mapper) {
-        return new ImmutableCompileState(this.context, mapper.apply(this.registry()), this.depth, this.stack);
+        return new ImmutableCompileState(this.context, mapper.apply(this.registry()), this.stack, this.depth);
     }
 
     @Override
     public CompileState mapContext(Function<Context, Context> mapper) {
-        return new ImmutableCompileState(mapper.apply(this.context), this.registry, this.depth, this.stack);
+        return new ImmutableCompileState(mapper.apply(this.context), this.registry, this.stack, this.depth);
     }
 
     @Override
     public CompileState enterDepth() {
-        return new ImmutableCompileState(this.context, this.registry, this.depth + 1, this.stack);
+        return new ImmutableCompileState(this.context, this.registry, this.stack, this.depth + 1);
     }
 
     @Override
     public CompileState exitDepth() {
-        return new ImmutableCompileState(this.context, this.registry, this.depth - 1, this.stack);
+        return new ImmutableCompileState(this.context, this.registry, this.stack, this.depth - 1);
     }
 
     @Override
     public CompileState mapStack(Function<Stack, Stack> mapper) {
-        return new ImmutableCompileState(this.context, this.registry, this.depth, mapper.apply(this.stack));
+        return new ImmutableCompileState(this.context, this.registry, mapper.apply(this.stack), this.depth);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package magma.app.compile;
 
+import jvm.api.collect.list.Lists;
 import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
@@ -7,6 +8,10 @@ import magma.api.text.Strings;
 import magma.app.compile.define.Definition;
 
 public record ImmutableStack(List<String> structureNames, List<Definition> definitions) implements Stack {
+    static Stack createEmpty() {
+        return new ImmutableStack(Lists.empty(), Lists.empty());
+    }
+
     @Override
     public Option<String> findLastStructureName() {
         return this.structureNames().findLast();

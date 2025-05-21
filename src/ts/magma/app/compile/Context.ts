@@ -89,7 +89,6 @@ export interface Context {
 	findNamespaceOrEmpty(): List<string>;
 	findNameOrEmpty(): string;
 	withPlatform(platform: Platform): Context;
-	platform(): Platform;
 	maybeLocation(): Option<Location>;
 	sources(): List<Source>;
 }

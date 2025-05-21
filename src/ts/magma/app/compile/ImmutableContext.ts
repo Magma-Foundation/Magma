@@ -76,37 +76,41 @@
 ]*/
 import { Context } from "../../../magma/app/compile/Context";
 import { Platform } from "../../../magma/app/Platform";
-import { Location } from "../../../magma/app/Location";
 import { Option } from "../../../magma/api/option/Option";
+import { Location } from "../../../magma/app/Location";
 import { Source } from "../../../magma/app/io/Source";
 import { List } from "../../../magma/api/collect/list/List";
+import { None } from "../../../magma/api/option/None";
+import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { Iter } from "../../../magma/api/collect/Iter";
 import { Strings } from "../../../magma/api/text/Strings";
 import { Some } from "../../../magma/api/option/Some";
-import { Lists } from "../../../jvm/api/collect/list/Lists";
 export class ImmutableContext implements Context {
-	platform: Platform;
+	maybePlatform: Option<Platform>;
 	maybeLocation: Option<Location>;
 	sources: List<Source>;
-	constructor (platform: Platform, maybeLocation: Option<Location>, sources: List<Source>) {
-		this.platform = platform;
+	constructor (maybePlatform: Option<Platform>, maybeLocation: Option<Location>, sources: List<Source>) {
+		this.maybePlatform = maybePlatform;
 		this.maybeLocation = maybeLocation;
 		this.sources = sources;
+	}
+	static createEmpty(): Context {
+		return new ImmutableContext(new None<>(), new None<Location>(), Lists.empty())/*unknown*/;
 	}
 	iterSources(): Iter<Source> {
 		return this.sources.iter()/*unknown*/;
 	}
 	hasPlatform(platform: Platform): boolean {
-		return this.platform() === platform/*unknown*/;
+		return this.maybePlatform.filter((thisPlatform: Platform) => thisPlatform === platform/*unknown*/).isPresent()/*unknown*/;
 	}
 	findSource(name: string): Option<Source> {
 		return this.iterSources().filter((source: Source) => Strings.equalsTo(source.createLocation().name(), name)/*unknown*/).next()/*unknown*/;
 	}
 	withLocation(location: Location): Context {
-		return new ImmutableContext(this.platform(), new Some<Location>(location), this.sources())/*unknown*/;
+		return new ImmutableContext(this.maybePlatform, new Some<Location>(location), this.sources())/*unknown*/;
 	}
 	addSource(source: Source): Context {
-		return new ImmutableContext(this.platform(), this.maybeLocation(), this.sources().addLast(source))/*unknown*/;
+		return new ImmutableContext(this.maybePlatform, this.maybeLocation(), this.sources().addLast(source))/*unknown*/;
 	}
 	findNamespaceOrEmpty(): List<string> {
 		return this.maybeLocation().map(Location.namespace).orElse(Lists.empty())/*unknown*/;
@@ -115,6 +119,6 @@ export class ImmutableContext implements Context {
 		return this.maybeLocation().map(Location.name).orElse("")/*unknown*/;
 	}
 	withPlatform(platform: Platform): Context {
-		return new ImmutableContext(platform, this.maybeLocation(), this.sources())/*unknown*/;
+		return new ImmutableContext(new Some<>(platform), this.maybeLocation(), this.sources())/*unknown*/;
 	}
 }

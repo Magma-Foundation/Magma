@@ -5,6 +5,10 @@ import magma.api.collect.Iter;
 import magma.api.collect.list.List;
 
 public record ImmutableRegistry(List<Import> imports, List<Dependency> dependencies, String output) implements Registry {
+    static Registry createEmpty() {
+        return new ImmutableRegistry(Lists.empty(), Lists.empty(), "");
+    }
+
     @Override
     public Iter<Dependency> iterDependencies() {
         return this.dependencies().iter();

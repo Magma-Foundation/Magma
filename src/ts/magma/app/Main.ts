@@ -82,8 +82,10 @@ import { CompileState } from "../../magma/app/compile/CompileState";
 import { Result } from "../../magma/api/result/Result";
 import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
+import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { Source } from "../../magma/app/io/Source";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
+import { Context } from "../../magma/app/compile/Context";
 import { Dependency } from "../../magma/app/compile/Dependency";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
@@ -91,13 +93,6 @@ import { Compiler } from "../../magma/app/Compiler";
 import { Ok } from "../../magma/api/result/Ok";
 import { Import } from "../../magma/app/compile/Import";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
-import { ImmutableContext } from "../../magma/app/compile/ImmutableContext";
-import { Location } from "../../magma/app/Location";
-import { None } from "../../magma/api/option/None";
-import { Lists } from "../../jvm/api/collect/list/Lists";
-import { ImmutableRegistry } from "../../magma/app/compile/ImmutableRegistry";
-import { ImmutableStack } from "../../magma/app/compile/ImmutableStack";
 export class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
@@ -105,9 +100,9 @@ export class Main {
 		Main.runWithSourceDirectory(sources).findError().map((error: IOError) => error.display()/*unknown*/).ifPresent((displayed: string) => Console.printErrLn(displayed)/*unknown*/)/*unknown*/;
 	}
 	static runWithSourceDirectory(sources: Sources): Result<CompileState, IOError> {
-		return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (state: CompileState, platform: Platform) => {
+		return Iters.fromArray(Platform.values()).foldWithInitialToResult(ImmutableCompileState.createEmpty(), (state: CompileState, platform: Platform) => {
 			return sources.listSources().flatMapValue((children: Iterable<Source>) => {
-				return Main.runWithChildren(state.mapContext(context -  > context.withPlatform(platform)), children)/*unknown*/;
+				return Main.runWithChildren(state.mapContext((context: Context) => context.withPlatform(platform)/*unknown*/), children)/*unknown*/;
 			})/*unknown*/;
 		})/*unknown*/;
 	}
@@ -153,8 +148,5 @@ export class Main {
 	}
 	static joinNamespace(source: Source): string {
 		return source.createLocation().namespace().iter().collect(new Joiner(".")).orElse("")/*unknown*/;
-	}
-	static createInitialState(): CompileState {
-		return new ImmutableCompileState(new ImmutableContext(Platform.TypeScript, new None<Location>(), Lists.empty()), new ImmutableRegistry(Lists.empty(), Lists.empty(), ""), 0, new ImmutableStack(Lists.empty(), Lists.empty()))/*unknown*/;
 	}
 }

@@ -1,6 +1,5 @@
 package magma.app;
 
-import jvm.api.collect.list.Lists;
 import jvm.api.io.Files;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iters;
@@ -8,17 +7,14 @@ import magma.api.collect.Joiner;
 import magma.api.collect.list.Iterable;
 import magma.api.io.Console;
 import magma.api.io.IOError;
-import magma.api.option.None;
 import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.app.compile.CompileState;
+import magma.app.compile.Context;
 import magma.app.compile.Dependency;
 import magma.app.compile.ImmutableCompileState;
-import magma.app.compile.ImmutableContext;
-import magma.app.compile.ImmutableRegistry;
-import magma.app.compile.ImmutableStack;
 import magma.app.compile.Import;
 import magma.app.io.Source;
 
@@ -33,9 +29,9 @@ public final class Main {
     }
 
     private static Result<CompileState, IOError> runWithSourceDirectory(Sources sources) {
-        return Iters.fromArray(Platform.values()).foldWithInitialToResult(Main.createInitialState(), (CompileState state, Platform platform) -> {
+        return Iters.fromArray(Platform.values()).foldWithInitialToResult(ImmutableCompileState.createEmpty(), (CompileState state, Platform platform) -> {
             return sources.listSources().flatMapValue((Iterable<Source> children) -> {
-                return Main.runWithChildren(state.mapContext(context -> context.withPlatform(platform)), children);
+                return Main.runWithChildren(state.mapContext((Context context) -> context.withPlatform(platform)), children);
             });
         });
     }
@@ -107,12 +103,5 @@ public final class Main {
                 .iter()
                 .collect(new Joiner("."))
                 .orElse("");
-    }
-
-    private static CompileState createInitialState() {
-        return new ImmutableCompileState(
-                new ImmutableContext(Platform.TypeScript, new None<Location>(), Lists.empty()),
-                new ImmutableRegistry(Lists.empty(), Lists.empty(), ""), 0,
-                new ImmutableStack(Lists.empty(), Lists.empty()));
     }
 }

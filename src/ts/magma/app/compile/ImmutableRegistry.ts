@@ -78,8 +78,8 @@ import { Registry } from "../../../magma/app/compile/Registry";
 import { Import } from "../../../magma/app/compile/Import";
 import { List } from "../../../magma/api/collect/list/List";
 import { Dependency } from "../../../magma/app/compile/Dependency";
-import { Iter } from "../../../magma/api/collect/Iter";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
+import { Iter } from "../../../magma/api/collect/Iter";
 export class ImmutableRegistry implements Registry {
 	imports: List<Import>;
 	dependencies: List<Dependency>;
@@ -88,6 +88,9 @@ export class ImmutableRegistry implements Registry {
 		this.imports = imports;
 		this.dependencies = dependencies;
 		this.output = output;
+	}
+	static createEmpty(): Registry {
+		return new ImmutableRegistry(Lists.empty(), Lists.empty(), "")/*unknown*/;
 	}
 	iterDependencies(): Iter<Dependency> {
 		return this.dependencies().iter()/*unknown*/;
