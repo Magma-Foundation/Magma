@@ -132,7 +132,6 @@ import { PrefixComposable } from "../../magma/app/compile/compose/PrefixComposab
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { ConstructionCaller } from "../../magma/app/compile/define/ConstructionCaller";
 import { Strings } from "../../magma/api/text/Strings";
-import { RootCompiler } from "../../magma/app/RootCompiler";
 import { Rule } from "../../magma/app/compile/rule/Rule";
 import { Some } from "../../magma/api/option/Some";
 import { StringValue } from "../../magma/app/compile/value/StringValue";
@@ -164,6 +163,8 @@ import { Caller } from "../../magma/app/compile/value/Caller";
 import { Invokable } from "../../magma/app/compile/value/Invokable";
 import { Iters } from "../../magma/api/collect/Iters";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
+import { OrRule } from "../../magma/app/compile/rule/OrRule";
+import { Lists } from "../../jvm/api/collect/list/Lists";
 class ValueCompiler {
 	static generateValue(tuple: Tuple2<CompileState, Value>): Tuple2Impl<CompileState, string> {
 		let state = tuple.left()/*unknown*/;
@@ -188,7 +189,7 @@ class ValueCompiler {
 							return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args)/*unknown*/;
 						})/*unknown*/;
 					}).apply(Strings.strip(callerString)).or(() => {
-						return RootCompiler.parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => {
+						return parseValue(state, callerString).flatMap((callerTuple: Tuple2<CompileState, Value>) => {
 							return ValueCompiler.assembleInvokable(callerTuple.left(), callerTuple.right(), args)/*unknown*/;
 						})/*unknown*/;
 					})/*unknown*/;
@@ -261,7 +262,7 @@ class ValueCompiler {
 				if (!ValueCompiler/*unknown*/.isSymbol(property)/*unknown*/){
 					return new None<Tuple2<CompileState, Value>>()/*unknown*/;
 				}
-				return RootCompiler.parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
+				return parseValue(state, childString).flatMap((childTuple: Tuple2<CompileState, Value>) => {
 					let childState = childTuple.left()/*unknown*/;
 					let child = childTuple.right()/*unknown*/;
 					return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new AccessValue(child, property)))/*unknown*/;
@@ -276,8 +277,8 @@ class ValueCompiler {
 					return new FirstSelector(sourceInfix).select(divisions)/*unknown*/;
 				}).apply(slice)/*unknown*/;
 			}, Composable.toComposable((leftString: string, rightString: string) => {
-				return RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => {
-					return RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
+				return parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => {
+					return parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 						let left = leftTuple.right()/*unknown*/;
 						let right = rightTuple.right()/*unknown*/;
 						return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)))/*unknown*/;
@@ -337,12 +338,12 @@ class ValueCompiler {
 		})/*unknown*/;
 	}
 	static compileValue(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return RootCompiler.parseValue(state, input).map((tuple: Tuple2<CompileState, Value>) => {
+		return parseValue(state, input).map((tuple: Tuple2<CompileState, Value>) => {
 			return ValueCompiler.generateValue(tuple)/*unknown*/;
 		})/*unknown*/;
 	}
 	static parseArgument(state1: CompileState, input: string): Option<Tuple2<CompileState, Argument>> {
-		return RootCompiler.parseValue(state1, input).map((tuple: Tuple2<CompileState, Value>) => {
+		return parseValue(state1, input).map((tuple: Tuple2<CompileState, Value>) => {
 			return new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right())/*unknown*/;
 		})/*unknown*/;
 	}
@@ -385,5 +386,8 @@ class ValueCompiler {
 	}
 	static retain<T, R>(args: Iterable<T>, mapper: (arg0 : T) => Option<R>): Iterable<R> {
 		return args.iter().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;
+	}
+	static parseValue(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
+		return new OrRule<Value>(Lists.of(ValueCompiler.parseLambda, createOperatorRule("+"), createOperatorRule("-"), createOperatorRule("<="), createOperatorRule("<"), createOperatorRule("&&"), createOperatorRule("||"), createOperatorRule(">"), createOperatorRule(">="), ValueCompiler.parseInvokable, createAccessRule("."), createAccessRule("::"), ValueCompiler.parseSymbol, ValueCompiler.parseNot, ValueCompiler.parseNumber, createOperatorRuleWithDifferentInfix("==", "==="), createOperatorRuleWithDifferentInfix("!=", "!=="), createTextRule("\""), createTextRule("'"))).apply(state, input)/*unknown*/;
 	}
 }

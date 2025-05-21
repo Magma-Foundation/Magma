@@ -1,5 +1,6 @@
 package magma.app;
 
+import jvm.api.collect.list.Lists;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iters;
@@ -24,6 +25,7 @@ import magma.app.compile.compose.SuffixComposable;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
+import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
 import magma.app.compile.select.FirstSelector;
 import magma.app.compile.select.Selector;
@@ -73,7 +75,7 @@ final class ValueCompiler {
                                 return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args);
                             });
                         }).apply(Strings.strip(callerString)).or(() -> {
-                            return RootCompiler.parseValue(state, callerString).flatMap((Tuple2<CompileState, Value> callerTuple) -> {
+                            return parseValue(state, callerString).flatMap((Tuple2<CompileState, Value> callerTuple) -> {
                                 return ValueCompiler.assembleInvokable(callerTuple.left(), callerTuple.right(), args);
                             });
                         });
@@ -155,7 +157,7 @@ final class ValueCompiler {
                     return new None<Tuple2<CompileState, Value>>();
                 }
 
-                return RootCompiler.parseValue(state, childString).flatMap((Tuple2<CompileState, Value> childTuple) -> {
+                return parseValue(state, childString).flatMap((Tuple2<CompileState, Value> childTuple) -> {
                     var childState = childTuple.left();
                     var child = childTuple.right();
                     return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(childState, new AccessValue(child, property)));
@@ -171,8 +173,8 @@ final class ValueCompiler {
                             return new FirstSelector(sourceInfix).select(divisions);
                         }).apply(slice);
                 }, Composable.toComposable((String leftString, String rightString) -> {
-                    return RootCompiler.parseValue(state1, leftString).flatMap((Tuple2<CompileState, Value> leftTuple) -> {
-                        return RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((Tuple2<CompileState, Value> rightTuple) -> {
+                    return parseValue(state1, leftString).flatMap((Tuple2<CompileState, Value> leftTuple) -> {
+                        return parseValue(leftTuple.left(), rightString).flatMap((Tuple2<CompileState, Value> rightTuple) -> {
                             var left = leftTuple.right();
                             var right = rightTuple.right();
                             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)));
@@ -243,13 +245,13 @@ final class ValueCompiler {
     }
 
     static Option<Tuple2<CompileState, String>> compileValue(CompileState state, String input) {
-        return RootCompiler.parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> {
+        return parseValue(state, input).map((Tuple2<CompileState, Value> tuple) -> {
             return ValueCompiler.generateValue(tuple);
         });
     }
 
     private static Option<Tuple2<CompileState, Argument>> parseArgument(CompileState state1, String input) {
-        return RootCompiler.parseValue(state1, input)
+        return parseValue(state1, input)
                 .map((Tuple2<CompileState, Value> tuple) -> {
                     return new Tuple2Impl<CompileState, Argument>(tuple.left(), tuple.right());
                 });
@@ -304,5 +306,29 @@ final class ValueCompiler {
                 .map(mapper)
                 .flatMap(Iters::fromOption)
                 .collect(new ListCollector<R>());
+    }
+
+    public static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, String input) {
+        return new OrRule<Value>(Lists.of(
+                ValueCompiler::parseLambda,
+                createOperatorRule("+"),
+                createOperatorRule("-"),
+                createOperatorRule("<="),
+                createOperatorRule("<"),
+                createOperatorRule("&&"),
+                createOperatorRule("||"),
+                createOperatorRule(">"),
+                createOperatorRule(">="),
+                ValueCompiler::parseInvokable,
+                createAccessRule("."),
+                createAccessRule("::"),
+                ValueCompiler::parseSymbol,
+                ValueCompiler::parseNot,
+                ValueCompiler::parseNumber,
+                createOperatorRuleWithDifferentInfix("==", "==="),
+                createOperatorRuleWithDifferentInfix("!=", "!=="),
+                createTextRule("\""),
+                createTextRule("'")
+        )).apply(state, input);
     }
 }

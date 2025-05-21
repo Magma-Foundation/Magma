@@ -25,7 +25,6 @@ import magma.app.compile.rule.Rule;
 import magma.app.compile.split.LocatingSplitter;
 import magma.app.compile.split.Splitter;
 import magma.app.compile.type.Type;
-import magma.app.compile.value.Value;
 
 public final class RootCompiler {
     private static Tuple2<CompileState, String> compileRootSegment(CompileState state, String input) {
@@ -41,25 +40,23 @@ public final class RootCompiler {
 
     private static Rule<String> createStructureRule(String sourceInfix, String targetInfix) {
         return (CompileState state, String input1) -> {
-            Splitter splitter1 = new LocatingSplitter(sourceInfix, new FirstLocator());
-            return new SplitComposable<Tuple2<CompileState, String>>(splitter1, Composable.toComposable((String beforeInfix, String afterInfix) -> {
-                    Splitter splitter = new LocatingSplitter("{", new FirstLocator());
-                    return new SplitComposable<Tuple2<CompileState, String>>(splitter, Composable.toComposable((String beforeContent, String withEnd) -> {
-                        return new SuffixComposable<Tuple2<CompileState, String>>("}", (String inputContent) -> {
-                            return SplitComposable.compileLast(beforeInfix, "\n", (String s, String s2) -> {
-                                var annotations = DefiningCompiler.parseAnnotations(s);
-                                if (annotations.contains("Actual")) {
-                                    return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
-                                }
+            return new SplitComposable<Tuple2<CompileState, String>>(new LocatingSplitter(sourceInfix, new FirstLocator()), Composable.toComposable((String beforeInfix, String afterInfix) -> {
+                return new SplitComposable<Tuple2<CompileState, String>>(new LocatingSplitter("{", new FirstLocator()), Composable.toComposable((String beforeContent, String withEnd) -> {
+                    return new SuffixComposable<Tuple2<CompileState, String>>("}", (String inputContent) -> {
+                        return SplitComposable.compileLast(beforeInfix, "\n", (String s, String s2) -> {
+                            var annotations = DefiningCompiler.parseAnnotations(s);
+                            if (annotations.contains("Actual")) {
+                                return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(state, ""));
+                            }
 
-                                return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent);
-                            }).or(() -> {
-                                var modifiers = DefiningCompiler.parseModifiers(beforeContent);
-                                return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
-                            });
-                        }).apply(Strings.strip(withEnd));
-                    })).apply(afterInfix);
-                })).apply(input1);
+                            return RootCompiler.compileStructureWithImplementing(state, annotations, DefiningCompiler.parseModifiers(s2), targetInfix, beforeContent, inputContent);
+                        }).or(() -> {
+                            var modifiers = DefiningCompiler.parseModifiers(beforeContent);
+                            return RootCompiler.compileStructureWithImplementing(state, Lists.empty(), modifiers, targetInfix, beforeContent, inputContent);
+                        });
+                    }).apply(Strings.strip(withEnd));
+                })).apply(afterInfix);
+            })).apply(input1);
         };
     }
 
@@ -108,9 +105,9 @@ public final class RootCompiler {
         return new SuffixComposable<Tuple2<CompileState, String>>(">", (String withoutTypeParamEnd) -> {
             Splitter splitter = new LocatingSplitter("<", new FirstLocator());
             return new SplitComposable<Tuple2<CompileState, String>>(splitter, Composable.toComposable((String name, String typeParamsString) -> {
-                    var typeParams = DefiningCompiler.divideValues(typeParamsString);
-                    return RootCompiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
-                })).apply(withoutTypeParamEnd);
+                var typeParams = DefiningCompiler.divideValues(typeParamsString);
+                return RootCompiler.assembleStructure(state, annotations, modifiers, infix, name, typeParams, parameters, maybeImplementing, content, maybeSuperType);
+            })).apply(withoutTypeParamEnd);
         }).apply(Strings.strip(beforeParams)).or(() -> {
             return RootCompiler.assembleStructure(state, annotations, modifiers, infix, beforeParams, Lists.empty(), parameters, maybeImplementing, content, maybeSuperType);
         });
@@ -287,30 +284,6 @@ public final class RootCompiler {
                 FieldCompiler::compileFieldDefinition,
                 FieldCompiler::compileEnumValues
         ));
-    }
-
-    public static Option<Tuple2<CompileState, Value>> parseValue(CompileState state, String input) {
-        return new OrRule<Value>(Lists.of(
-                ValueCompiler::parseLambda,
-                ValueCompiler.createOperatorRule("+"),
-                ValueCompiler.createOperatorRule("-"),
-                ValueCompiler.createOperatorRule("<="),
-                ValueCompiler.createOperatorRule("<"),
-                ValueCompiler.createOperatorRule("&&"),
-                ValueCompiler.createOperatorRule("||"),
-                ValueCompiler.createOperatorRule(">"),
-                ValueCompiler.createOperatorRule(">="),
-                ValueCompiler::parseInvokable,
-                ValueCompiler.createAccessRule("."),
-                ValueCompiler.createAccessRule("::"),
-                ValueCompiler::parseSymbol,
-                ValueCompiler::parseNot,
-                ValueCompiler::parseNumber,
-                ValueCompiler.createOperatorRuleWithDifferentInfix("==", "==="),
-                ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="),
-                ValueCompiler.createTextRule("\""),
-                ValueCompiler.createTextRule("'")
-        )).apply(state, input);
     }
 
     public static Tuple2<CompileState, String> compileRoot(CompileState state, String input, Location location) {

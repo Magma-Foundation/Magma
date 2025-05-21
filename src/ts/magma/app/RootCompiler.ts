@@ -121,10 +121,9 @@ import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { WhitespaceCompiler } from "../../magma/app/WhitespaceCompiler";
 import { Rule } from "../../magma/app/compile/rule/Rule";
+import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { FirstLocator } from "../../magma/app/compile/locate/FirstLocator";
-import { Splitter } from "../../magma/app/compile/split/Splitter";
-import { SplitComposable } from "../../magma/app/compile/compose/SplitComposable";
 import { Composable } from "../../magma/app/compile/compose/Composable";
 import { SuffixComposable } from "../../magma/app/compile/compose/SuffixComposable";
 import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
@@ -136,6 +135,7 @@ import { List } from "../../magma/api/collect/list/List";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
 import { Type } from "../../magma/app/compile/type/Type";
 import { None } from "../../magma/api/option/None";
+import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { ValueUtils } from "../../magma/app/compile/ValueUtils";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { Definition } from "../../magma/app/compile/define/Definition";
@@ -146,7 +146,6 @@ import { Joiner } from "../../magma/api/collect/Joiner";
 import { Platform } from "../../magma/app/Platform";
 import { Registry } from "../../magma/app/compile/Registry";
 import { FieldCompiler } from "../../magma/app/FieldCompiler";
-import { Value } from "../../magma/app/compile/value/Value";
 import { Location } from "../../magma/app/Location";
 import { Context } from "../../magma/app/compile/Context";
 export class RootCompiler {
@@ -155,10 +154,8 @@ export class RootCompiler {
 	}
 	static createStructureRule(sourceInfix: string, targetInfix: string): Rule<string> {
 		return (state: CompileState, input1: string) => {
-			let splitter1: Splitter = new LocatingSplitter(sourceInfix, new FirstLocator())/*unknown*/;
-			return new SplitComposable<Tuple2<CompileState, string>>(splitter1, Composable.toComposable((beforeInfix: string, afterInfix: string) => {
-				let splitter: Splitter = new LocatingSplitter("{", new FirstLocator())/*unknown*/;
-				return new SplitComposable<Tuple2<CompileState, string>>(splitter, Composable.toComposable((beforeContent: string, withEnd: string) => {
+			return new SplitComposable<Tuple2<CompileState, string>>(new LocatingSplitter(sourceInfix, new FirstLocator()), Composable.toComposable((beforeInfix: string, afterInfix: string) => {
+				return new SplitComposable<Tuple2<CompileState, string>>(new LocatingSplitter("{", new FirstLocator()), Composable.toComposable((beforeContent: string, withEnd: string) => {
 					return new SuffixComposable<Tuple2<CompileState, string>>("}", (inputContent: string) => {
 						return SplitComposable.compileLast(beforeInfix, "\n", (s: string, s2: string) => {
 							let annotations = DefiningCompiler.parseAnnotations(s)/*unknown*/;
@@ -325,9 +322,6 @@ export class RootCompiler {
 	}
 	static compileClassSegment(state1: CompileState, input1: string): Tuple2<CompileState, string> {
 		return OrRule.compileOrPlaceholder(state1, input1, Lists.of(WhitespaceCompiler.compileWhitespace, RootCompiler.createStructureRule("class ", "class "), RootCompiler.createStructureRule("interface ", "interface "), RootCompiler.createStructureRule("record ", "class "), RootCompiler.createStructureRule("enum ", "class "), FieldCompiler.compileMethod, FieldCompiler.compileFieldDefinition, FieldCompiler.compileEnumValues))/*unknown*/;
-	}
-	static parseValue(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
-		return new OrRule<Value>(Lists.of(ValueCompiler.parseLambda, ValueCompiler.createOperatorRule("+"), ValueCompiler.createOperatorRule("-"), ValueCompiler.createOperatorRule("<="), ValueCompiler.createOperatorRule("<"), ValueCompiler.createOperatorRule("&&"), ValueCompiler.createOperatorRule("||"), ValueCompiler.createOperatorRule(">"), ValueCompiler.createOperatorRule(">="), ValueCompiler.parseInvokable, ValueCompiler.createAccessRule("."), ValueCompiler.createAccessRule("::"), ValueCompiler.parseSymbol, ValueCompiler.parseNot, ValueCompiler.parseNumber, ValueCompiler.createOperatorRuleWithDifferentInfix("==", "==="), ValueCompiler.createOperatorRuleWithDifferentInfix("!=", "!=="), ValueCompiler.createTextRule("\""), ValueCompiler.createTextRule("'"))).apply(state, input)/*unknown*/;
 	}
 	static compileRoot(state: CompileState, input: string, location: Location): Tuple2<CompileState, string> {
 		return FunctionSegmentCompiler.compileStatements(state.mapContext((context2: Context) => {

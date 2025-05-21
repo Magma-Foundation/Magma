@@ -800,10 +800,9 @@ RootCompiler --> OrRule
 RootCompiler --> Lists
 RootCompiler --> WhitespaceCompiler
 RootCompiler --> Rule
+RootCompiler --> SplitComposable
 RootCompiler --> LocatingSplitter
 RootCompiler --> FirstLocator
-RootCompiler --> Splitter
-RootCompiler --> SplitComposable
 RootCompiler --> Composable
 RootCompiler --> SuffixComposable
 RootCompiler --> DefiningCompiler
@@ -815,6 +814,7 @@ RootCompiler --> List
 RootCompiler --> TypeCompiler
 RootCompiler --> Type
 RootCompiler --> None
+RootCompiler --> Splitter
 RootCompiler --> ValueUtils
 RootCompiler --> Iterable
 RootCompiler --> Definition
@@ -825,7 +825,6 @@ RootCompiler --> Joiner
 RootCompiler --> Platform
 RootCompiler --> Registry
 RootCompiler --> FieldCompiler
-RootCompiler --> Value
 RootCompiler --> Location
 RootCompiler --> Context
 Sources --> Source
@@ -885,7 +884,6 @@ ValueCompiler --> PrefixComposable
 ValueCompiler --> TypeCompiler
 ValueCompiler --> ConstructionCaller
 ValueCompiler --> Strings
-ValueCompiler --> RootCompiler
 ValueCompiler --> Rule
 ValueCompiler --> Some
 ValueCompiler --> StringValue
@@ -917,6 +915,8 @@ ValueCompiler --> Caller
 ValueCompiler --> Invokable
 ValueCompiler --> Iters
 ValueCompiler --> ListCollector
+ValueCompiler --> OrRule
+ValueCompiler --> Lists
 WhitespaceCompiler --> CompileState
 WhitespaceCompiler --> Tuple2
 WhitespaceCompiler --> Option
