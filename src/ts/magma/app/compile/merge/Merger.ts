@@ -64,6 +64,7 @@
 	Locator: magma.app.compile.locate, 
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
+	ValueMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
 	OrRule: magma.app.compile.rule, 
 	Rule: magma.app.compile.rule, 
@@ -110,5 +111,5 @@
 	ValueCompiler: magma.app
 ]*/
 export interface Merger {
-	apply(s: string, s2: string): string;
+	merge(s: string, s2: string): string;
 }

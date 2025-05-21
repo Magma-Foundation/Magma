@@ -20,6 +20,7 @@ import magma.app.compile.fold.ValueFolder;
 import magma.app.compile.locate.LastLocator;
 import magma.app.compile.merge.Merger;
 import magma.app.compile.merge.StatementsMerger;
+import magma.app.compile.merge.ValueMerger;
 import magma.app.compile.rule.OrRule;
 import magma.app.compile.rule.Rule;
 import magma.app.compile.split.LocatingSplitter;
@@ -42,7 +43,7 @@ public final class CompilerUtils {
     }
 
     private static String generateAll(Iterable<String> elements, Merger merger) {
-        return elements.iter().foldWithInitial("", merger::apply);
+        return elements.iter().foldWithInitial("", merger::merge);
     }
 
     private static <T> Option<Tuple2<CompileState, List<T>>> parseAll(CompileState state, String input, Folder folder, Rule<T> rule) {
@@ -84,7 +85,7 @@ public final class CompilerUtils {
     }
 
     public static String generateValueStrings(Iterable<String> values) {
-        return CompilerUtils.generateAll(values, CompilerUtils::mergeValues);
+        return CompilerUtils.generateAll(values, new ValueMerger());
     }
 
     static <T> Tuple2<CompileState, List<T>> parseValuesOrEmpty(
@@ -97,13 +98,6 @@ public final class CompilerUtils {
 
     static <T> Option<Tuple2<CompileState, List<T>>> parseValues(CompileState state, String input, Rule<T> mapper) {
         return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper);
-    }
-
-    private static String mergeValues(String cache, String element) {
-        if (Strings.isEmpty(cache)) {
-            return cache + element;
-        }
-        return cache + ", " + element;
     }
 
     public static <T> Option<T> compileLast(String input, String infix, BiFunction<String, String, Option<T>> mapper) {

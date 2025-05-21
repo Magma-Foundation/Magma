@@ -64,6 +64,7 @@
 	Locator: magma.app.compile.locate, 
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
+	ValueMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
 	OrRule: magma.app.compile.rule, 
 	Rule: magma.app.compile.rule, 
@@ -128,6 +129,7 @@ import { OrRule } from "../../magma/app/compile/rule/OrRule";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
 import { Strings } from "../../magma/api/text/Strings";
 import { None } from "../../magma/api/option/None";
+import { ValueMerger } from "../../magma/app/compile/merge/ValueMerger";
 import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
@@ -145,7 +147,7 @@ export class CompilerUtils {
 		return new Tuple2Impl<CompileState, string>(folded.left(), CompilerUtils.generateAll(folded.right(), merger))/*unknown*/;
 	}
 	static generateAll(elements: Iterable<string>, merger: Merger): string {
-		return elements.iter().foldWithInitial("", merger.apply)/*unknown*/;
+		return elements.iter().foldWithInitial("", merger.merge)/*unknown*/;
 	}
 	static parseAll<T>(state: CompileState, input: string, folder: Folder, rule: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
 		return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
@@ -177,19 +179,13 @@ export class CompilerUtils {
 		return new None<Tuple2<CompileState, Whitespace>>()/*unknown*/;
 	}
 	static generateValueStrings(values: Iterable<string>): string {
-		return CompilerUtils.generateAll(values, CompilerUtils.mergeValues)/*unknown*/;
+		return CompilerUtils.generateAll(values, new ValueMerger().merge)/*unknown*/;
 	}
 	static parseValuesOrEmpty<T>(state: CompileState, input: string, mapper: Rule<T>): Tuple2<CompileState, List<T>> {
 		return CompilerUtils.parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;
 	}
 	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
 		return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper)/*unknown*/;
-	}
-	static mergeValues(cache: string, element: string): string {
-		if (Strings.isEmpty(cache)/*unknown*/){
-			return cache + element/*unknown*/;
-		}
-		return cache + ", " + element/*unknown*/;
 	}
 	static compileLast<T>(input: string, infix: string, mapper: (arg0 : string, arg1 : string) => Option<T>): Option<T> {
 		return CompilerUtils.compileSplit(input, new LocatingSplitter(infix, new LastLocator()), mapper)/*unknown*/;

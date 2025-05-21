@@ -64,6 +64,7 @@
 	Locator: magma.app.compile.locate, 
 	Merger: magma.app.compile.merge, 
 	StatementsMerger: magma.app.compile.merge, 
+	ValueMerger: magma.app.compile.merge, 
 	Registry: magma.app.compile, 
 	OrRule: magma.app.compile.rule, 
 	Rule: magma.app.compile.rule, 
@@ -111,7 +112,7 @@
 ]*/
 import { Merger } from "../../../../magma/app/compile/merge/Merger";
 export class StatementsMerger implements Merger {
-	apply(cache: string, element: string): string {
+	merge(cache: string, element: string): string {
 		return cache + element/*unknown*/;
 	}
 }

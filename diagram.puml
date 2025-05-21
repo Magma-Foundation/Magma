@@ -161,6 +161,9 @@ interface Merger {
 class StatementsMerger {
 }
 StatementsMerger <|.. Merger
+class ValueMerger {
+}
+ValueMerger <|.. Merger
 interface Registry {
 }
 class OrRule<T> {
@@ -467,6 +470,8 @@ Import --> Strings
 FirstLocator --> Locator
 LastLocator --> Locator
 StatementsMerger --> Merger
+ValueMerger --> Merger
+ValueMerger --> Strings
 Registry --> Dependency
 Registry --> Iter
 Registry --> Import
@@ -618,6 +623,7 @@ CompilerUtils --> OrRule
 CompilerUtils --> Whitespace
 CompilerUtils --> Strings
 CompilerUtils --> None
+CompilerUtils --> ValueMerger
 CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
