@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Source } from "../../magma/app/io/Source";
@@ -88,7 +89,7 @@ import { Iterable } from "../../magma/api/collect/list/Iterable";
 import { IOError } from "../../magma/api/io/IOError";
 import { Result } from "../../magma/api/result/Result";
 import { Path } from "../../magma/api/io/Path";
-export interface Sources {
+interface Sources {
 	listSources(): Result<Iterable<Source>, IOError>;
 	retainSources(children: Iterable<Path>): Iterable<Source>;
 }

@@ -81,26 +81,33 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Option } from "../../magma/api/option/Option";
-import { RootCompiler } from "../../magma/app/RootCompiler";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Strings } from "../../magma/api/text/Strings";
 import { ConstructorHeader } from "../../magma/app/compile/define/ConstructorHeader";
 import { None } from "../../magma/api/option/None";
+import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Definition } from "../../magma/app/compile/define/Definition";
 import { MethodHeader } from "../../magma/app/compile/define/MethodHeader";
-import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Some } from "../../magma/api/option/Some";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
-export class FieldCompiler {
+import { FunctionSegmentCompiler } from "../../magma/app/FunctionSegmentCompiler";
+import { Stack } from "../../magma/app/compile/Stack";
+import { Parameter } from "../../magma/app/compile/define/Parameter";
+import { ValueCompiler } from "../../magma/app/ValueCompiler";
+import { List } from "../../magma/api/collect/list/List";
+import { Value } from "../../magma/app/compile/value/Value";
+class FieldCompiler {
 	static compileMethod(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
-		return RootCompiler.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
+		return CompilerUtils.compileFirst(input, "(", (beforeParams: string, withParams: string) => {
 			let strippedBeforeParams = Strings.strip(beforeParams)/*unknown*/;
-			return RootCompiler.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
+			return CompilerUtils.compileLast(strippedBeforeParams, " ", (_: string, name: string) => {
 				if (state.stack().isWithinLast(name)/*unknown*/){
 					return FieldCompiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams)/*unknown*/;
 				}
@@ -110,11 +117,11 @@ export class FieldCompiler {
 					return FieldCompiler.compileMethodWithBeforeParams(state, new ConstructorHeader(), withParams)/*unknown*/;
 				}
 				return new None<Tuple2<CompileState, string>>()/*unknown*/;
-			}).or(() => RootCompiler.parseDefinition(state, beforeParams).flatMap((tuple: Tuple2<CompileState, Definition>) => FieldCompiler.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)/*unknown*/)/*unknown*/)/*unknown*/;
+			}).or(() => DefiningCompiler.parseDefinition(state, beforeParams).flatMap((tuple: Tuple2<CompileState, Definition>) => FieldCompiler.compileMethodWithBeforeParams(tuple.left(), tuple.right(), withParams)/*unknown*/)/*unknown*/)/*unknown*/;
 		})/*unknown*/;
 	}
 	static compileMethodWithBeforeParams(state: CompileState, header: MethodHeader, withParams: string): Option<Tuple2<CompileState, string>> {
-		return RootCompiler.compileFirst(withParams, ")", (params: string, afterParams: string) => {
+		return CompilerUtils.compileFirst(withParams, ")", (params: string, afterParams: string) => {
 			let parametersTuple = DefiningCompiler.parseParameters(state, params)/*unknown*/;
 			let parametersState = parametersTuple.left()/*unknown*/;
 			let parameters = parametersTuple.right()/*unknown*/;
@@ -125,9 +132,9 @@ export class FieldCompiler {
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(parametersState, "\n\t" + headerGenerated + ";\n"))/*unknown*/;
 			}
 			let headerGenerated = header.generateWithAfterName("(" + joinedDefinitions + ")")/*unknown*/;
-			return RootCompiler.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => RootCompiler.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
+			return CompilerUtils.compilePrefix(Strings.strip(afterParams), "{", (withoutContentStart: string) => CompilerUtils.compileSuffix(Strings.strip(withoutContentStart), "}", (withoutContentEnd: string) => {
 				let compileState: CompileState = parametersState.enterDepth().enterDepth()/*unknown*/;
-				let statementsTuple = RootCompiler.compileFunctionStatements(compileState.mapStack(stack1 -  > stack1.defineAll(definitions)), withoutContentEnd)/*unknown*/;
+				let statementsTuple = FunctionSegmentCompiler.compileFunctionStatements(compileState.mapStack((stack1: Stack) => stack1.defineAll(definitions)/*unknown*/), withoutContentEnd)/*unknown*/;
 				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(statementsTuple.left().exitDepth().exitDepth(), "\n\t" + headerGenerated + " {" + statementsTuple.right() + "\n\t}"))/*unknown*/;
 			})/*unknown*/).or(() => {
 				if (Strings.equalsTo(";", Strings.strip(afterParams))/*unknown*/){
@@ -135,6 +142,27 @@ export class FieldCompiler {
 				}
 				return new None<Tuple2<CompileState, string>>()/*unknown*/;
 			})/*unknown*/;
+		})/*unknown*/;
+	}
+	static compileFieldDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
+		return CompilerUtils.compileSuffix(Strings.strip(input), ";", (withoutEnd: string) => FieldCompiler.getTupleOption(state, withoutEnd).or(() => FieldCompiler.compileEnumValues(state, withoutEnd)/*unknown*/)/*unknown*/)/*unknown*/;
+	}
+	static getTupleOption(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
+		return DefiningCompiler.parseParameter(state, withoutEnd).flatMap((definitionTuple: Tuple2<CompileState, Parameter>) => new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(definitionTuple.left(), "\n\t" + definitionTuple.right().generate() + ";"))/*unknown*/)/*unknown*/;
+	}
+	static compileEnumValues(state: CompileState, withoutEnd: string): Option<Tuple2<CompileState, string>> {
+		return CompilerUtils.parseValues(state, withoutEnd, (state1: CompileState, segment: string) => {
+			let stripped = segment.strip()/*unknown*/;
+			if (ValueCompiler.isSymbol(stripped)/*unknown*/){
+				return new Some<Tuple2<CompileState, string>>(new Tuple2Impl<CompileState, string>(state1, "\n\t static " + stripped + " = \"" + stripped + "\";"))/*unknown*/;
+			}
+			return FieldCompiler.getTuple2Option(state, state1, segment)/*unknown*/;
+		}).map((tuple: Tuple2<CompileState, List<string>>) => new Tuple2Impl<CompileState, string>(tuple.left(), tuple.right().iter().collect(new Joiner("")).orElse(""))/*unknown*/)/*unknown*/;
+	}
+	static getTuple2Option(state: CompileState, state1: CompileState, segment: string): Option<Tuple2<CompileState, string>> {
+		return ValueCompiler.parseInvokable(state1, segment).flatMap((tuple: Tuple2<CompileState, Value>) => {
+			let structureName = state.stack().findLastStructureName().orElse("")/*unknown*/;
+			return tuple.right().generateAsEnumValue(structureName).map((stringOption: string) => new Tuple2Impl<CompileState, string>(tuple.left(), stringOption)/*unknown*/)/*unknown*/;
 		})/*unknown*/;
 	}
 }

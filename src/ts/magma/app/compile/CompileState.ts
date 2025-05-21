@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Registry } from "../../../magma/app/compile/Registry";

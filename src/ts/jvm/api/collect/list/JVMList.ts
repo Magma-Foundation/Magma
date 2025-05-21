@@ -81,5 +81,6 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/

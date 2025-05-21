@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Parameter } from "../../../../magma/app/compile/define/Parameter";

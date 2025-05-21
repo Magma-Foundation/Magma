@@ -81,11 +81,12 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { IOError } from "../../magma/api/io/IOError";
 import { Option } from "../../magma/api/option/Option";
 import { Location } from "../../magma/app/Location";
-export interface Targets {
+interface Targets {
 	writeSource(location: Location, output: string): Option<IOError>;
 }

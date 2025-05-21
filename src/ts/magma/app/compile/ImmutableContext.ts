@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Context } from "../../../magma/app/compile/Context";
@@ -104,7 +105,7 @@ export class ImmutableContext implements Context {
 		this.sources = sources;
 	}
 	static createEmpty(): Context {
-		return new ImmutableContext(new None<>(), new None<Location>(), Lists.empty())/*unknown*/;
+		return new ImmutableContext(new None<Platform>(), new None<Location>(), Lists.empty())/*unknown*/;
 	}
 	iterSources(): Iter<Source> {
 		return this.sources.iter()/*unknown*/;
@@ -128,6 +129,6 @@ export class ImmutableContext implements Context {
 		return this.maybeLocation().map(Location.name).orElse("")/*unknown*/;
 	}
 	withPlatform(platform: Platform): Context {
-		return new ImmutableContext(new Some<>(platform), this.maybeLocation(), this.sources())/*unknown*/;
+		return new ImmutableContext(new Some<Platform>(platform), this.maybeLocation(), this.sources())/*unknown*/;
 	}
 }

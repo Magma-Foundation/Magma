@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Sources } from "../../magma/app/Sources";
@@ -102,7 +103,7 @@ import { RootCompiler } from "../../magma/app/RootCompiler";
 import { Ok } from "../../magma/api/result/Ok";
 import { Import } from "../../magma/app/compile/Import";
 import { Registry } from "../../magma/app/compile/Registry";
-export class Application {
+class Application {
 	sources: Sources;
 	targets: Targets;
 	constructor (sources: Sources, targets: Targets) {
@@ -120,7 +121,7 @@ export class Application {
 	}
 	runWithChildren(platform: Platform, children: Iterable<Source>): Result<CompileState, IOError> {
 		let state: CompileState = ImmutableCompileState.createEmpty().mapContext((context: Context) => context.withPlatform(platform)/*unknown*/)/*unknown*/;
-		let initial = children.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.mapContext(context1 -  > context1.addSource(source))/*unknown*/)/*unknown*/;
+		let initial = children.iter().foldWithInitial(state, (current: CompileState, source: Source) => current.mapContext((context1: Context) => context1.addSource(source)/*unknown*/)/*unknown*/)/*unknown*/;
 		let folded = children.iter().foldWithInitialToResult(initial, (state1: CompileState, source: Source) => this.runWithSource(state1, source)/*unknown*/)/*unknown*/;
 		if (!state/*unknown*/.context().hasPlatform(Platform.PlantUML) || !/*(folded instanceof Ok(var result))*//*unknown*/){
 			return folded/*unknown*/;

@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Files } from "../../jvm/api/io/Files";
@@ -92,7 +93,7 @@ import { Console } from "../../magma/api/io/Console";
 import { Option } from "../../magma/api/option/Option";
 import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
-export class Main {
+class Main {
 	static main(): void {
 		let sourceDirectory = Files.get(".", "src", "java")/*unknown*/;
 		let sources = new PathSources(sourceDirectory)/*unknown*/;

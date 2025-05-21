@@ -81,9 +81,10 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
-import { RootCompiler } from "../../../../magma/app/RootCompiler";
+import { CompilerUtils } from "../../../../magma/app/CompilerUtils";
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";
@@ -97,7 +98,7 @@ export class Placeholder {
 		this.input = input;
 	}
 	generate(): string {
-		return RootCompiler.generatePlaceholder(this.input)/*unknown*/;
+		return CompilerUtils.generatePlaceholder(this.input)/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;

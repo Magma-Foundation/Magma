@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Definition } from "../../magma/app/compile/define/Definition";
@@ -91,15 +92,82 @@ import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { RootCompiler } from "../../magma/app/RootCompiler";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Some } from "../../magma/api/option/Some";
-export class DefiningCompiler {
+import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
+import { Placeholder } from "../../magma/app/compile/value/Placeholder";
+import { Option } from "../../magma/api/option/Option";
+import { Whitespace } from "../../magma/app/compile/text/Whitespace";
+import { Strings } from "../../magma/api/text/Strings";
+import { Lists } from "../../jvm/api/collect/list/Lists";
+import { DivideState } from "../../magma/app/compile/DivideState";
+import { TypeCompiler } from "../../magma/app/TypeCompiler";
+import { Type } from "../../magma/app/compile/type/Type";
+import { Joiner } from "../../magma/api/collect/Joiner";
+class DefiningCompiler {
 	static retainDefinitionsFromParameters(parameters: Iterable<Parameter>): Iterable<Definition> {
 		return parameters.iter().map((parameter: Parameter) => parameter.asDefinition()/*unknown*/).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
 	}
 	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
-		return RootCompiler.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
-			return new Some<Tuple2<CompileState, Parameter>>(RootCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/;
+		return CompilerUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/)/*unknown*/;
+	}
+	static parseParameterOrPlaceholder(state: CompileState, input: string): Tuple2<CompileState, Parameter> {
+		return DefiningCompiler.parseParameter(state, input).orElseGet(() => new Tuple2Impl<CompileState, Parameter>(state, new Placeholder(input))/*unknown*/)/*unknown*/;
+	}
+	static parseParameter(state: CompileState, input: string): Option<Tuple2<CompileState, Parameter>> {
+		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => DefiningCompiler.getCompileStateParameterTuple2(tuple)/*unknown*/).or(() => DefiningCompiler.parseDefinition(state, input).map((tuple: Tuple2<CompileState, Definition>) => new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right())/*unknown*/)/*unknown*/)/*unknown*/;
+	}
+	static getCompileStateParameterTuple2(tuple: Tuple2<CompileState, Whitespace>): Tuple2<CompileState, Parameter> {
+		return new Tuple2Impl<CompileState, Parameter>(tuple.left(), tuple.right())/*unknown*/;
+	}
+	static parseDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, Definition>> {
+		return CompilerUtils.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => CompilerUtils.compileSplit(CompilerUtils.splitFoldedLast(Strings.strip(beforeName), " ", DefiningCompiler.foldTypeSeparators), (beforeType: string, type: string) => CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (annotationsString: string, afterAnnotations: string) => {
+			let annotations = DefiningCompiler.parseAnnotations(annotationsString)/*unknown*/;
+			return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name)/*unknown*/;
+		}).or(() => DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name)/*unknown*/)/*unknown*/).or(() => DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name)/*unknown*/)/*unknown*/)/*unknown*/;
+	}
+	static parseAnnotations(s: string): List<string> {
+		return CompilerUtils.divide(s, (state1: DivideState, c: string) => CompilerUtils.foldDelimited(state1, c, "\n")/*unknown*/).map((s2: string) => Strings.strip(s2)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).filter((value: string) => 1 <= Strings.length(value)/*unknown*/).map((value: string) => Strings.sliceFrom(value, 1)/*unknown*/).map((s1: string) => Strings.strip(s1)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
+	}
+	static parseDefinitionWithAnnotations(state: CompileState, annotations: List<string>, beforeType: string, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
+		return CompilerUtils.compileSuffix(Strings.strip(beforeType), ">", (withoutTypeParamEnd: string) => CompilerUtils.compileFirst(withoutTypeParamEnd, "<", (beforeTypeParams: string, typeParamsString: string) => {
+			let typeParams = CompilerUtils.divideValues(typeParamsString)/*unknown*/;
+			return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, typeParams, DefiningCompiler.parseModifiers(beforeTypeParams), type, name)/*unknown*/;
+		})/*unknown*/).or(() => {
+			let divided = DefiningCompiler.parseModifiers(beforeType)/*unknown*/;
+			return DefiningCompiler.parseDefinitionWithTypeParameters(state, annotations, Lists.empty(), divided, type, name)/*unknown*/;
 		})/*unknown*/;
+	}
+	static parseModifiers(beforeType: string): List<string> {
+		return CompilerUtils.divide(Strings.strip(beforeType), (state1: DivideState, c: string) => CompilerUtils.foldDelimited(state1, c, " ")/*unknown*/).map((s: string) => Strings.strip(s)/*unknown*/).filter((value: string) => !Strings/*unknown*/.isEmpty(value)/*unknown*/).collect(new ListCollector<string>())/*unknown*/;
+	}
+	static foldTypeSeparators(state: DivideState, c: string): DivideState {
+		if (" " === c && state.isLevel()/*unknown*/){
+			return state.advance()/*unknown*/;
+		}
+		let appended = state.append(c)/*unknown*/;
+		if ("<" === c/*unknown*/){
+			return appended.enter()/*unknown*/;
+		}
+		if (">" === c/*unknown*/){
+			return appended.exit()/*unknown*/;
+		}
+		return appended/*unknown*/;
+	}
+	static parseDefinitionWithTypeParameters(state: CompileState, annotations: List<string>, typeParams: List<string>, oldModifiers: List<string>, type: string, name: string): Option<Tuple2<CompileState, Definition>> {
+		return TypeCompiler.parseType(state, type).flatMap((typeTuple: Tuple2<CompileState, Type>) => {
+			let newModifiers = DefiningCompiler.modifyModifiers(oldModifiers)/*unknown*/;
+			let generated = new Definition(annotations, newModifiers, typeParams, typeTuple.right(), name)/*unknown*/;
+			return new Some<Tuple2<CompileState, Definition>>(new Tuple2Impl<CompileState, Definition>(typeTuple.left(), generated))/*unknown*/;
+		})/*unknown*/;
+	}
+	static joinParameters(parameters: Iterable<Definition>): string {
+		return parameters.iter().map((definition: Definition) => definition.generate()/*unknown*/).map((generated: string) => "\n\t" + generated + ";"/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
+	}
+	static modifyModifiers(oldModifiers: List<string>): List<string> {
+		if (oldModifiers.contains("static")/*unknown*/){
+			return Lists.of("static")/*unknown*/;
+		}
+		return Lists.empty()/*unknown*/;
 	}
 }

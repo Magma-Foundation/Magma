@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Result } from "../../../magma/api/result/Result";
@@ -101,6 +102,6 @@ export class Err<T, X> implements Result<T, X> {
 		return new Some<X>(this.error)/*unknown*/;
 	}
 	mapValue<R>(mapper: (arg0 : T) => R): Result<R, X> {
-		return new Err<>(this.error)/*unknown*/;
+		return new Err<R, X>(this.error)/*unknown*/;
 	}
 }

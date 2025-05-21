@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Definition } from "../../magma/app/compile/define/Definition";
@@ -92,9 +93,10 @@ import { Joiner } from "../../magma/api/collect/Joiner";
 import { CompileState } from "../../magma/app/compile/CompileState";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2 } from "../../magma/api/Tuple2";
-import { RootCompiler } from "../../magma/app/RootCompiler";
+import { CompilerUtils } from "../../magma/app/CompilerUtils";
 import { Some } from "../../magma/api/option/Some";
-export class DefinitionCompiler {
+import { DefiningCompiler } from "../../magma/app/DefiningCompiler";
+class DefinitionCompiler {
 	static retainDefinitionsFromParameters(parameters: Iterable<Parameter>): Iterable<Definition> {
 		return parameters.iter().map((parameter: Parameter) => parameter.asDefinition()/*unknown*/).flatMap(Iters.fromOption).collect(new ListCollector<Definition>())/*unknown*/;
 	}
@@ -102,8 +104,6 @@ export class DefinitionCompiler {
 		return parameters.iter().map((definition: Definition) => definition.generate()/*unknown*/).map((generated: string) => "\n\t" + generated + ";"/*unknown*/).collect(Joiner.empty()).orElse("")/*unknown*/;
 	}
 	static parseParameters(state: CompileState, params: string): Tuple2<CompileState, List<Parameter>> {
-		return RootCompiler.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => {
-			return new Some<Tuple2<CompileState, Parameter>>(RootCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/;
-		})/*unknown*/;
+		return CompilerUtils.parseValuesOrEmpty(state, params, (state1: CompileState, s: string) => new Some<Tuple2<CompileState, Parameter>>(DefiningCompiler.parseParameterOrPlaceholder(state1, s))/*unknown*/)/*unknown*/;
 	}
 }

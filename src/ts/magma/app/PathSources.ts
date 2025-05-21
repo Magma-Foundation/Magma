@@ -81,6 +81,7 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Sources } from "../../magma/app/Sources";
@@ -100,6 +101,6 @@ export class PathSources implements Sources {
 		return this.sourceDirectory().walk().mapValue((children: Iterable<Path>) => this.retainSources(children)/*unknown*/)/*unknown*/;
 	}
 	retainSources(children: Iterable<Path>): Iterable<Source> {
-		return children.iter().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<>())/*unknown*/;
+		return children.iter().filter((source: Path) => source.endsWith(".java")/*unknown*/). < Source > map((child: Path) => new PathSource(this.sourceDirectory, child)/*unknown*/).collect(new ListCollector<Source>())/*unknown*/;
 	}
 }

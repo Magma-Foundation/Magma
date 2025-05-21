@@ -81,11 +81,12 @@
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	Targets: magma.app, 
+	TypeCompiler: magma.app, 
 	ValueCompiler: magma.app
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { Iterable } from "../../../../magma/api/collect/list/Iterable";
-import { RootCompiler } from "../../../../magma/app/RootCompiler";
+import { CompilerUtils } from "../../../../magma/app/CompilerUtils";
 export class TemplateType implements Type {
 	base: string;
 	args: Iterable<string>;
@@ -94,7 +95,7 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + RootCompiler.generateValueStrings(this.args) + ">"/*unknown*/;
+		return this.base + "<" + CompilerUtils.generateValueStrings(this.args) + ">"/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;
