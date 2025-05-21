@@ -1,4 +1,5 @@
 @startuml
+skinparam linetype ortho
 class Lists {
 }
 class Files {
@@ -379,6 +380,7 @@ Main --> Iters
 Main --> Platform
 Main --> List
 Main --> Source
+Main --> Dependency
 Main --> Joiner
 Main --> Err
 Main --> ListCollector

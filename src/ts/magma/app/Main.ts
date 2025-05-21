@@ -73,6 +73,7 @@ import { Iters } from "../../magma/api/collect/Iters";
 import { Platform } from "../../magma/app/Platform";
 import { List } from "../../magma/api/collect/list/List";
 import { Source } from "../../magma/app/io/Source";
+import { Dependency } from "../../magma/app/compile/Dependency";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
@@ -131,8 +132,8 @@ export class Main {
 		let folded = Main.retainSources(children, sourceDirectory).query().foldWithInitialToResult(initial, Main.runWithSource)/*unknown*/;
 		if (/*state.hasPlatform(Platform.PlantUML) && folded instanceof Ok(var result)*/){
 			let diagramPath = Files.get(".", "diagram.puml")/*unknown*/;
-			let joinedDependencies = result.queryDependencies().map(dependency -  > dependency.name() + " --> " + dependency.child() + "\n").collect(new Joiner("")).orElse("")/*unknown*/;
-			let maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + joinedDependencies + "@enduml")/*unknown*/;
+			let joinedDependencies = result.queryDependencies().map((dependency: Dependency) => dependency.name() + " --> " + dependency.child() + "\n"/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+			let maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.findOutput() + joinedDependencies + "@enduml")/*unknown*/;
 			if (/*maybeError instanceof Some(var error)*/){
 				return new Err<>(error)/*unknown*/;
 			}

@@ -23,6 +23,7 @@ import magma.api.result.Result;
 import magma.api.text.Characters;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
+import magma.app.compile.Dependency;
 import magma.app.compile.DivideState;
 import magma.app.compile.ImmutableCompileState;
 import magma.app.compile.ImmutableDivideState;
@@ -83,11 +84,11 @@ public final class Main {
             var diagramPath = Files.get(".", "diagram.puml");
 
             var joinedDependencies = result.queryDependencies()
-                    .map(dependency -> dependency.name() + " --> " + dependency.child() + "\n")
+                    .map((Dependency dependency) -> dependency.name() + " --> " + dependency.child() + "\n")
                     .collect(new Joiner(""))
                     .orElse("");
 
-            var maybeError = diagramPath.writeString("@startuml\n" + result.findOutput() + joinedDependencies + "@enduml");
+            var maybeError = diagramPath.writeString("@startuml\nskinparam linetype ortho\n" + result.findOutput() + joinedDependencies + "@enduml");
             if (maybeError instanceof Some(var error)) {
                 return new Err<>(error);
             }
