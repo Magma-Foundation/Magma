@@ -10,6 +10,8 @@ import magma.api.text.Strings;
 import magma.app.compile.CompileState;
 import magma.app.compile.DivideState;
 import magma.app.compile.define.Definition;
+import magma.app.compile.select.Selector;
+import magma.app.compile.split.FoldingSplitter;
 import magma.app.compile.value.Value;
 import magma.app.compile.locate.FirstLocator;
 import magma.app.compile.select.LastSelector;
@@ -31,9 +33,10 @@ final class FunctionSegmentCompiler {
     public static Option<Tuple2<CompileState, String>> compileBlock(CompileState state, String input) {
         return CompilerUtils.compileSuffix(Strings.strip(input), "}", (String withoutEnd) -> {
             return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
-                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> {
-                    return foldBlockStarts(state1, c);
-                }, new LastSelector(""));
+                Selector selector = new LastSelector("");
+                return new FoldingSplitter((state1, c) -> {
+                            return foldBlockStarts(state1, c);
+                        }, selector).apply(withoutEnd0);
             }, (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
                 var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 

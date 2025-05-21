@@ -64,6 +64,7 @@
 	Registry: magma.app.compile, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
 	LocatingSplitter: magma.app.compile.split, 
 	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
@@ -126,7 +127,6 @@ import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { Joiner } from "../../magma/api/collect/Joiner";
 import { ListCollector } from "../../magma/api/collect/list/ListCollector";
-import { Selector } from "../../magma/app/compile/select/Selector";
 export class CompilerUtils {
 	static compileStatements(state: CompileState, input: string, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>): Tuple2<CompileState, string> {
 		return CompilerUtils.compileAll(state, input, new StatementsFolder(), mapper, new StatementsMerger())/*unknown*/;
@@ -212,12 +212,5 @@ export class CompilerUtils {
 	}
 	static retain<T, R>(args: Iterable<T>, mapper: (arg0 : T) => Option<R>): Iterable<R> {
 		return args.iter().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;
-	}
-	static splitFolded(input: string, folder: Folder, selector: Selector): Option<Tuple2<string, string>> {
-		let divisions = new FoldedDivider(new DecoratedFolder(folder)).divide(input).collect(new ListCollector<string>())/*unknown*/;
-		if (2 > divisions.size()/*unknown*/){
-			return new None<Tuple2<string, string>>()/*unknown*/;
-		}
-		return selector.apply(divisions)/*unknown*/;
 	}
 }

@@ -16,6 +16,8 @@ import magma.app.compile.fold.DelimitedFolder;
 import magma.app.compile.DivideState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
+import magma.app.compile.select.Selector;
+import magma.app.compile.split.FoldingSplitter;
 import magma.app.compile.text.Whitespace;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.Placeholder;
@@ -55,7 +57,8 @@ final class DefiningCompiler {
     public static Option<Tuple2<CompileState, Definition>> parseDefinition(CompileState state, String input) {
         return CompilerUtils.compileLast(Strings.strip(input), " ", (String beforeName, String name) -> {
             return CompilerUtils.compileSplit(beforeName, (beforeName0) -> {
-                return CompilerUtils.splitFolded(Strings.strip(beforeName0), new TypeSeparatorFolder(), new LastSelector(" "));
+                Selector selector = new LastSelector(" ");
+                return new FoldingSplitter(new TypeSeparatorFolder(), selector).apply(Strings.strip(beforeName0));
             }, (String beforeType, String type) -> CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
                 var annotations = DefiningCompiler.parseAnnotations(annotationsString);
                 return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);

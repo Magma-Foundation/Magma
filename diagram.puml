@@ -160,6 +160,9 @@ class LastSelector {
 LastSelector <|.. Selector
 interface Selector {
 }
+class FoldingSplitter {
+}
+FoldingSplitter <|.. Splitter
 class LocatingSplitter {
 }
 LocatingSplitter <|.. Splitter
@@ -451,6 +454,15 @@ LastSelector --> Tuple2Impl
 Selector --> Tuple2
 Selector --> Option
 Selector --> List
+FoldingSplitter --> Splitter
+FoldingSplitter --> Folder
+FoldingSplitter --> Selector
+FoldingSplitter --> Tuple2
+FoldingSplitter --> Option
+FoldingSplitter --> FoldedDivider
+FoldingSplitter --> DecoratedFolder
+FoldingSplitter --> ListCollector
+FoldingSplitter --> None
 LocatingSplitter --> Splitter
 LocatingSplitter --> Locator
 LocatingSplitter --> Tuple2
@@ -569,7 +581,6 @@ CompilerUtils --> LastLocator
 CompilerUtils --> Splitter
 CompilerUtils --> Joiner
 CompilerUtils --> ListCollector
-CompilerUtils --> Selector
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
 DefiningCompiler --> Parameter
@@ -762,6 +773,7 @@ ValueCompiler --> Lambda
 ValueCompiler --> None
 ValueCompiler --> RootCompiler
 ValueCompiler --> AccessValue
+ValueCompiler --> FoldingSplitter
 ValueCompiler --> OperatorFolder
 ValueCompiler --> Operation
 ValueCompiler --> TypeCompiler

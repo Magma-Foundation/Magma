@@ -64,6 +64,7 @@
 	Registry: magma.app.compile, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
 	LocatingSplitter: magma.app.compile.split, 
 	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
@@ -130,11 +131,12 @@ class FunctionSegmentCompiler {
 	static compileBlock(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return CompilerUtils.compileSuffix(Strings.strip(input), "}", (withoutEnd: string) => {
 			/*return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
-                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> {
-                    return foldBlockStarts(state1, c);
-                }, new LastSelector(""));
+                Selector selector */ = /* new LastSelector("");
+                return new FoldingSplitter((state1, c) -> {
+                            return foldBlockStarts(state1, c);
+                        }, selector).apply(withoutEnd0);
             }, (String beforeContentWithEnd, String content) -> CompilerUtils.compileSuffix(beforeContentWithEnd, "{", (String beforeContent) -> FunctionSegmentCompiler.compileBlockHeader(state, beforeContent).flatMap((Tuple2<CompileState, String> headerTuple) -> {
-                var contentTuple */ = /* FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
+                var contentTuple = FunctionSegmentCompiler.compileFunctionStatements(headerTuple.left().enterDepth(), content);
 
                 var indent = state.createIndent();
                 return new Some<Tuple2<CompileState, String>>(new Tuple2Impl<CompileState, String>(contentTuple.left().exitDepth(), indent + headerTuple.right() + "{" + contentTuple.right() + indent + "}"));

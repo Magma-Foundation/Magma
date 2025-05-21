@@ -13,18 +13,17 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import magma.api.text.Strings;
 import magma.app.compile.CompileState;
-import magma.app.compile.merge.Merger;
-import magma.app.compile.select.Selector;
-import magma.app.compile.text.Whitespace;
 import magma.app.compile.divide.FoldedDivider;
 import magma.app.compile.fold.DecoratedFolder;
 import magma.app.compile.fold.Folder;
 import magma.app.compile.fold.StatementsFolder;
 import magma.app.compile.fold.ValueFolder;
 import magma.app.compile.locate.LastLocator;
+import magma.app.compile.merge.Merger;
 import magma.app.compile.merge.StatementsMerger;
 import magma.app.compile.split.LocatingSplitter;
 import magma.app.compile.split.Splitter;
+import magma.app.compile.text.Whitespace;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -164,20 +163,5 @@ public final class CompilerUtils {
                 .map(mapper)
                 .flatMap(Iters::fromOption)
                 .collect(new ListCollector<R>());
-    }
-
-    public static Option<Tuple2<String, String>> splitFolded(
-            String input,
-            Folder folder,
-            Selector selector
-    ) {
-        var divisions = new FoldedDivider(new DecoratedFolder(folder)).divide(input)
-                .collect(new ListCollector<String>());
-
-        if (2 > divisions.size()) {
-            return new None<Tuple2<String, String>>();
-        }
-
-        return selector.apply(divisions);
     }
 }

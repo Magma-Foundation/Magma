@@ -64,6 +64,7 @@
 	Registry: magma.app.compile, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
 	LocatingSplitter: magma.app.compile.split, 
 	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
@@ -125,6 +126,7 @@ import { Lambda } from "../../magma/app/compile/value/Lambda";
 import { None } from "../../magma/api/option/None";
 import { RootCompiler } from "../../magma/app/RootCompiler";
 import { AccessValue } from "../../magma/app/compile/value/AccessValue";
+import { FoldingSplitter } from "../../magma/app/compile/split/FoldingSplitter";
 import { OperatorFolder } from "../../magma/app/compile/fold/OperatorFolder";
 import { Operation } from "../../magma/app/compile/value/Operation";
 import { TypeCompiler } from "../../magma/app/TypeCompiler";
@@ -148,9 +150,10 @@ class ValueCompiler {
 	static parseInvokable(state: CompileState, input: string): Option<Tuple2<CompileState, Value>> {
 		return CompilerUtils.compileSuffix(Strings.strip(input), ")", (withoutEnd: string) => {
 			/*return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
-                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> ValueCompiler.foldInvocationStarts(state1, c), new LastSelector(""));
+                Selector selector */ = /* new LastSelector("");
+                return new FoldingSplitter((state1, c) -> ValueCompiler.foldInvocationStarts(state1, c), selector).apply(withoutEnd0);
             }, (String callerWithArgStart, String args) -> CompilerUtils.compileSuffix(callerWithArgStart, "(", (String callerString) -> CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (String type) -> TypeCompiler.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple) -> {
-                var callerState */ = /* callerTuple.right();
+                var callerState = callerTuple.right();
                 var caller = callerTuple.left();
                 return ValueCompiler.assembleInvokable(caller, new ConstructionCaller(callerState), args);
             })).or(() -> RootCompiler.parseValue(state, callerString).flatMap((Tuple2<CompileState, Value> callerTuple) -> ValueCompiler.assembleInvokable(callerTuple.left(), callerTuple.right(), args)))))*/;
@@ -208,9 +211,9 @@ class ValueCompiler {
 	}
 	static createOperatorRuleWithDifferentInfix(sourceInfix: string, targetInfix: string): (arg0 : CompileState, arg1 : string) => Option<Tuple2<CompileState, Value>> {
 		return (state1: CompileState, input1: string) => {
-			return CompilerUtils.compileSplit(input1, (slice: string) => CompilerUtils.splitFolded(slice, new OperatorFolder(sourceInfix), (divisions: List<string>) => {
+			return CompilerUtils.compileSplit(input1, (slice: string) => new FoldingSplitter(new OperatorFolder(sourceInfix), (divisions: List<string>) => {
 				return CompilerUtils.selectFirst(divisions, sourceInfix)/*unknown*/;
-			})/*unknown*/, (leftString: string, rightString: string) => RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
+			}).apply(slice)/*unknown*/, (leftString: string, rightString: string) => RootCompiler.parseValue(state1, leftString).flatMap((leftTuple: Tuple2<CompileState, Value>) => RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((rightTuple: Tuple2<CompileState, Value>) => {
 				let left = leftTuple.right()/*unknown*/;
 				let right = rightTuple.right()/*unknown*/;
 				return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)))/*unknown*/;

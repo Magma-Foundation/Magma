@@ -17,6 +17,8 @@ import magma.app.compile.Stack;
 import magma.app.compile.define.ConstructionCaller;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
+import magma.app.compile.select.Selector;
+import magma.app.compile.split.FoldingSplitter;
 import magma.app.compile.type.Type;
 import magma.app.compile.value.AccessValue;
 import magma.app.compile.value.Argument;
@@ -48,7 +50,8 @@ final class ValueCompiler {
     static Option<Tuple2<CompileState, Value>> parseInvokable(CompileState state, String input) {
         return CompilerUtils.compileSuffix(Strings.strip(input), ")", (String withoutEnd) -> {
             return CompilerUtils.compileSplit(withoutEnd, (withoutEnd0) -> {
-                return CompilerUtils.splitFolded(withoutEnd0, (state1, c) -> ValueCompiler.foldInvocationStarts(state1, c), new LastSelector(""));
+                Selector selector = new LastSelector("");
+                return new FoldingSplitter((state1, c) -> ValueCompiler.foldInvocationStarts(state1, c), selector).apply(withoutEnd0);
             }, (String callerWithArgStart, String args) -> CompilerUtils.compileSuffix(callerWithArgStart, "(", (String callerString) -> CompilerUtils.compilePrefix(Strings.strip(callerString), "new ", (String type) -> TypeCompiler.compileType(state, type).flatMap((Tuple2<CompileState, String> callerTuple) -> {
                 var callerState = callerTuple.right();
                 var caller = callerTuple.left();
@@ -118,9 +121,9 @@ final class ValueCompiler {
 
     static BiFunction<CompileState, String, Option<Tuple2<CompileState, Value>>> createOperatorRuleWithDifferentInfix(String sourceInfix, String targetInfix) {
         return (CompileState state1, String input1) -> {
-            return CompilerUtils.compileSplit(input1, (String slice) -> CompilerUtils.splitFolded(slice, new OperatorFolder(sourceInfix), (List<String> divisions) -> {
-                return CompilerUtils.selectFirst(divisions, sourceInfix);
-            }), (String leftString, String rightString) -> RootCompiler.parseValue(state1, leftString).flatMap((Tuple2<CompileState, Value> leftTuple) -> RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((Tuple2<CompileState, Value> rightTuple) -> {
+            return CompilerUtils.compileSplit(input1, (String slice) -> new FoldingSplitter(new OperatorFolder(sourceInfix), (List<String> divisions) -> {
+                    return CompilerUtils.selectFirst(divisions, sourceInfix);
+                }).apply(slice), (String leftString, String rightString) -> RootCompiler.parseValue(state1, leftString).flatMap((Tuple2<CompileState, Value> leftTuple) -> RootCompiler.parseValue(leftTuple.left(), rightString).flatMap((Tuple2<CompileState, Value> rightTuple) -> {
                 var left = leftTuple.right();
                 var right = rightTuple.right();
                 return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(rightTuple.left(), new Operation(left, targetInfix, right)));

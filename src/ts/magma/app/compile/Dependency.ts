@@ -64,6 +64,7 @@
 	Registry: magma.app.compile, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
 	LocatingSplitter: magma.app.compile.split, 
 	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 

@@ -64,6 +64,7 @@
 	Registry: magma.app.compile, 
 	LastSelector: magma.app.compile.select, 
 	Selector: magma.app.compile.select, 
+	FoldingSplitter: magma.app.compile.split, 
 	LocatingSplitter: magma.app.compile.split, 
 	Splitter: magma.app.compile.split, 
 	Stack: magma.app.compile, 
@@ -147,9 +148,10 @@ class DefiningCompiler {
 	static parseDefinition(state: CompileState, input: string): Option<Tuple2<CompileState, Definition>> {
 		return CompilerUtils.compileLast(Strings.strip(input), " ", (beforeName: string, name: string) => {
 			/*return CompilerUtils.compileSplit(beforeName, (beforeName0) -> {
-                return CompilerUtils.splitFolded(Strings.strip(beforeName0), new TypeSeparatorFolder(), new LastSelector(" "));
+                Selector selector */ = /* new LastSelector(" ");
+                return new FoldingSplitter(new TypeSeparatorFolder(), selector).apply(Strings.strip(beforeName0));
             }, (String beforeType, String type) -> CompilerUtils.compileLast(Strings.strip(beforeType), "\n", (String annotationsString, String afterAnnotations) -> {
-                var annotations */ = /* DefiningCompiler.parseAnnotations(annotationsString);
+                var annotations = DefiningCompiler.parseAnnotations(annotationsString);
                 return DefiningCompiler.parseDefinitionWithAnnotations(state, annotations, afterAnnotations, type, name);
             }).or(() -> DefiningCompiler.parseDefinitionWithAnnotations(state, Lists.empty(), beforeType, type, name))).or(() -> DefiningCompiler.parseDefinitionWithTypeParameters(state, Lists.empty(), Lists.empty(), Lists.empty(), beforeName, name))*/;
 		})/*unknown*/;
