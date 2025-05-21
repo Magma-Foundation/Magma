@@ -275,7 +275,6 @@ ImmutableCompileState --> Option
 ImmutableCompileState --> Source
 ImmutableCompileState --> Platform
 ImmutableCompileState --> Dependency
-ImmutableCompileState --> Joiner
 ImmutableCompileState --> Iter
 ImmutableCompileState --> Strings
 ImmutableCompileState --> Lists
@@ -448,6 +447,7 @@ Main --> Joiner
 Main --> Err
 Main --> Compiler
 Main --> Ok
+Main --> Import
 Main --> Tuple2Impl
 Main --> ImmutableCompileState
 Main --> Lists

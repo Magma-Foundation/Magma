@@ -83,6 +83,7 @@ import { Joiner } from "../../magma/api/collect/Joiner";
 import { Err } from "../../magma/api/result/Err";
 import { Compiler } from "../../magma/app/Compiler";
 import { Ok } from "../../magma/api/result/Ok";
+import { Import } from "../../magma/app/compile/Import";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { ImmutableCompileState } from "../../magma/app/compile/ImmutableCompileState";
 import { Lists } from "../../jvm/api/collect/list/Lists";
@@ -125,7 +126,9 @@ export class Main {
 			return new Ok<CompileState, IOError>(compiledState)/*unknown*/;
 		}
 		let segment = state.querySources().map((source1: Source) => Main.formatSource(source1)/*unknown*/).collect(new Joiner(", ")).orElse("")/*unknown*/;
-		let joined = compiledState.join(compiled.right())/*unknown*/;
+		let otherOutput = compiled.right()/*unknown*/;
+		let joinedImports = compiledState.queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
+		let joined = joinedImports + compiledState.findOutput() + otherOutput/*unknown*/;
 		let output = new Tuple2Impl<CompileState, string>(state, "/*[" + segment + "\n]*/\n" + joined)/*unknown*/;
 		let cleared = output.left().clearImports().clearOutput()/*unknown*/;
 		return Main.writeTarget(source, cleared, output.right())/*unknown*/;

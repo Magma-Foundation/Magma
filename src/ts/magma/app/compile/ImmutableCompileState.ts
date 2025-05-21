@@ -77,7 +77,6 @@ import { Option } from "../../../magma/api/option/Option";
 import { Source } from "../../../magma/app/io/Source";
 import { Platform } from "../../../magma/app/Platform";
 import { Dependency } from "../../../magma/app/compile/Dependency";
-import { Joiner } from "../../../magma/api/collect/Joiner";
 import { Iter } from "../../../magma/api/collect/Iter";
 import { Strings } from "../../../magma/api/text/Strings";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
@@ -103,10 +102,6 @@ export class ImmutableCompileState implements CompileState {
 		this.sources = sources;
 		this.platform = platform;
 		this.dependencies = dependencies;
-	}
-	join(otherOutput: string): string {
-		let joinedImports = this.queryImports().map((anImport: Import) => anImport.generate()/*unknown*/).collect(new Joiner("")).orElse("")/*unknown*/;
-		return joinedImports + this.output + otherOutput/*unknown*/;
 	}
 	querySources(): Iter<Source> {
 		return this.sources.iter()/*unknown*/;

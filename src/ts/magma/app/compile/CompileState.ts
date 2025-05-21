@@ -78,7 +78,6 @@ import { Definition } from "../../../magma/app/compile/define/Definition";
 import { Iterable } from "../../../magma/api/collect/list/Iterable";
 import { Platform } from "../../../magma/app/Platform";
 export interface CompileState {
-	join(otherOutput: string): string;
 	queryImports(): Iter<Import>;
 	queryDependencies(): Iter<Dependency>;
 	querySources(): Iter<Source>;

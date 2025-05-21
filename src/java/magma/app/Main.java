@@ -16,6 +16,7 @@ import magma.api.result.Result;
 import magma.app.compile.CompileState;
 import magma.app.compile.Dependency;
 import magma.app.compile.ImmutableCompileState;
+import magma.app.compile.Import;
 import magma.app.io.Source;
 
 public final class Main {
@@ -75,7 +76,13 @@ public final class Main {
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        var joined = compiledState.join(compiled.right());
+        var otherOutput = compiled.right();
+        var joinedImports = compiledState.queryImports()
+                .map((Import anImport) -> anImport.generate())
+                .collect(new Joiner(""))
+                .orElse("");
+
+        var joined = joinedImports + compiledState.findOutput() + otherOutput;
         var output = new Tuple2Impl<CompileState, String>(state, "/*[" + segment + "\n]*/\n" + joined);
         var cleared = output.left().clearImports().clearOutput();
         return Main.writeTarget(source, cleared, output.right());

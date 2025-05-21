@@ -2,7 +2,6 @@ package magma.app.compile;
 
 import jvm.api.collect.list.Lists;
 import magma.api.collect.Iter;
-import magma.api.collect.Joiner;
 import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.option.Option;
@@ -24,16 +23,6 @@ public record ImmutableCompileState(
         Platform platform,
         List<Dependency> dependencies
 ) implements CompileState {
-    @Override
-    public String join(String otherOutput) {
-        var joinedImports = this.queryImports()
-                .map((Import anImport) -> anImport.generate())
-                .collect(new Joiner(""))
-                .orElse("");
-
-        return joinedImports + this.output + otherOutput;
-    }
-
     @Override
     public Iter<Source> querySources() {
         return this.sources.iter();

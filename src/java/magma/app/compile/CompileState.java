@@ -9,8 +9,6 @@ import magma.app.compile.define.Definition;
 import magma.app.io.Source;
 
 public interface CompileState {
-    String join(String otherOutput);
-
     Iter<Import> queryImports();
 
     Iter<Dependency> queryDependencies();
