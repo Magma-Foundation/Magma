@@ -9,7 +9,7 @@ import magma.api.option.Some;
 
 public record LastSelector(String delimiter) implements Selector {
     @Override
-    public Option<Tuple2<String, String>> apply(List<String> divisions) {
+    public Option<Tuple2<String, String>> select(List<String> divisions) {
         var beforeLast = divisions.subList(0, divisions.size() - 1).orElse(divisions);
         var last = divisions.findLast().orElse("");
 

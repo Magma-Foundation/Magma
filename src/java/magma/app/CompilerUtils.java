@@ -4,7 +4,6 @@ import jvm.api.collect.list.Lists;
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
 import magma.api.collect.Iters;
-import magma.api.collect.Joiner;
 import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
 import magma.api.collect.list.ListCollector;
@@ -146,16 +145,6 @@ public final class CompilerUtils {
                 .replace("*/", "end");
 
         return "/*" + replaced + "*/";
-    }
-
-    static Option<Tuple2<String, String>> selectFirst(List<String> divisions, String delimiter) {
-        var first = divisions.findFirst().orElse("");
-        var afterFirst = divisions.subList(1, divisions.size()).orElse(divisions)
-                .iter()
-                .collect(new Joiner(delimiter))
-                .orElse("");
-
-        return new Some<Tuple2<String, String>>(new Tuple2Impl<String, String>(first, afterFirst));
     }
 
     static <T, R> Iterable<R> retain(Iterable<T> args, Function<T, Option<R>> mapper) {

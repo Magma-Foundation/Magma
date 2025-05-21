@@ -19,6 +19,6 @@ public record FoldingSplitter(Folder folder, Selector selector) implements Split
             return new None<Tuple2<String, String>>();
         }
 
-        return this.selector.apply(divisions);
+        return this.selector.select(divisions);
     }
 }
