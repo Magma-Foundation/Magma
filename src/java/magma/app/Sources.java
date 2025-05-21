@@ -6,7 +6,7 @@ import magma.api.io.Path;
 import magma.api.result.Result;
 import magma.app.io.Source;
 
-public interface Sources {
+interface Sources {
     Result<Iterable<Source>, IOError> listSources();
 
     Iterable<Source> retainSources(Iterable<Path> children);

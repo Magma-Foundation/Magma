@@ -23,6 +23,6 @@ public record Err<T, X>(X error) implements Result<T, X> {
 
     @Override
     public <R> Result<R, X> mapValue(Function<T, R> mapper) {
-        return new Err<>(this.error);
+        return new Err<R, X>(this.error);
     }
 }

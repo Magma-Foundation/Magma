@@ -21,6 +21,6 @@ public record PathSources(Path sourceDirectory) implements Sources {
         return children.iter()
                 .filter((Path source) -> source.endsWith(".java"))
                 .<Source>map((Path child) -> new PathSource(this.sourceDirectory, child))
-                .collect(new ListCollector<>());
+                .collect(new ListCollector<Source>());
     }
 }

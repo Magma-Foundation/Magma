@@ -66,7 +66,11 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	Compiler: magma.app, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
@@ -74,10 +78,12 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	Targets: magma.app
+	Targets: magma.app, 
+	ValueCompiler: magma.app
 ]*/
-import { Compiler } from "../../../../magma/app/Compiler";
+import { RootCompiler } from "../../../../magma/app/RootCompiler";
 import { Value } from "../../../../magma/app/compile/value/Value";
 import { Option } from "../../../../magma/api/option/Option";
 import { None } from "../../../../magma/api/option/None";
@@ -91,7 +97,7 @@ export class Placeholder {
 		this.input = input;
 	}
 	generate(): string {
-		return Compiler.generatePlaceholder(this.input)/*unknown*/;
+		return RootCompiler.generatePlaceholder(this.input)/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;

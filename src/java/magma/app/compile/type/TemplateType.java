@@ -1,12 +1,12 @@
 package magma.app.compile.type;
 
 import magma.api.collect.list.Iterable;
-import magma.app.Compiler;
+import magma.app.CompilerUtils;
 
 public record TemplateType(String base, Iterable<String> args) implements Type {
     @Override
     public String generate() {
-        return this.base + "<" + Compiler.generateValueStrings(this.args) + ">";
+        return this.base + "<" + CompilerUtils.generateValueStrings(this.args) + ">";
     }
 
     @Override

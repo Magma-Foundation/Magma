@@ -66,7 +66,11 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	Compiler: magma.app, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
@@ -74,8 +78,10 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	Targets: magma.app
+	Targets: magma.app, 
+	ValueCompiler: magma.app
 ]*/
 import { Collector } from "../../../magma/api/collect/Collector";
 import { Option } from "../../../magma/api/option/Option";

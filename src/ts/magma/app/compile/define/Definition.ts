@@ -66,7 +66,11 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	Compiler: magma.app, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
@@ -74,8 +78,10 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	Targets: magma.app
+	Targets: magma.app, 
+	ValueCompiler: magma.app
 ]*/
 import { List } from "../../../../magma/api/collect/list/List";
 import { Iterable } from "../../../../magma/api/collect/list/Iterable";
@@ -83,7 +89,7 @@ import { Type } from "../../../../magma/app/compile/type/Type";
 import { Option } from "../../../../magma/api/option/Option";
 import { Some } from "../../../../magma/api/option/Some";
 import { Joiner } from "../../../../magma/api/collect/Joiner";
-import { Compiler } from "../../../../magma/app/Compiler";
+import { RootCompiler } from "../../../../magma/app/RootCompiler";
 import { MethodHeader } from "../../../../magma/app/compile/define/MethodHeader";
 import { Strings } from "../../../../magma/api/text/Strings";
 export class Definition {
@@ -123,7 +129,7 @@ export class Definition {
 		return ": " + this.type.generate()/*unknown*/;
 	}
 	joinTypeParams(): string {
-		return Compiler.joinTypeParams(this.typeParams)/*unknown*/;
+		return RootCompiler.joinTypeParams(this.typeParams)/*unknown*/;
 	}
 	hasAnnotation(annotation: string): boolean {
 		return this.annotations.contains(annotation)/*unknown*/;

@@ -66,7 +66,11 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	Compiler: magma.app, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
@@ -74,12 +78,14 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	Targets: magma.app
+	Targets: magma.app, 
+	ValueCompiler: magma.app
 ]*/
 import { Type } from "../../../../magma/app/compile/type/Type";
 import { Iterable } from "../../../../magma/api/collect/list/Iterable";
-import { Compiler } from "../../../../magma/app/Compiler";
+import { RootCompiler } from "../../../../magma/app/RootCompiler";
 export class TemplateType implements Type {
 	base: string;
 	args: Iterable<string>;
@@ -88,7 +94,7 @@ export class TemplateType implements Type {
 		this.args = args;
 	}
 	generate(): string {
-		return this.base + "<" + Compiler.generateValueStrings(this.args) + ">"/*unknown*/;
+		return this.base + "<" + RootCompiler.generateValueStrings(this.args) + ">"/*unknown*/;
 	}
 	isFunctional(): boolean {
 		return false/*unknown*/;

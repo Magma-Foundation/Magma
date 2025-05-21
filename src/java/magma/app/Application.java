@@ -17,7 +17,7 @@ import magma.app.compile.Import;
 import magma.app.compile.Registry;
 import magma.app.io.Source;
 
-public record Application(Sources sources, Targets targets) {
+record Application(Sources sources, Targets targets) {
     private static String formatSource(Source source) {
         return "\n\t" + source.createLocation().name() + ": " + Application.joinNamespace(source);
     }
@@ -37,7 +37,7 @@ public record Application(Sources sources, Targets targets) {
 
     private Result<CompileState, IOError> runWithChildren(Platform platform, Iterable<Source> children) {
         CompileState state = ImmutableCompileState.createEmpty().mapContext((Context context) -> context.withPlatform(platform));
-        var initial = children.iter().foldWithInitial(state, (CompileState current, Source source) -> current.mapContext(context1 -> context1.addSource(source)));
+        var initial = children.iter().foldWithInitial(state, (CompileState current, Source source) -> current.mapContext((Context context1) -> context1.addSource(source)));
         var folded = children.iter().foldWithInitialToResult(initial, (CompileState state1, Source source) -> this.runWithSource(state1, source));
 
         if (!state.context().hasPlatform(Platform.PlantUML) || !(folded instanceof Ok(var result))) {
@@ -64,7 +64,7 @@ public record Application(Sources sources, Targets targets) {
 
     private Result<CompileState, IOError> runWithInput(CompileState state1, Source source, String input) {
         var location = source.createLocation();
-        var compiled = Compiler.compileRoot(state1, input, location);
+        var compiled = RootCompiler.compileRoot(state1, input, location);
         var compiledState = compiled.left();
 
         if (compiledState.context().hasPlatform(Platform.PlantUML)) {

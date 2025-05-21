@@ -66,7 +66,11 @@
 	StringValue: magma.app.compile.value, 
 	Symbol: magma.app.compile.value, 
 	Value: magma.app.compile.value, 
-	Compiler: magma.app, 
+	CompilerUtils: magma.app, 
+	DefiningCompiler: magma.app, 
+	DefinitionCompiler: magma.app, 
+	FieldCompiler: magma.app, 
+	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
 	Source: magma.app.io, 
 	Location: magma.app, 
@@ -74,8 +78,10 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	RootCompiler: magma.app, 
 	Sources: magma.app, 
-	Targets: magma.app
+	Targets: magma.app, 
+	ValueCompiler: magma.app
 ]*/
 import { Sources } from "../../magma/app/Sources";
 import { Targets } from "../../magma/app/Targets";
@@ -92,7 +98,7 @@ import { Context } from "../../magma/app/compile/Context";
 import { Files } from "../../jvm/api/io/Files";
 import { Dependency } from "../../magma/app/compile/Dependency";
 import { Err } from "../../magma/api/result/Err";
-import { Compiler } from "../../magma/app/Compiler";
+import { RootCompiler } from "../../magma/app/RootCompiler";
 import { Ok } from "../../magma/api/result/Ok";
 import { Import } from "../../magma/app/compile/Import";
 import { Registry } from "../../magma/app/compile/Registry";
@@ -132,7 +138,7 @@ export class Application {
 	}
 	runWithInput(state1: CompileState, source: Source, input: string): Result<CompileState, IOError> {
 		let location = source.createLocation()/*unknown*/;
-		let compiled = Compiler.compileRoot(state1, input, location)/*unknown*/;
+		let compiled = RootCompiler.compileRoot(state1, input, location)/*unknown*/;
 		let compiledState = compiled.left()/*unknown*/;
 		if (compiledState.context().hasPlatform(Platform.PlantUML)/*unknown*/){
 			return new Ok<CompileState, IOError>(compiledState)/*unknown*/;

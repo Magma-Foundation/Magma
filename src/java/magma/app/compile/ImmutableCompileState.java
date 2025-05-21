@@ -8,7 +8,7 @@ public final class ImmutableCompileState implements CompileState {
     private final int depth;
     private final Stack stack;
 
-    public ImmutableCompileState(
+    private ImmutableCompileState(
             Context context,
             Registry registry,
             Stack stack, int depth

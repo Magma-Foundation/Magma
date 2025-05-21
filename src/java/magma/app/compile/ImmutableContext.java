@@ -17,7 +17,7 @@ public record ImmutableContext(
         List<Source> sources
 ) implements Context {
     static Context createEmpty() {
-        return new ImmutableContext(new None<>(), new None<Location>(), Lists.empty());
+        return new ImmutableContext(new None<Platform>(), new None<Location>(), Lists.empty());
     }
 
     @Override
@@ -63,6 +63,6 @@ public record ImmutableContext(
 
     @Override
     public Context withPlatform(Platform platform) {
-        return new ImmutableContext(new Some<>(platform), this.maybeLocation(), this.sources());
+        return new ImmutableContext(new Some<Platform>(platform), this.maybeLocation(), this.sources());
     }
 }

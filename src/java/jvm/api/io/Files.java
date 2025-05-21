@@ -4,7 +4,6 @@ import magma.annotate.Actual;
 import magma.annotate.Namespace;
 import jvm.api.collect.list.JVMList;
 import magma.api.collect.list.Iterable;
-import magma.api.collect.list.List;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.head.HeadedIter;
 import magma.api.collect.Iter;

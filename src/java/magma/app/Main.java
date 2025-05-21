@@ -6,7 +6,7 @@ import magma.api.io.Console;
 import magma.api.io.IOError;
 import magma.api.option.Option;
 
-public final class Main {
+final class Main {
     public static void main() {
         var sourceDirectory = Files.get(".", "src", "java");
         var sources = new PathSources(sourceDirectory);
@@ -16,7 +16,7 @@ public final class Main {
                 .ifPresent((String displayed) -> Console.printErrLn(displayed));
     }
 
-    static Option<IOError> run(Application application) {
+    private static Option<IOError> run(Application application) {
         return Iters.fromArray(Platform.values())
                 .map((Platform platform) -> application.runWith(platform))
                 .flatMap(Iters::fromOption)

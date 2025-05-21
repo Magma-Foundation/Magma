@@ -2,7 +2,7 @@ package magma.app.compile.value;
 
 import magma.api.option.None;
 import magma.api.option.Option;
-import magma.app.Compiler;
+import magma.app.CompilerUtils;
 import magma.app.compile.CompileState;
 import magma.app.compile.define.Definition;
 import magma.app.compile.define.Parameter;
@@ -12,7 +12,7 @@ import magma.app.compile.type.Type;
 public record Placeholder(String input) implements Parameter, Value, Type {
     @Override
     public String generate() {
-        return Compiler.generatePlaceholder(this.input);
+        return CompilerUtils.generatePlaceholder(this.input);
     }
 
     @Override
