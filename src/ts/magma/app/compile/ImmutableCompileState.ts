@@ -101,6 +101,7 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	SuffixComposable: magma.app, 

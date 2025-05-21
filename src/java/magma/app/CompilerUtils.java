@@ -71,17 +71,12 @@ public final class CompilerUtils {
         });
     }
 
-    static <T> Option<Tuple2<CompileState, T>> compilePrefix(
+    static <T> Option<T> compilePrefix(
             String input,
             String infix,
-            Function<String, Option<Tuple2<CompileState, T>>> mapper
+            Composable<String, T> mapper
     ) {
-        if (!input.startsWith(infix)) {
-            return new None<Tuple2<CompileState, T>>();
-        }
-
-        var slice = Strings.sliceFrom(input, Strings.length(infix));
-        return mapper.apply(slice);
+        return new PrefixRule<>(infix, mapper).apply(input);
     }
 
     static Option<Tuple2<CompileState, String>> compileWhitespace(CompileState state, String input) {

@@ -101,6 +101,7 @@
 	PathSources: magma.app, 
 	PathTargets: magma.app, 
 	Platform: magma.app, 
+	PrefixRule: magma.app, 
 	RootCompiler: magma.app, 
 	Sources: magma.app, 
 	SuffixComposable: magma.app, 
@@ -124,13 +125,14 @@ import { Rule } from "../../magma/app/compile/rule/Rule";
 import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
 import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
 import { OrRule } from "../../magma/app/compile/rule/OrRule";
-import { None } from "../../magma/api/option/None";
-import { Strings } from "../../magma/api/text/Strings";
+import { Composable } from "../../magma/app/compile/compose/Composable";
+import { PrefixRule } from "../../magma/app/PrefixRule";
 import { Whitespace } from "../../magma/app/compile/text/Whitespace";
+import { Strings } from "../../magma/api/text/Strings";
+import { None } from "../../magma/api/option/None";
 import { ValueFolder } from "../../magma/app/compile/fold/ValueFolder";
 import { LocatingSplitter } from "../../magma/app/compile/split/LocatingSplitter";
 import { LastLocator } from "../../magma/app/compile/locate/LastLocator";
-import { Composable } from "../../magma/app/compile/compose/Composable";
 import { SuffixComposable } from "../../magma/app/SuffixComposable";
 import { Splitter } from "../../magma/app/compile/split/Splitter";
 import { Iters } from "../../magma/api/collect/Iters";
@@ -166,12 +168,8 @@ export class CompilerUtils {
 			return new Tuple2Impl<CompileState, string>(state, CompilerUtils.generatePlaceholder(input))/*unknown*/;
 		})/*unknown*/;
 	}
-	static compilePrefix<T>(input: string, infix: string, mapper: (arg0 : string) => Option<Tuple2<CompileState, T>>): Option<Tuple2<CompileState, T>> {
-		if (!input/*string*/.startsWith(infix)/*unknown*/){
-			return new None<Tuple2<CompileState, T>>()/*unknown*/;
-		}
-		let slice = Strings.sliceFrom(input, Strings.length(infix))/*unknown*/;
-		return mapper(slice)/*unknown*/;
+	static compilePrefix<T>(input: string, infix: string, mapper: Composable<string, T>): Option<T> {
+		return new PrefixRule<>(infix, mapper).apply(input)/*unknown*/;
 	}
 	static compileWhitespace(state: CompileState, input: string): Option<Tuple2<CompileState, string>> {
 		return CompilerUtils.parseWhitespace(state, input).map((tuple: Tuple2<CompileState, Whitespace>) => {

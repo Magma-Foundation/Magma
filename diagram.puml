@@ -250,6 +250,9 @@ class PathTargets {
 PathTargets <|.. Targets
 class Platform {
 }
+class PrefixRule<T> {
+}
+PrefixRule <|.. Composable
 class RootCompiler {
 }
 interface Sources {
@@ -604,13 +607,14 @@ CompilerUtils --> Rule
 CompilerUtils --> FoldedDivider
 CompilerUtils --> DecoratedFolder
 CompilerUtils --> OrRule
-CompilerUtils --> None
-CompilerUtils --> Strings
+CompilerUtils --> Composable
+CompilerUtils --> PrefixRule
 CompilerUtils --> Whitespace
+CompilerUtils --> Strings
+CompilerUtils --> None
 CompilerUtils --> ValueFolder
 CompilerUtils --> LocatingSplitter
 CompilerUtils --> LastLocator
-CompilerUtils --> Composable
 CompilerUtils --> SuffixComposable
 CompilerUtils --> Splitter
 CompilerUtils --> Iters
@@ -733,6 +737,10 @@ PathTargets --> IOError
 PathTargets --> Option
 PathTargets --> None
 PathTargets --> Location
+PrefixRule --> Composable
+PrefixRule --> Option
+PrefixRule --> None
+PrefixRule --> Strings
 RootCompiler --> CompileState
 RootCompiler --> Tuple2
 RootCompiler --> CompilerUtils
