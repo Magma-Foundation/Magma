@@ -97,6 +97,7 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DivideRule: magma.app, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
@@ -117,45 +118,24 @@ import { CompileState } from "../../magma/app/compile/CompileState";
 import { Tuple2 } from "../../magma/api/Tuple2";
 import { Folder } from "../../magma/app/compile/fold/Folder";
 import { Merger } from "../../magma/app/compile/merge/Merger";
+import { DivideRule } from "../../magma/app/DivideRule";
 import { Some } from "../../magma/api/option/Some";
 import { List } from "../../magma/api/collect/list/List";
 import { Tuple2Impl } from "../../magma/api/Tuple2Impl";
 import { Lists } from "../../jvm/api/collect/list/Lists";
 import { Iterable } from "../../magma/api/collect/list/Iterable";
-import { Option } from "../../magma/api/option/Option";
-import { Rule } from "../../magma/app/compile/rule/Rule";
-import { FoldedDivider } from "../../magma/app/compile/divide/FoldedDivider";
-import { DecoratedFolder } from "../../magma/app/compile/fold/DecoratedFolder";
-import { Iters } from "../../magma/api/collect/Iters";
-import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 export class CompilerUtils {
 	static compileAll(state: CompileState, input: string, folder: Folder, mapper: (arg0 : CompileState, arg1 : string) => Tuple2<CompileState, string>, merger: Merger): Tuple2<CompileState, string> {
-		let folded = CompilerUtils.parseAll(state, input, folder, (state1: CompileState, s: string) => {
+		let folded = new DivideRule<>(folder, (state1: CompileState, s: string) => {
 			return new Some<Tuple2<CompileState, string>>(mapper(state1, s))/*unknown*/;
-		}).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
+		}).apply(state, input).orElse(new Tuple2Impl<CompileState, List<string>>(state, Lists.empty()))/*unknown*/;
 		return new Tuple2Impl<CompileState, string>(folded.left(), CompilerUtils.generateAll(folded.right(), merger))/*unknown*/;
 	}
 	static generateAll(elements: Iterable<string>, merger: Merger): string {
 		return elements.iter().foldWithInitial("", merger.merge)/*unknown*/;
 	}
-	static parseAll<T>(state: CompileState, input: string, folder: Folder, rule: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
-		return new FoldedDivider(new DecoratedFolder(folder)).divide(input).foldWithInitial(new Some<Tuple2<CompileState, List<T>>>(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty())), (maybeCurrent: Option<Tuple2<CompileState, List<T>>>, segment: string) => {
-			return maybeCurrent.flatMap((current: Tuple2<CompileState, List<T>>) => {
-				let currentState = current.left()/*unknown*/;
-				let currentElement = current.right()/*unknown*/;
-				return rule.apply(currentState, segment).map((mappedTuple: Tuple2<CompileState, T>) => {
-					let mappedState = mappedTuple.left()/*unknown*/;
-					let mappedElement = mappedTuple.right()/*unknown*/;
-					return new Tuple2Impl<CompileState, List<T>>(mappedState, currentElement.addLast(mappedElement))/*unknown*/;
-				})/*unknown*/;
-			})/*unknown*/;
-		})/*unknown*/;
-	}
 	static generatePlaceholder(input: string): string {
 		let replaced = input.replace("/*", "start").replace("*/", "end")/*unknown*/;
 		return "/*" + replaced + "*/"/*unknown*/;
-	}
-	static retain<T, R>(args: Iterable<T>, mapper: (arg0 : T) => Option<R>): Iterable<R> {
-		return args.iter().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;
 	}
 }

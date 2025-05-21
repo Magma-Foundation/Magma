@@ -97,6 +97,7 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DivideRule: magma.app, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
@@ -123,6 +124,7 @@ import { Rule } from "../../../magma/app/compile/rule/Rule";
 import { Tuple2Impl } from "../../../magma/api/Tuple2Impl";
 import { Lists } from "../../../jvm/api/collect/list/Lists";
 import { Option } from "../../../magma/api/option/Option";
+import { DivideRule } from "../../../magma/app/DivideRule";
 import { ValueFolder } from "../../../magma/app/compile/fold/ValueFolder";
 export class ValueUtils {
 	static generateValueStrings(values: Iterable<string>): string {
@@ -132,6 +134,6 @@ export class ValueUtils {
 		return parseValues(state, input, mapper).orElse(new Tuple2Impl<CompileState, List<T>>(state, Lists.empty()))/*unknown*/;
 	}
 	static parseValues<T>(state: CompileState, input: string, mapper: Rule<T>): Option<Tuple2<CompileState, List<T>>> {
-		return CompilerUtils.parseAll(state, input, new ValueFolder(), mapper)/*unknown*/;
+		return new DivideRule<>(new ValueFolder(), mapper).apply(state, input)/*unknown*/;
 	}
 }

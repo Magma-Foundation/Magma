@@ -243,6 +243,9 @@ class DefiningCompiler {
 }
 class DefinitionCompiler {
 }
+class DivideRule<T> {
+}
+DivideRule <|.. Rule
 class FieldCompiler {
 }
 class FunctionSegmentCompiler {
@@ -629,22 +632,18 @@ ValueUtils --> Rule
 ValueUtils --> Tuple2Impl
 ValueUtils --> Lists
 ValueUtils --> Option
+ValueUtils --> DivideRule
 ValueUtils --> ValueFolder
 CompilerUtils --> CompileState
 CompilerUtils --> Tuple2
 CompilerUtils --> Folder
 CompilerUtils --> Merger
+CompilerUtils --> DivideRule
 CompilerUtils --> Some
 CompilerUtils --> List
 CompilerUtils --> Tuple2Impl
 CompilerUtils --> Lists
 CompilerUtils --> Iterable
-CompilerUtils --> Option
-CompilerUtils --> Rule
-CompilerUtils --> FoldedDivider
-CompilerUtils --> DecoratedFolder
-CompilerUtils --> Iters
-CompilerUtils --> ListCollector
 DefiningCompiler --> Definition
 DefiningCompiler --> Iterable
 DefiningCompiler --> Parameter
@@ -690,6 +689,17 @@ DefinitionCompiler --> Tuple2
 DefinitionCompiler --> ValueUtils
 DefinitionCompiler --> Some
 DefinitionCompiler --> DefiningCompiler
+DivideRule --> List
+DivideRule --> Rule
+DivideRule --> Folder
+DivideRule --> CompileState
+DivideRule --> Tuple2
+DivideRule --> Option
+DivideRule --> FoldedDivider
+DivideRule --> DecoratedFolder
+DivideRule --> Some
+DivideRule --> Tuple2Impl
+DivideRule --> Lists
 FieldCompiler --> CompileState
 FieldCompiler --> Tuple2
 FieldCompiler --> Option
@@ -890,6 +900,8 @@ ValueCompiler --> Type
 ValueCompiler --> Argument
 ValueCompiler --> Caller
 ValueCompiler --> Invokable
+ValueCompiler --> Iters
+ValueCompiler --> ListCollector
 WhitespaceCompiler --> CompileState
 WhitespaceCompiler --> Tuple2
 WhitespaceCompiler --> Option

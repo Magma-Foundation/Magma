@@ -2,10 +2,12 @@ package magma.app;
 
 import magma.api.Tuple2;
 import magma.api.Tuple2Impl;
+import magma.api.collect.Iters;
 import magma.api.collect.head.HeadedIter;
 import magma.api.collect.head.RangeHead;
 import magma.api.collect.list.Iterable;
 import magma.api.collect.list.List;
+import magma.api.collect.list.ListCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
@@ -41,6 +43,8 @@ import magma.app.compile.fold.OperatorFolder;
 import magma.app.compile.locate.FirstLocator;
 import magma.app.compile.select.LastSelector;
 import magma.app.compile.split.LocatingSplitter;
+
+import java.util.function.Function;
 
 final class ValueCompiler {
     static Tuple2Impl<CompileState, String> generateValue(Tuple2<CompileState, Value> tuple) {
@@ -283,12 +287,19 @@ final class ValueCompiler {
             return ValueCompiler.parseArgument(state1, s);
         }).flatMap((Tuple2<CompileState, List<Argument>> argsTuple) -> {
             var argsState = argsTuple.left();
-            var args = CompilerUtils.retain(argsTuple.right(), (Argument argument) -> {
+            var args = retain(argsTuple.right(), (Argument argument) -> {
                 return argument.toValue();
             });
 
             var newCaller = ValueCompiler.transformCaller(argsState, oldCaller);
             return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new Invokable(newCaller, args)));
         });
+    }
+
+    static <T, R> Iterable<R> retain(Iterable<T> args, Function<T, Option<R>> mapper) {
+        return args.iter()
+                .map(mapper)
+                .flatMap(Iters::fromOption)
+                .collect(new ListCollector<R>());
     }
 }

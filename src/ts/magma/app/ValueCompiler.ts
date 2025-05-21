@@ -97,6 +97,7 @@
 	CompilerUtils: magma.app, 
 	DefiningCompiler: magma.app, 
 	DefinitionCompiler: magma.app, 
+	DivideRule: magma.app, 
 	FieldCompiler: magma.app, 
 	FunctionSegmentCompiler: magma.app, 
 	PathSource: magma.app.io, 
@@ -158,6 +159,8 @@ import { Type } from "../../magma/app/compile/type/Type";
 import { Argument } from "../../magma/app/compile/value/Argument";
 import { Caller } from "../../magma/app/compile/value/Caller";
 import { Invokable } from "../../magma/app/compile/value/Invokable";
+import { Iters } from "../../magma/api/collect/Iters";
+import { ListCollector } from "../../magma/api/collect/list/ListCollector";
 class ValueCompiler {
 	static generateValue(tuple: Tuple2<CompileState, Value>): Tuple2Impl<CompileState, string> {
 		let state = tuple.left()/*unknown*/;
@@ -369,11 +372,14 @@ class ValueCompiler {
 			return ValueCompiler.parseArgument(state1, s)/*unknown*/;
 		}).flatMap((argsTuple: Tuple2<CompileState, List<Argument>>) => {
 			let argsState = argsTuple.left()/*unknown*/;
-			let args = CompilerUtils.retain(argsTuple.right(), (argument: Argument) => {
+			let args = retain(argsTuple.right(), (argument: Argument) => {
 				return argument.toValue()/*unknown*/;
 			})/*unknown*/;
 			let newCaller = ValueCompiler.transformCaller(argsState, oldCaller)/*unknown*/;
 			return new Some<Tuple2<CompileState, Value>>(new Tuple2Impl<CompileState, Value>(argsState, new Invokable(newCaller, args)))/*unknown*/;
 		})/*unknown*/;
+	}
+	static retain<T, R>(args: Iterable<T>, mapper: (arg0 : T) => Option<R>): Iterable<R> {
+		return args.iter().map(mapper).flatMap(Iters.fromOption).collect(new ListCollector<R>())/*unknown*/;
 	}
 }
