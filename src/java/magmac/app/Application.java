@@ -35,13 +35,13 @@ public final class Application {
     }
 
     private static Result<Map<Source, Node>, IOException> lexSources(Map<Source, Node> nodes, Source source) {
-        return Application.lexSource(source).mapValue(compiled -> {
+        return Application.lex(source).mapValue(compiled -> {
             nodes.put(compiled.left(), compiled.right());
             return nodes;
         });
     }
 
-    private static Result<Tuple2<Source, Node>, IOException> lexSource(Source source) {
+    private static Result<Tuple2<Source, Node>, IOException> lex(Source source) {
         return source.read().mapValue(input -> {
             Node root = JavaRoots.createRule()
                     .lex(input)
@@ -53,13 +53,8 @@ public final class Application {
     }
 
     private Optional<IOException> generateSegments(Tuple2<Location, Node> tuple) {
-        String generated = PlantUMLRoots.createRule().generate(tuple.right())
-                .toOptional()
-                .orElse("");
-
-        return this.targets.write(tuple.left(), "@startuml\nskinparam linetype ortho\n" +
-                generated +
-                "@enduml\n");
+        String output = PlantUMLRoots.generate(tuple.right());
+        return this.targets.write(tuple.left(), output);
     }
 
     public Optional<IOException> run() {

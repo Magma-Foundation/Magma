@@ -77,6 +77,7 @@ Result --> Tuple2
 Result --> Function
 Result --> Supplier
 class PlantUMLRoots
+PlantUMLRoots --> Node
 PlantUMLRoots --> DivideRule
 PlantUMLRoots --> InfixRule
 PlantUMLRoots --> OrRule
