@@ -7,7 +7,8 @@ class InfixRule
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
 class Main
-Main --> State
+Main --> DivideState
+Main --> MutableDivideState
 Main --> MapNode
 Main --> Node
 Main --> InfixRule
@@ -38,6 +39,10 @@ class MapNode
 MapNode --> HashMap
 MapNode --> Map
 MapNode --> Optional
+class MutableDivideState
+MutableDivideState --> ArrayList
+MutableDivideState --> List
+MutableDivideState --> Stream
 class PrefixRule
 PrefixRule --> InlineRuleResult
 PrefixRule --> RuleResult
@@ -57,7 +62,6 @@ StringRule --> InlineRuleResult
 StringRule --> RuleResult
 class StripRule
 StripRule --> RuleResult
-class State
-State --> ArrayList
-State --> List
+class DivideState
+DivideState --> Stream
 @enduml

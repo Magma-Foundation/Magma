@@ -1,6 +1,7 @@
 package magmac;
 
-import magmac.app.State;
+import magmac.app.DivideState;
+import magmac.app.MutableDivideState;
 import magmac.app.node.MapNode;
 import magmac.app.node.Node;
 import magmac.app.rule.InfixRule;
@@ -111,18 +112,18 @@ public class Main {
     }
 
     private static List<String> divide(String input) {
-        State current = new State();
+        DivideState current = new MutableDivideState();
         int length = input.length();
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
             current = Main.fold(current, c);
         }
 
-        return current.advance().segments();
+        return current.advance().stream().toList();
     }
 
-    private static State fold(State state, char c) {
-        State appended = state.append(c);
+    private static DivideState fold(DivideState state, char c) {
+        DivideState appended = state.append(c);
         if (';' == c) {
             return appended.advance();
         }
