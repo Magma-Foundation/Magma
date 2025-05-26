@@ -7,6 +7,7 @@ import magmac.app.JavaRoots;
 import magmac.app.PlantUMLRoots;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.io.Unit;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +56,7 @@ public class Main {
             }
 
             segmentsResult = segmentsResult.and(() -> {
-                return Main.compileSource(source);
+                return Main.compileSource(new Unit(source));
             }).mapValue(tuple -> {
                 tuple.left().addAll(tuple.right());
                 return tuple.left();
@@ -65,12 +66,9 @@ public class Main {
         return segmentsResult.mapValue(segments -> new MapNode().withNodeList("children", segments));
     }
 
-    private static Result<List<Node>, IOException> compileSource(Path source) {
-        String fileName = source.getFileName().toString();
-        int fileSeparator = fileName.lastIndexOf('.');
-        String name = fileName.substring(0, fileSeparator);
-
-        return SafeFiles.readString(source).mapValue(input -> {
+    private static Result<List<Node>, IOException> compileSource(Unit unit) {
+        return unit.read().mapValue(input -> {
+            String name = unit.computeName();
             List<Node> dependencies = Main.compile(name, input);
 
             List<Node> copy = new ArrayList<Node>();

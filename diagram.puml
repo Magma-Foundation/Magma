@@ -87,6 +87,11 @@ MapNode --> HashMap
 MapNode --> List
 MapNode --> Map
 MapNode --> Optional
+class Unit
+Unit --> SafeFiles
+Unit --> Result
+Unit --> IOException
+Unit --> Path
 class Imports
 Imports --> InfixRule
 Imports --> PrefixRule
@@ -110,6 +115,7 @@ Main --> JavaRoots
 Main --> PlantUMLRoots
 Main --> MapNode
 Main --> Node
+Main --> Unit
 Main --> IOException
 Main --> Files
 Main --> Path
