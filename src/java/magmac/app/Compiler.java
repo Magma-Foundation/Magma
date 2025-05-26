@@ -5,7 +5,6 @@ import magmac.api.collect.Iters;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
-import magmac.app.io.Source;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,13 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Compiler {
-    static List<Node> getChildren(String name, Node root) {
-        return root.findNodeList("children").orElse(new ArrayList<>()).stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
-            nodes.add(Compiler.createDependency(name, node));
-            return nodes;
-        }, (_, next) -> next);
-    }
-
     private static Node createDependency(String parent, Node node) {
         if (node.is("import")) {
             return new MapNode("dependency")
@@ -49,21 +41,26 @@ public class Compiler {
 
     private static Map<Location, Node> parseAll(Map<Location, Node> root) {
         return Iters.fromSet(root.entrySet()).<Map<Location, Node>>fold(new HashMap<Location, Node>(),
-                (sourceNodeHashMap, tuple) -> Compiler.parseEntry(sourceNodeHashMap, tuple));
+                (sourceNodeHashMap, tuple) -> Compiler.parseEntry(sourceNodeHashMap, tuple.getKey(), tuple.getValue()));
     }
 
-    private static Map<Location, Node> parseEntry(Map<Location, Node> current, Map.Entry<Location, Node> entry) {
-        Location location = entry.getKey();
-        String sourceName = location.name();
-        Node root = entry.getValue();
+    private static Map<Location, Node> parseEntry(Map<Location, Node> current, Location location, Node root) {
+        current.put(location, Compiler.parse(location, root));
+        return current;
+    }
 
-        List<Node> dependencies = Compiler.getChildren(sourceName, root);
+    private static Node parse(Location location, Node root) {
+        String sourceName = location.name();
+
+        List<Node> dependencies = root.findNodeList("children").orElse(new ArrayList<>()).stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
+            nodes.add(Compiler.createDependency(sourceName, node));
+            return nodes;
+        }, (_, next) -> next);
+
         List<Node> copy = new ArrayList<Node>();
         copy.add(new MapNode("class").withString("name", sourceName));
         copy.addAll(dependencies);
 
-        Node newRoot = new MapNode().withNodeList("children", copy);
-        current.put(location, newRoot);
-        return current;
+        return new MapNode().withNodeList("children", copy);
     }
 }
