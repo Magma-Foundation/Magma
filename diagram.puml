@@ -24,6 +24,17 @@ DivideRule --> List
 class Rule
 Rule --> Node
 Rule --> RuleResult
+class SafeFiles
+SafeFiles --> Err
+SafeFiles --> Ok
+SafeFiles --> Result
+SafeFiles --> IOException
+SafeFiles --> Files
+SafeFiles --> Path
+SafeFiles --> Optional
+SafeFiles --> Set
+SafeFiles --> Collectors
+SafeFiles --> Stream
 class RuleResult
 RuleResult --> Tuple2
 RuleResult --> Node
@@ -77,7 +88,7 @@ Node --> List
 Node --> Map
 Node --> Optional
 class Main
-Main --> Err
+Main --> SafeFiles
 Main --> Ok
 Main --> Result
 Main --> JavaRoots
@@ -91,8 +102,6 @@ Main --> ArrayList
 Main --> List
 Main --> Optional
 Main --> Set
-Main --> Collectors
-Main --> Stream
 class MutableDivideState
 MutableDivideState --> ArrayList
 MutableDivideState --> List

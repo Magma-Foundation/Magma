@@ -1,6 +1,6 @@
 package magmac;
 
-import magmac.api.result.Err;
+import jvm.io.SafeFiles;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.JavaRoots;
@@ -15,14 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
     public static void main() {
         Path sourceDirectory = Paths.get(".", "src", "java");
 
-        Main.walk(sourceDirectory).match(sources -> {
+        SafeFiles.walk(sourceDirectory).match(sources -> {
             return Main.compileSources(sources).match(segments -> {
                 return Main.extracted(segments);
             }, Optional::of);
@@ -45,24 +43,7 @@ public class Main {
                 output +
                 "@enduml\n";
 
-        return Main.writeString(target, csq);
-    }
-
-    private static Optional<IOException> writeString(Path target, String output) {
-        try {
-            Files.writeString(target, output);
-            return Optional.empty();
-        } catch (IOException e) {
-            return Optional.of(e);
-        }
-    }
-
-    private static Result<Set<Path>, IOException> walk(Path sourceDirectory) {
-        try (Stream<Path> stream = Files.walk(sourceDirectory)) {
-            return new Ok<>(stream.collect(Collectors.toSet()));
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
+        return SafeFiles.writeString(target, csq);
     }
 
     private static Result<List<Node>, IOException> compileSources(Set<Path> sources) {
@@ -92,7 +73,7 @@ public class Main {
         int fileSeparator = fileName.lastIndexOf('.');
         String name = fileName.substring(0, fileSeparator);
 
-        return Main.readString(source).mapValue(input -> {
+        return SafeFiles.readString(source).mapValue(input -> {
             List<Node> dependencies = Main.compile(name, input);
 
             List<Node> copy = new ArrayList<Node>();
@@ -100,14 +81,6 @@ public class Main {
             copy.addAll(dependencies);
             return copy;
         });
-    }
-
-    private static Result<String, IOException> readString(Path source) {
-        try {
-            return new Ok(Files.readString(source));
-        } catch (IOException e) {
-            return new Err(e);
-        }
     }
 
     private static List<Node> compile(String name, String input) {
