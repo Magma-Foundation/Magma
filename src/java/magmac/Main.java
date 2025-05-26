@@ -1,5 +1,6 @@
 package magmac;
 
+import magmac.app.MapNode;
 import magmac.app.State;
 
 import java.io.IOException;
@@ -58,21 +59,26 @@ public class Main {
     }
 
     private static Optional<StringBuilder> compileRootSegment(StringBuilder state, String name, String input) {
-        if (input.endsWith(";")) {
-            String slice = input.substring(0, input.length() - ";".length());
-            if (slice.startsWith("import ")) {
-                String sliced = slice.substring("import ".length());
-                int separator = sliced.lastIndexOf('.');
-                String child = sliced.substring(separator + ".".length());
-                return Optional.of(Main.parseImport(state, name, child));
-            }
+        if (!input.endsWith(";")) {
+            return Optional.empty();
         }
+        String slice = input.substring(0, input.length() - ";".length());
 
-        return Optional.empty();
+        if (!slice.startsWith("import ")) {
+            return Optional.empty();
+        }
+        String sliced = slice.substring("import ".length());
+
+        int separator = sliced.lastIndexOf('.');
+        String child = sliced.substring(separator + ".".length());
+        Optional<MapNode> maybeValue = new StringRule("value").lex(child);
+        return maybeValue.map((MapNode value) -> {
+            return Main.parseImport(state, name, value);
+        });
     }
 
-    private static StringBuilder parseImport(StringBuilder state, String parent, String child) {
-        return state.append(parent + " --> " + child + "\n");
+    private static StringBuilder parseImport(StringBuilder state, String parent, MapNode mapNode) {
+        return state.append(parent + " --> " + mapNode.findString("value").orElse("") + "\n");
     }
 
     private static List<String> divide(String input) {
