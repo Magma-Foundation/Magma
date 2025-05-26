@@ -2,14 +2,14 @@ package magmac.app;
 
 import jvm.io.SafeFiles;
 import magmac.api.Tuple2;
-import magmac.api.result.Ok;
+import magmac.api.collect.Iterators;
 import magmac.api.result.Result;
 import magmac.app.compile.lang.JavaRoots;
 import magmac.app.compile.lang.PlantUMLRoots;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Sources;
-import magmac.app.io.Unit;
+import magmac.app.io.Source;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,22 +30,22 @@ public record Application(Sources sources) {
         return SafeFiles.writeString(target, csq);
     }
 
-    private static Result<Node, IOException> compileSources(Set<Unit> units) {
-        Result<List<Node>, IOException> segmentsResult = new Ok<>(new ArrayList<Node>());
-        for (var unit : units) {
-            segmentsResult = segmentsResult.and(() -> {
-                return Application.compileSource(unit);
-            }).mapValue(tuple -> {
-                tuple.left().addAll(tuple.right());
-                return tuple.left();
-            });
-        }
-
-        return segmentsResult.mapValue(segments -> new MapNode().withNodeList("children", segments));
+    private static Result<Node, IOException> compileSources(Set<Source> sources) {
+        return Iterators.fromSet(sources).<List<Node>, IOException>foldToResult(
+                new ArrayList<Node>(),
+                (nodes, source) -> Application.compileSource(nodes, source)
+        ).mapValue(segments -> new MapNode().withNodeList("children", segments));
     }
 
-    private static Result<List<Node>, IOException> compileSource(Unit unit) {
-        return Application.compileUnitToEntry(unit).mapValue(tuple -> {
+    private static Result<List<Node>, IOException> compileSource(List<Node> nodes, Source source) {
+        return Application.compileSource(source).mapValue(compiled -> {
+            nodes.addAll(compiled);
+            return nodes;
+        });
+    }
+
+    private static Result<List<Node>, IOException> compileSource(Source source) {
+        return Application.compileUnitToEntry(source).mapValue(tuple -> {
             String name = tuple.left().computeName();
             Node root = tuple.right();
 
@@ -57,14 +57,14 @@ public record Application(Sources sources) {
         });
     }
 
-    private static Result<Tuple2<Unit, Node>, IOException> compileUnitToEntry(Unit unit) {
-        return unit.read().mapValue(input -> {
+    private static Result<Tuple2<Source, Node>, IOException> compileUnitToEntry(Source source) {
+        return source.read().mapValue(input -> {
             Node root = JavaRoots.createRule()
                     .lex(input)
                     .toOptional()
                     .orElse(new MapNode());
 
-            return new Tuple2<>(unit, root);
+            return new Tuple2<>(source, root);
         });
     }
 

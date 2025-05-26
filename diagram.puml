@@ -15,6 +15,13 @@ class InfixRule
 InfixRule --> Node
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
+class HeadedIter
+HeadedIter --> Iter
+HeadedIter --> Ok
+HeadedIter --> Result
+HeadedIter --> Optional
+HeadedIter --> BiFunction
+HeadedIter --> Function
 class OrRule
 OrRule --> Node
 OrRule --> InlineRuleResult
@@ -33,6 +40,8 @@ DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
 DivideRule --> Collectors
+class RangeHead
+RangeHead --> Optional
 class Rule
 Rule --> Node
 Rule --> RuleResult
@@ -47,6 +56,8 @@ SafeFiles --> Optional
 SafeFiles --> Set
 SafeFiles --> Collectors
 SafeFiles --> Stream
+class Head
+Head --> Optional
 class RuleResult
 RuleResult --> Tuple2
 RuleResult --> Node
@@ -76,14 +87,20 @@ class PrefixRule
 PrefixRule --> Node
 PrefixRule --> InlineRuleResult
 PrefixRule --> RuleResult
+class StripRule
+StripRule --> Node
+StripRule --> RuleResult
 class StringRule
 StringRule --> MapNode
 StringRule --> Node
 StringRule --> InlineRuleResult
 StringRule --> RuleResult
-class StripRule
-StripRule --> Node
-StripRule --> RuleResult
+class Iterators
+Iterators --> RangeHead
+Iterators --> HeadedIter
+Iterators --> ArrayList
+Iterators --> List
+Iterators --> Set
 class Ok
 Ok --> Tuple2
 Ok --> Function
@@ -94,11 +111,10 @@ MapNode --> HashMap
 MapNode --> List
 MapNode --> Map
 MapNode --> Optional
-class Unit
-Unit --> SafeFiles
-Unit --> Result
-Unit --> IOException
-Unit --> Path
+class Iter
+Iter --> Result
+Iter --> BiFunction
+Iter --> Function
 class PathSources
 PathSources --> SafeFiles
 PathSources --> Result
@@ -110,6 +126,11 @@ PathSources --> Collectors
 class State
 State --> Node
 State --> List
+class Source
+Source --> SafeFiles
+Source --> Result
+Source --> IOException
+Source --> Path
 class Sources
 Sources --> Result
 Sources --> IOException
@@ -134,14 +155,15 @@ Imports --> SuffixRule
 Imports --> TypeRule
 class Application
 Application --> SafeFiles
-Application --> Ok
+Application --> Tuple2
+Application --> Iterators
 Application --> Result
+Application --> JavaRoots
+Application --> PlantUMLRoots
 Application --> MapNode
 Application --> Node
 Application --> Sources
-Application --> Unit
-Application --> JavaRoots
-Application --> PlantUMLRoots
+Application --> Source
 Application --> IOException
 Application --> Path
 Application --> Paths

@@ -6,7 +6,7 @@ import magmac.api.result.Result;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public record Unit(Path source) {
+public record Source(Path source) {
     public String computeName() {
         String fileName = this.source.getFileName().toString();
         int fileSeparator = fileName.lastIndexOf('.');

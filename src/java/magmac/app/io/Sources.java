@@ -6,5 +6,5 @@ import java.io.IOException;
 import java.util.Set;
 
 public interface Sources {
-    Result<Set<Unit>, IOException> collect();
+    Result<Set<Source>, IOException> collect();
 }
