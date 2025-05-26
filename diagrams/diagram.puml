@@ -15,6 +15,7 @@ class Roots
 Roots --> Node
 Roots --> Location
 Roots --> Map
+class CompileError
 class All
 All --> Node
 All --> Location
@@ -32,6 +33,8 @@ JavaRoots --> TypeRule
 JavaRoots --> List
 class RuleResult
 RuleResult --> Tuple2
+RuleResult --> Result
+RuleResult --> CompileError
 RuleResult --> Optional
 RuleResult --> Function
 RuleResult --> Supplier
@@ -73,6 +76,10 @@ class Lexer
 Lexer --> Location
 Lexer --> Map
 class StringRule
+StringRule --> Err
+StringRule --> Ok
+StringRule --> Result
+StringRule --> CompileError
 StringRule --> MapNode
 StringRule --> Node
 StringRule --> InlineRuleResult
@@ -151,6 +158,9 @@ class MapCollector
 MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map
+class NodeContext
+NodeContext --> Context
+NodeContext --> Node
 class CompileApplication
 CompileApplication --> Location
 CompileApplication --> Sources
@@ -167,7 +177,6 @@ ExactRule --> MapNode
 ExactRule --> Node
 ExactRule --> InlineRuleResult
 ExactRule --> RuleResult
-ExactRule --> Optional
 class PathSource
 PathSource --> SafeFiles
 PathSource --> Result
@@ -202,6 +211,10 @@ Rule --> Node
 Rule --> RuleResult
 class InlineRuleResult
 InlineRuleResult --> Tuple2
+InlineRuleResult --> Err
+InlineRuleResult --> Ok
+InlineRuleResult --> Result
+InlineRuleResult --> CompileError
 InlineRuleResult --> Optional
 InlineRuleResult --> Function
 InlineRuleResult --> Supplier
@@ -218,6 +231,8 @@ TreeParser --> Map
 class Location
 Location --> List
 class Parser
+class StringContext
+StringContext --> Context
 class PathTargets
 PathTargets --> SafeFiles
 PathTargets --> Iters
@@ -241,6 +256,7 @@ Iter --> Function
 Iter --> Predicate
 class Ok
 Ok --> Tuple2
+Ok --> Optional
 Ok --> Function
 Ok --> Supplier
 class Application
@@ -250,6 +266,10 @@ class RangeHead
 RangeHead --> Head
 RangeHead --> Optional
 class DivideRule
+DivideRule --> Err
+DivideRule --> Ok
+DivideRule --> Result
+DivideRule --> CompileError
 DivideRule --> MapNode
 DivideRule --> Node
 DivideRule --> DivideState
@@ -262,6 +282,7 @@ DivideRule --> Optional
 DivideRule --> Collectors
 class Err
 Err --> Tuple2
+Err --> Optional
 Err --> Function
 Err --> Supplier
 class RuleLexer
@@ -273,12 +294,14 @@ RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> Location
 RuleLexer --> Map
+class Context
 class SuffixRule
 SuffixRule --> Node
 SuffixRule --> InlineRuleResult
 SuffixRule --> RuleResult
 class Result
 Result --> Tuple2
+Result --> Optional
 Result --> Function
 Result --> Supplier
 class AfterAll

@@ -1,5 +1,9 @@
 package magmac.app.compile.rule;
 
+import magmac.api.result.Err;
+import magmac.api.result.Ok;
+import magmac.api.result.Result;
+import magmac.app.compile.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.InlineRuleResult;
@@ -13,6 +17,8 @@ public record StringRule(String key) implements Rule {
 
     @Override
     public RuleResult<String> generate(Node node) {
-        return new InlineRuleResult<>(node.findString(this.key));
+        return new InlineRuleResult<>(node.findString(this.key)
+                .<Result<String, CompileError>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileError("String '" + this.key + "' not present", new NodeContext(node)))));
     }
 }

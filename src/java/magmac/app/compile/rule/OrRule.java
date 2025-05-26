@@ -22,8 +22,15 @@ public record OrRule(List<Rule> rules) implements Rule {
         }
 
         RuleResult<T> toResult() {
-            return new InlineRuleResult<>(this.maybeValue);
+            return this.maybeValue.map(InlineRuleResult::from).orElseGet(InlineRuleResult::createEmpty);
         }
+    }
+
+    private static <T> State<T> foldElement(State<T> state, Rule rule, Function<Rule, RuleResult<T>> mapper) {
+        return mapper.apply(rule)
+                .map(state::withValue)
+                .toOptional()
+                .orElse(state);
     }
 
     @Override
@@ -36,13 +43,6 @@ public record OrRule(List<Rule> rules) implements Rule {
                         (state, rule) -> OrRule.foldElement(state, rule, mapper),
                         (_, next) -> next)
                 .toResult();
-    }
-
-    private static <T> State<T> foldElement(State<T> state, Rule rule, Function<Rule, RuleResult<T>> mapper) {
-        return mapper.apply(rule)
-                .map(state::withValue)
-                .toOptional()
-                .orElse(state);
     }
 
     @Override

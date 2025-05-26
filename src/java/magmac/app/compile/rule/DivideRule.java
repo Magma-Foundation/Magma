@@ -1,5 +1,9 @@
 package magmac.app.compile.rule;
 
+import magmac.api.result.Err;
+import magmac.api.result.Ok;
+import magmac.api.result.Result;
+import magmac.app.compile.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
@@ -51,10 +55,17 @@ public record DivideRule(String key, Rule childRule) implements Rule {
 
     @Override
     public RuleResult<String> generate(Node node) {
-        return new InlineRuleResult<>(node.findNodeList(this.key).map(list -> list.stream()
+        return new InlineRuleResult<>(node.findNodeList(this.key)
+                .map(list -> this.join(list))
+                .<Result<String, CompileError>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileError("Node list '" + this.key + "' not present", new NodeContext(node)))));
+    }
+
+    private String join(List<Node> list) {
+        return list.stream()
                 .map(this.childRule::generate)
                 .map(RuleResult::toOptional)
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining())));
+                .collect(Collectors.joining());
     }
 }
