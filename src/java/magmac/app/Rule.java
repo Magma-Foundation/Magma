@@ -1,6 +1,4 @@
-package magmac;
-
-import magmac.app.MapNode;
+package magmac.app;
 
 import java.util.Optional;
 

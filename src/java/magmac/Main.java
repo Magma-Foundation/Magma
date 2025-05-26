@@ -3,6 +3,7 @@ package magmac;
 import magmac.app.InfixRule;
 import magmac.app.MapNode;
 import magmac.app.State;
+import magmac.app.StringRule;
 
 import java.io.IOException;
 import java.nio.file.Files;

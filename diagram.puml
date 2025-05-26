@@ -1,9 +1,12 @@
 @startuml
 skinparam linetype ortho
+class Rule
+Rule --> Optional
 class Main
 Main --> InfixRule
 Main --> MapNode
 Main --> State
+Main --> StringRule
 Main --> IOException
 Main --> Files
 Main --> Path
@@ -13,20 +16,15 @@ Main --> Optional
 Main --> Set
 Main --> Collectors
 Main --> Stream
-class Rule
-Rule --> MapNode
-Rule --> Optional
 class MapNode
 MapNode --> HashMap
 MapNode --> Map
 MapNode --> Optional
 class InfixRule
-InfixRule --> Rule
 InfixRule --> Optional
 class State
 State --> ArrayList
 State --> List
 class StringRule
-StringRule --> MapNode
 StringRule --> Optional
 @enduml
