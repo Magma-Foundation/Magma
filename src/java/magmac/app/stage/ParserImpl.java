@@ -23,22 +23,34 @@ public class ParserImpl implements Parser {
     }
 
     private static Tuple2<ParseState, Node> parseTree(ParseState state, Node root) {
-        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
+        Tuple2<ParseState, Node> result = ParserImpl.getResult(state, "children", root);
+        return ParserImpl.afterPass(result.left(), result.right());
+    }
+
+    private static Tuple2<ParseState, Node> getResult(ParseState state, String key, Node root) {
+        List<Node> elements = root.findNodeList(key).orElse(new ArrayList<>());
+        Tuple2<ParseState, List<Node>> dependencies = ParserImpl.parseElements(state, elements);
+        Node children1 = new MapNode().withNodeList(key, dependencies.right());
+        return new Tuple2<>(dependencies.left(), children1);
+    }
+
+    private static Tuple2<ParseState, List<Node>> parseElements(ParseState state, List<Node> oldValues) {
         Tuple2<ParseState, List<Node>> initial = new Tuple2<>(state, new ArrayList<Node>());
-        Tuple2<ParseState, List<Node>> dependencies = Iters.fromList(children).fold(initial, (currentTuple, node) -> {
-            ParseState currentState = currentTuple.left();
-            List<Node> currentElements = currentTuple.right();
-
-            Tuple2<ParseState, Node> parsed = ParserImpl.beforePass(currentState, node);
-            ParseState newState = parsed.left();
-            Node newElement = parsed.right();
-
-            currentElements.add(newElement);
-            return new Tuple2<>(newState, currentElements);
+        return Iters.fromList(oldValues).fold(initial, (currentTuple, node) -> {
+            return ParserImpl.parseElement(currentTuple, node);
         });
+    }
 
-        Node children1 = new MapNode().withNodeList("children", dependencies.right());
-        return ParserImpl.afterPass(dependencies.left(), children1);
+    private static Tuple2<ParseState, List<Node>> parseElement(Tuple2<ParseState, List<Node>> currentTuple, Node element) {
+        ParseState currentState = currentTuple.left();
+        List<Node> currentElements = currentTuple.right();
+
+        Tuple2<ParseState, Node> parsed = ParserImpl.beforePass(currentState, element);
+        ParseState newState = parsed.left();
+        Node newElement = parsed.right();
+
+        currentElements.add(newElement);
+        return new Tuple2<>(newState, currentElements);
     }
 
     private static Tuple2<ParseState, Node> afterPass(ParseState state, Node node) {
