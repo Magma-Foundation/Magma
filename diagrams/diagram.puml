@@ -24,6 +24,7 @@ JavaRoots --> DivideRule
 JavaRoots --> OrRule
 JavaRoots --> Rule
 JavaRoots --> StringRule
+JavaRoots --> TypeRule
 JavaRoots --> List
 class RuleResult
 RuleResult --> Tuple2

@@ -26,18 +26,27 @@ public class ParserImpl implements Parser {
     }
 
     private static Tuple2<Location, Node> parse(Location location, Node root) {
-        String sourceName = location.name();
+        return ParserImpl.getLocationNodeTuple2(location, root);
+    }
 
-        List<Node> dependencies = root.findNodeList("children").orElse(new ArrayList<>()).stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
-            nodes.add(ParserImpl.createDependency(sourceName, node));
-            return nodes;
-        }, (_, next) -> next);
+    private static Tuple2<Location, Node> getLocationNodeTuple2(Location location, Node root) {
+        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
+        Tuple2<Location, List<Node>> initial = new Tuple2<>(location, new ArrayList<Node>());
+        Tuple2<Location, List<Node>> dependencies = Iters.fromList(children).fold(initial, (currentTuple, node) -> {
+            Tuple2<Location, Node> parsed = ParserImpl.getDependency(location, node);
+            currentTuple.right().add(parsed.right());
+            return new Tuple2<>(currentTuple.left(), currentTuple.right());
+        });
 
         List<Node> copy = new ArrayList<Node>();
-        copy.add(new MapNode("class").withString("name", sourceName));
-        copy.addAll(dependencies);
+        copy.add(new MapNode("class").withString("name", location.name()));
+        copy.addAll(dependencies.right());
 
-        return new Tuple2<>(location, new MapNode().withNodeList("children", copy));
+        return new Tuple2<>(dependencies.left(), new MapNode().withNodeList("children", copy));
+    }
+
+    private static Tuple2<Location, Node> getDependency(Location location, Node node) {
+        return new Tuple2<>(location, ParserImpl.createDependency(location.name(), node));
     }
 
     private static Map<Location, Node> afterParse(Map<Location, Node> parsedRoots) {
