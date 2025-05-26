@@ -1,10 +1,10 @@
-package magmac.app;
+package magmac.app.node;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class MapNode {
+public final class MapNode implements Node {
     private final Map<String, String> strings;
 
     public MapNode() {
@@ -15,11 +15,13 @@ public final class MapNode {
         this.strings = strings;
     }
 
-    public MapNode withString(String key, String value) {
+    @Override
+    public Node withString(String key, String value) {
         this.strings.put(key, value);
         return this;
     }
 
+    @Override
     public Optional<String> findString(String key) {
         if (this.strings.containsKey(key)) {
             return Optional.of(this.strings.get(key));
@@ -29,8 +31,14 @@ public final class MapNode {
         }
     }
 
-    public MapNode merge(MapNode other) {
-        strings.putAll(other.strings);
+    @Override
+    public Map<String, String> strings() {
+        return this.strings;
+    }
+
+    @Override
+    public Node merge(Node other) {
+        this.strings.putAll(other.strings());
         return this;
     }
 }

@@ -1,13 +1,13 @@
 package magmac;
 
-import magmac.app.InfixRule;
-import magmac.app.MapNode;
-import magmac.app.PrefixRule;
-import magmac.app.Rule;
+import magmac.app.node.Node;
+import magmac.app.rule.InfixRule;
+import magmac.app.rule.PrefixRule;
+import magmac.app.rule.Rule;
 import magmac.app.State;
-import magmac.app.StringRule;
-import magmac.app.StripRule;
-import magmac.app.SuffixRule;
+import magmac.app.rule.StringRule;
+import magmac.app.rule.StripRule;
+import magmac.app.rule.SuffixRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,7 +65,7 @@ public class Main {
     }
 
     private static Optional<StringBuilder> compileRootSegment(StringBuilder state, String name, String input) {
-        return Main.createImportRule().lex(input).map((MapNode value) -> {
+        return Main.createImportRule().lex(input).map((Node value) -> {
             return Main.parseImport(state, name, value);
         });
     }
@@ -74,8 +74,8 @@ public class Main {
         return new StripRule(new SuffixRule(new PrefixRule("import ", new InfixRule(new StringRule("namespace"), ".", new StringRule("child"))), ";"));
     }
 
-    private static StringBuilder parseImport(StringBuilder state, String parent, MapNode mapNode) {
-        return state.append(parent + " --> " + mapNode.findString("child").orElse("") + "\n");
+    private static StringBuilder parseImport(StringBuilder state, String parent, Node node) {
+        return state.append(parent + " --> " + node.findString("child").orElse("") + "\n");
     }
 
     private static List<String> divide(String input) {

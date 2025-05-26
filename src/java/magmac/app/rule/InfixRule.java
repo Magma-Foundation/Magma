@@ -1,10 +1,12 @@
-package magmac.app;
+package magmac.app.rule;
+
+import magmac.app.node.Node;
 
 import java.util.Optional;
 
 public record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
     @Override
-    public Optional<MapNode> lex(String input) {
+    public Optional<Node> lex(String input) {
         int separator = input.lastIndexOf(this.infix());
         if (0 > separator) {
             return Optional.empty();

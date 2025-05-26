@@ -1,10 +1,12 @@
-package magmac.app;
+package magmac.app.rule;
+
+import magmac.app.node.Node;
 
 import java.util.Optional;
 
 public record SuffixRule(Rule childRule, String suffix) implements Rule {
     @Override
-    public Optional<MapNode> lex(String input) {
+    public Optional<Node> lex(String input) {
         if (!input.endsWith(this.suffix())) {
             return Optional.empty();
         }
