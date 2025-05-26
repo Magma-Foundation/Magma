@@ -1,0 +1,27 @@
+package magmac.app;
+
+import jvm.io.SafeFiles;
+import magmac.api.collect.Iters;
+import magmac.app.io.Location;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+
+public record Targets(Path root) {
+    Optional<IOException> write(Location location, String output) {
+        Path targetParent = Iters.fromList(location.namespace())
+                .fold(this.root(), Path::resolve);
+
+        if (!Files.exists(targetParent)) {
+            Optional<IOException> maybeError = SafeFiles.createDirectories(targetParent);
+            if (maybeError.isPresent()) {
+                return maybeError;
+            }
+        }
+
+        Path target = targetParent.resolve(location.name() + ".puml");
+        return SafeFiles.writeString(target, output);
+    }
+}

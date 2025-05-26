@@ -37,4 +37,13 @@ public final class SafeFiles {
             return new Err<>(e);
         }
     }
+
+    public static Optional<IOException> createDirectories(Path targetParent) {
+        try {
+            Files.createDirectories(targetParent);
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(e);
+        }
+    }
 }

@@ -1,12 +1,15 @@
 package magmac.app;
 
-import magmac.api.collect.Iterators;
+import magmac.api.Tuple2;
+import magmac.api.collect.Iters;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.io.Location;
 import magmac.app.io.Source;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,7 @@ public class Compiler {
         return node;
     }
 
-    static Node compile(Map<Source, Node> roots) {
+    static Tuple2<Location, Node> compile(Map<Source, Node> roots) {
         List<Node> parsed = Compiler.parseAll(roots)
                 .values()
                 .stream()
@@ -39,11 +42,13 @@ public class Compiler {
                 .flatMap(Collection::stream)
                 .toList();
 
-        return new MapNode().withNodeList("children", parsed);
+        Node root = new MapNode().withNodeList("children", parsed);
+        Location location = new Location(Collections.emptyList(), "diagram");
+        return new Tuple2<>(location, root);
     }
 
     private static Map<Source, Node> parseAll(Map<Source, Node> root) {
-        return Iterators.fromSet(root.entrySet()).<Map<Source, Node>>fold(new HashMap<Source, Node>(),
+        return Iters.fromSet(root.entrySet()).<Map<Source, Node>>fold(new HashMap<Source, Node>(),
                 (sourceNodeHashMap, tuple) -> Compiler.parseEntry(sourceNodeHashMap, tuple));
     }
 
