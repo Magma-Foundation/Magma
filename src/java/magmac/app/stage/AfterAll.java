@@ -4,6 +4,7 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,12 @@ public class AfterAll implements All {
                 .toList();
 
         Location location = new Location(Collections.emptyList(), "diagram");
-        Node root = new MapNode().withNodeList("children", allChildren);
+        List<Node> copy = new ArrayList<Node>();
+        copy.add(new MapNode("start"));
+        copy.addAll(allChildren);
+        copy.add(new MapNode("end"));
+
+        Node root = new MapNode().withNodeList("children", copy);
         return Map.of(location, root);
     }
 }

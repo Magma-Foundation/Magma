@@ -24,8 +24,8 @@ Sources --> Result
 Sources --> IOException
 Sources --> Map
 class PlantUMLRoots
-PlantUMLRoots --> Node
 PlantUMLRoots --> DivideRule
+PlantUMLRoots --> ExactRule
 PlantUMLRoots --> InfixRule
 PlantUMLRoots --> OrRule
 PlantUMLRoots --> PrefixRule
@@ -115,12 +115,11 @@ DivideState --> Stream
 class ResultCollector
 ResultCollector --> Ok
 ResultCollector --> Result
+class RuleGenerator
+RuleGenerator --> Node
+RuleGenerator --> Rule
 class Generator
-Generator --> PlantUMLRoots
 Generator --> Node
-Generator --> Location
-Generator --> HashMap
-Generator --> Map
 class Passer
 Passer --> Tuple2
 Passer --> Node
@@ -135,6 +134,9 @@ InfixRule --> Node
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
 class CompileApplication
+CompileApplication --> Tuple2
+CompileApplication --> Iters
+CompileApplication --> MapCollector
 CompileApplication --> Node
 CompileApplication --> Location
 CompileApplication --> Sources
@@ -145,6 +147,12 @@ CompileApplication --> Parser
 CompileApplication --> IOException
 CompileApplication --> Map
 CompileApplication --> Optional
+class ExactRule
+ExactRule --> MapNode
+ExactRule --> Node
+ExactRule --> InlineRuleResult
+ExactRule --> RuleResult
+ExactRule --> Optional
 class Collector
 class PathSource
 PathSource --> SafeFiles
@@ -256,6 +264,7 @@ class AfterAll
 AfterAll --> MapNode
 AfterAll --> Node
 AfterAll --> Location
+AfterAll --> ArrayList
 AfterAll --> Collection
 AfterAll --> Collections
 AfterAll --> List
@@ -269,6 +278,7 @@ class Main
 Main --> Application
 Main --> CompileApplication
 Main --> JavaRoots
+Main --> PlantUMLRoots
 Main --> PathSources
 Main --> PathTargets
 Main --> Sources
@@ -278,6 +288,7 @@ Main --> AfterPasser
 Main --> BeforePasser
 Main --> Lexer
 Main --> Parser
+Main --> RuleGenerator
 Main --> RuleLexer
 Main --> TreeParser
 Main --> IOException
