@@ -9,6 +9,8 @@ import magmac.app.compile.rule.result.RuleResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record DivideRule(String key, Rule childRule) implements Rule {
     private static List<String> divide(String input) {
@@ -45,5 +47,16 @@ public record DivideRule(String key, Rule childRule) implements Rule {
         }
 
         return result.map(children -> new MapNode().withNodeList(this.key(), children));
+    }
+
+    @Override
+    public RuleResult<String> generate(Node node) {
+        return new InlineRuleResult<>(node.findNodeList(this.key).map(list -> {
+            return list.stream()
+                    .map(this.childRule::generate)
+                    .map(RuleResult::toOptional)
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.joining());
+        }));
     }
 }

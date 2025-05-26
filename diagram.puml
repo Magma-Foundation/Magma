@@ -14,6 +14,7 @@ OrRule --> InlineRuleResult
 OrRule --> RuleResult
 OrRule --> List
 OrRule --> Optional
+OrRule --> Function
 class DivideRule
 DivideRule --> MapNode
 DivideRule --> Node
@@ -23,6 +24,18 @@ DivideRule --> InlineRuleResult
 DivideRule --> RuleResult
 DivideRule --> ArrayList
 DivideRule --> List
+DivideRule --> Optional
+DivideRule --> Collectors
+class PlantUMLRoots
+PlantUMLRoots --> DivideRule
+PlantUMLRoots --> InfixRule
+PlantUMLRoots --> OrRule
+PlantUMLRoots --> PrefixRule
+PlantUMLRoots --> Rule
+PlantUMLRoots --> StringRule
+PlantUMLRoots --> SuffixRule
+PlantUMLRoots --> TypeRule
+PlantUMLRoots --> List
 class Rule
 Rule --> Node
 Rule --> RuleResult
@@ -94,6 +107,7 @@ Main --> SafeFiles
 Main --> Ok
 Main --> Result
 Main --> JavaRoots
+Main --> PlantUMLRoots
 Main --> MapNode
 Main --> Node
 Main --> IOException
@@ -106,6 +120,7 @@ Main --> Optional
 Main --> Set
 class TypeRule
 TypeRule --> Node
+TypeRule --> InlineRuleResult
 TypeRule --> RuleResult
 class JavaRoots
 JavaRoots --> Imports

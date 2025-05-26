@@ -8,4 +8,9 @@ public record StripRule(Rule rule) implements Rule {
     public RuleResult<Node> lex(String input) {
         return this.rule.lex(input.strip());
     }
+
+    @Override
+    public RuleResult<String> generate(Node node) {
+        return this.rule.generate(node);
+    }
 }

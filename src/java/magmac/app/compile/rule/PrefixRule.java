@@ -14,4 +14,9 @@ public record PrefixRule(String prefix, Rule childRule) implements Rule {
         String sliced = input.substring(this.prefix.length());
         return this.childRule.lex(sliced);
     }
+
+    @Override
+    public RuleResult<String> generate(Node node) {
+        return this.childRule.generate(node).map(value -> this.prefix + value);
+    }
 }

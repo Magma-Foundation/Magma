@@ -14,4 +14,9 @@ public record SuffixRule(Rule childRule, String suffix) implements Rule {
         String slice = input.substring(0, input.length() - this.suffix().length());
         return this.childRule.lex(slice);
     }
+
+    @Override
+    public RuleResult<String> generate(Node node) {
+        return this.childRule.generate(node).map(result -> result + this.suffix);
+    }
 }

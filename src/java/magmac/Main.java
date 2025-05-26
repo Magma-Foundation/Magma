@@ -4,6 +4,7 @@ import jvm.io.SafeFiles;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.JavaRoots;
+import magmac.app.PlantUMLRoots;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 
@@ -33,16 +34,10 @@ public class Main {
     }
 
     private static Optional<IOException> generateSegments(Node node) {
-        List<Node> segments = node.findNodeList("children").orElse(new ArrayList<>());
-
-        StringBuilder output = new StringBuilder();
-        for (Node segment : segments) {
-            output.append(Main.generate(segment).orElse(""));
-        }
-
+        String generated = PlantUMLRoots.createRule().generate(node).toOptional().orElse("");
         Path target = Paths.get(".", "diagram.puml");
         String csq = "@startuml\nskinparam linetype ortho\n" +
-                output +
+                generated +
                 "@enduml\n";
 
         return SafeFiles.writeString(target, csq);
@@ -95,20 +90,6 @@ public class Main {
             nodes.add(Main.createDependency(name, node));
             return nodes;
         }, (_, next) -> next);
-    }
-
-    private static Optional<String> generate(Node node) {
-        if (node.is("class")) {
-            String name = node.findString("name").orElse("");
-            return Optional.of("class " + name + "\n");
-        }
-
-        if (node.is("dependency")) {
-            String parent = node.findString("parent").orElse("");
-            String child = node.findString("child").orElse("");
-            return Optional.of(parent + " --> " + child + "\n");
-        }
-        return Optional.empty();
     }
 
     private static Node createDependency(String parent, Node node) {

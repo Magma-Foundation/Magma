@@ -6,38 +6,47 @@ import magmac.app.compile.rule.result.RuleResult;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public record OrRule(List<Rule> rules) implements Rule {
-    private record State(Optional<Node> maybeValue) {
+    private record State<T>(Optional<T> maybeValue) {
         private State() {
             this(Optional.empty());
         }
 
-        State withValue(Node value) {
+        State<T> withValue(T value) {
             if (this.maybeValue.isPresent()) {
                 return this;
             }
-            return new State(Optional.of(value));
+            return new State<>(Optional.of(value));
         }
 
-        RuleResult<Node> toResult() {
+        RuleResult<T> toResult() {
             return new InlineRuleResult<>(this.maybeValue);
         }
     }
 
-    private static State foldRule(State state, Rule rule, String input) {
-        return rule.lex(input)
+    @Override
+    public RuleResult<Node> lex(String input) {
+        return this.foldAll(rule1 -> rule1.lex(input));
+    }
+
+    private <T> RuleResult<T> foldAll(Function<Rule, RuleResult<T>> mapper) {
+        return this.rules.stream().reduce(new State<T>(),
+                        (state, rule) -> OrRule.foldElement(state, rule, mapper),
+                        (_, next) -> next)
+                .toResult();
+    }
+
+    private static <T> State<T> foldElement(State<T> state, Rule rule, Function<Rule, RuleResult<T>> mapper) {
+        return mapper.apply(rule)
                 .map(state::withValue)
                 .toOptional()
                 .orElse(state);
     }
 
     @Override
-    public RuleResult<Node> lex(String input) {
-        return this.rules.stream()
-                .reduce(new State(),
-                        (state, rule) -> OrRule.foldRule(state, rule, input),
-                        (_, next) -> next)
-                .toResult();
+    public RuleResult<String> generate(Node node) {
+        return this.foldAll(rule1 -> rule1.generate(node));
     }
 }

@@ -18,4 +18,11 @@ public record InfixRule(Rule leftRule, String infix, Rule rightRule) implements 
                 .and(() -> this.rightRule.lex(right))
                 .map(tuple -> tuple.left().merge(tuple.right()));
     }
+
+    @Override
+    public RuleResult<String> generate(Node node) {
+        return this.leftRule.generate(node)
+                .and(() -> this.rightRule.generate(node))
+                .map(tuple -> tuple.left() + this.infix + tuple.right());
+    }
 }

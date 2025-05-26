@@ -5,4 +5,6 @@ import magmac.app.compile.rule.result.RuleResult;
 
 public interface Rule {
     RuleResult<Node> lex(String input);
+
+    RuleResult<String> generate(Node node);
 }

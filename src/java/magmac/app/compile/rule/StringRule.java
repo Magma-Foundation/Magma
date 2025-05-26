@@ -10,4 +10,9 @@ public record StringRule(String key) implements Rule {
     public RuleResult<Node> lex(String input) {
         return InlineRuleResult.from(new MapNode().withString(this.key, input));
     }
+
+    @Override
+    public RuleResult<String> generate(Node node) {
+        return new InlineRuleResult<>(node.findString(this.key));
+    }
 }
