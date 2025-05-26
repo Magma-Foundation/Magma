@@ -7,9 +7,13 @@ import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;
 import magmac.app.io.Targets;
+import magmac.app.stage.AfterAll;
+import magmac.app.stage.AfterPasser;
+import magmac.app.stage.BeforePasser;
 import magmac.app.stage.Lexer;
-import magmac.app.stage.ParserImpl;
+import magmac.app.stage.Parser;
 import magmac.app.stage.RuleLexer;
+import magmac.app.stage.TreeParser;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -19,7 +23,8 @@ public final class Main {
         Sources sources = new PathSources(Paths.get(".", "src", "java"));
         Targets targets = new PathTargets(Paths.get(".", "diagrams"));
         Lexer lexer = new RuleLexer(JavaRoots.createRule());
-        Application application = new CompileApplication(sources, targets, lexer, new ParserImpl());
+        Parser parser = new TreeParser(new BeforePasser(), new AfterPasser(), new AfterAll());
+        Application application = new CompileApplication(sources, targets, lexer, parser);
         application.run().ifPresent(error -> Main.handleError(error));
     }
 
