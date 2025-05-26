@@ -21,7 +21,8 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
         return new HeadedIter<>(() -> this.head.next().map(mapper));
     }
 
-    private <R> R fold(R initial, BiFunction<R, T, R> folder) {
+    @Override
+    public <R> R fold(R initial, BiFunction<R, T, R> folder) {
         R current = initial;
         while (true) {
             R finalCurrent = current;

@@ -8,14 +8,14 @@ import magmac.app.compile.lang.JavaRoots;
 import magmac.app.compile.lang.PlantUMLRoots;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.io.Sources;
 import magmac.app.io.Source;
+import magmac.app.io.Sources;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,34 +30,21 @@ public record Application(Sources sources) {
         return SafeFiles.writeString(target, csq);
     }
 
-    private static Result<Node, IOException> compileSources(Set<Source> sources) {
-        return Iterators.fromSet(sources).<List<Node>, IOException>foldToResult(
-                new ArrayList<Node>(),
-                (nodes, source) -> Application.compileSource(nodes, source)
-        ).mapValue(segments -> new MapNode().withNodeList("children", segments));
+    private static Result<Map<Source, Node>, IOException> compileSources(Set<Source> sources) {
+        return Iterators.fromSet(sources).foldToResult(
+                new HashMap<Source, Node>(),
+                (nodes, source) -> Application.lexSources(nodes, source)
+        );
     }
 
-    private static Result<List<Node>, IOException> compileSource(List<Node> nodes, Source source) {
-        return Application.compileSource(source).mapValue(compiled -> {
-            nodes.addAll(compiled);
+    private static Result<Map<Source, Node>, IOException> lexSources(Map<Source, Node> nodes, Source source) {
+        return Application.lexSource(source).mapValue(compiled -> {
+            nodes.put(compiled.left(), compiled.right());
             return nodes;
         });
     }
 
-    private static Result<List<Node>, IOException> compileSource(Source source) {
-        return Application.compileUnitToEntry(source).mapValue(tuple -> {
-            String name = tuple.left().computeName();
-            Node root = tuple.right();
-
-            List<Node> dependencies = Application.getChildren(name, root);
-            List<Node> copy = new ArrayList<Node>();
-            copy.add(new MapNode("class").withString("name", name));
-            copy.addAll(dependencies);
-            return copy;
-        });
-    }
-
-    private static Result<Tuple2<Source, Node>, IOException> compileUnitToEntry(Source source) {
+    private static Result<Tuple2<Source, Node>, IOException> lexSource(Source source) {
         return source.read().mapValue(input -> {
             Node root = JavaRoots.createRule()
                     .lex(input)
@@ -68,27 +55,11 @@ public record Application(Sources sources) {
         });
     }
 
-    private static ArrayList<Node> getChildren(String name, Node root) {
-        return root.findNodeList("children").orElse(new ArrayList<>()).stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
-            nodes.add(Application.createDependency(name, node));
-            return nodes;
-        }, (_, next) -> next);
-    }
-
-    private static Node createDependency(String parent, Node node) {
-        if (node.is("import")) {
-            return new MapNode("dependency")
-                    .withString("parent", parent)
-                    .withString("child", node.findString("child").orElse(""));
-        }
-
-        return node;
-    }
-
     public Optional<IOException> run() {
         return this.sources().collect().match(units -> {
             return Application.compileSources(units).match(root -> {
-                return Application.generateSegments(root);
+                Node children = Compiler.compile(root);
+                return Application.generateSegments(children);
             }, Optional::of);
         }, Optional::of);
     }

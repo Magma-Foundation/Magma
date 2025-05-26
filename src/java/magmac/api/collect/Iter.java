@@ -9,4 +9,6 @@ public interface Iter<T> {
     <R, X> Result<R, X> foldToResult(R initial, BiFunction<R, T, Result<R, X>> folder);
 
     <R> Iter<R> map(Function<T, R> mapper);
+
+    <R> R fold(R initial, BiFunction<R, T, R> folder);
 }

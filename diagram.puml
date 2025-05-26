@@ -134,6 +134,17 @@ State --> List
 class Source
 Source --> Result
 Source --> IOException
+class Compiler
+Compiler --> Iterators
+Compiler --> MapNode
+Compiler --> Node
+Compiler --> Source
+Compiler --> ArrayList
+Compiler --> Collection
+Compiler --> HashMap
+Compiler --> List
+Compiler --> Map
+Compiler --> Optional
 class Sources
 Sources --> Result
 Sources --> IOException
@@ -165,13 +176,13 @@ Application --> JavaRoots
 Application --> PlantUMLRoots
 Application --> MapNode
 Application --> Node
-Application --> Sources
 Application --> Source
+Application --> Sources
 Application --> IOException
 Application --> Path
 Application --> Paths
-Application --> ArrayList
-Application --> List
+Application --> HashMap
+Application --> Map
 Application --> Optional
 Application --> Set
 class TypeRule
