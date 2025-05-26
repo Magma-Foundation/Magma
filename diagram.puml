@@ -1,6 +1,7 @@
 @startuml
 skinparam linetype ortho
 class Main
+Main --> InfixRule
 Main --> MapNode
 Main --> State
 Main --> IOException
@@ -19,6 +20,9 @@ class MapNode
 MapNode --> HashMap
 MapNode --> Map
 MapNode --> Optional
+class InfixRule
+InfixRule --> Rule
+InfixRule --> Optional
 class State
 State --> ArrayList
 State --> List

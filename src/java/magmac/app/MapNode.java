@@ -28,4 +28,9 @@ public final class MapNode {
             return Optional.empty();
         }
     }
+
+    public MapNode merge(MapNode other) {
+        strings.putAll(other.strings);
+        return this;
+    }
 }

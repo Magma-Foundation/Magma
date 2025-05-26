@@ -1,5 +1,6 @@
 package magmac;
 
+import magmac.app.InfixRule;
 import magmac.app.MapNode;
 import magmac.app.State;
 
@@ -59,6 +60,12 @@ public class Main {
     }
 
     private static Optional<StringBuilder> compileRootSegment(StringBuilder state, String name, String input) {
+        return Main.lexImport(input).map((MapNode value) -> {
+            return Main.parseImport(state, name, value);
+        });
+    }
+
+    private static Optional<MapNode> lexImport(String input) {
         if (!input.endsWith(";")) {
             return Optional.empty();
         }
@@ -69,16 +76,11 @@ public class Main {
         }
         String sliced = slice.substring("import ".length());
 
-        int separator = sliced.lastIndexOf('.');
-        String child = sliced.substring(separator + ".".length());
-        Optional<MapNode> maybeValue = new StringRule("value").lex(child);
-        return maybeValue.map((MapNode value) -> {
-            return Main.parseImport(state, name, value);
-        });
+        return new InfixRule(new StringRule("namespace"), ".", new StringRule("child")).lex(sliced);
     }
 
     private static StringBuilder parseImport(StringBuilder state, String parent, MapNode mapNode) {
-        return state.append(parent + " --> " + mapNode.findString("value").orElse("") + "\n");
+        return state.append(parent + " --> " + mapNode.findString("child").orElse("") + "\n");
     }
 
     private static List<String> divide(String input) {
