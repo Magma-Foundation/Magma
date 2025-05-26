@@ -1,4 +1,4 @@
-package magmac.app.rule;
+package magmac.app.rule.result;
 
 import magmac.app.node.Node;
 

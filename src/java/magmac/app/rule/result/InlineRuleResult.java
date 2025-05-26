@@ -1,4 +1,4 @@
-package magmac.app.rule;
+package magmac.app.rule.result;
 
 import magmac.app.node.Node;
 
@@ -12,7 +12,7 @@ public final class InlineRuleResult implements RuleResult {
         this.optional = optional;
     }
 
-    static RuleResult createEmpty() {
+    public static RuleResult createEmpty() {
         return new InlineRuleResult(Optional.empty());
     }
 

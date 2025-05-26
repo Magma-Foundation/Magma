@@ -1,5 +1,8 @@
 package magmac.app.rule;
 
+import magmac.app.rule.result.InlineRuleResult;
+import magmac.app.rule.result.RuleResult;
+
 public record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
     @Override
     public RuleResult lex(String input) {

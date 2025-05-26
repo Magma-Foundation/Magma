@@ -1,6 +1,8 @@
 package magmac.app.rule;
 
 import magmac.app.node.MapNode;
+import magmac.app.rule.result.InlineRuleResult;
+import magmac.app.rule.result.RuleResult;
 
 public record StringRule(String key) implements Rule {
     @Override

@@ -1,7 +1,11 @@
 @startuml
 skinparam linetype ortho
 class SuffixRule
+SuffixRule --> InlineRuleResult
+SuffixRule --> RuleResult
 class InfixRule
+InfixRule --> InlineRuleResult
+InfixRule --> RuleResult
 class Main
 Main --> Node
 Main --> InfixRule
@@ -21,26 +25,32 @@ Main --> Set
 Main --> Collectors
 Main --> Stream
 class Rule
+Rule --> RuleResult
 class Node
 Node --> Map
 Node --> Optional
-class InlineRuleResult
-InlineRuleResult --> Node
-InlineRuleResult --> Optional
-InlineRuleResult --> Supplier
 class MapNode
 MapNode --> HashMap
 MapNode --> Map
 MapNode --> Optional
 class PrefixRule
-class StringRule
-StringRule --> MapNode
-class StripRule
-class State
-State --> ArrayList
-State --> List
+PrefixRule --> InlineRuleResult
+PrefixRule --> RuleResult
 class RuleResult
 RuleResult --> Node
 RuleResult --> Optional
 RuleResult --> Supplier
+class InlineRuleResult
+InlineRuleResult --> Node
+InlineRuleResult --> Optional
+InlineRuleResult --> Supplier
+class StringRule
+StringRule --> MapNode
+StringRule --> InlineRuleResult
+StringRule --> RuleResult
+class StripRule
+StripRule --> RuleResult
+class State
+State --> ArrayList
+State --> List
 @enduml
