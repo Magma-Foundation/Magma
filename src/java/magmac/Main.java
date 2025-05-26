@@ -25,11 +25,12 @@ public class Main {
                     continue;
                 }
 
-                int separatpr = fileName.lastIndexOf(".");
-                String name = fileName.substring(0, separatpr);
+                int fileSeparator = fileName.lastIndexOf('.');
+                String name = fileName.substring(0, fileSeparator);
+
+                output.append("class " + name + "\n");
 
                 String input = Files.readString(source);
-
                 List<String> segments = new ArrayList<>();
                 StringBuilder buffer = new StringBuilder();
                 for (int i = 0; i < input.length(); i++) {
@@ -42,14 +43,13 @@ public class Main {
                 }
 
                 segments.add(buffer.toString());
-
                 for (String segment : segments) {
                     String stripped = segment.strip();
-                    if(stripped.endsWith(";")) {
+                    if (stripped.endsWith(";")) {
                         String slice = stripped.substring(0, stripped.length() - ";".length());
-                        if(slice.startsWith("import ")) {
+                        if (slice.startsWith("import ")) {
                             String sliced = slice.substring("import ".length());
-                            int separator = sliced.lastIndexOf(".");
+                            int separator = sliced.lastIndexOf('.');
                             String child = sliced.substring(separator + ".".length());
                             output.append(name + " --> " + child + "\n");
                         }
@@ -58,8 +58,8 @@ public class Main {
             }
 
             Path target = Paths.get(".", "diagram.puml");
-            Files.writeString(target, "@startuml\n" +
-                    output.toString() +
+            Files.writeString(target, "@startuml\nskinparam linetype ortho\n" +
+                    output +
                     "@enduml\n");
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace

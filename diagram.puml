@@ -1,4 +1,6 @@
 @startuml
+skinparam linetype ortho
+class Main
 Main --> IOException
 Main --> Files
 Main --> Path
