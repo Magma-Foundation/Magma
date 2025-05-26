@@ -28,7 +28,8 @@ public final class CompileApplication implements Application {
         return this.sources.collect().match(units -> {
             return lexer.lexAll(units).match(roots -> {
                 Map<Location, Node> parsed = Parser.parseAll(roots);
-                return Generator.generateSegments(parsed, this.targets);
+                Map<Location, String> outputs = Generator.generateAll(parsed);
+                return this.targets.writeAll(outputs);
             }, Optional::of);
         }, Optional::of);
     }

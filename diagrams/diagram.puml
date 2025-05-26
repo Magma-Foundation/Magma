@@ -95,6 +95,7 @@ PathTargets --> Iters
 PathTargets --> IOException
 PathTargets --> Files
 PathTargets --> Path
+PathTargets --> Map
 PathTargets --> Optional
 class JavaRoots
 JavaRoots --> Imports
@@ -207,10 +208,8 @@ class Generator
 Generator --> PlantUMLRoots
 Generator --> Node
 Generator --> Location
-Generator --> Targets
-Generator --> IOException
+Generator --> HashMap
 Generator --> Map
-Generator --> Optional
 class HeadedIter
 HeadedIter --> Collector
 HeadedIter --> Iter
@@ -244,6 +243,7 @@ CompileApplication --> Map
 CompileApplication --> Optional
 class Targets
 Targets --> IOException
+Targets --> Map
 Targets --> Optional
 class MapNode
 MapNode --> HashMap
