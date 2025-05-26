@@ -15,15 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ParserImpl implements Parser {
-    private static Node createDependency(String parent, Node node) {
-        if (node.is("import")) {
-            return new MapNode("dependency")
-                    .withString("parent", parent)
-                    .withString("child", node.findString("child").orElse(""));
-        }
-
-        return node;
-    }
 
     private static Tuple2<Location, Node> parse(Location location, Node root) {
         return ParserImpl.getLocationNodeTuple2(location, root);
@@ -33,7 +24,7 @@ public class ParserImpl implements Parser {
         List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
         Tuple2<Location, List<Node>> initial = new Tuple2<>(location, new ArrayList<Node>());
         Tuple2<Location, List<Node>> dependencies = Iters.fromList(children).fold(initial, (currentTuple, node) -> {
-            Tuple2<Location, Node> parsed = ParserImpl.getDependency(location, node);
+            Tuple2<Location, Node> parsed = ParserImpl.beforePass(location, node);
             currentTuple.right().add(parsed.right());
             return new Tuple2<>(currentTuple.left(), currentTuple.right());
         });
@@ -45,8 +36,16 @@ public class ParserImpl implements Parser {
         return new Tuple2<>(dependencies.left(), new MapNode().withNodeList("children", copy));
     }
 
-    private static Tuple2<Location, Node> getDependency(Location location, Node node) {
-        return new Tuple2<>(location, ParserImpl.createDependency(location.name(), node));
+    private static Tuple2<Location, Node> beforePass(Location state, Node node) {
+        if (node.is("import")) {
+            Node dependency = new MapNode("dependency")
+                    .withString("parent", state.name())
+                    .withString("child", node.findString("child").orElse(""));
+
+            return new Tuple2<>(state, dependency);
+        }
+
+        return new Tuple2<>(state, node);
     }
 
     private static Map<Location, Node> afterParse(Map<Location, Node> parsedRoots) {
