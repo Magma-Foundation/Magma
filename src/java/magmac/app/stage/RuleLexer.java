@@ -2,7 +2,7 @@ package magmac.app.stage;
 
 import magmac.api.Tuple2;
 import magmac.api.collect.Iters;
-import magmac.api.collect.MapCollector;
+import magmac.api.collect.collect.MapCollector;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;

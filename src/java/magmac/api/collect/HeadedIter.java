@@ -1,13 +1,16 @@
-package magmac.api.collect.head;
+package magmac.api.collect;
 
-import magmac.api.collect.Collector;
-import magmac.api.collect.Iter;
+import magmac.api.collect.collect.Collector;
+import magmac.api.collect.head.EmptyHead;
+import magmac.api.collect.head.FlatMapHead;
+import magmac.api.collect.head.SingleHead;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     @Override
@@ -40,5 +43,24 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
     @Override
     public <C> C collect(Collector<T, C> collector) {
         return this.fold(collector.createInitial(), collector::fold);
+    }
+
+    @Override
+    public Iter<T> filter(Predicate<T> predicate) {
+        return this.flatMap(value -> new HeadedIter<>(predicate.test(value)
+                ? new SingleHead<>(value)
+                : new EmptyHead<>()));
+    }
+
+    @Override
+    public Optional<T> next() {
+        return this.head.next();
+    }
+
+    private <R> Iter<R> flatMap(Function<T, Iter<R>> mapper) {
+        return new HeadedIter<>(this.head.next()
+                .map(mapper)
+                .<Head<R>>map(initial -> new FlatMapHead<>(this.head, mapper, initial))
+                .orElse(new EmptyHead<>()));
     }
 }

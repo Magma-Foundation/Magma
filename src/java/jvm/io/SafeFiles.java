@@ -1,5 +1,7 @@
 package jvm.io;
 
+import magmac.api.collect.Iter;
+import magmac.api.collect.Iters;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
@@ -8,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,9 +23,9 @@ public final class SafeFiles {
         }
     }
 
-    public static Result<Set<Path>, IOException> walk(Path sourceDirectory) {
+    public static Result<Iter<Path>, IOException> walk(Path sourceDirectory) {
         try (Stream<Path> stream = Files.walk(sourceDirectory)) {
-            return new Ok<>(stream.collect(Collectors.toSet()));
+            return new Ok<>(Iters.fromList(stream.collect(Collectors.toList())));
         } catch (IOException e) {
             return new Err<>(e);
         }

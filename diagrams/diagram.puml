@@ -1,9 +1,23 @@
 @startuml
 skinparam linetype ortho
+class HeadedIter
+HeadedIter --> Collector
+HeadedIter --> EmptyHead
+HeadedIter --> FlatMapHead
+HeadedIter --> SingleHead
+HeadedIter --> Ok
+HeadedIter --> Result
+HeadedIter --> Optional
+HeadedIter --> BiFunction
+HeadedIter --> Function
+HeadedIter --> Predicate
 class All
 All --> Node
 All --> Location
 All --> Map
+class EmptyHead
+EmptyHead --> Head
+EmptyHead --> Optional
 class JavaRoots
 JavaRoots --> Imports
 JavaRoots --> DivideRule
@@ -21,6 +35,13 @@ class Sources
 Sources --> Result
 Sources --> IOException
 Sources --> Map
+class Iters
+Iters --> Tuple2
+Iters --> RangeHead
+Iters --> ArrayList
+Iters --> List
+Iters --> Map
+Iters --> Set
 class PlantUMLRoots
 PlantUMLRoots --> DivideRule
 PlantUMLRoots --> ExactRule
@@ -32,15 +53,9 @@ PlantUMLRoots --> StringRule
 PlantUMLRoots --> SuffixRule
 PlantUMLRoots --> TypeRule
 PlantUMLRoots --> List
-class Iters
-Iters --> Tuple2
-Iters --> HeadedIter
-Iters --> RangeHead
-Iters --> ArrayList
-Iters --> List
-Iters --> Map
-Iters --> Set
 class SafeFiles
+SafeFiles --> Iter
+SafeFiles --> Iters
 SafeFiles --> Err
 SafeFiles --> Ok
 SafeFiles --> Result
@@ -48,7 +63,6 @@ SafeFiles --> IOException
 SafeFiles --> Files
 SafeFiles --> Path
 SafeFiles --> Optional
-SafeFiles --> Set
 SafeFiles --> Collectors
 SafeFiles --> Stream
 class Lexer
@@ -60,13 +74,10 @@ StringRule --> MapNode
 StringRule --> Node
 StringRule --> InlineRuleResult
 StringRule --> RuleResult
-class Head
-Head --> Optional
 class Tuple2
 class PathSources
 PathSources --> SafeFiles
 PathSources --> Tuple2
-PathSources --> Iters
 PathSources --> MapCollector
 PathSources --> ResultCollector
 PathSources --> Result
@@ -74,8 +85,6 @@ PathSources --> IOException
 PathSources --> Files
 PathSources --> Path
 PathSources --> Map
-PathSources --> Set
-PathSources --> Collectors
 class BeforePasser
 BeforePasser --> Tuple2
 BeforePasser --> MapNode
@@ -104,33 +113,38 @@ Imports --> TypeRule
 class Source
 Source --> Result
 Source --> IOException
-class MapCollector
-MapCollector --> Tuple2
-MapCollector --> HashMap
-MapCollector --> Map
 class DivideState
 DivideState --> Stream
-class ResultCollector
-ResultCollector --> Ok
-ResultCollector --> Result
 class RuleGenerator
 RuleGenerator --> Node
 RuleGenerator --> Rule
 class Generator
 Generator --> Node
+class FlatMapHead
+FlatMapHead --> Head
+FlatMapHead --> Iter
+FlatMapHead --> Optional
+FlatMapHead --> Function
 class Passer
 Passer --> Tuple2
 Passer --> Node
 Passer --> ParseState
 Passer --> Optional
-class PrefixRule
-PrefixRule --> Node
-PrefixRule --> InlineRuleResult
-PrefixRule --> RuleResult
+class ResultCollector
+ResultCollector --> Ok
+ResultCollector --> Result
 class InfixRule
 InfixRule --> Node
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
+class PrefixRule
+PrefixRule --> Node
+PrefixRule --> InlineRuleResult
+PrefixRule --> RuleResult
+class MapCollector
+MapCollector --> Tuple2
+MapCollector --> HashMap
+MapCollector --> Map
 class CompileApplication
 CompileApplication --> Tuple2
 CompileApplication --> Iters
@@ -151,7 +165,6 @@ ExactRule --> Node
 ExactRule --> InlineRuleResult
 ExactRule --> RuleResult
 ExactRule --> Optional
-class Collector
 class PathSource
 PathSource --> SafeFiles
 PathSource --> Result
@@ -159,12 +172,19 @@ PathSource --> IOException
 PathSource --> Path
 PathSource --> ArrayList
 PathSource --> List
+class Collector
+class Head
+Head --> Optional
 class TypeRule
 TypeRule --> Node
 TypeRule --> InlineRuleResult
 TypeRule --> RuleResult
-class ParseState
-ParseState --> Location
+class Node
+Node --> Tuple2
+Node --> Iter
+Node --> List
+Node --> Map
+Node --> Optional
 class OrRule
 OrRule --> Node
 OrRule --> InlineRuleResult
@@ -172,12 +192,8 @@ OrRule --> RuleResult
 OrRule --> List
 OrRule --> Optional
 OrRule --> Function
-class Node
-Node --> Tuple2
-Node --> Iter
-Node --> List
-Node --> Map
-Node --> Optional
+class ParseState
+ParseState --> Location
 class Rule
 Rule --> Node
 Rule --> RuleResult
@@ -210,21 +226,28 @@ PathTargets --> Files
 PathTargets --> Path
 PathTargets --> Map
 PathTargets --> Optional
+class SingleHead
+SingleHead --> Head
+SingleHead --> Optional
 class StripRule
 StripRule --> Node
 StripRule --> RuleResult
+class Iter
+Iter --> Collector
+Iter --> Result
+Iter --> Optional
+Iter --> BiFunction
+Iter --> Function
+Iter --> Predicate
 class Ok
 Ok --> Tuple2
 Ok --> Function
 Ok --> Supplier
-class Iter
-Iter --> Result
-Iter --> BiFunction
-Iter --> Function
 class Application
 Application --> IOException
 Application --> Optional
 class RangeHead
+RangeHead --> Head
 RangeHead --> Optional
 class DivideRule
 DivideRule --> MapNode
@@ -254,6 +277,10 @@ class SuffixRule
 SuffixRule --> Node
 SuffixRule --> InlineRuleResult
 SuffixRule --> RuleResult
+class Result
+Result --> Tuple2
+Result --> Function
+Result --> Supplier
 class AfterAll
 AfterAll --> MapNode
 AfterAll --> Node
@@ -264,10 +291,6 @@ AfterAll --> Collections
 AfterAll --> List
 AfterAll --> Map
 AfterAll --> Optional
-class Result
-Result --> Tuple2
-Result --> Function
-Result --> Supplier
 class Main
 Main --> Application
 Main --> CompileApplication
@@ -287,22 +310,10 @@ Main --> RuleLexer
 Main --> TreeParser
 Main --> IOException
 Main --> Paths
-class HeadedIter
-HeadedIter --> Collector
-HeadedIter --> Iter
-HeadedIter --> Ok
-HeadedIter --> Result
-HeadedIter --> Optional
-HeadedIter --> BiFunction
-HeadedIter --> Function
 class MutableDivideState
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 MutableDivideState --> Stream
-class Targets
-Targets --> IOException
-Targets --> Map
-Targets --> Optional
 class MapNode
 MapNode --> Tuple2
 MapNode --> Iter
@@ -311,4 +322,8 @@ MapNode --> HashMap
 MapNode --> List
 MapNode --> Map
 MapNode --> Optional
+class Targets
+Targets --> IOException
+Targets --> Map
+Targets --> Optional
 @enduml

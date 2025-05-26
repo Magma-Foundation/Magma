@@ -1,4 +1,4 @@
-package magmac.api.collect;
+package magmac.api.collect.collect;
 
 import magmac.api.Tuple2;
 

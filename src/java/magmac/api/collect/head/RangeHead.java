@@ -1,5 +1,7 @@
 package magmac.api.collect.head;
 
+import magmac.api.collect.Head;
+
 import java.util.Optional;
 
 public class RangeHead implements Head<Integer> {
