@@ -1,16 +1,16 @@
-package magmac.app;
+package magmac.app.io;
 
 import jvm.io.SafeFiles;
 import magmac.api.collect.Iters;
-import magmac.app.io.Location;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public record Targets(Path root) {
-    Optional<IOException> write(Location location, String output) {
+public record PathTargets(Path root) implements Targets {
+    @Override
+    public Optional<IOException> write(Location location, String output) {
         Path targetParent = Iters.fromList(location.namespace())
                 .fold(this.root(), Path::resolve);
 

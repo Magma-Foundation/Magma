@@ -10,11 +10,11 @@ import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 import magmac.app.io.Source;
 import magmac.app.io.Sources;
+import magmac.app.io.Targets;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -63,39 +63,11 @@ public final class Application {
     }
 
     public Optional<IOException> run() {
-        return this.sources().collect().match(units -> {
+        return this.sources.collect().match(units -> {
             return Application.compileSources(units).match(root -> {
                 Tuple2<Location, Node> children = Compiler.compile(root);
                 return this.generateSegments(children);
             }, Optional::of);
         }, Optional::of);
     }
-
-    public Sources sources() {
-        return this.sources;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (null == obj || obj.getClass() != this.getClass()) {
-            return false;
-        }
-        var that = (Application) obj;
-        return Objects.equals(this.sources, that.sources);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.sources);
-    }
-
-    @Override
-    public String toString() {
-        return "Application[" +
-                "sources=" + this.sources + ']';
-    }
-
 }
