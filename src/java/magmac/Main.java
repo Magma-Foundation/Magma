@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,20 +48,31 @@ public class Main {
 
     private static String compile(String name, String input) {
         List<String> segments = Main.divide(input);
-        StringBuilder output1 = new StringBuilder();
+        StringBuilder state = new StringBuilder();
         for (String segment : segments) {
             String stripped = segment.strip();
-            if (stripped.endsWith(";")) {
-                String slice = stripped.substring(0, stripped.length() - ";".length());
-                if (slice.startsWith("import ")) {
-                    String sliced = slice.substring("import ".length());
-                    int separator = sliced.lastIndexOf('.');
-                    String child = sliced.substring(separator + ".".length());
-                    output1.append(name + " --> " + child + "\n");
-                }
+            state = Main.compileRootSegment(state, name, stripped).orElse(state);
+        }
+
+        return state.toString();
+    }
+
+    private static Optional<StringBuilder> compileRootSegment(StringBuilder state, String name, String input) {
+        if (input.endsWith(";")) {
+            String slice = input.substring(0, input.length() - ";".length());
+            if (slice.startsWith("import ")) {
+                String sliced = slice.substring("import ".length());
+                int separator = sliced.lastIndexOf('.');
+                String child = sliced.substring(separator + ".".length());
+                return Optional.of(Main.parseImport(state, name, child));
             }
         }
-        return output1.toString();
+
+        return Optional.empty();
+    }
+
+    private static StringBuilder parseImport(StringBuilder state, String parent, String child) {
+        return state.append(parent + " --> " + child + "\n");
     }
 
     private static List<String> divide(String input) {
