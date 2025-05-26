@@ -1,10 +1,11 @@
 package magmac;
 
+import magmac.app.State;
+import magmac.app.node.MapNode;
 import magmac.app.node.Node;
 import magmac.app.rule.InfixRule;
 import magmac.app.rule.PrefixRule;
 import magmac.app.rule.Rule;
-import magmac.app.State;
 import magmac.app.rule.StringRule;
 import magmac.app.rule.StripRule;
 import magmac.app.rule.SuffixRule;
@@ -75,7 +76,17 @@ public class Main {
     }
 
     private static StringBuilder parseImport(StringBuilder state, String parent, Node node) {
-        return state.append(parent + " --> " + node.findString("child").orElse("") + "\n");
+        Node dependency = new MapNode()
+                .withString("parent", parent)
+                .withString("child", node.findString("child").orElse(""));
+
+        return Main.getStringBuilder(state, dependency);
+    }
+
+    private static StringBuilder getStringBuilder(StringBuilder state, Node dependency) {
+        String parent = dependency.findString("parent").orElse("");
+        String child = dependency.findString("child").orElse("");
+        return state.append(parent + " --> " + child + "\n");
     }
 
     private static List<String> divide(String input) {
