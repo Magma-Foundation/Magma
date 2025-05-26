@@ -11,4 +11,8 @@ public interface Node {
     Node merge(Node other);
 
     Map<String, String> strings();
+
+    boolean is(String type);
+
+    Node retype(String type);
 }

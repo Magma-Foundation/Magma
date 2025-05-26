@@ -3,6 +3,7 @@ package magmac.app.rule.result;
 import magmac.app.node.Node;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class InlineRuleResult implements RuleResult {
@@ -32,5 +33,10 @@ public final class InlineRuleResult implements RuleResult {
                 return inner.merge(otherValue);
             });
         }));
+    }
+
+    @Override
+    public RuleResult map(Function<Node, Node> mapper) {
+        return new InlineRuleResult(this.optional.map(mapper));
     }
 }

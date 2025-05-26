@@ -7,23 +7,28 @@ class InfixRule
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
 class Main
+Main --> State
+Main --> MapNode
 Main --> Node
 Main --> InfixRule
 Main --> PrefixRule
 Main --> Rule
-Main --> State
 Main --> StringRule
 Main --> StripRule
 Main --> SuffixRule
+Main --> TypeRule
 Main --> IOException
 Main --> Files
 Main --> Path
 Main --> Paths
+Main --> ArrayList
 Main --> List
 Main --> Optional
 Main --> Set
 Main --> Collectors
 Main --> Stream
+class TypeRule
+TypeRule --> RuleResult
 class Rule
 Rule --> RuleResult
 class Node
@@ -39,10 +44,12 @@ PrefixRule --> RuleResult
 class RuleResult
 RuleResult --> Node
 RuleResult --> Optional
+RuleResult --> Function
 RuleResult --> Supplier
 class InlineRuleResult
 InlineRuleResult --> Node
 InlineRuleResult --> Optional
+InlineRuleResult --> Function
 InlineRuleResult --> Supplier
 class StringRule
 StringRule --> MapNode

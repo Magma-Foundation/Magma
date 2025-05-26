@@ -6,13 +6,19 @@ import java.util.Optional;
 
 public final class MapNode implements Node {
     private final Map<String, String> strings;
+    private final Optional<String> maybeType;
 
     public MapNode() {
-        this(new HashMap<>());
+        this(Optional.empty(), new HashMap<>());
     }
 
-    public MapNode(Map<String, String> strings) {
+    public MapNode(Optional<String> maybeType, Map<String, String> strings) {
         this.strings = strings;
+        this.maybeType = maybeType;
+    }
+
+    public MapNode(String type) {
+        this(Optional.of(type), new HashMap<>());
     }
 
     @Override
@@ -34,6 +40,16 @@ public final class MapNode implements Node {
     @Override
     public Map<String, String> strings() {
         return this.strings;
+    }
+
+    @Override
+    public boolean is(String type) {
+        return this.maybeType.filter(inner -> inner.equals(type)).isPresent();
+    }
+
+    @Override
+    public Node retype(String type) {
+        return new MapNode(Optional.of(type), this.strings);
     }
 
     @Override
