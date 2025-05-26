@@ -65,7 +65,8 @@ public class Main {
     }
 
     private static Optional<StringBuilder> compileRootSegment(StringBuilder state, String name, String input) {
-        return Main.createImportRule().lex(input).map((Node value) -> {
+        Rule rule = Main.createImportRule();
+        return rule.lex(input).optional().map((Node value) -> {
             return Main.parseImport(state, name, value);
         });
     }
