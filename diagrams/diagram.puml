@@ -123,6 +123,10 @@ Ok --> Function
 Ok --> Supplier
 class Iter
 Iter --> Result
+Iter --> Node
+Iter --> Location
+Iter --> IOException
+Iter --> Map
 Iter --> BiFunction
 Iter --> Function
 class Application
@@ -159,6 +163,8 @@ Imports --> TypeRule
 class RuleLexer
 RuleLexer --> Tuple2
 RuleLexer --> Iters
+RuleLexer --> MapCollector
+RuleLexer --> ResultCollector
 RuleLexer --> Result
 RuleLexer --> MapNode
 RuleLexer --> Node
@@ -166,7 +172,6 @@ RuleLexer --> Rule
 RuleLexer --> Location
 RuleLexer --> Source
 RuleLexer --> IOException
-RuleLexer --> HashMap
 RuleLexer --> Map
 RuleLexer --> Set
 class SuffixRule
@@ -189,8 +194,15 @@ Main --> Paths
 class Source
 Source --> Result
 Source --> IOException
+class MapCollector
+MapCollector --> Tuple2
+MapCollector --> HashMap
+MapCollector --> Map
 class DivideState
 DivideState --> Stream
+class ResultCollector
+ResultCollector --> Ok
+ResultCollector --> Result
 class Generator
 Generator --> PlantUMLRoots
 Generator --> Node
@@ -200,6 +212,7 @@ Generator --> IOException
 Generator --> Map
 Generator --> Optional
 class HeadedIter
+HeadedIter --> Collector
 HeadedIter --> Iter
 HeadedIter --> Ok
 HeadedIter --> Result
@@ -244,4 +257,5 @@ PathSource --> IOException
 PathSource --> Path
 PathSource --> ArrayList
 PathSource --> List
+class Collector
 @enduml

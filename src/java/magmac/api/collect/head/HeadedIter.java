@@ -1,5 +1,6 @@
 package magmac.api.collect.head;
 
+import magmac.api.collect.Collector;
 import magmac.api.collect.Iter;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
@@ -34,5 +35,10 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
                 return current;
             }
         }
+    }
+
+    @Override
+    public <C> C collect(Collector<T, C> collector) {
+        return fold(collector.createInitial(), collector::fold);
     }
 }

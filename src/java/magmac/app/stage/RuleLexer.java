@@ -2,6 +2,8 @@ package magmac.app.stage;
 
 import magmac.api.Tuple2;
 import magmac.api.collect.Iters;
+import magmac.api.collect.MapCollector;
+import magmac.api.collect.ResultCollector;
 import magmac.api.result.Result;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -10,7 +12,6 @@ import magmac.app.io.Location;
 import magmac.app.io.Source;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,17 +24,9 @@ public class RuleLexer implements Lexer {
 
     @Override
     public Result<Map<Location, Node>, IOException> lexAll(Set<Source> sources) {
-        return Iters.fromSet(sources).foldToResult(
-                new HashMap<Location, Node>(),
-                (nodes, source) -> this.foldSource(nodes, source)
-        );
-    }
-
-    private Result<Map<Location, Node>, IOException> foldSource(Map<Location, Node> nodes, Source source) {
-        return this.lexSource(source).mapValue(compiled -> {
-            nodes.put(compiled.left(), compiled.right());
-            return nodes;
-        });
+        return Iters.fromSet(sources)
+                .map(source -> this.lexSource(source))
+                .collect(new ResultCollector<>(new MapCollector<>()));
     }
 
     private Result<Tuple2<Location, Node>, IOException> lexSource(Source source) {
