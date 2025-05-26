@@ -18,7 +18,7 @@ public final class InlineRuleResult<T> implements RuleResult<T> {
     }
 
     public static <T> RuleResult<T> createEmpty() {
-        return new InlineRuleResult<>(new Err<>(new CompileError("", new StringContext(""))));
+        return new InlineRuleResult<>(new Err<>(new CompileError("?", new StringContext("?"))));
     }
 
     public static <T> RuleResult<T> from(T value) {
