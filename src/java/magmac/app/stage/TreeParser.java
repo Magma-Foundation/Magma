@@ -69,8 +69,12 @@ public class TreeParser implements Parser {
         return this.afterPasser.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
     }
 
-    @Override
-    public Map<Location, Node> parseAll(Map<Location, Node> roots) {
+    private Map<Location, Node> parseAll0(Map<Location, Node> roots) {
         return this.all.afterAll(this.parseAllRaw(roots));
+    }
+
+    @Override
+    public Roots parseAll(Roots roots) {
+        return new Roots(this.parseAll0(roots.roots()));
     }
 }

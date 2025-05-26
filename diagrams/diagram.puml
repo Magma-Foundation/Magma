@@ -11,6 +11,10 @@ HeadedIter --> Optional
 HeadedIter --> BiFunction
 HeadedIter --> Function
 HeadedIter --> Predicate
+class Roots
+Roots --> Node
+Roots --> Location
+Roots --> Map
 class All
 All --> Node
 All --> Location
@@ -66,7 +70,6 @@ SafeFiles --> Optional
 SafeFiles --> Collectors
 SafeFiles --> Stream
 class Lexer
-Lexer --> Node
 Lexer --> Location
 Lexer --> Map
 class StringRule
@@ -116,10 +119,16 @@ Source --> IOException
 class DivideState
 DivideState --> Stream
 class RuleGenerator
+RuleGenerator --> Tuple2
+RuleGenerator --> Iters
+RuleGenerator --> MapCollector
 RuleGenerator --> Node
 RuleGenerator --> Rule
+RuleGenerator --> Location
+RuleGenerator --> Map
 class Generator
-Generator --> Node
+Generator --> Location
+Generator --> Map
 class FlatMapHead
 FlatMapHead --> Head
 FlatMapHead --> Iter
@@ -146,16 +155,13 @@ MapCollector --> Tuple2
 MapCollector --> HashMap
 MapCollector --> Map
 class CompileApplication
-CompileApplication --> Tuple2
-CompileApplication --> Iters
-CompileApplication --> MapCollector
-CompileApplication --> Node
 CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
 CompileApplication --> Generator
 CompileApplication --> Lexer
 CompileApplication --> Parser
+CompileApplication --> Roots
 CompileApplication --> IOException
 CompileApplication --> Map
 CompileApplication --> Optional
@@ -215,9 +221,6 @@ TreeParser --> Map
 class Location
 Location --> List
 class Parser
-Parser --> Node
-Parser --> Location
-Parser --> Map
 class PathTargets
 PathTargets --> SafeFiles
 PathTargets --> Iters

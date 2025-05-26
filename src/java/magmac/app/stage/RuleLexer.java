@@ -17,8 +17,7 @@ public class RuleLexer implements Lexer {
         this.rootRule = rootRule;
     }
 
-    @Override
-    public Map<Location, Node> lexAll(Map<Location, String> values) {
+    private Map<Location, Node> lexAll0(Map<Location, String> values) {
         return Iters.fromMap(values)
                 .map(entry -> this.getLocationNodeTuple2(entry))
                 .collect(new MapCollector<>());
@@ -36,4 +35,8 @@ public class RuleLexer implements Lexer {
         return new Tuple2<>(location, root);
     }
 
+    @Override
+    public Roots lexAll(Map<Location, String> values) {
+        return new Roots(this.lexAll0(values));
+    }
 }

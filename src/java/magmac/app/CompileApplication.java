@@ -1,15 +1,12 @@
 package magmac.app;
 
-import magmac.api.Tuple2;
-import magmac.api.collect.Iters;
-import magmac.api.collect.collect.MapCollector;
-import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 import magmac.app.io.Sources;
 import magmac.app.io.Targets;
 import magmac.app.stage.Generator;
 import magmac.app.stage.Lexer;
 import magmac.app.stage.Parser;
+import magmac.app.stage.Roots;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,16 +30,11 @@ public final class CompileApplication implements Application {
     @Override
     public Optional<IOException> run() {
         return this.sources.readAll().match(units -> {
-            Map<Location, Node> roots = this.lexer.lexAll(units);
-            Map<Location, Node> parsed = this.parser.parseAll(roots);
-            Map<Location, String> outputs = this.generateAll(parsed);
+            Roots lex = this.lexer.lexAll(units);
+            Roots parsed = this.parser.parseAll(lex);
+            Map<Location, String> outputs = this.generator.generateAll(parsed);
             return this.targets.writeAll(outputs);
         }, Optional::of);
     }
 
-    private Map<Location, String> generateAll(Map<Location, Node> parsed) {
-        return Iters.fromMap(parsed)
-                .map(entry -> new Tuple2<>(entry.left(), this.generator.generate(entry.right())))
-                .collect(new MapCollector<>());
-    }
 }
