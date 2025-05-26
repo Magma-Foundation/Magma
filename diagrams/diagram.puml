@@ -75,16 +75,11 @@ SafeFiles --> Set
 SafeFiles --> Collectors
 SafeFiles --> Stream
 class Lexer
-Lexer --> Tuple2
-Lexer --> Iters
 Lexer --> Result
-Lexer --> JavaRoots
-Lexer --> MapNode
 Lexer --> Node
 Lexer --> Location
 Lexer --> Source
 Lexer --> IOException
-Lexer --> HashMap
 Lexer --> Map
 Lexer --> Set
 class Location
@@ -161,6 +156,19 @@ Imports --> StringRule
 Imports --> StripRule
 Imports --> SuffixRule
 Imports --> TypeRule
+class RuleLexer
+RuleLexer --> Tuple2
+RuleLexer --> Iters
+RuleLexer --> Result
+RuleLexer --> MapNode
+RuleLexer --> Node
+RuleLexer --> Rule
+RuleLexer --> Location
+RuleLexer --> Source
+RuleLexer --> IOException
+RuleLexer --> HashMap
+RuleLexer --> Map
+RuleLexer --> Set
 class SuffixRule
 SuffixRule --> Node
 SuffixRule --> InlineRuleResult
@@ -171,9 +179,11 @@ Result --> Function
 Result --> Supplier
 class Main
 Main --> CompileApplication
+Main --> JavaRoots
 Main --> PathTargets
 Main --> PathSources
 Main --> Sources
+Main --> RuleLexer
 Main --> IOException
 Main --> Paths
 class Source

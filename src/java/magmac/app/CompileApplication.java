@@ -15,16 +15,18 @@ import java.util.Optional;
 public final class CompileApplication implements Application {
     private final Sources sources;
     private final Targets targets;
+    private final Lexer lexer;
 
-    public CompileApplication(Sources sources, Targets targets) {
+    public CompileApplication(Sources sources, Targets targets, Lexer lexer) {
         this.sources = sources;
         this.targets = targets;
+        this.lexer = lexer;
     }
 
     @Override
     public Optional<IOException> run() {
         return this.sources.collect().match(units -> {
-            return Lexer.lexSources(units).match(roots -> {
+            return lexer.lexAll(units).match(roots -> {
                 Map<Location, Node> parsed = Parser.parseAll(roots);
                 return Generator.generateSegments(parsed, this.targets);
             }, Optional::of);
