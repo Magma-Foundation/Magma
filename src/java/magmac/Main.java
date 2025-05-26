@@ -1,10 +1,12 @@
 package magmac;
 
-import magmac.app.compile.DivideState;
 import magmac.app.ast.Imports;
-import magmac.app.compile.MutableDivideState;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.DivideRule;
+import magmac.app.compile.rule.OrRule;
+import magmac.app.compile.rule.Rule;
+import magmac.app.compile.rule.StringRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +41,11 @@ public class Main {
 
                 String input = Files.readString(source);
 
-                List<Node> dependencies = Main.compile(name, input);
+                List<Node> dependencies = Main.compile(name, input, new OrRule(List.of(
+                        Imports.createImportRule(),
+                        new StringRule("value")
+                )));
+
                 segments.add(new MapNode("class").withString("name", name));
                 segments.addAll(dependencies);
             }
@@ -73,51 +79,29 @@ public class Main {
         return Optional.empty();
     }
 
-    private static List<Node> compile(String name, String input) {
-        List<String> segments = Main.divide(input);
-        List<Node> state = new ArrayList<>();
-        for (String segment : segments) {
-            String stripped = segment.strip();
-            state = Main.compileRootSegment(state, name, stripped).orElse(state);
+    private static List<Node> compile(String name, String input, Rule childRule) {
+        return Main.createRootRule(childRule).lex(input).map(root -> {
+                    List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
+                    return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
+                        nodes.add(Main.createDependency(name, node));
+                        return nodes;
+                    }, (_, next) -> next);
+                })
+                .toOptional()
+                .orElse(new ArrayList<>());
+    }
+
+    private static Rule createRootRule(Rule childRule) {
+        return new DivideRule("children", childRule);
+    }
+
+    private static Node createDependency(String parent, Node node) {
+        if (node.is("import")) {
+            return new MapNode("dependency")
+                    .withString("parent", parent)
+                    .withString("child", node.findString("child").orElse(""));
         }
 
-        return state;
+        return node;
     }
-
-    private static Optional<List<Node>> compileRootSegment(List<Node> state, String name, String input) {
-        return Imports.createImportRule().lex(input).toOptional().map((Node value) -> {
-            return Main.parseImport(state, name, value);
-        });
-    }
-
-    private static List<Node> parseImport(List<Node> state, String parent, Node node) {
-        Node dependency = new MapNode("dependency")
-                .withString("parent", parent)
-                .withString("child", node.findString("child").orElse(""));
-
-        state.add(dependency);
-        return state;
-    }
-
-    private static List<String> divide(String input) {
-        DivideState current = new MutableDivideState();
-        int length = input.length();
-        for (int i = 0; i < length; i++) {
-            char c = input.charAt(i);
-            current = Main.fold(current, c);
-        }
-
-        return current.advance().stream().toList();
-    }
-
-    private static DivideState fold(DivideState state, char c) {
-        DivideState appended = state.append(c);
-        if (';' == c) {
-            return appended.advance();
-        }
-        else {
-            return appended;
-        }
-    }
-
 }

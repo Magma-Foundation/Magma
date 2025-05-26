@@ -1,7 +1,8 @@
 package magmac.app.compile.rule;
 
+import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.RuleResult;
 
 public interface Rule {
-    RuleResult lex(String input);
+    RuleResult<Node> lex(String input);
 }

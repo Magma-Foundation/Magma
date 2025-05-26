@@ -1,24 +1,27 @@
 package magmac.app.compile.node;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public final class MapNode implements Node {
-    private final Map<String, String> strings;
     private final Optional<String> maybeType;
+    private final Map<String, String> strings;
+    private final Map<String, List<Node>> nodeLists;
 
     public MapNode() {
-        this(Optional.empty(), new HashMap<>());
+        this(Optional.empty(), new HashMap<>(), new HashMap<>());
     }
 
-    public MapNode(Optional<String> maybeType, Map<String, String> strings) {
+    public MapNode(Optional<String> maybeType, Map<String, String> strings, Map<String, List<Node>> nodeLists) {
         this.strings = strings;
         this.maybeType = maybeType;
+        this.nodeLists = nodeLists;
     }
 
     public MapNode(String type) {
-        this(Optional.of(type), new HashMap<>());
+        this(Optional.of(type), new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -49,7 +52,23 @@ public final class MapNode implements Node {
 
     @Override
     public Node retype(String type) {
-        return new MapNode(Optional.of(type), this.strings);
+        return new MapNode(Optional.of(type), this.strings, this.nodeLists);
+    }
+
+    @Override
+    public Node withNodeList(String key, List<Node> values) {
+        this.nodeLists.put(key, values);
+        return this;
+    }
+
+    @Override
+    public Optional<List<Node>> findNodeList(String key) {
+        if (this.nodeLists.containsKey(key)) {
+            return Optional.of(this.nodeLists.get(key));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     @Override

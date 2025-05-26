@@ -1,61 +1,56 @@
 @startuml
 skinparam linetype ortho
 class SuffixRule
+SuffixRule --> Node
 SuffixRule --> InlineRuleResult
 SuffixRule --> RuleResult
 class InfixRule
+InfixRule --> Node
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
-class Node
-Node --> Map
-Node --> Optional
-class Main
-Main --> DivideState
-Main --> Imports
-Main --> MutableDivideState
-Main --> MapNode
-Main --> Node
-Main --> IOException
-Main --> Files
-Main --> Path
-Main --> Paths
-Main --> ArrayList
-Main --> List
-Main --> Optional
-Main --> Set
-Main --> Collectors
-Main --> Stream
 class DivideState
 DivideState --> Stream
+class OrRule
+OrRule --> Node
+OrRule --> InlineRuleResult
+OrRule --> RuleResult
+OrRule --> List
+OrRule --> Optional
+class DivideRule
+DivideRule --> DivideState
+DivideRule --> MutableDivideState
+DivideRule --> MapNode
+DivideRule --> Node
+DivideRule --> InlineRuleResult
+DivideRule --> RuleResult
+DivideRule --> ArrayList
+DivideRule --> List
 class Rule
+Rule --> Node
 Rule --> RuleResult
-class TypeRule
-TypeRule --> RuleResult
 class RuleResult
+RuleResult --> Tuple2
 RuleResult --> Node
+RuleResult --> List
 RuleResult --> Optional
 RuleResult --> Function
 RuleResult --> Supplier
-class MutableDivideState
-MutableDivideState --> ArrayList
-MutableDivideState --> List
-MutableDivideState --> Stream
 class PrefixRule
+PrefixRule --> Node
 PrefixRule --> InlineRuleResult
 PrefixRule --> RuleResult
 class StringRule
 StringRule --> MapNode
+StringRule --> Node
 StringRule --> InlineRuleResult
 StringRule --> RuleResult
 class StripRule
+StripRule --> Node
 StripRule --> RuleResult
-class InlineRuleResult
-InlineRuleResult --> Node
-InlineRuleResult --> Optional
-InlineRuleResult --> Function
-InlineRuleResult --> Supplier
+class Tuple2
 class MapNode
 MapNode --> HashMap
+MapNode --> List
 MapNode --> Map
 MapNode --> Optional
 class Imports
@@ -66,4 +61,38 @@ Imports --> StringRule
 Imports --> StripRule
 Imports --> SuffixRule
 Imports --> TypeRule
+class Node
+Node --> List
+Node --> Map
+Node --> Optional
+class Main
+Main --> Imports
+Main --> MapNode
+Main --> Node
+Main --> DivideRule
+Main --> OrRule
+Main --> Rule
+Main --> StringRule
+Main --> IOException
+Main --> Files
+Main --> Path
+Main --> Paths
+Main --> ArrayList
+Main --> List
+Main --> Optional
+Main --> Set
+Main --> Collectors
+Main --> Stream
+class TypeRule
+TypeRule --> Node
+TypeRule --> RuleResult
+class MutableDivideState
+MutableDivideState --> ArrayList
+MutableDivideState --> List
+MutableDivideState --> Stream
+class InlineRuleResult
+InlineRuleResult --> Tuple2
+InlineRuleResult --> Optional
+InlineRuleResult --> Function
+InlineRuleResult --> Supplier
 @enduml

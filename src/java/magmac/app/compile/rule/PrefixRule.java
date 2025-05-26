@@ -1,11 +1,12 @@
 package magmac.app.compile.rule;
 
+import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.InlineRuleResult;
 import magmac.app.compile.rule.result.RuleResult;
 
 public record PrefixRule(String prefix, Rule childRule) implements Rule {
     @Override
-    public RuleResult lex(String input) {
+    public RuleResult<Node> lex(String input) {
         if (!input.startsWith(this.prefix())) {
             return InlineRuleResult.createEmpty();
         }
