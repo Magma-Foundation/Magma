@@ -4,6 +4,8 @@ class TypeRule
 TypeRule --> Node
 TypeRule --> InlineRuleResult
 TypeRule --> RuleResult
+class ParseState
+ParseState --> Location
 class OrRule
 OrRule --> Node
 OrRule --> InlineRuleResult
@@ -108,6 +110,7 @@ ParserImpl --> MapCollector
 ParserImpl --> MapNode
 ParserImpl --> Node
 ParserImpl --> Location
+ParserImpl --> ParseState
 ParserImpl --> ArrayList
 ParserImpl --> Collection
 ParserImpl --> Collections
