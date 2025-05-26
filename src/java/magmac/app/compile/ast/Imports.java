@@ -1,4 +1,4 @@
-package magmac.app.ast;
+package magmac.app.compile.ast;
 
 import magmac.app.compile.rule.InfixRule;
 import magmac.app.compile.rule.PrefixRule;

@@ -7,6 +7,8 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Sources;
 import magmac.app.io.Unit;
+import magmac.app.compile.lang.JavaRoots;
+import magmac.app.compile.lang.PlantUMLRoots;
 
 import java.io.IOException;
 import java.nio.file.Path;

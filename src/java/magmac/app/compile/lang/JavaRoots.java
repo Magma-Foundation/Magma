@@ -1,6 +1,6 @@
-package magmac.app;
+package magmac.app.compile.lang;
 
-import magmac.app.ast.Imports;
+import magmac.app.compile.ast.Imports;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.Rule;

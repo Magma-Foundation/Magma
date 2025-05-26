@@ -4,6 +4,13 @@ class SuffixRule
 SuffixRule --> Node
 SuffixRule --> InlineRuleResult
 SuffixRule --> RuleResult
+class JavaRoots
+JavaRoots --> Imports
+JavaRoots --> DivideRule
+JavaRoots --> OrRule
+JavaRoots --> Rule
+JavaRoots --> StringRule
+JavaRoots --> List
 class InfixRule
 InfixRule --> Node
 InfixRule --> InlineRuleResult
@@ -26,16 +33,6 @@ DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
 DivideRule --> Collectors
-class PlantUMLRoots
-PlantUMLRoots --> DivideRule
-PlantUMLRoots --> InfixRule
-PlantUMLRoots --> OrRule
-PlantUMLRoots --> PrefixRule
-PlantUMLRoots --> Rule
-PlantUMLRoots --> StringRule
-PlantUMLRoots --> SuffixRule
-PlantUMLRoots --> TypeRule
-PlantUMLRoots --> List
 class Rule
 Rule --> Node
 Rule --> RuleResult
@@ -61,6 +58,16 @@ class Result
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
+class PlantUMLRoots
+PlantUMLRoots --> DivideRule
+PlantUMLRoots --> InfixRule
+PlantUMLRoots --> OrRule
+PlantUMLRoots --> PrefixRule
+PlantUMLRoots --> Rule
+PlantUMLRoots --> StringRule
+PlantUMLRoots --> SuffixRule
+PlantUMLRoots --> TypeRule
+PlantUMLRoots --> List
 class Err
 Err --> Tuple2
 Err --> Function
@@ -92,14 +99,6 @@ Unit --> SafeFiles
 Unit --> Result
 Unit --> IOException
 Unit --> Path
-class Imports
-Imports --> InfixRule
-Imports --> PrefixRule
-Imports --> Rule
-Imports --> StringRule
-Imports --> StripRule
-Imports --> SuffixRule
-Imports --> TypeRule
 class PathSources
 PathSources --> SafeFiles
 PathSources --> Result
@@ -125,6 +124,14 @@ Main --> PathSources
 Main --> Sources
 Main --> IOException
 Main --> Paths
+class Imports
+Imports --> InfixRule
+Imports --> PrefixRule
+Imports --> Rule
+Imports --> StringRule
+Imports --> StripRule
+Imports --> SuffixRule
+Imports --> TypeRule
 class Application
 Application --> SafeFiles
 Application --> Ok
@@ -133,6 +140,8 @@ Application --> MapNode
 Application --> Node
 Application --> Sources
 Application --> Unit
+Application --> JavaRoots
+Application --> PlantUMLRoots
 Application --> IOException
 Application --> Path
 Application --> Paths
@@ -144,13 +153,6 @@ class TypeRule
 TypeRule --> Node
 TypeRule --> InlineRuleResult
 TypeRule --> RuleResult
-class JavaRoots
-JavaRoots --> Imports
-JavaRoots --> DivideRule
-JavaRoots --> OrRule
-JavaRoots --> Rule
-JavaRoots --> StringRule
-JavaRoots --> List
 class DivideState
 DivideState --> Stream
 class MutableDivideState
