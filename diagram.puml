@@ -8,8 +8,6 @@ class InfixRule
 InfixRule --> Node
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
-class DivideState
-DivideState --> Stream
 class OrRule
 OrRule --> Node
 OrRule --> InlineRuleResult
@@ -17,8 +15,6 @@ OrRule --> RuleResult
 OrRule --> List
 OrRule --> Optional
 class DivideRule
-DivideRule --> DivideState
-DivideRule --> MutableDivideState
 DivideRule --> MapNode
 DivideRule --> Node
 DivideRule --> InlineRuleResult
@@ -61,6 +57,9 @@ Imports --> StringRule
 Imports --> StripRule
 Imports --> SuffixRule
 Imports --> TypeRule
+class State
+State --> Node
+State --> List
 class Node
 Node --> List
 Node --> Map
@@ -83,13 +82,15 @@ Main --> Optional
 Main --> Set
 Main --> Collectors
 Main --> Stream
-class TypeRule
-TypeRule --> Node
-TypeRule --> RuleResult
 class MutableDivideState
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 MutableDivideState --> Stream
+class TypeRule
+TypeRule --> Node
+TypeRule --> RuleResult
+class DivideState
+DivideState --> Stream
 class InlineRuleResult
 InlineRuleResult --> Tuple2
 InlineRuleResult --> Optional

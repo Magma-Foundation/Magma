@@ -24,32 +24,7 @@ public class Main {
         Path sourceDirectory = Paths.get(".", "src", "java");
         try (Stream<Path> stream = Files.walk(sourceDirectory)) {
             Set<Path> sources = stream.collect(Collectors.toSet());
-
-            List<Node> segments = new ArrayList<Node>();
-            for (Path source : sources) {
-                if (!Files.isRegularFile(source)) {
-                    continue;
-                }
-
-                String fileName = source.getFileName().toString();
-                if (!fileName.endsWith(".java")) {
-                    continue;
-                }
-
-                int fileSeparator = fileName.lastIndexOf('.');
-                String name = fileName.substring(0, fileSeparator);
-
-                String input = Files.readString(source);
-
-                List<Node> dependencies = Main.compile(name, input, new OrRule(List.of(
-                        Imports.createImportRule(),
-                        new StringRule("value")
-                )));
-
-                segments.add(new MapNode("class").withString("name", name));
-                segments.addAll(dependencies);
-            }
-
+            List<Node> segments = Main.compileSources(sources);
             StringBuilder output = new StringBuilder();
             for (Node segment : segments) {
                 output.append(Main.generate(segment).orElse(""));
@@ -63,6 +38,44 @@ public class Main {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    private static List<Node> compileSources(Set<Path> sources) throws IOException {
+        List<Node> segments = new ArrayList<Node>();
+        for (Path source : sources) {
+            if (!Files.isRegularFile(source)) {
+                continue;
+            }
+
+            String fileName = source.getFileName().toString();
+            if (!fileName.endsWith(".java")) {
+                continue;
+            }
+
+            segments.addAll(Main.compileSource(source));
+        }
+        return segments;
+    }
+
+    private static List<Node> compileSource(Path source) throws IOException {
+        String fileName = source.getFileName().toString();
+        int fileSeparator = fileName.lastIndexOf('.');
+        String name = fileName.substring(0, fileSeparator);
+
+        String input = Files.readString(source);
+        List<Node> dependencies = Main.compile(name, input);
+
+        List<Node> copy = new ArrayList<Node>();
+        copy.add(new MapNode("class").withString("name", name));
+        copy.addAll(dependencies);
+        return copy;
+    }
+
+    private static List<Node> compile(String name, String input) {
+        return Main.compile(name, input, new OrRule(List.of(
+                Imports.createImportRule(),
+                new StringRule("value")
+        )));
     }
 
     private static Optional<String> generate(Node node) {

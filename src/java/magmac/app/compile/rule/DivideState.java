@@ -1,4 +1,4 @@
-package magmac.app.compile;
+package magmac.app.compile.rule;
 
 import java.util.stream.Stream;
 
