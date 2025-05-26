@@ -31,6 +31,14 @@ RuleResult --> List
 RuleResult --> Optional
 RuleResult --> Function
 RuleResult --> Supplier
+class Result
+Result --> Tuple2
+Result --> Function
+Result --> Supplier
+class Err
+Err --> Tuple2
+Err --> Function
+Err --> Supplier
 class PrefixRule
 PrefixRule --> Node
 PrefixRule --> InlineRuleResult
@@ -43,6 +51,10 @@ StringRule --> RuleResult
 class StripRule
 StripRule --> Node
 StripRule --> RuleResult
+class Ok
+Ok --> Tuple2
+Ok --> Function
+Ok --> Supplier
 class Tuple2
 class MapNode
 MapNode --> HashMap
@@ -65,6 +77,9 @@ Node --> List
 Node --> Map
 Node --> Optional
 class Main
+Main --> Err
+Main --> Ok
+Main --> Result
 Main --> Imports
 Main --> MapNode
 Main --> Node
