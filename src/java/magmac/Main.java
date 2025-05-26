@@ -80,15 +80,15 @@ public class Main {
     }
 
     private static List<Node> compile(String name, String input, Rule childRule) {
-        return Main.createRootRule(childRule).lex(input).map(root -> {
-                    List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
-                    return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
-                        nodes.add(Main.createDependency(name, node));
-                        return nodes;
-                    }, (_, next) -> next);
-                })
+        Node root = Main.createRootRule(childRule).lex(input)
                 .toOptional()
-                .orElse(new ArrayList<>());
+                .orElse(new MapNode());
+
+        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
+        return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
+            nodes.add(Main.createDependency(name, node));
+            return nodes;
+        }, (_, next) -> next);
     }
 
     private static Rule createRootRule(Rule childRule) {
