@@ -44,12 +44,14 @@ InlineRuleResult --> Supplier
 class Sources
 Sources --> Result
 Sources --> IOException
-Sources --> Set
+Sources --> Map
 class Iters
-Iters --> RangeHead
+Iters --> Tuple2
 Iters --> HeadedIter
+Iters --> RangeHead
 Iters --> ArrayList
 Iters --> List
+Iters --> Map
 Iters --> Set
 class Parser
 Parser --> Iters
@@ -75,13 +77,9 @@ SafeFiles --> Set
 SafeFiles --> Collectors
 SafeFiles --> Stream
 class Lexer
-Lexer --> Result
 Lexer --> Node
 Lexer --> Location
-Lexer --> Source
-Lexer --> IOException
 Lexer --> Map
-Lexer --> Set
 class Location
 Location --> List
 class StringRule
@@ -112,10 +110,15 @@ StripRule --> Node
 StripRule --> RuleResult
 class PathSources
 PathSources --> SafeFiles
+PathSources --> Tuple2
+PathSources --> Iters
+PathSources --> MapCollector
+PathSources --> ResultCollector
 PathSources --> Result
 PathSources --> IOException
 PathSources --> Files
 PathSources --> Path
+PathSources --> Map
 PathSources --> Set
 PathSources --> Collectors
 class Ok
@@ -165,16 +168,11 @@ class RuleLexer
 RuleLexer --> Tuple2
 RuleLexer --> Iters
 RuleLexer --> MapCollector
-RuleLexer --> ResultCollector
-RuleLexer --> Result
 RuleLexer --> MapNode
 RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> Location
-RuleLexer --> Source
-RuleLexer --> IOException
 RuleLexer --> Map
-RuleLexer --> Set
 class SuffixRule
 SuffixRule --> Node
 SuffixRule --> InlineRuleResult

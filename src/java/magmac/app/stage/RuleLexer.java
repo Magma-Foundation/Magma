@@ -3,17 +3,12 @@ package magmac.app.stage;
 import magmac.api.Tuple2;
 import magmac.api.collect.Iters;
 import magmac.api.collect.MapCollector;
-import magmac.api.collect.ResultCollector;
-import magmac.api.result.Result;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;
-import magmac.app.io.Source;
 
-import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 
 public class RuleLexer implements Lexer {
     private final Rule rootRule;
@@ -23,20 +18,22 @@ public class RuleLexer implements Lexer {
     }
 
     @Override
-    public Result<Map<Location, Node>, IOException> lexAll(Set<Source> sources) {
-        return Iters.fromSet(sources)
-                .map(source -> this.lexSource(source))
-                .collect(new ResultCollector<>(new MapCollector<>()));
+    public Map<Location, Node> lexAll(Map<Location, String> values) {
+        return Iters.fromMap(values)
+                .map(entry -> this.getLocationNodeTuple2(entry))
+                .collect(new MapCollector<>());
     }
 
-    private Result<Tuple2<Location, Node>, IOException> lexSource(Source source) {
-        return source.read().mapValue(input -> {
-            Node root = this.rootRule
-                    .lex(input)
-                    .toOptional()
-                    .orElse(new MapNode());
+    private Tuple2<Location, Node> getLocationNodeTuple2(Tuple2<Location, String> tuple) {
+        Location location = tuple.left();
+        String input = tuple.right();
 
-            return new Tuple2<>(source.computeLocation(), root);
-        });
+        Node root = this.rootRule
+                .lex(input)
+                .toOptional()
+                .orElse(new MapNode());
+
+        return new Tuple2<>(location, root);
     }
+
 }

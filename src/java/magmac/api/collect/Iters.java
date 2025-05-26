@@ -1,18 +1,25 @@
 package magmac.api.collect;
 
-import magmac.api.collect.head.RangeHead;
+import magmac.api.Tuple2;
 import magmac.api.collect.head.HeadedIter;
+import magmac.api.collect.head.RangeHead;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class Iters {
     public static <T> Iter<T> fromSet(Set<T> set) {
-        return fromList(new ArrayList<>(set));
+        return Iters.fromList(new ArrayList<>(set));
     }
 
     public static <T> Iter<T> fromList(List<T> list) {
         return new HeadedIter<>(new RangeHead(list.size())).map(list::get);
+    }
+
+    public static <K, V> Iter<Tuple2<K, V>> fromMap(Map<K, V> map) {
+        return Iters.fromList(new ArrayList<>(map.entrySet()))
+                .map(entry -> new Tuple2<>(entry.getKey(), entry.getValue()));
     }
 }

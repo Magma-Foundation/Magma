@@ -3,8 +3,8 @@ package magmac.app.io;
 import magmac.api.result.Result;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Map;
 
 public interface Sources {
-    Result<Set<Source>, IOException> collect();
+    Result<Map<Location, String>, IOException> readAll();
 }

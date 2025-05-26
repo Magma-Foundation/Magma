@@ -25,12 +25,11 @@ public final class CompileApplication implements Application {
 
     @Override
     public Optional<IOException> run() {
-        return this.sources.collect().match(units -> {
-            return lexer.lexAll(units).match(roots -> {
-                Map<Location, Node> parsed = Parser.parseAll(roots);
-                Map<Location, String> outputs = Generator.generateAll(parsed);
-                return this.targets.writeAll(outputs);
-            }, Optional::of);
+        return this.sources.readAll().match(units -> {
+            Map<Location, Node> roots = this.lexer.lexAll(units);
+            Map<Location, Node> parsed = Parser.parseAll(roots);
+            Map<Location, String> outputs = Generator.generateAll(parsed);
+            return this.targets.writeAll(outputs);
         }, Optional::of);
     }
 }
