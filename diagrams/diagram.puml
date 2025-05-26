@@ -51,6 +51,18 @@ Iters --> HeadedIter
 Iters --> ArrayList
 Iters --> List
 Iters --> Set
+class Parser
+Parser --> Iters
+Parser --> MapNode
+Parser --> Node
+Parser --> Location
+Parser --> ArrayList
+Parser --> Collection
+Parser --> Collections
+Parser --> HashMap
+Parser --> List
+Parser --> Map
+Parser --> Optional
 class SafeFiles
 SafeFiles --> Err
 SafeFiles --> Ok
@@ -62,6 +74,19 @@ SafeFiles --> Optional
 SafeFiles --> Set
 SafeFiles --> Collectors
 SafeFiles --> Stream
+class Lexer
+Lexer --> Tuple2
+Lexer --> Iters
+Lexer --> Result
+Lexer --> JavaRoots
+Lexer --> MapNode
+Lexer --> Node
+Lexer --> Location
+Lexer --> Source
+Lexer --> IOException
+Lexer --> HashMap
+Lexer --> Map
+Lexer --> Set
 class Location
 Location --> List
 class StringRule
@@ -89,20 +114,6 @@ class Tuple2
 class StripRule
 StripRule --> Node
 StripRule --> RuleResult
-class Compiler
-Compiler --> Tuple2
-Compiler --> Iters
-Compiler --> MapNode
-Compiler --> Node
-Compiler --> Location
-Compiler --> Source
-Compiler --> ArrayList
-Compiler --> Collection
-Compiler --> Collections
-Compiler --> HashMap
-Compiler --> List
-Compiler --> Map
-Compiler --> Optional
 class PathSources
 PathSources --> SafeFiles
 PathSources --> Result
@@ -120,22 +131,8 @@ Iter --> Result
 Iter --> BiFunction
 Iter --> Function
 class Application
-Application --> Tuple2
-Application --> Iters
-Application --> Result
-Application --> JavaRoots
-Application --> PlantUMLRoots
-Application --> MapNode
-Application --> Node
-Application --> Location
-Application --> Source
-Application --> Sources
-Application --> Targets
 Application --> IOException
-Application --> HashMap
-Application --> Map
 Application --> Optional
-Application --> Set
 class State
 State --> Node
 State --> List
@@ -173,7 +170,7 @@ Result --> Tuple2
 Result --> Function
 Result --> Supplier
 class Main
-Main --> Application
+Main --> CompileApplication
 Main --> PathTargets
 Main --> PathSources
 Main --> Sources
@@ -184,6 +181,14 @@ Source --> Result
 Source --> IOException
 class DivideState
 DivideState --> Stream
+class Generator
+Generator --> PlantUMLRoots
+Generator --> Node
+Generator --> Location
+Generator --> Targets
+Generator --> IOException
+Generator --> Map
+Generator --> Optional
 class HeadedIter
 HeadedIter --> Iter
 HeadedIter --> Ok
@@ -203,6 +208,17 @@ class MutableDivideState
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 MutableDivideState --> Stream
+class CompileApplication
+CompileApplication --> Node
+CompileApplication --> Location
+CompileApplication --> Sources
+CompileApplication --> Targets
+CompileApplication --> Generator
+CompileApplication --> Lexer
+CompileApplication --> Parser
+CompileApplication --> IOException
+CompileApplication --> Map
+CompileApplication --> Optional
 class Targets
 Targets --> IOException
 Targets --> Optional

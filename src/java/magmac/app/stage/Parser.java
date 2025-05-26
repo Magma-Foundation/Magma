@@ -1,6 +1,5 @@
-package magmac.app;
+package magmac.app.stage;
 
-import magmac.api.Tuple2;
 import magmac.api.collect.Iters;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class Compiler {
+public class Parser {
     private static Node createDependency(String parent, Node node) {
         if (node.is("import")) {
             return new MapNode("dependency")
@@ -25,8 +24,9 @@ public class Compiler {
         return node;
     }
 
-    static Tuple2<Location, Node> compile(Map<Location, Node> roots) {
-        List<Node> parsed = Compiler.parseAll(roots)
+    public static Map<Location, Node> parseAll(Map<Location, Node> roots) {
+        List<Node> parsed = Iters.fromSet(roots.entrySet()).<Map<Location, Node>>fold(new HashMap<Location, Node>(),
+                        (sourceNodeHashMap, tuple) -> Parser.parseEntry(sourceNodeHashMap, tuple.getKey(), tuple.getValue()))
                 .values()
                 .stream()
                 .map(node -> node.findNodeList("children"))
@@ -36,16 +36,11 @@ public class Compiler {
 
         Node root = new MapNode().withNodeList("children", parsed);
         Location location = new Location(Collections.emptyList(), "diagram");
-        return new Tuple2<>(location, root);
-    }
-
-    private static Map<Location, Node> parseAll(Map<Location, Node> root) {
-        return Iters.fromSet(root.entrySet()).<Map<Location, Node>>fold(new HashMap<Location, Node>(),
-                (sourceNodeHashMap, tuple) -> Compiler.parseEntry(sourceNodeHashMap, tuple.getKey(), tuple.getValue()));
+        return Map.of(location, root);
     }
 
     private static Map<Location, Node> parseEntry(Map<Location, Node> current, Location location, Node root) {
-        current.put(location, Compiler.parse(location, root));
+        current.put(location, Parser.parse(location, root));
         return current;
     }
 
@@ -53,7 +48,7 @@ public class Compiler {
         String sourceName = location.name();
 
         List<Node> dependencies = root.findNodeList("children").orElse(new ArrayList<>()).stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
-            nodes.add(Compiler.createDependency(sourceName, node));
+            nodes.add(Parser.createDependency(sourceName, node));
             return nodes;
         }, (_, next) -> next);
 
