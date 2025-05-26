@@ -1,4 +1,4 @@
-package magmac.app;
+package magmac.app.compile;
 
 import java.util.ArrayList;
 import java.util.List;

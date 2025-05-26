@@ -1,6 +1,6 @@
-package magmac.app.rule;
+package magmac.app.compile.rule;
 
-import magmac.app.rule.result.RuleResult;
+import magmac.app.compile.rule.result.RuleResult;
 
 public record TypeRule(String type, Rule childRule) implements Rule {
     @Override

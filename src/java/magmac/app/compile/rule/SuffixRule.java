@@ -1,7 +1,7 @@
-package magmac.app.rule;
+package magmac.app.compile.rule;
 
-import magmac.app.rule.result.InlineRuleResult;
-import magmac.app.rule.result.RuleResult;
+import magmac.app.compile.rule.result.InlineRuleResult;
+import magmac.app.compile.rule.result.RuleResult;
 
 public record SuffixRule(Rule childRule, String suffix) implements Rule {
     @Override

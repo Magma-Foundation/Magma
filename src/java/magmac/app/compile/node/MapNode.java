@@ -1,4 +1,4 @@
-package magmac.app.node;
+package magmac.app.compile.node;
 
 import java.util.HashMap;
 import java.util.Map;

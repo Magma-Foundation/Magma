@@ -1,7 +1,7 @@
-package magmac.app.rule;
+package magmac.app.compile.rule;
 
-import magmac.app.rule.result.InlineRuleResult;
-import magmac.app.rule.result.RuleResult;
+import magmac.app.compile.rule.result.InlineRuleResult;
+import magmac.app.compile.rule.result.RuleResult;
 
 public record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
     @Override

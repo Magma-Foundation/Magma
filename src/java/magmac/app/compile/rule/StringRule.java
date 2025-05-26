@@ -1,8 +1,8 @@
-package magmac.app.rule;
+package magmac.app.compile.rule;
 
-import magmac.app.node.MapNode;
-import magmac.app.rule.result.InlineRuleResult;
-import magmac.app.rule.result.RuleResult;
+import magmac.app.compile.node.MapNode;
+import magmac.app.compile.rule.result.InlineRuleResult;
+import magmac.app.compile.rule.result.RuleResult;
 
 public record StringRule(String key) implements Rule {
     @Override

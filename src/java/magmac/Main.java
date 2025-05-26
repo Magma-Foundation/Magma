@@ -1,16 +1,10 @@
 package magmac;
 
-import magmac.app.DivideState;
-import magmac.app.MutableDivideState;
-import magmac.app.node.MapNode;
-import magmac.app.node.Node;
-import magmac.app.rule.InfixRule;
-import magmac.app.rule.PrefixRule;
-import magmac.app.rule.Rule;
-import magmac.app.rule.StringRule;
-import magmac.app.rule.StripRule;
-import magmac.app.rule.SuffixRule;
-import magmac.app.rule.TypeRule;
+import magmac.app.compile.DivideState;
+import magmac.app.ast.Imports;
+import magmac.app.compile.MutableDivideState;
+import magmac.app.compile.node.MapNode;
+import magmac.app.compile.node.Node;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -91,15 +85,9 @@ public class Main {
     }
 
     private static Optional<List<Node>> compileRootSegment(List<Node> state, String name, String input) {
-        return Main.createImportRule().lex(input).toOptional().map((Node value) -> {
+        return Imports.createImportRule().lex(input).toOptional().map((Node value) -> {
             return Main.parseImport(state, name, value);
         });
-    }
-
-    private static Rule createImportRule() {
-        Rule childRule = new InfixRule(new StringRule("namespace"), ".", new StringRule("child"));
-        Rule stripRule = new StripRule(new SuffixRule(new PrefixRule("import ", childRule), ";"));
-        return new TypeRule("import", stripRule);
     }
 
     private static List<Node> parseImport(List<Node> state, String parent, Node node) {

@@ -1,6 +1,6 @@
-package magmac.app.rule.result;
+package magmac.app.compile.rule.result;
 
-import magmac.app.node.Node;
+import magmac.app.compile.node.Node;
 
 import java.util.Optional;
 import java.util.function.Function;

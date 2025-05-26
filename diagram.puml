@@ -6,18 +6,15 @@ SuffixRule --> RuleResult
 class InfixRule
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
+class Node
+Node --> Map
+Node --> Optional
 class Main
 Main --> DivideState
+Main --> Imports
 Main --> MutableDivideState
 Main --> MapNode
 Main --> Node
-Main --> InfixRule
-Main --> PrefixRule
-Main --> Rule
-Main --> StringRule
-Main --> StripRule
-Main --> SuffixRule
-Main --> TypeRule
 Main --> IOException
 Main --> Files
 Main --> Path
@@ -28,17 +25,17 @@ Main --> Optional
 Main --> Set
 Main --> Collectors
 Main --> Stream
-class TypeRule
-TypeRule --> RuleResult
+class DivideState
+DivideState --> Stream
 class Rule
 Rule --> RuleResult
-class Node
-Node --> Map
-Node --> Optional
-class MapNode
-MapNode --> HashMap
-MapNode --> Map
-MapNode --> Optional
+class TypeRule
+TypeRule --> RuleResult
+class RuleResult
+RuleResult --> Node
+RuleResult --> Optional
+RuleResult --> Function
+RuleResult --> Supplier
 class MutableDivideState
 MutableDivideState --> ArrayList
 MutableDivideState --> List
@@ -46,22 +43,27 @@ MutableDivideState --> Stream
 class PrefixRule
 PrefixRule --> InlineRuleResult
 PrefixRule --> RuleResult
-class RuleResult
-RuleResult --> Node
-RuleResult --> Optional
-RuleResult --> Function
-RuleResult --> Supplier
-class InlineRuleResult
-InlineRuleResult --> Node
-InlineRuleResult --> Optional
-InlineRuleResult --> Function
-InlineRuleResult --> Supplier
 class StringRule
 StringRule --> MapNode
 StringRule --> InlineRuleResult
 StringRule --> RuleResult
 class StripRule
 StripRule --> RuleResult
-class DivideState
-DivideState --> Stream
+class InlineRuleResult
+InlineRuleResult --> Node
+InlineRuleResult --> Optional
+InlineRuleResult --> Function
+InlineRuleResult --> Supplier
+class MapNode
+MapNode --> HashMap
+MapNode --> Map
+MapNode --> Optional
+class Imports
+Imports --> InfixRule
+Imports --> PrefixRule
+Imports --> Rule
+Imports --> StringRule
+Imports --> StripRule
+Imports --> SuffixRule
+Imports --> TypeRule
 @enduml
