@@ -1,16 +1,5 @@
 @startuml
 skinparam linetype ortho
-class PlantUMLRoots
-PlantUMLRoots --> Node
-PlantUMLRoots --> DivideRule
-PlantUMLRoots --> InfixRule
-PlantUMLRoots --> OrRule
-PlantUMLRoots --> PrefixRule
-PlantUMLRoots --> Rule
-PlantUMLRoots --> StringRule
-PlantUMLRoots --> SuffixRule
-PlantUMLRoots --> TypeRule
-PlantUMLRoots --> List
 class TypeRule
 TypeRule --> Node
 TypeRule --> InlineRuleResult
@@ -29,6 +18,13 @@ Node --> Optional
 class Rule
 Rule --> Node
 Rule --> RuleResult
+class JavaRoots
+JavaRoots --> Imports
+JavaRoots --> DivideRule
+JavaRoots --> OrRule
+JavaRoots --> Rule
+JavaRoots --> StringRule
+JavaRoots --> List
 class RuleResult
 RuleResult --> Tuple2
 RuleResult --> Node
@@ -45,6 +41,17 @@ class Sources
 Sources --> Result
 Sources --> IOException
 Sources --> Map
+class PlantUMLRoots
+PlantUMLRoots --> Node
+PlantUMLRoots --> DivideRule
+PlantUMLRoots --> InfixRule
+PlantUMLRoots --> OrRule
+PlantUMLRoots --> PrefixRule
+PlantUMLRoots --> Rule
+PlantUMLRoots --> StringRule
+PlantUMLRoots --> SuffixRule
+PlantUMLRoots --> TypeRule
+PlantUMLRoots --> List
 class Iters
 Iters --> Tuple2
 Iters --> HeadedIter
@@ -87,13 +94,6 @@ PathTargets --> Files
 PathTargets --> Path
 PathTargets --> Map
 PathTargets --> Optional
-class JavaRoots
-JavaRoots --> Imports
-JavaRoots --> DivideRule
-JavaRoots --> OrRule
-JavaRoots --> Rule
-JavaRoots --> StringRule
-JavaRoots --> List
 class Head
 Head --> Optional
 class Tuple2
@@ -101,14 +101,15 @@ class StripRule
 StripRule --> Node
 StripRule --> RuleResult
 class ParserImpl
+ParserImpl --> Tuple2
 ParserImpl --> Iters
+ParserImpl --> MapCollector
 ParserImpl --> MapNode
 ParserImpl --> Node
 ParserImpl --> Location
 ParserImpl --> ArrayList
 ParserImpl --> Collection
 ParserImpl --> Collections
-ParserImpl --> HashMap
 ParserImpl --> List
 ParserImpl --> Map
 ParserImpl --> Optional

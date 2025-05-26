@@ -2,7 +2,7 @@ package magmac;
 
 import magmac.app.Application;
 import magmac.app.CompileApplication;
-import magmac.app.compile.lang.JavaRoots;
+import magmac.app.compile.lang.java.JavaRoots;
 import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;

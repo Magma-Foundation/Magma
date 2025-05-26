@@ -1,4 +1,4 @@
-package magmac.app.compile.lang;
+package magmac.app.compile.lang.java;
 
 import magmac.app.compile.ast.Imports;
 import magmac.app.compile.rule.DivideRule;

@@ -1,6 +1,6 @@
 package magmac.app.stage;
 
-import magmac.app.compile.lang.PlantUMLRoots;
+import magmac.app.compile.lang.plant.PlantUMLRoots;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 
