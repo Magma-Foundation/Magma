@@ -15,6 +15,11 @@ class InfixRule
 InfixRule --> Node
 InfixRule --> InlineRuleResult
 InfixRule --> RuleResult
+class PathSource
+PathSource --> SafeFiles
+PathSource --> Result
+PathSource --> IOException
+PathSource --> Path
 class HeadedIter
 HeadedIter --> Iter
 HeadedIter --> Ok
@@ -127,10 +132,8 @@ class State
 State --> Node
 State --> List
 class Source
-Source --> SafeFiles
 Source --> Result
 Source --> IOException
-Source --> Path
 class Sources
 Sources --> Result
 Sources --> IOException

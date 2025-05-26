@@ -14,7 +14,7 @@ public record PathSources(Path root) implements Sources {
         return sources.stream()
                 .filter(Files::isRegularFile)
                 .filter(file -> file.toString().endsWith(".java"))
-                .map(path -> new Source(path))
+                .map(path -> new PathSource(path))
                 .collect(Collectors.toSet());
     }
 
