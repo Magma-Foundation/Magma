@@ -17,9 +17,7 @@ public class RuleGenerator implements Generator {
     }
 
     private String generate(Node value) {
-        return this.rootRule.generate(value)
-                .toOptional()
-                .orElse("");
+        return this.rootRule.generate(value).findValue().orElse("");
     }
 
     @Override

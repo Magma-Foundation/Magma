@@ -1,14 +1,16 @@
 package magmac.app.compile.rule;
 
+import magmac.api.result.Err;
+import magmac.api.result.Result;
+import magmac.app.compile.CompileError;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.result.InlineRuleResult;
-import magmac.app.compile.rule.result.RuleResult;
+import magmac.app.compile.rule.result.StringContext;
 
 public record PrefixRule(String prefix, Rule childRule) implements Rule {
     @Override
-    public RuleResult<Node> lex(String input) {
+    public Result<Node, CompileError> lex(String input) {
         if (!input.startsWith(this.prefix())) {
-            return InlineRuleResult.createEmpty();
+            return new Err<>(new CompileError("?", new StringContext("?")));
         }
 
         String sliced = input.substring(this.prefix.length());
@@ -16,7 +18,7 @@ public record PrefixRule(String prefix, Rule childRule) implements Rule {
     }
 
     @Override
-    public RuleResult<String> generate(Node node) {
-        return this.childRule.generate(node).map(value -> this.prefix + value);
+    public Result<String, CompileError> generate(Node node) {
+        return this.childRule.generate(node).mapValue(value -> this.prefix + value);
     }
 }

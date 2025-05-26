@@ -1,21 +1,24 @@
 package magmac.app.compile.rule;
 
+import magmac.api.result.Err;
+import magmac.api.result.Ok;
+import magmac.api.result.Result;
+import magmac.app.compile.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.result.InlineRuleResult;
-import magmac.app.compile.rule.result.RuleResult;
+import magmac.app.compile.rule.result.StringContext;
 
 public record ExactRule(String value) implements Rule {
     @Override
-    public RuleResult<Node> lex(String input) {
+    public Result<Node, CompileError> lex(String input) {
         if (input.equals(this.value)) {
-            return InlineRuleResult.from(new MapNode());
+            return new Ok<>(new MapNode());
         }
-        return InlineRuleResult.createEmpty();
+        return new Err<>(new CompileError("?", new StringContext("?")));
     }
 
     @Override
-    public RuleResult<String> generate(Node node) {
-        return InlineRuleResult.from(this.value);
+    public Result<String, CompileError> generate(Node node) {
+        return new Ok<>(this.value);
     }
 }

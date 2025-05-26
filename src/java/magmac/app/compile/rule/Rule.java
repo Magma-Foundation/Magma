@@ -1,10 +1,11 @@
 package magmac.app.compile.rule;
 
+import magmac.api.result.Result;
+import magmac.app.compile.CompileError;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.result.RuleResult;
 
 public interface Rule {
-    RuleResult<Node> lex(String input);
+    Result<Node, CompileError> lex(String input);
 
-    RuleResult<String> generate(Node node);
+    Result<String, CompileError> generate(Node node);
 }

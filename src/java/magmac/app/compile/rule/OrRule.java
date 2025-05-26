@@ -1,8 +1,11 @@
 package magmac.app.compile.rule;
 
+import magmac.api.result.Err;
+import magmac.api.result.Ok;
+import magmac.api.result.Result;
+import magmac.app.compile.CompileError;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.result.InlineRuleResult;
-import magmac.app.compile.rule.result.RuleResult;
+import magmac.app.compile.rule.result.StringContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,24 +24,27 @@ public record OrRule(List<Rule> rules) implements Rule {
             return new State<>(Optional.of(value));
         }
 
-        RuleResult<T> toResult() {
-            return this.maybeValue.map(InlineRuleResult::from).orElseGet(InlineRuleResult::createEmpty);
+        Result<T, CompileError> toResult() {
+            return this.maybeValue
+                    .<Result<T, CompileError>>map(value -> new Ok<>(value))
+                    .orElseGet(() -> new Err<>(new CompileError("?", new StringContext("?"))));
+        }
+
+        public State<T> withError(CompileError error) {
+            return this;
         }
     }
 
-    private static <T> State<T> foldElement(State<T> state, Rule rule, Function<Rule, RuleResult<T>> mapper) {
-        return mapper.apply(rule)
-                .map(state::withValue)
-                .toOptional()
-                .orElse(state);
+    private static <T> State<T> foldElement(State<T> state, Rule rule, Function<Rule, Result<T, CompileError>> mapper) {
+        return mapper.apply(rule).match(state::withValue, state::withError);
     }
 
     @Override
-    public RuleResult<Node> lex(String input) {
+    public Result<Node, CompileError> lex(String input) {
         return this.foldAll(rule1 -> rule1.lex(input));
     }
 
-    private <T> RuleResult<T> foldAll(Function<Rule, RuleResult<T>> mapper) {
+    private <T> Result<T, CompileError> foldAll(Function<Rule, Result<T, CompileError>> mapper) {
         return this.rules.stream().reduce(new State<T>(),
                         (state, rule) -> OrRule.foldElement(state, rule, mapper),
                         (_, next) -> next)
@@ -46,7 +52,7 @@ public record OrRule(List<Rule> rules) implements Rule {
     }
 
     @Override
-    public RuleResult<String> generate(Node node) {
+    public Result<String, CompileError> generate(Node node) {
         return this.foldAll(rule1 -> rule1.generate(node));
     }
 }

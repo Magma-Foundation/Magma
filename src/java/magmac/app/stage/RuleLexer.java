@@ -29,7 +29,7 @@ public class RuleLexer implements Lexer {
 
         Node root = this.rootRule
                 .lex(input)
-                .toOptional()
+                .findValue()
                 .orElse(new MapNode());
 
         return new Tuple2<>(location, root);

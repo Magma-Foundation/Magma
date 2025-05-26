@@ -1,5 +1,7 @@
 package magmac.app.compile.rule;
 
+import magmac.api.collect.Iters;
+import magmac.api.collect.collect.ResultCollector;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
@@ -8,13 +10,10 @@ import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
-import magmac.app.compile.rule.result.InlineRuleResult;
-import magmac.app.compile.rule.result.RuleResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public record DivideRule(String key, Rule childRule) implements Rule {
     private static List<String> divide(String input) {
@@ -39,33 +38,31 @@ public record DivideRule(String key, Rule childRule) implements Rule {
     }
 
     @Override
-    public RuleResult<Node> lex(String input) {
+    public Result<Node, CompileError> lex(String input) {
         List<String> segments = DivideRule.divide(input);
-        RuleResult<List<Node>> result = InlineRuleResult.from(new ArrayList<>());
+        var result = (Result<List<Node>, CompileError>) new Ok<List<Node>, CompileError>(new ArrayList<Node>());
         for (String segment : segments) {
             String stripped = segment.strip();
-            result = result.and(() -> this.childRule.lex(stripped)).map(tuple -> {
+            result = result.and(() -> this.childRule.lex(stripped)).mapValue(tuple -> {
                 tuple.left().add(tuple.right());
                 return tuple.left();
             });
         }
 
-        return result.map(children -> new MapNode().withNodeList(this.key(), children));
+        return result.mapValue(children -> new MapNode().withNodeList(this.key(), children));
     }
 
     @Override
-    public RuleResult<String> generate(Node node) {
-        return new InlineRuleResult<>(node.findNodeList(this.key)
+    public Result<String, CompileError> generate(Node node) {
+        return node.findNodeList(this.key)
                 .map(list -> this.join(list))
-                .<Result<String, CompileError>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("Node list '" + this.key + "' not present", new NodeContext(node)))));
+                .orElseGet(() -> new Err<>(new CompileError("Node list '" + this.key + "' not present", new NodeContext(node))))
+                .mapValue(value -> value.orElse(""));
     }
 
-    private String join(List<Node> list) {
-        return list.stream()
+    private Result<Optional<String>, CompileError> join(List<Node> list) {
+        return Iters.fromList(list)
                 .map(this.childRule::generate)
-                .map(RuleResult::toOptional)
-                .flatMap(Optional::stream)
-                .collect(Collectors.joining());
+                .collect(new ResultCollector<>(new Joiner()));
     }
 }
