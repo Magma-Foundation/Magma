@@ -28,11 +28,7 @@ public final class InlineRuleResult<T> implements RuleResult<T> {
 
     @Override
     public <R> RuleResult<Tuple2<T, R>> and(Supplier<RuleResult<R>> other) {
-        return new InlineRuleResult<>(this.optional.flatMap(leftResult -> {
-            return other.get().toOptional().map(otherResult -> {
-                return new Tuple2<>(leftResult, otherResult);
-            });
-        }));
+        return new InlineRuleResult<>(this.optional.flatMap(leftResult -> other.get().toOptional().map(otherResult -> new Tuple2<>(leftResult, otherResult))));
     }
 
     @Override

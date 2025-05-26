@@ -14,8 +14,6 @@ JavaRoots --> TypeRule
 JavaRoots --> List
 class RuleResult
 RuleResult --> Tuple2
-RuleResult --> Node
-RuleResult --> List
 RuleResult --> Optional
 RuleResult --> Function
 RuleResult --> Supplier
@@ -221,10 +219,6 @@ Ok --> Function
 Ok --> Supplier
 class Iter
 Iter --> Result
-Iter --> Node
-Iter --> Location
-Iter --> IOException
-Iter --> Map
 Iter --> BiFunction
 Iter --> Function
 class Application

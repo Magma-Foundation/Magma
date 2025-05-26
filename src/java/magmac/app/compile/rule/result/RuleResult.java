@@ -1,9 +1,7 @@
 package magmac.app.compile.rule.result;
 
 import magmac.api.Tuple2;
-import magmac.app.compile.node.Node;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;

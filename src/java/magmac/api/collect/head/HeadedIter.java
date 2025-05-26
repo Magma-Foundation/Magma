@@ -39,6 +39,6 @@ public record HeadedIter<T>(Head<T> head) implements Iter<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return fold(collector.createInitial(), collector::fold);
+        return this.fold(collector.createInitial(), collector::fold);
     }
 }

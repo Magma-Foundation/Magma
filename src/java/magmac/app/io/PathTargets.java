@@ -28,7 +28,7 @@ public record PathTargets(Path root) implements Targets {
     @Override
     public Optional<IOException> writeAll(Map<Location, String> outputs) {
         for (Map.Entry<Location, String> tuple : outputs.entrySet()) {
-            Optional<IOException> maybeError = write(tuple.getKey(), tuple.getValue());
+            Optional<IOException> maybeError = this.write(tuple.getKey(), tuple.getValue());
             if (maybeError.isPresent()) {
                 return maybeError;
             }

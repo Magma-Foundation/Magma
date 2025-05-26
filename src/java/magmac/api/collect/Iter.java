@@ -1,11 +1,7 @@
 package magmac.api.collect;
 
 import magmac.api.result.Result;
-import magmac.app.compile.node.Node;
-import magmac.app.io.Location;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 

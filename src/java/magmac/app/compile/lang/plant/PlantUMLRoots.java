@@ -12,7 +12,7 @@ import magmac.app.compile.rule.TypeRule;
 
 import java.util.List;
 
-public class PlantUMLRoots {
+public final class PlantUMLRoots {
     public static Rule createRule() {
         return new DivideRule("children", PlantUMLRoots.createRootSegmentRule());
     }

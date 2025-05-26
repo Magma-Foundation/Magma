@@ -8,7 +8,7 @@ import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
 
-public class Imports {
+public final class Imports {
     public static Rule createImportRule() {
         Rule childRule = new InfixRule(new StringRule("namespace"), ".", new StringRule("child"));
         Rule stripRule = new StripRule(new SuffixRule(new PrefixRule("import ", childRule), ";"));

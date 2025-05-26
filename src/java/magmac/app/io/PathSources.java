@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public record PathSources(Path root) implements Sources {
-    public Set<Source> collectUnits(Set<Path> sources) {
+    private Set<Source> collectUnits(Set<Path> sources) {
         return sources.stream()
                 .filter(Files::isRegularFile)
                 .filter(file -> file.toString().endsWith(".java"))
@@ -29,7 +29,7 @@ public record PathSources(Path root) implements Sources {
 
     @Override
     public Result<Map<Location, String>, IOException> readAll() {
-        return collect().flatMapValue(sources1 -> Iters.fromSet(sources1)
+        return this.collect().flatMapValue(sources1 -> Iters.fromSet(sources1)
                 .map(source -> source.read().mapValue(input -> new Tuple2<>(source.computeLocation(), input)))
                 .collect(new ResultCollector<>(new MapCollector<>())));
     }

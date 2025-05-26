@@ -23,9 +23,7 @@ public class TreeParser implements Parser {
     }
 
     private Tuple2<ParseState, Node> parseNodeLists(ParseState state, Node root) {
-        return root.iterNodeLists().fold(new Tuple2<>(state, root), (current, entry) -> {
-            return this.parseNodeList(current, entry);
-        });
+        return root.iterNodeLists().fold(new Tuple2<>(state, root), (current, entry) -> this.parseNodeList(current, entry));
     }
 
     private Tuple2<ParseState, Node> parseNodeList(Tuple2<ParseState, Node> current, Tuple2<String, List<Node>> entry) {
@@ -68,9 +66,7 @@ public class TreeParser implements Parser {
         Tuple2<ParseState, Node> nodeListsTuple = this.parseNodeLists(beforeTuple.left(), beforeTuple.right());
         ParseState state1 = nodeListsTuple.left();
         Node node = nodeListsTuple.right();
-        return this.afterPasser.pass(state1, node).orElseGet(() -> {
-            return new Tuple2<>(state1, node);
-        });
+        return this.afterPasser.pass(state1, node).orElseGet(() -> new Tuple2<>(state1, node));
     }
 
     @Override

@@ -51,12 +51,10 @@ public record DivideRule(String key, Rule childRule) implements Rule {
 
     @Override
     public RuleResult<String> generate(Node node) {
-        return new InlineRuleResult<>(node.findNodeList(this.key).map(list -> {
-            return list.stream()
-                    .map(this.childRule::generate)
-                    .map(RuleResult::toOptional)
-                    .flatMap(Optional::stream)
-                    .collect(Collectors.joining());
-        }));
+        return new InlineRuleResult<>(node.findNodeList(this.key).map(list -> list.stream()
+                .map(this.childRule::generate)
+                .map(RuleResult::toOptional)
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining())));
     }
 }
