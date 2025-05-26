@@ -3,6 +3,10 @@ package magmac.app.rule;
 import magmac.app.node.Node;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public record RuleResult(Optional<Node> optional) {
+public interface RuleResult {
+    Optional<Node> toOptional();
+
+    RuleResult and(Supplier<RuleResult> other);
 }
