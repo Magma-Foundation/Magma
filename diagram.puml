@@ -100,30 +100,46 @@ Imports --> StringRule
 Imports --> StripRule
 Imports --> SuffixRule
 Imports --> TypeRule
+class PathSources
+PathSources --> SafeFiles
+PathSources --> Result
+PathSources --> IOException
+PathSources --> Files
+PathSources --> Path
+PathSources --> Set
+PathSources --> Collectors
 class State
 State --> Node
 State --> List
+class Sources
+Sources --> Result
+Sources --> IOException
+Sources --> Set
 class Node
 Node --> List
 Node --> Map
 Node --> Optional
 class Main
-Main --> SafeFiles
-Main --> Ok
-Main --> Result
-Main --> JavaRoots
-Main --> PlantUMLRoots
-Main --> MapNode
-Main --> Node
-Main --> Unit
+Main --> Application
+Main --> PathSources
+Main --> Sources
 Main --> IOException
-Main --> Files
-Main --> Path
 Main --> Paths
-Main --> ArrayList
-Main --> List
-Main --> Optional
-Main --> Set
+class Application
+Application --> SafeFiles
+Application --> Ok
+Application --> Result
+Application --> MapNode
+Application --> Node
+Application --> Sources
+Application --> Unit
+Application --> IOException
+Application --> Path
+Application --> Paths
+Application --> ArrayList
+Application --> List
+Application --> Optional
+Application --> Set
 class TypeRule
 TypeRule --> Node
 TypeRule --> InlineRuleResult

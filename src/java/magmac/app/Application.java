@@ -1,0 +1,85 @@
+package magmac.app;
+
+import jvm.io.SafeFiles;
+import magmac.api.result.Ok;
+import magmac.api.result.Result;
+import magmac.app.compile.node.MapNode;
+import magmac.app.compile.node.Node;
+import magmac.app.io.Sources;
+import magmac.app.io.Unit;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+public record Application(Sources sources) {
+    private static Optional<IOException> generateSegments(Node node) {
+        String generated = PlantUMLRoots.createRule().generate(node).toOptional().orElse("");
+        Path target = Paths.get(".", "diagram.puml");
+        String csq = "@startuml\nskinparam linetype ortho\n" +
+                generated +
+                "@enduml\n";
+
+        return SafeFiles.writeString(target, csq);
+    }
+
+    private static Result<Node, IOException> compileSources(Set<Unit> units) {
+        Result<List<Node>, IOException> segmentsResult = new Ok<>(new ArrayList<Node>());
+        for (var unit : units) {
+            segmentsResult = segmentsResult.and(() -> {
+                return Application.compileSource(unit);
+            }).mapValue(tuple -> {
+                tuple.left().addAll(tuple.right());
+                return tuple.left();
+            });
+        }
+
+        return segmentsResult.mapValue(segments -> new MapNode().withNodeList("children", segments));
+    }
+
+    private static Result<List<Node>, IOException> compileSource(Unit unit) {
+        return unit.read().mapValue(input -> {
+            String name = unit.computeName();
+            List<Node> dependencies = Application.compile(name, input);
+
+            List<Node> copy = new ArrayList<Node>();
+            copy.add(new MapNode("class").withString("name", name));
+            copy.addAll(dependencies);
+            return copy;
+        });
+    }
+
+    private static List<Node> compile(String name, String input) {
+        Node root = JavaRoots.createRule().lex(input)
+                .toOptional()
+                .orElse(new MapNode());
+
+        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
+        return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
+            nodes.add(Application.createDependency(name, node));
+            return nodes;
+        }, (_, next) -> next);
+    }
+
+    private static Node createDependency(String parent, Node node) {
+        if (node.is("import")) {
+            return new MapNode("dependency")
+                    .withString("parent", parent)
+                    .withString("child", node.findString("child").orElse(""));
+        }
+
+        return node;
+    }
+
+    public Optional<IOException> run() {
+        return this.sources().collect().match(units -> {
+            return Application.compileSources(units).match(root -> {
+                return Application.generateSegments(root);
+            }, Optional::of);
+        }, Optional::of);
+    }
+}
