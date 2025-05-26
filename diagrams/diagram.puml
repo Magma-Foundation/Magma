@@ -182,11 +182,14 @@ Result --> Tuple2
 Result --> Function
 Result --> Supplier
 class Main
+Main --> Application
 Main --> CompileApplication
 Main --> JavaRoots
-Main --> PathTargets
 Main --> PathSources
+Main --> PathTargets
 Main --> Sources
+Main --> Targets
+Main --> Lexer
 Main --> RuleLexer
 Main --> IOException
 Main --> Paths
