@@ -80,13 +80,9 @@ class Main
 Main --> Err
 Main --> Ok
 Main --> Result
-Main --> Imports
+Main --> JavaRoots
 Main --> MapNode
 Main --> Node
-Main --> DivideRule
-Main --> OrRule
-Main --> Rule
-Main --> StringRule
 Main --> IOException
 Main --> Files
 Main --> Path
@@ -104,6 +100,13 @@ MutableDivideState --> Stream
 class TypeRule
 TypeRule --> Node
 TypeRule --> RuleResult
+class JavaRoots
+JavaRoots --> Imports
+JavaRoots --> DivideRule
+JavaRoots --> OrRule
+JavaRoots --> Rule
+JavaRoots --> StringRule
+JavaRoots --> List
 class DivideState
 DivideState --> Stream
 class InlineRuleResult

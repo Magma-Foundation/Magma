@@ -3,13 +3,9 @@ package magmac;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
-import magmac.app.ast.Imports;
+import magmac.app.JavaRoots;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.DivideRule;
-import magmac.app.compile.rule.OrRule;
-import magmac.app.compile.rule.Rule;
-import magmac.app.compile.rule.StringRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -115,10 +111,19 @@ public class Main {
     }
 
     private static List<Node> compile(String name, String input) {
-        return Main.compile(name, input, new OrRule(List.of(
-                Imports.createImportRule(),
-                new StringRule("value")
-        )));
+        return Main.getValue(name, input);
+    }
+
+    private static List<Node> getValue(String name, String input) {
+        Node root = JavaRoots.createRule().lex(input)
+                .toOptional()
+                .orElse(new MapNode());
+
+        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
+        return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
+            nodes.add(Main.createDependency(name, node));
+            return nodes;
+        }, (_, next) -> next);
     }
 
     private static Optional<String> generate(Node node) {
@@ -133,22 +138,6 @@ public class Main {
             return Optional.of(parent + " --> " + child + "\n");
         }
         return Optional.empty();
-    }
-
-    private static List<Node> compile(String name, String input, Rule childRule) {
-        Node root = Main.createRootRule(childRule).lex(input)
-                .toOptional()
-                .orElse(new MapNode());
-
-        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
-        return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
-            nodes.add(Main.createDependency(name, node));
-            return nodes;
-        }, (_, next) -> next);
-    }
-
-    private static Rule createRootRule(Rule childRule) {
-        return new DivideRule("children", childRule);
     }
 
     private static Node createDependency(String parent, Node node) {
