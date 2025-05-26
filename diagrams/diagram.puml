@@ -94,9 +94,6 @@ BeforePasser --> MapNode
 BeforePasser --> Node
 BeforePasser --> ParseState
 BeforePasser --> Optional
-class State
-State --> Node
-State --> List
 class AfterPasser
 AfterPasser --> Tuple2
 AfterPasser --> MapNode
