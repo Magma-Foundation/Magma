@@ -54,17 +54,9 @@ Iters --> List
 Iters --> Map
 Iters --> Set
 class Parser
-Parser --> Iters
-Parser --> MapNode
 Parser --> Node
 Parser --> Location
-Parser --> ArrayList
-Parser --> Collection
-Parser --> Collections
-Parser --> HashMap
-Parser --> List
 Parser --> Map
-Parser --> Optional
 class SafeFiles
 SafeFiles --> Err
 SafeFiles --> Ok
@@ -108,6 +100,18 @@ class Tuple2
 class StripRule
 StripRule --> Node
 StripRule --> RuleResult
+class ParserImpl
+ParserImpl --> Iters
+ParserImpl --> MapNode
+ParserImpl --> Node
+ParserImpl --> Location
+ParserImpl --> ArrayList
+ParserImpl --> Collection
+ParserImpl --> Collections
+ParserImpl --> HashMap
+ParserImpl --> List
+ParserImpl --> Map
+ParserImpl --> Optional
 class PathSources
 PathSources --> SafeFiles
 PathSources --> Tuple2
@@ -190,6 +194,7 @@ Main --> PathTargets
 Main --> Sources
 Main --> Targets
 Main --> Lexer
+Main --> ParserImpl
 Main --> RuleLexer
 Main --> IOException
 Main --> Paths

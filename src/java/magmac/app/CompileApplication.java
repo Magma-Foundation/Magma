@@ -16,18 +16,20 @@ public final class CompileApplication implements Application {
     private final Sources sources;
     private final Targets targets;
     private final Lexer lexer;
+    private final Parser parser;
 
-    public CompileApplication(Sources sources, Targets targets, Lexer lexer) {
+    public CompileApplication(Sources sources, Targets targets, Lexer lexer, Parser parser) {
         this.sources = sources;
         this.targets = targets;
         this.lexer = lexer;
+        this.parser = parser;
     }
 
     @Override
     public Optional<IOException> run() {
         return this.sources.readAll().match(units -> {
             Map<Location, Node> roots = this.lexer.lexAll(units);
-            Map<Location, Node> parsed = Parser.parseAll(roots);
+            Map<Location, Node> parsed = this.parser.parseAll(roots);
             Map<Location, String> outputs = Generator.generateAll(parsed);
             return this.targets.writeAll(outputs);
         }, Optional::of);
