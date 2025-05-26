@@ -21,6 +21,7 @@ public class Main {
                 if (!Files.isRegularFile(source)) {
                     continue;
                 }
+
                 String fileName = source.getFileName().toString();
                 if (!fileName.endsWith(".java")) {
                     continue;
@@ -30,21 +31,8 @@ public class Main {
                 String name = fileName.substring(0, fileSeparator);
 
                 output.append("class " + name + "\n");
-
                 String input = Files.readString(source);
-                List<String> segments = Main.divide(input);
-                for (String segment : segments) {
-                    String stripped = segment.strip();
-                    if (stripped.endsWith(";")) {
-                        String slice = stripped.substring(0, stripped.length() - ";".length());
-                        if (slice.startsWith("import ")) {
-                            String sliced = slice.substring("import ".length());
-                            int separator = sliced.lastIndexOf('.');
-                            String child = sliced.substring(separator + ".".length());
-                            output.append(name + " --> " + child + "\n");
-                        }
-                    }
-                }
+                output.append(Main.compile(name, input));
             }
 
             Path target = Paths.get(".", "diagram.puml");
@@ -55,6 +43,24 @@ public class Main {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
+    }
+
+    private static String compile(String name, String input) {
+        List<String> segments = Main.divide(input);
+        StringBuilder output1 = new StringBuilder();
+        for (String segment : segments) {
+            String stripped = segment.strip();
+            if (stripped.endsWith(";")) {
+                String slice = stripped.substring(0, stripped.length() - ";".length());
+                if (slice.startsWith("import ")) {
+                    String sliced = slice.substring("import ".length());
+                    int separator = sliced.lastIndexOf('.');
+                    String child = sliced.substring(separator + ".".length());
+                    output1.append(name + " --> " + child + "\n");
+                }
+            }
+        }
+        return output1.toString();
     }
 
     private static List<String> divide(String input) {
