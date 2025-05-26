@@ -1,2 +1,11 @@
 @startuml
+Main --> IOException
+Main --> Files
+Main --> Path
+Main --> Paths
+Main --> ArrayList
+Main --> List
+Main --> Set
+Main --> Collectors
+Main --> Stream
 @enduml
