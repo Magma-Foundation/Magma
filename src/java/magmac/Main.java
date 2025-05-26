@@ -1,10 +1,11 @@
 package magmac;
 
+import magmac.app.State;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,18 +32,7 @@ public class Main {
                 output.append("class " + name + "\n");
 
                 String input = Files.readString(source);
-                List<String> segments = new ArrayList<>();
-                StringBuilder buffer = new StringBuilder();
-                for (int i = 0; i < input.length(); i++) {
-                    char c = input.charAt(i);
-                    buffer.append(c);
-                    if (';' == c) {
-                        segments.add(buffer.toString());
-                        buffer = new StringBuilder();
-                    }
-                }
-
-                segments.add(buffer.toString());
+                List<String> segments = Main.divide(input);
                 for (String segment : segments) {
                     String stripped = segment.strip();
                     if (stripped.endsWith(";")) {
@@ -66,4 +56,26 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    private static List<String> divide(String input) {
+        State current = new State();
+        int length = input.length();
+        for (int i = 0; i < length; i++) {
+            char c = input.charAt(i);
+            current = Main.fold(current, c);
+        }
+
+        return current.advance().segments();
+    }
+
+    private static State fold(State state, char c) {
+        State appended = state.append(c);
+        if (';' == c) {
+            return appended.advance();
+        }
+        else {
+            return appended;
+        }
+    }
+
 }
