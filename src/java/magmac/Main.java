@@ -21,8 +21,8 @@ public class Main {
         Path sourceDirectory = Paths.get(".", "src", "java");
 
         SafeFiles.walk(sourceDirectory).match(sources -> {
-            return Main.compileSources(sources).match(segments -> {
-                return Main.extracted(segments);
+            return Main.compileSources(sources).match(root -> {
+                return Main.generateSegments(root);
             }, Optional::of);
         }, Optional::of).ifPresent(error -> Main.handleError(error));
     }
@@ -32,7 +32,9 @@ public class Main {
         error.printStackTrace();
     }
 
-    private static Optional<IOException> extracted(List<Node> segments) {
+    private static Optional<IOException> generateSegments(Node node) {
+        List<Node> segments = node.findNodeList("children").orElse(new ArrayList<>());
+
         StringBuilder output = new StringBuilder();
         for (Node segment : segments) {
             output.append(Main.generate(segment).orElse(""));
@@ -46,8 +48,8 @@ public class Main {
         return SafeFiles.writeString(target, csq);
     }
 
-    private static Result<List<Node>, IOException> compileSources(Set<Path> sources) {
-        Result<List<Node>, IOException> segments = new Ok<>(new ArrayList<Node>());
+    private static Result<Node, IOException> compileSources(Set<Path> sources) {
+        Result<List<Node>, IOException> segmentsResult = new Ok<>(new ArrayList<Node>());
         for (Path source : sources) {
             if (!Files.isRegularFile(source)) {
                 continue;
@@ -57,7 +59,7 @@ public class Main {
                 continue;
             }
 
-            segments = segments.and(() -> {
+            segmentsResult = segmentsResult.and(() -> {
                 return Main.compileSource(source);
             }).mapValue(tuple -> {
                 tuple.left().addAll(tuple.right());
@@ -65,7 +67,7 @@ public class Main {
             });
         }
 
-        return segments;
+        return segmentsResult.mapValue(segments -> new MapNode().withNodeList("children", segments));
     }
 
     private static Result<List<Node>, IOException> compileSource(Path source) {
