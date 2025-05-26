@@ -2,11 +2,17 @@
 skinparam linetype ortho
 class Rule
 Rule --> Optional
+class SuffixRule
+SuffixRule --> Optional
 class Main
 Main --> InfixRule
 Main --> MapNode
+Main --> PrefixRule
+Main --> Rule
 Main --> State
 Main --> StringRule
+Main --> StripRule
+Main --> SuffixRule
 Main --> IOException
 Main --> Files
 Main --> Path
@@ -16,6 +22,8 @@ Main --> Optional
 Main --> Set
 Main --> Collectors
 Main --> Stream
+class StripRule
+StripRule --> Optional
 class MapNode
 MapNode --> HashMap
 MapNode --> Map
@@ -25,6 +33,8 @@ InfixRule --> Optional
 class State
 State --> ArrayList
 State --> List
+class PrefixRule
+PrefixRule --> Optional
 class StringRule
 StringRule --> Optional
 @enduml

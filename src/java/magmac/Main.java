@@ -2,8 +2,12 @@ package magmac;
 
 import magmac.app.InfixRule;
 import magmac.app.MapNode;
+import magmac.app.PrefixRule;
+import magmac.app.Rule;
 import magmac.app.State;
 import magmac.app.StringRule;
+import magmac.app.StripRule;
+import magmac.app.SuffixRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,23 +65,13 @@ public class Main {
     }
 
     private static Optional<StringBuilder> compileRootSegment(StringBuilder state, String name, String input) {
-        return Main.lexImport(input).map((MapNode value) -> {
+        return Main.createImportRule().lex(input).map((MapNode value) -> {
             return Main.parseImport(state, name, value);
         });
     }
 
-    private static Optional<MapNode> lexImport(String input) {
-        if (!input.endsWith(";")) {
-            return Optional.empty();
-        }
-        String slice = input.substring(0, input.length() - ";".length());
-
-        if (!slice.startsWith("import ")) {
-            return Optional.empty();
-        }
-        String sliced = slice.substring("import ".length());
-
-        return new InfixRule(new StringRule("namespace"), ".", new StringRule("child")).lex(sliced);
+    private static Rule createImportRule() {
+        return new StripRule(new SuffixRule(new PrefixRule("import ", new InfixRule(new StringRule("namespace"), ".", new StringRule("child"))), ";"));
     }
 
     private static StringBuilder parseImport(StringBuilder state, String parent, MapNode mapNode) {
