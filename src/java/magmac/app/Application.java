@@ -1,14 +1,15 @@
 package magmac.app;
 
 import jvm.io.SafeFiles;
+import magmac.api.Tuple2;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
+import magmac.app.compile.lang.JavaRoots;
+import magmac.app.compile.lang.PlantUMLRoots;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Sources;
 import magmac.app.io.Unit;
-import magmac.app.compile.lang.JavaRoots;
-import magmac.app.compile.lang.PlantUMLRoots;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -44,10 +45,11 @@ public record Application(Sources sources) {
     }
 
     private static Result<List<Node>, IOException> compileSource(Unit unit) {
-        return unit.read().mapValue(input -> {
-            String name = unit.computeName();
-            List<Node> dependencies = Application.compile(name, input);
+        return Application.compileUnitToEntry(unit).mapValue(tuple -> {
+            String name = tuple.left().computeName();
+            Node root = tuple.right();
 
+            List<Node> dependencies = Application.getChildren(name, root);
             List<Node> copy = new ArrayList<Node>();
             copy.add(new MapNode("class").withString("name", name));
             copy.addAll(dependencies);
@@ -55,13 +57,19 @@ public record Application(Sources sources) {
         });
     }
 
-    private static List<Node> compile(String name, String input) {
-        Node root = JavaRoots.createRule().lex(input)
-                .toOptional()
-                .orElse(new MapNode());
+    private static Result<Tuple2<Unit, Node>, IOException> compileUnitToEntry(Unit unit) {
+        return unit.read().mapValue(input -> {
+            Node root = JavaRoots.createRule()
+                    .lex(input)
+                    .toOptional()
+                    .orElse(new MapNode());
 
-        List<Node> children = root.findNodeList("children").orElse(new ArrayList<>());
-        return children.stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
+            return new Tuple2<>(unit, root);
+        });
+    }
+
+    private static ArrayList<Node> getChildren(String name, Node root) {
+        return root.findNodeList("children").orElse(new ArrayList<>()).stream().reduce(new ArrayList<Node>(), (nodes, node) -> {
             nodes.add(Application.createDependency(name, node));
             return nodes;
         }, (_, next) -> next);
