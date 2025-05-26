@@ -2,6 +2,8 @@ package magmac.app.compile.rule;
 
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.divide.DivideState;
+import magmac.app.compile.rule.divide.MutableDivideState;
 import magmac.app.compile.rule.result.InlineRuleResult;
 import magmac.app.compile.rule.result.RuleResult;
 

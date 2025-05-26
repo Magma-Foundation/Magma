@@ -1,4 +1,4 @@
-package magmac.app.compile.rule;
+package magmac.app.compile.rule.divide;
 
 import java.util.ArrayList;
 import java.util.List;

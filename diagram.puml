@@ -17,6 +17,8 @@ OrRule --> Optional
 class DivideRule
 DivideRule --> MapNode
 DivideRule --> Node
+DivideRule --> DivideState
+DivideRule --> MutableDivideState
 DivideRule --> InlineRuleResult
 DivideRule --> RuleResult
 DivideRule --> ArrayList
@@ -102,10 +104,6 @@ Main --> ArrayList
 Main --> List
 Main --> Optional
 Main --> Set
-class MutableDivideState
-MutableDivideState --> ArrayList
-MutableDivideState --> List
-MutableDivideState --> Stream
 class TypeRule
 TypeRule --> Node
 TypeRule --> RuleResult
@@ -118,6 +116,10 @@ JavaRoots --> StringRule
 JavaRoots --> List
 class DivideState
 DivideState --> Stream
+class MutableDivideState
+MutableDivideState --> ArrayList
+MutableDivideState --> List
+MutableDivideState --> Stream
 class InlineRuleResult
 InlineRuleResult --> Tuple2
 InlineRuleResult --> Optional

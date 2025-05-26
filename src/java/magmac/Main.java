@@ -84,10 +84,6 @@ public class Main {
     }
 
     private static List<Node> compile(String name, String input) {
-        return Main.getValue(name, input);
-    }
-
-    private static List<Node> getValue(String name, String input) {
         Node root = JavaRoots.createRule().lex(input)
                 .toOptional()
                 .orElse(new MapNode());
