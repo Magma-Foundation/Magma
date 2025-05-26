@@ -1,5 +1,9 @@
 package magmac.app.compile.node;
 
+import magmac.api.Tuple2;
+import magmac.api.collect.Iter;
+import magmac.api.collect.Iters;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,11 @@ public final class MapNode implements Node {
 
     public MapNode(String type) {
         this(Optional.of(type), new HashMap<>(), new HashMap<>());
+    }
+
+    @Override
+    public Iter<Tuple2<String, List<Node>>> iterNodeLists() {
+        return Iters.fromMap(this.nodeLists);
     }
 
     @Override

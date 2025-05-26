@@ -14,6 +14,8 @@ OrRule --> List
 OrRule --> Optional
 OrRule --> Function
 class Node
+Node --> Tuple2
+Node --> Iter
 Node --> List
 Node --> Map
 Node --> Optional
@@ -257,6 +259,9 @@ Targets --> IOException
 Targets --> Map
 Targets --> Optional
 class MapNode
+MapNode --> Tuple2
+MapNode --> Iter
+MapNode --> Iters
 MapNode --> HashMap
 MapNode --> List
 MapNode --> Map

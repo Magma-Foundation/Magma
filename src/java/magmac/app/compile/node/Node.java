@@ -1,10 +1,15 @@
 package magmac.app.compile.node;
 
+import magmac.api.Tuple2;
+import magmac.api.collect.Iter;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public interface Node {
+    Iter<Tuple2<String, List<Node>>> iterNodeLists();
+
     Node withString(String key, String value);
 
     Optional<String> findString(String key);
