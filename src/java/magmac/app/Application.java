@@ -27,28 +27,28 @@ public final class Application {
         this.targets = targets;
     }
 
-    private static Result<Map<Source, Node>, IOException> compileSources(Set<Source> sources) {
+    private static Result<Map<Location, Node>, IOException> compileSources(Set<Source> sources) {
         return Iters.fromSet(sources).foldToResult(
-                new HashMap<Source, Node>(),
+                new HashMap<Location, Node>(),
                 (nodes, source) -> Application.lexSources(nodes, source)
         );
     }
 
-    private static Result<Map<Source, Node>, IOException> lexSources(Map<Source, Node> nodes, Source source) {
+    private static Result<Map<Location, Node>, IOException> lexSources(Map<Location, Node> nodes, Source source) {
         return Application.lex(source).mapValue(compiled -> {
             nodes.put(compiled.left(), compiled.right());
             return nodes;
         });
     }
 
-    private static Result<Tuple2<Source, Node>, IOException> lex(Source source) {
+    private static Result<Tuple2<Location, Node>, IOException> lex(Source source) {
         return source.read().mapValue(input -> {
             Node root = JavaRoots.createRule()
                     .lex(input)
                     .toOptional()
                     .orElse(new MapNode());
 
-            return new Tuple2<>(source, root);
+            return new Tuple2<>(source.computeLocation(), root);
         });
     }
 

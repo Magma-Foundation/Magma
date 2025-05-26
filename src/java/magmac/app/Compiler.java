@@ -33,7 +33,7 @@ public class Compiler {
         return node;
     }
 
-    static Tuple2<Location, Node> compile(Map<Source, Node> roots) {
+    static Tuple2<Location, Node> compile(Map<Location, Node> roots) {
         List<Node> parsed = Compiler.parseAll(roots)
                 .values()
                 .stream()
@@ -47,14 +47,14 @@ public class Compiler {
         return new Tuple2<>(location, root);
     }
 
-    private static Map<Source, Node> parseAll(Map<Source, Node> root) {
-        return Iters.fromSet(root.entrySet()).<Map<Source, Node>>fold(new HashMap<Source, Node>(),
+    private static Map<Location, Node> parseAll(Map<Location, Node> root) {
+        return Iters.fromSet(root.entrySet()).<Map<Location, Node>>fold(new HashMap<Location, Node>(),
                 (sourceNodeHashMap, tuple) -> Compiler.parseEntry(sourceNodeHashMap, tuple));
     }
 
-    private static Map<Source, Node> parseEntry(Map<Source, Node> current, Map.Entry<Source, Node> entry) {
-        Source source = entry.getKey();
-        String sourceName = source.computeName();
+    private static Map<Location, Node> parseEntry(Map<Location, Node> current, Map.Entry<Location, Node> entry) {
+        Location location = entry.getKey();
+        String sourceName = location.name();
         Node root = entry.getValue();
 
         List<Node> dependencies = Compiler.getChildren(sourceName, root);
@@ -63,7 +63,7 @@ public class Compiler {
         copy.addAll(dependencies);
 
         Node newRoot = new MapNode().withNodeList("children", copy);
-        current.put(source, newRoot);
+        current.put(location, newRoot);
         return current;
     }
 }

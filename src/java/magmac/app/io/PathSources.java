@@ -10,16 +10,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public record PathSources(Path root) implements Sources {
-    public static Set<Source> collectUnits(Set<Path> sources) {
+    public Set<Source> collectUnits(Set<Path> sources) {
         return sources.stream()
                 .filter(Files::isRegularFile)
                 .filter(file -> file.toString().endsWith(".java"))
-                .map(path -> new PathSource(path))
+                .map(path -> new PathSource(this.root, path))
                 .collect(Collectors.toSet());
     }
 
     @Override
     public Result<Set<Source>, IOException> collect() {
-        return SafeFiles.walk(this.root).mapValue(PathSources::collectUnits);
+        return SafeFiles.walk(this.root).mapValue(this::collectUnits);
     }
 }

@@ -8,4 +8,6 @@ public interface Source {
     String computeName();
 
     Result<String, IOException> read();
+
+    Location computeLocation();
 }
