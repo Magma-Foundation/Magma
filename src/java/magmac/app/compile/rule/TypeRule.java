@@ -2,13 +2,18 @@ package magmac.app.compile.rule;
 
 import magmac.api.result.Err;
 import magmac.api.result.Result;
-import magmac.app.error.CompileError;
 import magmac.app.compile.node.Node;
+import magmac.app.compile.rule.result.StringContext;
+import magmac.app.error.CompileError;
+
+import java.util.List;
 
 public record TypeRule(String type, Rule childRule) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
-        return this.childRule.lex(input).mapValue(node -> node.retype(this.type));
+        return this.childRule.lex(input)
+                .mapValue(node -> node.retype(this.type))
+                .mapErr(err -> new CompileError("Cannot assign type '" + this.type + "'", new StringContext(input), List.of(err)));
     }
 
     @Override
