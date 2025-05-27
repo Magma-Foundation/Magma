@@ -15,7 +15,7 @@ public record CompileError(String message, Context context, List<CompileError> e
     public String display() {
         String joined = this.errors.stream()
                 .map(CompileError::display)
-                .map(display -> display + "\n")
+                .map(display -> "\n" + display)
                 .collect(Collectors.joining());
 
         return this.message + ": " + this.context.display() + joined;

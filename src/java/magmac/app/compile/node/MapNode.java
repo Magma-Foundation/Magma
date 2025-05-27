@@ -29,6 +29,15 @@ public final class MapNode implements Node {
     }
 
     @Override
+    public String toString() {
+        return "MapNode{" +
+                "maybeType=" + this.maybeType +
+                ", strings=" + this.strings +
+                ", nodeLists=" + this.nodeLists +
+                '}';
+    }
+
+    @Override
     public Iter<Tuple2<String, List<Node>>> iterNodeLists() {
         return Iters.fromMap(this.nodeLists);
     }
