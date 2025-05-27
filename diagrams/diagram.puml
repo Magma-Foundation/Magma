@@ -1,13 +1,5 @@
 @startuml
 skinparam linetype ortho
-class ThrowableError
-
-ThrowableError --> PrintWriter
-ThrowableError --> StringWriter
-
-
-
-
 class HeadedIter
 
 HeadedIter --> Collector
@@ -37,16 +29,6 @@ class Roots
 Roots --> Node
 Roots --> Location
 Roots --> Map
-
-class CompileError
-
-CompileError --> Error
-CompileError --> ArrayList
-CompileError --> List
-CompileError --> Collectors
-
-
-
 
 class All
 
@@ -149,7 +131,19 @@ StringRule --> Node
 
 
 
+class ThrowableError
+
+ThrowableError --> PrintWriter
+ThrowableError --> StringWriter
+
+
+
+
 class Tuple2
+
+
+class ApplicationError
+
 
 
 class PathSources
@@ -191,7 +185,7 @@ AfterPasser --> Optional
 
 
 
-class ApplicationError
+class Error
 
 
 
@@ -313,6 +307,9 @@ NodeContext --> Node
 
 class CompileApplication
 
+CompileApplication --> ApplicationError
+CompileApplication --> Error
+CompileApplication --> ThrowableError
 CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
@@ -443,6 +440,16 @@ class ParseState
 
 ParseState --> Location
 
+class CompileError
+
+CompileError --> Context
+CompileError --> ArrayList
+CompileError --> List
+CompileError --> Collectors
+
+
+
+
 class Rule
 
 Rule --> Result
@@ -560,10 +567,6 @@ StripRule --> Node
 
 
 
-class Error
-
-
-
 class Iter
 
 Iter --> Collector
@@ -594,6 +597,7 @@ Ok --> Supplier
 
 class Application
 
+Application --> Error
 Application --> Optional
 
 
@@ -731,10 +735,10 @@ AfterAll --> Optional
 class Main
 
 Main --> Application
-Main --> ApplicationError
 Main --> CompileApplication
 Main --> JavaRoots
 Main --> PlantUMLRoots
+Main --> Error
 Main --> PathSources
 Main --> PathTargets
 Main --> Sources

@@ -1,10 +1,10 @@
 package magmac;
 
 import magmac.app.Application;
-import magmac.app.ApplicationError;
 import magmac.app.CompileApplication;
 import magmac.app.compile.lang.java.JavaRoots;
 import magmac.app.compile.lang.plant.PlantUMLRoots;
+import magmac.app.error.Error;
 import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;
@@ -30,7 +30,7 @@ public final class Main {
         application.run().ifPresent(error -> Main.handleError(error));
     }
 
-    private static void handleError(ApplicationError error) {
+    private static void handleError(Error error) {
         //noinspection CallToPrintStackTrace
         System.err.println(error.display());
     }

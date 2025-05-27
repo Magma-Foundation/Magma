@@ -1,6 +1,6 @@
-package magmac.app.compile;
+package magmac.app.error;
 
-import magmac.app.Error;
+import magmac.app.compile.Context;
 
 import java.util.ArrayList;
 import java.util.List;

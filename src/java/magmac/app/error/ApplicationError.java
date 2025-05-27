@@ -1,4 +1,4 @@
-package magmac.app;
+package magmac.app.error;
 
 public record ApplicationError(Error error) implements Error {
     @Override

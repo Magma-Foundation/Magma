@@ -5,7 +5,7 @@ import magmac.api.collect.Iters;
 import magmac.api.collect.collect.MapCollector;
 import magmac.api.collect.collect.ResultCollector;
 import magmac.api.result.Result;
-import magmac.app.compile.CompileError;
+import magmac.app.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.Location;

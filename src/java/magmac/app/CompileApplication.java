@@ -1,5 +1,8 @@
 package magmac.app;
 
+import magmac.app.error.ApplicationError;
+import magmac.app.error.Error;
+import magmac.app.error.ThrowableError;
 import magmac.app.io.Location;
 import magmac.app.io.Sources;
 import magmac.app.io.Targets;
@@ -27,14 +30,14 @@ public final class CompileApplication implements Application {
     }
 
     @Override
-    public Optional<ApplicationError> run() {
+    public Optional<Error> run() {
         return this.sources.readAll()
                 .mapErr(ThrowableError::new)
                 .mapErr(ApplicationError::new)
                 .match(units -> this.compileAndWrite(units), Optional::of);
     }
 
-    private Optional<ApplicationError> compileAndWrite(Map<Location, String> units) {
+    private Optional<Error> compileAndWrite(Map<Location, String> units) {
         return this.lexer.lexAll(units).mapErr(ApplicationError::new).match(lex -> {
             Roots parsed = this.parser.parseAll(lex);
             return this.generator.generateAll(parsed)

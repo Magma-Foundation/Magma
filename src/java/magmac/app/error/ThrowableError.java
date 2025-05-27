@@ -1,4 +1,4 @@
-package magmac.app;
+package magmac.app.error;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

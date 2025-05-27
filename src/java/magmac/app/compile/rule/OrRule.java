@@ -3,7 +3,7 @@ package magmac.app.compile.rule;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
-import magmac.app.compile.CompileError;
+import magmac.app.error.CompileError;
 import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
