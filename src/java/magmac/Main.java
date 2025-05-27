@@ -10,12 +10,12 @@ import magmac.app.compile.StagedCompiler;
 import magmac.app.compile.rule.Rule;
 import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
-import magmac.app.io.targets.PathTargets;
 import magmac.app.io.targets.Targets;
 import magmac.app.lang.AfterPasser;
 import magmac.app.lang.JavaToPlantUML;
 import magmac.app.lang.PlantUMLRoots;
 import magmac.app.lang.TargetPlatform;
+import magmac.app.lang.TypescriptRoots;
 import magmac.app.stage.AfterAll;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.generate.RuleGenerator;
@@ -23,7 +23,6 @@ import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;
 import magmac.app.stage.parse.TreeParser;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -39,14 +38,8 @@ final class Main {
     }
 
     private static Optional<Error> getDiagrams(TargetPlatform platform, Sources sources) {
-        Path targetPath = platform.createTargetPath();
-        String extension = switch (platform) {
-            case PlantUML -> "puml";
-            case TypeScript -> "ts";
-        };
-
-        Targets targets = new PathTargets(targetPath, extension);
-        Rule rule = PlantUMLRoots.createRule();
+        Targets targets = platform.createTargets();
+        Rule rule = TypescriptRoots.createRule();
 
         Lexer lexer = Config.createLexer();
         AfterAll afterAllChildren = platform.createAfterAll();

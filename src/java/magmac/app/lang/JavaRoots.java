@@ -13,13 +13,12 @@ import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.SymbolRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.DelimitedFolder;
-import magmac.app.compile.rule.fold.StatementFolder;
 
 import java.util.List;
 
 public final class JavaRoots {
     public static Rule createRule() {
-        return new TypeRule("root", new DivideRule("children", new StatementFolder(), new OrRule(List.of(
+        return new TypeRule("root", DivideRule.Statements("children", new OrRule(List.of(
                 JavaRoots.createRule("package", "package "),
                 JavaRoots.createRule("import", "import "),
                 JavaRoots.createStructureRule("record"),

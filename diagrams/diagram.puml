@@ -343,6 +343,8 @@ JavaRoots --> TypeRule
 JavaRoots --> DelimitedFolder
 JavaRoots --> StatementFolder
 JavaRoots --> List
+TargetPlatform --> PathTargets
+TargetPlatform --> Targets
 TargetPlatform --> AfterAll
 TargetPlatform --> EmptyAfterAll
 TargetPlatform --> Path
@@ -411,7 +413,6 @@ Main --> StagedCompiler
 Main --> Rule
 Main --> PathSources
 Main --> Sources
-Main --> PathTargets
 Main --> Targets
 Main --> AfterPasser
 Main --> JavaToPlantUML
@@ -423,7 +424,6 @@ Main --> RuleGenerator
 Main --> Lexer
 Main --> Parser
 Main --> TreeParser
-Main --> Path
 Main --> Paths
 Main --> Optional
 RuleLexer --> Tuple2

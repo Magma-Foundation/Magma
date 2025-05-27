@@ -13,11 +13,16 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
 import magmac.app.compile.rule.fold.Folder;
+import magmac.app.compile.rule.fold.StatementFolder;
 
 import java.util.List;
 import java.util.Optional;
 
 public record DivideRule(String key, Folder folder, Rule childRule) implements Rule {
+    public static DivideRule Statements(String key, Rule childRule) {
+        return new DivideRule(key, new StatementFolder(), childRule);
+    }
+
     @Override
     public Result<Node, CompileError> lex(String input) {
         return this.divide(input)

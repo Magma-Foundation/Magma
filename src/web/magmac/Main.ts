@@ -8,7 +8,6 @@ StagedCompiler --> Main
 Rule --> Main
 PathSources --> Main
 Sources --> Main
-PathTargets --> Main
 Targets --> Main
 AfterPasser --> Main
 JavaToPlantUML --> Main
@@ -20,7 +19,6 @@ RuleGenerator --> Main
 Lexer --> Main
 Parser --> Main
 TreeParser --> Main
-Path --> Main
 Paths --> Main
 Optional --> Main
 class Main
