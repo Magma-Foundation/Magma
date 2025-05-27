@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface Node {
     Iter<Tuple2<String, Node>> iterNodes();
 
+    String format(int depth);
+
     Iter<Tuple2<String, List<Node>>> iterNodeLists();
 
     Node withString(String key, String value);

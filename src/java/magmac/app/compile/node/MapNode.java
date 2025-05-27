@@ -53,38 +53,39 @@ public final class MapNode implements Node {
         return this.format(0);
     }
 
-    private String format(int depth) {
+    @Override
+    public String format(int depth) {
         String typeString = this.maybeType
                 .map(type -> type + " ")
                 .orElse("");
 
-        Stream<String> stringsString;
-        if (this.strings.isEmpty()) {
-            stringsString = Stream.empty();
-        }
-        else {
-            stringsString = this.strings.entrySet()
-                    .stream()
-                    .map(entry -> this.formatEntry(depth, entry.getKey(), "\"" + entry.getValue() + "\""));
-        }
+        Stream<String> stringsStream = this.toStream(depth, this.strings, value -> "\"" + value + "\"");
+        Stream<String> nodesStream = this.toStream(depth, this.nodes, value -> value.format(depth + 1));
+        Stream<String> nodeListsStream = this.toStream(depth, this.nodeLists, values -> "[" + this.formatNodeList(depth, values) + "]");
 
-        Stream<String> nodesString = this.nodes.isEmpty() ? Stream.empty() : Stream.of("nodes=" + this.nodes);
-
-        Stream<String> nodeListsStream;
-        if (this.nodeLists.isEmpty()) {
-            nodeListsStream = Stream.empty();
-        }
-        else {
-            nodeListsStream = this.nodeLists.entrySet()
-                    .stream()
-                    .map(entry -> this.formatEntry(depth, entry.getKey(), "[" + entry.getValue() + "]"));
-        }
-
-        String joined = Stream.of(stringsString, nodesString, nodeListsStream)
+        String joined = Stream.of(stringsStream, nodesStream, nodeListsStream)
                 .flatMap(value -> value)
                 .collect(Collectors.joining(", "));
 
         return typeString + "{" + joined + this.createIndent(depth) + "}";
+    }
+
+    private <T> Stream<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
+        if (map.isEmpty()) {
+            return Stream.empty();
+        }
+
+        return map.entrySet().stream().map(entry -> {
+            String key = entry.getKey();
+            T value = entry.getValue();
+            return this.formatEntry(depth, key, mapper.apply(value));
+        });
+    }
+
+    private String formatNodeList(int depth, List<Node> nodeList) {
+        return nodeList.stream()
+                .map(child -> child.format(depth + 1))
+                .collect(Collectors.joining(", "));
     }
 
     private String formatEntry(int depth, String key, String value) {
