@@ -8,6 +8,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.SuffixRule;
+import magmac.app.compile.rule.SymbolRule;
 import magmac.app.compile.rule.TypeRule;
 import magmac.app.compile.rule.fold.StatementFolder;
 
@@ -25,7 +26,7 @@ public final class JavaRoots {
     }
 
     private static Rule createStructureRule(String keyword) {
-        Rule beforeContent = new StringRule("name");
+        Rule beforeContent = new SymbolRule(new StringRule("name"));
         Rule withImplements = new OrRule(List.of(
                 new InfixRule(beforeContent, " implements ", new StringRule("implemented")),
                 beforeContent
