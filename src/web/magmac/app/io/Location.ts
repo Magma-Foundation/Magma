@@ -1,3 +1,3 @@
-import { List } from "?magmacapicollectlistList";
+import { List } from "magmacapicollectlistList";
 export class Location {
 }

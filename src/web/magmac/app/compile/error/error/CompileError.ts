@@ -1,3 +1,3 @@
-import { Error } from "?magmacapierrorError";
+import { Error } from "magmacapierrorError";
 export interface ? {
 }

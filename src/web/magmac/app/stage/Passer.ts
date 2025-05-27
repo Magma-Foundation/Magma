@@ -1,4 +1,4 @@
-import { Node } from "?magmacappcompilenodeNode";
-import { ParseState } from "?magmacappstageparseParseState";
+import { Node } from "magmacappcompilenodeNode";
+import { ParseState } from "magmacappstageparseParseState";
 export interface ? {
 }

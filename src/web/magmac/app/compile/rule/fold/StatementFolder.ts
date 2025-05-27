@@ -1,4 +1,4 @@
-import { DivideState } from "?magmacappcompileruledivideDivideState";
+import { DivideState } from "magmacappcompileruledivideDivideState";
 export class StatementFolder {
 	temp(){
 	}

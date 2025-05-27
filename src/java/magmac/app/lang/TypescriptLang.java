@@ -25,7 +25,7 @@ public final class TypescriptLang {
 
     private static TypeRule createImportRule() {
         Rule segments = new SuffixRule(new DivideRule("segments", new DelimitedFolder('\\'), new StringRule("value")), "\";\n");
-        Rule first = LocatingRule.First(new StringRule("child"), " } from \"?", segments);
+        Rule first = LocatingRule.First(new StringRule("child"), " } from \"", segments);
         return new TypeRule("import", new PrefixRule("import { ", first));
     }
 

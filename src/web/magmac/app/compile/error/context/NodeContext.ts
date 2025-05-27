@@ -1,4 +1,4 @@
-import { Node } from "?magmacappcompilenodeNode";
+import { Node } from "magmacappcompilenodeNode";
 export class NodeContext {
 	temp(){
 	}

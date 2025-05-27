@@ -1,5 +1,5 @@
-import { Ok } from "?magmacapiresultOk";
-import { Result } from "?magmacapiresultResult";
+import { Ok } from "magmacapiresultOk";
+import { Result } from "magmacapiresultResult";
 export class ResultCollector {
 	temp(){
 	}

@@ -1,6 +1,6 @@
-import { None } from "?magmacapiNone";
-import { Option } from "?magmacapiOption";
-import { Some } from "?magmacapiSome";
+import { None } from "magmacapiNone";
+import { Option } from "magmacapiOption";
+import { Some } from "magmacapiSome";
 export class RangeHead {
 	temp(){
 	}

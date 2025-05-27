@@ -1,4 +1,4 @@
-import { Error } from "?magmacapierrorError";
+import { Error } from "magmacapierrorError";
 export class ApplicationError {
 	temp(){
 	}
