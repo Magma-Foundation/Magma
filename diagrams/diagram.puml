@@ -230,11 +230,9 @@ RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
 RuleGenerator --> Result
 RuleGenerator --> CompileError
-RuleGenerator --> Node
 RuleGenerator --> Rule
 RuleGenerator --> Location
 RuleGenerator --> Map
-
 
 
 
