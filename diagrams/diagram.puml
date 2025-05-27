@@ -37,9 +37,9 @@ JavaRoots --> DivideRule
 JavaRoots --> InfixRule
 JavaRoots --> OrRule
 JavaRoots --> Rule
-JavaRoots --> StatementFolder
 JavaRoots --> StringRule
 JavaRoots --> TypeRule
+JavaRoots --> StatementFolder
 JavaRoots --> List
 
 class Sources

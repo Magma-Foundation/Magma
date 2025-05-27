@@ -9,7 +9,7 @@ import magmac.app.error.CompileError;
 public record InfixRule(Rule leftRule, String infix, Rule rightRule) implements Rule {
     @Override
     public Result<Node, CompileError> lex(String input) {
-        int separator = input.lastIndexOf(this.infix());
+        int separator = input.indexOf(this.infix());
         if (0 > separator) {
             return new Err<>(new CompileError("Infix '" + this.infix + "' not present", new StringContext(input)));
         }
