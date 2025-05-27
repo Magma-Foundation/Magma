@@ -8,30 +8,32 @@ import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 public record OrRule(List<Rule> rules) implements Rule {
-    private record State<T>(Optional<T> maybeValue) {
+    private record State<T>(Optional<T> maybeValue, List<CompileError> errors) {
         private State() {
-            this(Optional.empty());
+            this(Optional.empty(), new ArrayList<>());
         }
 
         State<T> withValue(T value) {
             if (this.maybeValue.isPresent()) {
                 return this;
             }
-            return new State<>(Optional.of(value));
+            return new State<>(Optional.of(value), this.errors);
         }
 
         Result<T, CompileError> toResult(Context context) {
             return this.maybeValue
                     .<Result<T, CompileError>>map(value -> new Ok<>(value))
-                    .orElseGet(() -> new Err<>(new CompileError("Value not present", context)));
+                    .orElseGet(() -> new Err<>(new CompileError("Value not present", context, errors)));
         }
 
         public State<T> withError(CompileError error) {
+            this.errors.add(error);
             return this;
         }
     }
