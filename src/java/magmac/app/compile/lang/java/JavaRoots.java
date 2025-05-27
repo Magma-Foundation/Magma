@@ -49,7 +49,7 @@ public final class JavaRoots {
 
     private static Rule createTypeRule() {
         return new NodeRule("implemented", new OrRule(List.of(
-
+                new StripRule(new SymbolRule(new StringRule("value")))
         )));
     }
 }
