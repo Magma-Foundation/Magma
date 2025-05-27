@@ -512,8 +512,6 @@ PassResult --> Option
 PassResult --> Tuple2
 PassResult --> Node
 PassResult --> ParseState
-PassResult --> Function
-PassResult --> Predicate
 PassResult --> Supplier
 FilterRule --> CompileErrors
 Passer --> Node
