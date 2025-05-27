@@ -12,7 +12,8 @@ import java.nio.file.Path;
 
 public record PathTargets(Path root, String extension) implements Targets {
     private Option<IOException> write(Location location, String output) {
-        Path targetParent = location.namespace().iter()
+        Path targetParent = location.namespace()
+                .iter()
                 .fold(this.root(), Path::resolve);
 
         if (!Files.exists(targetParent)) {

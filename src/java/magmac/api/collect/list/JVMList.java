@@ -33,7 +33,7 @@ public record JVMList<T>(java.util.List<T> elements) implements List<T> {
     @Override
     public List<T> removeAll(List<T> others) {
         return this.iter()
-                .filter(value -> others.contains(value))
+                .filter(value -> !others.contains(value))
                 .collect(new ListCollector<>());
     }
 

@@ -26,10 +26,6 @@ public record Some<T>(T value) implements Option<T> {
         return false;
     }
 
-    public T get() {
-        return this.value;
-    }
-
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return mapper.apply(this.value);

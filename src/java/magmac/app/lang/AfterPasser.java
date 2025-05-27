@@ -35,9 +35,11 @@ public class AfterPasser implements Passer {
     }
 
     private static Iter<Node> replaceRootChild(Node child) {
-        Iter<Node> maybeExtends = Iters.fromOption(AfterPasser.createInherits(child, "extended"));
-        Iter<Node> maybeImplemented = Iters.fromOption(AfterPasser.createInherits(child, "implemented"));
-        return Iters.fromValues(child).concat(maybeExtends).concat(maybeImplemented);
+        Option<Node> extended = AfterPasser.createInherits(child, "extended");
+        Option<Node> implemented = AfterPasser.createInherits(child, "implemented");
+        return Iters.fromValues(child)
+                .concat(Iters.fromOption(extended))
+                .concat(Iters.fromOption(implemented));
     }
 
     private static NodeList replaceRootChildren(Node node) {

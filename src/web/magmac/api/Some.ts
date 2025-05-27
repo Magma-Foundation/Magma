@@ -21,6 +21,4 @@ export class Some {
 	}
 	temp(){
 	}
-	temp(){
-	}
 }

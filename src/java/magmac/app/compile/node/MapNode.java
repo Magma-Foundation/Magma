@@ -173,6 +173,11 @@ public final class MapNode implements Node {
     }
 
     @Override
+    public String toString() {
+        return this.display();
+    }
+
+    @Override
     public Option<NodeList> findNodeList(String key) {
         if (this.nodeLists.containsKey(key)) {
             return new Some<>(this.nodeLists.get(key));

@@ -26,10 +26,6 @@ public class None<T> implements Option<T> {
         return true;
     }
 
-    public T get() {
-        return null;
-    }
-
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return new None<>();
@@ -47,7 +43,7 @@ public class None<T> implements Option<T> {
 
     @Override
     public Option<T> or(Supplier<Option<T>> other) {
-        return this;
+        return other.get();
     }
 
     @Override

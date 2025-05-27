@@ -56,4 +56,6 @@ export class MapNode {
 	}
 	temp(){
 	}
+	temp(){
+	}
 }
