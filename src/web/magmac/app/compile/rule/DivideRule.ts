@@ -15,5 +15,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class DivideRule {
-}
+export class DivideRule {}

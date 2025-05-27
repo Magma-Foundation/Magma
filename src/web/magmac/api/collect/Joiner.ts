@@ -1,3 +1,2 @@
 import { ? } from ?;
-export class Joiner {
-}
+export class Joiner {}

@@ -2,5 +2,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class InlineNodeList {
-}
+export class InlineNodeList {}

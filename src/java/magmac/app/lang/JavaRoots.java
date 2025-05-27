@@ -3,7 +3,7 @@ package magmac.app.lang;
 import magmac.app.compile.rule.ContextRule;
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
-import magmac.app.compile.rule.InfixRule;
+import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.NodeRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
@@ -32,27 +32,27 @@ public final class JavaRoots {
     private static Rule createStructureRule(String keyword) {
         Rule name = new StripRule(new SymbolRule(new StringRule("name")));
         Rule beforeContent = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(name, "<", new StringRule("type-params")), ">")),
+                new StripRule(new SuffixRule(LocatingRule.First(name, "<", new StringRule("type-params")), ">")),
                 name
         ));
 
         Rule withParameters = new OrRule(List.of(
-                new StripRule(new SuffixRule(new InfixRule(beforeContent, "(", new StringRule("parameters")), ")")),
+                new StripRule(new SuffixRule(LocatingRule.First(beforeContent, "(", new StringRule("parameters")), ")")),
                 beforeContent
         ));
 
         Rule withEnds = new OrRule(List.of(
-                new InfixRule(withParameters, " extends ", new NodeRule("extended", JavaRoots.createTypeRule())),
+                LocatingRule.First(withParameters, " extends ", new NodeRule("extended", JavaRoots.createTypeRule())),
                 withParameters
         ));
 
         Rule withImplements = new OrRule(List.of(
-                new ContextRule("With implements", new InfixRule(withEnds, " implements ", new NodeRule("implemented", JavaRoots.createTypeRule()))),
+                new ContextRule("With implements", LocatingRule.First(withEnds, " implements ", new NodeRule("implemented", JavaRoots.createTypeRule()))),
                 new ContextRule("Without implements", withEnds)
         ));
 
-        Rule afterKeyword = new InfixRule(withImplements, "{", new StripRule(new SuffixRule(DivideRule.Statements("children", JavaRoots.createStructureMemberRule()), "}")));
-        return new TypeRule(keyword, new InfixRule(new StringRule("before-keyword"), keyword + " ", afterKeyword));
+        Rule afterKeyword = LocatingRule.First(withImplements, "{", new StripRule(new SuffixRule(DivideRule.Statements("children", JavaRoots.createStructureMemberRule()), "}")));
+        return new TypeRule(keyword, LocatingRule.First(new StringRule("before-keyword"), keyword + " ", afterKeyword));
     }
 
     private static OrRule createStructureMemberRule() {
@@ -67,8 +67,8 @@ public final class JavaRoots {
         return new StripRule(new SuffixRule(new NodeRule("definition", JavaRoots.createDefinitionRule()), ";"));
     }
 
-    private static InfixRule createMethodRule() {
-        return new InfixRule(new NodeRule("definition", JavaRoots.createDefinitionRule()), "(", new StringRule("with-params"));
+    private static Rule createMethodRule() {
+        return LocatingRule.First(new NodeRule("definition", JavaRoots.createDefinitionRule()), "(", new StringRule("with-params"));
     }
 
     private static Rule createDefinitionRule() {
@@ -87,7 +87,7 @@ public final class JavaRoots {
     }
 
     private static TypeRule createTemplateRule() {
-        return new TypeRule("template", new StripRule(new SuffixRule(new InfixRule(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
+        return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 
     public static Rule createRule(String type, String prefix) {

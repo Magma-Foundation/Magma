@@ -9,5 +9,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class PlantUMLRoots {
-}
+export class PlantUMLRoots {}

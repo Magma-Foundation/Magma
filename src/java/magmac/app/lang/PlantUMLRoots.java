@@ -2,7 +2,7 @@ package magmac.app.lang;
 
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
-import magmac.app.compile.rule.InfixRule;
+import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
@@ -25,8 +25,8 @@ public final class PlantUMLRoots {
                 PlantUMLRoots.createStructureRule("class"),
                 PlantUMLRoots.createStructureRule("interface"),
                 PlantUMLRoots.createStructureRule("enum"),
-                new TypeRule("inherits", new InfixRule(new StringRule("parent"), " <|-- ", new StringRule("child"))),
-                new TypeRule("dependency", new InfixRule(new StringRule("child"), " --> ", new StringRule("parent")))
+                new TypeRule("inherits", LocatingRule.First(new StringRule("parent"), " <|-- ", new StringRule("child"))),
+                new TypeRule("dependency", LocatingRule.First(new StringRule("child"), " --> ", new StringRule("parent")))
         )), "\n");
     }
 

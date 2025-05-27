@@ -1,2 +1,1 @@
-export class StringContext {
-}
+export class StringContext {}

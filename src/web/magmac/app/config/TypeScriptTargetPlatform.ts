@@ -6,5 +6,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class TypeScriptTargetPlatform {
-}
+export class TypeScriptTargetPlatform {}

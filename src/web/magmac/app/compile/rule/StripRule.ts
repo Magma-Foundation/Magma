@@ -1,5 +1,4 @@
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class StripRule {
-}
+export class StripRule {}

@@ -6,5 +6,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class CompileApplication {
-}
+export class CompileApplication {}

@@ -1,3 +1,2 @@
 import { ? } from ?;
-export class ImmutableParseState {
-}
+export class ImmutableParseState {}

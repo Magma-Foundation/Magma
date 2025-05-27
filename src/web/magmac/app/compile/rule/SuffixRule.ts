@@ -5,5 +5,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class SuffixRule {
-}
+export class SuffixRule {}

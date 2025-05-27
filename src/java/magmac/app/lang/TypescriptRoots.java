@@ -2,7 +2,7 @@ package magmac.app.lang;
 
 import magmac.app.compile.rule.DivideRule;
 import magmac.app.compile.rule.ExactRule;
-import magmac.app.compile.rule.InfixRule;
+import magmac.app.compile.rule.LocatingRule;
 import magmac.app.compile.rule.OrRule;
 import magmac.app.compile.rule.PrefixRule;
 import magmac.app.compile.rule.Rule;
@@ -23,13 +23,13 @@ public class TypescriptRoots {
     }
 
     private static TypeRule createClassRule() {
-        Rule name = new InfixRule(new StringRule("name"), " {", new SuffixRule(DivideRule.Statements("children", TypescriptRoots.createStructureMemberRule()), "}\n"));
+        Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(DivideRule.Statements("children", TypescriptRoots.createStructureMemberRule()), "}\n"));
         return new TypeRule("class", new PrefixRule("export class ", name));
     }
 
     private static Rule createStructureMemberRule() {
         return new OrRule(List.of(
-
+                new ExactRule("")
         ));
     }
 }

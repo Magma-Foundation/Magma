@@ -1,3 +1,2 @@
 import { ? } from ?;
-export class DelimitedFolder {
-}
+export class DelimitedFolder {}

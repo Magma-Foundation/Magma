@@ -61,8 +61,6 @@ Error <|-- CompileError
 class RuleGenerator
 Generator <|-- RuleGenerator
 interface Passer
-class InfixRule
-Rule <|-- InfixRule
 class PrefixRule
 Rule <|-- PrefixRule
 class RuleLexer
@@ -83,6 +81,8 @@ class TypeRule
 Rule <|-- TypeRule
 class InlineNodeList
 NodeList <|-- InlineNodeList
+class FirstLocator
+Locator <|-- FirstLocator
 class OrState
 interface Node
 class OrRule
@@ -122,6 +122,8 @@ class TreeParser
 Parser <|-- TreeParser
 class Err
 Result <|-- Err
+class LocatingRule
+Rule <|-- LocatingRule
 class SuffixRule
 Rule <|-- SuffixRule
 class AfterPasser
@@ -132,10 +134,13 @@ interface Result
 interface AfterAll
 class Main
 class SafeFiles
+class LastLocator
+Locator <|-- LastLocator
 class HeadedIter
 Iter <|-- HeadedIter
 class MutableDivideState
 DivideState <|-- MutableDivideState
+interface Locator
 class MapNode
 Node <|-- MapNode
 class ContextRule
@@ -200,6 +205,7 @@ DivideRule --> MutableDivideState
 DivideRule --> Folder
 DivideRule --> StatementFolder
 DivideRule --> Optional
+Locator --> Optional
 ListCollector --> ArrayList
 ListCollector --> List
 Stage --> Result
@@ -224,7 +230,6 @@ Compiler --> CompileError
 Compiler --> Location
 Compiler --> Map
 Head --> Optional
-InfixRule --> CompileErrors
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
@@ -276,7 +281,7 @@ InlineNodeList --> ArrayList
 InlineNodeList --> List
 TypescriptRoots --> DivideRule
 TypescriptRoots --> ExactRule
-TypescriptRoots --> InfixRule
+TypescriptRoots --> LocatingRule
 TypescriptRoots --> OrRule
 TypescriptRoots --> PrefixRule
 TypescriptRoots --> Rule
@@ -305,7 +310,7 @@ StringRule --> MapNode
 StringRule --> ImmutableCompileError
 PlantUMLRoots --> DivideRule
 PlantUMLRoots --> ExactRule
-PlantUMLRoots --> InfixRule
+PlantUMLRoots --> LocatingRule
 PlantUMLRoots --> OrRule
 PlantUMLRoots --> PrefixRule
 PlantUMLRoots --> Rule
@@ -340,7 +345,7 @@ ExactRule --> MapNode
 JavaRoots --> ContextRule
 JavaRoots --> DivideRule
 JavaRoots --> ExactRule
-JavaRoots --> InfixRule
+JavaRoots --> LocatingRule
 JavaRoots --> NodeRule
 JavaRoots --> OrRule
 JavaRoots --> PrefixRule
@@ -407,6 +412,10 @@ PlantUMLTargetPlatform --> AfterPasser
 PlantUMLTargetPlatform --> MergeDiagram
 PlantUMLTargetPlatform --> PlantUMLRoots
 PlantUMLTargetPlatform --> Paths
+LocatingRule --> CompileErrors
+LocatingRule --> FirstLocator
+LocatingRule --> Locator
+LocatingRule --> Optional
 NodeRule --> Ok
 NodeRule --> CompileErrors
 NodeRule --> MapNode

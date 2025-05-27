@@ -1,3 +1,2 @@
 import { ? } from ?;
-export class NodeContext {
-}
+export class NodeContext {}

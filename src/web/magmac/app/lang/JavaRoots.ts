@@ -13,5 +13,4 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-export class JavaRoots {
-}
+export class JavaRoots {}
