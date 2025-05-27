@@ -1,6 +1,7 @@
-package magmac.api.collect;
+package magmac.api.collect.map;
 
 import magmac.api.Tuple2;
+import magmac.api.iter.collect.Collector;
 
 public record MapCollector<K, V>() implements Collector<Tuple2<K, V>, Map<K, V>> {
     @Override

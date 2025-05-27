@@ -1,6 +1,6 @@
 package magmac.api.head;
 
-import magmac.api.collect.Collector;
+import magmac.api.iter.collect.Collector;
 import magmac.api.iter.Iter;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;

@@ -5,7 +5,7 @@ import magmac.api.iter.Iter;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 
 public record MapRoots(Map<Location, Node> roots) implements Roots {
     @Override

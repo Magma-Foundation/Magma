@@ -1,4 +1,4 @@
-package magmac.api.collect;
+package magmac.api.collect.map;
 
 import magmac.api.Tuple2;
 import magmac.api.iter.Iter;

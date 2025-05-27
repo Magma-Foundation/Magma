@@ -3,7 +3,7 @@ package magmac.app.lang;
 import magmac.api.None;
 import magmac.api.Some;
 import magmac.api.Tuple2;
-import magmac.api.collect.ListCollector;
+import magmac.api.iter.collect.ListCollector;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.node.NodeList;

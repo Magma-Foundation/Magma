@@ -4,7 +4,7 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
-import magmac.api.collect.ListCollector;
+import magmac.api.iter.collect.ListCollector;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.app.compile.node.InlineNodeList;

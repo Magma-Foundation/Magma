@@ -1,4 +1,4 @@
-package magmac.api.collect;
+package magmac.api.iter.collect;
 
 import java.util.ArrayList;
 import java.util.List;

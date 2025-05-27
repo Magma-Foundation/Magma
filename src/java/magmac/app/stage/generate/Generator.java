@@ -4,7 +4,7 @@ import magmac.app.io.Location;
 import magmac.app.stage.Roots;
 import magmac.app.stage.Stage;
 
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 
 public interface Generator extends Stage<Roots, Map<Location, String>> {
 }

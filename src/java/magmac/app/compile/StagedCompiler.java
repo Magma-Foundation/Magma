@@ -6,7 +6,7 @@ import magmac.app.stage.generate.Generator;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;
 
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 
 public record StagedCompiler(Lexer lexer, Parser parser, Generator generator) implements Compiler {
     @Override

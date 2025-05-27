@@ -1,7 +1,7 @@
 package magmac.app.stage.parse;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.MapCollector;
+import magmac.api.collect.map.MapCollector;
 import magmac.api.result.Ok;
 import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.error.error.CompileError;
@@ -15,7 +15,7 @@ import magmac.app.stage.MapRoots;
 import magmac.app.stage.Passer;
 import magmac.app.stage.Roots;
 
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 
 public class TreeParser implements Parser {
     private final Passer beforeChild;

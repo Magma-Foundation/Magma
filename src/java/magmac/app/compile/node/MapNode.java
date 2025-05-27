@@ -4,9 +4,9 @@ import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
-import magmac.api.collect.Joiner;
-import magmac.api.collect.Map;
-import magmac.api.collect.Maps;
+import magmac.api.iter.collect.Joiner;
+import magmac.api.collect.map.Map;
+import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 

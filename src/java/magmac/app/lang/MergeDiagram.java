@@ -1,9 +1,9 @@
 package magmac.app.lang;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.ListCollector;
-import magmac.api.collect.Map;
-import magmac.api.collect.Maps;
+import magmac.api.iter.collect.ListCollector;
+import magmac.api.collect.map.Map;
+import magmac.api.collect.map.Maps;
 import magmac.api.iter.Iters;
 import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;

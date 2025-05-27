@@ -1,4 +1,4 @@
-package magmac.api.collect;
+package magmac.api.collect.map;
 
 import java.util.HashMap;
 

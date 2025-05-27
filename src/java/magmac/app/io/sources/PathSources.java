@@ -1,8 +1,8 @@
 package magmac.app.io.sources;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.MapCollector;
-import magmac.api.collect.ResultCollector;
+import magmac.api.collect.map.MapCollector;
+import magmac.api.iter.collect.ResultCollector;
 import magmac.api.iter.Iter;
 import magmac.app.io.IOResult;
 import magmac.app.io.InlineIOResult;
@@ -11,7 +11,7 @@ import magmac.app.io.SafeFiles;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 
 public record PathSources(Path root) implements Sources {
     @Override

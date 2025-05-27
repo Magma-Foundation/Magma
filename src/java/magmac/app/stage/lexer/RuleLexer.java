@@ -1,8 +1,8 @@
 package magmac.app.stage.lexer;
 
 import magmac.api.Tuple2;
-import magmac.api.collect.MapCollector;
-import magmac.api.collect.ResultCollector;
+import magmac.api.collect.map.MapCollector;
+import magmac.api.iter.collect.ResultCollector;
 import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.InlineCompileResult;
 import magmac.app.compile.node.Node;
@@ -11,7 +11,7 @@ import magmac.app.io.Location;
 import magmac.app.stage.MapRoots;
 import magmac.app.stage.Roots;
 
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 
 public class RuleLexer implements Lexer {
     private final Rule rootRule;

@@ -1,7 +1,7 @@
 package magmac.app.io.targets;
 
 import magmac.api.Option;
-import magmac.api.collect.Map;
+import magmac.api.collect.map.Map;
 import magmac.api.iter.Iters;
 import magmac.app.io.Location;
 import magmac.app.io.SafeFiles;
