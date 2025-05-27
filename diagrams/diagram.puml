@@ -133,6 +133,7 @@ StringRule --> Node
 
 class ThrowableError
 
+ThrowableError --> Error
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
 
@@ -144,6 +145,7 @@ class Tuple2
 
 class ApplicationError
 
+ApplicationError --> Error
 
 
 class PathSources
@@ -182,10 +184,6 @@ AfterPasser --> Optional
 
 
 
-
-
-
-class Error
 
 
 
@@ -308,7 +306,6 @@ NodeContext --> Node
 class CompileApplication
 
 CompileApplication --> ApplicationError
-CompileApplication --> Error
 CompileApplication --> ThrowableError
 CompileApplication --> Location
 CompileApplication --> Sources
@@ -442,6 +439,7 @@ ParseState --> Location
 
 class CompileError
 
+CompileError --> Error
 CompileError --> Context
 CompileError --> ArrayList
 CompileError --> List
@@ -567,6 +565,10 @@ StripRule --> Node
 
 
 
+class Error
+
+
+
 class Iter
 
 Iter --> Collector
@@ -597,7 +599,6 @@ Ok --> Supplier
 
 class Application
 
-Application --> Error
 Application --> Optional
 
 

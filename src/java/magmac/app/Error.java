@@ -1,4 +1,4 @@
-package magmac.app.error;
+package magmac.app;
 
 public interface Error {
     String display();

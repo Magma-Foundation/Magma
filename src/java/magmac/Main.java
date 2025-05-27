@@ -4,7 +4,7 @@ import magmac.app.Application;
 import magmac.app.CompileApplication;
 import magmac.app.compile.lang.java.JavaRoots;
 import magmac.app.compile.lang.plant.PlantUMLRoots;
-import magmac.app.error.Error;
+import magmac.app.Error;
 import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;
