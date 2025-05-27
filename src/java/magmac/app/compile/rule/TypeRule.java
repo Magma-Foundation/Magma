@@ -4,7 +4,6 @@ import magmac.api.result.Err;
 import magmac.api.result.Result;
 import magmac.app.compile.CompileError;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.result.StringContext;
 
 public record TypeRule(String type, Rule childRule) implements Rule {
     @Override
@@ -14,10 +13,10 @@ public record TypeRule(String type, Rule childRule) implements Rule {
 
     @Override
     public Result<String, CompileError> generate(Node node) {
-        if (!node.is(this.type)) {
-            return new Err<>(new CompileError("?", new StringContext("?")));
+        if (node.is(this.type)) {
+            return this.childRule.generate(node);
         }
 
-        return this.childRule.generate(node);
+        return new Err<>(new CompileError("Type '" + this.type + "' not present", new NodeContext(node)));
     }
 }

@@ -4,6 +4,7 @@ import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
 import magmac.app.compile.CompileError;
+import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.result.StringContext;
 
@@ -24,10 +25,10 @@ public record OrRule(List<Rule> rules) implements Rule {
             return new State<>(Optional.of(value));
         }
 
-        Result<T, CompileError> toResult() {
+        Result<T, CompileError> toResult(Context context) {
             return this.maybeValue
                     .<Result<T, CompileError>>map(value -> new Ok<>(value))
-                    .orElseGet(() -> new Err<>(new CompileError("?", new StringContext("?"))));
+                    .orElseGet(() -> new Err<>(new CompileError("Value not present", context)));
         }
 
         public State<T> withError(CompileError error) {
@@ -41,18 +42,18 @@ public record OrRule(List<Rule> rules) implements Rule {
 
     @Override
     public Result<Node, CompileError> lex(String input) {
-        return this.foldAll(rule1 -> rule1.lex(input));
+        return this.foldAll(rule1 -> rule1.lex(input), new StringContext(input));
     }
 
-    private <T> Result<T, CompileError> foldAll(Function<Rule, Result<T, CompileError>> mapper) {
+    private <T> Result<T, CompileError> foldAll(Function<Rule, Result<T, CompileError>> mapper, Context context) {
         return this.rules.stream().reduce(new State<T>(),
                         (state, rule) -> OrRule.foldElement(state, rule, mapper),
                         (_, next) -> next)
-                .toResult();
+                .toResult(context);
     }
 
     @Override
     public Result<String, CompileError> generate(Node node) {
-        return this.foldAll(rule1 -> rule1.generate(node));
+        return this.foldAll(rule1 -> rule1.generate(node), new NodeContext(node));
     }
 }
