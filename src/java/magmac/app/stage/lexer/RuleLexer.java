@@ -30,7 +30,7 @@ public class RuleLexer implements Lexer {
     }
 
     @Override
-    public Result<Roots, CompileError> lexAll(Map<Location, String> values) {
+    public Result<Roots, CompileError> apply(Map<Location, String> values) {
         return Iters.fromMap(values)
                 .map(entry -> this.foldEntry(entry))
                 .collect(new ResultCollector<>(new MapCollector<>()))

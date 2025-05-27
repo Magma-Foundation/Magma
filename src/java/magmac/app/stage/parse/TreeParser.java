@@ -3,10 +3,12 @@ package magmac.app.stage.parse;
 import magmac.api.Tuple2;
 import magmac.api.iter.Iters;
 import magmac.api.collect.MapCollector;
+import magmac.api.result.Ok;
+import magmac.api.result.Result;
+import magmac.app.compile.error.CompileError;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
 import magmac.app.stage.AfterAll;
-import magmac.app.stage.Parser;
 import magmac.app.stage.Passer;
 import magmac.app.stage.Roots;
 
@@ -77,7 +79,7 @@ public class TreeParser implements Parser {
     }
 
     @Override
-    public Roots parseAll(Roots roots) {
-        return new Roots(this.parseAll0(roots.roots()));
+    public Result<Roots, CompileError> apply(Roots roots) {
+        return new Ok<>(new Roots(this.parseAll0(roots.roots())));
     }
 }

@@ -27,6 +27,7 @@ class StatementFolder
 Folder <|-- StatementFolder
 class CompileErrors
 interface Generator
+Stage <|-- Generator
 interface Compiler
 class NodeContext
 Context <|-- NodeContext
@@ -34,6 +35,7 @@ class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
 class EmptyHead
 Head <|-- EmptyHead
+interface Stage
 class MapCollector
 Collector <|-- MapCollector
 interface Folder
@@ -83,7 +85,6 @@ Folder <|-- DelimitedFolder
 class PathTargets
 Targets <|-- PathTargets
 class Location
-interface Parser
 class SingleHead
 Head <|-- SingleHead
 interface Context
@@ -93,10 +94,13 @@ interface Error
 class Ok
 Result <|-- Ok
 interface Sources
+interface Parser
+Stage <|-- Parser
 interface Application
 class ImmutableParseState
 ParseState <|-- ImmutableParseState
 interface Lexer
+Stage <|-- Lexer
 class DivideRule
 Rule <|-- DivideRule
 class TreeParser
@@ -154,6 +158,8 @@ DivideRule --> CompileErrors
 DivideRule --> ArrayList
 DivideRule --> List
 DivideRule --> Optional
+Stage --> Result
+Stage --> CompileError
 Iter --> Collector
 Iter --> Result
 Iter --> Optional
@@ -206,20 +212,21 @@ Sources --> Result
 Sources --> Location
 Sources --> IOException
 Sources --> Map
+Parser --> Roots
 HeadedIter --> Ok
-Lexer --> Result
-Lexer --> CompileError
 Lexer --> Location
 Lexer --> Roots
 Lexer --> Map
 TreeParser --> Tuple2
 TreeParser --> Iters
 TreeParser --> MapCollector
+TreeParser --> Ok
+TreeParser --> Result
+TreeParser --> CompileError
 TreeParser --> Node
 TreeParser --> Location
 TreeParser --> AfterAll
 TreeParser --> Passer
-TreeParser --> Roots
 TreeParser --> ArrayList
 TreeParser --> List
 TreeParser --> Map
@@ -234,6 +241,8 @@ RuleGenerator --> Tuple2
 RuleGenerator --> Iters
 RuleGenerator --> MapCollector
 RuleGenerator --> ResultCollector
+RuleGenerator --> Result
+RuleGenerator --> CompileError
 RuleGenerator --> Rule
 Application --> Optional
 CreateDiagram --> Iters
@@ -244,8 +253,6 @@ CreateDiagram --> Collections
 CreateDiagram --> HashMap
 CreateDiagram --> List
 CreateDiagram --> Optional
-Generator --> Result
-Generator --> CompileError
 Generator --> Location
 Generator --> Roots
 Generator --> Map
@@ -345,7 +352,6 @@ Targets --> Optional
 StagedCompiler --> Generator
 StagedCompiler --> Lexer
 StagedCompiler --> Parser
-StagedCompiler --> Roots
 MutableDivideState --> ArrayList
 MutableDivideState --> List
 CompileApplication --> Compiler
@@ -384,6 +390,8 @@ RuleLexer --> Tuple2
 RuleLexer --> Iters
 RuleLexer --> MapCollector
 RuleLexer --> ResultCollector
+RuleLexer --> Result
+RuleLexer --> CompileError
 RuleLexer --> Node
 RuleLexer --> Rule
 TypeRule --> Err

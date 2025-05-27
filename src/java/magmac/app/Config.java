@@ -9,7 +9,7 @@ import magmac.app.lang.CreateDiagram;
 import magmac.app.stage.generate.Generator;
 import magmac.app.lang.JavaToPlantUML;
 import magmac.app.stage.lexer.Lexer;
-import magmac.app.stage.Parser;
+import magmac.app.stage.parse.Parser;
 import magmac.app.stage.generate.RuleGenerator;
 import magmac.app.stage.lexer.RuleLexer;
 import magmac.app.stage.parse.TreeParser;
