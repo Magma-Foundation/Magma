@@ -3,7 +3,7 @@ package magmac.api.collect.list;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Lists {
+public final class Lists {
     public static <T> List<T> of(T... elements) {
         return new JVMList<>(new ArrayList<>(Arrays.asList(elements)));
     }

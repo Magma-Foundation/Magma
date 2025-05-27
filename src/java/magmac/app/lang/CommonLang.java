@@ -5,7 +5,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StripRule;
 import magmac.app.compile.rule.TypeRule;
 
-public class CommonLang {
+public final class CommonLang {
     static Rule createWhitespaceRule() {
         return new TypeRule("whitespace", new StripRule(new ExactRule("")));
     }

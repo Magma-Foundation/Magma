@@ -1,6 +1,5 @@
 package magmac.app.lang;
 
-import magmac.api.None;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.InlinePassResult;
 import magmac.app.stage.PassResult;

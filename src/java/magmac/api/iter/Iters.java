@@ -7,7 +7,6 @@ import magmac.api.head.RangeHead;
 import magmac.api.head.SingleHead;
 
 public final class Iters {
-
     public static <T> Iter<T> fromArray(T[] array) {
         return new HeadedIter<>(new RangeHead(array.length)).map(index -> array[index]);
     }

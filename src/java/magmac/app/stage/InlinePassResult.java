@@ -6,7 +6,6 @@ import magmac.api.Tuple2;
 import magmac.app.compile.node.Node;
 import magmac.app.stage.parse.ParseState;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -14,11 +13,6 @@ import java.util.function.Supplier;
 public record InlinePassResult(Option<Tuple2<ParseState, Node>> option) implements PassResult {
     public static PassResult empty() {
         return new InlinePassResult(new None<>());
-    }
-
-    @Override
-    public PassResult or(Supplier<PassResult> other) {
-        return new InlinePassResult(this.option.or(() -> other.get().toOption()));
     }
 
     @Override
@@ -32,18 +26,8 @@ public record InlinePassResult(Option<Tuple2<ParseState, Node>> option) implemen
     }
 
     @Override
-    public void ifPresent(Consumer<Tuple2<ParseState, Node>> consumer) {
-        this.option.ifPresent(consumer);
-    }
-
-    @Override
     public boolean isEmpty() {
         return this.option.isEmpty();
-    }
-
-    @Override
-    public boolean isPresent() {
-        return this.option.isPresent();
     }
 
     @Override

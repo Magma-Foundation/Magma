@@ -66,14 +66,14 @@ public final class MapNode implements Node {
 
         Iter<String> stringsStream = this.toStream(depth, this.strings, value -> "\"" + value + "\"");
         Iter<String> nodesStream = this.toStream(depth, this.nodes, value -> value.format(depth + 1));
-        Iter<String> nodeListsStream = this.toStream(depth, this.nodeLists, values -> "[" + this.formatNodeList(depth, values) + "]");
+        Iter<String> nodeListsStream = this.toStream(depth, this.nodeLists, values -> "[" + MapNode.formatNodeList(depth, values) + "]");
 
         String joined = stringsStream.concat(nodesStream)
                 .concat(nodeListsStream)
                 .collect(new Joiner(", "))
                 .orElse("");
 
-        return typeString + "{" + joined + this.createIndent(depth) + "}";
+        return typeString + "{" + joined + MapNode.createIndent(depth) + "}";
     }
 
     private <T> Iter<String> toStream(int depth, Map<String, T> map, Function<T, String> mapper) {
@@ -88,7 +88,7 @@ public final class MapNode implements Node {
         });
     }
 
-    private String formatNodeList(int depth, NodeList nodeList) {
+    private static String formatNodeList(int depth, NodeList nodeList) {
         return nodeList.iter()
                 .map(child -> child.format(depth + 1))
                 .collect(new Joiner(", "))
@@ -96,10 +96,10 @@ public final class MapNode implements Node {
     }
 
     private String formatEntry(int depth, String key, String value) {
-        return this.createIndent(depth + 1) + key + ": " + value;
+        return MapNode.createIndent(depth + 1) + key + ": " + value;
     }
 
-    private String createIndent(int depth) {
+    private static String createIndent(int depth) {
         return "\n" + "\t".repeat(depth);
     }
 

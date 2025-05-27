@@ -21,7 +21,7 @@ import magmac.app.stage.parse.TreeParser;
 import java.nio.file.Path;
 import magmac.api.Option;
 
-public class ApplicationBuilder {
+public final class ApplicationBuilder {
     public static Option<Error> run(TargetPlatform platform, Sources sources) {
         Path targetPath = platform.createTargetPath();
         String extension = platform.createExtension();

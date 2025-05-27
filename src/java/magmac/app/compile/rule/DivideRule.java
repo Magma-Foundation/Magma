@@ -47,14 +47,14 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
             char c = maybePopped.orElse(null).right();
 
             DivideState finalCurrent = current;
-            current = this.foldSingleQuotes(current, c)
+            current = DivideRule.foldSingleQuotes(current, c)
                     .orElseGet(() -> this.folder.fold(finalCurrent, c));
         }
 
         return current.advance().iter();
     }
 
-    private Option<DivideState> foldSingleQuotes(DivideState current, char c) {
+    private static Option<DivideState> foldSingleQuotes(DivideState current, char c) {
         if ('\'' != c) {
             return new None<>();
         }

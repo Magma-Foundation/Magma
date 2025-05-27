@@ -1,6 +1,5 @@
 package magmac.app.lang;
 
-import magmac.api.None;
 import magmac.api.Option;
 import magmac.api.Some;
 import magmac.api.Tuple2;
