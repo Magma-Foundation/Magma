@@ -6,10 +6,11 @@ import magmac.app.Config;
 import magmac.app.Error;
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
+import magmac.app.config.TargetPlatform;
+import magmac.app.config.TargetPlatformImpl;
 import magmac.app.io.sources.PathSources;
 import magmac.app.io.sources.Sources;
 import magmac.app.io.targets.Targets;
-import magmac.app.config.TargetPlatform;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.lexer.Lexer;
 import magmac.app.stage.parse.Parser;
@@ -21,14 +22,14 @@ final class Main {
     public static void main() {
         Sources sources = new PathSources(Paths.get(".", "src", "java"));
 
-        Iters.fromArray(TargetPlatform.values())
-                .map(platform -> Main.getDiagrams(platform, sources))
+        Iters.fromArray(TargetPlatformImpl.values())
+                .map(platform -> Main.run(platform, sources))
                 .flatMap(Iters::fromOption)
                 .next()
                 .ifPresent(error -> Main.handleError(error));
     }
 
-    private static Optional<Error> getDiagrams(TargetPlatform platform, Sources sources) {
+    private static Optional<Error> run(TargetPlatform platform, Sources sources) {
         Targets targets = platform.createTargets();
         Lexer lexer = Config.createLexer();
         Parser parser = platform.createParser();
