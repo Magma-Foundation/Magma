@@ -1,6 +1,5 @@
-package magmac.app.compile.rule;
+package magmac.app.compile.error.context;
 
-import magmac.app.compile.Context;
 import magmac.app.compile.node.Node;
 
 public record NodeContext(Node node) implements Context {

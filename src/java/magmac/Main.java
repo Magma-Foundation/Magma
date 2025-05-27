@@ -4,11 +4,11 @@ import magmac.app.Application;
 import magmac.app.CompileApplication;
 import magmac.app.compile.Compiler;
 import magmac.app.Error;
-import magmac.app.config.Config;
-import magmac.app.io.PathSources;
-import magmac.app.io.PathTargets;
-import magmac.app.io.Sources;
-import magmac.app.io.Targets;
+import magmac.app.Config;
+import magmac.app.io.sources.PathSources;
+import magmac.app.io.targets.PathTargets;
+import magmac.app.io.sources.Sources;
+import magmac.app.io.targets.Targets;
 
 import java.nio.file.Paths;
 

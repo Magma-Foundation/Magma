@@ -3,10 +3,10 @@ package magmac.app.compile.rule;
 import magmac.api.result.Err;
 import magmac.api.result.Ok;
 import magmac.api.result.Result;
-import magmac.app.error.CompileError;
+import magmac.app.compile.error.CompileError;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
-import magmac.app.compile.rule.result.StringContext;
+import magmac.app.compile.error.context.StringContext;
 import magmac.app.error.ImmutableCompileError;
 
 public record ExactRule(String value) implements Rule {

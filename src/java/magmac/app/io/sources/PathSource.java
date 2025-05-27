@@ -1,7 +1,8 @@
-package magmac.app.io;
+package magmac.app.io.sources;
 
-import jvm.io.SafeFiles;
 import magmac.api.result.Result;
+import magmac.app.io.Location;
+import magmac.app.io.SafeFiles;
 
 import java.io.IOException;
 import java.nio.file.Path;

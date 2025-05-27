@@ -9,8 +9,8 @@ import magmac.app.compile.node.Node;
 import magmac.app.compile.rule.divide.DivideState;
 import magmac.app.compile.rule.divide.MutableDivideState;
 import magmac.app.compile.rule.fold.Folder;
-import magmac.app.error.CompileError;
-import magmac.app.error.CompileErrors;
+import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileErrors;
 
 import java.util.ArrayList;
 import java.util.List;

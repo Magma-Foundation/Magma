@@ -1,4 +1,4 @@
-package jvm.io;
+package magmac.app.io;
 
 import magmac.api.collect.Iter;
 import magmac.api.collect.Iters;

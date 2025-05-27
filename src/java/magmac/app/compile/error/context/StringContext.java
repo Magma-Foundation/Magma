@@ -1,6 +1,4 @@
-package magmac.app.compile.rule.result;
-
-import magmac.app.compile.Context;
+package magmac.app.compile.error.context;
 
 public record StringContext(String value) implements Context {
     @Override

@@ -1,18 +1,19 @@
 @startuml
 skinparam linetype ortho
+interface Source
 class HeadedIter
 Iter <|-- HeadedIter
+class Config
 class Roots
+interface Targets
 interface All
 class SymbolRule
 Rule <|-- SymbolRule
 class EmptyHead
 Head <|-- EmptyHead
 class JavaRoots
-interface Sources
 class Iters
 class PlantUMLRoots
-class SafeFiles
 interface Lexer
 class StringRule
 Rule <|-- StringRule
@@ -23,21 +24,24 @@ class ApplicationError
 Error <|-- ApplicationError
 class StagedCompiler
 Compiler <|-- StagedCompiler
-class PathSources
-Sources <|-- PathSources
 class StatementFolder
 Folder <|-- StatementFolder
+class CompileErrors
 class AfterPasser
 Passer <|-- AfterPasser
 interface Compiler
+class NodeContext
+Context <|-- NodeContext
 class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
-class Config
-interface Source
 interface Folder
+class PathSources
+Sources <|-- PathSources
 interface DivideState
 class JavaToPlantUML
 Passer <|-- JavaToPlantUML
+interface CompileError
+Error <|-- CompileError
 class CreateDiagram
 All <|-- CreateDiagram
 class RuleGenerator
@@ -54,14 +58,14 @@ class PrefixRule
 Rule <|-- PrefixRule
 class MapCollector
 Collector <|-- MapCollector
-class NodeContext
-Context <|-- NodeContext
 class CompileApplication
 Application <|-- CompileApplication
 class ExactRule
 Rule <|-- ExactRule
 class PathSource
 Source <|-- PathSource
+class StringContext
+Context <|-- StringContext
 interface Collector
 interface Head
 class TypeRule
@@ -74,29 +78,26 @@ Rule <|-- OrRule
 interface ParseState
 class NodeRule
 Rule <|-- NodeRule
-interface CompileError
-Error <|-- CompileError
 interface Rule
 class Namespaced
 class DelimitedFolder
 Folder <|-- DelimitedFolder
+class PathTargets
+Targets <|-- PathTargets
 class TreeParser
 Parser <|-- TreeParser
 class Location
 interface Parser
-class StringContext
-Context <|-- StringContext
-class PathTargets
-Targets <|-- PathTargets
 class SingleHead
 Head <|-- SingleHead
+interface Context
 class StripRule
 Rule <|-- StripRule
 interface Error
 interface Iter
 class Ok
 Result <|-- Ok
-class CompileErrors
+interface Sources
 interface Application
 class ImmutableParseState
 ParseState <|-- ImmutableParseState
@@ -108,16 +109,15 @@ class Err
 Result <|-- Err
 class RuleLexer
 Lexer <|-- RuleLexer
-interface Context
 class SuffixRule
 Rule <|-- SuffixRule
 interface Result
 class Main
+class SafeFiles
 class MutableDivideState
 DivideState <|-- MutableDivideState
 class MapNode
 Node <|-- MapNode
-interface Targets
 class ContextRule
 Rule <|-- ContextRule
 All --> Node
@@ -190,6 +190,7 @@ InfixRule --> ImmutableCompileError
 OrRule --> Err
 OrRule --> Ok
 OrRule --> Context
+OrRule --> NodeContext
 OrRule --> StringContext
 OrRule --> ImmutableCompileError
 OrRule --> ArrayList
@@ -201,18 +202,20 @@ PathSource --> SafeFiles
 PathSource --> Path
 PathSource --> ArrayList
 PathSource --> List
-Sources --> Result
-Sources --> IOException
-Sources --> Map
-DivideState --> Stream
-PathTargets --> SafeFiles
-PathTargets --> Iters
-PathTargets --> Files
-PathTargets --> Path
 CompileErrors --> Err
 CompileErrors --> Result
-CompileErrors --> Node
 CompileErrors --> NodeContext
+CompileErrors --> Node
+CompileErrors --> ImmutableCompileError
+DivideState --> Stream
+PathTargets --> Iters
+PathTargets --> SafeFiles
+PathTargets --> Files
+PathTargets --> Path
+Sources --> Result
+Sources --> Location
+Sources --> IOException
+Sources --> Map
 HeadedIter --> EmptyHead
 HeadedIter --> FlatMapHead
 HeadedIter --> SingleHead
@@ -270,6 +273,7 @@ PlantUMLRoots --> StatementFolder
 PlantUMLRoots --> List
 StringRule --> Err
 StringRule --> Ok
+StringRule --> NodeContext
 StringRule --> MapNode
 StringRule --> ImmutableCompileError
 Config --> Compiler
@@ -291,14 +295,15 @@ MapNode --> Map
 MapNode --> BiFunction
 MapNode --> Function
 Folder --> DivideState
-PathSources --> SafeFiles
+Source --> Result
+Source --> Location
+Source --> IOException
 PathSources --> Tuple2
 PathSources --> MapCollector
 PathSources --> ResultCollector
+PathSources --> SafeFiles
 PathSources --> Files
 PathSources --> Path
-Source --> Result
-Source --> IOException
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
 ExactRule --> Err
@@ -340,6 +345,7 @@ SafeFiles --> Path
 SafeFiles --> Optional
 SafeFiles --> Collectors
 SafeFiles --> Stream
+Targets --> Location
 Targets --> IOException
 Targets --> Map
 Targets --> Optional
@@ -356,11 +362,13 @@ CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
 CompileApplication --> Map
+ContextRule --> NodeContext
 ContextRule --> StringContext
 ContextRule --> ImmutableCompileError
 ContextRule --> List
 NodeRule --> Err
 NodeRule --> Ok
+NodeRule --> NodeContext
 NodeRule --> MapNode
 NodeRule --> ImmutableCompileError
 SuffixRule --> Err
@@ -387,6 +395,7 @@ RuleLexer --> Node
 RuleLexer --> Rule
 TypeRule --> Err
 TypeRule --> Context
+TypeRule --> NodeContext
 TypeRule --> StringContext
 TypeRule --> ImmutableCompileError
 TypeRule --> List

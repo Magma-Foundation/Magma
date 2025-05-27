@@ -1,4 +1,4 @@
-package magmac.app.error;
+package magmac.app.compile.error;
 
 import magmac.app.Error;
 

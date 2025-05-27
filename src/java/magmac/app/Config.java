@@ -1,4 +1,4 @@
-package magmac.app.config;
+package magmac.app;
 
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;

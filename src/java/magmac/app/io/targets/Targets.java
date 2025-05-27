@@ -1,4 +1,6 @@
-package magmac.app.io;
+package magmac.app.io.targets;
+
+import magmac.app.io.Location;
 
 import java.io.IOException;
 import java.util.Map;

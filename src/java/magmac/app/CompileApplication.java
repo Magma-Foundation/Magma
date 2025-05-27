@@ -4,8 +4,8 @@ import magmac.app.compile.Compiler;
 import magmac.app.error.ApplicationError;
 import magmac.app.error.ThrowableError;
 import magmac.app.io.Location;
-import magmac.app.io.Sources;
-import magmac.app.io.Targets;
+import magmac.app.io.sources.Sources;
+import magmac.app.io.targets.Targets;
 
 import java.util.Map;
 import java.util.Optional;

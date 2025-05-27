@@ -1,10 +1,11 @@
-package magmac.app.io;
+package magmac.app.io.sources;
 
-import jvm.io.SafeFiles;
 import magmac.api.Tuple2;
 import magmac.api.collect.collect.MapCollector;
 import magmac.api.collect.collect.ResultCollector;
 import magmac.api.result.Result;
+import magmac.app.io.Location;
+import magmac.app.io.SafeFiles;
 
 import java.io.IOException;
 import java.nio.file.Files;
