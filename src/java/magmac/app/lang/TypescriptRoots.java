@@ -33,7 +33,8 @@ public final class TypescriptRoots {
         return new OrRule(List.of(
                 CommonLang.createWhitespaceRule(),
                 new TypeRule("method", new ExactRule("\n\ttemp(){\n\t}")),
-                new TypeRule("definition-statement", new ExactRule("\n\ttemp : ?;"))
+                new TypeRule("definition-statement", new ExactRule("\n\ttemp : ?;")),
+                new ExactRule("")
         ));
     }
 }

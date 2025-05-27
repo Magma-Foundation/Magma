@@ -1,4 +1,4 @@
 import { ? } from ?;
 import { ? } from ?;
-export interface ? {
+export class CompileResult {
 }

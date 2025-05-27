@@ -21,7 +21,7 @@ public class RuleGenerator implements Generator {
     @Override
     public Result<Map<Location, String>, CompileError> apply(Roots roots) {
         return roots.iter()
-                .map(entry -> this.rootRule.generate(entry.right()).mapValue(generated -> new Tuple2<>(entry.left(), generated)))
+                .map(entry -> this.rootRule.generate(entry.right()).result().mapValue(generated -> new Tuple2<>(entry.left(), generated)))
                 .collect(new ResultCollector<>(new MapCollector<>()));
     }
 }

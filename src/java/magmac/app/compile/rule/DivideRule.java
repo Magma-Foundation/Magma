@@ -7,6 +7,7 @@ import magmac.api.collect.ResultCollector;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 import magmac.api.result.Result;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileError;
 import magmac.app.compile.error.CompileErrors;
 import magmac.app.compile.node.InlineNodeList;
@@ -25,10 +26,9 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
         return new DivideRule(key, new StatementFolder(), childRule);
     }
 
-    @Override
-    public Result<Node, CompileError> lex(String input) {
+    private Result<Node, CompileError> lex0(String input) {
         return this.divide(input)
-                .map(segment -> this.childRule.lex(segment))
+                .map(segment -> this.childRule.lex(segment).result())
                 .collect(new ResultCollector<>(new ListCollector<>()))
                 .mapValue(children -> {
                     Node node = new MapNode();
@@ -75,8 +75,7 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
         }
     }
 
-    @Override
-    public Result<String, CompileError> generate(Node node) {
+    private Result<String, CompileError> generate0(Node node) {
         return node.findNodeList(this.key)
                 .map(list -> this.join(list))
                 .orElseGet(() -> CompileErrors.createNodeError("Node list '" + this.key + "' not present", node))
@@ -85,7 +84,17 @@ public record DivideRule(String key, Folder folder, Rule childRule) implements R
 
     private Result<Optional<String>, CompileError> join(NodeList list) {
         return list.iter()
-                .map(this.childRule::generate)
+                .map(node -> this.childRule.generate(node).result())
                 .collect(new ResultCollector<>(new Joiner()));
+    }
+
+    @Override
+    public CompileResult<Node> lex(String input) {
+        return new CompileResult<>(this.lex0(input));
+    }
+
+    @Override
+    public CompileResult<String> generate(Node node) {
+        return new CompileResult<>(this.generate0(node));
     }
 }

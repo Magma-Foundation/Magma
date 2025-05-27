@@ -66,6 +66,8 @@ class TypescriptRoots
 class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
 
+class CompileResult
+
 class EmptyHead
 Head <|-- EmptyHead
 
@@ -204,8 +206,6 @@ Parser <|-- TreeParser
 class Err
 Result <|-- Err
 
-class CompileResult
-
 class LocatingRule
 Rule <|-- LocatingRule
 
@@ -276,6 +276,8 @@ Node --> Tuple2
 Node --> Iter
 Node --> Optional
 ParseState --> Location
+FilterRule --> Result
+FilterRule --> CompileError
 FilterRule --> CompileErrors
 FlatMapHead --> Iter
 FlatMapHead --> Function
@@ -320,6 +322,8 @@ DivideRule --> ListCollector
 DivideRule --> ResultCollector
 DivideRule --> Iter
 DivideRule --> Iters
+DivideRule --> Result
+DivideRule --> CompileError
 DivideRule --> CompileErrors
 DivideRule --> InlineNodeList
 DivideRule --> MapNode
@@ -348,13 +352,18 @@ AfterPasser --> Iters
 AfterPasser --> InlineNodeList
 AfterPasser --> MapNode
 AfterPasser --> NodeList
+PrefixRule --> Result
+PrefixRule --> CompileError
 PrefixRule --> CompileErrors
+Compiler --> CompileResult
 Compiler --> Location
 Compiler --> Map
 Head --> Optional
+OrRule --> Result
 OrRule --> Context
 OrRule --> NodeContext
 OrRule --> StringContext
+OrRule --> CompileError
 OrRule --> List
 OrRule --> Function
 NodeContext --> Node
@@ -364,6 +373,8 @@ PathSource --> Path
 PathSource --> ArrayList
 PathSource --> Collections
 PathSource --> List
+StripRule --> Result
+StripRule --> CompileError
 CompileErrors --> Err
 CompileErrors --> Result
 CompileErrors --> NodeContext
@@ -414,8 +425,7 @@ TypescriptRoots --> StringRule
 TypescriptRoots --> SuffixRule
 TypescriptRoots --> TypeRule
 TypescriptRoots --> List
-Rule --> Result
-Rule --> CompileError
+Rule --> CompileResult
 Rule --> Node
 RuleGenerator --> Tuple2
 RuleGenerator --> MapCollector
@@ -428,12 +438,11 @@ Application --> Optional
 Generator --> Location
 Generator --> Roots
 Generator --> Map
-StringRule --> Err
 StringRule --> Ok
+StringRule --> Result
+StringRule --> CompileError
 StringRule --> CompileErrors
-StringRule --> NodeContext
 StringRule --> MapNode
-StringRule --> ImmutableCompileError
 MapNode --> Joiner
 MapNode --> Iters
 MapNode --> HashMap
@@ -455,6 +464,8 @@ PathSources --> Path
 ThrowableError --> PrintWriter
 ThrowableError --> StringWriter
 ExactRule --> Ok
+ExactRule --> Result
+ExactRule --> CompileError
 ExactRule --> CompileErrors
 ExactRule --> MapNode
 TargetPlatform --> Rule
@@ -506,8 +517,10 @@ CompileApplication --> Location
 CompileApplication --> Sources
 CompileApplication --> Targets
 CompileApplication --> Map
+ContextRule --> Result
 ContextRule --> NodeContext
 ContextRule --> StringContext
+ContextRule --> CompileError
 ContextRule --> ImmutableCompileError
 ContextRule --> List
 PlantUMLTargetPlatform --> AfterPasser
@@ -518,18 +531,21 @@ CommonLang --> ExactRule
 CommonLang --> Rule
 CommonLang --> StripRule
 CommonLang --> TypeRule
+LocatingRule --> Result
+LocatingRule --> CompileError
 LocatingRule --> CompileErrors
 LocatingRule --> FirstLocator
 LocatingRule --> LastLocator
 LocatingRule --> Locator
 LocatingRule --> Optional
 NodeRule --> Ok
+NodeRule --> Result
+NodeRule --> CompileError
 NodeRule --> CompileErrors
 NodeRule --> MapNode
-SuffixRule --> Err
+SuffixRule --> Result
+SuffixRule --> CompileError
 SuffixRule --> CompileErrors
-SuffixRule --> StringContext
-SuffixRule --> ImmutableCompileError
 JavaLang --> ContextRule
 JavaLang --> DivideRule
 JavaLang --> LocatingRule
@@ -545,7 +561,6 @@ JavaLang --> TypeRule
 JavaLang --> DelimitedFolder
 JavaLang --> List
 CompileResult --> Result
-CompileResult --> CompileError
 PlantUMLLang --> DivideRule
 PlantUMLLang --> ExactRule
 PlantUMLLang --> LocatingRule
@@ -577,6 +592,8 @@ RuleLexer --> CompileError
 RuleLexer --> Node
 RuleLexer --> Rule
 RuleLexer --> MapRoots
+TypeRule --> Result
+TypeRule --> CompileError
 TypeRule --> CompileErrors
 TypeRule --> Context
 TypeRule --> NodeContext

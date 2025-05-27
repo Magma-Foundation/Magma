@@ -2,6 +2,7 @@ package magmac.app.compile;
 
 import magmac.api.result.Result;
 import magmac.app.compile.error.CompileError;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.io.Location;
 import magmac.app.stage.generate.Generator;
 import magmac.app.stage.lexer.Lexer;

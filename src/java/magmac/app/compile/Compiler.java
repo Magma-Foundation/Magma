@@ -1,5 +1,6 @@
 package magmac.app.compile;
 
+import magmac.app.compile.error.CompileResult;
 import magmac.app.io.Location;
 
 import java.util.Map;

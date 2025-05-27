@@ -3,11 +3,15 @@ import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
 import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
-import { ? } from ?;
-export class CompileApplication {
+export class FilterRule {
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
+	temp(){
+	}
 	temp(){
 	}
 	temp(){

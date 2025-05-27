@@ -1,6 +1,7 @@
 package magmac.app.compile.rule;
 
 import magmac.api.result.Result;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.CompileError;
 import magmac.app.compile.error.CompileErrors;
 import magmac.app.compile.node.Node;
@@ -31,8 +32,7 @@ public final class LocatingRule implements Rule {
         return new LocatingRule(leftRule, infix, rightRule, new LastLocator());
     }
 
-    @Override
-    public Result<Node, CompileError> lex(String input) {
+    private Result<Node, CompileError> lex0(String input) {
         Optional<Integer> maybeSeparator = this.locator.locate(input, this.infix);
         if (maybeSeparator.isEmpty()) {
             return CompileErrors.createStringError("Infix '" + this.infix + "' not present", input);
@@ -41,15 +41,24 @@ public final class LocatingRule implements Rule {
         int separator = maybeSeparator.get();
         String left = input.substring(0, separator);
         String right = input.substring(separator + this.infix.length());
-        return this.leftRule.lex(left)
-                .and(() -> this.rightRule.lex(right))
+        return this.leftRule.lex(left).result()
+                .and(() -> this.rightRule.lex(right).result())
                 .mapValue(tuple -> tuple.left().merge(tuple.right()));
     }
 
-    @Override
-    public Result<String, CompileError> generate(Node node) {
-        return this.leftRule.generate(node)
-                .and(() -> this.rightRule.generate(node))
+    private Result<String, CompileError> generate0(Node node) {
+        return this.leftRule.generate(node).result()
+                .and(() -> this.rightRule.generate(node).result())
                 .mapValue(tuple -> tuple.left() + this.infix + tuple.right());
+    }
+
+    @Override
+    public CompileResult<Node> lex(String input) {
+        return new CompileResult<>(this.lex0(input));
+    }
+
+    @Override
+    public CompileResult<String> generate(Node node) {
+        return new CompileResult<>(this.generate0(node));
     }
 }

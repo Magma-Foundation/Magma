@@ -1,6 +1,7 @@
 package magmac.app.compile.rule;
 
 import magmac.api.result.Result;
+import magmac.app.compile.error.CompileResult;
 import magmac.app.compile.error.context.Context;
 import magmac.app.compile.error.context.NodeContext;
 import magmac.app.compile.node.Node;
@@ -15,9 +16,8 @@ public record OrRule(List<Rule> rules) implements Rule {
         return mapper.apply(rule).match(state::withValue, state::withError);
     }
 
-    @Override
-    public Result<Node, CompileError> lex(String input) {
-        return this.foldAll(rule1 -> rule1.lex(input), new StringContext(input));
+    private Result<Node, CompileError> lex0(String input) {
+        return this.foldAll(rule1 -> rule1.lex(input).result(), new StringContext(input));
     }
 
     private <T> Result<T, CompileError> foldAll(Function<Rule, Result<T, CompileError>> mapper, Context context) {
@@ -27,8 +27,17 @@ public record OrRule(List<Rule> rules) implements Rule {
                 .toResult(context);
     }
 
+    private Result<String, CompileError> generate0(Node node) {
+        return this.foldAll(rule1 -> rule1.generate(node).result(), new NodeContext(node));
+    }
+
     @Override
-    public Result<String, CompileError> generate(Node node) {
-        return this.foldAll(rule1 -> rule1.generate(node), new NodeContext(node));
+    public CompileResult<Node> lex(String input) {
+        return new CompileResult<>(this.lex0(input));
+    }
+
+    @Override
+    public CompileResult<String> generate(Node node) {
+        return new CompileResult<>(this.generate0(node));
     }
 }

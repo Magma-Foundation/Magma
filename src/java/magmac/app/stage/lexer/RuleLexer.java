@@ -25,8 +25,7 @@ public class RuleLexer implements Lexer {
         Location location = tuple.left();
         String input = tuple.right();
 
-        return this.rootRule
-                .lex(input)
+        return this.rootRule.lex(input).result()
                 .mapValue(root -> new Tuple2<>(location, root));
     }
 
