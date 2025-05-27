@@ -14,9 +14,13 @@ public record CompileError(String message, Context context, List<CompileError> e
 
     @Override
     public String display() {
+        return format(0);
+    }
+
+    private String format(int depth) {
         String joined = this.errors.stream()
-                .map(CompileError::display)
-                .map(display -> "\n" + display)
+                .map(compileError -> compileError.format(depth + 1))
+                .map(display -> "\n" + "\t".repeat(depth) + display)
                 .collect(Collectors.joining());
 
         return this.message + ": " + this.context.display() + joined;
