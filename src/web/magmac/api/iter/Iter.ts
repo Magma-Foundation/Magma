@@ -1,8 +1,8 @@
-import { Option } from ?;
-import { Collector } from ?;
-import { Result } from ?;
-import { BiFunction } from ?;
-import { Function } from ?;
-import { Predicate } from ?;
+import { Option } from "?magmacapiOption";
+import { Collector } from "?magmacapiitercollectCollector";
+import { Result } from "?magmacapiresultResult";
+import { BiFunction } from "?javautilfunctionBiFunction";
+import { Function } from "?javautilfunctionFunction";
+import { Predicate } from "?javautilfunctionPredicate";
 export interface ? {
 }

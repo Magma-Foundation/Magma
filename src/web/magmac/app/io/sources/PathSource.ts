@@ -1,9 +1,9 @@
-import { List } from ?;
-import { Lists } from ?;
-import { IOResult } from ?;
-import { Location } from ?;
-import { SafeFiles } from ?;
-import { Path } from ?;
+import { List } from "?magmacapicollectlistList";
+import { Lists } from "?magmacapicollectlistLists";
+import { IOResult } from "?magmacappioIOResult";
+import { Location } from "?magmacappioLocation";
+import { SafeFiles } from "?magmacappioSafeFiles";
+import { Path } from "?javaniofilePath";
 export class PathSource {
 	temp(){
 	}

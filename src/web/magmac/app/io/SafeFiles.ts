@@ -1,15 +1,15 @@
-import { None } from ?;
-import { Option } from ?;
-import { Some } from ?;
-import { JVMList } from ?;
-import { Iter } from ?;
-import { Err } from ?;
-import { Ok } from ?;
-import { IOException } from ?;
-import { Files } from ?;
-import { Path } from ?;
-import { Collectors } from ?;
-import { Stream } from ?;
+import { None } from "?magmacapiNone";
+import { Option } from "?magmacapiOption";
+import { Some } from "?magmacapiSome";
+import { JVMList } from "?magmacapicollectlistJVMList";
+import { Iter } from "?magmacapiiterIter";
+import { Err } from "?magmacapiresultErr";
+import { Ok } from "?magmacapiresultOk";
+import { IOException } from "?javaioIOException";
+import { Files } from "?javaniofileFiles";
+import { Path } from "?javaniofilePath";
+import { Collectors } from "?javautilstreamCollectors";
+import { Stream } from "?javautilstreamStream";
 export class SafeFiles {
 	temp(){
 	}

@@ -1,6 +1,6 @@
-import { None } from ?;
-import { Option } from ?;
-import { Some } from ?;
+import { None } from "?magmacapiNone";
+import { Option } from "?magmacapiOption";
+import { Some } from "?magmacapiSome";
 export class Joiner {
 	temp(){
 	}

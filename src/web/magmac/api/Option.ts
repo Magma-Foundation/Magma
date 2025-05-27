@@ -1,6 +1,6 @@
-import { Consumer } from ?;
-import { Function } from ?;
-import { Predicate } from ?;
-import { Supplier } from ?;
+import { Consumer } from "?javautilfunctionConsumer";
+import { Function } from "?javautilfunctionFunction";
+import { Predicate } from "?javautilfunctionPredicate";
+import { Supplier } from "?javautilfunctionSupplier";
 export interface ? {
 }

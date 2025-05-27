@@ -1,7 +1,7 @@
-import { ExactRule } from ?;
-import { Rule } from ?;
-import { StripRule } from ?;
-import { TypeRule } from ?;
+import { ExactRule } from "?magmacappcompileruleExactRule";
+import { Rule } from "?magmacappcompileruleRule";
+import { StripRule } from "?magmacappcompileruleStripRule";
+import { TypeRule } from "?magmacappcompileruleTypeRule";
 export class CommonLang {
 	temp(){
 	}

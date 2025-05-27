@@ -1,10 +1,10 @@
-import { None } from ?;
-import { Option } from ?;
-import { Some } from ?;
-import { Tuple2 } from ?;
-import { List } from ?;
-import { Lists } from ?;
-import { Iter } from ?;
+import { None } from "?magmacapiNone";
+import { Option } from "?magmacapiOption";
+import { Some } from "?magmacapiSome";
+import { Tuple2 } from "?magmacapiTuple2";
+import { List } from "?magmacapicollectlistList";
+import { Lists } from "?magmacapicollectlistLists";
+import { Iter } from "?magmacapiiterIter";
 export class MutableDivideState {
 	temp(){
 	}

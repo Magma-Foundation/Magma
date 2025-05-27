@@ -10,6 +10,7 @@ import magmac.app.compile.rule.Rule;
 import magmac.app.compile.rule.StringRule;
 import magmac.app.compile.rule.SuffixRule;
 import magmac.app.compile.rule.TypeRule;
+import magmac.app.compile.rule.fold.DelimitedFolder;
 
 public final class TypescriptLang {
     public static Rule createRule() {
@@ -23,7 +24,9 @@ public final class TypescriptLang {
     }
 
     private static TypeRule createImportRule() {
-        return new TypeRule("import", new PrefixRule("import { ", new SuffixRule(new StringRule("child"), " } from ?;\n")));
+        Rule segments = new SuffixRule(new DivideRule("segments", new DelimitedFolder('\\'), new StringRule("value")), "\";\n");
+        Rule first = LocatingRule.First(new StringRule("child"), " } from \"?", segments);
+        return new TypeRule("import", new PrefixRule("import { ", first));
     }
 
     private static Rule createClassRule() {

@@ -1,5 +1,5 @@
-import { CompileResult } from ?;
-import { Node } from ?;
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { Node } from "?magmacappcompilenodeNode";
 export class StripRule {
 	temp(){
 	}

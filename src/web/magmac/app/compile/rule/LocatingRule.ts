@@ -1,9 +1,9 @@
-import { CompileResult } from ?;
-import { CompileErrors } from ?;
-import { Node } from ?;
-import { FirstLocator } from ?;
-import { LastLocator } from ?;
-import { Locator } from ?;
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { CompileErrors } from "?magmacappcompileerrorerrorCompileErrors";
+import { Node } from "?magmacappcompilenodeNode";
+import { FirstLocator } from "?magmacappcompilerulelocateFirstLocator";
+import { LastLocator } from "?magmacappcompilerulelocateLastLocator";
+import { Locator } from "?magmacappcompilerulelocateLocator";
 export class LocatingRule {
 	temp(){
 	}

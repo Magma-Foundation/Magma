@@ -1,3 +1,3 @@
-import { Iter } from ?;
+import { Iter } from "?magmacapiiterIter";
 export interface ? {
 }

@@ -1,9 +1,9 @@
-import { Ok } from ?;
-import { CompileResult } from ?;
-import { InlineCompileResult } from ?;
-import { CompileErrors } from ?;
-import { MapNode } from ?;
-import { Node } from ?;
+import { Ok } from "?magmacapiresultOk";
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { InlineCompileResult } from "?magmacappcompileerrorInlineCompileResult";
+import { CompileErrors } from "?magmacappcompileerrorerrorCompileErrors";
+import { MapNode } from "?magmacappcompilenodeMapNode";
+import { Node } from "?magmacappcompilenodeNode";
 export class StringRule {
 	temp(){
 	}

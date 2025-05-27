@@ -1,11 +1,11 @@
-import { Collector } from ?;
-import { Iter } from ?;
-import { Ok } from ?;
-import { Result } from ?;
-import { Option } from ?;
-import { BiFunction } from ?;
-import { Function } from ?;
-import { Predicate } from ?;
+import { Collector } from "?magmacapiitercollectCollector";
+import { Iter } from "?magmacapiiterIter";
+import { Ok } from "?magmacapiresultOk";
+import { Result } from "?magmacapiresultResult";
+import { Option } from "?magmacapiOption";
+import { BiFunction } from "?javautilfunctionBiFunction";
+import { Function } from "?javautilfunctionFunction";
+import { Predicate } from "?javautilfunctionPredicate";
 export class HeadedIter {
 	temp(){
 	}

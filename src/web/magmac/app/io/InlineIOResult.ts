@@ -1,6 +1,6 @@
-import { Result } from ?;
-import { IOException } from ?;
-import { Function } from ?;
+import { Result } from "?magmacapiresultResult";
+import { IOException } from "?javaioIOException";
+import { Function } from "?javautilfunctionFunction";
 export class InlineIOResult {
 	temp(){
 	}

@@ -1,18 +1,18 @@
-import { Tuple2 } from ?;
-import { MapCollector } from ?;
-import { Ok } from ?;
-import { InlineCompileResult } from ?;
-import { CompileError } from ?;
-import { CompileResult } from ?;
-import { InlineNodeList } from ?;
-import { Node } from ?;
-import { NodeList } from ?;
-import { Location } from ?;
-import { AfterAll } from ?;
-import { MapRoots } from ?;
-import { Passer } from ?;
-import { Roots } from ?;
-import { Map } from ?;
+import { Tuple2 } from "?magmacapiTuple2";
+import { MapCollector } from "?magmacapicollectmapMapCollector";
+import { Ok } from "?magmacapiresultOk";
+import { InlineCompileResult } from "?magmacappcompileerrorInlineCompileResult";
+import { CompileError } from "?magmacappcompileerrorerrorCompileError";
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { InlineNodeList } from "?magmacappcompilenodeInlineNodeList";
+import { Node } from "?magmacappcompilenodeNode";
+import { NodeList } from "?magmacappcompilenodeNodeList";
+import { Location } from "?magmacappioLocation";
+import { AfterAll } from "?magmacappstageAfterAll";
+import { MapRoots } from "?magmacappstageMapRoots";
+import { Passer } from "?magmacappstagePasser";
+import { Roots } from "?magmacappstageRoots";
+import { Map } from "?magmacapicollectmapMap";
 export class TreeParser {
 	temp(){
 	}

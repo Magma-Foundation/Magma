@@ -1,11 +1,11 @@
-import { Rule } from ?;
-import { TypeScriptAfterPasser } from ?;
-import { TypescriptLang } from ?;
-import { AfterAll } from ?;
-import { EmptyAfterAll } from ?;
-import { Passer } from ?;
-import { Path } from ?;
-import { Paths } from ?;
+import { Rule } from "?magmacappcompileruleRule";
+import { TypeScriptAfterPasser } from "?magmacapplangTypeScriptAfterPasser";
+import { TypescriptLang } from "?magmacapplangTypescriptLang";
+import { AfterAll } from "?magmacappstageAfterAll";
+import { EmptyAfterAll } from "?magmacappstageEmptyAfterAll";
+import { Passer } from "?magmacappstagePasser";
+import { Path } from "?javaniofilePath";
+import { Paths } from "?javaniofilePaths";
 export class TypeScriptTargetPlatform {
 	temp(){
 	}

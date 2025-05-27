@@ -28,6 +28,32 @@ public record FoldingDivider(Folder folder) implements Divider {
         }
     }
 
+    private static Option<DivideState> foldDoubleQuotes(DivideState state, char c) {
+        if ('\"' != c) {
+            return new None<>();
+        }
+
+        DivideState current = state.append('\"');
+        while (true) {
+            Option<Tuple2<DivideState, Character>> maybePopped = current.popAndAppendToTuple();
+            if (maybePopped.isEmpty()) {
+                break;
+            }
+
+            Tuple2<DivideState, Character> poppedTuple = maybePopped.orElse(null);
+            current = poppedTuple.left();
+
+            if ('\\' == poppedTuple.right()) {
+                current = current.popAndAppendToOption().orElse(current);
+            }
+            if ('\"' == poppedTuple.right()) {
+                break;
+            }
+        }
+
+        return new Some<>(current);
+    }
+
     @Override
     public Iter<String> divide(String input) {
         DivideState current = new MutableDivideState(input);
@@ -42,6 +68,7 @@ public record FoldingDivider(Folder folder) implements Divider {
 
             DivideState finalCurrent = current;
             current = FoldingDivider.foldSingleQuotes(current, c)
+                    .or(() -> FoldingDivider.foldDoubleQuotes(finalCurrent, c))
                     .orElseGet(() -> this.folder.fold(finalCurrent, c));
         }
 

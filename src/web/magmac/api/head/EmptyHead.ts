@@ -1,5 +1,5 @@
-import { None } from ?;
-import { Option } from ?;
+import { None } from "?magmacapiNone";
+import { Option } from "?magmacapiOption";
 export class EmptyHead {
 	temp(){
 	}

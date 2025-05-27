@@ -433,6 +433,7 @@ TypescriptLang --> Rule
 TypescriptLang --> StringRule
 TypescriptLang --> SuffixRule
 TypescriptLang --> TypeRule
+TypescriptLang --> DelimitedFolder
 MapNode --> None
 MapNode --> Some
 MapNode --> Map

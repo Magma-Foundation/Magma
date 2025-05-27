@@ -1,4 +1,4 @@
-import { Location } from ?;
+import { Location } from "?magmacappioLocation";
 export class ImmutableParseState {
 	temp(){
 	}

@@ -1,6 +1,6 @@
-import { Location } from ?;
-import { IOException } from ?;
-import { Map } from ?;
-import { Option } from ?;
+import { Location } from "?magmacappioLocation";
+import { IOException } from "?javaioIOException";
+import { Map } from "?magmacapicollectmapMap";
+import { Option } from "?magmacapiOption";
 export interface ? {
 }

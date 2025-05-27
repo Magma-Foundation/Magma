@@ -1,11 +1,11 @@
-import { Iters } from ?;
-import { ApplicationBuilder } from ?;
-import { Error } from ?;
-import { PlantUMLTargetPlatform } from ?;
-import { TypeScriptTargetPlatform } from ?;
-import { PathSources } from ?;
-import { Sources } from ?;
-import { Paths } from ?;
+import { Iters } from "?magmacapiiterIters";
+import { ApplicationBuilder } from "?magmacappApplicationBuilder";
+import { Error } from "?magmacapierrorError";
+import { PlantUMLTargetPlatform } from "?magmacappconfigPlantUMLTargetPlatform";
+import { TypeScriptTargetPlatform } from "?magmacappconfigTypeScriptTargetPlatform";
+import { PathSources } from "?magmacappiosourcesPathSources";
+import { Sources } from "?magmacappiosourcesSources";
+import { Paths } from "?javaniofilePaths";
 export class Main {
 	temp(){
 	}

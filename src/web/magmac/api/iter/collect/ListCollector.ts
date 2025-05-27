@@ -1,5 +1,5 @@
-import { List } from ?;
-import { Lists } from ?;
+import { List } from "?magmacapicollectlistList";
+import { Lists } from "?magmacapicollectlistLists";
 export class ListCollector {
 	temp(){
 	}

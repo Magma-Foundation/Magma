@@ -1,8 +1,8 @@
-import { Option } from ?;
-import { EmptyHead } from ?;
-import { HeadedIter } from ?;
-import { RangeHead } from ?;
-import { SingleHead } from ?;
+import { Option } from "?magmacapiOption";
+import { EmptyHead } from "?magmacapiheadEmptyHead";
+import { HeadedIter } from "?magmacapiheadHeadedIter";
+import { RangeHead } from "?magmacapiheadRangeHead";
+import { SingleHead } from "?magmacapiheadSingleHead";
 export class Iters {
 	temp(){
 	}

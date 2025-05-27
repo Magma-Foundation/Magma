@@ -1,17 +1,19 @@
+import { Option } from "?magmacapiOption";
+import { Some } from "?magmacapiSome";
 import { Tuple2 } from "?magmacapiTuple2";
-import { List } from "?magmacapicollectlistList";
-import { Lists } from "?magmacapicollectlistLists";
-import { Map } from "?magmacapicollectmapMap";
-import { Maps } from "?magmacapicollectmapMaps";
-import { Iters } from "?magmacapiiterIters";
 import { ListCollector } from "?magmacapiitercollectListCollector";
+import { Iter } from "?magmacapiiterIter";
+import { Iters } from "?magmacapiiterIters";
 import { InlineNodeList } from "?magmacappcompilenodeInlineNodeList";
 import { MapNode } from "?magmacappcompilenodeMapNode";
 import { Node } from "?magmacappcompilenodeNode";
 import { NodeList } from "?magmacappcompilenodeNodeList";
-import { Location } from "?magmacappioLocation";
-import { AfterAll } from "?magmacappstageAfterAll";
-export class MergeDiagram {
+import { InlinePassResult } from "?magmacappstageInlinePassResult";
+import { Passer } from "?magmacappstagePasser";
+import { ParseState } from "?magmacappstageparseParseState";
+export class PlantUMLAfterPasser {
+	temp(){
+	}
 	temp(){
 	}
 	temp(){

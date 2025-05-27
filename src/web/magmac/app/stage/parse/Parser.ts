@@ -1,4 +1,4 @@
-import { Roots } from ?;
-import { Stage } from ?;
+import { Roots } from "?magmacappstageRoots";
+import { Stage } from "?magmacappstageStage";
 export interface ? {
 }

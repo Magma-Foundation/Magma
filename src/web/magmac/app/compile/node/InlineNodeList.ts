@@ -1,8 +1,8 @@
-import { Option } from ?;
-import { Some } from ?;
-import { List } from ?;
-import { Lists } from ?;
-import { Iter } from ?;
+import { Option } from "?magmacapiOption";
+import { Some } from "?magmacapiSome";
+import { List } from "?magmacapicollectlistList";
+import { Lists } from "?magmacapicollectlistLists";
+import { Iter } from "?magmacapiiterIter";
 export class InlineNodeList {
 	temp(){
 	}

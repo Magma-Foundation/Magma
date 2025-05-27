@@ -1,11 +1,11 @@
-import { Rule } from ?;
-import { PlantUMLAfterPasser } from ?;
-import { MergeDiagram } from ?;
-import { PlantUMLLang } from ?;
-import { AfterAll } from ?;
-import { Passer } from ?;
-import { Path } from ?;
-import { Paths } from ?;
+import { Rule } from "?magmacappcompileruleRule";
+import { PlantUMLAfterPasser } from "?magmacapplangPlantUMLAfterPasser";
+import { MergeDiagram } from "?magmacapplangMergeDiagram";
+import { PlantUMLLang } from "?magmacapplangPlantUMLLang";
+import { AfterAll } from "?magmacappstageAfterAll";
+import { Passer } from "?magmacappstagePasser";
+import { Path } from "?javaniofilePath";
+import { Paths } from "?javaniofilePaths";
 export class PlantUMLTargetPlatform {
 	temp(){
 	}

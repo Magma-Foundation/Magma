@@ -1,6 +1,6 @@
-import { Error } from ?;
-import { PrintWriter } from ?;
-import { StringWriter } from ?;
+import { Error } from "?magmacapierrorError";
+import { PrintWriter } from "?javaioPrintWriter";
+import { StringWriter } from "?javaioStringWriter";
 export class ThrowableError {
 	temp(){
 	}

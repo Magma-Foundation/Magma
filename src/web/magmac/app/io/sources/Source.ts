@@ -1,4 +1,4 @@
-import { IOResult } from ?;
-import { Location } from ?;
+import { IOResult } from "?magmacappioIOResult";
+import { Location } from "?magmacappioLocation";
 export interface ? {
 }

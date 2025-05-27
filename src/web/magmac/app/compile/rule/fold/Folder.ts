@@ -1,3 +1,3 @@
-import { DivideState } from ?;
+import { DivideState } from "?magmacappcompileruledivideDivideState";
 export interface ? {
 }

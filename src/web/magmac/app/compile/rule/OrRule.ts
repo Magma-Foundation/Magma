@@ -1,11 +1,11 @@
-import { Iter } from ?;
-import { CompileResult } from ?;
-import { Context } from ?;
-import { NodeContext } from ?;
-import { StringContext } from ?;
-import { Node } from ?;
-import { List } from ?;
-import { Function } from ?;
+import { Iter } from "?magmacapiiterIter";
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { Context } from "?magmacappcompileerrorcontextContext";
+import { NodeContext } from "?magmacappcompileerrorcontextNodeContext";
+import { StringContext } from "?magmacappcompileerrorcontextStringContext";
+import { Node } from "?magmacappcompilenodeNode";
+import { List } from "?magmacapicollectlistList";
+import { Function } from "?javautilfunctionFunction";
 export class OrRule {
 	temp(){
 	}

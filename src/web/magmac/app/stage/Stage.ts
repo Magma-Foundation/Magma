@@ -1,3 +1,3 @@
-import { CompileResult } from ?;
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
 export interface ? {
 }

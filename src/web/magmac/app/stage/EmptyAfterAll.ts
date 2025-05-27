@@ -1,6 +1,6 @@
-import { Node } from ?;
-import { Location } from ?;
-import { Map } from ?;
+import { Node } from "?magmacappcompilenodeNode";
+import { Location } from "?magmacappioLocation";
+import { Map } from "?magmacapicollectmapMap";
 export class EmptyAfterAll {
 	temp(){
 	}

@@ -1,3 +1,3 @@
-import { Option } from ?;
+import { Option } from "?magmacapiOption";
 export interface ? {
 }

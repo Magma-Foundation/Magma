@@ -1,5 +1,5 @@
-import { DivideState } from ?;
-import { Folder } from ?;
+import { DivideState } from "?magmacappcompileruledivideDivideState";
+import { Folder } from "?magmacappcompilerulefoldFolder";
 export class TypeSeparatorFolder {
 	temp(){
 	}

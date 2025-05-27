@@ -1,10 +1,10 @@
-import { List } from ?;
-import { Lists } from ?;
-import { Iter } from ?;
-import { Joiner } from ?;
-import { Max } from ?;
-import { Context } from ?;
-import { CompileError } from ?;
+import { List } from "?magmacapicollectlistList";
+import { Lists } from "?magmacapicollectlistLists";
+import { Iter } from "?magmacapiiterIter";
+import { Joiner } from "?magmacapiitercollectJoiner";
+import { Max } from "?magmacapiitercollectMax";
+import { Context } from "?magmacappcompileerrorcontextContext";
+import { CompileError } from "?magmacappcompileerrorerrorCompileError";
 export class ImmutableCompileError {
 	temp(){
 	}

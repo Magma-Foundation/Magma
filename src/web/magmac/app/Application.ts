@@ -1,4 +1,4 @@
-import { Error } from ?;
-import { Option } from ?;
+import { Error } from "?magmacapierrorError";
+import { Option } from "?magmacapiOption";
 export interface ? {
 }

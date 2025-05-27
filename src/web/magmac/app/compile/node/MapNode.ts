@@ -1,14 +1,14 @@
-import { None } from ?;
-import { Option } from ?;
-import { Some } from ?;
-import { Tuple2 } from ?;
-import { Map } from ?;
-import { Maps } from ?;
-import { Iter } from ?;
-import { Iters } from ?;
-import { Joiner } from ?;
-import { BiFunction } from ?;
-import { Function } from ?;
+import { None } from "?magmacapiNone";
+import { Option } from "?magmacapiOption";
+import { Some } from "?magmacapiSome";
+import { Tuple2 } from "?magmacapiTuple2";
+import { Map } from "?magmacapicollectmapMap";
+import { Maps } from "?magmacapicollectmapMaps";
+import { Iter } from "?magmacapiiterIter";
+import { Iters } from "?magmacapiiterIters";
+import { Joiner } from "?magmacapiitercollectJoiner";
+import { BiFunction } from "?javautilfunctionBiFunction";
+import { Function } from "?javautilfunctionFunction";
 export class MapNode {
 	temp(){
 	}

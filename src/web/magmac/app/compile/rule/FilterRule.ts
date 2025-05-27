@@ -1,9 +1,9 @@
-import { CompileResult } from ?;
-import { CompileErrors } from ?;
-import { Node } from ?;
-import { Filter } from ?;
-import { NumberFilter } from ?;
-import { SymbolFilter } from ?;
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { CompileErrors } from "?magmacappcompileerrorerrorCompileErrors";
+import { Node } from "?magmacappcompilenodeNode";
+import { Filter } from "?magmacappcompilerulefilterFilter";
+import { NumberFilter } from "?magmacappcompilerulefilterNumberFilter";
+import { SymbolFilter } from "?magmacappcompilerulefilterSymbolFilter";
 export class FilterRule {
 	temp(){
 	}

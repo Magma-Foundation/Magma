@@ -1,11 +1,11 @@
-import { Option } from ?;
-import { Map } from ?;
-import { Iters } from ?;
-import { Location } from ?;
-import { SafeFiles } from ?;
-import { IOException } from ?;
-import { Files } from ?;
-import { Path } from ?;
+import { Option } from "?magmacapiOption";
+import { Map } from "?magmacapicollectmapMap";
+import { Iters } from "?magmacapiiterIters";
+import { Location } from "?magmacappioLocation";
+import { SafeFiles } from "?magmacappioSafeFiles";
+import { IOException } from "?javaioIOException";
+import { Files } from "?javaniofileFiles";
+import { Path } from "?javaniofilePath";
 export class PathTargets {
 	temp(){
 	}

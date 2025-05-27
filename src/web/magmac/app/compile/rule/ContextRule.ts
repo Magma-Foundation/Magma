@@ -1,9 +1,9 @@
-import { Lists } from ?;
-import { CompileResult } from ?;
-import { NodeContext } from ?;
-import { Node } from ?;
-import { StringContext } from ?;
-import { ImmutableCompileError } from ?;
+import { Lists } from "?magmacapicollectlistLists";
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { NodeContext } from "?magmacappcompileerrorcontextNodeContext";
+import { Node } from "?magmacappcompilenodeNode";
+import { StringContext } from "?magmacappcompileerrorcontextStringContext";
+import { ImmutableCompileError } from "?magmacapperrorImmutableCompileError";
 export class ContextRule {
 	temp(){
 	}

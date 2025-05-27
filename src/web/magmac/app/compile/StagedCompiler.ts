@@ -1,9 +1,9 @@
-import { CompileResult } from ?;
-import { Location } from ?;
-import { Generator } from ?;
-import { Lexer } from ?;
-import { Parser } from ?;
-import { Map } from ?;
+import { CompileResult } from "?magmacappcompileerrorCompileResult";
+import { Location } from "?magmacappioLocation";
+import { Generator } from "?magmacappstagegenerateGenerator";
+import { Lexer } from "?magmacappstagelexerLexer";
+import { Parser } from "?magmacappstageparseParser";
+import { Map } from "?magmacapicollectmapMap";
 export class StagedCompiler {
 	temp(){
 	}
