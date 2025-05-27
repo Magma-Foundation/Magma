@@ -19,13 +19,7 @@ public class RuleLexer implements Lexer {
         this.rootRule = rootRule;
     }
 
-    private Result<Map<Location, Node>, CompileError> lexAll0(Map<Location, String> values) {
-        return Iters.fromMap(values)
-                .map(entry -> this.getLocationNodeTuple2(entry))
-                .collect(new ResultCollector<>(new MapCollector<>()));
-    }
-
-    private Result<Tuple2<Location, Node>, CompileError> getLocationNodeTuple2(Tuple2<Location, String> tuple) {
+    private Result<Tuple2<Location, Node>, CompileError> foldEntry(Tuple2<Location, String> tuple) {
         Location location = tuple.left();
         String input = tuple.right();
 
@@ -36,6 +30,9 @@ public class RuleLexer implements Lexer {
 
     @Override
     public Result<Roots, CompileError> lexAll(Map<Location, String> values) {
-        return this.lexAll0(values).mapValue(Roots::new);
+        return Iters.fromMap(values)
+                .map(entry -> this.foldEntry(entry))
+                .collect(new ResultCollector<>(new MapCollector<>()))
+                .mapValue(Roots::new);
     }
 }
