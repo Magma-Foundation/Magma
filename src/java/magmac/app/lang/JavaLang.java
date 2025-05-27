@@ -98,16 +98,15 @@ public final class JavaLang {
     private static OrRule createTypeRule() {
         return new OrRule(Lists.of(
                 JavaLang.createTemplateRule(),
-                JavaLang.createSymbolTypeRule(),
-                new StringRule("placeholder")
+                JavaLang.createSymbolTypeRule()
         ));
     }
 
-    private static TypeRule createSymbolTypeRule() {
+    private static Rule createSymbolTypeRule() {
         return new TypeRule("symbol", new StripRule(FilterRule.Symbol(new StringRule("value"))));
     }
 
-    private static TypeRule createTemplateRule() {
+    private static Rule createTemplateRule() {
         return new TypeRule("template", new StripRule(new SuffixRule(LocatingRule.First(new StripRule(new StringRule("base")), "<", new StringRule("arguments")), ">")));
     }
 

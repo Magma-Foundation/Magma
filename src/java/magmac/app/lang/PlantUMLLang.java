@@ -30,7 +30,7 @@ public final class PlantUMLLang {
         )), "\n");
     }
 
-    private static TypeRule createStructureRule(String type) {
+    private static Rule createStructureRule(String type) {
         return new TypeRule(type, new PrefixRule(type + " ", new StringRule("name")));
     }
 

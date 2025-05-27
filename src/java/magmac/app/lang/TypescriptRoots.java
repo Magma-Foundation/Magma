@@ -22,7 +22,7 @@ public final class TypescriptRoots {
         ))));
     }
 
-    private static TypeRule createClassRule() {
+    private static Rule createClassRule() {
         DivideRule children = DivideRule.Statements("children", TypescriptRoots.createStructureMemberRule());
         Rule name = LocatingRule.First(new StringRule("name"), " {", new SuffixRule(children, "\n}\n"));
         return new TypeRule("class", new PrefixRule("export class ", name));
