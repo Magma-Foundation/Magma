@@ -1,11 +1,11 @@
 package magmac.app.compile.node;
 
 import magmac.api.Tuple2;
+import magmac.api.collect.Joiner;
 import magmac.api.iter.Iter;
 import magmac.api.iter.Iters;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -17,13 +17,18 @@ public final class MapNode implements Node {
     private final Optional<String> maybeType;
     private final Map<String, String> strings;
     private final Map<String, Node> nodes;
-    private final Map<String, List<Node>> nodeLists;
+    private final Map<String, NodeList> nodeLists;
 
     public MapNode() {
         this(Optional.empty(), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
-    private MapNode(Optional<String> maybeType, Map<String, String> strings, Map<String, Node> nodes, Map<String, List<Node>> nodeLists) {
+    private MapNode(
+            Optional<String> maybeType,
+            Map<String, String> strings,
+            Map<String, Node> nodes,
+            Map<String, NodeList> nodeLists
+    ) {
         this.strings = strings;
         this.maybeType = maybeType;
         this.nodes = nodes;
@@ -50,7 +55,7 @@ public final class MapNode implements Node {
 
     @Override
     public String display() {
-        return format(0);
+        return this.format(0);
     }
 
     @Override
@@ -82,10 +87,11 @@ public final class MapNode implements Node {
         });
     }
 
-    private String formatNodeList(int depth, List<Node> nodeList) {
-        return nodeList.stream()
+    private String formatNodeList(int depth, NodeList nodeList) {
+        return nodeList.iter()
                 .map(child -> child.format(depth + 1))
-                .collect(Collectors.joining(", "));
+                .collect(new Joiner(", "))
+                .orElse("");
     }
 
     private String formatEntry(int depth, String key, String value) {
@@ -94,10 +100,6 @@ public final class MapNode implements Node {
 
     private String createIndent(int depth) {
         return "\n" + "\t".repeat(depth);
-    }
-
-    private Iter<Tuple2<String, List<Node>>> iterNodeLists0() {
-        return Iters.fromMap(this.nodeLists);
     }
 
     @Override
@@ -130,20 +132,6 @@ public final class MapNode implements Node {
         return new MapNode(Optional.of(type), this.strings, this.nodes, this.nodeLists);
     }
 
-    private Node withNodeList0(String key, List<Node> values) {
-        this.nodeLists.put(key, values);
-        return this;
-    }
-
-    private Optional<List<Node>> findNodeList0(String key) {
-        if (this.nodeLists.containsKey(key)) {
-            return Optional.of(this.nodeLists.get(key));
-        }
-        else {
-            return Optional.empty();
-        }
-    }
-
     @Override
     public Node withNode(String key, Node value) {
         this.nodes.put(key, value);
@@ -174,16 +162,22 @@ public final class MapNode implements Node {
 
     @Override
     public Iter<Tuple2<String, NodeList>> iterNodeLists() {
-        return this.iterNodeLists0().map(tuple -> new Tuple2<>(tuple.left(), new InlineNodeList(tuple.right())));
+        return Iters.fromMap(this.nodeLists);
     }
 
     @Override
     public Node withNodeList(String key, NodeList values) {
-        return this.withNodeList0(key, values.unwrap());
+        this.nodeLists.put(key, values);
+        return this;
     }
 
     @Override
     public Optional<NodeList> findNodeList(String key) {
-        return this.findNodeList0(key).map(InlineNodeList::new);
+        if (this.nodeLists.containsKey(key)) {
+            return Optional.of(this.nodeLists.get(key));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 }

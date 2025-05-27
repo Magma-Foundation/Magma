@@ -230,6 +230,7 @@ OrRule --> StringContext
 OrRule --> List
 OrRule --> Function
 NodeContext --> Node
+NodeList --> Iter
 NodeList --> List
 PathSource --> SafeFiles
 PathSource --> Path
@@ -271,6 +272,7 @@ TreeParser --> List
 TreeParser --> Map
 MapRoots --> Iters
 MapRoots --> Map
+InlineNodeList --> Iters
 TypescriptRoots --> DivideRule
 TypescriptRoots --> ExactRule
 TypescriptRoots --> OrRule
@@ -319,9 +321,9 @@ Config --> Parser
 Config --> RuleGenerator
 Config --> RuleLexer
 Config --> TreeParser
+MapNode --> Joiner
 MapNode --> Iters
 MapNode --> HashMap
-MapNode --> List
 MapNode --> Map
 MapNode --> BiFunction
 MapNode --> Function
