@@ -543,6 +543,7 @@ Passer --> ParseState
 Result --> Tuple2
 Result --> Function
 Result --> Supplier
+ApplicationBuilder --> Option
 ApplicationBuilder --> Error
 ApplicationBuilder --> Compiler
 ApplicationBuilder --> StagedCompiler
@@ -561,7 +562,6 @@ ApplicationBuilder --> RuleLexer
 ApplicationBuilder --> Parser
 ApplicationBuilder --> TreeParser
 ApplicationBuilder --> Path
-ApplicationBuilder --> Option
 Maps --> HashMap
 List --> Option
 List --> Tuple2

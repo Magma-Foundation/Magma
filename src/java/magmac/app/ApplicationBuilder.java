@@ -1,5 +1,6 @@
 package magmac.app;
 
+import magmac.api.Option;
 import magmac.api.error.Error;
 import magmac.app.compile.Compiler;
 import magmac.app.compile.StagedCompiler;
@@ -19,7 +20,6 @@ import magmac.app.stage.parse.Parser;
 import magmac.app.stage.parse.TreeParser;
 
 import java.nio.file.Path;
-import magmac.api.Option;
 
 public final class ApplicationBuilder {
     public static Option<Error> run(TargetPlatform platform, Sources sources) {
@@ -35,6 +35,7 @@ public final class ApplicationBuilder {
 
         Generator generator = new RuleGenerator(platform.createRule());
         Compiler compiler = new StagedCompiler(lexer, parser, generator);
-        return new CompileApplication(sources, compiler, targets).run();
+        Application application = new CompileApplication(sources, compiler, targets);
+        return application.run();
     }
 }
