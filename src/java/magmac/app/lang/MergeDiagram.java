@@ -1,6 +1,7 @@
 package magmac.app.lang;
 
 import magmac.api.iter.Iters;
+import magmac.app.compile.node.InlineNodeList;
 import magmac.app.compile.node.MapNode;
 import magmac.app.compile.node.Node;
 import magmac.app.io.Location;
@@ -27,7 +28,7 @@ public class MergeDiagram implements AfterAll {
     public Map<Location, Node> afterAll(Map<Location, Node> roots) {
         List<Node> oldRootSegments = roots.values()
                 .stream()
-                .map(node -> node.findNodeList("children"))
+                .map(node -> node.findNodeList("children").map(list -> list.unwrap()))
                 .flatMap(Optional::stream)
                 .flatMap(Collection::stream)
                 .toList();
@@ -61,7 +62,8 @@ public class MergeDiagram implements AfterAll {
         copy.addAll(newDependencies);
         copy.add(new MapNode("end"));
 
-        Node root = new MapNode().withNodeList("children", copy);
+        Node node = new MapNode();
+        Node root = node.withNodeList("children", new InlineNodeList(copy));
         Location location = new Location(Collections.emptyList(), "diagram");
         return Map.of(location, root);
     }
