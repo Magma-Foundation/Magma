@@ -343,6 +343,8 @@ JavaRoots --> TypeRule
 JavaRoots --> DelimitedFolder
 JavaRoots --> StatementFolder
 JavaRoots --> List
+TargetPlatform --> AfterAll
+TargetPlatform --> EmptyAfterAll
 TargetPlatform --> Path
 TargetPlatform --> Paths
 AfterAll --> Node
@@ -413,11 +415,9 @@ Main --> PathTargets
 Main --> Targets
 Main --> AfterPasser
 Main --> JavaToPlantUML
-Main --> MergeDiagram
 Main --> PlantUMLRoots
 Main --> TargetPlatform
 Main --> AfterAll
-Main --> EmptyAfterAll
 Main --> Generator
 Main --> RuleGenerator
 Main --> Lexer

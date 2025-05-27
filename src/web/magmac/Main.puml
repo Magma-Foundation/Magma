@@ -12,11 +12,9 @@ PathTargets --> Main
 Targets --> Main
 AfterPasser --> Main
 JavaToPlantUML --> Main
-MergeDiagram --> Main
 PlantUMLRoots --> Main
 TargetPlatform --> Main
 AfterAll --> Main
-EmptyAfterAll --> Main
 Generator --> Main
 RuleGenerator --> Main
 Lexer --> Main
