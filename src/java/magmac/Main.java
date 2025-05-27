@@ -2,23 +2,13 @@ package magmac;
 
 import magmac.app.Application;
 import magmac.app.CompileApplication;
+import magmac.app.compile.Compiler;
 import magmac.app.Error;
-import magmac.app.StagedCompiler;
-import magmac.app.compile.lang.java.JavaRoots;
-import magmac.app.compile.lang.plant.PlantUMLRoots;
+import magmac.app.config.Config;
 import magmac.app.io.PathSources;
 import magmac.app.io.PathTargets;
 import magmac.app.io.Sources;
 import magmac.app.io.Targets;
-import magmac.app.stage.AfterPasser;
-import magmac.app.stage.CreateDiagram;
-import magmac.app.stage.Generator;
-import magmac.app.stage.JavaToPlantUML;
-import magmac.app.stage.Lexer;
-import magmac.app.stage.Parser;
-import magmac.app.stage.RuleGenerator;
-import magmac.app.stage.RuleLexer;
-import magmac.app.stage.TreeParser;
 
 import java.nio.file.Paths;
 
@@ -26,10 +16,8 @@ public final class Main {
     public static void main() {
         Sources sources = new PathSources(Paths.get(".", "src", "java"));
         Targets targets = new PathTargets(Paths.get(".", "diagrams"));
-        Lexer lexer = new RuleLexer(JavaRoots.createRule());
-        Parser parser = new TreeParser(new JavaToPlantUML(), new AfterPasser(), new CreateDiagram());
-        Generator generator = new RuleGenerator(PlantUMLRoots.createRule());
-        Application application = new CompileApplication(sources, new StagedCompiler(lexer, parser, generator), targets);
+        Compiler compiler = Config.createCompiler();
+        Application application = new CompileApplication(sources, compiler, targets);
         application.run().ifPresent(error -> Main.handleError(error));
     }
 

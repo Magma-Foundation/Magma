@@ -21,14 +21,18 @@ Error <|-- ThrowableError
 class Tuple2
 class ApplicationError
 Error <|-- ApplicationError
+class StagedCompiler
+Compiler <|-- StagedCompiler
 class PathSources
 Sources <|-- PathSources
 class StatementFolder
 Folder <|-- StatementFolder
 class AfterPasser
 Passer <|-- AfterPasser
+interface Compiler
 class ImmutableCompileError
 CompileError <|-- ImmutableCompileError
+class Config
 interface Source
 interface Folder
 interface DivideState
@@ -82,8 +86,6 @@ class Location
 interface Parser
 class StringContext
 Context <|-- StringContext
-class StagedCompiler
-Compiler <|-- StagedCompiler
 class PathTargets
 Targets <|-- PathTargets
 class SingleHead
@@ -91,7 +93,6 @@ Head <|-- SingleHead
 class StripRule
 Rule <|-- StripRule
 interface Error
-interface Compiler
 interface Iter
 class Ok
 Result <|-- Ok
@@ -264,6 +265,19 @@ StringRule --> Err
 StringRule --> Ok
 StringRule --> MapNode
 StringRule --> ImmutableCompileError
+Config --> Compiler
+Config --> StagedCompiler
+Config --> JavaRoots
+Config --> PlantUMLRoots
+Config --> AfterPasser
+Config --> CreateDiagram
+Config --> Generator
+Config --> JavaToPlantUML
+Config --> Lexer
+Config --> Parser
+Config --> RuleGenerator
+Config --> RuleLexer
+Config --> TreeParser
 MapNode --> Iters
 MapNode --> HashMap
 MapNode --> Map
@@ -328,6 +342,7 @@ StagedCompiler --> Parser
 StagedCompiler --> Roots
 MutableDivideState --> ArrayList
 MutableDivideState --> List
+CompileApplication --> Compiler
 CompileApplication --> ApplicationError
 CompileApplication --> ThrowableError
 CompileApplication --> Location
@@ -349,23 +364,13 @@ SymbolRule --> StringContext
 SymbolRule --> ImmutableCompileError
 Main --> Application
 Main --> CompileApplication
+Main --> Compiler
 Main --> Error
-Main --> StagedCompiler
-Main --> JavaRoots
-Main --> PlantUMLRoots
+Main --> Config
 Main --> PathSources
 Main --> PathTargets
 Main --> Sources
 Main --> Targets
-Main --> AfterPasser
-Main --> CreateDiagram
-Main --> Generator
-Main --> JavaToPlantUML
-Main --> Lexer
-Main --> Parser
-Main --> RuleGenerator
-Main --> RuleLexer
-Main --> TreeParser
 Main --> Paths
 RuleLexer --> Tuple2
 RuleLexer --> Iters

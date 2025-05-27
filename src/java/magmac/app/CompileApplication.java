@@ -1,5 +1,6 @@
 package magmac.app;
 
+import magmac.app.compile.Compiler;
 import magmac.app.error.ApplicationError;
 import magmac.app.error.ThrowableError;
 import magmac.app.io.Location;

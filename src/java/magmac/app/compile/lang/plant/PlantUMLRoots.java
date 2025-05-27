@@ -25,7 +25,7 @@ public final class PlantUMLRoots {
                 PlantUMLRoots.createStructureRule("class"),
                 PlantUMLRoots.createStructureRule("interface"),
                 new TypeRule("inherits", new InfixRule(new StringRule("parent"), " <|-- ", new StringRule("child"))),
-                new TypeRule("dependency", new InfixRule(new StringRule("parent"), " --> ", new StringRule("child")))
+                new TypeRule("dependency", new InfixRule(new StringRule("child"), " --> ", new StringRule("parent")))
         )), "\n");
     }
 

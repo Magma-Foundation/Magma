@@ -1,4 +1,4 @@
-package magmac.app;
+package magmac.app.compile;
 
 import magmac.api.result.Result;
 import magmac.app.error.CompileError;

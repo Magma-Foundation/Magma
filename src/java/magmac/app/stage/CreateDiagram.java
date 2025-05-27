@@ -24,33 +24,36 @@ public class CreateDiagram implements All {
 
     @Override
     public Map<Location, Node> afterAll(Map<Location, Node> roots) {
-        List<Node> allChildren = roots.values()
+        List<Node> oldRootSegments = roots.values()
                 .stream()
                 .map(node -> node.findNodeList("children"))
                 .flatMap(Optional::stream)
                 .flatMap(Collection::stream)
                 .toList();
 
-        Map<String, List<String>> inheritances = this.findInheritances(allChildren);
-        Map<String, List<String>> dependencies = this.findDependencies(allChildren);
-        List<Node> newDependencies = Iters.fromMap(dependencies).fold(new ArrayList<Node>(), (current, entry) -> {
-            String parent = entry.left();
+        Map<String, List<String>> childrenWithInheritedTypes = this.findChildrenWithInheritedTypes(oldRootSegments);
+        Map<String, List<String>> childrenWithDependencies = this.findChildrenWithDependencies(oldRootSegments);
+        List<Node> newDependencies = Iters.fromMap(childrenWithDependencies).fold(new ArrayList<Node>(), (current, entry) -> {
+            String child = entry.left();
             List<String> currentDependencies = entry.right();
 
-            List<String> parentDependencies = CreateDiagram.findParentDependencies(parent, inheritances, dependencies);
+            List<String> parentDependencies = CreateDiagram.findParentDependencies(child, childrenWithInheritedTypes, childrenWithDependencies);
             List<String> toRemove = new ArrayList<>(parentDependencies);
-            toRemove.addAll(inheritances.getOrDefault(parent, new ArrayList<>()));
+            toRemove.addAll(childrenWithInheritedTypes.getOrDefault(child, new ArrayList<>()));
 
             List<String> list = new ArrayList<>(currentDependencies);
             list.removeAll(toRemove);
 
-            list.forEach(child -> current.add(new MapNode("dependency").withString("parent", parent).withString("child", child)));
+            list.forEach(parent -> {
+                Node dependency = new MapNode("dependency").withString("parent", parent).withString("child", child);
+                current.add(dependency);
+            });
             return current;
         });
 
         List<Node> copy = new ArrayList<Node>();
         copy.add(new MapNode("start"));
-        copy.addAll(allChildren.stream()
+        copy.addAll(oldRootSegments.stream()
                 .filter(child -> !child.is("dependency"))
                 .toList());
 
@@ -62,8 +65,8 @@ public class CreateDiagram implements All {
         return Map.of(location, root);
     }
 
-    private HashMap<String, List<String>> findDependencies(List<Node> allChildren) {
-        return Iters.fromList(allChildren).fold(new HashMap<String, List<String>>(), (current, node) -> {
+    private Map<String, List<String>> findChildrenWithDependencies(List<Node> rootSegments) {
+        return Iters.fromList(rootSegments).fold(new HashMap<String, List<String>>(), (current, node) -> {
             if (node.is("dependency")) {
                 String parent = node.findString("parent").orElse("");
                 String child = node.findString("child").orElse("");
@@ -78,18 +81,20 @@ public class CreateDiagram implements All {
         });
     }
 
-    private HashMap<String, List<String>> findInheritances(List<Node> allChildren) {
-        return Iters.fromList(allChildren).fold(new HashMap<String, List<String>>(), (current1, node1) -> {
-            if (node1.is("inherits")) {
-                String parent1 = node1.findString("parent").orElse("");
-                String child1 = node1.findString("child").orElse("");
-
-                if (!current1.containsKey(child1)) {
-                    current1.put(child1, new ArrayList<>());
-                }
-
-                current1.get(child1).add(parent1);
+    private Map<String, List<String>> findChildrenWithInheritedTypes(List<Node> rootSegments) {
+        return Iters.fromList(rootSegments).fold(new HashMap<String, List<String>>(), (current1, node1) -> {
+            if (!node1.is("inherits")) {
+                return current1;
             }
+
+            String parent = node1.findString("parent").orElse("");
+            String child = node1.findString("child").orElse("");
+
+            if (!current1.containsKey(child)) {
+                current1.put(child, new ArrayList<>());
+            }
+
+            current1.get(child).add(parent);
             return current1;
         });
     }
