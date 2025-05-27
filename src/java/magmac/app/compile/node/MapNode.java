@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class MapNode implements Node {
     private final Optional<String> maybeType;
@@ -32,6 +34,15 @@ public final class MapNode implements Node {
         this(Optional.of(type), new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
+    private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
+        return iter.fold(node, (current, tuple) -> {
+            String left = tuple.left();
+            T right = tuple.right();
+
+            return mapper.apply(current).apply(left, right);
+        });
+    }
+
     @Override
     public Iter<Tuple2<String, Node>> iterNodes() {
         return Iters.fromMap(this.nodes);
@@ -39,12 +50,15 @@ public final class MapNode implements Node {
 
     @Override
     public String toString() {
-        return "MapNode{" +
-                "maybeType=" + this.maybeType +
-                ", strings=" + this.strings +
-                ", nodes=" + this.nodes +
-                ", nodeLists=" + this.nodeLists +
-                '}';
+        Stream<String> typeString = this.maybeType.map(inner -> "maybeType=" + inner).stream();
+        Stream<String> stringsString = this.strings.isEmpty() ? Stream.empty() : Stream.of("strings=" + this.strings);
+        Stream<String> nodesString = this.nodes.isEmpty() ? Stream.empty() : Stream.of("nodes=" + this.nodes);
+        Stream<String> nodeListsString = this.nodeLists.isEmpty() ? Stream.empty() : Stream.of("nodeLists=" + this.nodeLists);
+        String joined = Stream.of(typeString, stringsString, nodesString, nodeListsString)
+                .flatMap(value -> value)
+                .collect(Collectors.joining(", "));
+
+        return "MapNode {" + joined + '}';
     }
 
     @Override
@@ -119,15 +133,6 @@ public final class MapNode implements Node {
         var withStrings = MapNode.fold(this, other.iterStrings(), current -> current::withString);
         var withNodes = MapNode.fold(withStrings, other.iterNodes(), current -> current::withNode);
         return MapNode.fold(withNodes, other.iterNodeLists(), current -> current::withNodeList);
-    }
-
-    private static <T> Node fold(Node node, Iter<Tuple2<String, T>> iter, Function<Node, BiFunction<String, T, Node>> mapper) {
-        return iter.fold(node, (current, tuple) -> {
-            String left = tuple.left();
-            T right = tuple.right();
-
-            return mapper.apply(current).apply(left, right);
-        });
     }
 
     @Override

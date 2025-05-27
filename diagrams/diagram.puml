@@ -318,6 +318,8 @@ MapNode --> HashMap
 MapNode --> Map
 MapNode --> BiFunction
 MapNode --> Function
+MapNode --> Collectors
+MapNode --> Stream
 Folder --> DivideState
 Source --> Result
 Source --> Location
